@@ -32,6 +32,8 @@
         <lombok.version>1.18.46</lombok.version>
         <jackson-bom.version>2.22.0</jackson-bom.version>
         <jakarta-persistence.version>3.2.0</jakarta-persistence.version>
+        <jakarta-transaction.version>2.0.1</jakarta-transaction.version>
+        <jakarta-ws-rs.version>4.0.0</jakarta-ws-rs.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <hikari.version>7.0.2</hikari.version>
         <mybatis-plus.version>3.5.16</mybatis-plus.version>
@@ -54,6 +56,16 @@
             <dependency>
                 <groupId>com.innospots</groupId>
                 <artifactId>innospots-nexus-core</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.innospots</groupId>
+                <artifactId>innospots-nexus-console</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.innospots</groupId>
+                <artifactId>innospots-nexus-kernel</artifactId>
                 <version>${revision}</version>
             </dependency>
 
@@ -141,6 +153,16 @@
                 <groupId>jakarta.persistence</groupId>
                 <artifactId>jakarta.persistence-api</artifactId>
                 <version>${jakarta-persistence.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.transaction</groupId>
+                <artifactId>jakarta.transaction-api</artifactId>
+                <version>${jakarta-transaction.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.ws.rs</groupId>
+                <artifactId>jakarta.ws.rs-api</artifactId>
+                <version>${jakarta-ws-rs.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.zaxxer</groupId>

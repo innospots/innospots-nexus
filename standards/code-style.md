@@ -61,3 +61,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.json.Jsons;
 ```
+
+## Lombok
+
+- Implementation classes that use constructor injection should prefer
+  `@RequiredArgsConstructor` with `final` dependency fields instead of manually
+  writing boilerplate constructors.
+- Operator and service implementation classes should include `@Slf4j` so
+  logging is available without hand-written logger fields.
+- Keep Lombok imports in the third-party import group, before
+  `com.innospots.*` project imports.
+- Do not use Lombok to hide domain invariants. Records and explicit factories
+  remain preferred for immutable request, VO, and model objects.

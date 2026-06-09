@@ -112,6 +112,12 @@ depend on, with zero infrastructure bindings (no Spring, no Servlet, no database
 | `DataResponse` | `class` | Success/failure response envelope with schema and meta |
 | `DataSchema` | `class` | Field schema definition with configurable properties |
 
+### Package `domain.request`
+
+| Class | Type | Description |
+|-------|------|-------------|
+| `BasePageRequest` | `class` | Base paginated query request with input, page number, and page size fields. |
+
 ### Package `domain.dictionary`
 
 | Class | Type | Description |
@@ -266,7 +272,7 @@ depend on, with zero infrastructure bindings (no Spring, no Servlet, no database
 | Class | Type | Description |
 |-------|------|-------------|
 | `BeanUtils` | `final class` | Bean copy/conversion wrapping Hutool: copyProperties, toMap, toBean with camelCase support |
-| `CryptoUtils` | `final class` | Crypto: SHA-256, BCrypt password hash/verify, AES-GCM encrypt/decrypt (random IV prepended), RSA-OAEP key pair gen/encrypt/decrypt (block mode) |
+| `CryptoUtils` | `final class` | Crypto: SHA-256, BCrypt salt generation/password hash/verify, AES-GCM encrypt/decrypt (random IV prepended), RSA-OAEP key pair gen/encrypt/decrypt (block mode) |
 | `DateTimeUtils` | `final class` | Date/time formatting and parsing with 12+ predefined patterns, ISO instant support, and multi-pattern fallback |
 | `EnvUtils` | `final class` | Environment resolver with override support: overrides → system properties → env vars |
 | `IdGenerator` | `final class` | ID generation: Snowflake distributed IDs, random IDs (4 charset types), timestamp-prefixed, batch generation |
@@ -303,4 +309,5 @@ To use: open a reference file when you need complete method-level API details fo
 | `status` | [`references/status.md`](references/status.md) | StatusCategory, StatusCode, StatusCodeRules, NexusStatusCode |
 | `thread` | [`references/thread.md`](references/thread.md) | TLC, NexusThreadFactory, NexusThreadPoolExecutor, ThreadPoolBuilder, AsyncExecutors |
 | `ui` | [`references/ui.md`](references/ui.md) | UiComponent, UiCondition, UiPage, UiResource |
+| `domain.request` | [`references/domain-request.md`](references/domain-request.md) | BasePageRequest |
 | `util` | [`references/util.md`](references/util.md) | BeanUtils, CryptoUtils, DateTimeUtils, EnvUtils, IdGenerator, MetricsSnapshot, MetricsUtils, StringUtils |

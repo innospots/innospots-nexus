@@ -79,6 +79,54 @@ try {
 }
 ```
 
+## Persistence Entities
+
+- Every JPA/MyBatis-Plus persistence entity must inherit either
+  `com.innospots.nexus.core.entity.BaseEntity` or
+  `com.innospots.nexus.core.entity.ProjectBaseEntity`.
+- Use `BaseEntity` for platform-wide records that are not scoped to one
+  project, such as users, credentials, OAuth identities, service registry
+  records, and global dictionaries.
+- Use `ProjectBaseEntity` for records whose lifecycle and queries are scoped
+  to a project.
+- Do not duplicate audit fields (`createdTime`, `updatedTime`, `createdBy`,
+  `updatedBy`) in concrete entities. They are inherited from `BaseEntity`.
+- Do not duplicate `projectId` in concrete project-scoped entities. It is
+  inherited from `ProjectBaseEntity`.
+
+## Password Registration Requests
+
+- Password registration request objects must carry the frontend encrypted
+  password payload, not password hash, salt, algorithm, or password policy
+  version fields.
+- Decrypt frontend password payloads through a public module interface so the
+  transport encryption method can be replaced or extended without changing
+  request objects.
+- Store server-side password hashes only after decrypting the frontend payload
+  and hashing with `innospots-nexus-base` cryptographic utilities.
+- Password hashing utilities must support externally supplied salt values, and
+  registration persistence should store the salt used for the generated hash.
+
+## Page Requests
+
+- Shared paginated query request objects belong under `domain.request`.
+- Module-specific page query requests should extend
+  `com.innospots.nexus.base.domain.request.BasePageRequest` when they need the
+  common `input`, `pageNo`, and `pageSize` fields.
+- Page query methods should accept a request object instead of separate page
+  number, page size, and filter parameters.
+
+## Transaction Boundaries
+
+- Methods that perform multiple DAO writes or coordinate writes across multiple
+  tables must declare `jakarta.transaction.Transactional`.
+- Keep simple single-table reads outside transactions unless a concrete
+  consistency requirement needs a transactional read.
+- Prefer method-level `@Transactional` on the smallest write operation instead
+  of annotating an entire class by default.
+- Transaction API versions belong in `innospots-nexus-bom`; modules must depend
+  on `jakarta.transaction-api` without inline versions.
+
 ## Fluent API
 
 - Setter-like methods on mutable objects should return `this` for chaining.

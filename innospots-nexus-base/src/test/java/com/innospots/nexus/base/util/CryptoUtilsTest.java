@@ -36,6 +36,18 @@ class CryptoUtilsTest {
     }
 
     @Test
+    void encryptsPasswordWithExternallyProvidedSalt() {
+        String salt = CryptoUtils.generatePasswordSalt();
+
+        String first = CryptoUtils.encryptPassword("nexus-secret", salt);
+        String second = CryptoUtils.encryptPassword("nexus-secret", salt);
+
+        assertThat(salt).isNotBlank();
+        assertThat(first).isEqualTo(second);
+        assertThat(CryptoUtils.matchesPassword("nexus-secret", first)).isTrue();
+    }
+
+    @Test
     void rejectsPasswordMismatch() {
         String encrypted = CryptoUtils.encryptPassword("nexus-secret");
 

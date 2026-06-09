@@ -23,6 +23,17 @@
 - Use singular nouns: `domain.condition` not `domain.conditions`.
 - No "impl", "util" sub-packages for implementation details.
 - Infrastructure belongs in adapter/plugin modules, not in domain packages.
+- Module packages with application contracts should use these responsibility
+  names consistently:
+  - `api` for application-facing interfaces exposed to other modules or upper
+    layers.
+  - `operator` for data-operation ports that usually coordinate DAO access.
+  - `service` for business services that contain non-trivial workflow,
+    orchestration, validation, or cross-aggregate logic.
+  - `dao` for MyBatis-Plus persistence mapper interfaces and direct database
+    access contracts.
+  - `domain.entity`, `domain.vo`, `domain.request`, and `domain.model` for
+    domain data structures.
 
 ```java
 com.innospots.nexus.base

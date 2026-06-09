@@ -47,6 +47,14 @@ Cryptographic utilities: password hashing (BCrypt), symmetric encryption (AES-GC
 - **Description:** Encrypts a raw password using BCrypt.
 - **Throws:** NexusException if rawPassword is null or encryption fails
 
+- **Signature:** `generatePasswordSalt() → String`
+- **Description:** Generates a BCrypt salt for password hashing.
+- **Throws:** NexusException if salt generation fails
+
+- **Signature:** `encryptPassword(String rawPassword, String salt) → String`
+- **Description:** Encrypts a raw password using BCrypt and an externally supplied salt.
+- **Throws:** NexusException if rawPassword is null, salt is blank, or encryption fails
+
 - **Signature:** `matchesPassword(String rawPassword, String encryptedPassword) → boolean`
 - **Description:** Verifies a raw password against a BCrypt hash.
 

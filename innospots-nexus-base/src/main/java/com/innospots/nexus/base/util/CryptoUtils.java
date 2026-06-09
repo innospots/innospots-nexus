@@ -61,6 +61,40 @@ public final class CryptoUtils {
     }
 
     /**
+     * Generates a BCrypt salt for password hashing.
+     *
+     * @return the BCrypt salt string
+     */
+    public static String generatePasswordSalt() {
+        try {
+            return BCrypt.gensalt();
+        } catch (Exception e) {
+            throw new NexusException("PASSWORD_SALT_GENERATE_FAILED", "Failed to generate password salt", e);
+        }
+    }
+
+    /**
+     * Encrypts a raw password using BCrypt and an externally supplied salt.
+     *
+     * @param rawPassword the plain-text password (must not be null)
+     * @param salt        externally supplied BCrypt salt (must not be blank)
+     * @return the BCrypt hash string
+     */
+    public static String encryptPassword(String rawPassword, String salt) {
+        if (rawPassword == null) {
+            throw new NexusException("PASSWORD_ENCRYPT_FAILED", "Raw password must not be null");
+        }
+        if (salt == null || salt.isBlank()) {
+            throw new NexusException("PASSWORD_ENCRYPT_FAILED", "Password salt must not be blank");
+        }
+        try {
+            return BCrypt.hashpw(rawPassword, salt);
+        } catch (Exception e) {
+            throw new NexusException("PASSWORD_ENCRYPT_FAILED", "Failed to encrypt password", e);
+        }
+    }
+
+    /**
      * Verifies a raw password against a BCrypt hash.
      *
      * @return true if the password matches the hash
