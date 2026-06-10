@@ -174,7 +174,8 @@ Environment property resolver with override support. Lookup order: overrides →
 
 **Type:** final class
 
-ID generation utilities: Snowflake-based distributed IDs, random IDs, timestamp-prefixed IDs, and batch generation.
+ID generation utilities: Snowflake-based distributed IDs, prefixed ULIDs,
+random IDs, timestamp-prefixed IDs, and batch generation.
 
 ### Factory Methods
 - **Signature:** `of(long datacenterId, long workerId) → IdGenerator`
@@ -190,6 +191,13 @@ ID generation utilities: Snowflake-based distributed IDs, random IDs, timestamp-
 ### Instance Methods
 - **Signature:** `nextId() → long` (synchronized)
 - **Signature:** `nextIdString() → String`
+
+### ULID Generation
+- **Signature:** `ulid(String prefix) → String`
+- **Description:** Generates a ULID string with an optional prefix.
+
+- **Signature:** `monotonicUlid(String prefix) → String`
+- **Description:** Generates a monotonic ULID string with an optional prefix.
 
 ### Random ID Generation
 - **Signature:** `random(String prefix) → String`

@@ -24,9 +24,9 @@ public class MetaResourceEntity extends ProjectBaseEntity {
 
     public static final String TABLE_NAME = "nexus_meta_resource";
 
-    @TableId(type = IdType.ASSIGN_ID)
+    @TableId(type = IdType.INPUT)
     @Id
-    @Column(length = 64, nullable = false)
+    @Column(length = 32, nullable = false)
     private String resourceId;
     @Column(length = 128)
     private String mimeType;

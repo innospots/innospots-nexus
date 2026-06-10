@@ -25,10 +25,10 @@ public class ServiceRegistryEntity extends BaseEntity {
 
     public static final String TABLE_NAME = "nexus_service_registry";
 
-    @TableId(type = IdType.ASSIGN_ID)
+    @TableId(type = IdType.INPUT)
     @Id
-    @Column(nullable = false)
-    private Long serverId;
+    @Column(length = 32, nullable = false)
+    private String serverId;
     @Column(length = 128)
     private String serviceName;
     @Column(length = 128)

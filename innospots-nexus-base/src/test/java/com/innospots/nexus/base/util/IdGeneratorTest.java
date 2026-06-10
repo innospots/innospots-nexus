@@ -46,6 +46,17 @@ class IdGeneratorTest {
     }
 
     @Test
+    void generatesUlidIdsWithOptionalPrefix() {
+        String id = IdGenerator.ulid("usr");
+        String monotonicId = IdGenerator.monotonicUlid("msg");
+        String rawId = IdGenerator.ulid(null);
+
+        assertThat(id).matches("usr[0-9A-HJKMNP-TV-Z]{26}");
+        assertThat(monotonicId).matches("msg[0-9A-HJKMNP-TV-Z]{26}");
+        assertThat(rawId).matches("[0-9A-HJKMNP-TV-Z]{26}");
+    }
+
+    @Test
     void rejectsInvalidLengthsAndCounts() {
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> IdGenerator.random("x", IdGenerator.Type.NUMERIC, 0));

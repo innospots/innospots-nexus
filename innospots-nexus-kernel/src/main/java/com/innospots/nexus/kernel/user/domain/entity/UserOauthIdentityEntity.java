@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,18 +22,21 @@ import com.innospots.nexus.core.entity.BaseEntity;
 @Getter
 @Setter
 @Entity
-@Table(name = UserOauthIdentityEntity.TABLE_NAME)
+@Table(name = UserOauthIdentityEntity.TABLE_NAME, indexes = {
+        @Index(name = "idx_nx_user_oauth_user_id", columnList = "user_id"),
+        @Index(name = "uk_nx_user_oauth_provider_subject", columnList = "provider, provider_subject", unique = true)
+})
 @TableName(UserOauthIdentityEntity.TABLE_NAME)
 public class UserOauthIdentityEntity extends BaseEntity {
 
     public static final String TABLE_NAME = "nx_user_oauth";
 
-    @TableId(type = IdType.ASSIGN_ID)
+    @TableId(type = IdType.INPUT)
     @Id
-    @Column(nullable = false)
-    private Long identityId;
-    @Column(nullable = false)
-    private Long userId;
+    @Column(length = 32, nullable = false)
+    private String identityId;
+    @Column(length = 32, nullable = false)
+    private String userId;
     @Column(length = 64, nullable = false)
     private String provider;
     @Column(length = 256, nullable = false)

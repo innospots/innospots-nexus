@@ -16,7 +16,7 @@ description: |
   - **Resources**: File storage SPI for pluggable backends (local, S3, OSS) with metadata tracking
   - **HTTP**: Apache HttpClient5 builder with pooling and convenience GET/POST utilities
   - **UI descriptors**: Dynamic page/component models with conditional visibility for configurable UIs
-  - **ID generation**: Snowflake distributed IDs, random/timestamped IDs with configurable character sets
+  - **ID generation**: Snowflake distributed IDs, prefixed ULIDs, random/timestamped IDs with configurable character sets
   - **Metrics**: Micrometer counters, timers, gauges with auto name normalization
   - **Bean/Date/String utils**: Property copying, multi-pattern datetime parsing, placeholder replacement
 version: 1.0.0
@@ -47,7 +47,7 @@ depend on, with zero infrastructure bindings (no Spring, no Servlet, no database
 | **File Storage** | Pluggable resource store SPI for save/read/delete with metadata tracking |
 | **HTTP Client** | Apache HttpClient5 builder with pooling, timeouts, and convenience GET/POST utilities |
 | **UI Descriptors** | Dynamic page/component models with conditional visibility for configurable frontends |
-| **ID Generation** | Snowflake distributed IDs, random/timestamped IDs with configurable charset (numeric, hex, alphanumeric) |
+| **ID Generation** | Snowflake distributed IDs, prefixed ULIDs, random/timestamped IDs with configurable charset (numeric, hex, alphanumeric) |
 | **Metrics** | Micrometer counters, timers, gauges with auto name normalization and success/failure tracking |
 | **Utilities** | Bean copy, multi-pattern datetime parsing, environment resolution, string placeholder replacement |
 
@@ -275,7 +275,7 @@ depend on, with zero infrastructure bindings (no Spring, no Servlet, no database
 | `CryptoUtils` | `final class` | Crypto: SHA-256, BCrypt salt generation/password hash/verify, AES-GCM encrypt/decrypt (random IV prepended), RSA-OAEP key pair gen/encrypt/decrypt (block mode) |
 | `DateTimeUtils` | `final class` | Date/time formatting and parsing with 12+ predefined patterns, ISO instant support, and multi-pattern fallback |
 | `EnvUtils` | `final class` | Environment resolver with override support: overrides → system properties → env vars |
-| `IdGenerator` | `final class` | ID generation: Snowflake distributed IDs, random IDs (4 charset types), timestamp-prefixed, batch generation |
+| `IdGenerator` | `final class` | ID generation: Snowflake distributed IDs, prefixed ULIDs, random IDs (4 charset types), timestamp-prefixed, batch generation |
 | `MetricsSnapshot` | `record` | Point-in-time metrics snapshot: name, tags, count, totalNanos, totalMillis |
 | `MetricsUtils` | `final class` | Micrometer facade: counters, timers, gauges with auto name normalization and success/failure/retry counting |
 | `StringUtils` | `final class` | String utilities: blank checks, placeholder replacement (`${key}` / `{{key}}`), camelCase/underscore conversion, random key generation |

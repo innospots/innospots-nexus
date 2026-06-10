@@ -1,6 +1,6 @@
 package com.innospots.nexus.kernel.user.domain.vo;
 
-import com.innospots.nexus.kernel.user.UserStatus;
+import com.innospots.nexus.kernel.user.enums.UserStatus;
 import com.innospots.nexus.kernel.user.enums.UserRegisterSource;
 
 /**
@@ -17,7 +17,7 @@ import com.innospots.nexus.kernel.user.enums.UserRegisterSource;
  * @param status         user lifecycle status
  */
 public record UserProfileVO(
-        Long userId,
+        String userId,
         String userName,
         String displayName,
         String realName,

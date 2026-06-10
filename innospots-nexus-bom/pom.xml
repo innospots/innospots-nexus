@@ -44,6 +44,7 @@
         <kafka-clients.version>4.1.0</kafka-clients.version>
         <micrometer.version>1.15.5</micrometer.version>
         <quartz.version>2.5.2</quartz.version>
+        <ulid-creator.version>5.2.4</ulid-creator.version>
     </properties>
 
     <dependencyManagement>
@@ -208,6 +209,11 @@
                 <groupId>io.micrometer</groupId>
                 <artifactId>micrometer-core</artifactId>
                 <version>${micrometer.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.f4b6a3</groupId>
+                <artifactId>ulid-creator</artifactId>
+                <version>${ulid-creator.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.quartz-scheduler</groupId>

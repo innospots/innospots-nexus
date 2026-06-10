@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,16 +26,22 @@ import com.innospots.nexus.core.entity.BaseEntity;
 @Getter
 @Setter
 @Entity
-@Table(name = UserEntity.TABLE_NAME)
+@Table(name = UserEntity.TABLE_NAME, indexes = {
+        @Index(name = "uk_nx_user_user_name", columnList = "user_name", unique = true),
+        @Index(name = "idx_nx_user_real_name", columnList = "real_name"),
+        @Index(name = "idx_nx_user_email", columnList = "email"),
+        @Index(name = "idx_nx_user_mobile", columnList = "mobile"),
+        @Index(name = "idx_nx_user_status", columnList = "status")
+})
 @TableName(UserEntity.TABLE_NAME)
 public class UserEntity extends BaseEntity {
 
     public static final String TABLE_NAME = "nx_user";
 
-    @TableId(type = IdType.ASSIGN_ID)
+    @TableId(type = IdType.INPUT)
     @Id
-    @Column(nullable = false)
-    private Long userId;
+    @Column(length = 32, nullable = false)
+    private String userId;
     @Column(length = 64, nullable = false)
     private String userName;
     @Column(length = 128)

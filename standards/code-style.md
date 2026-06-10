@@ -69,6 +69,10 @@ import com.innospots.nexus.base.json.Jsons;
   writing boilerplate constructors.
 - Operator and service implementation classes should include `@Slf4j` so
   logging is available without hand-written logger fields.
+- Non-`record` classes under domain data-shape packages such as
+  `domain.entity`, `domain.pojo`, `domain.model`, `domain.request`, and
+  `domain.vo` should use Lombok `@Getter` and `@Setter` instead of hand-written
+  JavaBean accessors.
 - Keep Lombok imports in the third-party import group, before
   `com.innospots.*` project imports.
 - Do not use Lombok to hide domain invariants. Records and explicit factories

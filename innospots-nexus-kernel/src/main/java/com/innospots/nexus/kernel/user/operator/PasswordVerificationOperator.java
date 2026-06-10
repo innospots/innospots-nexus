@@ -1,5 +1,7 @@
 package com.innospots.nexus.kernel.user.operator;
 
+import com.innospots.nexus.kernel.user.enums.VerificationType;
+
 /**
  * Password verification code service port.
  * <p>Implementations are responsible for sending, verifying, and expiring

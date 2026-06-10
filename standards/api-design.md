@@ -93,6 +93,15 @@ try {
   `updatedBy`) in concrete entities. They are inherited from `BaseEntity`.
 - Do not duplicate `projectId` in concrete project-scoped entities. It is
   inherited from `ProjectBaseEntity`.
+- Concrete persistence entity primary keys must be `String` fields annotated
+  with `@TableId(type = IdType.INPUT)`, `@Id`, and `@Column(length = 32,
+  nullable = false)`.
+- Because entity primary keys use `IdType.INPUT`, data operators must assign
+  IDs before insertion. Prefer `IdGenerator.ulid(prefix)` or
+  `IdGenerator.monotonicUlid(prefix)` with a short domain prefix.
+- Concrete persistence entities should declare necessary JPA `@Table(indexes =
+  ...)` annotations for unique lookup fields, foreign-key lookup fields, and
+  page-query filter fields. Keep index names explicit and table-prefixed.
 
 ## Password Registration Requests
 

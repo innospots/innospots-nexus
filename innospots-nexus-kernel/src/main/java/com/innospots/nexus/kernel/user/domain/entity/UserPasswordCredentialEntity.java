@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,18 +22,20 @@ import com.innospots.nexus.core.entity.BaseEntity;
 @Getter
 @Setter
 @Entity
-@Table(name = UserPasswordCredentialEntity.TABLE_NAME)
+@Table(name = UserPasswordCredentialEntity.TABLE_NAME, indexes = {
+        @Index(name = "uk_nx_user_password_user_id", columnList = "user_id", unique = true)
+})
 @TableName(UserPasswordCredentialEntity.TABLE_NAME)
 public class UserPasswordCredentialEntity extends BaseEntity {
 
     public static final String TABLE_NAME = "nx_user_password";
 
-    @TableId(type = IdType.ASSIGN_ID)
+    @TableId(type = IdType.INPUT)
     @Id
-    @Column(nullable = false)
-    private Long credentialId;
-    @Column(nullable = false)
-    private Long userId;
+    @Column(length = 32, nullable = false)
+    private String credentialId;
+    @Column(length = 32, nullable = false)
+    private String userId;
     @Column(length = 256, nullable = false)
     private String passwordHash;
     @Column(length = 128, nullable = false)

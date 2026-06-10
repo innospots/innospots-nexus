@@ -115,15 +115,23 @@ class CoreEntityContractsTest {
         assertThat(ServiceRegistryEntity.class.getAnnotation(TableName.class).value()).isEqualTo("nexus_service_registry");
 
         MetaResourceEntity resource = new MetaResourceEntity();
-        resource.setResourceId("res-1");
+        resource.setResourceId("res01HZY8J6Y3D6S4V7N9X2M5Q8");
         resource.setFileUri("file://demo");
 
         ServiceRegistryEntity service = new ServiceRegistryEntity();
-        service.setServerId(1L);
+        service.setServerId("srv01HZY8J6Y3D6S4V7N9X2M5Q8");
         service.setServiceName("nexus-core");
 
-        assertThat(resource.getResourceId()).isEqualTo("res-1");
+        assertThat(resource.getResourceId()).startsWith("res");
         assertThat(service.getServiceName()).isEqualTo("nexus-core");
+    }
+
+    @Test
+    void concreteEntityPrimaryKeysUseInputStringIdentifiersWithLength32() throws NoSuchFieldException {
+        assertStringInputPrimaryKey(ConversationEntity.class.getDeclaredField("conversationId"));
+        assertStringInputPrimaryKey(SessionMessageEntity.class.getDeclaredField("messageId"));
+        assertStringInputPrimaryKey(MetaResourceEntity.class.getDeclaredField("resourceId"));
+        assertStringInputPrimaryKey(ServiceRegistryEntity.class.getDeclaredField("serverId"));
     }
 
     @Test
@@ -185,5 +193,18 @@ class CoreEntityContractsTest {
         assertThat(field.getAnnotation(Id.class))
                 .as("%s.%s @Id", field.getDeclaringClass().getSimpleName(), field.getName())
                 .isNotNull();
+    }
+
+    private static void assertStringInputPrimaryKey(Field field) {
+        assertPersistenceId(field);
+        assertThat(field.getType())
+                .as("%s.%s type", field.getDeclaringClass().getSimpleName(), field.getName())
+                .isEqualTo(String.class);
+        assertThat(field.getAnnotation(TableId.class).type())
+                .as("%s.%s id type", field.getDeclaringClass().getSimpleName(), field.getName())
+                .isEqualTo(IdType.INPUT);
+        assertThat(field.getAnnotation(Column.class).length())
+                .as("%s.%s length", field.getDeclaringClass().getSimpleName(), field.getName())
+                .isEqualTo(32);
     }
 }

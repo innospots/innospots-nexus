@@ -26,7 +26,7 @@ public class ConversationEntity extends ProjectBaseEntity {
 
     @TableId(type = IdType.INPUT)
     @Id
-    @Column(length = 64, nullable = false)
+    @Column(length = 32, nullable = false)
     private String conversationId;
     @Column(length = 64)
     private String userId;

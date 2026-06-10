@@ -2,6 +2,8 @@ package com.innospots.nexus.base.util;
 
 import cn.hutool.core.lang.generator.SnowflakeGenerator;
 import cn.hutool.core.util.StrUtil;
+import com.github.f4b6a3.ulid.Ulid;
+import com.github.f4b6a3.ulid.UlidCreator;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
@@ -80,6 +82,18 @@ public final class IdGenerator {
     /** Generates a random alphanumeric ID (8 chars) with an optional prefix. */
     public static String random(String prefix) {
         return random(prefix, Type.ALPHANUMERIC, DEFAULT_RANDOM_LENGTH);
+    }
+
+    /** Generates a ULID string with an optional prefix. */
+    public static String ulid(String prefix) {
+        Ulid ulid = UlidCreator.getUlid();
+        return prepend(prefix, ulid.toString());
+    }
+
+    /** Generates a monotonic ULID string with an optional prefix. */
+    public static String monotonicUlid(String prefix) {
+        Ulid ulid = UlidCreator.getMonotonicUlid();
+        return prepend(prefix, ulid.toString());
     }
 
     /** Generates a random ID with the specified character type and length. */

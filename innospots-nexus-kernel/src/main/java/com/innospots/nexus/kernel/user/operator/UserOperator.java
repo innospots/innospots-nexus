@@ -12,15 +12,13 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.innospots.nexus.base.domain.data.DataPage;
 import com.innospots.nexus.base.util.CryptoUtils;
-import com.innospots.nexus.kernel.user.UserStatus;
+import com.innospots.nexus.base.util.IdGenerator;
+import com.innospots.nexus.kernel.user.enums.UserStatus;
 import com.innospots.nexus.kernel.user.api.UserPasswordDecryptor;
 import com.innospots.nexus.kernel.user.dao.UserDao;
-import com.innospots.nexus.kernel.user.dao.UserOauthIdentityDao;
 import com.innospots.nexus.kernel.user.dao.UserPasswordCredentialDao;
 import com.innospots.nexus.kernel.user.domain.entity.UserEntity;
-import com.innospots.nexus.kernel.user.domain.entity.UserOauthIdentityEntity;
 import com.innospots.nexus.kernel.user.domain.entity.UserPasswordCredentialEntity;
-import com.innospots.nexus.kernel.user.domain.request.UserOauthRegisterRequest;
 import com.innospots.nexus.kernel.user.domain.request.UserPageRequest;
 import com.innospots.nexus.kernel.user.domain.request.UserPasswordRegisterRequest;
 import com.innospots.nexus.kernel.user.domain.vo.UserProfileVO;
@@ -38,10 +36,11 @@ public class UserOperator {
 
     private static final String DEFAULT_PASSWORD_ALGORITHM = "BCRYPT";
     private static final int DEFAULT_PASSWORD_VERSION = 1;
+    private static final String USER_ID_PREFIX = "usr";
+    private static final String PASSWORD_CREDENTIAL_ID_PREFIX = "upc";
 
     private final UserDao userDao;
     private final UserPasswordCredentialDao passwordCredentialDao;
-    private final UserOauthIdentityDao oauthIdentityDao;
     private final UserPasswordDecryptor passwordDecryptor;
 
     /**
@@ -50,7 +49,7 @@ public class UserOperator {
      * @param userId user identifier
      * @return user profile when found
      */
-    public Optional<UserProfileVO> findById(Long userId) {
+    public Optional<UserProfileVO> findById(String userId) {
         if (userId == null) {
             return Optional.empty();
         }
@@ -84,7 +83,7 @@ public class UserOperator {
      * @return true when a row was deleted
      */
     @Transactional
-    public boolean deleteUser(Long userId) {
+    public boolean deleteUser(String userId) {
         if (userId == null) {
             return false;
         }
@@ -98,13 +97,30 @@ public class UserOperator {
      * @return true when a row was updated
      */
     @Transactional
-    public boolean freezeUser(Long userId) {
+    public boolean freezeUser(String userId) {
         if (userId == null) {
             return false;
         }
         UserEntity user = new UserEntity();
         user.setUserId(userId);
         user.setStatus(UserStatus.DISABLED.name());
+        return userDao.updateById(user) > 0;
+    }
+
+    /**
+     * Unfreezes a user by restoring its lifecycle status.
+     *
+     * @param userId user identifier
+     * @return true when a row was updated
+     */
+    @Transactional
+    public boolean unfreezeUser(String userId) {
+        if (userId == null) {
+            return false;
+        }
+        UserEntity user = new UserEntity();
+        user.setUserId(userId);
+        user.setStatus(UserStatus.ACTIVE.name());
         return userDao.updateById(user) > 0;
     }
 
@@ -124,6 +140,7 @@ public class UserOperator {
         String rawPassword = passwordDecryptor.decrypt(request.encryptedPassword());
         String passwordSalt = CryptoUtils.generatePasswordSalt();
         UserPasswordCredentialEntity credential = new UserPasswordCredentialEntity();
+        credential.setCredentialId(IdGenerator.monotonicUlid(PASSWORD_CREDENTIAL_ID_PREFIX));
         credential.setUserId(user.getUserId());
         credential.setPasswordHash(CryptoUtils.encryptPassword(rawPassword, passwordSalt));
         credential.setPasswordSalt(passwordSalt);
@@ -132,35 +149,6 @@ public class UserOperator {
         credential.setForceReset(false);
         credential.setFailedAttempts(0);
         passwordCredentialDao.insert(credential);
-
-        return toProfile(user);
-    }
-
-    /**
-     * Registers a user with an OAuth identity binding.
-     *
-     * @param request OAuth registration request
-     * @return created user profile
-     */
-    @Transactional
-    public UserProfileVO registerWithOauth(UserOauthRegisterRequest request) {
-        Objects.requireNonNull(request, "request must not be null");
-        UserEntity user = createUserEntity(request.userName(), request.displayName(), request.realName(),
-                request.email(), request.mobile(), UserRegisterSource.OAUTH);
-        userDao.insert(user);
-
-        UserOauthIdentityEntity identity = new UserOauthIdentityEntity();
-        identity.setUserId(user.getUserId());
-        identity.setProvider(request.provider());
-        identity.setProviderSubject(request.providerSubject());
-        identity.setProviderAccount(request.providerAccount());
-        identity.setProviderDisplayName(request.providerDisplayName());
-        identity.setProviderEmail(request.providerEmail());
-        identity.setProviderAvatarUrl(request.providerAvatarUrl());
-        identity.setAccessTokenKey(request.accessTokenKey());
-        identity.setRefreshTokenKey(request.refreshTokenKey());
-        identity.setTokenExpiresAt(request.tokenExpiresAt());
-        oauthIdentityDao.insert(identity);
 
         return toProfile(user);
     }
@@ -174,6 +162,7 @@ public class UserOperator {
             UserRegisterSource registerSource
     ) {
         UserEntity user = new UserEntity();
+        user.setUserId(IdGenerator.monotonicUlid(USER_ID_PREFIX));
         user.setUserName(userName);
         user.setDisplayName(displayName);
         user.setRealName(realName);

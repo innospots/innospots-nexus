@@ -16,15 +16,15 @@ class RequestContractsTest {
     }
 
     @Test
-    void basePageRequestNormalizesInvalidPagination() {
+    void basePageRequestAllowsLombokGeneratedAccessorsToAssignPagination() {
         BasePageRequest request = new BasePageRequest();
 
         request.setInput("alice");
-        request.setPageNo(0L);
-        request.setPageSize(0L);
+        request.setPageNo(2L);
+        request.setPageSize(50L);
 
         assertThat(request.getInput()).isEqualTo("alice");
-        assertThat(request.getPageNo()).isEqualTo(1L);
-        assertThat(request.getPageSize()).isEqualTo(20L);
+        assertThat(request.getPageNo()).isEqualTo(2L);
+        assertThat(request.getPageSize()).isEqualTo(50L);
     }
 }

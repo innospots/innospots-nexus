@@ -19,6 +19,8 @@ class UserPackageContractsTest {
     void userOperatorLivesInOperatorPackage() throws ClassNotFoundException {
         assertThat(Class.forName("com.innospots.nexus.kernel.user.operator.UserOperator"))
                 .isNotInterface();
+        assertThat(Class.forName("com.innospots.nexus.kernel.user.operator.UserOauthOperator"))
+                .isNotInterface();
     }
 
     @Test

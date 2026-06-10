@@ -26,7 +26,7 @@ public class SessionMessageEntity extends ProjectBaseEntity {
 
     @TableId(type = IdType.INPUT)
     @Id
-    @Column(length = 64, nullable = false)
+    @Column(length = 32, nullable = false)
     private String messageId;
     @Column(length = 64)
     private String sessionId;

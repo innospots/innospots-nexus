@@ -10,6 +10,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.base.util.CryptoUtils;
 import com.innospots.nexus.kernel.user.dao.UserDao;
 import com.innospots.nexus.kernel.user.dao.UserPasswordCredentialDao;
@@ -30,7 +32,6 @@ public class PasswordOperator {
 
     private final UserDao userDao;
     private final UserPasswordCredentialDao passwordCredentialDao;
-    private final UserPasswordDecryptor passwordDecryptor;
     private final PasswordVerificationOperator verificationOperator;
     private final PasswordValidator validator;
 
@@ -51,7 +52,7 @@ public class PasswordOperator {
 
         UserEntity user = userDao.selectById(userId);
         if (user == null) {
-            throw new NoSuchElementException("User not found: " + userId);
+            throw NexusException.build(NexusStatusCode.USER_NOT_FOUND);
         }
 
         UserPasswordCredentialEntity credential = passwordCredentialDao.getByUserId(userId);
@@ -59,17 +60,17 @@ public class PasswordOperator {
             throw new IllegalStateException("No password credential for user: " + userId);
         }
 
-        boolean matches = CryptoUtils.verifyPassword(oldPassword, credential.getPasswordSalt(), credential.getPasswordHash());
+        boolean matches = CryptoUtils.matchesPassword(oldPassword, credential.getPasswordHash());
         if (!matches) {
-            throw new PasswordMismatch("Old password is incorrect");
+            throw NexusException.build(NexusStatusCode.PASSWORD_ERROR);
         }
 
         if (oldPassword.equals(newPassword)) {
-            throw new PasswordSame("New password must differ from old password");
+            throw NexusException.build(NexusStatusCode.BUSINESS_ERROR);
         }
 
         if (!validator.isValid(newPassword)) {
-            throw new PasswordWeak("New password does not meet minimum strength requirements");
+            throw NexusException.build(NexusStatusCode.BUSINESS_ERROR);
         }
 
         String newSalt = CryptoUtils.generatePasswordSalt();
@@ -107,13 +108,13 @@ public class PasswordOperator {
 
         UserEntity user = resolveUser(identity);
         if (user == null) {
-            throw new NoSuchElementException("User not found for identity: " + identity);
+            throw NexusException.build(NexusStatusCode.USER_NOT_FOUND);
         }
 
-        verifyCode(identity, type, verificationCode);
+        verifyCode(verificationOperator, identity, type, verificationCode);
 
         if (!validator.isValid(newPassword)) {
-            throw new PasswordWeak("New password does not meet minimum strength requirements");
+            throw NexusException.build(NexusStatusCode.BUSINESS_ERROR);
         }
 
         UserPasswordCredentialEntity credential = passwordCredentialDao.getByUserId(user.getUserId());
@@ -160,7 +161,7 @@ public class PasswordOperator {
     private void verifyCode(PasswordVerificationOperator op, String identity, VerificationType type, String code) {
         Objects.requireNonNull(op, "PasswordVerificationOperator must not be null");
         if (!op.verifyVerificationCode(identity, type, code)) {
-            throw new CodeInvalid("Verification code is invalid or expired");
+            throw NexusException.build(NexusStatusCode.BUSINESS_ERROR);
         }
         op.expireVerificationCode(identity, type);
     }

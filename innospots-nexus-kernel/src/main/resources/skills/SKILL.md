@@ -47,7 +47,7 @@ Quarkus, Servlet, or a concrete web runtime.
 | `user` | `KernelUser`, `UserStatus` |
 | `user.api` | `UserPasswordDecryptor`, `RsaUserPasswordDecryptor` |
 | `user.dao` | `UserDao`, `UserPasswordCredentialDao`, `UserOauthIdentityDao` |
-| `user.operator` | `UserOperator` |
+| `user.operator` | `UserOperator`, `UserOauthOperator` |
 | `group` | `UserGroup`, `GroupType`, `GroupOperator` |
 | `role` | `Role`, `RoleScope`, `RoleOperator` |
 | `permission` | `Permission`, `PermissionEffect`, `PermissionOperator` |
@@ -77,6 +77,7 @@ Quarkus, Servlet, or a concrete web runtime.
 | Class | Type | Description |
 |-------|------|-------------|
 | `UserOperator` | `class` | User data operator backed by DAO implementations. |
+| `UserOauthOperator` | `class` | OAuth user registration operator backed by user and OAuth identity DAO implementations. |
 
 ### Package `user.domain.request`
 
