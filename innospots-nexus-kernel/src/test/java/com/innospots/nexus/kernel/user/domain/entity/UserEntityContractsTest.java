@@ -15,8 +15,8 @@ import jakarta.persistence.Table;
 import org.junit.jupiter.api.Test;
 
 import com.innospots.nexus.core.entity.BaseEntity;
-import com.innospots.nexus.kernel.user.enums.UserStatus;
-import com.innospots.nexus.kernel.user.enums.UserRegisterSource;
+import com.innospots.nexus.kernel.user.domain.enums.UserStatus;
+import com.innospots.nexus.kernel.user.domain.enums.UserRegisterSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -53,7 +53,7 @@ class UserEntityContractsTest {
 
     @Test
     void userEntityStoresRegistrationProfileWithoutPasswordSecret() throws NoSuchFieldException {
-        assertPersistenceId(UserEntity.class.getDeclaredField("userId"), IdType.INPUT);
+        assertPersistenceId(UserEntity.class.getDeclaredField("userId"), IdType.ASSIGN_UUID);
         assertField(UserEntity.class, "userId", String.class, 32, false);
 
         assertField(UserEntity.class, "userName", String.class, 64, false);
@@ -72,7 +72,7 @@ class UserEntityContractsTest {
 
     @Test
     void passwordCredentialEntityStoresLocalPasswordMaterialSeparately() throws NoSuchFieldException {
-        assertPersistenceId(UserPasswordCredentialEntity.class.getDeclaredField("credentialId"), IdType.INPUT);
+        assertPersistenceId(UserPasswordCredentialEntity.class.getDeclaredField("credentialId"), IdType.ASSIGN_UUID);
 
         assertField(UserPasswordCredentialEntity.class, "credentialId", String.class, 32, false);
         assertField(UserPasswordCredentialEntity.class, "userId", String.class, 32, false);
@@ -85,7 +85,7 @@ class UserEntityContractsTest {
 
     @Test
     void oauthIdentityEntityAllowsExternalRegistrationWithoutLocalPassword() throws NoSuchFieldException {
-        assertPersistenceId(UserOauthIdentityEntity.class.getDeclaredField("identityId"), IdType.INPUT);
+        assertPersistenceId(UserOauthIdentityEntity.class.getDeclaredField("identityId"), IdType.ASSIGN_UUID);
 
         assertField(UserOauthIdentityEntity.class, "identityId", String.class, 32, false);
         assertField(UserOauthIdentityEntity.class, "userId", String.class, 32, false);

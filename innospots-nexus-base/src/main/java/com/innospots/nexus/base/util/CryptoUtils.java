@@ -51,12 +51,12 @@ public final class CryptoUtils {
      */
     public static String encryptPassword(String rawPassword) {
         if (rawPassword == null) {
-            throw new NexusException("PASSWORD_ENCRYPT_FAILED", "Raw password must not be null");
+            throw NexusException.build("PASSWORD_ENCRYPT_FAILED", "Raw password must not be null");
         }
         try {
             return BCrypt.hashpw(rawPassword);
         } catch (Exception e) {
-            throw new NexusException("PASSWORD_ENCRYPT_FAILED", "Failed to encrypt password", e);
+            throw NexusException.build("PASSWORD_ENCRYPT_FAILED", "Failed to encrypt password", e);
         }
     }
 
@@ -69,7 +69,7 @@ public final class CryptoUtils {
         try {
             return BCrypt.gensalt();
         } catch (Exception e) {
-            throw new NexusException("PASSWORD_SALT_GENERATE_FAILED", "Failed to generate password salt", e);
+            throw NexusException.build("PASSWORD_SALT_GENERATE_FAILED", "Failed to generate password salt", e);
         }
     }
 
@@ -82,15 +82,15 @@ public final class CryptoUtils {
      */
     public static String encryptPassword(String rawPassword, String salt) {
         if (rawPassword == null) {
-            throw new NexusException("PASSWORD_ENCRYPT_FAILED", "Raw password must not be null");
+            throw NexusException.build("PASSWORD_ENCRYPT_FAILED", "Raw password must not be null");
         }
         if (salt == null || salt.isBlank()) {
-            throw new NexusException("PASSWORD_ENCRYPT_FAILED", "Password salt must not be blank");
+            throw NexusException.build("PASSWORD_ENCRYPT_FAILED", "Password salt must not be blank");
         }
         try {
             return BCrypt.hashpw(rawPassword, salt);
         } catch (Exception e) {
-            throw new NexusException("PASSWORD_ENCRYPT_FAILED", "Failed to encrypt password", e);
+            throw NexusException.build("PASSWORD_ENCRYPT_FAILED", "Failed to encrypt password", e);
         }
     }
 
@@ -129,7 +129,7 @@ public final class CryptoUtils {
             System.arraycopy(encrypted, 0, payload, iv.length, encrypted.length);
             return Base64.encode(payload);
         } catch (Exception e) {
-            throw new NexusException("AES_GCM_ENCRYPT_FAILED", "Failed to encrypt text", e);
+            throw NexusException.build("AES_GCM_ENCRYPT_FAILED", "Failed to encrypt text", e);
         }
     }
 
@@ -150,7 +150,7 @@ public final class CryptoUtils {
             cipher.init(Cipher.DECRYPT_MODE, key(secret), new GCMParameterSpec(GCM_TAG_BITS, iv));
             return new String(cipher.doFinal(cipherText), StandardCharsets.UTF_8);
         } catch (Exception e) {
-            throw new NexusException("AES_GCM_DECRYPT_FAILED", "Failed to decrypt text", e);
+            throw NexusException.build("AES_GCM_DECRYPT_FAILED", "Failed to decrypt text", e);
         }
     }
 
@@ -167,7 +167,7 @@ public final class CryptoUtils {
      */
     public static AsymmetricKeyPair generateRsaKeyPair(int keySize) {
         if (keySize < DEFAULT_RSA_KEY_SIZE) {
-            throw new NexusException("RSA_KEY_SIZE_TOO_SMALL", "RSA key size must be at least 2048 bits");
+            throw NexusException.build("RSA_KEY_SIZE_TOO_SMALL", "RSA key size must be at least 2048 bits");
         }
         try {
             KeyPairGenerator generator = KeyPairGenerator.getInstance(RSA_ALGORITHM);
@@ -178,7 +178,7 @@ public final class CryptoUtils {
                     Base64.encode(keyPair.getPrivate().getEncoded())
             );
         } catch (Exception e) {
-            throw new NexusException("RSA_KEY_PAIR_GENERATE_FAILED", "Failed to generate RSA key pair", e);
+            throw NexusException.build("RSA_KEY_PAIR_GENERATE_FAILED", "Failed to generate RSA key pair", e);
         }
     }
 
@@ -199,7 +199,7 @@ public final class CryptoUtils {
             byte[] encrypted = cipherBlocks(cipher, plaintext.getBytes(StandardCharsets.UTF_8), blockSize);
             return Base64.encode(encrypted);
         } catch (Exception e) {
-            throw new NexusException("RSA_ENCRYPT_FAILED", "Failed to encrypt text with RSA public key", e);
+            throw NexusException.build("RSA_ENCRYPT_FAILED", "Failed to encrypt text with RSA public key", e);
         }
     }
 
@@ -219,7 +219,7 @@ public final class CryptoUtils {
             byte[] plaintext = cipherBlocks(cipher, cipherText, rsaKeyBytes(key));
             return new String(plaintext, StandardCharsets.UTF_8);
         } catch (Exception e) {
-            throw new NexusException("RSA_DECRYPT_FAILED", "Failed to decrypt text with RSA private key", e);
+            throw NexusException.build("RSA_DECRYPT_FAILED", "Failed to decrypt text with RSA private key", e);
         }
     }
 
@@ -241,7 +241,7 @@ public final class CryptoUtils {
         if (key instanceof RSAKey rsaKey) {
             return (rsaKey.getModulus().bitLength() + 7) / 8;
         }
-        throw new NexusException("RSA_KEY_INVALID", "Key is not an RSA key");
+        throw NexusException.build("RSA_KEY_INVALID", "Key is not an RSA key");
     }
 
     private static byte[] cipherBlocks(Cipher cipher, byte[] input, int blockSize) throws Exception {

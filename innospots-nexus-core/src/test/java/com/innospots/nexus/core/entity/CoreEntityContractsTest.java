@@ -91,14 +91,14 @@ class CoreEntityContractsTest {
     }
 
     @Test
-    void sessionEntitiesUseInputIdentifiersAndNewTableNames() throws NoSuchFieldException {
+    void sessionEntitiesUseAssignedUuidIdentifiersAndNewTableNames() throws NoSuchFieldException {
         assertThat(ConversationEntity.class.getAnnotation(TableName.class).value()).isEqualTo("nexus_conversation");
         assertThat(SessionMessageEntity.class.getAnnotation(TableName.class).value()).isEqualTo("nexus_session_message");
 
         TableId conversationId = ConversationEntity.class.getDeclaredField("conversationId").getAnnotation(TableId.class);
         TableId messageId = SessionMessageEntity.class.getDeclaredField("messageId").getAnnotation(TableId.class);
-        assertThat(conversationId.type()).isEqualTo(IdType.INPUT);
-        assertThat(messageId.type()).isEqualTo(IdType.INPUT);
+        assertThat(conversationId.type()).isEqualTo(IdType.ASSIGN_UUID);
+        assertThat(messageId.type()).isEqualTo(IdType.ASSIGN_UUID);
     }
 
     @Test
@@ -127,11 +127,22 @@ class CoreEntityContractsTest {
     }
 
     @Test
-    void concreteEntityPrimaryKeysUseInputStringIdentifiersWithLength32() throws NoSuchFieldException {
-        assertStringInputPrimaryKey(ConversationEntity.class.getDeclaredField("conversationId"));
-        assertStringInputPrimaryKey(SessionMessageEntity.class.getDeclaredField("messageId"));
-        assertStringInputPrimaryKey(MetaResourceEntity.class.getDeclaredField("resourceId"));
-        assertStringInputPrimaryKey(ServiceRegistryEntity.class.getDeclaredField("serverId"));
+    void concreteEntityPrimaryKeysUseAssignedUuidStringIdentifiersWithLength32() throws NoSuchFieldException {
+        assertStringAssignedUuidPrimaryKey(ConversationEntity.class.getDeclaredField("conversationId"));
+        assertStringAssignedUuidPrimaryKey(SessionMessageEntity.class.getDeclaredField("messageId"));
+        assertStringAssignedUuidPrimaryKey(MetaResourceEntity.class.getDeclaredField("resourceId"));
+        assertStringAssignedUuidPrimaryKey(ServiceRegistryEntity.class.getDeclaredField("serverId"));
+    }
+
+    @Test
+    void databasePrimaryGeneratorUsesEntityPrefixes() {
+        DbPrimaryGenerator generator = new DbPrimaryGenerator();
+
+        assertThat(generator.nextUUID(new ConversationEntity())).startsWith("cnv").hasSize(29);
+        assertThat(generator.nextUUID(new SessionMessageEntity())).startsWith("msg").hasSize(29);
+        assertThat(generator.nextUUID(new MetaResourceEntity())).startsWith("res").hasSize(29);
+        assertThat(generator.nextUUID(new ServiceRegistryEntity())).startsWith("srv").hasSize(29);
+        assertThat(generator.nextUUID(new BaseEntity())).hasSize(26);
     }
 
     @Test
@@ -195,14 +206,14 @@ class CoreEntityContractsTest {
                 .isNotNull();
     }
 
-    private static void assertStringInputPrimaryKey(Field field) {
+    private static void assertStringAssignedUuidPrimaryKey(Field field) {
         assertPersistenceId(field);
         assertThat(field.getType())
                 .as("%s.%s type", field.getDeclaringClass().getSimpleName(), field.getName())
                 .isEqualTo(String.class);
         assertThat(field.getAnnotation(TableId.class).type())
                 .as("%s.%s id type", field.getDeclaringClass().getSimpleName(), field.getName())
-                .isEqualTo(IdType.INPUT);
+                .isEqualTo(IdType.ASSIGN_UUID);
         assertThat(field.getAnnotation(Column.class).length())
                 .as("%s.%s length", field.getDeclaringClass().getSimpleName(), field.getName())
                 .isEqualTo(32);

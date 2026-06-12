@@ -1,6 +1,6 @@
 package com.innospots.nexus.kernel.user.domain.model;
 
-import com.innospots.nexus.kernel.user.enums.UserStatus;
+import com.innospots.nexus.kernel.user.domain.enums.UserStatus;
 
 /**
  * Kernel user aggregate root for identity management.

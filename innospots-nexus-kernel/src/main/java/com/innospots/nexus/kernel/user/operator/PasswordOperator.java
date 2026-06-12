@@ -1,10 +1,10 @@
 package com.innospots.nexus.kernel.user.operator;
 
-import java.util.NoSuchElementException;
 import java.util.Objects;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
+import com.innospots.nexus.kernel.user.tools.PasswordValidator;
 import jakarta.transaction.Transactional;
 
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ import com.innospots.nexus.kernel.user.dao.UserDao;
 import com.innospots.nexus.kernel.user.dao.UserPasswordCredentialDao;
 import com.innospots.nexus.kernel.user.domain.entity.UserEntity;
 import com.innospots.nexus.kernel.user.domain.entity.UserPasswordCredentialEntity;
-import com.innospots.nexus.kernel.user.enums.VerificationType;
+import com.innospots.nexus.kernel.user.domain.enums.VerificationType;
 
 /**
  * User password operation operator.

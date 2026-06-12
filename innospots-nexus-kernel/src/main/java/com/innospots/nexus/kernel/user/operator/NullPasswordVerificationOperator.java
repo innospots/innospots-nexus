@@ -1,6 +1,6 @@
 package com.innospots.nexus.kernel.user.operator;
 
-import com.innospots.nexus.kernel.user.enums.VerificationType;
+import com.innospots.nexus.kernel.user.domain.enums.VerificationType;
 
 /**
  * Null implementation that rejects all verification code operations.

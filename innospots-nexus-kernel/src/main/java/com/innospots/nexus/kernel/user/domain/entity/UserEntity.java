@@ -38,10 +38,15 @@ public class UserEntity extends BaseEntity {
 
     public static final String TABLE_NAME = "nx_user";
 
-    @TableId(type = IdType.INPUT)
+    @TableId(type = IdType.ASSIGN_UUID)
     @Id
     @Column(length = 32, nullable = false)
     private String userId;
+
+    @Override
+    public String idPrefix() {
+        return "usr";
+    }
     @Column(length = 64, nullable = false)
     private String userName;
     @Column(length = 128)

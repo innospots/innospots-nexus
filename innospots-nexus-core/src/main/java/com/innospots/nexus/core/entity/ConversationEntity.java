@@ -24,10 +24,15 @@ public class ConversationEntity extends ProjectBaseEntity {
 
     public static final String TABLE_NAME = "nexus_conversation";
 
-    @TableId(type = IdType.INPUT)
+    @TableId(type = IdType.ASSIGN_UUID)
     @Id
     @Column(length = 32, nullable = false)
     private String conversationId;
+
+    @Override
+    public String idPrefix() {
+        return "cnv";
+    }
     @Column(length = 64)
     private String userId;
     @Column(length = 128)

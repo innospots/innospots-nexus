@@ -24,10 +24,15 @@ public class SessionMessageEntity extends ProjectBaseEntity {
 
     public static final String TABLE_NAME = "nexus_session_message";
 
-    @TableId(type = IdType.INPUT)
+    @TableId(type = IdType.ASSIGN_UUID)
     @Id
     @Column(length = 32, nullable = false)
     private String messageId;
+
+    @Override
+    public String idPrefix() {
+        return "msg";
+    }
     @Column(length = 64)
     private String sessionId;
     @Column(length = 64)

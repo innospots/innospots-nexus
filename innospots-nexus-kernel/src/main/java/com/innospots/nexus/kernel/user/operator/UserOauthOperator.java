@@ -6,15 +6,14 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import com.innospots.nexus.base.util.IdGenerator;
-import com.innospots.nexus.kernel.user.enums.UserStatus;
+import com.innospots.nexus.kernel.user.domain.enums.UserStatus;
 import com.innospots.nexus.kernel.user.dao.UserDao;
 import com.innospots.nexus.kernel.user.dao.UserOauthIdentityDao;
 import com.innospots.nexus.kernel.user.domain.entity.UserEntity;
 import com.innospots.nexus.kernel.user.domain.entity.UserOauthIdentityEntity;
 import com.innospots.nexus.kernel.user.domain.request.UserOauthRegisterRequest;
 import com.innospots.nexus.kernel.user.domain.vo.UserProfileVO;
-import com.innospots.nexus.kernel.user.enums.UserRegisterSource;
+import com.innospots.nexus.kernel.user.domain.enums.UserRegisterSource;
 
 /**
  * OAuth user data operator backed by MyBatis-Plus DAO objects.
@@ -22,9 +21,6 @@ import com.innospots.nexus.kernel.user.enums.UserRegisterSource;
 @Slf4j
 @RequiredArgsConstructor
 public class UserOauthOperator {
-
-    private static final String USER_ID_PREFIX = "usr";
-    private static final String OAUTH_IDENTITY_ID_PREFIX = "uoi";
 
     private final UserDao userDao;
     private final UserOauthIdentityDao oauthIdentityDao;
@@ -42,7 +38,6 @@ public class UserOauthOperator {
         userDao.insert(user);
 
         UserOauthIdentityEntity identity = new UserOauthIdentityEntity();
-        identity.setIdentityId(IdGenerator.monotonicUlid(OAUTH_IDENTITY_ID_PREFIX));
         identity.setUserId(user.getUserId());
         identity.setProvider(request.provider());
         identity.setProviderSubject(request.providerSubject());
@@ -60,7 +55,6 @@ public class UserOauthOperator {
 
     private UserEntity createUserEntity(UserOauthRegisterRequest request) {
         UserEntity user = new UserEntity();
-        user.setUserId(IdGenerator.monotonicUlid(USER_ID_PREFIX));
         user.setUserName(request.userName());
         user.setDisplayName(request.displayName());
         user.setRealName(request.realName());

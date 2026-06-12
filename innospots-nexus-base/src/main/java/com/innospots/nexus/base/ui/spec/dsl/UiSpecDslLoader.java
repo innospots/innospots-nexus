@@ -22,7 +22,7 @@ public final class UiSpecDslLoader {
         try {
             return YAML_MAPPER.readValue(yaml, UiSpecDsl.class);
         } catch (JsonProcessingException e) {
-            throw new NexusException("UI_DSL_YAML_READ_FAILED", "Failed to read UI DSL YAML", e);
+            throw NexusException.build("UI_DSL_YAML_READ_FAILED", "Failed to read UI DSL YAML", e);
         }
     }
 
@@ -30,7 +30,7 @@ public final class UiSpecDslLoader {
         try {
             return YAML_MAPPER.writeValueAsString(dsl);
         } catch (JsonProcessingException e) {
-            throw new NexusException("UI_DSL_YAML_WRITE_FAILED", "Failed to write UI DSL YAML", e);
+            throw NexusException.build("UI_DSL_YAML_WRITE_FAILED", "Failed to write UI DSL YAML", e);
         }
     }
 }

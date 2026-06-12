@@ -22,6 +22,15 @@ import java.time.LocalDateTime;
 @MappedSuperclass
 public class BaseEntity {
 
+    /**
+     * Returns the prefix used when generating this entity's primary key.
+     *
+     * @return primary-key prefix, or an empty string when no prefix is required
+     */
+    public String idPrefix() {
+        return "";
+    }
+
     /** Record creation timestamp, set once on insert and never updated. */
     @TableField(fill = FieldFill.INSERT)
     @Column(updatable = false)

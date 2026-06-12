@@ -12,9 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.innospots.nexus.base.domain.data.DataPage;
 import com.innospots.nexus.base.util.CryptoUtils;
-import com.innospots.nexus.base.util.IdGenerator;
-import com.innospots.nexus.kernel.user.enums.UserStatus;
-import com.innospots.nexus.kernel.user.api.UserPasswordDecryptor;
+import com.innospots.nexus.kernel.user.domain.enums.UserStatus;
+import com.innospots.nexus.kernel.user.tools.UserPasswordDecryptor;
 import com.innospots.nexus.kernel.user.dao.UserDao;
 import com.innospots.nexus.kernel.user.dao.UserPasswordCredentialDao;
 import com.innospots.nexus.kernel.user.domain.entity.UserEntity;
@@ -22,7 +21,7 @@ import com.innospots.nexus.kernel.user.domain.entity.UserPasswordCredentialEntit
 import com.innospots.nexus.kernel.user.domain.request.UserPageRequest;
 import com.innospots.nexus.kernel.user.domain.request.UserPasswordRegisterRequest;
 import com.innospots.nexus.kernel.user.domain.vo.UserProfileVO;
-import com.innospots.nexus.kernel.user.enums.UserRegisterSource;
+import com.innospots.nexus.kernel.user.domain.enums.UserRegisterSource;
 
 /**
  * User data operator backed by MyBatis-Plus DAO objects.
@@ -36,8 +35,6 @@ public class UserOperator {
 
     private static final String DEFAULT_PASSWORD_ALGORITHM = "BCRYPT";
     private static final int DEFAULT_PASSWORD_VERSION = 1;
-    private static final String USER_ID_PREFIX = "usr";
-    private static final String PASSWORD_CREDENTIAL_ID_PREFIX = "upc";
 
     private final UserDao userDao;
     private final UserPasswordCredentialDao passwordCredentialDao;
@@ -65,13 +62,13 @@ public class UserOperator {
     public DataPage<UserProfileVO> pageUsers(UserPageRequest request) {
         UserPageRequest pageRequest = request == null ? new UserPageRequest() : request;
         IPage<UserEntity> selectedPage = userDao.selectPage(
-                new Page<>(pageRequest.getPageNo(), pageRequest.getPageSize()),
+                new Page<>(pageRequest.pageNo(), pageRequest.pageSize()),
                 pageQuery(pageRequest)
         );
         return DataPage.of(
                 selectedPage.getRecords().stream().map(this::toProfile).toList(),
-                pageRequest.getPageNo(),
-                pageRequest.getPageSize(),
+                pageRequest.pageNo(),
+                pageRequest.pageSize(),
                 selectedPage.getTotal()
         );
     }
@@ -140,7 +137,6 @@ public class UserOperator {
         String rawPassword = passwordDecryptor.decrypt(request.encryptedPassword());
         String passwordSalt = CryptoUtils.generatePasswordSalt();
         UserPasswordCredentialEntity credential = new UserPasswordCredentialEntity();
-        credential.setCredentialId(IdGenerator.monotonicUlid(PASSWORD_CREDENTIAL_ID_PREFIX));
         credential.setUserId(user.getUserId());
         credential.setPasswordHash(CryptoUtils.encryptPassword(rawPassword, passwordSalt));
         credential.setPasswordSalt(passwordSalt);
@@ -162,7 +158,6 @@ public class UserOperator {
             UserRegisterSource registerSource
     ) {
         UserEntity user = new UserEntity();
-        user.setUserId(IdGenerator.monotonicUlid(USER_ID_PREFIX));
         user.setUserName(userName);
         user.setDisplayName(displayName);
         user.setRealName(realName);
@@ -177,27 +172,27 @@ public class UserOperator {
 
     private QueryWrapper<UserEntity> pageQuery(UserPageRequest request) {
         QueryWrapper<UserEntity> query = new QueryWrapper<>();
-        if (hasText(request.getInput())) {
+        if (hasText(request.input())) {
             query.and(wrapper -> wrapper
-                    .like("user_name", request.getInput())
+                    .like("user_name", request.input())
                     .or()
-                    .like("real_name", request.getInput())
+                    .like("real_name", request.input())
                     .or()
-                    .like("email", request.getInput())
+                    .like("email", request.input())
                     .or()
-                    .like("mobile", request.getInput()));
+                    .like("mobile", request.input()));
         }
-        if (hasText(request.getUserName())) {
-            query.like("user_name", request.getUserName());
+        if (hasText(request.userName())) {
+            query.like("user_name", request.userName());
         }
-        if (hasText(request.getRealName())) {
-            query.like("real_name", request.getRealName());
+        if (hasText(request.realName())) {
+            query.like("real_name", request.realName());
         }
-        if (hasText(request.getEmail())) {
-            query.like("email", request.getEmail());
+        if (hasText(request.email())) {
+            query.like("email", request.email());
         }
-        if (hasText(request.getMobile())) {
-            query.like("mobile", request.getMobile());
+        if (hasText(request.mobile())) {
+            query.like("mobile", request.mobile());
         }
         return query;
     }

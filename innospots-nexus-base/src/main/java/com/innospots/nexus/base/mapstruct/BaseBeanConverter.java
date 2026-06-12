@@ -45,7 +45,7 @@ public interface BaseBeanConverter<Model, Entity> {
             return Jsons.mapper().readValue(json, new TypeReference<>() {
             });
         } catch (JsonProcessingException e) {
-            throw new NexusException("JSON_READ_FAILED", "Failed to read JSON string map", e);
+            throw NexusException.build("JSON_READ_FAILED", "Failed to read JSON string map", e);
         }
     }
 
@@ -66,7 +66,7 @@ public interface BaseBeanConverter<Model, Entity> {
             return Jsons.mapper().readValue(json, new TypeReference<>() {
             });
         } catch (JsonProcessingException e) {
-            throw new NexusException("JSON_READ_FAILED", "Failed to read JSON map list", e);
+            throw NexusException.build("JSON_READ_FAILED", "Failed to read JSON map list", e);
         }
     }
 

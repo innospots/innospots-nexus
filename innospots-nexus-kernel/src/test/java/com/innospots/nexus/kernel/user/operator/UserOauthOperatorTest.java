@@ -7,17 +7,20 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
 
-import com.innospots.nexus.kernel.user.enums.UserStatus;
+import com.innospots.nexus.core.entity.DbPrimaryGenerator;
+import com.innospots.nexus.kernel.user.domain.enums.UserStatus;
 import com.innospots.nexus.kernel.user.dao.UserDao;
 import com.innospots.nexus.kernel.user.dao.UserOauthIdentityDao;
 import com.innospots.nexus.kernel.user.domain.entity.UserEntity;
 import com.innospots.nexus.kernel.user.domain.entity.UserOauthIdentityEntity;
 import com.innospots.nexus.kernel.user.domain.request.UserOauthRegisterRequest;
 import com.innospots.nexus.kernel.user.domain.vo.UserProfileVO;
-import com.innospots.nexus.kernel.user.enums.UserRegisterSource;
+import com.innospots.nexus.kernel.user.domain.enums.UserRegisterSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentCaptor.forClass;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -43,6 +46,17 @@ class UserOauthOperatorTest {
         UserDao userDao = mock(UserDao.class);
         UserOauthIdentityDao oauthDao = mock(UserOauthIdentityDao.class);
         UserOauthOperator operator = new UserOauthOperator(userDao, oauthDao);
+        DbPrimaryGenerator generator = new DbPrimaryGenerator();
+        doAnswer(invocation -> {
+            UserEntity entity = invocation.getArgument(0);
+            entity.setUserId(generator.nextUUID(entity));
+            return 1;
+        }).when(userDao).insert(any(UserEntity.class));
+        doAnswer(invocation -> {
+            UserOauthIdentityEntity entity = invocation.getArgument(0);
+            entity.setIdentityId(generator.nextUUID(entity));
+            return 1;
+        }).when(oauthDao).insert(any(UserOauthIdentityEntity.class));
 
         UserProfileVO profile = operator.registerWithOauth(new UserOauthRegisterRequest(
                 "carol",

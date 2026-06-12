@@ -30,10 +30,15 @@ public class UserPasswordCredentialEntity extends BaseEntity {
 
     public static final String TABLE_NAME = "nx_user_password";
 
-    @TableId(type = IdType.INPUT)
+    @TableId(type = IdType.ASSIGN_UUID)
     @Id
     @Column(length = 32, nullable = false)
     private String credentialId;
+
+    @Override
+    public String idPrefix() {
+        return "upc";
+    }
     @Column(length = 32, nullable = false)
     private String userId;
     @Column(length = 256, nullable = false)

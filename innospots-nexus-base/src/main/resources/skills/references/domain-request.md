@@ -1,23 +1,30 @@
 # Package `domain.request`
 
-## BasePageRequest
+## SimpleQueryRequest
 
-**Type:** class
+**Type:** record
 
-Base request object for paginated queries. Higher-level modules should extend
-it for domain-specific page filters.
+Immutable paginated query request with built-in defaults. Subclasses are not
+supported — domain-specific page requests should inline the fields or compose
+this record.
 
-### Fields
-- `input` — common fuzzy search input
-- `pageNo` — 1-indexed page number, default `1`
-- `pageSize` — page size, default `20`
+### Components
+- **Signature:** `input() -> String`
+- **Description:** Common fuzzy search keyword, may be `null`.
 
-### Methods
-- **Signature:** `getInput() -> String`
-- **Description:** Returns the common fuzzy search input.
+- **Signature:** `pageNo() -> long`
+- **Description:** 1-indexed page number, defaults to `1`. Invalid values are normalized to `1`.
 
-- **Signature:** `getPageNo() -> Long`
-- **Description:** Returns a normalized page number, defaulting invalid values to `1`.
+- **Signature:** `pageSize() -> long`
+- **Description:** Records per page, defaults to `20`. Invalid values are normalized to `20`.
 
-- **Signature:** `getPageSize() -> Long`
-- **Description:** Returns a normalized page size, defaulting invalid values to `20`.
+### Constants
+- `DEFAULT_PAGE_NO = 1L`
+- `DEFAULT_PAGE_SIZE = 20L`
+
+### Constructors
+- **Signature:** `SimpleQueryRequest()`
+- **Description:** No-arg constructor with defaults (`null`, `1`, `20`).
+
+- **Signature:** `SimpleQueryRequest(String input, long pageNo, long pageSize)`
+- **Description:** Canonical constructor. Invalid page number or size are normalized.

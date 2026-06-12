@@ -51,7 +51,7 @@ final class ValueConvertingSerializer extends StdSerializer<Object> {
             return (Function<Object, Object>) valueConverter.value().getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
                  NoSuchMethodException e) {
-            throw new NexusException("JSON_VALUE_CONVERTER_CREATE_FAILED",
+            throw NexusException.build("JSON_VALUE_CONVERTER_CREATE_FAILED",
                     "Failed to create JSON value converter: " + valueConverter.value().getName(), e);
         }
     }

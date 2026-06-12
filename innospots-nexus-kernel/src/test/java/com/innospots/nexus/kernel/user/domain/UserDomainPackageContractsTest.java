@@ -2,7 +2,7 @@ package com.innospots.nexus.kernel.user.domain;
 
 import org.junit.jupiter.api.Test;
 
-import com.innospots.nexus.base.domain.request.BasePageRequest;
+import com.innospots.nexus.base.domain.request.SimpleQueryRequest;
 import com.innospots.nexus.kernel.user.domain.request.UserPageRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -18,21 +18,18 @@ class UserDomainPackageContractsTest {
     }
 
     @Test
-    void userPageRequestExtendsBasePageRequestAndProvidesUserFilters() {
-        UserPageRequest request = new UserPageRequest();
+    void userPageRequestProvidesUserFiltersWithPaginationDefaults() {
+        UserPageRequest request = new UserPageRequest(
+                "common", 1L, 20L, "alice", "Alice Lee",
+                "alice@example.com", "13800000000");
 
-        request.setInput("common");
-        request.setUserName("alice");
-        request.setRealName("Alice Lee");
-        request.setEmail("alice@example.com");
-        request.setMobile("13800000000");
-
-        assertThat(request).isInstanceOf(BasePageRequest.class);
-        assertThat(request.getInput()).isEqualTo("common");
-        assertThat(request.getUserName()).isEqualTo("alice");
-        assertThat(request.getRealName()).isEqualTo("Alice Lee");
-        assertThat(request.getEmail()).isEqualTo("alice@example.com");
-        assertThat(request.getMobile()).isEqualTo("13800000000");
+        assertThat(request.input()).isEqualTo("common");
+        assertThat(request.pageNo()).isEqualTo(SimpleQueryRequest.DEFAULT_PAGE_NO);
+        assertThat(request.pageSize()).isEqualTo(SimpleQueryRequest.DEFAULT_PAGE_SIZE);
+        assertThat(request.userName()).isEqualTo("alice");
+        assertThat(request.realName()).isEqualTo("Alice Lee");
+        assertThat(request.email()).isEqualTo("alice@example.com");
+        assertThat(request.mobile()).isEqualTo("13800000000");
     }
 
     private static void assertPackageExists(String packageName) throws ClassNotFoundException {

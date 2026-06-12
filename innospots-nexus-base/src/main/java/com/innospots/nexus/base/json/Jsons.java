@@ -70,7 +70,7 @@ public final class Jsons {
         try {
             return mapper.writeValueAsString(value);
         } catch (JsonProcessingException e) {
-            throw new NexusException("JSON_WRITE_FAILED", "Failed to write JSON", e);
+            throw NexusException.build("JSON_WRITE_FAILED", "Failed to write JSON", e);
         }
     }
 
@@ -81,7 +81,7 @@ public final class Jsons {
         try {
             return MAPPER.readValue(json, type);
         } catch (JsonProcessingException e) {
-            throw new NexusException("JSON_READ_FAILED", "Failed to read JSON", e);
+            throw NexusException.build("JSON_READ_FAILED", "Failed to read JSON", e);
         }
     }
 
@@ -93,7 +93,7 @@ public final class Jsons {
             return MAPPER.readValue(json, MAPPER.getTypeFactory()
                     .constructCollectionType(List.class, elementType));
         } catch (JsonProcessingException e) {
-            throw new NexusException("JSON_READ_FAILED", "Failed to read JSON list", e);
+            throw NexusException.build("JSON_READ_FAILED", "Failed to read JSON list", e);
         }
     }
 
@@ -105,7 +105,7 @@ public final class Jsons {
             return MAPPER.readValue(json, MAPPER.getTypeFactory()
                     .constructCollectionType(Set.class, elementType));
         } catch (JsonProcessingException e) {
-            throw new NexusException("JSON_READ_FAILED", "Failed to read JSON set", e);
+            throw NexusException.build("JSON_READ_FAILED", "Failed to read JSON set", e);
         }
     }
 
@@ -117,7 +117,7 @@ public final class Jsons {
             return MAPPER.readValue(json, new TypeReference<>() {
             });
         } catch (JsonProcessingException e) {
-            throw new NexusException("JSON_READ_FAILED", "Failed to read JSON map", e);
+            throw NexusException.build("JSON_READ_FAILED", "Failed to read JSON map", e);
         }
     }
 }

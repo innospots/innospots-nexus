@@ -1,7 +1,7 @@
 package com.innospots.nexus.kernel.user.domain.vo;
 
-import com.innospots.nexus.kernel.user.enums.UserStatus;
-import com.innospots.nexus.kernel.user.enums.UserRegisterSource;
+import com.innospots.nexus.kernel.user.domain.enums.UserStatus;
+import com.innospots.nexus.kernel.user.domain.enums.UserRegisterSource;
 
 /**
  * Read model for user profile data returned by user data operations.

@@ -9,7 +9,7 @@ class NexusExceptionTest {
 
     @Test
     void exceptionCarriesCodeAndMessage() {
-        NexusException exception = new NexusException("CONFIG_MISSING", "Required config is missing");
+        NexusException exception = NexusException.build("CONFIG_MISSING", "Required config is missing");
 
         assertThat(exception.code()).isEqualTo("CONFIG_MISSING");
         assertThat(exception.getMessage()).isEqualTo("Required config is missing");

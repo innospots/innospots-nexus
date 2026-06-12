@@ -116,7 +116,7 @@ depend on, with zero infrastructure bindings (no Spring, no Servlet, no database
 
 | Class | Type | Description |
 |-------|------|-------------|
-| `BasePageRequest` | `class` | Base paginated query request with input, page number, and page size fields. |
+| `SimpleQueryRequest` | `record` | Paginated query request with keyword, page number, and page size. |
 
 ### Package `domain.dictionary`
 
@@ -309,5 +309,5 @@ To use: open a reference file when you need complete method-level API details fo
 | `status` | [`references/status.md`](references/status.md) | StatusCategory, StatusCode, StatusCodeRules, NexusStatusCode |
 | `thread` | [`references/thread.md`](references/thread.md) | TLC, NexusThreadFactory, NexusThreadPoolExecutor, ThreadPoolBuilder, AsyncExecutors |
 | `ui` | [`references/ui.md`](references/ui.md) | UiComponent, UiCondition, UiPage, UiResource |
-| `domain.request` | [`references/domain-request.md`](references/domain-request.md) | BasePageRequest |
+| `domain.request` | [`references/domain-request.md`](references/domain-request.md) | SimpleQueryRequest |
 | `util` | [`references/util.md`](references/util.md) | BeanUtils, CryptoUtils, DateTimeUtils, EnvUtils, IdGenerator, MetricsSnapshot, MetricsUtils, StringUtils |

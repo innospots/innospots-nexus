@@ -12,8 +12,9 @@ import org.slf4j.Logger;
 
 import com.innospots.nexus.base.domain.data.DataPage;
 import com.innospots.nexus.base.util.CryptoUtils;
-import com.innospots.nexus.kernel.user.enums.UserStatus;
-import com.innospots.nexus.kernel.user.api.UserPasswordDecryptor;
+import com.innospots.nexus.core.entity.DbPrimaryGenerator;
+import com.innospots.nexus.kernel.user.domain.enums.UserStatus;
+import com.innospots.nexus.kernel.user.tools.UserPasswordDecryptor;
 import com.innospots.nexus.kernel.user.dao.UserDao;
 import com.innospots.nexus.kernel.user.dao.UserPasswordCredentialDao;
 import com.innospots.nexus.kernel.user.domain.entity.UserEntity;
@@ -21,13 +22,14 @@ import com.innospots.nexus.kernel.user.domain.entity.UserPasswordCredentialEntit
 import com.innospots.nexus.kernel.user.domain.request.UserPageRequest;
 import com.innospots.nexus.kernel.user.domain.request.UserPasswordRegisterRequest;
 import com.innospots.nexus.kernel.user.domain.vo.UserProfileVO;
-import com.innospots.nexus.kernel.user.enums.UserRegisterSource;
+import com.innospots.nexus.kernel.user.domain.enums.UserRegisterSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -84,13 +86,8 @@ class UserOperatorTest {
                 userDao,
                 mock(UserPasswordCredentialDao.class),
                 mock(UserPasswordDecryptor.class));
-        UserPageRequest request = new UserPageRequest();
-        request.setPageNo(2L);
-        request.setPageSize(5L);
-        request.setUserName("dav");
-        request.setRealName("Lee");
-        request.setEmail("example.com");
-        request.setMobile("139");
+        UserPageRequest request = new UserPageRequest(
+                null, 2L, 5L, "dav", "Lee", "example.com", "139");
 
         DataPage<UserProfileVO> page = operator.pageUsers(request);
 
@@ -188,6 +185,17 @@ class UserOperatorTest {
         UserPasswordCredentialDao credentialDao = mock(UserPasswordCredentialDao.class);
         UserPasswordDecryptor passwordDecryptor = mock(UserPasswordDecryptor.class);
         UserOperator operator = new UserOperator(userDao, credentialDao, passwordDecryptor);
+        DbPrimaryGenerator generator = new DbPrimaryGenerator();
+        doAnswer(invocation -> {
+            UserEntity entity = invocation.getArgument(0);
+            entity.setUserId(generator.nextUUID(entity));
+            return 1;
+        }).when(userDao).insert(any(UserEntity.class));
+        doAnswer(invocation -> {
+            UserPasswordCredentialEntity entity = invocation.getArgument(0);
+            entity.setCredentialId(generator.nextUUID(entity));
+            return 1;
+        }).when(credentialDao).insert(any(UserPasswordCredentialEntity.class));
         when(passwordDecryptor.decrypt(eq("front-encrypted-password"))).thenReturn("raw-secret");
 
         UserProfileVO profile = operator.registerWithPassword(new UserPasswordRegisterRequest(

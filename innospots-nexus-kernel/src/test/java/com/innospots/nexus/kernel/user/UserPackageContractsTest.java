@@ -8,11 +8,11 @@ class UserPackageContractsTest {
 
     @Test
     void userModuleDefinesApplicationAndDataOperationPackages() throws ClassNotFoundException {
-        assertPackageExists("com.innospots.nexus.kernel.user.api");
+        assertPackageExists("com.innospots.nexus.kernel.user.tools");
         assertPackageExists("com.innospots.nexus.kernel.user.dao");
         assertPackageExists("com.innospots.nexus.kernel.user.operator");
         assertPackageExists("com.innospots.nexus.kernel.user.domain");
-        assertPackageExists("com.innospots.nexus.kernel.user.enums");
+        assertPackageExists("com.innospots.nexus.kernel.user.domain.enums");
     }
 
     @Test
@@ -24,10 +24,10 @@ class UserPackageContractsTest {
     }
 
     @Test
-    void userApiProvidesFrontendPasswordDecryptionContract() throws ClassNotFoundException {
-        assertThat(Class.forName("com.innospots.nexus.kernel.user.api.UserPasswordDecryptor"))
+    void userToolsProvideFrontendPasswordDecryptionContract() throws ClassNotFoundException {
+        assertThat(Class.forName("com.innospots.nexus.kernel.user.tools.UserPasswordDecryptor"))
                 .isInterface();
-        assertThat(Class.forName("com.innospots.nexus.kernel.user.api.RsaUserPasswordDecryptor"))
+        assertThat(Class.forName("com.innospots.nexus.kernel.user.tools.RsaUserPasswordDecryptor"))
                 .isNotInterface();
     }
 
