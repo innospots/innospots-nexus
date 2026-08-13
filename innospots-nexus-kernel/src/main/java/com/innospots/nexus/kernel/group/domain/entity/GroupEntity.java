@@ -29,6 +29,9 @@ public class GroupEntity extends ProjectBaseEntity {
 
     public static final String TABLE_NAME = "nx_group";
 
+    /**
+     * Group identifier.
+     */
     @TableId(type = IdType.ASSIGN_UUID)
     @Id
     @Column(length = 32, nullable = false)
@@ -39,24 +42,45 @@ public class GroupEntity extends ProjectBaseEntity {
         return "grp";
     }
 
+    /**
+     * Optional parent group identifier.
+     */
     @Column(length = 32)
     private String parentId;
 
+    /**
+     * Stable project-unique group code.
+     */
     @Column(length = 64, nullable = false)
     private String groupCode;
 
+    /**
+     * Display name.
+     */
     @Column(length = 128, nullable = false)
     private String groupName;
 
+    /**
+     * Optional description.
+     */
     @Column(length = 256)
     private String description;
 
+    /**
+     * Lifecycle status.
+     */
     @Column(length = 32, nullable = false)
     private String status;
 
+    /**
+     * Sibling display order.
+     */
     @Column(nullable = false)
     private Integer sortOrder;
 
+    /**
+     * Whether the group is protected.
+     */
     @Column(nullable = false)
     private Boolean builtIn;
 }

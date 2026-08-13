@@ -28,6 +28,9 @@ public class TagEntity extends ProjectBaseEntity {
 
     public static final String TABLE_NAME = "nx_tag";
 
+    /**
+     * Tag identifier.
+     */
     @TableId(type = IdType.ASSIGN_UUID)
     @Id
     @Column(length = 32, nullable = false)
@@ -38,12 +41,21 @@ public class TagEntity extends ProjectBaseEntity {
         return "tag";
     }
 
+    /**
+     * Project-unique tag name.
+     */
     @Column(length = 64, nullable = false)
     private String tagName;
 
+    /**
+     * Optional description.
+     */
     @Column(length = 256)
     private String description;
 
+    /**
+     * Lifecycle status.
+     */
     @Column(length = 32, nullable = false)
     private String status;
 }

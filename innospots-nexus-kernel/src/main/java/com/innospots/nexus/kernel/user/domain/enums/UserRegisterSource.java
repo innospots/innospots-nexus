@@ -6,6 +6,13 @@ package com.innospots.nexus.kernel.user.domain.enums;
  */
 public enum UserRegisterSource {
 
+    /**
+     * Registered with local password credentials.
+     */
     PASSWORD,
+
+    /**
+     * Registered through an external identity provider.
+     */
     OAUTH
 }

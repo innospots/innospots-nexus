@@ -35,6 +35,9 @@ public class GroupMemberEntity extends ProjectBaseEntity {
 
     public static final String TABLE_NAME = "nx_group_member";
 
+    /**
+     * Group membership identifier.
+     */
     @TableId(type = IdType.ASSIGN_UUID)
     @Id
     @Column(length = 32, nullable = false)
@@ -45,12 +48,21 @@ public class GroupMemberEntity extends ProjectBaseEntity {
         return "gmb";
     }
 
+    /**
+     * Group identifier.
+     */
     @Column(length = 32, nullable = false)
     private String groupId;
 
+    /**
+     * User identifier.
+     */
     @Column(length = 32, nullable = false)
     private String userId;
 
+    /**
+     * Whether the user leads the group.
+     */
     @Column(nullable = false)
     private Boolean leader;
 }

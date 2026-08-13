@@ -32,6 +32,9 @@ public class GroupMemberTagEntity extends ProjectBaseEntity {
 
     public static final String TABLE_NAME = "nx_group_member_tag";
 
+    /**
+     * Group member tag assignment identifier.
+     */
     @TableId(type = IdType.ASSIGN_UUID)
     @Id
     @Column(length = 32, nullable = false)
@@ -42,12 +45,21 @@ public class GroupMemberTagEntity extends ProjectBaseEntity {
         return "gmt";
     }
 
+    /**
+     * Group identifier the tag applies within.
+     */
     @Column(length = 32, nullable = false)
     private String groupId;
 
+    /**
+     * User identifier.
+     */
     @Column(length = 32, nullable = false)
     private String userId;
 
+    /**
+     * Tag name assigned to the user.
+     */
     @Column(length = 64, nullable = false)
     private String tagName;
 }
