@@ -2,6 +2,8 @@ package com.innospots.nexus.kernel.logger;
 
 import java.util.Objects;
 
+import com.innospots.nexus.kernel.logger.domain.context.InvocationLogContext;
+
 /**
  * Reusable interception routine shared by all framework adapters.
  * <p>Wraps a {@link Callback} with timing, outcome capture, and delegation to

@@ -1,14 +1,17 @@
-package com.innospots.nexus.kernel.logger;
+package com.innospots.nexus.kernel.logger.domain.context;
 
 /**
  * Framework-independent description of a single intercepted invocation.
  * <p>Assembled by an interceptor adapter around an {@code @AuditLog}-annotated
- * method and handed to an {@link InvocationLogHandler} for persistence.
- * Contains no framework type so any Java runtime can produce and consume it.</p>
+ * method and handed to an {@link com.innospots.nexus.kernel.logger.InvocationLogHandler}
+ * for persistence. Contains no framework type so any Java runtime can produce
+ * and consume it. This record is the canonical domain context carried from the
+ * interceptor boundary into the audit log operator.</p>
  *
  * @param className  declaring class name of the intercepted method
  * @param methodName intercepted method name
- * @param action     business action code declared by the {@link AuditLog} annotation
+ * @param action     business action code declared by the
+ *                   {@link com.innospots.nexus.kernel.logger.AuditLog} annotation
  * @param arguments  captured method arguments, or an empty array when not recorded
  * @param result     captured return value, or null when not recorded or on failure
  * @param exception  thrown exception, or null on success

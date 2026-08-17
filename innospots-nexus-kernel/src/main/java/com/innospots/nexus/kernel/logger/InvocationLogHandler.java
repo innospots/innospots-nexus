@@ -1,5 +1,7 @@
 package com.innospots.nexus.kernel.logger;
 
+import com.innospots.nexus.kernel.logger.domain.context.InvocationLogContext;
+
 /**
  * Common interception handler port.
  * <p>Receives a fully assembled {@link InvocationLogContext} and is responsible
