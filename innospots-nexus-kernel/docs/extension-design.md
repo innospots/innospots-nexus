@@ -2,13 +2,9 @@
 
 ## 1. 文档定位
 
-本文定义 Nexus 管理平台扩展机制的目标设计。它说明扩展如何开发、被系统发现和注册、
+本文定义 Nexus 管理平台扩展机制。它说明扩展如何开发、被系统发现和注册、
 由管理端启用或停用，以及扩展贡献的模块、菜单、页面、前端资源、API 和页面操作如何
 形成一棵可校验、可加载、可授权的资源树。
-
-本文是后续实现蓝图，不表示文中全部类型和运行时能力已经存在。现有
-`ConsoleContribution`、`ConsoleMenuDeclaration`、`ConsoleRouteDeclaration` 和
-`PageResourceDeclaration` 应按第 14 节逐步迁移。
 
 ## 2. 设计原则
 
@@ -18,8 +14,8 @@
    启动时发现并注册扩展，管理端控制是否启用。
 3. **扩展与模块分层。** 一个扩展是安装和启停单元，一个扩展可以贡献多个
    `moduleKey`；模块是资源归属和权限目录的一级边界。
-4. **所属关系显式。** 扩展拥有模块，模块拥有菜单与页面，页面拥有导航入口和加载入口，
-   API/操作通过注解显式引用模块及页面；禁止依靠相同 path 或相似 key 猜测关系。
+4. **所属关系显式。** 扩展拥有模块，模块拥有菜单树和无菜单页面，目录菜单拥有子菜单，
+   页面菜单拥有页面；API/操作通过注解显式引用模块及页面。
 5. **页面与部署方式解耦。** 页面声明只引用逻辑入口。页面独立部署还是位于 JAR 静态
    资源中，由页面入口解析器处理，不改变页面、菜单或权限资源模型。
 6. **资源声明与权限分配分离。** 扩展只声明资源身份、结构和展示元数据，不声明权限码、
@@ -31,36 +27,39 @@
 
 ```text
 ExtensionDescriptor
-├── extensionId
+├── extensionKey
 ├── version
 └── modules
     ├── ExtensionModuleDeclaration (moduleKey = "sales")
-    │   ├── menu groups
-    │   ├── pages
-    │   │   ├── navigation
-    │   │   └── pageEntryKey
+    │   ├── menu tree
+    │   │   └── directory menu
+    │   │       ├── directory menu
+    │   │       └── page menu
+    │   │           └── page
+    │   │               └── pageEntryKey
+    │   ├── non-menu pages
     │   └── endpoints
     │       ├── @ApiResource
     │       └── @PageActionResource
     └── ExtensionModuleDeclaration (moduleKey = "inventory")
-        ├── menu groups
-        ├── pages
+        ├── menu tree
+        ├── non-menu pages
         └── endpoints
 ```
 
 关系方向固定：
 
 ```text
-extensionId -> moduleKey -> resource key
-module -> menu group
-module -> page -> navigation parent menu
+extensionKey -> moduleKey -> resource key
+module -> menu tree
+directory menu -> child menu nodes
+page menu -> exactly one page
 module -> page -> page entry -> resource location
 endpoint operation -> API resource -> optional page references
 endpoint operation -> page action -> required page reference
 ```
 
-运行时不再维护三张缺少所有权的平行清单，也不通过 `menu.path == route.path` 判断菜单、
-路由和页面是否属于同一个功能。
+菜单与页面的关系由对象所属结构直接表达，不通过 path 相等或多个 key 的组合进行推断。
 
 ## 4. 扩展与模块模型
 
@@ -70,7 +69,7 @@ endpoint operation -> page action -> required page reference
 
 ```java
 public record ExtensionDescriptor(
-        String extensionId,
+        String extensionKey,
         String version,
         I18nObject displayName,
         String description,
@@ -83,13 +82,13 @@ public record ExtensionDescriptor(
 
 | 字段 | 约束 |
 |------|------|
-| `extensionId` | 全局唯一、发布后稳定，建议使用反向域名，如 `com.innospots.erp` |
+| `extensionKey` | 全局唯一、发布后稳定，建议使用反向域名，如 `com.innospots.erp` |
 | `version` | 扩展版本，用于诊断和兼容性校验，不参与资源身份 |
 | `displayName` | 管理端展示名，可国际化，可随版本变化 |
 | `description` | 扩展用途说明，不参与运行时判定 |
 | `modules` | 扩展拥有的模块，不得为空；同一扩展内 `moduleKey` 不得重复 |
 
-`extensionId` 只用于发现、登记、启停、版本和诊断，不直接替代资源的 `moduleKey`。
+`extensionKey` 只用于发现、登记、启停、版本和诊断，不直接替代资源的 `moduleKey`。
 
 ### 4.2 模块描述
 
@@ -100,11 +99,14 @@ public record ExtensionModuleDeclaration(
         String moduleKey,
         I18nObject displayName,
         String description,
-        List<MenuGroupDeclaration> menuGroups,
-        List<ConsolePageDeclaration> pages
+        List<MenuNodeDeclaration> menuTree,
+        List<ConsolePageDeclaration> nonMenuPages
 ) {
 }
 ```
+
+`menuTree` 是模块的导航树。目录菜单通过 `children` 直接拥有下级菜单，页面菜单直接拥有
+页面。`nonMenuPages` 保存不出现在菜单中的页面，例如详情页、弹窗页或内部跳转页。
 
 `moduleKey` 是全局稳定的资源命名空间。例如扩展 `com.innospots.erp` 可以贡献
 `sales` 和 `inventory` 两个模块。系统首先登记模块资源：
@@ -133,84 +135,127 @@ module:inventory
 
 ## 5. 菜单、页面与加载入口
 
-### 5.1 不再使用三张平行声明表
+### 5.1 菜单节点类型
 
-当前 `ConsoleMenuDeclaration`、`ConsoleRouteDeclaration`、
-`PageResourceDeclaration` 分别声明菜单、路由和页面，再依赖 `menuKey`、`routeKey` 和
-path 交叉关联。主要问题是：
-
-- 无法从任一声明直接知道所属扩展和模块；
-- 菜单到页面、页面到路由的关系依赖字符串引用；
-- 菜单 path 与路由 path 重复定义，可能漂移；
-- 页面部署位置被误当成路由身份；
-- 页面资源中混入权限码，使资源发现与权限分配耦合。
-
-目标模型保留“菜单”和“页面”两个不同概念，但让页面聚合路由、导航和加载入口。
-顶级 `ConsoleRouteDeclaration` 不再需要。
-
-### 5.2 菜单目录
-
-`MenuGroupDeclaration` 只用于不能由页面自然产生的目录或分组节点：
+菜单是一棵由模块直接拥有的树。菜单节点只分为两种类型：
 
 ```java
-public record MenuGroupDeclaration(
-        String menuKey,
-        String parentMenuKey,
-        I18nObject title,
-        String icon,
-        int orderIndex
-) {
+public sealed interface MenuNodeDeclaration
+        permits MenuDirectoryDeclaration, MenuPageDeclaration {
+
+    String menuKey();
+
+    I18nObject title();
+
+    String icon();
+
+    int orderIndex();
 }
 ```
 
-- `menuKey` 是模块内局部 key，完整资源 key 为 `<moduleKey>.<menuKey>`；
-- `parentMenuKey` 显式表达父子关系，根节点为空；
-- 同级节点按 `orderIndex`、稳定 key 排序；
-- 普通页面不需要再额外声明一个重复的菜单对象。
+- `MenuDirectoryDeclaration` 是父菜单或分组，只能包含子菜单，不对应页面；
+- `MenuPageDeclaration` 是页面菜单，必须直接包含一个页面，不能再包含子菜单。
 
-外部链接如果需要进入资源目录，应作为具有明确加载入口的页面声明，不在菜单目录类型中
-再引入第二套路由目标。
+这种类型约束保证“父菜单没有页面、叶子菜单拥有页面”。父子关系和菜单页面关系都由
+对象嵌套结构表达，不使用额外字符串进行二次关联。
 
-### 5.3 页面声明
+### 5.2 目录菜单与子菜单
 
-`ConsolePageDeclaration` 是页面聚合根：
+目录菜单通过 `children` 直接包含下级菜单：
+
+```java
+public record MenuDirectoryDeclaration(
+        String menuKey,
+        I18nObject title,
+        String icon,
+        int orderIndex,
+        List<MenuNodeDeclaration> children
+) implements MenuNodeDeclaration {
+}
+```
+
+`children` 可以包含下一层目录菜单，也可以包含页面菜单，因此菜单树可以表达任意合理的
+目录深度。同级节点按 `orderIndex`、`menuKey` 稳定排序。目录节点必须至少包含一个有效
+子节点，不能通过 route 或 page 字段指向页面。
+
+父子关系由对象包含关系确定：模块 `menuTree` 中的节点是根菜单，
+`MenuDirectoryDeclaration.children` 中的节点以该目录作为直接父菜单。注册表递归展开
+菜单树时，为每个子节点生成 `parentMenuResourceId`；扩展作者不需要重复填写父菜单 key。
+
+例如：
+
+```text
+订单管理（目录菜单，不对应页面）
+├── 订单列表（页面菜单） -> OrderListPage
+└── 退款管理（目录菜单，不对应页面）
+    ├── 退款单（页面菜单） -> RefundListPage
+    └── 退款规则（页面菜单） -> RefundRulePage
+```
+
+### 5.3 页面菜单与页面
+
+页面菜单直接包含 `ConsolePageDeclaration`，对应关系在对象结构中一次完成：
+
+```java
+public record MenuPageDeclaration(
+        String menuKey,
+        I18nObject title,
+        String icon,
+        int orderIndex,
+        ConsolePageDeclaration page
+) implements MenuNodeDeclaration {
+}
+```
 
 ```java
 public record ConsolePageDeclaration(
         String pageKey,
         I18nObject title,
         String routePath,
-        String pageEntryKey,
-        PageNavigationDeclaration navigation
+        String pageEntryKey
 ) {
 }
 ```
 
-```java
-public record PageNavigationDeclaration(
-        String parentMenuKey,
-        I18nObject title,
-        String icon,
-        int orderIndex
-) {
-}
-```
-
-字段语义：
-
-| 字段 | 作用 |
-|------|------|
+| 页面字段 | 作用 |
+|----------|------|
 | `pageKey` | 模块内稳定页面 key，完整资源为 `page:<moduleKey>.<pageKey>` |
-| `title` | 页面及资源目录展示名 |
-| `routePath` | Console 内部导航地址，由页面唯一拥有 |
-| `pageEntryKey` | 逻辑页面入口，交给页面入口解析器处理 |
-| `navigation` | 可选；存在时由页面生成菜单入口，不存在时为隐藏页面 |
+| `title` | 页面标题，可以与菜单展示标题不同 |
+| `routePath` | Console 内部路由，由所属页面唯一声明 |
+| `pageEntryKey` | 逻辑页面入口，由 `PageEntryResolver` 解析为实际资源位置 |
 
-页面菜单的资源 key 默认与页面保持同一局部 key。例如页面 `order-list` 的菜单资源为
-`menu:sales.order-list`。若确实需要一个页面有多个导航入口，应显式声明额外导航别名，
-不能复制页面或复用 path 猜测。
+关系和约束如下：
 
-### 5.4 页面资源位置
+- 一个 `MenuPageDeclaration` 必须且只能包含一个页面；
+- 一个菜单树页面只能归属于一个页面菜单，不能在树中重复挂载；
+- `menuKey` 和 `pageKey` 分别是菜单身份和页面身份，可以不同；
+- 菜单点击后直接使用其页面的 `routePath`，不再声明独立 route；
+- 页面加载时使用 `pageEntryKey`，与菜单层级无关；
+- 页面菜单是叶子节点，不能再拥有 `children`。
+
+例如 `menu:sales.order-list` 直接包含 `page:sales.order-list`。运行时从页面菜单即可得到
+菜单标题、页面路由和页面入口，不需要查询另一张关联表。
+
+注册后的规范化关系如下：
+
+```text
+menu:sales.order
+  type = DIRECTORY
+  parent = null
+
+menu:sales.order-list
+  type = PAGE
+  parent = menu:sales.order
+  page = page:sales.order-list
+```
+
+### 5.4 无菜单页面
+
+详情页、弹窗页、向导页等不需要显示在导航树中的页面，由模块的 `nonMenuPages`
+直接持有。无菜单页面仍具有 PAGE 资源、路由和页面入口，可以被 API/ACTION 引用，但不会
+产生 MENU 资源。
+
+### 5.5 页面资源位置
 
 页面声明不直接保存 JAR 路径或远程 URL。扩展另外提供 `PageEntryResolver`，把
 `pageEntryKey` 解析为实际位置：
@@ -231,14 +276,14 @@ public interface PageEntryResolver {
 因此同一个 `ConsolePageDeclaration` 可以在不同部署环境解析为不同位置。环境配置只可
 参与逻辑入口到实际部署位置的映射，不负责新增业务页面或重写页面身份。
 
-### 5.5 前端加载流程
+### 5.6 前端加载流程
 
-1. Console 前端请求当前项目的活动扩展清单；
-2. 服务端只返回已激活扩展的模块、菜单树、页面路由和可用页面入口；
+1. Console 前端请求项目的活动扩展清单；
+2. 服务端递归展开目录菜单和页面菜单，并合并无菜单页面的路由；
 3. 前端根据管理端权限模块返回的可见资源集合过滤菜单和路由；
 4. 用户进入路由时，页面加载适配器解析 `pageEntryKey`；
 5. JAR 静态资源由内嵌资源适配器加载，独立部署页面由远程资源适配器加载；
-6. 加载失败只影响目标页面，并记录 `extensionId/moduleKey/pageKey` 诊断信息。
+6. 加载失败只影响目标页面，并记录 `extensionKey/moduleKey/pageKey` 诊断信息。
 
 ## 6. API 与页面操作资源
 
@@ -287,10 +332,7 @@ Jakarta REST 容器。资源扫描器读取 Endpoint 方法上的专用注解，
 
 页面调用接口时仍使用标准 HTTP API。`@ApiResource` 的职责是提供稳定资源身份、建立
 页面关联，并为权限拦截器提供查找入口；它不替代 Jakarta REST 路由，也不生成前端客户
-端。权限拦截器根据当前 Endpoint 操作解析出 API 资源 ID，再查询权限模块的分配结果。
-
-目标模型中，现有 `@RequiresPermission("...")` 不再承担扩展资源目录的声明职责。迁移期
-可以兼容读取，但不能继续让扩展通过它内置权限码或授权策略。
+端。权限拦截器根据被调用的 Endpoint 操作解析出 API 资源 ID，再查询权限模块的分配结果。
 
 ## 7. 三种代码发现入口
 
@@ -335,8 +377,8 @@ Provider 实现类的全限定名。推荐使用构建期工具生成该文件�
 三种入口可能发现同一个 Provider：
 
 - 相同 Provider 实例或相同实现类型只归一化一次；
-- 同一 `extensionId` 对应内容等价的重复来源只保留一份并记录来源；
-- 同一 `extensionId` 对应不同描述符时视为冲突，相关扩展不得激活；
+- 同一 `extensionKey` 对应内容等价的重复来源只保留一份并记录来源；
+- 同一 `extensionKey` 对应不同描述符时视为冲突，相关扩展不得激活；
 - 不允许通过“后发现覆盖先发现”解决冲突。
 
 ## 8. 安装、注册、启停与激活
@@ -368,7 +410,7 @@ JAR 加入依赖/classpath（安装）
 - **期望启用**：扩展管理中保存的 `enabled` 状态；
 - **实际激活**：本次运行中发现、校验和装配全部成功。
 
-首次发现一个 `extensionId` 时自动登记并默认启用。若管理端曾将其停用，下次启动即使
+首次发现一个 `extensionKey` 时自动登记并默认启用。若管理端曾将其停用，下次启动即使
 仍发现 JAR，也必须保持停用。若 JAR 被移除，登记记录标记为 `MISSING`，不能直接删除，
 以保留诊断信息和已有权限分配关系。
 
@@ -384,7 +426,7 @@ JAR 加入依赖/classpath（安装）
 1. 校验扩展描述和兼容版本；
 2. 校验全部 `moduleKey` 及资源 ID 唯一性；
 3. 构建并校验菜单树；
-4. 校验页面 route、导航父节点和 `pageEntryKey`；
+4. 递归校验目录/页面菜单结构、页面 route 和 `pageEntryKey`；
 5. 注册 Endpoint，并读取 API/ACTION 注解；
 6. 校验 API/ACTION 的模块和页面引用；
 7. 解析页面入口，生成 Console 活动清单；
@@ -397,7 +439,7 @@ JAR 加入依赖/classpath（安装）
 停用扩展时：
 
 - 从活动菜单、路由、页面入口和 Endpoint 注册表撤出该扩展；
-- 从当前活动资源视图撤出其模块资源；
+- 从活动资源视图撤出其模块资源；
 - 保留扩展登记、资源快照和权限模块中的既有分配；
 - 新请求不能再进入已停用扩展，执行中的请求按运行时适配器策略完成或终止。
 
@@ -462,17 +504,26 @@ public final class ErpConsoleExtension implements ConsoleExtensionProvider {
                 "sales",
                 I18nObject.of("en", "Sales", "zh", "销售"),
                 "Sales management",
-                List.of(new MenuGroupDeclaration(
-                        "order", null,
+                List.of(new MenuDirectoryDeclaration(
+                        "order",
                         I18nObject.of("en", "Orders", "zh", "订单"),
-                        "orders", 20)),
+                        "orders",
+                        20,
+                        List.of(new MenuPageDeclaration(
+                                "order-list",
+                                I18nObject.of("en", "Order List", "zh", "订单列表"),
+                                "list",
+                                10,
+                                new ConsolePageDeclaration(
+                                        "order-list",
+                                        I18nObject.of("en", "Order List", "zh", "订单列表"),
+                                        "/sales/orders",
+                                        "sales.order-list"))))),
                 List.of(new ConsolePageDeclaration(
-                        "order-list",
-                        I18nObject.of("en", "Order List", "zh", "订单列表"),
-                        "/sales/orders",
-                        "sales.order-list",
-                        new PageNavigationDeclaration(
-                                "order", null, "list", 10))));
+                        "order-detail",
+                        I18nObject.of("en", "Order Detail", "zh", "订单详情"),
+                        "/sales/orders/:orderId",
+                        "sales.order-detail")));
     }
 
     private ExtensionModuleDeclaration inventoryModule() {
@@ -540,7 +591,7 @@ public class OrderEndpoint {
 2. 把扩展 JAR 加入应用依赖，随应用发布；
 3. 应用启动时发现 Provider，登记 `com.innospots.erp`，首次默认启用；
 4. 激活器校验 `sales`、`inventory` 模块及其全部资源；
-5. REST 适配器注册 Endpoint，页面资源适配器注册逻辑入口；
+5. REST 适配器注册 Endpoint，页面入口适配器注册逻辑入口；
 6. Console 获取活动清单并加载菜单、路由和页面；
 7. 管理员在权限模块中为资源配置权限并分配给角色或用户组；
 8. 管理员可在扩展管理中停用或重新启用整个扩展。
@@ -549,21 +600,22 @@ public class OrderEndpoint {
 
 注册或激活阶段至少执行以下校验：
 
-- `extensionId`、版本和模块列表合法；
+- `extensionKey`、版本和模块列表合法；
 - 全局 `moduleKey` 唯一；
 - 同一模块内 menu/page/api/action 局部 key 唯一；
 - 规范化后的 `type:key` 全局唯一；
-- 菜单父节点存在、无循环、排序稳定；
+- 目录菜单至少包含一个子节点，菜单树无循环且排序稳定；
+- 页面菜单直接包含且只包含一个页面，不能同时拥有子节点；
+- 菜单树页面不能重复挂载，也不能与 `nonMenuPages` 中的页面重复；
 - 页面 routePath 合法且在活动页面中唯一；
-- 页面导航引用的父菜单存在；
 - `pageEntryKey` 可被且只能被一个活动页面入口解析器解析；
 - Endpoint 可以被 REST 运行时注册；
-- `@ApiResource.moduleKey` 指向当前扩展拥有的模块；
+- `@ApiResource.moduleKey` 指向所属扩展拥有的模块；
 - API 的 `pages` 和 ACTION 的 `pageKey` 指向已声明页面；
 - 同一 Endpoint 操作不存在冲突资源声明；
 - 扩展版本与宿主契约版本兼容。
 
-冲突一律失败关闭。错误信息必须包含来源、`extensionId`、`moduleKey`、资源类型和资源 key，
+冲突一律失败关闭。错误信息必须包含来源、`extensionKey`、`moduleKey`、资源类型和资源 key，
 以便扩展管理页面直接展示诊断。
 
 ## 13. 测试要求
@@ -573,7 +625,9 @@ public class OrderEndpoint {
 - Provider 返回集合不可变，必填字段校验明确；
 - 一个扩展可贡献多个模块；
 - 资源 ID 规范化稳定；
-- 菜单树、页面导航和 API 页面引用正确解析；
+- 多级目录菜单、页面菜单和无菜单页面正确展开；
+- 目录菜单不能对应页面，页面菜单必须对应一个页面；
+- API 和 ACTION 的页面引用正确解析；
 - Embedded/Remote 页面资源解析产生相同逻辑页面身份。
 
 ### 13.2 发现与生命周期测试
@@ -593,27 +647,3 @@ public class OrderEndpoint {
 - 未知模块、未知页面和重复资源失败关闭；
 - 权限分配不因扩展停用或短暂缺失而被删除；
 - 恢复相同资源 ID 后可以继续关联既有分配。
-
-## 14. 现有类型的取舍与迁移
-
-| 现有类型 | 结论 | 目标类型/处理方式 |
-|----------|------|-------------------|
-| `ConsoleContribution` | 结构不足 | 迁移为包含多模块的 `ExtensionDescriptor` |
-| `ConsoleMenuDeclaration` | 概念有必要，现有结构不足 | 目录迁移为 `MenuGroupDeclaration`；页面菜单由 `navigation` 生成 |
-| `ConsoleRouteDeclaration` | 不应继续独立存在 | `path` 归入 `ConsolePageDeclaration.routePath`，组件改为逻辑 `pageEntryKey` |
-| `PageResourceDeclaration` | 页面概念有必要，权限字段和引用方式不合理 | 迁移为不含权限码的 `ConsolePageDeclaration` |
-| `PageResourceProvider` | 不再单独提供页面清单 | 页面声明并入 `ExtensionModuleDeclaration`；部署位置由 `PageEntryResolver` 解析 |
-| `@RequiresPermission` | 不再作为扩展资源声明 | API/ACTION 分别改用专用资源注解，授权由权限模块查询 |
-| `@PageResourceRef` | 可由更明确关系替代 | API 使用 `pages`，ACTION 使用 `pageKey` |
-
-建议分阶段实施：
-
-1. 先引入新的扩展、模块、页面和资源 ID 契约；
-2. 实现统一发现器、注册表和只读活动清单；
-3. 实现页面资源解析器与 Endpoint 专用资源注解；
-4. 实现扩展管理的持久化启停和运行时激活器；
-5. 让权限模块消费新的资源树；
-6. 提供旧声明到新模型的临时适配器，完成业务迁移后删除旧类型。
-
-旧、新模型并存期间，适配器只能单向把旧声明转换为新资源树，不能让两套注册表分别发布
-菜单或权限资源，否则会再次产生关系漂移和重复资源。
