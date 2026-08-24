@@ -106,7 +106,8 @@ public record ExtensionModuleDeclaration(
 ```
 
 `menuTree` 是模块的导航树。目录菜单通过 `children` 直接拥有下级菜单，页面菜单直接拥有
-页面。`nonMenuPages` 保存不出现在菜单中的页面，例如详情页、弹窗页或内部跳转页。
+页面。`nonMenuPages` 只保存需要由 Console 宿主独立识别、但不出现在菜单中的平台页面；
+前端页面内部的子页面、弹窗和组件不放入该集合。
 
 `moduleKey` 是全局稳定的资源命名空间。例如扩展 `com.innospots.erp` 可以贡献
 `sales` 和 `inventory` 两个模块。系统首先登记模块资源：
@@ -221,7 +222,7 @@ public record ConsolePageDeclaration(
 |----------|------|
 | `pageKey` | 模块内稳定页面 key，完整资源为 `page:<moduleKey>.<pageKey>` |
 | `title` | 页面标题，可以与菜单展示标题不同 |
-| `routePath` | Console 内部路由，由所属页面唯一声明 |
+| `routePath` | Console 宿主路由基路径，该路径及其子路径交给同一页面入口处理 |
 | `pageEntryKey` | 逻辑页面入口，由 `PageEntryResolver` 解析为实际资源位置 |
 
 关系和约束如下：
@@ -251,9 +252,36 @@ menu:sales.order-list
 
 ### 5.4 无菜单页面
 
-详情页、弹窗页、向导页等不需要显示在导航树中的页面，由模块的 `nonMenuPages`
-直接持有。无菜单页面仍具有 PAGE 资源、路由和页面入口，可以被 API/ACTION 引用，但不会
-产生 MENU 资源。
+并非所有前端页面、路由或组件都需要声明为 `ConsolePageDeclaration`。这里的“页面”是
+Console 宿主和权限资源目录能够独立识别的平台页面边界，不等同于前端工程中的每一个
+视图组件。
+
+以下内容属于页面内部实现，不需要再次声明：
+
+- 从页面中的链接打开的详情视图、编辑视图或步骤页；
+- 由页面自身前端路由管理的子路由；
+- 弹窗、抽屉、页签和局部组件；
+- 与父页面共用 `pageEntryKey`，且不需要独立 PAGE 资源的视图。
+
+例如菜单页面 `page:sales.order-list` 加载 `sales.order-list` 前端入口。该入口可以自行处理
+`/sales/orders/:orderId`，并渲染订单详情子页面。订单详情仍归属于
+`page:sales.order-list`，扩展中不再声明 `order-detail` 页面，也不产生新的 PAGE 资源。
+子页面沿用父平台页面的 PAGE 资源；它调用的 API 和页面操作仍通过各自专用注解独立进入
+资源目录。
+
+Console 宿主按路径段进行最长基路径匹配。例如已声明平台页面基路径
+`/sales/orders` 后，直接访问 `/sales/orders/123` 仍会先加载 `sales.order-list`，再由该
+页面的前端路由渲染订单详情。这样内部子页面支持深链接，但不需要注册为平台页面。
+
+只有满足下列任一条件时，页面才进入模块的 `nonMenuPages`：
+
+- Console 宿主必须为它注册独立路由并单独加载页面入口；
+- 它使用独立 `pageEntryKey`，生命周期不属于某个已声明页面；
+- 权限模块需要把它作为独立 PAGE 资源进行配置；
+- API 或 ACTION 必须引用它自己的稳定 `pageKey`，不能归属于已有页面。
+
+因此，`nonMenuPages` 表示“宿主管理但无菜单入口的页面”，不是前端内部子页面清单。这类
+页面具有 PAGE 资源、路由和页面入口，但不产生 MENU 资源。
 
 ### 5.5 页面资源位置
 
@@ -281,9 +309,10 @@ public interface PageEntryResolver {
 1. Console 前端请求项目的活动扩展清单；
 2. 服务端递归展开目录菜单和页面菜单，并合并无菜单页面的路由；
 3. 前端根据管理端权限模块返回的可见资源集合过滤菜单和路由；
-4. 用户进入路由时，页面加载适配器解析 `pageEntryKey`；
+4. 用户进入路由时，宿主按最长基路径选择平台页面，再解析其 `pageEntryKey`；
 5. JAR 静态资源由内嵌资源适配器加载，独立部署页面由远程资源适配器加载；
-6. 加载失败只影响目标页面，并记录 `extensionKey/moduleKey/pageKey` 诊断信息。
+6. 页面入口加载后，由页面自身处理内部链接、子路由、弹窗和子页面；
+7. 加载失败只影响目标平台页面，并记录 `extensionKey/moduleKey/pageKey` 诊断信息。
 
 ## 6. API 与页面操作资源
 
@@ -321,6 +350,7 @@ public R<PageResult<OrderVo>> list(...) {
 - API 表示一次可识别、可授权的后端调用；
 - ACTION 表示页面上可见或可执行的交互能力；
 - `pages`、`pageKey` 只表达归属关系，不代表已获得访问权限；
+- 前端内部子页面使用所属平台页面的 `pageKey`，不为子页面创建新的页面引用；
 - 不允许根据 HTTP method、URL 或 Java 方法名自动生成资源 key；
 - 未声明 `@ApiResource` 的 Endpoint 操作不会作为 API 资源进入权限资源目录。
 
@@ -519,11 +549,7 @@ public final class ErpConsoleExtension implements ConsoleExtensionProvider {
                                         I18nObject.of("en", "Order List", "zh", "订单列表"),
                                         "/sales/orders",
                                         "sales.order-list"))))),
-                List.of(new ConsolePageDeclaration(
-                        "order-detail",
-                        I18nObject.of("en", "Order Detail", "zh", "订单详情"),
-                        "/sales/orders/:orderId",
-                        "sales.order-detail")));
+                List.of());
     }
 
     private ExtensionModuleDeclaration inventoryModule() {
@@ -537,7 +563,21 @@ public final class ErpConsoleExtension implements ConsoleExtensionProvider {
 }
 ```
 
-### 11.2 页面资源
+### 11.2 页面内部子页面
+
+订单列表前端入口可以在自己的前端路由中定义：
+
+```text
+/sales/orders                 -> OrderListView
+/sales/orders/:orderId        -> OrderDetailView
+/sales/orders/:orderId/edit   -> OrderEditView
+```
+
+三个视图共用平台页面 `page:sales.order-list` 和页面入口 `sales.order-list`。扩展声明中只
+定义 `ConsolePageDeclaration("order-list", ...)`；`OrderDetailView` 和 `OrderEditView`
+不进入 `nonMenuPages`，也不生成独立 PAGE 资源。
+
+### 11.3 页面资源
 
 同一逻辑入口可以由不同 Provider 解析：
 
@@ -551,7 +591,7 @@ RemotePageResource.of("sales.order-list", URI.create("https://sales.example.com/
 
 页面和菜单声明无需因部署方式变化而修改。
 
-### 11.3 Endpoint 资源
+### 11.4 Endpoint 资源
 
 ```java
 @Path("/sales/orders")
@@ -585,7 +625,7 @@ public class OrderEndpoint {
 }
 ```
 
-### 11.4 安装和加载
+### 11.5 安装和加载
 
 1. 扩展工程实现 Provider，并通过接口装配、发现注解或 Java SPI 暴露；
 2. 把扩展 JAR 加入应用依赖，随应用发布；
@@ -607,8 +647,9 @@ public class OrderEndpoint {
 - 目录菜单至少包含一个子节点，菜单树无循环且排序稳定；
 - 页面菜单直接包含且只包含一个页面，不能同时拥有子节点；
 - 菜单树页面不能重复挂载，也不能与 `nonMenuPages` 中的页面重复；
-- 页面 routePath 合法且在活动页面中唯一；
+- 平台页面 `routePath` 合法且精确值唯一，嵌套路由按最长基路径匹配；
 - `pageEntryKey` 可被且只能被一个活动页面入口解析器解析；
+- 前端内部子路由不进入平台页面注册表，也不参与全局 routePath 唯一性校验；
 - Endpoint 可以被 REST 运行时注册；
 - `@ApiResource.moduleKey` 指向所属扩展拥有的模块；
 - API 的 `pages` 和 ACTION 的 `pageKey` 指向已声明页面；
@@ -627,6 +668,8 @@ public class OrderEndpoint {
 - 资源 ID 规范化稳定；
 - 多级目录菜单、页面菜单和无菜单页面正确展开；
 - 目录菜单不能对应页面，页面菜单必须对应一个页面；
+- 页面内部子页面不产生独立 PAGE 资源；
+- 需要宿主独立管理的无菜单页面可以通过 `nonMenuPages` 注册；
 - API 和 ACTION 的页面引用正确解析；
 - Embedded/Remote 页面资源解析产生相同逻辑页面身份。
 
