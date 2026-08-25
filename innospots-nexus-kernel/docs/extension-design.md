@@ -72,7 +72,7 @@ public record ExtensionDescriptor(
         String extensionKey,
         String version,
         I18nObject displayName,
-        String description,
+        I18nObject description,
         List<ExtensionModuleDeclaration> modules
 ) {
 }
@@ -85,7 +85,7 @@ public record ExtensionDescriptor(
 | `extensionKey` | 全局唯一、发布后稳定，建议使用反向域名，如 `com.innospots.erp` |
 | `version` | 扩展版本，用于诊断和兼容性校验，不参与资源身份 |
 | `displayName` | 管理端展示名，可国际化，可随版本变化 |
-| `description` | 扩展用途说明，不参与运行时判定 |
+| `description` | 国际化扩展用途说明，不参与运行时判定 |
 | `modules` | 扩展拥有的模块，不得为空；同一扩展内 `moduleKey` 不得重复 |
 
 `extensionKey` 只用于发现、登记、启停、版本和诊断，不直接替代资源的 `moduleKey`。
@@ -98,7 +98,7 @@ public record ExtensionDescriptor(
 public record ExtensionModuleDeclaration(
         String moduleKey,
         I18nObject displayName,
-        String description,
+        I18nObject description,
         List<MenuNodeDeclaration> menuTree,
         List<ConsolePageDeclaration> nonMenuPages
 ) {
@@ -108,6 +108,9 @@ public record ExtensionModuleDeclaration(
 `menuTree` 是模块的导航树。目录菜单通过 `children` 直接拥有下级菜单，页面菜单直接拥有
 页面。`nonMenuPages` 只保存需要由 Console 宿主独立识别、但不出现在菜单中的平台页面；
 前端页面内部的子页面、弹窗和组件不放入该集合。
+
+扩展和模块的 `displayName`、`description` 都使用 `I18nObject`。注册表保留完整国际化
+内容，管理端输出时再按请求语言解析，不在扩展发现阶段转换为单一字符串。
 
 `moduleKey` 是全局稳定的资源命名空间。例如扩展 `com.innospots.erp` 可以贡献
 `sales` 和 `inventory` 两个模块。系统首先登记模块资源：
@@ -525,7 +528,9 @@ public final class ErpConsoleExtension implements ConsoleExtensionProvider {
                 "com.innospots.erp",
                 "1.0.0",
                 I18nObject.of("en", "ERP", "zh", "企业资源管理"),
-                "ERP console extension",
+                I18nObject.of(
+                        "en", "ERP console extension",
+                        "zh", "企业资源管理控制台扩展"),
                 List.of(salesModule(), inventoryModule()));
     }
 
@@ -533,7 +538,9 @@ public final class ErpConsoleExtension implements ConsoleExtensionProvider {
         return new ExtensionModuleDeclaration(
                 "sales",
                 I18nObject.of("en", "Sales", "zh", "销售"),
-                "Sales management",
+                I18nObject.of(
+                        "en", "Sales management",
+                        "zh", "销售管理"),
                 List.of(new MenuDirectoryDeclaration(
                         "order",
                         I18nObject.of("en", "Orders", "zh", "订单"),
@@ -556,7 +563,9 @@ public final class ErpConsoleExtension implements ConsoleExtensionProvider {
         return new ExtensionModuleDeclaration(
                 "inventory",
                 I18nObject.of("en", "Inventory", "zh", "库存"),
-                "Inventory management",
+                I18nObject.of(
+                        "en", "Inventory management",
+                        "zh", "库存管理"),
                 List.of(),
                 List.of());
     }
