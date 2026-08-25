@@ -14,10 +14,10 @@
    启动时发现并注册扩展，管理端控制是否启用。
 3. **扩展与模块分层。** 一个扩展是安装和启停单元，一个扩展可以贡献多个
    `moduleKey`；模块是资源归属和权限目录的一级边界。
-4. **所属关系显式。** 扩展拥有模块，模块拥有菜单树和无菜单页面，目录菜单拥有子菜单，
-   页面菜单拥有页面；API/操作通过注解显式引用模块及页面。
-5. **页面与部署方式解耦。** 页面声明只引用逻辑入口。页面独立部署还是位于 JAR 静态
-   资源中，由页面入口解析器处理，不改变页面、菜单或权限资源模型。
+4. **所属关系显式。** 扩展拥有模块，模块分别拥有页面树和菜单树；页面树表达页面领域
+   关系，菜单叶子通过 `pageKey` 引用模块页面，API/操作通过注解引用页面。
+5. **声明与渲染解耦。** 扩展只声明 `pageKey` 和 `pagePath`。渲染模块通过
+   `moduleKey + pageKey` 定位 DSL 文件，扩展不保存 DSL 内容或文件路径。
 6. **资源声明与权限分配分离。** 扩展只声明资源身份、结构和展示元数据，不声明权限码、
    角色、用户组或授权策略。权限模块在管理端统一配置和分配。
 7. **显式、稳定、失败关闭。** 所有资源使用稳定 key；重复、悬空引用或无法解析的加载
@@ -31,19 +31,22 @@ ExtensionDescriptor
 ├── version
 └── modules
     ├── ExtensionModuleDeclaration (moduleKey = "sales")
+    │   ├── page tree
+    │   │   └── PageDslDeclaration
+    │   │       ├── pageKey
+    │   │       ├── pagePath
+    │   │       └── children
     │   ├── menu tree
     │   │   └── directory menu
     │   │       ├── directory menu
     │   │       └── page menu
-    │   │           └── page
-    │   │               └── pageEntryKey
-    │   ├── non-menu pages
+    │   │           └── pageKey reference
     │   └── endpoints
     │       ├── @ApiResource
     │       └── @PageActionResource
     └── ExtensionModuleDeclaration (moduleKey = "inventory")
+        ├── page tree
         ├── menu tree
-        ├── non-menu pages
         └── endpoints
 ```
 
@@ -51,15 +54,18 @@ ExtensionDescriptor
 
 ```text
 extensionKey -> moduleKey -> resource key
+module -> page tree
+page -> child pages
 module -> menu tree
 directory menu -> child menu nodes
-page menu -> exactly one page
-module -> page -> page entry -> resource location
+page menu -> pageKey reference
+moduleKey + pageKey -> DSL renderer
 endpoint operation -> API resource -> optional page references
 endpoint operation -> page action -> required page reference
 ```
 
-菜单与页面的关系由对象所属结构直接表达，不通过 path 相等或多个 key 的组合进行推断。
+页面先归属于模块，菜单再通过 `pageKey` 引用模块页面。`pagePath` 只负责路由匹配，不参与
+菜单和页面的关联。
 
 ## 4. 扩展与模块模型
 
@@ -99,15 +105,15 @@ public record ExtensionModuleDeclaration(
         String moduleKey,
         I18nObject displayName,
         I18nObject description,
-        List<MenuNodeDeclaration> menuTree,
-        List<ConsolePageDeclaration> nonMenuPages
+        List<PageDslDeclaration> pages,
+        List<MenuNodeDeclaration> menuTree
 ) {
 }
 ```
 
-`menuTree` 是模块的导航树。目录菜单通过 `children` 直接拥有下级菜单，页面菜单直接拥有
-页面。`nonMenuPages` 只保存需要由 Console 宿主独立识别、但不出现在菜单中的平台页面；
-前端页面内部的子页面、弹窗和组件不放入该集合。
+`pages` 是模块的页面资源树，定义模块拥有哪些平台页面以及页面之间的单向父子关系。
+`menuTree` 是模块的导航树，只引用 `pages` 中需要出现在菜单里的页面。页面是否出现在
+菜单中，不影响其 MODULE/PAGE 资源归属。
 
 扩展和模块的 `displayName`、`description` 都使用 `I18nObject`。注册表保留完整国际化
 内容，管理端输出时再按请求语言解析，不在扩展发现阶段转换为单一字符串。
@@ -137,11 +143,96 @@ module:inventory
 推荐在代码内部使用 `ResourceId(type, key)` 值对象，而不是到处传递拼接后的字符串。
 序列化和管理端展示时再输出 `type:key`。
 
-## 5. 菜单、页面与加载入口
+## 5. 页面 DSL、页面关系与菜单
 
-### 5.1 菜单节点类型
+### 5.1 模块页面声明
 
-菜单是一棵由模块直接拥有的树。菜单节点只分为两种类型：
+模块使用 `PageDslDeclaration` 声明平台页面：
+
+```java
+public record PageDslDeclaration(
+        String pageKey,
+        String pagePath,
+        List<PageDslDeclaration> children
+) {
+}
+```
+
+| 字段 | 作用 |
+|------|------|
+| `pageKey` | 模块内唯一页面标识，同时对应 DSL 配置文件中的 `pageKey` |
+| `pagePath` | Console 页面路径模板，用于匹配浏览器路径和提取变量 |
+| `children` | 子页面声明，表达父页面到子页面的单向领域关系 |
+
+模块内页面资源 ID 为 `page:<moduleKey>.<pageKey>`。`pageKey` 发布后保持稳定；
+`pagePath` 可以随页面导航结构调整，但变更时必须避免与其他活动页面产生匹配冲突。
+
+扩展声明不包含 DSL 内容，也不保存 `dslPath`。渲染模块通过 `moduleKey + pageKey` 定位唯一
+DSL 文件，并校验文件内部的 `pageKey` 与声明一致。
+
+DSL 文件既可以来自扩展 JAR 的静态资源，也可以由独立部署的页面服务提供。具体来源、
+地址和加载协议由渲染运行时管理，不进入扩展声明；两种部署方式使用相同的
+`moduleKey + pageKey` 页面身份和查询契约。
+
+### 5.2 页面树与声明边界
+
+模块 `pages` 中的节点是页面树根节点，`PageDslDeclaration.children` 直接包含子页面。
+每个声明页面最多只有一个父页面；同一个 `pageKey` 不得在页面树中重复出现。注册表递归
+展开页面树后，为子页面生成 `parentPageResourceId`。
+
+页面父子关系表达领域归属，不从 `pagePath` 推导，也不强制子页面路径必须以前端父页面
+路径为前缀。路径结构与领域关系分别校验。
+
+```text
+page:sales.order-list
+  parent = null
+
+page:sales.order-detail
+  parent = page:sales.order-list
+
+page:sales.order-edit
+  parent = page:sales.order-detail
+```
+
+只有具有独立 DSL `pageKey`、需要成为独立 PAGE 资源的页面才进入页面树。一个 DSL 页面
+内部的弹窗、抽屉、页签、局部组件和内部视图不需要声明，也不产生 PAGE 资源。页面之间
+通过前端链接跳转，不要求它们出现在菜单中。
+
+### 5.3 `pagePath` 路径模板
+
+`pagePath` 使用命名路径变量，不使用 `*` 或 `**`：
+
+```text
+/sales/orders
+/sales/orders/{orderId}
+/sales/orders/{orderId}/items/{itemId}
+```
+
+路径模板约束：
+
+- 必须以 `/` 开头；
+- `{variableName}` 必须占据完整路径段；
+- 变量名不能为空，同一模板内不能重复；
+- 静态路径优先于变量模板，例如 `/orders/create` 优先于 `/orders/{orderId}`；
+- `/orders/{id}` 与 `/orders/{orderId}` 具有相同结构，视为冲突；
+- 具有相同匹配优先级且可能匹配同一路径的模板视为冲突；
+- 路径变量经过一次 URL 解码后，以只读 `Map<String, String>` 传给渲染模块。
+
+例如访问 `/sales/orders/ORD-1001` 时，页面注册表匹配
+`/sales/orders/{orderId}`，得到：
+
+```text
+moduleKey = sales
+pageKey = order-detail
+pathVariables = {
+  orderId: "ORD-1001"
+}
+```
+
+### 5.4 菜单树与页面引用
+
+菜单树仍由目录菜单和页面菜单组成。目录菜单拥有子菜单，不对应页面；页面菜单是叶子
+节点，通过 `pageKey` 引用模块 `pages` 中已经声明的页面：
 
 ```java
 public sealed interface MenuNodeDeclaration
@@ -157,16 +248,6 @@ public sealed interface MenuNodeDeclaration
 }
 ```
 
-- `MenuDirectoryDeclaration` 是父菜单或分组，只能包含子菜单，不对应页面；
-- `MenuPageDeclaration` 是页面菜单，必须直接包含一个页面，不能再包含子菜单。
-
-这种类型约束保证“父菜单没有页面、叶子菜单拥有页面”。父子关系和菜单页面关系都由
-对象嵌套结构表达，不使用额外字符串进行二次关联。
-
-### 5.2 目录菜单与子菜单
-
-目录菜单通过 `children` 直接包含下级菜单：
-
 ```java
 public record MenuDirectoryDeclaration(
         String menuKey,
@@ -178,69 +259,27 @@ public record MenuDirectoryDeclaration(
 }
 ```
 
-`children` 可以包含下一层目录菜单，也可以包含页面菜单，因此菜单树可以表达任意合理的
-目录深度。同级节点按 `orderIndex`、`menuKey` 稳定排序。目录节点必须至少包含一个有效
-子节点，不能通过 route 或 page 字段指向页面。
-
-父子关系由对象包含关系确定：模块 `menuTree` 中的节点是根菜单，
-`MenuDirectoryDeclaration.children` 中的节点以该目录作为直接父菜单。注册表递归展开
-菜单树时，为每个子节点生成 `parentMenuResourceId`；扩展作者不需要重复填写父菜单 key。
-
-例如：
-
-```text
-订单管理（目录菜单，不对应页面）
-├── 订单列表（页面菜单） -> OrderListPage
-└── 退款管理（目录菜单，不对应页面）
-    ├── 退款单（页面菜单） -> RefundListPage
-    └── 退款规则（页面菜单） -> RefundRulePage
-```
-
-### 5.3 页面菜单与页面
-
-页面菜单直接包含 `ConsolePageDeclaration`，对应关系在对象结构中一次完成：
-
 ```java
 public record MenuPageDeclaration(
         String menuKey,
         I18nObject title,
         String icon,
         int orderIndex,
-        ConsolePageDeclaration page
+        String pageKey
 ) implements MenuNodeDeclaration {
 }
 ```
 
-```java
-public record ConsolePageDeclaration(
-        String pageKey,
-        I18nObject title,
-        String routePath,
-        String pageEntryKey
-) {
-}
-```
+页面和菜单是两棵独立结构：
 
-| 页面字段 | 作用 |
-|----------|------|
-| `pageKey` | 模块内稳定页面 key，完整资源为 `page:<moduleKey>.<pageKey>` |
-| `title` | 页面标题，可以与菜单展示标题不同 |
-| `routePath` | Console 宿主路由基路径，该路径及其子路径交给同一页面入口处理 |
-| `pageEntryKey` | 逻辑页面入口，由 `PageEntryResolver` 解析为实际资源位置 |
+- 模块 `pages` 决定页面资源归属和页面父子关系；
+- 模块 `menuTree` 决定导航父子关系；
+- `MenuPageDeclaration.pageKey` 必须引用同一模块中存在的页面；
+- 没有菜单引用的页面仍是合法 PAGE 资源，可由其他页面链接进入；
+- 一个页面可以被至多一个菜单叶子引用，避免产生重复导航入口；
+- 带必填路径变量的页面不能直接作为静态菜单入口，因为静态菜单无法提供变量值。
 
-关系和约束如下：
-
-- 一个 `MenuPageDeclaration` 必须且只能包含一个页面；
-- 一个菜单树页面只能归属于一个页面菜单，不能在树中重复挂载；
-- `menuKey` 和 `pageKey` 分别是菜单身份和页面身份，可以不同；
-- 菜单点击后直接使用其页面的 `routePath`，不再声明独立 route；
-- 页面加载时使用 `pageEntryKey`，与菜单层级无关；
-- 页面菜单是叶子节点，不能再拥有 `children`。
-
-例如 `menu:sales.order-list` 直接包含 `page:sales.order-list`。运行时从页面菜单即可得到
-菜单标题、页面路由和页面入口，不需要查询另一张关联表。
-
-注册后的规范化关系如下：
+规范化关系示例：
 
 ```text
 menu:sales.order
@@ -253,69 +292,32 @@ menu:sales.order-list
   page = page:sales.order-list
 ```
 
-### 5.4 无菜单页面
+### 5.5 DSL 查询与渲染
 
-并非所有前端页面、路由或组件都需要声明为 `ConsolePageDeclaration`。这里的“页面”是
-Console 宿主和权限资源目录能够独立识别的平台页面边界，不等同于前端工程中的每一个
-视图组件。
-
-以下内容属于页面内部实现，不需要再次声明：
-
-- 从页面中的链接打开的详情视图、编辑视图或步骤页；
-- 由页面自身前端路由管理的子路由；
-- 弹窗、抽屉、页签和局部组件；
-- 与父页面共用 `pageEntryKey`，且不需要独立 PAGE 资源的视图。
-
-例如菜单页面 `page:sales.order-list` 加载 `sales.order-list` 前端入口。该入口可以自行处理
-`/sales/orders/:orderId`，并渲染订单详情子页面。订单详情仍归属于
-`page:sales.order-list`，扩展中不再声明 `order-detail` 页面，也不产生新的 PAGE 资源。
-子页面沿用父平台页面的 PAGE 资源；它调用的 API 和页面操作仍通过各自专用注解独立进入
-资源目录。
-
-Console 宿主按路径段进行最长基路径匹配。例如已声明平台页面基路径
-`/sales/orders` 后，直接访问 `/sales/orders/123` 仍会先加载 `sales.order-list`，再由该
-页面的前端路由渲染订单详情。这样内部子页面支持深链接，但不需要注册为平台页面。
-
-只有满足下列任一条件时，页面才进入模块的 `nonMenuPages`：
-
-- Console 宿主必须为它注册独立路由并单独加载页面入口；
-- 它使用独立 `pageEntryKey`，生命周期不属于某个已声明页面；
-- 权限模块需要把它作为独立 PAGE 资源进行配置；
-- API 或 ACTION 必须引用它自己的稳定 `pageKey`，不能归属于已有页面。
-
-因此，`nonMenuPages` 表示“宿主管理但无菜单入口的页面”，不是前端内部子页面清单。这类
-页面具有 PAGE 资源、路由和页面入口，但不产生 MENU 资源。
-
-### 5.5 页面资源位置
-
-页面声明不直接保存 JAR 路径或远程 URL。扩展另外提供 `PageEntryResolver`，把
-`pageEntryKey` 解析为实际位置：
+页面注册表以 `(moduleKey, pageKey)` 为唯一键保存 `PageDslDeclaration`。匹配页面路径后，
+宿主向渲染模块提交：
 
 ```java
-public interface PageEntryResolver {
-
-    Optional<PageResourceLocation> resolve(String pageEntryKey);
+public record PageRenderRequest(
+        String moduleKey,
+        String pageKey,
+        Map<String, String> pathVariables
+) {
 }
 ```
 
-`PageResourceLocation` 至少支持：
+`PageDslDeclaration` 只定义资源身份、领域关系和路径模板。页面标题、描述等展示元数据由
+渲染模块读取 DSL 后提供给资源目录，不在扩展声明中重复维护。
 
-- `EmbeddedPageResource`：位于扩展 JAR 中的静态资源入口；
-- `RemotePageResource`：独立部署的前端入口；
-- 后续新增的加载协议，由适配器扩展，不修改页面声明。
+渲染顺序：
 
-因此同一个 `ConsolePageDeclaration` 可以在不同部署环境解析为不同位置。环境配置只可
-参与逻辑入口到实际部署位置的映射，不负责新增业务页面或重写页面身份。
-
-### 5.6 前端加载流程
-
-1. Console 前端请求项目的活动扩展清单；
-2. 服务端递归展开目录菜单和页面菜单，并合并无菜单页面的路由；
-3. 前端根据管理端权限模块返回的可见资源集合过滤菜单和路由；
-4. 用户进入路由时，宿主按最长基路径选择平台页面，再解析其 `pageEntryKey`；
-5. JAR 静态资源由内嵌资源适配器加载，独立部署页面由远程资源适配器加载；
-6. 页面入口加载后，由页面自身处理内部链接、子路由、弹窗和子页面；
-7. 加载失败只影响目标平台页面，并记录 `extensionKey/moduleKey/pageKey` 诊断信息。
+1. Console 获取已激活扩展的模块、页面树和菜单树；
+2. 权限模块根据 PAGE/MENU 资源过滤用户可访问的导航与页面；
+3. 页面注册表匹配 `pagePath`，确定 `moduleKey + pageKey`；
+4. 注册表提取命名路径变量，构造 `PageRenderRequest`；
+5. 渲染模块按 `moduleKey + pageKey` 查询唯一 DSL 文件；
+6. 渲染模块校验 DSL 文件内部 `pageKey`，并注入 `pathVariables`；
+7. DSL 文件不存在、pageKey 不一致或渲染失败时，记录模块、页面和路径变量诊断。
 
 ## 6. API 与页面操作资源
 
@@ -353,7 +355,7 @@ public R<PageResult<OrderVo>> list(...) {
 - API 表示一次可识别、可授权的后端调用；
 - ACTION 表示页面上可见或可执行的交互能力；
 - `pages`、`pageKey` 只表达归属关系，不代表已获得访问权限；
-- 前端内部子页面使用所属平台页面的 `pageKey`，不为子页面创建新的页面引用；
+- 独立 DSL 子页面使用自己的 `pageKey`；DSL 内部组件使用所属页面的 `pageKey`；
 - 不允许根据 HTTP method、URL 或 Java 方法名自动生成资源 key；
 - 未声明 `@ApiResource` 的 Endpoint 操作不会作为 API 资源进入权限资源目录。
 
@@ -378,8 +380,6 @@ public interface ConsoleExtensionProvider {
     ExtensionDescriptor descriptor();
 
     Collection<Class<?>> endpointTypes();
-
-    Collection<PageEntryResolver> pageEntryResolvers();
 }
 ```
 
@@ -458,11 +458,11 @@ JAR 加入依赖/classpath（安装）
 
 1. 校验扩展描述和兼容版本；
 2. 校验全部 `moduleKey` 及资源 ID 唯一性；
-3. 构建并校验菜单树；
-4. 递归校验目录/页面菜单结构、页面 route 和 `pageEntryKey`；
+3. 构建页面树并校验 `pageKey`、父子关系和 `pagePath` 模板；
+4. 构建菜单树并校验菜单引用的 `pageKey`；
 5. 注册 Endpoint，并读取 API/ACTION 注解；
 6. 校验 API/ACTION 的模块和页面引用；
-7. 解析页面入口，生成 Console 活动清单；
+7. 由渲染模块校验 `moduleKey + pageKey` 可定位 DSL 且内部 pageKey 一致；
 8. 原子发布扩展资源到活动注册表。
 
 任一步失败，整个扩展保持 `FAILED`，不发布部分菜单或部分接口。其他已激活扩展不受影响。
@@ -471,13 +471,13 @@ JAR 加入依赖/classpath（安装）
 
 停用扩展时：
 
-- 从活动菜单、路由、页面入口和 Endpoint 注册表撤出该扩展；
+- 从活动页面、菜单、路径模板和 Endpoint 注册表撤出该扩展；
 - 从活动资源视图撤出其模块资源；
 - 保留扩展登记、资源快照和权限模块中的既有分配；
 - 新请求不能再进入已停用扩展，执行中的请求按运行时适配器策略完成或终止。
 
 重新启用必须重新执行完整激活校验。只有原子发布成功后，状态才变为 `ACTIVE`。
-若底层 REST 运行时或静态资源容器不支持安全的动态卸载，管理端仍保存启停状态，但界面
+若底层 REST 运行时或 DSL 渲染模块不支持安全的动态卸载，管理端仍保存启停状态，但界面
 必须明确提示“重启后生效”，不能伪装成已完成热停用。
 
 ## 9. 权限模块边界
@@ -508,8 +508,9 @@ JAR 加入依赖/classpath（安装）
 |-------------|------|
 | `innospots-nexus-console` | 扩展、模块、菜单、页面、资源注解和 Provider 契约；保持业务中立 |
 | `innospots-nexus-kernel` | 扩展登记、启停管理、资源目录、权限管理及相应管理 Endpoint |
-| 应用/运行时适配器 | 接口装配、注解索引、Java SPI、Jakarta REST 注册、JAR 静态资源挂载、远程页面加载 |
-| 业务扩展 JAR | Provider 实现、模块声明、页面入口解析器、Endpoint 与前端产物 |
+| 应用/运行时适配器 | 接口装配、注解索引、Java SPI、Jakarta REST 注册和 DSL 渲染模块接入 |
+| DSL 渲染模块 | 按 `moduleKey + pageKey` 定位 DSL、校验 DSL pageKey、注入路径变量并渲染页面 |
+| 业务扩展 JAR | Provider 实现、模块/页面/菜单声明和 Endpoint |
 
 `innospots-nexus-core` 可以提供业务中立的生命周期、注册表或资源解析基础设施，但不能
 内置具体扩展管理业务，也不能绑定 Spring Boot 自动配置。
@@ -541,6 +542,16 @@ public final class ErpConsoleExtension implements ConsoleExtensionProvider {
                 I18nObject.of(
                         "en", "Sales management",
                         "zh", "销售管理"),
+                List.of(new PageDslDeclaration(
+                        "order-list",
+                        "/sales/orders",
+                        List.of(new PageDslDeclaration(
+                                "order-detail",
+                                "/sales/orders/{orderId}",
+                                List.of(new PageDslDeclaration(
+                                        "order-edit",
+                                        "/sales/orders/{orderId}/edit",
+                                        List.of())))))),
                 List.of(new MenuDirectoryDeclaration(
                         "order",
                         I18nObject.of("en", "Orders", "zh", "订单"),
@@ -551,12 +562,7 @@ public final class ErpConsoleExtension implements ConsoleExtensionProvider {
                                 I18nObject.of("en", "Order List", "zh", "订单列表"),
                                 "list",
                                 10,
-                                new ConsolePageDeclaration(
-                                        "order-list",
-                                        I18nObject.of("en", "Order List", "zh", "订单列表"),
-                                        "/sales/orders",
-                                        "sales.order-list"))))),
-                List.of());
+                                "order-list")))));
     }
 
     private ExtensionModuleDeclaration inventoryModule() {
@@ -572,33 +578,33 @@ public final class ErpConsoleExtension implements ConsoleExtensionProvider {
 }
 ```
 
-### 11.2 页面内部子页面
+### 11.2 页面树与路径变量
 
-订单列表前端入口可以在自己的前端路由中定义：
+上述模块声明形成页面资源树：
 
 ```text
-/sales/orders                 -> OrderListView
-/sales/orders/:orderId        -> OrderDetailView
-/sales/orders/:orderId/edit   -> OrderEditView
+page:sales.order-list
+└── page:sales.order-detail
+    └── page:sales.order-edit
 ```
 
-三个视图共用平台页面 `page:sales.order-list` 和页面入口 `sales.order-list`。扩展声明中只
-定义 `ConsolePageDeclaration("order-list", ...)`；`OrderDetailView` 和 `OrderEditView`
-不进入 `nonMenuPages`，也不生成独立 PAGE 资源。
+访问 `/sales/orders/ORD-1001/edit` 时匹配 `order-edit` 页面，渲染请求为：
 
-### 11.3 页面资源
-
-同一逻辑入口可以由不同 Provider 解析：
-
-```java
-// JAR 内置静态资源
-EmbeddedPageResource.of("sales.order-list", "/META-INF/nexus/pages/sales/index.html");
-
-// 独立部署资源
-RemotePageResource.of("sales.order-list", URI.create("https://sales.example.com/entry.js"));
+```text
+moduleKey = sales
+pageKey = order-edit
+pathVariables = {
+  orderId: "ORD-1001"
+}
 ```
 
-页面和菜单声明无需因部署方式变化而修改。
+渲染模块使用 `sales + order-edit` 定位 DSL 文件，并把 `orderId` 注入渲染上下文。菜单只
+引用 `order-list`；详情和编辑页面无需菜单，也不影响其 PAGE 资源归属。
+
+### 11.3 页面内部视图
+
+如果订单 DSL 内部还有弹窗、抽屉、页签或不具备独立 DSL `pageKey` 的视图，这些内容不
+进入 `PageDslDeclaration.children`，也不生成 PAGE 资源。
 
 ### 11.4 Endpoint 资源
 
@@ -640,8 +646,8 @@ public class OrderEndpoint {
 2. 把扩展 JAR 加入应用依赖，随应用发布；
 3. 应用启动时发现 Provider，登记 `com.innospots.erp`，首次默认启用；
 4. 激活器校验 `sales`、`inventory` 模块及其全部资源；
-5. REST 适配器注册 Endpoint，页面入口适配器注册逻辑入口；
-6. Console 获取活动清单并加载菜单、路由和页面；
+5. REST 适配器注册 Endpoint，DSL 渲染模块校验模块页面；
+6. Console 获取活动页面树、菜单树和路径模板注册表；
 7. 管理员在权限模块中为资源配置权限并分配给角色或用户组；
 8. 管理员可在扩展管理中停用或重新启用整个扩展。
 
@@ -653,12 +659,13 @@ public class OrderEndpoint {
 - 全局 `moduleKey` 唯一；
 - 同一模块内 menu/page/api/action 局部 key 唯一；
 - 规范化后的 `type:key` 全局唯一；
+- 页面树无循环，每个页面最多一个父页面；
+- `pageKey` 与 DSL 文件内部 pageKey 一致；
+- `pagePath` 以 `/` 开头，路径变量合法且不重复；
+- 静态/变量模板匹配优先级确定，不存在结构相同或同优先级歧义模板；
 - 目录菜单至少包含一个子节点，菜单树无循环且排序稳定；
-- 页面菜单直接包含且只包含一个页面，不能同时拥有子节点；
-- 菜单树页面不能重复挂载，也不能与 `nonMenuPages` 中的页面重复；
-- 平台页面 `routePath` 合法且精确值唯一，嵌套路由按最长基路径匹配；
-- `pageEntryKey` 可被且只能被一个活动页面入口解析器解析；
-- 前端内部子路由不进入平台页面注册表，也不参与全局 routePath 唯一性校验；
+- 页面菜单引用的 `pageKey` 存在于同一模块，且一个页面最多被一个菜单引用；
+- 包含必填路径变量的页面不能直接作为静态菜单入口；
 - Endpoint 可以被 REST 运行时注册；
 - `@ApiResource.moduleKey` 指向所属扩展拥有的模块；
 - API 的 `pages` 和 ACTION 的 `pageKey` 指向已声明页面；
@@ -675,12 +682,15 @@ public class OrderEndpoint {
 - Provider 返回集合不可变，必填字段校验明确；
 - 一个扩展可贡献多个模块；
 - 资源 ID 规范化稳定；
-- 多级目录菜单、页面菜单和无菜单页面正确展开；
-- 目录菜单不能对应页面，页面菜单必须对应一个页面；
-- 页面内部子页面不产生独立 PAGE 资源；
-- 需要宿主独立管理的无菜单页面可以通过 `nonMenuPages` 注册；
-- API 和 ACTION 的页面引用正确解析；
-- Embedded/Remote 页面资源解析产生相同逻辑页面身份。
+- 页面树正确生成单向父子资源关系；
+- 菜单树正确引用模块页面，未被菜单引用的页面仍保留 PAGE 资源；
+- DSL 内部组件和视图不产生独立 PAGE 资源；
+- 静态路径优先于变量模板；
+- 路径变量正确提取、URL 解码并以不可变 Map 传递；
+- 结构相同或同优先级歧义的路径模板失败关闭；
+- 渲染模块可以通过 `moduleKey + pageKey` 唯一定位 DSL；
+- 声明 pageKey 与 DSL 内部 pageKey 不一致时激活失败；
+- API 和 ACTION 的页面引用正确解析。
 
 ### 13.2 发现与生命周期测试
 
