@@ -15,7 +15,7 @@
 3. **扩展与模块分层。** 一个扩展是安装和启停单元，一个扩展可以贡献多个
    `moduleKey`；模块是资源归属和权限目录的一级边界。
 4. **所属关系显式。** 扩展拥有模块，模块分别拥有页面树和菜单树；页面树表达页面领域
-   关系，菜单叶子通过 `pageKey` 引用模块页面，API/操作通过注解引用页面。
+   关系，菜单页面节点通过 `pageKey` 引用模块页面，API/操作通过注解引用页面。
 5. **声明与渲染解耦。** 扩展只声明 `pageKey` 和 `pagePath`。渲染模块通过
    `moduleKey + pageKey` 定位 DSL 文件，扩展不保存 DSL 内容或文件路径。
 6. **资源声明与权限分配分离。** 扩展只声明资源身份、结构和展示元数据，不声明权限码、
@@ -37,10 +37,9 @@ ExtensionDescriptor
     │   │       ├── pagePath
     │   │       └── children
     │   ├── menu tree
-    │   │   └── directory menu
-    │   │       ├── directory menu
-    │   │       └── page menu
-    │   │           └── pageKey reference
+    │   │   └── MenuDeclaration
+    │   │       ├── children
+    │   │       └── optional pageKey reference
     │   └── endpoints
     │       ├── @ApiResource
     │       └── @PageActionResource
@@ -57,8 +56,7 @@ extensionKey -> moduleKey -> resource key
 module -> page tree
 page -> child pages
 module -> menu tree
-directory menu -> child menu nodes
-page menu -> pageKey reference
+menu -> child menu nodes or pageKey reference
 moduleKey + pageKey -> DSL renderer
 endpoint operation -> API resource -> optional page references
 endpoint operation -> page action -> required page reference
@@ -106,7 +104,7 @@ public record ExtensionModuleDeclaration(
         I18nObject displayName,
         I18nObject description,
         List<PageDslDeclaration> pages,
-        List<MenuNodeDeclaration> menuTree
+        List<MenuDeclaration> menuTree
 ) {
 }
 ```
@@ -231,52 +229,39 @@ pathVariables = {
 
 ### 5.4 菜单树与页面引用
 
-菜单树仍由目录菜单和页面菜单组成。目录菜单拥有子菜单，不对应页面；页面菜单是叶子
-节点，通过 `pageKey` 引用模块 `pages` 中已经声明的页面：
+菜单树使用一个递归声明类型。目录节点通过 `children` 包含子菜单，页面节点通过
+`pageKey` 引用模块 `pages` 中已经声明的页面：
 
 ```java
-public sealed interface MenuNodeDeclaration
-        permits MenuDirectoryDeclaration, MenuPageDeclaration {
-
-    String menuKey();
-
-    I18nObject title();
-
-    String icon();
-
-    int orderIndex();
-}
-```
-
-```java
-public record MenuDirectoryDeclaration(
+public record MenuDeclaration(
         String menuKey,
         I18nObject title,
         String icon,
         int orderIndex,
-        List<MenuNodeDeclaration> children
-) implements MenuNodeDeclaration {
+        String pageKey,
+        List<MenuDeclaration> children
+) {
 }
 ```
 
-```java
-public record MenuPageDeclaration(
-        String menuKey,
-        I18nObject title,
-        String icon,
-        int orderIndex,
-        String pageKey
-) implements MenuNodeDeclaration {
-}
-```
+`pageKey` 是可选页面引用；`children` 缺省时规范化为空列表。节点类型不再使用接口、枚举
+或不同 record 表达，而是由字段组合确定。注册表可以派生 `DIRECTORY` 或 `PAGE` 类型，
+但扩展作者不需要声明该类型：
+
+| `pageKey` | `children` | 节点语义 |
+|-----------|------------|----------|
+| 空 | 非空 | 目录节点，只负责组织子菜单 |
+| 非空 | 空 | 页面节点，引用一个模块页面 |
+| 空 | 空 | 非法，没有导航意义 |
+| 非空 | 非空 | 非法，不能同时作为目录和页面入口 |
 
 页面和菜单是两棵独立结构：
 
 - 模块 `pages` 决定页面资源归属和页面父子关系；
 - 模块 `menuTree` 决定导航父子关系；
-- `MenuPageDeclaration.pageKey` 必须引用同一模块中存在的页面；
+- `MenuDeclaration.pageKey` 必须引用同一模块中存在的页面；
 - 没有菜单引用的页面仍是合法 PAGE 资源，可由其他页面链接进入；
-- 一个页面可以被至多一个菜单叶子引用，避免产生重复导航入口；
+- 一个页面可以被至多一个菜单页面节点引用，避免产生重复导航入口；
 - 带必填路径变量的页面不能直接作为静态菜单入口，因为静态菜单无法提供变量值。
 
 规范化关系示例：
@@ -552,17 +537,19 @@ public final class ErpConsoleExtension implements ConsoleExtensionProvider {
                                         "order-edit",
                                         "/sales/orders/{orderId}/edit",
                                         List.of())))))),
-                List.of(new MenuDirectoryDeclaration(
+                List.of(new MenuDeclaration(
                         "order",
                         I18nObject.of("en", "Orders", "zh", "订单"),
                         "orders",
                         20,
-                        List.of(new MenuPageDeclaration(
+                        null,
+                        List.of(new MenuDeclaration(
                                 "order-list",
                                 I18nObject.of("en", "Order List", "zh", "订单列表"),
                                 "list",
                                 10,
-                                "order-list")))));
+                                "order-list",
+                                List.of())))));
     }
 
     private ExtensionModuleDeclaration inventoryModule() {
@@ -663,8 +650,9 @@ public class OrderEndpoint {
 - `pageKey` 与 DSL 文件内部 pageKey 一致；
 - `pagePath` 以 `/` 开头，路径变量合法且不重复；
 - 静态/变量模板匹配优先级确定，不存在结构相同或同优先级歧义模板；
-- 目录菜单至少包含一个子节点，菜单树无循环且排序稳定；
-- 页面菜单引用的 `pageKey` 存在于同一模块，且一个页面最多被一个菜单引用；
+- 菜单节点必须在“目录节点”和“页面节点”两种有效字段组合中选择一种；
+- 菜单树无循环、目录节点至少包含一个子节点且同级排序稳定；
+- 页面节点引用的 `pageKey` 存在于同一模块，且一个页面最多被一个菜单引用；
 - 包含必填路径变量的页面不能直接作为静态菜单入口；
 - Endpoint 可以被 REST 运行时注册；
 - `@ApiResource.moduleKey` 指向所属扩展拥有的模块；
@@ -684,6 +672,7 @@ public class OrderEndpoint {
 - 资源 ID 规范化稳定；
 - 页面树正确生成单向父子资源关系；
 - 菜单树正确引用模块页面，未被菜单引用的页面仍保留 PAGE 资源；
+- 目录节点和页面节点的有效字段组合可以正确识别，其他组合激活失败；
 - DSL 内部组件和视图不产生独立 PAGE 资源；
 - 静态路径优先于变量模板；
 - 路径变量正确提取、URL 解码并以不可变 Map 传递；
