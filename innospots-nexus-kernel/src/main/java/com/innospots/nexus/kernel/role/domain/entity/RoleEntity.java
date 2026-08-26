@@ -31,6 +31,9 @@ public class RoleEntity extends ProjectBaseEntity {
 
     public static final String TABLE_NAME = "nx_role";
 
+    /**
+     * Role identifier.
+     */
     @TableId(type = IdType.ASSIGN_UUID)
     @Id
     @Column(length = 32, nullable = false)
@@ -41,24 +44,45 @@ public class RoleEntity extends ProjectBaseEntity {
         return "rol";
     }
 
+    /**
+     * Display name.
+     */
     @Column(length = 64, nullable = false)
     private String roleName;
 
+    /**
+     * Stable project-unique role code.
+     */
     @Column(length = 64, nullable = false)
     private String roleCode;
 
+    /**
+     * Optional description.
+     */
     @Column(length = 256)
     private String description;
 
+    /**
+     * Lifecycle status.
+     */
     @Column(length = 32, nullable = false)
     private String status;
 
+    /**
+     * Sibling display order.
+     */
     @Column(nullable = false)
     private Integer sortOrder;
 
+    /**
+     * Whether the role is protected.
+     */
     @Column(nullable = false)
     private Boolean builtIn;
 
+    /**
+     * Whether the role grants administrator privileges.
+     */
     @Column(nullable = false)
     private Boolean administrator;
 }

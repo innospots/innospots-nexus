@@ -8,7 +8,19 @@ package com.innospots.nexus.kernel.menu.domain.enums;
  * </p>
  */
 public enum MenuType {
+
+    /**
+     * Groups child menu nodes without a navigable destination.
+     */
     DIRECTORY,
+
+    /**
+     * Renders an internal application page.
+     */
     PAGE,
+
+    /**
+     * Opens an external URL.
+     */
     EXTERNAL_LINK
 }

@@ -33,6 +33,9 @@ public class UserRoleEntity extends ProjectBaseEntity {
 
     public static final String TABLE_NAME = "nx_user_role";
 
+    /**
+     * User-role assignment identifier.
+     */
     @TableId(type = IdType.ASSIGN_UUID)
     @Id
     @Column(length = 32, nullable = false)
@@ -43,9 +46,15 @@ public class UserRoleEntity extends ProjectBaseEntity {
         return "uro";
     }
 
+    /**
+     * User identifier.
+     */
     @Column(length = 32, nullable = false)
     private String userId;
 
+    /**
+     * Role identifier.
+     */
     @Column(length = 32, nullable = false)
     private String roleId;
 
