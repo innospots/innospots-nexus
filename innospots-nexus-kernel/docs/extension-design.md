@@ -3,50 +3,48 @@
 ## 1. 文档定位
 
 本文定义 Nexus 管理平台扩展机制。它说明扩展如何开发、被系统发现和注册、
-由管理端启用或停用，以及扩展贡献的模块、菜单、页面、前端资源、API 和页面操作如何
-形成一棵可校验、可加载、可授权的资源树。
+由管理端启用或停用，以及扩展贡献的模块、菜单、页面和页面接口如何形成可校验、
+可加载、可授权的资源结构。
 
 ## 2. 设计原则
 
-1. **代码是扩展事实源。** 菜单、页面和接口资源通过 Java 接口、发现注解或 Java SPI
-   暴露；配置文件不作为业务资源的主要定义方式。
+1. **代码是扩展结构事实源。** 扩展、模块、页面和菜单通过 Java 接口、发现注解或
+   Java SPI 暴露；页面使用的接口 URL 来自对应页面 DSL。
 2. **安装与启停分离。** 把扩展 JAR 加入应用依赖或运行时 classpath 即完成安装；系统
    启动时发现并注册扩展，管理端控制是否启用。
 3. **扩展与模块分层。** 一个扩展是安装和启停单元，一个扩展可以贡献多个
    `moduleKey`；模块是资源归属和权限目录的一级边界。
 4. **所属关系显式。** 扩展拥有模块，模块分别拥有页面树和菜单树；页面树表达页面领域
-   关系，菜单页面节点通过 `pageKey` 引用模块页面，API/操作通过注解引用页面。
+   关系，菜单页面节点通过 `pageKey` 引用模块页面，页面 DSL 中的 URL 引用归属于该页面。
 5. **声明与渲染解耦。** 扩展只声明 `pageKey` 和 `pagePath`。渲染模块通过
    `moduleKey + pageKey` 定位 DSL 文件，扩展不保存 DSL 内容或文件路径。
-6. **资源声明与权限分配分离。** 扩展只声明资源身份、结构和展示元数据，不声明权限码、
-   角色、用户组或授权策略。权限模块在管理端统一配置和分配。
-7. **显式、稳定、失败关闭。** 所有资源使用稳定 key；重复、悬空引用或无法解析的加载
-   入口会阻止该扩展激活，不采用后者覆盖前者。
+6. **资源声明与权限分配分离。** 扩展和页面 DSL 只提供资源事实，不声明角色、用户组或
+   授权策略。权限模块在管理端统一为页面及页面 URL 分配角色权限。
+7. **显式、稳定、失败关闭。** 模块、菜单和页面使用稳定 key，页面接口使用明确的页面
+   与 URL 复合身份；重复、悬空引用或无法解析的加载入口会阻止该扩展激活。
 
 ## 3. 总体结构
 
 ```text
-ExtensionDescriptor
-├── extensionKey
-├── version
-└── modules
-    ├── ExtensionModuleDeclaration (moduleKey = "sales")
-    │   ├── page tree
-    │   │   └── PageDslDeclaration
-    │   │       ├── pageKey
-    │   │       ├── pagePath
-    │   │       └── children
-    │   ├── menu tree
-    │   │   └── MenuDeclaration
-    │   │       ├── children
-    │   │       └── optional pageKey reference
-    │   └── endpoints
-    │       ├── @ApiResource
-    │       └── @PageActionResource
-    └── ExtensionModuleDeclaration (moduleKey = "inventory")
-        ├── page tree
-        ├── menu tree
-        └── endpoints
+ConsoleExtensionProvider
+├── ExtensionDescriptor
+│   ├── extensionKey
+│   ├── version
+│   └── modules
+│       ├── ExtensionModuleDeclaration (moduleKey = "sales")
+│       │   ├── page tree
+│       │   │   └── PageDslDeclaration
+│       │   │       ├── pageKey
+│       │   │       ├── pagePath
+│       │   │       └── children
+│       │   └── menu tree
+│       │       └── MenuDeclaration
+│       │           ├── children
+│       │           └── optional pageKey reference
+│       └── ExtensionModuleDeclaration (moduleKey = "inventory")
+│           ├── page tree
+│           └── menu tree
+└── endpointTypes (standard Jakarta REST)
 ```
 
 关系方向固定：
@@ -58,8 +56,8 @@ page -> child pages
 module -> menu tree
 menu -> child menu nodes or pageKey reference
 moduleKey + pageKey -> DSL renderer
-endpoint operation -> API resource -> optional page references
-endpoint operation -> page action -> required page reference
+page DSL -> referenced URLs
+qualified pageKey + request URL -> role permission check
 ```
 
 页面先归属于模块，菜单再通过 `pageKey` 引用模块页面。`pagePath` 只负责路由匹配，不参与
@@ -128,18 +126,19 @@ module:inventory
 
 ### 4.3 统一资源身份
 
-资源 ID 由资源类型和稳定 key 组成，子资源 key 必须包含 `moduleKey`：
+模块、菜单和页面资源 ID 由资源类型和稳定 key 组成，子资源 key 必须包含 `moduleKey`：
 
 | 类型 | 示例 | 含义 |
 |------|------|------|
 | MODULE | `module:sales` | 模块资源边界 |
 | MENU | `menu:sales.order` | 菜单目录或页面导航入口 |
 | PAGE | `page:sales.order-list` | 可加载页面 |
-| API | `api:sales.order.query` | 后端接口操作 |
-| ACTION | `action:sales.order-list.export` | 页面操作 |
 
 推荐在代码内部使用 `ResourceId(type, key)` 值对象，而不是到处传递拼接后的字符串。
 序列化和管理端展示时再输出 `type:key`。
+
+页面接口权限使用 `(moduleKey, pageKey, urlPattern)` 作为唯一身份。URL 发生变化时视为
+新的页面接口权限项。
 
 ## 5. 页面 DSL、页面关系与菜单
 
@@ -301,58 +300,68 @@ public record PageRenderRequest(
 3. 页面注册表匹配 `pagePath`，确定 `moduleKey + pageKey`；
 4. 注册表提取命名路径变量，构造 `PageRenderRequest`；
 5. 渲染模块按 `moduleKey + pageKey` 查询唯一 DSL 文件；
-6. 渲染模块校验 DSL 文件内部 `pageKey`，并注入 `pathVariables`；
-7. DSL 文件不存在、pageKey 不一致或渲染失败时，记录模块、页面和路径变量诊断。
+6. 渲染模块校验 DSL 文件内部 `pageKey`，登记该页面引用的接口 URL，并注入
+   `pathVariables`；
+7. DSL 文件不存在、pageKey 不一致、URL 引用无效或渲染失败时，记录模块、页面和路径
+   变量诊断。
 
-## 6. API 与页面操作资源
+## 6. 页面接口权限
 
-### 6.1 专用声明注解
+### 6.1 页面 URL 权限项
 
-API 资源必须通过独立的 `@ApiResource` 显式声明：
+页面 DSL 中的 datasource 和 action 可以引用后端接口 URL。系统加载页面 DSL 后，按页面
+登记这些 URL，并在管理端提供角色权限配置。本文只定义权限协作方式，不定义 DSL 内部
+字段结构。
 
-```java
-@ApiResource(
-        moduleKey = "sales",
-        apiKey = "order.query",
-        name = "Query orders",
-        pages = {"order-list"}
-)
-@GET
-@Path("/orders")
-public R<PageResult<OrderVo>> list(...) {
-    // ...
-}
+一个页面 URL 权限项由以下内容唯一确定：
+
+- `moduleKey`；
+- `pageKey`；
+- 规范化后的 URL 模板。
+
+例如 `sales` 模块的 `order-list` 页面引用 `/sales/orders`，对应的权限身份为：
+
+```text
+(sales, order-list, /sales/orders)
 ```
 
-页面操作使用独立的 `@PageActionResource`：
+同一 URL 被不同页面引用时，分别形成各自页面下的权限项。一个页面中的 datasource 和
+action 如果引用同一 URL，则共用同一权限项。权限只按 URL 路径区分，HTTP method、
+Java 方法和 action 类型不参与权限身份。
 
-```java
-@PageActionResource(
-        moduleKey = "sales",
-        pageKey = "order-list",
-        actionKey = "export",
-        name = "Export orders"
-)
+URL 模板使用与接口路由兼容的路径变量。实际请求路径先规范化并匹配模板；查询参数、
+片段和域名不参与权限身份。例如 `/sales/orders/ORD-1001` 可以匹配页面登记的
+`/sales/orders/{orderId}`。
+
+### 6.2 页面来源 Header
+
+页面发起接口请求时必须在 Header 中携带 URL 来源页面。由于 `pageKey` 只在模块内唯一，
+Header 使用 `<moduleKey>.<pageKey>` 完整页面标识：
+
+```http
+X-Nexus-Page-Key: sales.order-list
 ```
 
-一个 Endpoint 方法可以同时声明 API 和页面操作资源。二者的区别是：
+Header 只声明请求来源，不能直接作为授权依据。拦截器必须确认扩展和页面处于活动
+状态，并确认实际请求 URL 被该页面 DSL 引用。这样不能通过伪造其他页面的 `pageKey`
+绕过权限。
 
-- API 表示一次可识别、可授权的后端调用；
-- ACTION 表示页面上可见或可执行的交互能力；
-- `pages`、`pageKey` 只表达归属关系，不代表已获得访问权限；
-- 独立 DSL 子页面使用自己的 `pageKey`；DSL 内部组件使用所属页面的 `pageKey`；
-- 不允许根据 HTTP method、URL 或 Java 方法名自动生成资源 key；
-- 未声明 `@ApiResource` 的 Endpoint 操作不会作为 API 资源进入权限资源目录。
+### 6.3 统一拦截流程
 
-### 6.2 接口注册与调用
+页面接口统一经过权限拦截器：
 
-扩展贡献源同时对外提供 Endpoint 类型或 Endpoint 实例。运行时适配器负责把它们注册到
-Jakarta REST 容器。资源扫描器读取 Endpoint 方法上的专用注解，形成 API/ACTION 资源，
-并校验其 `moduleKey` 和 `pageKey`。
+1. 从登录会话取得当前用户及其角色，不接受客户端传入角色；
+2. 读取 `X-Nexus-Page-Key`，解析 `moduleKey + pageKey`；
+3. 规范化实际请求 URL，并在该页面的活动 URL 引用中匹配 URL 模板；
+4. 使用 `(moduleKey, pageKey, urlPattern)` 查询管理端配置的角色权限；
+5. 当前用户拥有任一授权角色时放行，否则拒绝；
+6. 权限通过后，Jakarta REST 容器继续调用实际 Endpoint。
 
-页面调用接口时仍使用标准 HTTP API。`@ApiResource` 的职责是提供稳定资源身份、建立
-页面关联，并为权限拦截器提供查找入口；它不替代 Jakarta REST 路由，也不生成前端客户
-端。权限拦截器根据被调用的 Endpoint 操作解析出 API 资源 ID，再查询权限模块的分配结果。
+需要鉴权的页面请求缺少 Header、页面不存在、扩展未激活或 URL 不属于该页面时，一律
+拒绝。登录、健康检查等不属于页面的公共接口由平台白名单单独管理，不伪造页面来源。
+
+扩展 Endpoint 只使用标准 Jakarta REST 注解完成注册和路由，Endpoint 方法不声明权限
+元数据。
 
 ## 7. 三种代码发现入口
 
@@ -375,8 +384,8 @@ public interface ConsoleExtensionProvider {
 
 ### 7.2 发现注解
 
-扩展入口类型使用专用发现注解标记。注解只标记入口和必要身份，不把复杂菜单、页面清单
-全部塞进注解属性；发现器获得实例后仍调用统一 Provider 接口。
+扩展入口类型使用专用发现注解标记。注解只标记入口和必要身份，不把复杂菜单、页面
+清单全部塞进注解属性；发现器获得实例后仍调用统一 Provider 接口。
 
 注解扫描由应用适配器或构建期索引完成。`innospots-nexus-console` 不绑定 Spring Boot
 自动配置，也不依赖不受控的全 classpath 反射扫描。
@@ -434,8 +443,8 @@ JAR 加入依赖/classpath（安装）
 
 ### 8.2 注册快照
 
-注册阶段保存扩展身份、版本、来源、模块清单摘要、发现时间和期望启用状态。禁用扩展仍
-可以在扩展管理中查看，但其菜单、页面、Endpoint 和活动资源不进入运行时。
+注册阶段保存扩展身份、版本、来源、模块清单摘要、发现时间和期望启用状态。禁用扩展
+仍可以在扩展管理中查看，但其菜单、页面、Endpoint 和活动资源不进入运行时。
 
 ### 8.3 原子激活
 
@@ -445,18 +454,19 @@ JAR 加入依赖/classpath（安装）
 2. 校验全部 `moduleKey` 及资源 ID 唯一性；
 3. 构建页面树并校验 `pageKey`、父子关系和 `pagePath` 模板；
 4. 构建菜单树并校验菜单引用的 `pageKey`；
-5. 注册 Endpoint，并读取 API/ACTION 注解；
-6. 校验 API/ACTION 的模块和页面引用；
-7. 由渲染模块校验 `moduleKey + pageKey` 可定位 DSL 且内部 pageKey 一致；
+5. 注册只包含标准 Jakarta REST 注解的 Endpoint；
+6. 由渲染模块校验 `moduleKey + pageKey` 可定位 DSL 且内部 pageKey 一致；
+7. 校验页面引用的 URL，并构建活动页面 URL 权限索引；
 8. 原子发布扩展资源到活动注册表。
 
-任一步失败，整个扩展保持 `FAILED`，不发布部分菜单或部分接口。其他已激活扩展不受影响。
+任一步失败，整个扩展保持 `FAILED`，不发布部分菜单或部分接口。其他已激活扩展不受
+影响。
 
 ### 8.4 停用与重新启用
 
 停用扩展时：
 
-- 从活动页面、菜单、路径模板和 Endpoint 注册表撤出该扩展；
+- 从活动页面、菜单、路径模板、页面 URL 权限索引和 Endpoint 注册表撤出该扩展；
 - 从活动资源视图撤出其模块资源；
 - 保留扩展登记、资源快照和权限模块中的既有分配；
 - 新请求不能再进入已停用扩展，执行中的请求按运行时适配器策略完成或终止。
@@ -471,7 +481,7 @@ JAR 加入依赖/classpath（安装）
 
 - 资源 ID、类型、名称和所属 `moduleKey`；
 - 菜单父子关系、页面与菜单关系；
-- API 与页面关系、ACTION 与页面关系；
+- 页面 DSL 引用的 URL 及其所属页面；
 - 扩展是否处于活动状态。
 
 扩展不得声明：
@@ -481,20 +491,21 @@ JAR 加入依赖/classpath（安装）
 - 默认授权、拒绝策略或数据范围；
 - 因部署方式而变化的权限规则。
 
-权限模块通过管理端统一把 MODULE、MENU、PAGE、API、ACTION 资源与权限及授权主体建立
-关系。`module:<moduleKey>` 使管理端可以按模块组织或批量配置资源，但是否支持模块级继承、
-默认拒绝或其他授权语义，属于权限模块设计，不由扩展决定。
+权限模块通过管理端统一把 MODULE、MENU、PAGE 和页面 URL 权限项与角色建立关系。
+`module:<moduleKey>` 使管理端可以按模块组织或批量配置资源；是否支持模块级继承和批量
+授权等管理能力，属于权限模块设计，不由扩展决定。页面 URL 没有匹配的角色授权时固定
+拒绝访问。
 
-扩展停用时不删除权限分配；重新启用并发现相同稳定资源 ID 后可以继续使用既有分配。
+扩展停用时不删除权限分配；重新启用并发现相同资源身份后可以继续使用既有分配。
 
 ## 10. 模块与运行时职责
 
 | 模块/适配层 | 职责 |
 |-------------|------|
-| `innospots-nexus-console` | 扩展、模块、菜单、页面、资源注解和 Provider 契约；保持业务中立 |
-| `innospots-nexus-kernel` | 扩展登记、启停管理、资源目录、权限管理及相应管理 Endpoint |
-| 应用/运行时适配器 | 接口装配、注解索引、Java SPI、Jakarta REST 注册和 DSL 渲染模块接入 |
-| DSL 渲染模块 | 按 `moduleKey + pageKey` 定位 DSL、校验 DSL pageKey、注入路径变量并渲染页面 |
+| `innospots-nexus-console` | 扩展、模块、菜单、页面和 Provider 契约；保持业务中立 |
+| `innospots-nexus-kernel` | 扩展登记、启停管理、资源目录、角色权限配置和页面 URL 权限拦截 |
+| 应用/运行时适配器 | 接口装配、扩展入口发现、Java SPI、REST 注册和 DSL 渲染模块接入 |
+| DSL 渲染模块 | 定位 DSL、登记页面 URL 引用、注入路径变量并渲染页面 |
 | 业务扩展 JAR | Provider 实现、模块/页面/菜单声明和 Endpoint |
 
 `innospots-nexus-core` 可以提供业务中立的生命周期、注册表或资源解析基础设施，但不能
@@ -593,39 +604,35 @@ pathVariables = {
 如果订单 DSL 内部还有弹窗、抽屉、页签或不具备独立 DSL `pageKey` 的视图，这些内容不
 进入 `PageDslDeclaration.children`，也不生成 PAGE 资源。
 
-### 11.4 Endpoint 资源
+### 11.4 Endpoint 与页面接口鉴权
 
 ```java
 @Path("/sales/orders")
 public class OrderEndpoint {
 
     @GET
-    @ApiResource(
-            moduleKey = "sales",
-            apiKey = "order.query",
-            name = "Query orders",
-            pages = {"order-list"})
     public R<PageResult<OrderVo>> list() {
         // ...
     }
 
     @POST
     @Path("/export")
-    @ApiResource(
-            moduleKey = "sales",
-            apiKey = "order.export",
-            name = "Export orders",
-            pages = {"order-list"})
-    @PageActionResource(
-            moduleKey = "sales",
-            pageKey = "order-list",
-            actionKey = "export",
-            name = "Export orders")
     public R<Void> export() {
         // ...
     }
 }
 ```
+
+Endpoint 只声明标准 REST 路由。假设 `order-list` 页面 DSL 引用了 `/sales/orders/export`，
+页面发起导出请求时携带：
+
+```http
+POST /sales/orders/export
+X-Nexus-Page-Key: sales.order-list
+```
+
+拦截器匹配权限身份 `(sales, order-list, /sales/orders/export)`，再根据当前用户角色决定
+是否放行。其他页面即使调用同一 URL，也必须使用自己的完整页面标识和权限配置。
 
 ### 11.5 安装和加载
 
@@ -633,9 +640,9 @@ public class OrderEndpoint {
 2. 把扩展 JAR 加入应用依赖，随应用发布；
 3. 应用启动时发现 Provider，登记 `com.innospots.erp`，首次默认启用；
 4. 激活器校验 `sales`、`inventory` 模块及其全部资源；
-5. REST 适配器注册 Endpoint，DSL 渲染模块校验模块页面；
-6. Console 获取活动页面树、菜单树和路径模板注册表；
-7. 管理员在权限模块中为资源配置权限并分配给角色或用户组；
+5. REST 适配器注册 Endpoint，DSL 渲染模块校验页面并登记页面 URL 引用；
+6. Console 获取活动页面树、菜单树、路径模板和页面 URL 权限项；
+7. 管理员在权限模块中为页面及页面 URL 配置角色权限；
 8. 管理员可在扩展管理中停用或重新启用整个扩展。
 
 ## 12. 校验与冲突处理
@@ -644,7 +651,7 @@ public class OrderEndpoint {
 
 - `extensionKey`、版本和模块列表合法；
 - 全局 `moduleKey` 唯一；
-- 同一模块内 menu/page/api/action 局部 key 唯一；
+- 同一模块内 menu/page 局部 key 唯一；
 - 规范化后的 `type:key` 全局唯一；
 - 页面树无循环，每个页面最多一个父页面；
 - `pageKey` 与 DSL 文件内部 pageKey 一致；
@@ -655,13 +662,12 @@ public class OrderEndpoint {
 - 页面节点引用的 `pageKey` 存在于同一模块，且一个页面最多被一个菜单引用；
 - 包含必填路径变量的页面不能直接作为静态菜单入口；
 - Endpoint 可以被 REST 运行时注册；
-- `@ApiResource.moduleKey` 指向所属扩展拥有的模块；
-- API 的 `pages` 和 ACTION 的 `pageKey` 指向已声明页面；
-- 同一 Endpoint 操作不存在冲突资源声明；
+- 页面引用的 URL 模板合法，可以规范化且路径变量结构无歧义；
+- 同一页面下相同的规范化 URL 只生成一个权限项；
 - 扩展版本与宿主契约版本兼容。
 
-冲突一律失败关闭。错误信息必须包含来源、`extensionKey`、`moduleKey`、资源类型和资源 key，
-以便扩展管理页面直接展示诊断。
+冲突一律失败关闭。错误信息必须包含来源、`extensionKey`、`moduleKey`、资源类型，以及
+资源 key 或 URL 模板，以便扩展管理页面直接展示诊断。
 
 ## 13. 测试要求
 
@@ -679,7 +685,7 @@ public class OrderEndpoint {
 - 结构相同或同优先级歧义的路径模板失败关闭；
 - 渲染模块可以通过 `moduleKey + pageKey` 唯一定位 DSL；
 - 声明 pageKey 与 DSL 内部 pageKey 不一致时激活失败；
-- API 和 ACTION 的页面引用正确解析。
+- 页面 DSL 引用的 URL 可以按完整页面标识正确登记和去重。
 
 ### 13.2 发现与生命周期测试
 
@@ -694,7 +700,14 @@ public class OrderEndpoint {
 ### 13.3 资源与权限边界测试
 
 - 扩展声明不包含权限码、角色或授权规则；
-- API/ACTION 仅从专用注解产生；
+- Endpoint 契约只包含标准 Jakarta REST 注解，不声明权限元数据；
+- 同一 URL 被不同页面引用时形成相互独立的角色权限项；
+- datasource 和 action 引用同一页面 URL 时共用一个权限项；
+- 请求 Header 使用 `<moduleKey>.<pageKey>` 完整页面标识；
+- Header 缺失、页面无效、扩展停用或 URL 不属于来源页面时拒绝访问；
+- URL 路径变量正确匹配，查询参数不影响权限身份；
+- 拦截器只从登录会话读取用户角色；
+- 当前用户具有任一授权角色时放行，否则拒绝；
 - 未知模块、未知页面和重复资源失败关闭；
 - 权限分配不因扩展停用或短暂缺失而被删除；
-- 恢复相同资源 ID 后可以继续关联既有分配。
+- 恢复相同资源身份后可以继续关联既有分配。
