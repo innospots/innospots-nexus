@@ -64,7 +64,7 @@ Extension Runtime，也不把管理页面、菜单、权限或 Endpoint 注册�
 - 不使用 YAML、JSON、XML 或注解描述插件；
 - Classpath 中的插件通过标准 Java `ServiceLoader<Plugin>` 全量发现；
 - 每个 Plugin 实现通过 `PluginDefinition` 声明所有静态信息；
-- Plugin 通过类型安全的 `CapabilityContribution` 直接声明 Provider 工厂；
+- Plugin 通过类型安全的 `CapabilityContribution` 直接声明 `CapabilityProviderFactory`；
 - 不再为每个 Capability 创建 `META-INF/services/<Capability API>`；
 - 业务代码只依赖 Capability API 和 `CapabilityManager`；
 - V1 支持启动时发现、显式启动和安全停止，不支持运行时修改 classpath。
@@ -90,8 +90,8 @@ Capability Provider 的归属。这增加了以下复杂度：
 
 改为 Java `PluginDefinition` 后：
 
-- 编译器校验 Capability API 和 Provider 类型；
-- Provider 工厂天然归属于声明它的 Plugin；
+- 编译器校验 Capability API 和 CapabilityProvider 类型；
+- CapabilityProviderFactory 天然归属于声明它的 Plugin；
 - Classpath 只需要一个标准 SPI 入口；
 - 不需要 YAML Parser、JAR 资源枚举或 CodeSource 绑定；
 - 全部 PluginDefinition 可以先汇总和校验，再执行任何插件初始化行为。
@@ -110,7 +110,7 @@ Capability Provider 的归属。这增加了以下复杂度：
 5. 支持 Capability 名称和主版本依赖检查。
 6. 支持插件默认值、宿主配置、环境变量、系统属性和运行时变量的配置覆盖。
 7. 支持配置类型、必填项和 Secret 标记校验。
-8. 支持 Plugin、Extension 和托管资源的原子启动与失败回滚。
+8. 支持 Plugin、CapabilityProvider 和托管资源的原子启动与失败回滚。
 9. 支持并发读取 Capability Registry。
 10. 提供不泄露运行时可变对象的诊断快照。
 11. 单个普通插件失败不破坏其他插件；宿主指定的必需插件失败可阻断应用启动。
@@ -182,7 +182,7 @@ Application Classpath
 | Plugin SPI | Classpath 中有哪些插件实现 | Capability 路由 |
 | `PluginDefinition` | 插件是什么、提供和依赖什么 | 运行时状态和资源实例 |
 | `Plugin` | 插件级定义和生命周期行为 | 具体业务 Capability |
-| `CapabilityContribution` | Capability 由哪个工厂创建 Provider | 业务选择哪个 Provider |
+| `CapabilityContribution` | Capability 由哪个工厂创建 CapabilityProvider | 业务选择哪个能力提供者 |
 | `CapabilityManager` | 业务调用时选择哪个 ACTIVE Provider | Plugin 发现和生命周期 |
 | `ConfigurationManager` | 插件最终获得什么配置 | 应用配置文件协议 |
 | `PluginManager` | 插件何时启动、停止和回滚 | UI、持久化和业务管理规则 |
@@ -194,10 +194,10 @@ Application Classpath
 com.innospots.nexus.core.plugin
 ├── contract
 │   ├── Plugin
-│   ├── Extension
-│   ├── ExtensionFactory
+│   ├── CapabilityProvider
+│   ├── CapabilityProviderFactory
 │   ├── PluginContext
-│   └── ExtensionContext
+│   └── CapabilityProviderContext
 ├── declaration
 │   ├── PluginDefinition
 │   ├── CapabilityContribution
@@ -294,7 +294,7 @@ Java `ServiceLoader` 会聚合指定 ClassLoader 可见范围内所有 JAR 和 c
 7. 校验通过后才允许进入配置和启动阶段。
 
 发现阶段可以加载 Plugin 类并执行其公共无参构造函数与 `definition()`，但不执行
-`initialize/start`，也不调用任何 Capability Provider 工厂。
+`initialize/start`，也不调用任何 CapabilityProviderFactory。
 
 ### 7.3 发现失败规则
 
@@ -368,7 +368,7 @@ public record PluginDefinition(
 | `version` | 插件发布版本；V1 只展示，不计算 SemVer 范围 |
 | `apiVersion` | Plugin Core 协议主版本；Builder 缺省为 V1 当前版本 |
 | `tags` | Plugin 实现身份；至少一个 Tag |
-| `capabilities` | 本插件提供的类型安全 Provider 工厂，可为空 |
+| `capabilities` | 本插件提供的类型安全 CapabilityProviderFactory，可为空 |
 | `requirements` | required/optional Capability 依赖，可为空 |
 | `config` | 配置结构和默认值，缺省为空定义 |
 
@@ -412,18 +412,40 @@ public final class WeComPlugin implements Plugin {
 - 插件身份和版本；
 - 路由 Tags；
 - 提供的 Capability；
-- Provider 创建方式和所属 Plugin；
+- CapabilityProvider 创建方式和所属 Plugin；
 - 依赖的 Capability；
 - 配置结构和默认值。
 
-## 9. Extension 和 Provider 工厂
+## 9. CapabilityProvider 与创建工厂
 
-### 9.1 Extension
+### 9.1 CapabilityProvider 的明确含义
+
+`CapabilityProvider` 是由一个 Plugin 创建和拥有、实现一个明确 Capability API、经过 Plugin
+Runtime 初始化后注册到 CapabilityRegistry，并随所属 Plugin 停止而销毁的运行时能力提供者。
+
+它不是泛化扩展点，也不表示任意 Hook、Listener、Endpoint、后台任务或插件内部组件。只有需要被
+业务代码通过 `CapabilityManager` 查找和调用的能力实现，才属于 CapabilityProvider。
+
+本文后续单独使用“Provider”时均指 CapabilityProvider；`ServiceLoader.Provider` 会始终使用完整
+类型名，避免与能力提供者混淆。
+
+约束：
+
+- 必须实现一个由应用和插件共同可见的 Capability API；
+- 一个实例只归属于一个 Plugin 和一个 CapabilityKey；
+- 只能由所属 PluginDefinition 中的 CapabilityProviderFactory 创建；
+- 创建后由 Runtime 注入 CapabilityProviderContext；
+- 初始化成功且所属 Plugin 启动成功后才能进入 CapabilityRegistry；
+- 通过 CapabilityType + Tags 被业务代码选择；
+- Plugin 停止时先从 Registry 撤出，再调用 `destroy()`；
+- Plugin 重新启动时创建新实例，不复用已销毁实例。
+
+接口定义：
 
 ```java
-public interface Extension {
+public interface CapabilityProvider {
 
-    default void initialize(ExtensionContext context) {
+    default void initialize(CapabilityProviderContext context) {
     }
 
     default void destroy() {
@@ -431,28 +453,52 @@ public interface Extension {
 }
 ```
 
-简单 Provider 可以只实现 Capability 方法。需要配置、依赖能力或资源的 Provider 在
+简单 CapabilityProvider 可以只实现 Capability 方法。需要配置、依赖能力或资源的 Provider 在
 `initialize` 中取得上下文，并把副作用登记到 `ResourceScope`。
 
-### 9.2 ExtensionFactory
+例如 `MessagePushProvider` 是 Capability API，`WeComMessagePushProvider` 是具体的
+CapabilityProvider：
+
+```java
+public final class WeComMessagePushProvider implements MessagePushProvider {
+
+    @Override
+    public void initialize(CapabilityProviderContext context) {
+        // 读取本 Plugin 配置、获取依赖能力并登记托管资源。
+    }
+
+    @Override
+    public PushResult send(PushMessage message) {
+        // 执行企业微信消息发送。
+    }
+
+    @Override
+    public void destroy() {
+        // 清理 CapabilityProvider 自身的非托管状态。
+    }
+}
+```
+
+### 9.2 CapabilityProviderFactory
 
 ```java
 @FunctionalInterface
-public interface ExtensionFactory<T extends Extension> {
+public interface CapabilityProviderFactory<T extends CapabilityProvider> {
 
     T create();
 }
 ```
 
-Factory 必须只创建尚未初始化的 Provider 实例，不得建立网络连接、启动线程或向全局状态注册对象。
-所有需要失败回滚的行为放入 `Extension.initialize()`。
+Factory 必须只创建尚未初始化的 CapabilityProvider 实例，不得建立网络连接、启动线程或向全局
+状态注册对象。
+所有需要失败回滚的行为放入 `CapabilityProvider.initialize()`。
 
 ### 9.3 CapabilityContribution
 
 ```java
-public record CapabilityContribution<T extends Extension>(
+public record CapabilityContribution<T extends CapabilityProvider>(
         CapabilityType<T> type,
-        ExtensionFactory<? extends T> factory
+        CapabilityProviderFactory<? extends T> factory
 ) {
 }
 ```
@@ -460,12 +506,12 @@ public record CapabilityContribution<T extends Extension>(
 Runtime 调用 factory 后必须校验：
 
 - 返回值非空；
-- Provider 是 `type.api()` 的实例；
+- CapabilityProvider 是 `type.api()` 的实例；
 - 同一个 PluginDefinition 中不存在重复 CapabilityKey；
-- Provider 实例只属于当前 ManagedPlugin；
-- Plugin 停止后不复用旧 Provider 实例。
+- CapabilityProvider 实例只属于当前 ManagedPlugin；
+- Plugin 停止后不复用旧 CapabilityProvider 实例。
 
-Provider 工厂直接由 PluginDefinition 持有，因此不需要 Capability SPI，也不需要根据 JAR
+CapabilityProviderFactory 直接由 PluginDefinition 持有，因此不需要 Capability SPI，也不需要根据 JAR
 `CodeSource` 判断 Provider 属于哪个 Plugin。
 
 ## 10. Tags 和 Capability 模型
@@ -508,12 +554,12 @@ V1 中 Provider 继承 Plugin 的全部 Tags，不增加 Provider 局部 Tags �
 public record CapabilityKey(String name, int majorVersion) {
 }
 
-public record CapabilityType<T extends Extension>(
+public record CapabilityType<T extends CapabilityProvider>(
         CapabilityKey key,
         Class<T> api
 ) {
 
-    public static <T extends Extension> CapabilityType<T> of(
+    public static <T extends CapabilityProvider> CapabilityType<T> of(
             String name,
             int majorVersion,
             Class<T> api
@@ -524,7 +570,7 @@ public record CapabilityType<T extends Extension>(
 Capability API 发布类型安全常量：
 
 ```java
-public interface MessagePushProvider extends Extension {
+public interface MessagePushProvider extends CapabilityProvider {
 
     CapabilityType<MessagePushProvider> CAPABILITY = CapabilityType.of(
             "message.push",
@@ -554,7 +600,7 @@ public record CapabilityRequirement(
 ### 10.4 注册模型
 
 ```java
-public record CapabilityRegistration<T extends Extension>(
+public record CapabilityRegistration<T extends CapabilityProvider>(
         CapabilityType<T> type,
         T provider,
         String pluginId,
@@ -563,7 +609,7 @@ public record CapabilityRegistration<T extends Extension>(
 }
 ```
 
-注册对象只在 Plugin 和全部 Provider 启动成功后发布。Registry 内部至少建立：
+注册对象只在 Plugin 和全部 CapabilityProvider 启动成功后发布。Registry 内部至少建立：
 
 - `CapabilityKey -> immutable registrations`；
 - `pluginId -> registered CapabilityKey`。
@@ -573,15 +619,15 @@ public record CapabilityRegistration<T extends Extension>(
 ```java
 public interface CapabilityManager {
 
-    <T extends Extension> T require(
+    <T extends CapabilityProvider> T require(
             CapabilityType<T> type,
             Tags requiredTags);
 
-    <T extends Extension> Optional<T> find(
+    <T extends CapabilityProvider> Optional<T> find(
             CapabilityType<T> type,
             Tags requiredTags);
 
-    <T extends Extension> List<T> findAll(
+    <T extends CapabilityProvider> List<T> findAll(
             CapabilityType<T> type);
 }
 ```
@@ -623,16 +669,16 @@ Application ClassLoader
 └── plugin-c.jar
 ```
 
-PluginManager 不创建、不修改也不关闭该 ClassLoader。插件停止只撤出 Capability、销毁 Extension、
-停止 Plugin 和释放 ResourceScope，不能从 JVM 卸载 classpath 中的类。
+PluginManager 不创建、不修改也不关闭该 ClassLoader。插件停止只撤出 Capability、销毁
+CapabilityProvider、停止 Plugin 和释放 ResourceScope，不能从 JVM 卸载 classpath 中的类。
 
 ### 11.2 类型一致性
 
 Runtime 校验每个 CapabilityContribution：
 
 1. Capability API 是接口；
-2. Capability API 继承 `Extension`；
-3. Provider 是该 API 的实例；
+2. Capability API 继承 `CapabilityProvider`；
+3. CapabilityProvider 是该 API 的实例；
 4. 相同 CapabilityKey 在全局使用相同 API `Class`；
 5. 同名、同主版本但 API Class 不同属于全局冲突。
 
@@ -812,7 +858,7 @@ V1 提供内部 ConfigSource 抽象，但不通过普通 Plugin 加载 ConfigSou
 ConfigurationManager 与 PluginManager 形成循环启动依赖。未来需要 Nacos、Apollo 或 Vault 时，
 应设计独立 bootstrap SPI。
 
-## 14. PluginContext 和 ExtensionContext
+## 14. PluginContext 和 CapabilityProviderContext
 
 ```java
 public interface PluginContext {
@@ -830,7 +876,7 @@ public interface PluginContext {
     System.Logger logger();
 }
 
-public interface ExtensionContext extends PluginContext {
+public interface CapabilityProviderContext extends PluginContext {
 
     CapabilityKey capability();
 }
@@ -927,17 +973,17 @@ V1 没有持久化 DISABLED。宿主要禁用插件，在 `PluginRuntimeConfig.d
 2. 获取并校验 PluginConfig
 3. 校验 required Capability 已 AVAILABLE
 4. 创建 ResourceScope、PluginEventBus 视图和 PluginContext
-5. 按 definition.capabilities 顺序调用全部 Provider factory
-6. 校验 Provider 类型
+5. 按 definition.capabilities 顺序调用全部 CapabilityProviderFactory
+6. 校验 CapabilityProvider 类型
 7. plugin.initialize(context)
-8. extension.initialize(context)，按声明顺序执行
+8. capabilityProvider.initialize(context)，按声明顺序执行
 9. plugin.start()
 10. 一次性向 CapabilityRegistry 发布全部 registrations
 11. 状态切换为 ACTIVE
 ```
 
-Capability 只有在 Plugin 和全部 Provider 初始化、启动成功后才原子发布，其他线程不会看到半激活
-插件。
+Capability 只有在 Plugin 和全部 CapabilityProvider 初始化、启动成功后才原子发布，其他线程不会
+看到半激活插件。
 
 ### 16.3 启动失败回滚
 
@@ -946,13 +992,13 @@ Capability 只有在 Plugin 和全部 Provider 初始化、启动成功后才原
 ```text
 从 Registry 移除当前插件全部 Capability（如果已经发布）
         ↓
-逆序调用已初始化 Extension.destroy()
+逆序调用已初始化 CapabilityProvider.destroy()
         ↓
 调用 Plugin.stop()（仅当 initialize 已开始）
         ↓
 关闭 ResourceScope
         ↓
-清除 Provider、Context 和配置强引用
+清除 CapabilityProvider、Context 和配置强引用
         ↓
 记录 FAILED、失败阶段和根因
 ```
@@ -964,10 +1010,10 @@ Capability 只有在 Plugin 和全部 Provider 初始化、启动成功后才原
 ```text
 1. 状态 ACTIVE -> STOPPING
 2. 原子撤出该插件全部 Capability，拒绝新查找
-3. 逆序调用 Extension.destroy()
+3. 逆序调用 CapabilityProvider.destroy()
 4. 调用 Plugin.stop()
 5. 关闭 ResourceScope
-6. 清除 Provider、Context 和配置强引用
+6. 清除 CapabilityProvider、Context 和配置强引用
 7. 状态 -> STOPPED
 ```
 
@@ -975,8 +1021,9 @@ V1 没有调用引用计数。撤出 Registry 前已经取得 Provider 引用的
 停止属于维护操作，调用方应先停止接收相关业务请求。
 
 从 STOPPED 重新启动时，Runtime 复用由 ServiceLoader 创建的 Plugin 实例，但重新创建
-PluginConfig、Context、ResourceScope 和全部 Provider。Plugin 实现必须支持 initialize/start/stop
-生命周期重复执行；若未来发现这一约束不合理，再引入 PluginFactory SPI，不在 V1 提前设计。
+PluginConfig、Context、ResourceScope 和全部 CapabilityProvider。Plugin 实现必须支持
+initialize/start/stop 生命周期重复执行；若未来发现这一约束不合理，再引入 PluginFactory SPI，
+不在 V1 提前设计。
 
 ### 16.5 PluginManager
 
@@ -1057,7 +1104,7 @@ Core 不提供全局静态 `Plugins.get(...)`。应用通过构造参数显式�
 - 注册和撤出通过 copy-on-write 原子替换完整快照；
 - CapabilityRouter 只读取一次快照并在该快照内匹配；
 - 返回的集合和诊断模型均为不可变副本；
-- Plugin、Extension 自身线程安全由各 Capability 契约声明。
+- Plugin、CapabilityProvider 自身线程安全由各 Capability 契约声明。
 
 ### 18.2 原子边界
 
@@ -1076,7 +1123,7 @@ Core 不提供全局静态 `Plugins.get(...)`。应用通过构造参数显式�
 - 同一 PluginDefinition 重复 CapabilityKey；
 - 同一 PluginDefinition 重复 Requirement；
 - 相同 CapabilityKey 对应不同 API Class；
-- Provider factory 返回 null 或错误类型；
+- CapabilityProviderFactory 返回 null 或错误类型；
 - Plugin API version 不兼容；
 - 默认路由命中多个 Provider；
 - required 依赖缺失或循环等待；
@@ -1138,7 +1185,7 @@ public record PluginRuntimeInfo(
 ```
 
 诊断只保留可展示的错误摘要；完整异常由 Core 日志记录。PluginRuntimeInfo 不持有 Plugin、
-Provider、Context、ClassLoader、配置值、Factory 或资源实例。
+CapabilityProvider、Context、ClassLoader、配置值、Factory 或资源实例。
 
 ## 20. 日志和安全边界
 
@@ -1214,12 +1261,12 @@ V1 实现期间：
 - 不兼容 apiVersion 失败；
 - ServiceLoader 顺序不影响诊断和路由；
 - Definition 集合不可变；
-- Provider factory 在发现和定义校验阶段不会执行。
+- CapabilityProviderFactory 在发现和定义校验阶段不会执行。
 
 ### 22.2 Capability 测试
 
 - CapabilityType 正确校验 name/version/api；
-- Provider 自动继承 Plugin Tags；
+- CapabilityProvider 自动继承 Plugin Tags；
 - Tags 子集匹配正确；
 - 显式 Tags、默认 Tags、唯一 Provider 三层路由顺序正确；
 - 无匹配和多匹配使用不同状态码；
@@ -1243,20 +1290,20 @@ V1 实现期间：
 - optional 依赖缺失仍可启动；
 - 多 Provider 中一个 ACTIVE 即满足依赖；
 - 缺失和循环等待诊断可区分；
-- Plugin/Extension 初始化顺序和销毁逆序正确；
+- Plugin/CapabilityProvider 初始化顺序和销毁逆序正确；
 - 任一 Provider 初始化失败不发布部分 Capability；
 - 回滚继续释放全部资源并保留 suppressed 异常；
 - 停止先撤出 Capability 再销毁资源；
 - 单插件停止不会破坏依赖它的 ACTIVE 插件；
 - start、stop 和 close 幂等；
-- STOPPED 后重新创建 Provider；
+- STOPPED 后重新创建 CapabilityProvider；
 - 普通插件失败隔离，required plugin 失败回滚整体启动。
 
 ### 22.5 ClassLoader 和资源测试
 
 - 自定义 URLClassLoader 中多个 fixture JAR 的 Plugin 均被发现；
 - PluginManager 不关闭宿主传入的 ClassLoader；
-- Runtime 关闭后不保留 Provider、Context 和 Factory 的额外强引用；
+- Runtime 关闭后不保留 CapabilityProvider、Context 和 Factory 的额外强引用；
 - ResourceScope 逆序、幂等和聚合异常行为正确；
 - Event Subscription 随 Scope 自动解除；
 - 诊断快照不持有运行时对象。
@@ -1284,7 +1331,7 @@ fixture 不能引用 Console、Kernel 或 Platform。
 
 实现：
 
-- Plugin、Extension、ExtensionFactory 和 Context；
+- Plugin、CapabilityProvider、CapabilityProviderFactory 和 Context；
 - PluginDefinition 和 Builder；
 - CapabilityContribution、CapabilityRequirement；
 - CapabilityKey、CapabilityType、Tag、Tags；
@@ -1302,7 +1349,8 @@ fixture 不能引用 Console、Kernel 或 Platform。
 - Definition 全局校验；
 - 多 fixture JAR 的自定义 ClassLoader 测试。
 
-验收：一次发现获得指定 ClassLoader 可见的全部 Plugin，且不执行 Provider factory 或生命周期。
+验收：一次发现获得指定 ClassLoader 可见的全部 Plugin，且不执行 CapabilityProviderFactory 或
+生命周期。
 
 ### 阶段 3：配置
 
@@ -1320,7 +1368,7 @@ fixture 不能引用 Console、Kernel 或 Platform。
 
 实现：
 
-- Provider factory 调用和类型校验；
+- CapabilityProviderFactory 调用和类型校验；
 - copy-on-write Registry；
 - Router 和默认 Tags；
 - 类型安全 CapabilityManager；
@@ -1382,7 +1430,7 @@ git diff --check
 - 不存在插件 YAML、Descriptor Parser 或 Capability Provider SPI；
 - 指定 ClassLoader 可见的全部 Plugin SPI 实现均被发现；
 - 每个 Plugin 通过 Java PluginDefinition 完整声明身份、Tags、能力、依赖和配置；
-- Provider factory 与所属 Plugin 天然绑定；
+- CapabilityProviderFactory 与所属 Plugin 天然绑定；
 - 两个相同 Capability、不同 Tags 的 Provider 可以确定性路由；
 - 多匹配和无匹配均失败关闭；
 - required/optional 依赖和循环等待诊断正确；
@@ -1424,12 +1472,12 @@ Plugin 实现
         +
 不可变 PluginDefinition
         +
-Capability Provider Factory
+CapabilityProviderFactory
 ```
 
 Runtime 只使用一次 `ServiceLoader<Plugin>`，即可聚合指定 ClassLoader 可见范围内所有 JAR 和
-classes 目录中的 Plugin。PluginDefinition 直接持有类型安全的 Capability 和 Provider 工厂，消除
-YAML、字符串 SPI API、独立 Capability SPI 及 Provider 归属推断。
+classes 目录中的 Plugin。PluginDefinition 直接持有类型安全的 Capability 和
+CapabilityProviderFactory，消除 YAML、字符串 SPI API、独立 Capability SPI 及 Provider 归属推断。
 
 业务调用保持：
 
