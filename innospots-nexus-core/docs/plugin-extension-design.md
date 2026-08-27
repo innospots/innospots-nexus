@@ -382,32 +382,44 @@ PluginDefinition。
 
 ### 8.3 完整定义示例
 
+一个 Plugin 可以通过多次调用 `provide` 声明多个 CapabilityProvider。它们应当属于相同的实现
+身份，复用 Plugin 的 Tags、配置和生命周期，但分别实现不同的 Capability API。
+
 ```java
 public final class WeComPlugin implements Plugin {
 
+    private static final PluginDefinition DEFINITION =
+            PluginDefinition.builder("message-wecom")
+                    .name("WeCom Message Plugin")
+                    .version("1.0.0")
+                    .tags(Tags.of("channel", "wecom")
+                            .and("provider", "tencent"))
+                    .provide(
+                            MessagePushProvider.CAPABILITY,
+                            WeComMessagePushProvider::new)
+                    .provide(
+                            MessageTemplateProvider.CAPABILITY,
+                            WeComMessageTemplateProvider::new)
+                    .provide(
+                            MessageCallbackVerifier.CAPABILITY,
+                            WeComMessageCallbackVerifier::new)
+                    .require(HttpClientProvider.CAPABILITY, true)
+                    .config(ConfigDefinition.builder()
+                            .string("corpId")
+                                .required()
+                                .end()
+                            .secret("corpSecret")
+                                .required()
+                                .end()
+                            .integer("timeout")
+                                .defaultValue("5000")
+                                .end()
+                            .build())
+                    .build();
+
     @Override
     public PluginDefinition definition() {
-        return PluginDefinition.builder("message-wecom")
-                .name("WeCom Message Plugin")
-                .version("1.0.0")
-                .tags(Tags.of("channel", "wecom")
-                        .and("provider", "tencent"))
-                .provide(
-                        MessagePushProvider.CAPABILITY,
-                        WeComMessagePushProvider::new)
-                .require(HttpClientProvider.CAPABILITY, true)
-                .config(ConfigDefinition.builder()
-                        .string("corpId")
-                            .required()
-                            .end()
-                        .secret("corpSecret")
-                            .required()
-                            .end()
-                        .integer("timeout")
-                            .defaultValue("5000")
-                            .end()
-                        .build())
-                .build();
+        return DEFINITION;
     }
 }
 ```
@@ -420,6 +432,10 @@ public final class WeComPlugin implements Plugin {
 - CapabilityProvider 创建方式和所属 Plugin；
 - 依赖的 Capability；
 - 配置结构和默认值。
+
+三个 `provide` 分别产生三个 `CapabilityContribution`。这不是注册三个 Plugin，也不是声明三个
+ServiceLoader SPI 实现；SPI 中仍然只有 `WeComPlugin`。Plugin Runtime 启动该 Plugin 时，才通过
+三个 Factory 创建并初始化三个具体 CapabilityProvider。
 
 ## 9. CapabilityProvider 与创建工厂
 
@@ -484,6 +500,36 @@ public final class WeComMessagePushProvider implements MessagePushProvider {
 }
 ```
 
+完整类型关系如下：
+
+```text
+Capability API（业务可见的能力契约）
+        ↑ implements
+具体 CapabilityProvider（功能实现类）
+        ↑ create
+CapabilityProviderFactory（无副作用的延迟创建函数）
+        ↓ 与 CapabilityType 组成
+CapabilityContribution（一个能力声明）
+        ↓ 收集到
+PluginDefinition（一个插件的完整静态定义）
+        ↓ Plugin Runtime 初始化并原子发布
+CapabilityRegistry / CapabilityManager（业务查询和调用入口）
+```
+
+各类型的职责边界：
+
+| 类型 | 回答的问题 | 示例 |
+|------|------------|------|
+| `MessagePushProvider` | 业务能够调用什么能力 | `send(PushMessage)` |
+| `WeComMessagePushProvider` | 企业微信如何实现该能力 | 调用企业微信发送接口 |
+| `CapabilityProviderFactory` | Runtime 如何创建一个新的实现实例 | `WeComMessagePushProvider::new` |
+| `CapabilityContribution` | 哪个 CapabilityType 绑定哪个 Factory | `message.push@1 -> factory` |
+| `WeComPlugin` | 哪些能力、配置和依赖组成一个可管理单元 | 消息发送、模板渲染、回调校验 |
+
+Capability API 不包含插件身份、配置读取和路由逻辑；具体 Provider 不负责把自己注册到 Registry；
+Plugin 也不实现具体业务能力。三者分开后，业务模块只依赖 Capability API，Runtime 统一负责实例
+创建、上下文注入、发布和销毁。
+
 ### 9.2 CapabilityProviderFactory
 
 ```java
@@ -497,6 +543,34 @@ public interface CapabilityProviderFactory<T extends CapabilityProvider> {
 Factory 必须只创建尚未初始化的 CapabilityProvider 实例，不得建立网络连接、启动线程或向全局
 状态注册对象。
 所有需要失败回滚的行为放入 `CapabilityProvider.initialize()`。
+
+使用 Factory 而不是在 `PluginDefinition` 中直接保存 Provider 实例，主要用于：
+
+- 延迟创建：发现和校验全部 PluginDefinition 时不实例化具体功能实现；
+- 生命周期隔离：每次从 STOPPED 重新启动都创建新的 Provider；
+- 失败回滚：实例创建后仍由 Runtime 统一控制 initialize、destroy 和资源释放；
+- 类型安全：Builder 的泛型保证 Factory 产物能够实现对应 Capability API。
+
+Builder 的核心方法定义为：
+
+```java
+public <T extends CapabilityProvider> Builder provide(
+        CapabilityType<T> type,
+        CapabilityProviderFactory<? extends T> factory
+);
+```
+
+因此下面的声明在编译期即可建立明确关系：
+
+```java
+.provide(
+        MessagePushProvider.CAPABILITY,
+        WeComMessagePushProvider::new)
+```
+
+其含义是：`MessagePushProvider.CAPABILITY` 要求一个能够创建 `MessagePushProvider` 的 Factory，
+而 `WeComMessagePushProvider` 实现了 `MessagePushProvider`，所以构造方法引用满足该类型约束。
+若误传一个只实现 `MessageTemplateProvider` 的构造方法引用，代码不能通过编译。
 
 ### 9.3 CapabilityContribution
 
@@ -518,6 +592,159 @@ Runtime 调用 factory 后必须校验：
 
 CapabilityProviderFactory 直接由 PluginDefinition 持有，因此不需要 Capability SPI，也不需要根据 JAR
 `CodeSource` 判断 Provider 属于哪个 Plugin。
+
+### 9.4 一个 Plugin 提供多个 CapabilityProvider
+
+下面示例展示两个 Capability API、两个具体功能实现类，以及它们如何加入同一个 Plugin。
+
+```java
+public interface MessagePushProvider extends CapabilityProvider {
+
+    CapabilityType<MessagePushProvider> CAPABILITY = CapabilityType.of(
+            "message.push",
+            1,
+            MessagePushProvider.class);
+
+    PushResult send(PushMessage message);
+}
+```
+
+```java
+public interface MessageTemplateProvider extends CapabilityProvider {
+
+    CapabilityType<MessageTemplateProvider> CAPABILITY = CapabilityType.of(
+            "message.template",
+            1,
+            MessageTemplateProvider.class);
+
+    RenderedMessage render(
+            String templateCode,
+            Map<String, Object> variables);
+}
+```
+
+```java
+public final class WeComMessagePushProvider implements MessagePushProvider {
+
+    @Override
+    public void initialize(CapabilityProviderContext context) {
+        // 读取所属 Plugin 的配置，并获取共享 HTTP 能力。
+    }
+
+    @Override
+    public PushResult send(PushMessage message) {
+        // 调用企业微信消息发送接口。
+    }
+}
+```
+
+```java
+public final class WeComMessageTemplateProvider implements MessageTemplateProvider {
+
+    @Override
+    public RenderedMessage render(
+            String templateCode,
+            Map<String, Object> variables) {
+        // 执行企业微信模板渲染。
+    }
+}
+```
+
+在 Plugin 中连续声明即可加入多个实现类：
+
+```java
+PluginDefinition.builder("message-wecom")
+        .name("WeCom Message Plugin")
+        .version("1.0.0")
+        .tags(Tags.of("channel", "wecom")
+                .and("provider", "tencent"))
+        .provide(
+                MessagePushProvider.CAPABILITY,
+                WeComMessagePushProvider::new)
+        .provide(
+                MessageTemplateProvider.CAPABILITY,
+                WeComMessageTemplateProvider::new)
+        .build();
+```
+
+`capabilities` 列表保留声明顺序。Runtime 按声明顺序创建和初始化 Provider，Plugin 成功启动后一次性
+发布全部 Capability；停止时按相反顺序销毁。任一 Factory 创建失败或任一 Provider 初始化失败，
+Runtime 都会逆序销毁此前已初始化的 Provider，且不会发布该 Plugin 的任何 Capability。
+
+### 9.5 同一 Capability 的多个具体实现
+
+V1 允许整个 Runtime 中存在同一 CapabilityKey 的多个实现，但同一个 PluginDefinition 内禁止重复
+CapabilityKey。下面的定义不合法：
+
+```java
+PluginDefinition.builder("message-wecom")
+        .provide(
+                MessagePushProvider.CAPABILITY,
+                WeComAppMessageProvider::new)
+        .provide(
+                MessagePushProvider.CAPABILITY,
+                WeComRobotMessageProvider::new)
+        .build();
+```
+
+原因是 V1 的 Provider 只继承 Plugin Tags，不支持 Provider 局部 Tags。上述两个 Provider 会拥有
+完全相同的 `CapabilityKey + Tags`，业务路由无法确定应该选择哪一个。
+
+根据实现是否需要被业务独立选择，采用两种处理方式：
+
+1. **需要独立路由选择**：拆成两个 Plugin 实现，分别声明不同 Plugin Tags，例如
+   `mode=app` 和 `mode=robot`。两个 Plugin 都提供 `MessagePushProvider.CAPABILITY`，调用方通过
+   Tags 选择实现。
+2. **只是插件内部实现策略**：只注册一个 `WeComMessagePushProvider`，由它在内部组合
+   `WeComAppMessageSender` 和 `WeComRobotMessageSender`。内部策略不是 CapabilityProvider，
+   不进入 CapabilityRegistry。
+
+拆成两个可路由 Plugin 的示例：
+
+```java
+public final class WeComAppPlugin implements Plugin {
+
+    @Override
+    public PluginDefinition definition() {
+        return PluginDefinition.builder("message-wecom-app")
+                .name("WeCom App Message Plugin")
+                .version("1.0.0")
+                .tags(Tags.of("channel", "wecom")
+                        .and("mode", "app"))
+                .provide(
+                        MessagePushProvider.CAPABILITY,
+                        WeComAppMessageProvider::new)
+                .build();
+    }
+}
+```
+
+```java
+public final class WeComRobotPlugin implements Plugin {
+
+    @Override
+    public PluginDefinition definition() {
+        return PluginDefinition.builder("message-wecom-robot")
+                .name("WeCom Robot Message Plugin")
+                .version("1.0.0")
+                .tags(Tags.of("channel", "wecom")
+                        .and("mode", "robot"))
+                .provide(
+                        MessagePushProvider.CAPABILITY,
+                        WeComRobotMessageProvider::new)
+                .build();
+    }
+}
+```
+
+对应 SPI 文件可以同时列出这两个 Plugin 实现类：
+
+```text
+com.example.wecom.WeComAppPlugin
+com.example.wecom.WeComRobotPlugin
+```
+
+这样多个实现仍通过唯一的 Plugin SPI 被发现，CapabilityProvider 本身不需要新增 SPI 文件。
 
 ## 10. Tags 和 Capability 模型
 
@@ -1492,6 +1719,9 @@ V1 实现期间：
 ### 22.2 Capability 测试
 
 - CapabilityType 正确校验 name/version/api；
+- 同一 PluginDefinition 可以声明多个不同 CapabilityKey，并按声明顺序创建 Provider；
+- 同一 PluginDefinition 声明重复 CapabilityKey 时在任何 Factory 执行前失败；
+- `provide` 的 CapabilityType 与 Factory 产物保持泛型类型安全；
 - CapabilityProvider 自动继承 Plugin Tags；
 - Tags 子集匹配正确；
 - 显式 Tags、默认 Tags、唯一 Provider 三层路由顺序正确；
