@@ -225,8 +225,13 @@ com.innospots.nexus.core.plugin
 │   ├── DependencyResolver
 │   └── DependencyResolution
 ├── event
+│   ├── PluginEvent
 │   ├── PluginEventBus
-│   └── Subscription
+│   ├── Subscription
+│   ├── PluginStartedEvent
+│   ├── PluginStoppedEvent
+│   ├── PluginFailedEvent
+│   └── DefaultPluginEventBus
 ├── lifecycle
 │   ├── PluginState
 │   ├── ManagedPlugin
@@ -885,34 +890,40 @@ public interface CapabilityProviderContext extends PluginContext {
 Tags 通过 `definition().tags()` 获取，不在 Context 中重复保存。Context 不暴露 ManagedPlugin、
 ClassLoader、Registry 可写接口或其他插件的运行时对象。插件不能自行注册 Capability 或修改状态。
 
-## 15. 事件和资源生命周期
+## 15. PluginEventBus 和 ResourceScope
 
-### 15.1 实例级 PluginEventBus
+这两个类型解决不同问题：
 
-Base 当前 EventBus 是静态进程级总线，订阅返回 void，不适合绑定插件停止生命周期。插件内核提供
-实例级事件门面：
+```text
+PluginEventBus
+    → 已经发生的状态如何被其他 Plugin 观察
 
-```java
-public interface PluginEventBus {
-
-    <E> Subscription subscribe(
-            Class<E> eventType,
-            Consumer<E> handler);
-
-    void publish(Object event);
-}
-
-public interface Subscription extends AutoCloseable {
-
-    @Override
-    void close();
-}
+ResourceScope
+    → Plugin 启动周期内创建的外部资源如何保证被释放
 ```
 
-V1 同步、同进程发布，处理器异常向发布方传播。它用于状态通知，不代替需要返回值的同步
-Capability 调用，也不桥接 Base 静态 EventBus。
+它们都由 Plugin Runtime 创建和管理，不是业务 Capability，也不能通过 CapabilityManager 路由。
 
-### 15.2 ResourceScope
+### 15.1 ResourceScope 的用途
+
+`ResourceScope` 是 Plugin Runtime 为每个 Plugin 启动周期创建的资源释放栈。它托管 Plugin 和其
+全部 CapabilityProvider 在初始化和运行期间产生的外部资源，确保正常停止与启动失败回滚都能按
+逆序、幂等地释放资源。
+
+它解决的核心问题是“部分初始化资源泄漏”。例如一个 Provider 已经创建线程池和 HTTP Client，
+随后另一个 Provider 初始化失败。此时 Plugin 尚未 ACTIVE，但前面创建的资源仍必须被关闭。
+
+典型托管对象：
+
+- ExecutorService、Scheduler 和后台 Worker；
+- HTTP Client、连接池和可关闭 Session；
+- 文件或配置监听器；
+- Event Subscription；
+- 定时任务、回调或路由 Registration；
+- 临时目录、临时文件清理函数；
+- 其他实现 `AutoCloseable` 的外部资源。
+
+接口：
 
 ```java
 public interface ResourceScope extends AutoCloseable {
@@ -924,16 +935,229 @@ public interface ResourceScope extends AutoCloseable {
     @Override
     void close();
 }
+
+public interface ResourceRegistration extends AutoCloseable {
+
+    @Override
+    void close();
+}
 ```
 
-规则：
+`manage` 用于直接托管 AutoCloseable；`add` 用于登记没有 AutoCloseable 对象的注销行为。返回的
+ResourceRegistration 可以提前执行一次注销，Scope 关闭时不会重复执行同一 disposer。
 
-- 每个插件运行实例独占一个 Scope；
-- Scope 关闭时按注册逆序释放；
-- 单个 disposer 失败不阻止后续资源释放；
-- 释放异常聚合为 NexusException，清理异常以 suppressed 保留；
-- Scope 关闭幂等，关闭后注册资源失败；
-- Event Subscription 必须由 Scope 托管。
+示例：
+
+```java
+public final class WeComMessagePushProvider implements MessagePushProvider {
+
+    @Override
+    public void initialize(CapabilityProviderContext context) {
+        ExecutorService executor = context.resources().manage(
+                Executors.newVirtualThreadPerTaskExecutor());
+
+        Callback callback = this::receiveCallback;
+        callbackRegistry.register(callback);
+        context.resources().add(
+                () -> callbackRegistry.unregister(callback));
+    }
+}
+```
+
+所有权和生命周期：
+
+```text
+Plugin 每次进入 STARTING
+        ↓
+Runtime 创建新的 ResourceScope
+        ↓
+Plugin / CapabilityProvider initialize
+        ↓
+ACTIVE
+        ↓
+CapabilityProvider.destroy()
+        ↓
+Plugin.stop()
+        ↓
+ResourceScope.close()
+```
+
+启动失败时同样关闭：
+
+```text
+初始化异常
+    ↓
+已初始化 CapabilityProvider 逆序回滚
+    ↓
+Plugin 回滚
+    ↓
+ResourceScope.close()
+```
+
+`destroy()/stop()` 与 ResourceScope 的职责不同：
+
+| 机制 | 负责 | 示例 |
+|------|------|------|
+| `CapabilityProvider.destroy()` | Provider 自身逻辑收尾 | 停止接收任务、刷新本地缓冲 |
+| `Plugin.stop()` | Plugin 级逻辑收尾 | 停止插件协调器、撤销插件状态 |
+| `ResourceScope.close()` | 兜底释放已登记外部资源 | 关闭线程池、连接、监听和订阅 |
+
+先执行 `destroy()/stop()`，再关闭 Scope，是为了让逻辑收尾仍可使用已登记资源。即使
+`destroy()/stop()` 失败，Scope 仍必须继续关闭。
+
+ResourceScope 不负责：
+
+- 创建资源或进行依赖注入；
+- 保存业务数据或持久化状态；
+- 创建、注册或销毁 CapabilityProvider 对象；
+- 自动发现未登记的线程、连接和静态资源；
+- 代替 CapabilityProvider.destroy() 和 Plugin.stop()；
+- 管理其他 Plugin 的资源；
+- 跨进程资源协调。
+
+实现规则：
+
+- 每个 Plugin 的每次启动周期独占一个 Scope；
+- Plugin 和其全部 CapabilityProvider 共享该 Scope；
+- Scope 按登记逆序释放；
+- 单个 disposer 失败不阻止其余资源释放；
+- 首个异常作为 NexusException cause，其余异常作为 suppressed；
+- Scope、ResourceRegistration 和 disposer 执行都必须幂等；
+- Scope 关闭后继续登记资源立即失败；
+- Runtime 不允许一个 Plugin 获取另一个 Plugin 的 Scope。
+
+### 15.2 PluginEventBus 的用途
+
+`PluginEventBus` 是一个 PluginManager 实例内部共享的、进程内、同步、尽力而为的状态通知通道。
+它让 Plugin 观察“已经发生的事情”，而不直接依赖事件发布方的实现类。
+
+适用场景：
+
+- Plugin 启动、停止或失败后的观察通知；
+- CapabilityProvider 上线或下线后的观察通知；
+- 消息发送完成后的审计和指标统计；
+- 配置应用完成通知；
+- 缓存失效通知；
+- 非关键监控、日志和诊断扩展。
+
+V1 由 Runtime 发布三个内置事件：
+
+| 事件 | 发布时机 | 最小内容 |
+|------|----------|----------|
+| `PluginStartedEvent` | 状态成功切换为 ACTIVE 后 | plugin id、version、CapabilityKey、时间 |
+| `PluginStoppedEvent` | 资源释放完成并切换为 STOPPED 后 | plugin id、时间 |
+| `PluginFailedEvent` | 启动或停止失败并记录 FAILED 后 | plugin id、phase、error code、时间 |
+
+内置失败事件不携带 Throwable、配置值或运行时对象。完整异常只进入 Core 日志和内部诊断。
+
+事件必须是不可变值对象，并实现标记接口：
+
+```java
+public interface PluginEvent {
+}
+
+public record MessageSentEvent(
+        String channel,
+        String messageId
+) implements PluginEvent {
+}
+```
+
+接口：
+
+```java
+public interface PluginEventBus {
+
+    <E extends PluginEvent> Subscription subscribe(
+            Class<E> eventType,
+            Consumer<E> handler);
+
+    void publish(PluginEvent event);
+}
+
+public interface Subscription extends AutoCloseable {
+
+    @Override
+    void close();
+}
+```
+
+一个 PluginManager 拥有一个 DefaultPluginEventBus。PluginContext 和 CapabilityProviderContext
+暴露的是绑定当前 Plugin 的事件总线视图，而不是底层可写订阅表。
+
+发布示例：
+
+```java
+context.events().publish(
+        new MessageSentEvent("wecom", messageId));
+```
+
+订阅示例：
+
+```java
+public final class MetricsPlugin implements Plugin {
+
+    @Override
+    public void initialize(PluginContext context) {
+        context.events().subscribe(
+                MessageSentEvent.class,
+                this::recordMetric);
+    }
+}
+```
+
+PluginContext 的订阅操作自动把 Subscription 登记到当前 ResourceScope：
+
+```text
+context.events().subscribe(...)
+        ↓
+创建 Subscription
+        ↓
+自动登记到当前 Plugin ResourceScope
+        ↓
+Plugin 停止或启动回滚
+        ↓
+Subscription 自动关闭
+```
+
+返回 Subscription 只用于 Plugin 主动提前退订。即使 Plugin 忘记保存返回值，Scope 仍能保证清理。
+
+### 15.3 Event 与 Capability 的选择规则
+
+```text
+需要返回值，失败必须反馈调用方
+        → CapabilityManager
+
+事情已经发生，希望其他 Plugin 观察
+        → PluginEventBus
+
+需要可靠、持久、跨进程传递
+        → 消息中间件或 Outbox
+```
+
+PluginEventBus 不用于：
+
+- 请求—响应、查询或命令执行；
+- 消息发送、文件存储、脚本执行等同步业务能力；
+- 替代 CapabilityManager；
+- 表达 required Capability 依赖；
+- 可靠消息、事务事件或失败重试；
+- 跨 JVM、跨进程或跨服务通信；
+- 工作流编排；
+- 在订阅者之间传递可变共享状态。
+
+### 15.4 V1 事件语义
+
+- 事件在发布线程同步分发，不创建内部异步线程池；
+- 使用订阅快照分发，发布过程不持有 Plugin 生命周期锁；
+- 一个处理器异常被隔离并记录，不能阻止其他订阅者；
+- `publish` 不因观察者失败而使发布方失败；
+- 订阅者执行顺序不属于契约；
+- 不保证事务一致性、持久化、重试或至少一次投递；
+- 一个 PluginManager 的事件不会传播到另一个 PluginManager；
+- PluginEventBus 不与 Base 静态 EventBus 自动桥接；
+- Runtime 生命周期事件只在对应状态转换成功后发布；
+- Event 对象不得包含 Plugin、Context、Registry、连接或其他可变运行时对象。
 
 ## 16. 生命周期和状态机
 
@@ -980,6 +1204,7 @@ V1 没有持久化 DISABLED。宿主要禁用插件，在 `PluginRuntimeConfig.d
 9. plugin.start()
 10. 一次性向 CapabilityRegistry 发布全部 registrations
 11. 状态切换为 ACTIVE
+12. 发布 PluginStartedEvent
 ```
 
 Capability 只有在 Plugin 和全部 CapabilityProvider 初始化、启动成功后才原子发布，其他线程不会
@@ -1015,6 +1240,7 @@ Capability 只有在 Plugin 和全部 CapabilityProvider 初始化、启动成�
 5. 关闭 ResourceScope
 6. 清除 CapabilityProvider、Context 和配置强引用
 7. 状态 -> STOPPED
+8. 发布 PluginStoppedEvent
 ```
 
 V1 没有调用引用计数。撤出 Registry 前已经取得 Provider 引用的调用可能与停止并发，因此单插件
@@ -1304,8 +1530,15 @@ V1 实现期间：
 - 自定义 URLClassLoader 中多个 fixture JAR 的 Plugin 均被发现；
 - PluginManager 不关闭宿主传入的 ClassLoader；
 - Runtime 关闭后不保留 CapabilityProvider、Context 和 Factory 的额外强引用；
-- ResourceScope 逆序、幂等和聚合异常行为正确；
-- Event Subscription 随 Scope 自动解除；
+- ResourceScope 的 manage 和 add 都按登记逆序释放；
+- ResourceRegistration 提前关闭后不会被重复执行；
+- CapabilityProvider.destroy() 和 Plugin.stop() 执行时托管资源仍可用；
+- ResourceScope 幂等关闭并聚合全部释放异常；
+- PluginEventBus 在发布线程同步分发；
+- 单个事件处理器失败不会阻断其他订阅者或发布方；
+- Event Subscription 自动绑定 Scope，并在停止和回滚时解除；
+- 不同 PluginManager 的事件互不传播；
+- PluginStartedEvent、PluginStoppedEvent 和 PluginFailedEvent 的发布时机正确；
 - 诊断快照不持有运行时对象。
 
 ### 22.6 测试插件
@@ -1380,13 +1613,14 @@ fixture 不能引用 Console、Kernel 或 Platform。
 
 实现：
 
-- DefaultResourceScope；
-- 实例级 PluginEventBus；
+- DefaultResourceScope、ResourceRegistration 和逆序失败聚合；
+- 实例级 PluginEventBus、Plugin 作用域订阅视图和三个内置生命周期事件；
 - ManagedPlugin 和精简状态机；
 - 原子启动、停止和失败回滚；
 - PluginRuntimeInfo。
 
-验收：失败 Plugin 无残留 Capability、Provider 或托管资源。
+验收：失败 Plugin 无残留 Capability、CapabilityProvider、订阅或托管资源，观察者异常不改变 Plugin
+生命周期结果。
 
 ### 阶段 6：依赖编排和宿主入口
 
