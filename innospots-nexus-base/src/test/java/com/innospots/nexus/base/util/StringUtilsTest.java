@@ -13,6 +13,12 @@ class StringUtilsTest {
     void recognizesBlankTextAndDefaultValue() {
         assertThat(StringUtils.isBlank("  ")).isTrue();
         assertThat(StringUtils.isBlank("nexus")).isFalse();
+        assertThat(StringUtils.isNotBlank("nexus")).isTrue();
+        assertThat(StringUtils.isNotBlank("  ")).isFalse();
+        assertThat(StringUtils.isEmpty("")).isTrue();
+        assertThat(StringUtils.isEmpty(" ")).isFalse();
+        assertThat(StringUtils.isNotEmpty(" ")).isTrue();
+        assertThat(StringUtils.isNotEmpty("")).isFalse();
         assertThat(StringUtils.defaultIfBlank(" ", "fallback")).isEqualTo("fallback");
     }
 

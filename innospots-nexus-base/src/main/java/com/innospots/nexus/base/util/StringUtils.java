@@ -25,6 +25,21 @@ public final class StringUtils {
         return CharSequenceUtil.isBlank(value);
     }
 
+    /** Checks if a CharSequence is not null and not blank. */
+    public static boolean isNotBlank(CharSequence value) {
+        return CharSequenceUtil.isNotBlank(value);
+    }
+
+    /** Checks if a CharSequence is null or empty. */
+    public static boolean isEmpty(CharSequence value) {
+        return CharSequenceUtil.isEmpty(value);
+    }
+
+    /** Checks if a CharSequence is not null and not empty. */
+    public static boolean isNotEmpty(CharSequence value) {
+        return CharSequenceUtil.isNotEmpty(value);
+    }
+
     /** Returns the value if non-blank, otherwise the default. */
     public static String defaultIfBlank(String value, String defaultValue) {
         return CharSequenceUtil.blankToDefault(value, defaultValue);

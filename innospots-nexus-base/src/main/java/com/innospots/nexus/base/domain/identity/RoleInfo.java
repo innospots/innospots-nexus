@@ -9,7 +9,7 @@ import java.util.List;
  * programmatic code.  Used as a domain value object across module
  * boundaries.
  *
- * @see com.innospots.nexus.kernel.role.domain.entity.RoleEntity
+ * @see com.innospots.nexus.console.role.domain.entity.RoleEntity
  */
 public record RoleInfo(
         String roleId,

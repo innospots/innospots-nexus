@@ -6,7 +6,7 @@ import java.util.Map;
 
 /**
  * Thread-Local Context — a typed {@link ThreadLocal} map for propagating
- * cross-cutting state (trace ID, tenant ID, user ID, project ID, etc.)
+ * cross-cutting state (trace ID, tenant ID, user ID, workspace ID, etc.)
  * across asynchronous boundaries.
  * <p>Use {@link #scope(Map)} with try-with-resources for scoped context
  * injection:</p>
@@ -22,23 +22,36 @@ public final class TLC {
     public static final String TENANT_ID = "tenantId";
     public static final String SESSION_ID = "sessionId";
     public static final String CONVERSATION_ID = "conversationId";
-    public static final String PROJECT_ID = "projectId";
+    public static final String WORKSPACE_ID = "workspaceId";
     public static final String USER_ID = "userId";
     public static final String USER_NAME = "userName";
+    public static final String SECURITY_REALM = "securityRealm";
+    public static final String TENANT_MEMBER_ID = "tenantMemberId";
+    public static final String PLATFORM_USER_ID = "platformUserId";
 
     private static final ThreadLocal<Map<String, Object>> CONTEXT = ThreadLocal.withInitial(LinkedHashMap::new);
 
     private TLC() {
     }
 
-    /** Sets the project ID in context. Passing null removes the entry. */
-    public static void projectId(Long projectId) {
-        put(PROJECT_ID, projectId);
+    /** Sets the tenant ID in context. Passing null removes the entry. */
+    public static void tenantId(String tenantId) {
+        put(TENANT_ID, tenantId);
     }
 
-    /** Returns the project ID from context, or null. */
-    public static Long projectId() {
-        return getLong(PROJECT_ID);
+    /** Returns the tenant ID from context, or null. */
+    public static String tenantId() {
+        return getString(TENANT_ID);
+    }
+
+    /** Sets the workspace ID in context. Passing null removes the entry. */
+    public static void workspaceId(String workspaceId) {
+        put(WORKSPACE_ID, workspaceId);
+    }
+
+    /** Returns the workspace ID from context, or null. */
+    public static String workspaceId() {
+        return getString(WORKSPACE_ID);
     }
 
     /** Sets the user ID in context. Passing null removes the entry. */
@@ -59,6 +72,36 @@ public final class TLC {
     /** Returns the user name from context, or null. */
     public static String userName() {
         return getString(USER_NAME);
+    }
+
+    /** Sets the security realm in context. Passing null removes the entry. */
+    public static void securityRealm(String securityRealm) {
+        put(SECURITY_REALM, securityRealm);
+    }
+
+    /** Returns the security realm from context, or null. */
+    public static String securityRealm() {
+        return getString(SECURITY_REALM);
+    }
+
+    /** Sets the tenant member ID in context. Passing null removes the entry. */
+    public static void tenantMemberId(String tenantMemberId) {
+        put(TENANT_MEMBER_ID, tenantMemberId);
+    }
+
+    /** Returns the tenant member ID from context, or null. */
+    public static String tenantMemberId() {
+        return getString(TENANT_MEMBER_ID);
+    }
+
+    /** Sets the platform user ID in context. Passing null removes the entry. */
+    public static void platformUserId(String platformUserId) {
+        put(PLATFORM_USER_ID, platformUserId);
+    }
+
+    /** Returns the platform user ID from context, or null. */
+    public static String platformUserId() {
+        return getString(PLATFORM_USER_ID);
     }
 
     /**

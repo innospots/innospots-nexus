@@ -25,8 +25,8 @@ public class UiAction {
     private String target;
     private I18nObject tooltip = new I18nObject();
     private VisibleCondition visibleIf;
-    private ActionPermissions permissions;
     private ActionStyle style;
+    private String datasourceKey;
     private ApiRequest request;
     private ActionConfirm confirm;
     private ActionFeedback feedback;
@@ -105,21 +105,28 @@ public class UiAction {
         return this;
     }
 
-    public ActionPermissions permissions() {
-        return permissions;
-    }
-
-    public UiAction permissions(ActionPermissions permissions) {
-        this.permissions = permissions;
-        return this;
-    }
-
     public ActionStyle style() {
         return style;
     }
 
     public UiAction style(ActionStyle style) {
         this.style = style;
+        return this;
+    }
+
+    /** Returns the referenced page datasource key. */
+    public String datasourceKey() {
+        return datasourceKey;
+    }
+
+    /**
+     * References a datasource declared by the owning {@code UiSpec}.
+     *
+     * @param datasourceKey page-local datasource key
+     * @return this action
+     */
+    public UiAction datasourceKey(String datasourceKey) {
+        this.datasourceKey = datasourceKey;
         return this;
     }
 

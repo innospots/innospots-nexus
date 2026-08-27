@@ -1,8 +1,11 @@
 package com.innospots.nexus.base.util;
 
+import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.base.status.NexusStatusCode;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class CryptoUtilsTest {
 
@@ -84,5 +87,21 @@ class CryptoUtilsTest {
         String encrypted = CryptoUtils.encryptRsa(plaintext, keyPair.publicKey());
 
         assertThat(CryptoUtils.decryptRsa(encrypted, keyPair.privateKey())).isEqualTo(plaintext);
+    }
+
+    @Test
+    void rejectsNullPasswordWithInvalidParameter() {
+        assertThatThrownBy(() -> CryptoUtils.encryptPassword(null))
+                .isInstanceOf(NexusException.class)
+                .extracting(error -> ((NexusException) error).code())
+                .isEqualTo(NexusStatusCode.INVALID_PARAMETER.fullCode());
+    }
+
+    @Test
+    void decryptFailureUsesCryptoStatusCode() {
+        assertThatThrownBy(() -> CryptoUtils.decryptAesGcm("not-ciphertext", "0123456789abcdef"))
+                .isInstanceOf(NexusException.class)
+                .extracting(error -> ((NexusException) error).code())
+                .isEqualTo(NexusStatusCode.CRYPTO_FAILED.fullCode());
     }
 }

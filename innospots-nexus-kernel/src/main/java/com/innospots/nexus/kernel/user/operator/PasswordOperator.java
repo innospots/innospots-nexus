@@ -3,21 +3,20 @@ package com.innospots.nexus.kernel.user.operator;
 import java.util.Objects;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-
-import com.innospots.nexus.kernel.user.tools.PasswordValidator;
 import jakarta.transaction.Transactional;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.base.util.CryptoUtils;
+import com.innospots.nexus.console.credential.PasswordValidator;
+import com.innospots.nexus.console.credential.api.PasswordVerificationOperator;
+import com.innospots.nexus.console.credential.domain.enums.VerificationType;
 import com.innospots.nexus.kernel.user.dao.UserDao;
 import com.innospots.nexus.kernel.user.dao.UserPasswordCredentialDao;
 import com.innospots.nexus.kernel.user.domain.entity.UserEntity;
 import com.innospots.nexus.kernel.user.domain.entity.UserPasswordCredentialEntity;
-import com.innospots.nexus.kernel.user.domain.enums.VerificationType;
 
 /**
  * User password operation operator.
@@ -117,9 +116,9 @@ public class PasswordOperator {
             throw NexusException.build(NexusStatusCode.BUSINESS_ERROR);
         }
 
-        UserPasswordCredentialEntity credential = passwordCredentialDao.getByUserId(user.getUserId());
+        UserPasswordCredentialEntity credential = passwordCredentialDao.getByUserId(user.getTenantUserId());
         if (credential == null) {
-            throw new IllegalStateException("No password credential for user: " + user.getUserId());
+            throw new IllegalStateException("No password credential for user: " + user.getTenantUserId());
         }
 
         String newSalt = CryptoUtils.generatePasswordSalt();
@@ -134,7 +133,7 @@ public class PasswordOperator {
 
         passwordCredentialDao.updateById(credential);
 
-        log.info("Password reset for user: {} via {} code", user.getUserId(), type);
+        log.info("Password reset for user: {} via {} code", user.getTenantUserId(), type);
     }
 
     private UserEntity resolveUser(String identity) {

@@ -12,24 +12,24 @@ import org.slf4j.Logger;
 
 import com.innospots.nexus.base.domain.data.DataPage;
 import com.innospots.nexus.base.util.CryptoUtils;
-import com.innospots.nexus.core.entity.DbPrimaryGenerator;
-import com.innospots.nexus.kernel.user.domain.enums.UserStatus;
-import com.innospots.nexus.kernel.user.tools.UserPasswordDecryptor;
+import com.innospots.nexus.console.credential.api.PasswordDecryptor;
+import com.innospots.nexus.core.persistence.id.DbPrimaryGenerator;
 import com.innospots.nexus.kernel.user.dao.UserDao;
 import com.innospots.nexus.kernel.user.dao.UserPasswordCredentialDao;
 import com.innospots.nexus.kernel.user.domain.entity.UserEntity;
 import com.innospots.nexus.kernel.user.domain.entity.UserPasswordCredentialEntity;
+import com.innospots.nexus.kernel.user.domain.enums.UserRegisterSource;
+import com.innospots.nexus.kernel.user.domain.enums.UserStatus;
 import com.innospots.nexus.kernel.user.domain.request.UserPageRequest;
 import com.innospots.nexus.kernel.user.domain.request.UserPasswordRegisterRequest;
-import com.innospots.nexus.kernel.user.domain.vo.UserProfileVO;
-import com.innospots.nexus.kernel.user.domain.enums.UserRegisterSource;
+import com.innospots.nexus.kernel.user.domain.vo.UserProfileVo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -40,8 +40,9 @@ class UserOperatorTest {
         assertThat(UserOperator.class.getDeclaredConstructor(
                 UserDao.class,
                 UserPasswordCredentialDao.class,
-                UserPasswordDecryptor.class)).isNotNull();
+                PasswordDecryptor.class)).isNotNull();
         assertThat(UserOperator.class.getDeclaredField("log").getType()).isEqualTo(Logger.class);
+        assertThat(UserOperator.class.getDeclaredConstructors()[0].getParameterCount()).isEqualTo(3);
     }
 
     @Test
@@ -72,9 +73,9 @@ class UserOperatorTest {
         UserDao userDao = mock(UserDao.class);
         IPage<UserEntity> selectedPage = mock(IPage.class);
         UserEntity entity = new UserEntity();
-        entity.setUserId("usr01HZY8J6Y3D6S4V7N9X2M5Q8");
+        entity.setTenantUserId("tus01HZY8J6Y3D6S4V7N9X2M5Q8");
         entity.setUserName("dave");
-        entity.setRealName("Dave Lee");
+        entity.setDisplayName("Dave Lee");
         entity.setEmail("dave@example.com");
         entity.setMobile("13900000000");
         entity.setRegisterSource(UserRegisterSource.PASSWORD.name());
@@ -85,11 +86,11 @@ class UserOperatorTest {
         UserOperator operator = new UserOperator(
                 userDao,
                 mock(UserPasswordCredentialDao.class),
-                mock(UserPasswordDecryptor.class));
+                mock(PasswordDecryptor.class));
         UserPageRequest request = new UserPageRequest(
                 null, 2L, 5L, "dav", "Lee", "example.com", "139");
 
-        DataPage<UserProfileVO> page = operator.pageUsers(request);
+        DataPage<UserProfileVo> page = operator.pageUsers(request);
 
         assertThat(page.pageNo()).isEqualTo(2L);
         assertThat(page.pageSize()).isEqualTo(5L);
@@ -101,21 +102,21 @@ class UserOperatorTest {
         assertThat(pageCaptor.getValue().getCurrent()).isEqualTo(2L);
         assertThat(pageCaptor.getValue().getSize()).isEqualTo(5L);
         assertThat(wrapperCaptor.getValue().getCustomSqlSegment())
-                .contains("user_name", "real_name", "email", "mobile");
+                .contains("user_name", "display_name", "email", "mobile");
     }
 
     @Test
     void deletesUserById() {
         UserDao userDao = mock(UserDao.class);
-        when(userDao.deleteById("usr01HZY8J6Y3D6S4V7N9X2M5Q9")).thenReturn(1);
+        when(userDao.deleteById("tus01HZY8J6Y3D6S4V7N9X2M5Q9")).thenReturn(1);
         UserOperator operator = new UserOperator(
                 userDao,
                 mock(UserPasswordCredentialDao.class),
-                mock(UserPasswordDecryptor.class));
+                mock(PasswordDecryptor.class));
 
-        assertThat(operator.deleteUser("usr01HZY8J6Y3D6S4V7N9X2M5Q9")).isTrue();
+        assertThat(operator.deleteUser("tus01HZY8J6Y3D6S4V7N9X2M5Q9")).isTrue();
 
-        verify(userDao).deleteById("usr01HZY8J6Y3D6S4V7N9X2M5Q9");
+        verify(userDao).deleteById("tus01HZY8J6Y3D6S4V7N9X2M5Q9");
     }
 
     @Test
@@ -125,13 +126,13 @@ class UserOperatorTest {
         UserOperator operator = new UserOperator(
                 userDao,
                 mock(UserPasswordCredentialDao.class),
-                mock(UserPasswordDecryptor.class));
+                mock(PasswordDecryptor.class));
 
-        assertThat(operator.freezeUser("usr01HZY8J6Y3D6S4V7N9X2M5QA")).isTrue();
+        assertThat(operator.freezeUser("tus01HZY8J6Y3D6S4V7N9X2M5QA")).isTrue();
 
         ArgumentCaptor<UserEntity> userCaptor = forClass(UserEntity.class);
         verify(userDao).updateById(userCaptor.capture());
-        assertThat(userCaptor.getValue().getUserId()).isEqualTo("usr01HZY8J6Y3D6S4V7N9X2M5QA");
+        assertThat(userCaptor.getValue().getTenantUserId()).isEqualTo("tus01HZY8J6Y3D6S4V7N9X2M5QA");
         assertThat(userCaptor.getValue().getStatus()).isEqualTo(UserStatus.DISABLED.name());
     }
 
@@ -142,13 +143,13 @@ class UserOperatorTest {
         UserOperator operator = new UserOperator(
                 userDao,
                 mock(UserPasswordCredentialDao.class),
-                mock(UserPasswordDecryptor.class));
+                mock(PasswordDecryptor.class));
 
-        assertThat(operator.unfreezeUser("usr01HZY8J6Y3D6S4V7N9X2M5QA")).isTrue();
+        assertThat(operator.unfreezeUser("tus01HZY8J6Y3D6S4V7N9X2M5QA")).isTrue();
 
         ArgumentCaptor<UserEntity> userCaptor = forClass(UserEntity.class);
         verify(userDao).updateById(userCaptor.capture());
-        assertThat(userCaptor.getValue().getUserId()).isEqualTo("usr01HZY8J6Y3D6S4V7N9X2M5QA");
+        assertThat(userCaptor.getValue().getTenantUserId()).isEqualTo("tus01HZY8J6Y3D6S4V7N9X2M5QA");
         assertThat(userCaptor.getValue().getStatus()).isEqualTo(UserStatus.ACTIVE.name());
     }
 
@@ -156,23 +157,23 @@ class UserOperatorTest {
     void findsUserProfileById() {
         UserDao userDao = mock(UserDao.class);
         UserEntity entity = new UserEntity();
-        entity.setUserId("usr01HZY8J6Y3D6S4V7N9X2M5QB");
+        entity.setTenantUserId("tus01HZY8J6Y3D6S4V7N9X2M5QB");
         entity.setUserName("alice");
         entity.setDisplayName("Alice");
         entity.setEmail("alice@example.com");
         entity.setRegisterSource(UserRegisterSource.PASSWORD.name());
         entity.setStatus(UserStatus.ACTIVE.name());
-        when(userDao.selectById("usr01HZY8J6Y3D6S4V7N9X2M5QB")).thenReturn(entity);
+        when(userDao.selectById("tus01HZY8J6Y3D6S4V7N9X2M5QB")).thenReturn(entity);
 
         UserOperator operator = new UserOperator(
                 userDao,
                 mock(UserPasswordCredentialDao.class),
-                mock(UserPasswordDecryptor.class));
+                mock(PasswordDecryptor.class));
 
-        Optional<UserProfileVO> profile = operator.findById("usr01HZY8J6Y3D6S4V7N9X2M5QB");
+        Optional<UserProfileVo> profile = operator.findById("tus01HZY8J6Y3D6S4V7N9X2M5QB");
 
         assertThat(profile).hasValueSatisfying(user -> {
-            assertThat(user.userId()).isEqualTo("usr01HZY8J6Y3D6S4V7N9X2M5QB");
+            assertThat(user.userId()).isEqualTo("tus01HZY8J6Y3D6S4V7N9X2M5QB");
             assertThat(user.userName()).isEqualTo("alice");
             assertThat(user.registerSource()).isEqualTo(UserRegisterSource.PASSWORD);
             assertThat(user.status()).isEqualTo(UserStatus.ACTIVE);
@@ -183,12 +184,12 @@ class UserOperatorTest {
     void registersPasswordUserWithSeparatePasswordCredential() {
         UserDao userDao = mock(UserDao.class);
         UserPasswordCredentialDao credentialDao = mock(UserPasswordCredentialDao.class);
-        UserPasswordDecryptor passwordDecryptor = mock(UserPasswordDecryptor.class);
+        PasswordDecryptor passwordDecryptor = mock(PasswordDecryptor.class);
         UserOperator operator = new UserOperator(userDao, credentialDao, passwordDecryptor);
         DbPrimaryGenerator generator = new DbPrimaryGenerator();
         doAnswer(invocation -> {
             UserEntity entity = invocation.getArgument(0);
-            entity.setUserId(generator.nextUUID(entity));
+            entity.setTenantUserId(generator.nextUUID(entity));
             return 1;
         }).when(userDao).insert(any(UserEntity.class));
         doAnswer(invocation -> {
@@ -198,28 +199,31 @@ class UserOperatorTest {
         }).when(credentialDao).insert(any(UserPasswordCredentialEntity.class));
         when(passwordDecryptor.decrypt(eq("front-encrypted-password"))).thenReturn("raw-secret");
 
-        UserProfileVO profile = operator.registerWithPassword(new UserPasswordRegisterRequest(
+        UserProfileVo profile = operator.registerWithPassword(new UserPasswordRegisterRequest(
                 "bob",
                 "Bob",
-                "Bob Lee",
                 "bob@example.com",
                 "13800000000",
+                "CN",
+                "Asia/Shanghai",
+                "zh-CN",
                 "front-encrypted-password"));
 
-        assertThat(profile.userId()).startsWith("usr");
+        assertThat(profile.userId()).startsWith("tus");
         assertThat(profile.userId()).hasSize(29);
         assertThat(profile.registerSource()).isEqualTo(UserRegisterSource.PASSWORD);
+        assertThat(profile.region()).isEqualTo("CN");
         ArgumentCaptor<UserEntity> userCaptor = forClass(UserEntity.class);
         verify(userDao).insert(userCaptor.capture());
-        assertThat(userCaptor.getValue().getUserId()).isEqualTo(profile.userId());
+        assertThat(userCaptor.getValue().getTenantUserId()).isEqualTo(profile.userId());
         verify(passwordDecryptor).decrypt("front-encrypted-password");
 
         ArgumentCaptor<UserPasswordCredentialEntity> credentialCaptor = forClass(UserPasswordCredentialEntity.class);
         verify(credentialDao).insert(credentialCaptor.capture());
         UserPasswordCredentialEntity credential = credentialCaptor.getValue();
-        assertThat(credential.getCredentialId()).startsWith("upc");
+        assertThat(credential.getCredentialId()).startsWith("tpc");
         assertThat(credential.getCredentialId()).hasSize(29);
-        assertThat(credential.getUserId()).isEqualTo(profile.userId());
+        assertThat(credential.getTenantUserId()).isEqualTo(profile.userId());
         assertThat(credential.getPasswordHash()).isNotEqualTo("raw-secret");
         assertThat(CryptoUtils.matchesPassword("raw-secret", credential.getPasswordHash())).isTrue();
         assertThat(credential.getPasswordSalt()).isNotBlank();

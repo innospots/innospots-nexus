@@ -16,7 +16,7 @@ Before creating files, determine:
 
 - which Maven module owns the business capability;
 - whether the concept is business-specific or reusable infrastructure;
-- whether records are platform-wide or project-scoped;
+- whether records are platform-wide, tenant-scoped, or workspace-scoped;
 - which adjacent domains interact with it;
 - which behavior is required now and which behavior is intentionally deferred.
 
@@ -88,7 +88,7 @@ List the domain records before writing Java:
 - lifecycle and visibility fields;
 - ordering fields;
 - protected or built-in flags;
-- audit and project ownership inherited from shared entities.
+- audit and tenant/workspace ownership inherited from shared entities.
 
 Do not merge an adjacent domain merely because the legacy project stored the
 data together. For example, menu navigation and permission resources must
@@ -96,14 +96,16 @@ remain separate when permission is independently owned.
 
 ### 2.2 Select Persistence Scope
 
-Use `ProjectBaseEntity` by default for project-owned business records.
-Use `BaseEntity` only when the record is explicitly platform-wide.
+Use `WorkspaceBaseEntity` by default for workspace-owned business records.
+Use `TenantBaseEntity` when the record is tenant-scoped but not workspace-scoped.
+Use `BaseEntity` only when the record is explicitly platform-wide or realm-global.
 
 Never redeclare inherited fields such as:
 
-- `projectId`;
-- `createdTime`;
-- `updatedTime`;
+- `tenantId`;
+- `workspaceId`;
+- `createdAt`;
+- `updatedAt`;
 - `createdBy`;
 - `updatedBy`.
 
@@ -148,7 +150,7 @@ explicit mapping.
 
 Do not add:
 
-- duplicated inherited audit or project fields;
+- duplicated inherited audit or tenant/workspace fields;
 - transient response-only fields to entities;
 - cached ancestor paths without a demonstrated query need;
 - HTTP methods or permission actions to unrelated navigation entities;
@@ -165,15 +167,16 @@ Declare explicit Jakarta Persistence indexes for:
 - association uniqueness;
 - sibling ordering where tree queries require it.
 
-Index names must be explicit and table-prefixed. Project-scoped uniqueness
-normally includes `project_id`.
+Index names must be explicit and table-prefixed. Workspace-scoped uniqueness
+normally includes `workspace_id`. Tenant-scoped uniqueness normally includes
+`tenant_id`.
 
 ### 2.6 Entity Gate
 
 Do not proceed until all answers are yes:
 
 - Is the entity in the correct module and domain?
-- Is platform versus project scope correct?
+- Is platform versus tenant/workspace scope correct?
 - Are primary and stable business keys clearly separated?
 - Are required fields present?
 - Have obsolete or adjacent-domain fields been removed?

@@ -8,8 +8,8 @@
 
 ## 2. 设计原则
 
-1. **代码是扩展结构事实源。** 扩展、模块、页面和菜单通过 Java 接口、发现注解或
-   Java SPI 暴露；页面使用的接口 URL 来自对应页面 UiSpec。
+1. **代码是扩展结构事实源。** 扩展、模块、页面和菜单通过 Java SPI 暴露；页面使用的
+   接口 URL 来自对应页面 UiSpec。
 2. **安装与启停分离。** 把扩展 JAR 加入应用依赖或运行时 classpath 即完成安装；系统
    启动时发现并注册扩展，管理端控制是否启用。
 3. **扩展与模块分层。** 一个扩展是安装和启停单元，一个扩展可以贡献多个
@@ -63,24 +63,31 @@ qualified pageKey + request URL -> role permission check
 页面先归属于模块，菜单再通过 `pageKey` 引用模块页面。`pagePath` 只负责路由匹配，不参与
 菜单和页面的关联。
 
-### 3.1 Core 扩展包职责
+### 3.1 Core 扩展 SDK 职责
 
-扩展运行时实现位于 `innospots-nexus-core` 的
-`com.innospots.nexus.core.extension` 命名空间下，按变化原因拆分子包：
+`innospots-nexus-core` 是供外部工程依赖的扩展 SDK，只提供稳定接口和声明结构：
 
 | 子包 | 职责 | 主要类型 |
 |------|------|----------|
-| `contract` | 对外扩展入口契约和发现注解 | `ConsoleExtensionProvider`、`ConsoleExtensionEntry` |
+| `contract` | 对外扩展入口契约 | `ConsoleExtensionProvider` |
 | `declaration` | 扩展、模块、页面、菜单的不可变声明 | `ExtensionDescriptor`、`ExtensionModuleDeclaration`、`UiSpecPageDeclaration`、`MenuDeclaration` |
-| `discovery` | 直接装配、注解入口和 Java SPI 的发现归一化 | `ExtensionProviderDiscovery` |
-| `lifecycle` | 内存注册、启停、激活校验和状态快照 | `ExtensionRegistry`、`ExtensionRegistration`、`ExtensionState` |
-| `entity` | 安装注册表持久化实体 | `ExtensionInstallationEntity` |
-| `dao` | 单表 MyBatis-Plus 数据访问 | `ExtensionInstallationDao` |
-| `repository` | 基于 DAO 的注册、状态变更和查询协调 | `ExtensionInstallationRepository` |
 
-`repository` 只依赖 `dao` 完成数据库读写；`lifecycle` 通过可选的
-`ExtensionInstallationRepository` 把启动注册、启用、停用、激活失败等状态同步到安装注册表。
-因此没有持久化适配器时仍可使用纯内存注册表，接入数据库后不会改变扩展声明契约。
+Core 不发现扩展、不保存安装记录，也不提供启停和激活操作。外部扩展工程只需要依赖 Core，
+实现 Provider 并返回声明对象，不依赖 Kernel 的运行时实现。
+
+### 3.2 Kernel 扩展运行时职责
+
+`innospots-nexus-kernel` 的 `com.innospots.nexus.kernel.extension` 承接实际运行能力：
+
+| 子包 | 职责 | 主要类型 |
+|------|------|----------|
+| `discovery` | 通过 Java SPI 发现和校验扩展 Provider | `ExtensionProviderDiscovery` |
+| `service` | 注册、启停、激活校验和活动扩展查询 | `ExtensionRegistry` |
+| `domain` | 安装实体、生命周期状态和注册快照 | `ExtensionInstallationEntity`、`ExtensionState`、`ExtensionRegistration` |
+| `dao` | 单表 MyBatis-Plus 数据访问 | `ExtensionInstallationDao` |
+| `repository` | 安装登记、状态变更和缺失扩展对账 | `ExtensionInstallationRepository` |
+
+Kernel 依赖 Core 的稳定契约执行加载和操作，Core 不反向依赖 Kernel。
 
 ## 4. 扩展与模块模型
 
@@ -387,10 +394,10 @@ Header 只声明请求来源，不能直接作为授权依据。拦截器必须�
 扩展 Endpoint 只使用标准 Jakarta REST 注解完成注册和路由，Endpoint 方法不声明权限
 元数据。
 
-## 7. 三种代码发现入口
+## 7. Java SPI 发现入口
 
-系统支持接口装配、发现注解和 Java SPI 三种入口。它们只解决“如何找到扩展贡献源”，
-最终必须归一化为同一个 `ConsoleExtensionProvider` 契约，不能形成三套资源模型。
+系统只通过 Java SPI 发现扩展 Provider。扩展实现只需要实现统一的
+`ConsoleExtensionProvider` 契约，并在 JAR 中提供标准 SPI 配置文件。
 
 ```java
 public interface ConsoleExtensionProvider {
@@ -401,36 +408,27 @@ public interface ConsoleExtensionProvider {
 }
 ```
 
-### 7.1 接口装配
+### 7.1 SPI 配置
 
-应用或运行时适配器直接把 `ConsoleExtensionProvider` 实例交给发现器。适用于内建模块、
-测试和已有依赖注入容器的应用。
-
-### 7.2 发现注解
-
-扩展入口类型使用专用发现注解标记。注解只标记入口和必要身份，不把复杂菜单、页面
-清单全部塞进注解属性；发现器获得实例后仍调用统一 Provider 接口。
-
-注解扫描由应用适配器或构建期索引完成。`innospots-nexus-core` 不绑定 Spring Boot
-自动配置，也不依赖不受控的全 classpath 反射扫描。
-
-### 7.3 Java SPI
-
-独立扩展 JAR 可通过 `ServiceLoader<ConsoleExtensionProvider>` 发布 Provider。JAR 被加入
-应用依赖后，系统启动时即可发现。SPI 是默认的跨运行时插件入口。
+扩展 JAR 被加入应用依赖或运行时 classpath 后，Kernel 在启动阶段使用
+`ServiceLoader<ConsoleExtensionProvider>` 发现 Provider。SPI 不需要全 ClassPath 反射扫描，
+也不需要扩展实现类添加额外注解。
 
 SPI 文件位于扩展 JAR 的
 `META-INF/services/com.innospots.nexus.core.extension.contract.ConsoleExtensionProvider`，内容为
 Provider 实现类的全限定名。推荐使用构建期工具生成该文件，避免手写类名漂移。
 
-### 7.4 去重规则
+### 7.2 校验规则
 
-三种入口可能发现同一个 Provider：
+Provider 必须满足以下条件：
 
-- 相同 Provider 实例或相同实现类型只归一化一次；
-- 同一 `extensionKey` 对应内容等价的重复来源只保留一份并记录来源；
-- 同一 `extensionKey` 对应不同描述符时视为冲突，相关扩展不得激活；
-- 不允许通过“后发现覆盖先发现”解决冲突。
+- Provider 类型实现 `ConsoleExtensionProvider`；
+- Provider 有可被 `ServiceLoader` 调用的公共无参构造函数；
+- `descriptor()` 返回合法的扩展描述；
+- 当前 ClassLoader 下同一实现类型不会重复注册；
+- 不同 Provider 不得声明重复的 `extensionKey`。
+
+SPI 配置缺失、Provider 无法实例化或描述冲突时，启动发现失败，不发布部分扩展资源。
 
 ## 8. 安装、注册、启停与激活
 
@@ -528,22 +526,21 @@ JAR 加入依赖/classpath（安装）
 
 | 模块/适配层 | 职责 |
 |-------------|------|
-| `innospots-nexus-core` | 扩展、模块、菜单、页面和 Provider 契约；发现、登记、启停和激活校验；保持业务中立 |
+| `innospots-nexus-core` | 供外部工程继承和实现的 Provider 接口及扩展声明结构 |
 | `innospots-nexus-console` | 管理平台的页面 URL 权限注册与统一请求拦截；不声明扩展权限策略 |
-| `innospots-nexus-kernel` | 扩展管理端、资源目录和角色权限分配业务；不实现扩展发现协议 |
-| 应用/运行时适配器 | 接口装配、扩展入口发现、Java SPI、REST 注册和 UiSpec 渲染模块接入 |
+| `innospots-nexus-kernel` | 扩展发现、安装存储、注册启停、激活校验、管理操作、资源目录和权限业务 |
+| 应用/运行时适配器 | 提供 SPI ClassLoader，装配 REST 和 UiSpec 渲染运行时 |
 | UiSpec 渲染模块 | 定位 UiSpec、登记页面 URL 引用、注入路径变量并渲染页面 |
 | 业务扩展 JAR | Provider 实现、模块/页面/菜单声明和 Endpoint |
 
-`innospots-nexus-core` 可以提供业务中立的生命周期、注册表或资源解析基础设施，但不能
-内置具体扩展管理业务，也不能绑定 Spring Boot 自动配置。
+`innospots-nexus-core` 不提供生命周期、注册表和安装持久化实现。Kernel 可以提供这些实际
+能力，但不改变 Core 对外契约，也不绑定 Spring Boot 自动配置。
 
 ## 11. 完整接入示例
 
 ### 11.1 扩展贡献
 
 ```java
-@ConsoleExtensionEntry
 public final class ErpConsoleExtension implements ConsoleExtensionProvider {
 
     @Override
@@ -663,7 +660,7 @@ X-Nexus-Page-Key: sales.order-list
 
 ### 11.5 安装和加载
 
-1. 扩展工程实现 Provider，并通过接口装配、发现注解或 Java SPI 暴露；
+1. 扩展工程实现 Provider，并在 JAR 的 `META-INF/services` 中声明 Provider；
 2. 把扩展 JAR 加入应用依赖，随应用发布；
 3. 应用启动时发现 Provider，登记 `com.innospots.erp`，首次默认启用；
 4. 激活器校验 `sales`、`inventory` 模块及其全部资源；
@@ -716,8 +713,8 @@ X-Nexus-Page-Key: sales.order-list
 
 ### 13.2 发现与生命周期测试
 
-- 接口、发现注解和 Java SPI 均归一化为相同 Provider；
-- 多入口重复发现同一扩展只登记一次；
+- Java SPI 能发现并实例化 Provider；
+- 重复的 Provider 实现类型只登记一次；
 - 首次发现默认启用；
 - 已持久化停用状态在重启后保持；
 - 激活失败不发布部分资源；

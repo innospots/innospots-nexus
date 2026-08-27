@@ -1,0 +1,14 @@
+pageInfo:
+  pageId: order-list
+  title:
+    en: Orders
+pageType: table
+datasources:
+  orders:
+    method: GET
+    url: /api/orders
+actionDefinitions:
+  refresh:
+    actionId: refresh
+    actionType: refresh
+    datasourceKey: orders

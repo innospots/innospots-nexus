@@ -3,13 +3,15 @@ package com.innospots.nexus.kernel.user.domain.request;
 import java.time.LocalDateTime;
 
 /**
- * Request object for registering a user with an external OAuth identity.
+ * Request object for registering a tenant-realm user with an external OAuth identity.
  *
  * @param userName            unique login user name
  * @param displayName         display name shown in UI
- * @param realName            legal or real-world name when provided
  * @param email               email address
  * @param mobile              mobile phone number
+ * @param region              region preference such as CN
+ * @param timeZone            IANA time zone such as Asia/Shanghai
+ * @param language            UI language such as zh-CN
  * @param provider            OAuth provider code
  * @param providerSubject     stable subject identifier from the provider
  * @param providerAccount     provider-side account name
@@ -23,9 +25,11 @@ import java.time.LocalDateTime;
 public record UserOauthRegisterRequest(
         String userName,
         String displayName,
-        String realName,
         String email,
         String mobile,
+        String region,
+        String timeZone,
+        String language,
         String provider,
         String providerSubject,
         String providerAccount,

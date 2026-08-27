@@ -23,7 +23,7 @@ class ThreadPoolBuilderTest {
     @Test
     void buildsNamedThreadPoolAndPropagatesContext() throws Exception {
         TLC.put("traceId", "trace-1");
-        TLC.projectId(1001L);
+        TLC.workspaceId("1001");
         executor = ThreadPoolBuilder.builder("agent-worker")
                 .coreSize(1)
                 .maxSize(1)
@@ -31,7 +31,7 @@ class ThreadPoolBuilderTest {
                 .build();
 
         Future<String> result = executor.submit(() ->
-                Thread.currentThread().getName() + "|" + TLC.getString("traceId") + "|" + TLC.projectId());
+                Thread.currentThread().getName() + "|" + TLC.getString("traceId") + "|" + TLC.workspaceId());
 
         assertThat(result.get(2, TimeUnit.SECONDS)).startsWith("agent-worker-").endsWith("|trace-1|1001");
     }

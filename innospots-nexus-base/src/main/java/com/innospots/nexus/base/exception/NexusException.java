@@ -60,6 +60,31 @@ public class NexusException extends RuntimeException {
         return new NexusException(code.fullCode(), code.summary(), display, cause);
     }
 
+    /**
+     * Builds from a {@link StatusCode} with an override message.
+     *
+     * @param statusCode status code providing the machine-readable code
+     * @param message    human-readable message; blank values fall back to the status summary
+     * @return exception carrying the status full code
+     */
+    public static NexusException build(StatusCode statusCode, String message) {
+        StatusCode code = Objects.requireNonNull(statusCode, "statusCode must not be null");
+        String resolved = message == null || message.isBlank() ? code.summary() : message;
+        return new NexusException(code.fullCode(), resolved);
+    }
+
+    /**
+     * Builds from a {@link StatusCode} with an originating cause.
+     *
+     * @param statusCode status code providing the machine-readable code and summary
+     * @param cause      originating failure
+     * @return exception carrying the status full code
+     */
+    public static NexusException build(StatusCode statusCode, Throwable cause) {
+        StatusCode code = Objects.requireNonNull(statusCode, "statusCode must not be null");
+        return new NexusException(code.fullCode(), code.summary(), cause);
+    }
+
     /** Builds with a machine-readable code and a human-readable message. */
     public static NexusException build(String code, String message) {
         return new NexusException(code, message);

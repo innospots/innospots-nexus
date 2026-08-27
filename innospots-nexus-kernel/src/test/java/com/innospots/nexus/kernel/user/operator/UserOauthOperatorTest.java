@@ -7,15 +7,15 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
 
-import com.innospots.nexus.core.entity.DbPrimaryGenerator;
-import com.innospots.nexus.kernel.user.domain.enums.UserStatus;
+import com.innospots.nexus.core.persistence.id.DbPrimaryGenerator;
 import com.innospots.nexus.kernel.user.dao.UserDao;
 import com.innospots.nexus.kernel.user.dao.UserOauthIdentityDao;
 import com.innospots.nexus.kernel.user.domain.entity.UserEntity;
 import com.innospots.nexus.kernel.user.domain.entity.UserOauthIdentityEntity;
-import com.innospots.nexus.kernel.user.domain.request.UserOauthRegisterRequest;
-import com.innospots.nexus.kernel.user.domain.vo.UserProfileVO;
 import com.innospots.nexus.kernel.user.domain.enums.UserRegisterSource;
+import com.innospots.nexus.kernel.user.domain.enums.UserStatus;
+import com.innospots.nexus.kernel.user.domain.request.UserOauthRegisterRequest;
+import com.innospots.nexus.kernel.user.domain.vo.UserProfileVo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentCaptor.forClass;
@@ -49,7 +49,7 @@ class UserOauthOperatorTest {
         DbPrimaryGenerator generator = new DbPrimaryGenerator();
         doAnswer(invocation -> {
             UserEntity entity = invocation.getArgument(0);
-            entity.setUserId(generator.nextUUID(entity));
+            entity.setTenantUserId(generator.nextUUID(entity));
             return 1;
         }).when(userDao).insert(any(UserEntity.class));
         doAnswer(invocation -> {
@@ -58,12 +58,14 @@ class UserOauthOperatorTest {
             return 1;
         }).when(oauthDao).insert(any(UserOauthIdentityEntity.class));
 
-        UserProfileVO profile = operator.registerWithOauth(new UserOauthRegisterRequest(
+        UserProfileVo profile = operator.registerWithOauth(new UserOauthRegisterRequest(
                 "carol",
                 "Carol",
-                "Carol Smith",
                 "carol@example.com",
                 null,
+                "US",
+                "America/New_York",
+                "en-US",
                 "github",
                 "gh-1003",
                 "carol-gh",
@@ -74,17 +76,18 @@ class UserOauthOperatorTest {
                 "refresh-key",
                 LocalDateTime.now().plusDays(1)));
 
-        assertThat(profile.userId()).startsWith("usr");
+        assertThat(profile.userId()).startsWith("tus");
         assertThat(profile.userId()).hasSize(29);
         assertThat(profile.registerSource()).isEqualTo(UserRegisterSource.OAUTH);
         assertThat(profile.status()).isEqualTo(UserStatus.ACTIVE);
+        assertThat(profile.language()).isEqualTo("en-US");
         ArgumentCaptor<UserEntity> userCaptor = forClass(UserEntity.class);
         verify(userDao).insert(userCaptor.capture());
-        assertThat(userCaptor.getValue().getUserId()).isEqualTo(profile.userId());
+        assertThat(userCaptor.getValue().getTenantUserId()).isEqualTo(profile.userId());
         ArgumentCaptor<UserOauthIdentityEntity> identityCaptor = forClass(UserOauthIdentityEntity.class);
         verify(oauthDao).insert(identityCaptor.capture());
-        assertThat(identityCaptor.getValue().getIdentityId()).startsWith("uoi");
+        assertThat(identityCaptor.getValue().getIdentityId()).startsWith("toi");
         assertThat(identityCaptor.getValue().getIdentityId()).hasSize(29);
-        assertThat(identityCaptor.getValue().getUserId()).isEqualTo(profile.userId());
+        assertThat(identityCaptor.getValue().getTenantUserId()).isEqualTo(profile.userId());
     }
 }

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.base.status.NexusStatusCode;
 
 import java.util.List;
 import java.util.Map;
@@ -22,12 +23,14 @@ public final class Jsons {
     private static final ObjectMapper MAPPER = JsonMapper.builder()
             .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .findAndAddModules()
             .build();
 
     /** Mapper with {@link MaskingModule} registered for field-level conversion and masking support. */
     private static final ObjectMapper MASKED_MAPPER = JsonMapper.builder()
             .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .findAndAddModules()
             .addModule(new MaskingModule())
             .build();
 
@@ -70,7 +73,7 @@ public final class Jsons {
         try {
             return mapper.writeValueAsString(value);
         } catch (JsonProcessingException e) {
-            throw NexusException.build("JSON_WRITE_FAILED", "Failed to write JSON", e);
+            throw NexusException.build(NexusStatusCode.SERIALIZATION_FAILED, e);
         }
     }
 
@@ -81,7 +84,7 @@ public final class Jsons {
         try {
             return MAPPER.readValue(json, type);
         } catch (JsonProcessingException e) {
-            throw NexusException.build("JSON_READ_FAILED", "Failed to read JSON", e);
+            throw NexusException.build(NexusStatusCode.SERIALIZATION_FAILED, e);
         }
     }
 
@@ -93,7 +96,7 @@ public final class Jsons {
             return MAPPER.readValue(json, MAPPER.getTypeFactory()
                     .constructCollectionType(List.class, elementType));
         } catch (JsonProcessingException e) {
-            throw NexusException.build("JSON_READ_FAILED", "Failed to read JSON list", e);
+            throw NexusException.build(NexusStatusCode.SERIALIZATION_FAILED, e);
         }
     }
 
@@ -105,7 +108,7 @@ public final class Jsons {
             return MAPPER.readValue(json, MAPPER.getTypeFactory()
                     .constructCollectionType(Set.class, elementType));
         } catch (JsonProcessingException e) {
-            throw NexusException.build("JSON_READ_FAILED", "Failed to read JSON set", e);
+            throw NexusException.build(NexusStatusCode.SERIALIZATION_FAILED, e);
         }
     }
 
@@ -117,7 +120,23 @@ public final class Jsons {
             return MAPPER.readValue(json, new TypeReference<>() {
             });
         } catch (JsonProcessingException e) {
-            throw NexusException.build("JSON_READ_FAILED", "Failed to read JSON map", e);
+            throw NexusException.build(NexusStatusCode.SERIALIZATION_FAILED, e);
+        }
+    }
+
+    /**
+     * Deserializes a JSON string to a typed value described by {@link TypeReference}.
+     *
+     * @param json JSON text
+     * @param type target type reference
+     * @param <T>  target type
+     * @return deserialized value
+     */
+    public static <T> T fromJson(String json, TypeReference<T> type) {
+        try {
+            return MAPPER.readValue(json, type);
+        } catch (JsonProcessingException e) {
+            throw NexusException.build(NexusStatusCode.SERIALIZATION_FAILED, e);
         }
     }
 }

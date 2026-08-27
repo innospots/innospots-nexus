@@ -13,16 +13,12 @@ public record SimpleQueryRequest(
         long pageSize
 ) {
 
-    public static final long DEFAULT_PAGE_NO = 1L;
-    public static final long DEFAULT_PAGE_SIZE = 20L;
+    public static final long DEFAULT_PAGE_NO = Pagination.DEFAULT_PAGE_NO;
+    public static final long DEFAULT_PAGE_SIZE = Pagination.DEFAULT_PAGE_SIZE;
 
     public SimpleQueryRequest {
-        if (pageNo < 1) {
-            pageNo = DEFAULT_PAGE_NO;
-        }
-        if (pageSize < 1) {
-            pageSize = DEFAULT_PAGE_SIZE;
-        }
+        pageNo = Pagination.normalizePageNo(pageNo);
+        pageSize = Pagination.normalizePageSize(pageSize);
     }
 
     public SimpleQueryRequest() {

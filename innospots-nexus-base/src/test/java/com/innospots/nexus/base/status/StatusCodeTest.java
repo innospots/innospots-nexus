@@ -70,7 +70,8 @@ class StatusCodeTest {
                 NexusStatusCode.OPTIMISTIC_LOCK_FAILED,
                 NexusStatusCode.COMPILE_FAILED,
                 NexusStatusCode.INITIALIZATION_FAILED,
-                NexusStatusCode.SYSTEM_ERROR
+                NexusStatusCode.SYSTEM_ERROR,
+                NexusStatusCode.CRYPTO_FAILED
         );
         assertThat(Arrays.stream(NexusStatusCode.values()).map(Enum::name))
                 .noneMatch(name -> name.startsWith("JSON_"));

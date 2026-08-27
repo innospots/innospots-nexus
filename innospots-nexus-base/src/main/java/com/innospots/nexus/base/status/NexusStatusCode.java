@@ -82,6 +82,10 @@ public enum NexusStatusCode implements StatusCode {
     SYSTEM_ERROR("0017", StatusCategory.INTERNAL_ERROR,
             "System error", "系统错误",
             "Please contact the administrator or retry later", "请联系管理员或稍后重试",
+            500),
+    CRYPTO_FAILED("0018", StatusCategory.CRYPTO,
+            "Cryptography failed", "加解密失败",
+            "Please check the key, payload, or algorithm configuration", "请检查密钥、密文或算法配置",
             500);
 
     private static final String MODULE = "NEX";

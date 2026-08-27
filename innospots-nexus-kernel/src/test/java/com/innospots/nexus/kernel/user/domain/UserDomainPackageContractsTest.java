@@ -27,7 +27,7 @@ class UserDomainPackageContractsTest {
         assertThat(request.pageNo()).isEqualTo(SimpleQueryRequest.DEFAULT_PAGE_NO);
         assertThat(request.pageSize()).isEqualTo(SimpleQueryRequest.DEFAULT_PAGE_SIZE);
         assertThat(request.userName()).isEqualTo("alice");
-        assertThat(request.realName()).isEqualTo("Alice Lee");
+        assertThat(request.displayName()).isEqualTo("Alice Lee");
         assertThat(request.email()).isEqualTo("alice@example.com");
         assertThat(request.mobile()).isEqualTo("13800000000");
     }

@@ -69,6 +69,16 @@ is a reference, not a source template.
 - Must use the shared infrastructure and contracts from `base`, `core`, and
   `console` rather than reimplementing them.
 
+### `innospots-nexus-platform`
+
+- Ops-domain platform built on the console foundation, parallel to kernel.
+- Owns tenant lifecycle (`nx_tenant`), enterprise legal profile
+  (`nx_enterprise`), and later platform users, support access, and platform
+  audit.
+- Exposes `/platform/**` contracts. Must not provide public self-registration.
+- Must depend on `console` (and transitive `core` / `base`). Must not depend
+  on `innospots-nexus-kernel`.
+
 ## Dependency Rules
 
 - `innospots-nexus-base` must remain middleware-free.
@@ -81,10 +91,13 @@ is a reference, not a source template.
   transitive base foundation.
 - `innospots-nexus-kernel` may depend on `innospots-nexus-console`,
   `innospots-nexus-core`, and their transitive base foundation.
+- `innospots-nexus-platform` may depend on `innospots-nexus-console`,
+  `innospots-nexus-core`, and their transitive base foundation.
 - The primary dependency direction is
-  `innospots-nexus-base -> innospots-nexus-core -> innospots-nexus-console
-  -> innospots-nexus-kernel`; dependencies must not point back toward a higher
-  layer.
+  `innospots-nexus-base -> innospots-nexus-core -> innospots-nexus-console`,
+  then `console -> innospots-nexus-kernel` and `console -> innospots-nexus-platform`
+  in parallel. Kernel and platform must not depend on each other. Dependencies
+  must not point back toward a higher layer.
 - `innospots-nexus-core` may provide concrete business-neutral middleware and
   database support, but must not bind itself to Spring Boot
   auto-configuration.

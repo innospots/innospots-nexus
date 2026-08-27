@@ -1,14 +1,13 @@
 package com.innospots.nexus.base.mapstruct;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.innospots.nexus.base.exception.NexusException;
-import com.innospots.nexus.base.json.Jsons;
-import com.innospots.nexus.base.util.DateTimeUtils;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+
+import com.innospots.nexus.base.json.Jsons;
+import com.innospots.nexus.base.util.DateTimeUtils;
 
 /**
  * Base MapStruct-like converter interface between domain models and
@@ -41,12 +40,8 @@ public interface BaseBeanConverter<Model, Entity> {
     }
 
     default Map<String, String> jsonStrToMapStr(String json) {
-        try {
-            return Jsons.mapper().readValue(json, new TypeReference<>() {
-            });
-        } catch (JsonProcessingException e) {
-            throw NexusException.build("JSON_READ_FAILED", "Failed to read JSON string map", e);
-        }
+        return Jsons.fromJson(json, new TypeReference<>() {
+        });
     }
 
     default String mapStrToJsonStr(Map<String, String> map) {
@@ -62,12 +57,8 @@ public interface BaseBeanConverter<Model, Entity> {
     }
 
     default List<Map<String, Object>> jsonStrToListMap(String json) {
-        try {
-            return Jsons.mapper().readValue(json, new TypeReference<>() {
-            });
-        } catch (JsonProcessingException e) {
-            throw NexusException.build("JSON_READ_FAILED", "Failed to read JSON map list", e);
-        }
+        return Jsons.fromJson(json, new TypeReference<>() {
+        });
     }
 
     default String listMapToJsonStr(List<Map<String, Object>> list) {

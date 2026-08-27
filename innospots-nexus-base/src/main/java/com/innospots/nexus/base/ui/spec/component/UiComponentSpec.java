@@ -30,7 +30,6 @@ public class UiComponentSpec {
     private String width;
     private VisibleCondition visibleIf;
     private String icon;
-    private final List<String> permissions = new ArrayList<>();
     private UiTable table;
     private final List<FormField> formFields = new ArrayList<>();
     private UiLayout layout;
@@ -126,17 +125,6 @@ public class UiComponentSpec {
 
     public UiComponentSpec icon(String icon) {
         this.icon = icon;
-        return this;
-    }
-
-    public List<String> permissions() {
-        return List.copyOf(permissions);
-    }
-
-    public UiComponentSpec permission(String permission) {
-        if (permission != null) {
-            permissions.add(permission);
-        }
         return this;
     }
 

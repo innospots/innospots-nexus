@@ -69,6 +69,11 @@
                 <artifactId>innospots-nexus-kernel</artifactId>
                 <version>${revision}</version>
             </dependency>
+            <dependency>
+                <groupId>com.innospots</groupId>
+                <artifactId>innospots-nexus-platform</artifactId>
+                <version>${revision}</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.junit</groupId>

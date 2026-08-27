@@ -14,33 +14,35 @@ import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import org.junit.jupiter.api.Test;
 
-import com.innospots.nexus.core.entity.BaseEntity;
-import com.innospots.nexus.kernel.user.domain.enums.UserStatus;
+import com.innospots.nexus.core.persistence.entity.BaseEntity;
 import com.innospots.nexus.kernel.user.domain.enums.UserRegisterSource;
+import com.innospots.nexus.kernel.user.domain.enums.UserStatus;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class UserEntityContractsTest {
 
     @Test
-    void userEntitiesExposePersistenceTables() {
-        assertPersistenceTable(UserEntity.class, "nx_user");
-        assertPersistenceTable(UserPasswordCredentialEntity.class, "nx_user_password");
-        assertPersistenceTable(UserOauthIdentityEntity.class, "nx_user_oauth");
+    void userEntitiesExposeTenantRealmPersistenceTables() {
+        assertPersistenceTable(UserEntity.class, "nx_tenant_user");
+        assertPersistenceTable(UserPasswordCredentialEntity.class, "nx_tenant_user_password");
+        assertPersistenceTable(UserOauthIdentityEntity.class, "nx_tenant_user_oauth");
+        assertThat(new UserEntity().idPrefix()).isEqualTo("tus");
+        assertThat(new UserPasswordCredentialEntity().idPrefix()).isEqualTo("tpc");
+        assertThat(new UserOauthIdentityEntity().idPrefix()).isEqualTo("toi");
     }
 
     @Test
     void userEntitiesDeclareNecessaryIndexes() {
-        assertIndex(UserEntity.class, "uk_nx_user_user_name", "user_name", true);
-        assertIndex(UserEntity.class, "idx_nx_user_real_name", "real_name", false);
-        assertIndex(UserEntity.class, "idx_nx_user_email", "email", false);
-        assertIndex(UserEntity.class, "idx_nx_user_mobile", "mobile", false);
-        assertIndex(UserEntity.class, "idx_nx_user_status", "status", false);
+        assertIndex(UserEntity.class, "uk_nx_tenant_user_user_name", "user_name", true);
+        assertIndex(UserEntity.class, "uk_nx_tenant_user_email", "email", true);
+        assertIndex(UserEntity.class, "uk_nx_tenant_user_mobile", "mobile", true);
+        assertIndex(UserEntity.class, "idx_nx_tenant_user_status", "status", false);
 
-        assertIndex(UserPasswordCredentialEntity.class, "uk_nx_user_password_user_id", "user_id", true);
+        assertIndex(UserPasswordCredentialEntity.class, "uk_nx_tenant_user_password_user", "tenant_user_id", true);
 
-        assertIndex(UserOauthIdentityEntity.class, "idx_nx_user_oauth_user_id", "user_id", false);
-        assertIndex(UserOauthIdentityEntity.class, "uk_nx_user_oauth_provider_subject",
+        assertIndex(UserOauthIdentityEntity.class, "idx_nx_tenant_user_oauth_user", "tenant_user_id", false);
+        assertIndex(UserOauthIdentityEntity.class, "uk_nx_tenant_user_oauth_provider_subject",
                 "provider, provider_subject", true);
     }
 
@@ -53,21 +55,27 @@ class UserEntityContractsTest {
 
     @Test
     void userEntityStoresRegistrationProfileWithoutPasswordSecret() throws NoSuchFieldException {
-        assertPersistenceId(UserEntity.class.getDeclaredField("userId"), IdType.ASSIGN_UUID);
-        assertField(UserEntity.class, "userId", String.class, 32, false);
+        assertPersistenceId(UserEntity.class.getDeclaredField("tenantUserId"), IdType.ASSIGN_UUID);
+        assertField(UserEntity.class, "tenantUserId", String.class, 32, false);
 
         assertField(UserEntity.class, "userName", String.class, 64, false);
         assertField(UserEntity.class, "displayName", String.class, 128, true);
         assertField(UserEntity.class, "email", String.class, 128, true);
         assertField(UserEntity.class, "mobile", String.class, 32, true);
+        assertField(UserEntity.class, "region", String.class, 32, true);
+        assertField(UserEntity.class, "timeZone", String.class, 64, true);
+        assertField(UserEntity.class, "language", String.class, 32, true);
         assertField(UserEntity.class, "avatarKey", String.class, 256, true);
         assertField(UserEntity.class, "registerSource", String.class, 32, false);
         assertField(UserEntity.class, "status", String.class, 32, false);
+        assertField(UserEntity.class, "emailVerified", Boolean.class, 255, false);
+        assertField(UserEntity.class, "mobileVerified", Boolean.class, 255, false);
         assertField(UserEntity.class, "lastLoginTime", LocalDateTime.class, 255, true);
+        assertField(UserEntity.class, "lastLoginIp", String.class, 64, true);
 
         assertThat(List.of(UserEntity.class.getDeclaredFields()))
                 .extracting(Field::getName)
-                .doesNotContain("password", "passwordHash", "salt");
+                .doesNotContain("password", "passwordHash", "salt", "realName", "locale", "userId");
     }
 
     @Test
@@ -75,7 +83,7 @@ class UserEntityContractsTest {
         assertPersistenceId(UserPasswordCredentialEntity.class.getDeclaredField("credentialId"), IdType.ASSIGN_UUID);
 
         assertField(UserPasswordCredentialEntity.class, "credentialId", String.class, 32, false);
-        assertField(UserPasswordCredentialEntity.class, "userId", String.class, 32, false);
+        assertField(UserPasswordCredentialEntity.class, "tenantUserId", String.class, 32, false);
         assertField(UserPasswordCredentialEntity.class, "passwordHash", String.class, 256, false);
         assertField(UserPasswordCredentialEntity.class, "passwordSalt", String.class, 128, false);
         assertField(UserPasswordCredentialEntity.class, "passwordAlgorithm", String.class, 64, false);
@@ -88,7 +96,7 @@ class UserEntityContractsTest {
         assertPersistenceId(UserOauthIdentityEntity.class.getDeclaredField("identityId"), IdType.ASSIGN_UUID);
 
         assertField(UserOauthIdentityEntity.class, "identityId", String.class, 32, false);
-        assertField(UserOauthIdentityEntity.class, "userId", String.class, 32, false);
+        assertField(UserOauthIdentityEntity.class, "tenantUserId", String.class, 32, false);
         assertField(UserOauthIdentityEntity.class, "provider", String.class, 64, false);
         assertField(UserOauthIdentityEntity.class, "providerSubject", String.class, 256, false);
         assertField(UserOauthIdentityEntity.class, "providerAccount", String.class, 128, true);
@@ -100,20 +108,20 @@ class UserEntityContractsTest {
     @Test
     void entitiesCanBeCreatedByMybatisPlusAndJpaReflection() {
         UserEntity user = new UserEntity();
-        user.setUserId("usr01HZY8J6Y3D6S4V7N9X2M5Q8");
+        user.setTenantUserId("tus01HZY8J6Y3D6S4V7N9X2M5Q8");
         user.setUserName("alice");
         user.setRegisterSource(UserRegisterSource.PASSWORD.name());
         user.setStatus(UserStatus.ACTIVE.name());
 
         UserPasswordCredentialEntity password = new UserPasswordCredentialEntity();
-        password.setUserId(user.getUserId());
+        password.setTenantUserId(user.getTenantUserId());
         password.setPasswordHash("hash");
         password.setPasswordSalt("salt");
         password.setPasswordAlgorithm("argon2id");
         password.setPasswordVersion(1);
 
         UserOauthIdentityEntity oauth = new UserOauthIdentityEntity();
-        oauth.setUserId(user.getUserId());
+        oauth.setTenantUserId(user.getTenantUserId());
         oauth.setProvider("github");
         oauth.setProviderSubject("gh-1001");
 

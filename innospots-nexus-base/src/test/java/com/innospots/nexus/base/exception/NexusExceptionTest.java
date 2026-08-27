@@ -22,4 +22,21 @@ class NexusExceptionTest {
         assertThat(exception.code()).isEqualTo(NexusStatusCode.CONFIG_ERROR.fullCode());
         assertThat(exception.getMessage()).contains("配置错误");
     }
+
+    @Test
+    void buildsExceptionFromStatusCodeWithOverrideMessage() {
+        NexusException exception = NexusException.build(NexusStatusCode.INVALID_PARAMETER, "userId must not be blank");
+
+        assertThat(exception.code()).isEqualTo(NexusStatusCode.INVALID_PARAMETER.fullCode());
+        assertThat(exception.getMessage()).isEqualTo("userId must not be blank");
+    }
+
+    @Test
+    void buildsExceptionFromStatusCodeWithCause() {
+        IllegalStateException cause = new IllegalStateException("boom");
+        NexusException exception = NexusException.build(NexusStatusCode.SERIALIZATION_FAILED, cause);
+
+        assertThat(exception.code()).isEqualTo(NexusStatusCode.SERIALIZATION_FAILED.fullCode());
+        assertThat(exception.getCause()).isSameAs(cause);
+    }
 }

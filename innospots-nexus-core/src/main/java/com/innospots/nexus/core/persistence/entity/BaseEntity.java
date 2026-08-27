@@ -1,4 +1,4 @@
-package com.innospots.nexus.core.domain.entity;
+package com.innospots.nexus.core.persistence.entity;
 
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -16,7 +16,8 @@ import java.time.LocalDateTime;
  * MyBatis-Plus meta-object handling — no manual assignment required.</p>
  *
  * @see AuditMetaObjectHandler
- * @see ProjectBaseEntity
+ * @see TenantBaseEntity
+ * @see WorkspaceBaseEntity
  */
 @Getter
 @Setter
@@ -35,12 +36,12 @@ public class BaseEntity {
     /** Record creation timestamp, set once on insert and never updated. */
     @TableField(fill = FieldFill.INSERT)
     @Column(updatable = false)
-    protected LocalDateTime createdTime;
+    protected LocalDateTime createdAt;
 
     /** Record last-update timestamp, refreshed on every insert and update. */
     @TableField(fill = FieldFill.INSERT_UPDATE)
     @Column
-    protected LocalDateTime updatedTime;
+    protected LocalDateTime updatedAt;
 
     /** Identity of the user who created the record. Immutable after insert. */
     @TableField(fill = FieldFill.INSERT)

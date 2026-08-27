@@ -97,21 +97,17 @@ if (role == null) {
 
 ## Persistence Entities
 
-- Every JPA/MyBatis-Plus persistence entity must inherit either
-  `com.innospots.nexus.core.entity.BaseEntity` or
-  `com.innospots.nexus.core.entity.ProjectBaseEntity`.
-- Use `ProjectBaseEntity` by default. An entity may inherit `BaseEntity` only
-  when the requirement explicitly identifies the data as platform-wide and
-  not project-scoped.
-- Use `BaseEntity` for platform-wide records that are not scoped to one
-  project, such as users, credentials, OAuth identities, service registry
-  records, and global dictionaries.
-- Use `ProjectBaseEntity` for records whose lifecycle and queries are scoped
-  to a project.
-- Do not duplicate audit fields (`createdTime`, `updatedTime`, `createdBy`,
+- Every JPA/MyBatis-Plus persistence entity must inherit
+  `com.innospots.nexus.core.persistence.entity.BaseEntity`,
+  `TenantBaseEntity`, or `WorkspaceBaseEntity`.
+- Use `WorkspaceBaseEntity` for records scoped to a workspace (tenant + workspace).
+  Use `TenantBaseEntity` for records scoped to a tenant but not a workspace.
+  Use `BaseEntity` only when the requirement identifies the data as platform-wide
+  or realm-global (users, credentials, service registry).
+- Do not introduce `ProjectBaseEntity` or a `projectId` isolation column.
+- Do not duplicate audit fields (`createdAt`, `updatedAt`, `createdBy`,
   `updatedBy`) in concrete entities. They are inherited from `BaseEntity`.
-- Do not duplicate `projectId` in concrete project-scoped entities. It is
-  inherited from `ProjectBaseEntity`.
+- Do not duplicate `tenantId` or `workspaceId` in concrete scoped entities.
 - Concrete persistence entity primary keys must be `String` fields annotated
   with `@TableId(type = IdType.ASSIGN_UUID)`, `@Id`, and `@Column(length = 32,
   nullable = false)`.
@@ -146,7 +142,7 @@ if (role == null) {
         @Index(name = "uk_nx_role_code", columnList = "role_code", unique = true)
 })
 @TableName(RoleEntity.TABLE_NAME)
-public class RoleEntity extends ProjectBaseEntity {
+public class RoleEntity extends WorkspaceBaseEntity {
 
     public static final String TABLE_NAME = "nx_role";
 
@@ -353,9 +349,9 @@ public final class RoleCreatedEventHandler
   and document why.
 
 ```java
-public UiComponent setting(String key, Object value) {
+public UiDatasource param(String key, Object value) {
     if (key != null) {
-        settings.put(key, value);
+        params.put(key, value);
     }
     return this;
 }

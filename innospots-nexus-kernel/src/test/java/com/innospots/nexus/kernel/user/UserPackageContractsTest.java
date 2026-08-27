@@ -24,14 +24,6 @@ class UserPackageContractsTest {
     }
 
     @Test
-    void userToolsProvideFrontendPasswordDecryptionContract() throws ClassNotFoundException {
-        assertThat(Class.forName("com.innospots.nexus.kernel.user.tools.UserPasswordDecryptor"))
-                .isInterface();
-        assertThat(Class.forName("com.innospots.nexus.kernel.user.tools.RsaUserPasswordDecryptor"))
-                .isNotInterface();
-    }
-
-    @Test
     void userDaoLivesInDaoPackage() throws ClassNotFoundException {
         assertThat(Class.forName("com.innospots.nexus.kernel.user.dao.UserDao"))
                 .isInterface();

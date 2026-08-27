@@ -39,16 +39,34 @@ class TLCTest {
     }
 
     @Test
-    void exposesProjectAndUserIdentityKeys() {
-        TLC.projectId(1001L);
+    void exposesWorkspaceAndUserIdentityKeys() {
+        TLC.workspaceId("wks01");
+        TLC.tenantId("tnt01");
         TLC.userId(2002L);
         TLC.userName("alice");
 
-        assertThat(TLC.projectId()).isEqualTo(1001L);
+        assertThat(TLC.workspaceId()).isEqualTo("wks01");
+        assertThat(TLC.tenantId()).isEqualTo("tnt01");
         assertThat(TLC.userId()).isEqualTo(2002L);
         assertThat(TLC.userName()).isEqualTo("alice");
-        assertThat(TLC.snapshot()).containsEntry(TLC.PROJECT_ID, 1001L)
+        assertThat(TLC.snapshot()).containsEntry(TLC.WORKSPACE_ID, "wks01")
+                .containsEntry(TLC.TENANT_ID, "tnt01")
                 .containsEntry(TLC.USER_ID, 2002L)
                 .containsEntry(TLC.USER_NAME, "alice");
+    }
+
+    @Test
+    void exposesSecurityRealmAndRealmUserKeys() {
+        TLC.securityRealm("TENANT");
+        TLC.tenantMemberId("tmb01");
+        TLC.platformUserId("pus01");
+
+        assertThat(TLC.securityRealm()).isEqualTo("TENANT");
+        assertThat(TLC.tenantMemberId()).isEqualTo("tmb01");
+        assertThat(TLC.platformUserId()).isEqualTo("pus01");
+        assertThat(TLC.snapshot())
+                .containsEntry(TLC.SECURITY_REALM, "TENANT")
+                .containsEntry(TLC.TENANT_MEMBER_ID, "tmb01")
+                .containsEntry(TLC.PLATFORM_USER_ID, "pus01");
     }
 }

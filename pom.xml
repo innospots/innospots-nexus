@@ -19,6 +19,7 @@
         <module>innospots-nexus-core</module>
         <module>innospots-nexus-console</module>
         <module>innospots-nexus-kernel</module>
+        <module>innospots-nexus-platform</module>
     </modules>
 
     <properties>

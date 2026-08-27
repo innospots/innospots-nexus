@@ -13,23 +13,23 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-import com.innospots.nexus.core.entity.BaseEntity;
+import com.innospots.nexus.core.persistence.entity.BaseEntity;
 
 /**
- * OAuth identity binding for a platform user and one external identity
+ * OAuth identity binding for a tenant-realm user and one external identity
  * provider subject.
  */
 @Getter
 @Setter
 @Entity
 @Table(name = UserOauthIdentityEntity.TABLE_NAME, indexes = {
-        @Index(name = "idx_nx_user_oauth_user_id", columnList = "user_id"),
-        @Index(name = "uk_nx_user_oauth_provider_subject", columnList = "provider, provider_subject", unique = true)
+        @Index(name = "idx_nx_tenant_user_oauth_user", columnList = "tenant_user_id"),
+        @Index(name = "uk_nx_tenant_user_oauth_provider_subject", columnList = "provider, provider_subject", unique = true)
 })
 @TableName(UserOauthIdentityEntity.TABLE_NAME)
 public class UserOauthIdentityEntity extends BaseEntity {
 
-    public static final String TABLE_NAME = "nx_user_oauth";
+    public static final String TABLE_NAME = "nx_tenant_user_oauth";
 
     /**
      * OAuth identity binding identifier.
@@ -41,14 +41,14 @@ public class UserOauthIdentityEntity extends BaseEntity {
 
     @Override
     public String idPrefix() {
-        return "uoi";
+        return "toi";
     }
 
     /**
-     * User identifier.
+     * Tenant-realm user identifier.
      */
     @Column(length = 32, nullable = false)
-    private String userId;
+    private String tenantUserId;
 
     /**
      * External identity provider name.

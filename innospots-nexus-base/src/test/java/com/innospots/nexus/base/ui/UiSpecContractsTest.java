@@ -1,5 +1,6 @@
 package com.innospots.nexus.base.ui;
 
+import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.i18n.I18nObject;
 import com.innospots.nexus.base.json.Jsons;
 import com.innospots.nexus.base.ui.spec.ApiRequest;
@@ -10,13 +11,15 @@ import com.innospots.nexus.base.ui.spec.action.ActionType;
 import com.innospots.nexus.base.ui.spec.action.UiAction;
 import com.innospots.nexus.base.ui.spec.component.ComponentType;
 import com.innospots.nexus.base.ui.spec.component.UiComponentSpec;
-import com.innospots.nexus.base.ui.spec.dsl.UiSpecDsl;
-import com.innospots.nexus.base.ui.spec.dsl.UiSpecDslLoader;
+import com.innospots.nexus.base.ui.spec.config.UiSpecConfig;
+import com.innospots.nexus.base.ui.spec.datasource.UiDatasource;
 import com.innospots.nexus.base.ui.spec.form.FormField;
 import com.innospots.nexus.base.ui.spec.form.OptionItem;
 import com.innospots.nexus.base.ui.spec.layout.ComponentRef;
 import com.innospots.nexus.base.ui.spec.layout.LayoutType;
 import com.innospots.nexus.base.ui.spec.layout.UiLayout;
+import com.innospots.nexus.base.ui.spec.loader.ClasspathUiSpecLoader;
+import com.innospots.nexus.base.ui.spec.parser.JacksonUiSpecParser;
 import com.innospots.nexus.base.ui.spec.table.TableColumn;
 import com.innospots.nexus.base.ui.spec.table.UiTable;
 import org.junit.jupiter.api.Test;
@@ -25,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class UiSpecContractsTest {
 
@@ -49,28 +53,31 @@ class UiSpecContractsTest {
         UiSpec spec = UiSpec.page(PageInfo.of("orders", I18nObject.of("Orders")))
                 .component(table)
                 .layout(layout)
-                .actionDefinition(refresh)
-                .datasource("orders", ApiRequest.get("/api/orders"));
+                .actionDefinition(refresh.datasourceKey("orders"))
+                .datasource("orders", UiDatasource.get("/api/orders")
+                        .param("groupIds", "${groupIds}"));
 
         assertThat(spec.components()).containsKey("orders");
         assertThat(spec.actionDefinitions()).containsKey("refresh");
+        assertThat(spec.datasources().get("orders").params())
+                .containsEntry("groupIds", "${groupIds}");
         assertThat(spec.layout().components()).singleElement().extracting(ComponentRef::componentId).isEqualTo("orders");
     }
 
     @Test
-    void dslAddsVariablesAndFiltersActionDefinitions() {
-        UiSpecDsl dsl = UiSpecDsl.create()
+    void uiSpecAddsVariablesAndFiltersActionDefinitions() {
+        UiSpec spec = UiSpec.create()
                 .actionDefinition(UiAction.of("delete", ActionType.API)
                         .request(ApiRequest.delete("/api/orders/${id}"))
                         .visibleIf(VisibleCondition.expression("${canDelete}")))
                 .actionDefinition(UiAction.of("view", ActionType.LINK)
                         .visibleIf(VisibleCondition.expression("${canView}")));
 
-        dsl.addVariableValues(Map.of("canDelete", false, "canView", true));
-        dsl.filterActionDefinitions((expression, context) -> Boolean.TRUE.equals(context.get(expression)));
+        spec.addVariableValues(Map.of("canDelete", false, "canView", true));
+        spec.filterActionDefinitions((expression, context) -> Boolean.TRUE.equals(context.get(expression)));
 
-        assertThat(dsl.variables()).containsKeys("canDelete", "canView");
-        assertThat(dsl.actionDefinitions()).containsOnlyKeys("view");
+        assertThat(spec.variables()).containsKeys("canDelete", "canView");
+        assertThat(spec.actionDefinitions()).containsOnlyKeys("view");
     }
 
     @Test
@@ -89,28 +96,13 @@ class UiSpecContractsTest {
     }
 
     @Test
-    void keepsLegacyUiPageAndResourceShape() {
-        UiPage page = UiPage.of("home", "Home", "/home")
-                .component(UiComponent.named("name", "input")
-                        .valueType("String")
-                        .setting("placeholder", "Name"));
-        UiResource resource = UiResource.create()
-                .page(page)
-                .schema("orders", Map.of("uri", "/api/orders"));
-
-        assertThat(resource.pages()).singleElement().extracting(UiPage::pageKey).isEqualTo("home");
-        assertThat(page.components()).containsKey("name");
-        assertThat(resource.schemas()).containsKey("orders");
-    }
-
-    @Test
-    void loadsDslFromYamlWithJackson() {
+    void parsesUiSpecFromYamlWithJackson() {
         String yaml = """
                 pageInfo:
                   pageId: orders
                   title:
                     en: Orders
-                type: dashboard
+                pageType: dashboard
                 variables:
                   canView:
                     name: canView
@@ -119,20 +111,106 @@ class UiSpecContractsTest {
                 datasources:
                   orders:
                     method: GET
-                    uri: /api/orders
+                    url: /api/orders
                 actionDefinitions:
                   view:
                     actionId: view
                     actionType: link
+                    datasourceKey: orders
                     visibleIf:
                       expression: ${canView}
                 """;
 
-        UiSpecDsl dsl = UiSpecDslLoader.fromYaml(yaml);
+        JacksonUiSpecParser parser = new JacksonUiSpecParser(UiSpecConfig.defaults());
+        UiSpec spec = parser.parse(yaml);
 
-        assertThat(dsl.type()).isEqualTo("dashboard");
-        assertThat(dsl.pageInfo().pageId()).isEqualTo("orders");
-        assertThat(dsl.datasources()).containsKey("orders");
-        assertThat(dsl.actionDefinitions()).containsKey("view");
+        assertThat(spec.pageType()).isEqualTo("dashboard");
+        assertThat(spec.pageInfo().pageId()).isEqualTo("orders");
+        assertThat(spec.datasources()).containsKey("orders");
+        assertThat(spec.actionDefinitions()).containsKey("view");
+    }
+
+    @Test
+    void rejectsUnknownUiSpecFieldsAndDatasourceReferences() {
+        JacksonUiSpecParser parser = new JacksonUiSpecParser(UiSpecConfig.defaults());
+
+        assertThatThrownBy(() -> parser.parse("""
+                pageInfo:
+                  pageId: orders
+                unsupported: true
+                """))
+                .isInstanceOf(NexusException.class);
+
+        assertThatThrownBy(() -> parser.parse("""
+                pageInfo:
+                  pageId: orders
+                actionDefinitions:
+                  export:
+                    actionId: export
+                    actionType: api
+                    datasourceKey: missing
+                """))
+                .isInstanceOf(NexusException.class)
+                .hasMessageContaining("missing");
+    }
+
+    @Test
+    void loadsUiSpecFromConfiguredClasspathLocation() {
+        UiSpecConfig config = UiSpecConfig.defaults();
+        ClasspathUiSpecLoader loader = new ClasspathUiSpecLoader(
+                config,
+                new JacksonUiSpecParser(config),
+                getClass().getClassLoader());
+
+        UiSpec spec = loader.load("sales", "order-list");
+
+        assertThat(spec.pageInfo().pageId()).isEqualTo("order-list");
+        assertThat(spec.datasources()).containsKey("orders");
+        assertThat(config.resourcePath("sales", "order-list"))
+                .isEqualTo("ui-spec/sales/order-list.yaml");
+    }
+
+    @Test
+    void writesYamlAndSupportsConfiguredYamlSuffix() {
+        UiSpecConfig config = new UiSpecConfig(
+                "pages",
+                ".yml",
+                true);
+        JacksonUiSpecParser parser = new JacksonUiSpecParser(config);
+
+        UiSpec spec = parser.parse("""
+                pageInfo:
+                  pageId: orders
+                pageType: table
+                datasources:
+                  orders:
+                    method: GET
+                    url: /api/orders
+                """);
+        String yaml = parser.write(spec);
+
+        assertThat(spec.pageInfo().pageId()).isEqualTo("orders");
+        assertThat(parser.parse(yaml).pageType()).isEqualTo("table");
+        assertThat(config.resourcePath("sales", "orders"))
+                .isEqualTo("pages/sales/orders.yml");
+    }
+
+    @Test
+    void rejectsNonYamlUiSpecSuffix() {
+        assertThatThrownBy(() -> new UiSpecConfig("pages", ".json", true))
+                .isInstanceOf(NexusException.class)
+                .hasMessageContaining(".yaml");
+    }
+
+    @Test
+    void rejectsUnsafeUiSpecResourceKeys() {
+        UiSpecConfig config = UiSpecConfig.defaults();
+
+        assertThatThrownBy(() -> config.resourcePath("../sales", "orders"))
+                .isInstanceOf(NexusException.class)
+                .hasMessageContaining("moduleKey");
+        assertThatThrownBy(() -> config.resourcePath("sales", "../orders"))
+                .isInstanceOf(NexusException.class)
+                .hasMessageContaining("pageKey");
     }
 }

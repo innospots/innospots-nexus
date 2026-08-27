@@ -13,91 +13,86 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-import com.innospots.nexus.core.entity.BaseEntity;
+import com.innospots.nexus.core.persistence.entity.BaseEntity;
 
 /**
- * User persistence entity for registration profile and lifecycle state.
- * <p>Passwords are intentionally stored in {@link UserPasswordCredentialEntity}
- * so OAuth-only users can exist without local password material.</p>
- *
- * @see UserPasswordCredentialEntity
- * @see UserOauthIdentityEntity
+ * Tenant-realm login identity. Membership in a tenant is {@code nx_tenant_member},
+ * not this table.
  */
 @Getter
 @Setter
 @Entity
 @Table(name = UserEntity.TABLE_NAME, indexes = {
-        @Index(name = "uk_nx_user_user_name", columnList = "user_name", unique = true),
-        @Index(name = "idx_nx_user_real_name", columnList = "real_name"),
-        @Index(name = "idx_nx_user_email", columnList = "email"),
-        @Index(name = "idx_nx_user_mobile", columnList = "mobile"),
-        @Index(name = "idx_nx_user_status", columnList = "status")
+        @Index(name = "uk_nx_tenant_user_user_name", columnList = "user_name", unique = true),
+        @Index(name = "uk_nx_tenant_user_email", columnList = "email", unique = true),
+        @Index(name = "uk_nx_tenant_user_mobile", columnList = "mobile", unique = true),
+        @Index(name = "idx_nx_tenant_user_status", columnList = "status")
 })
 @TableName(UserEntity.TABLE_NAME)
 public class UserEntity extends BaseEntity {
 
-    public static final String TABLE_NAME = "nx_user";
+    public static final String TABLE_NAME = "nx_tenant_user";
 
     /**
-     * User identifier.
+     * Tenant-realm user identifier.
      */
     @TableId(type = IdType.ASSIGN_UUID)
     @Id
     @Column(length = 32, nullable = false)
-    private String userId;
+    private String tenantUserId;
 
     @Override
     public String idPrefix() {
-        return "usr";
+        return "tus";
     }
 
     /**
-     * Unique login user name.
+     * Unique login user name in the tenant realm.
      */
     @Column(length = 64, nullable = false)
     private String userName;
 
     /**
-     * Display name shown in the UI.
+     * Display name; empty values fall back to {@code userName} in UI.
      */
     @Column(length = 128)
     private String displayName;
 
     /**
-     * Legal or real-world name when provided.
-     */
-    @Column(length = 128)
-    private String realName;
-
-    /**
-     * Email address.
+     * Email address; unique when present.
      */
     @Column(length = 128)
     private String email;
 
     /**
-     * Mobile phone number.
+     * Mobile number; unique when present.
      */
     @Column(length = 32)
     private String mobile;
+
+    /**
+     * Region preference such as CN or US.
+     */
+    @Column(length = 32)
+    private String region;
+
+    /**
+     * IANA time zone such as Asia/Shanghai.
+     */
+    @Column(length = 64)
+    private String timeZone;
+
+    /**
+     * UI language such as zh-CN.
+     */
+    @Column(length = 32)
+    private String language;
 
     /**
      * Avatar storage key.
      */
     @Column(length = 256)
     private String avatarKey;
-
-    /**
-     * Preferred locale.
-     */
-    @Column(length = 32)
-    private String locale;
-
-    /**
-     * Preferred time zone.
-     */
-    @Column(length = 64)
-    private String timeZone;
 
     /**
      * Original registration source.

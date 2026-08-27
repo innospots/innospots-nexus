@@ -1,4 +1,4 @@
 /**
- * Focused user-domain tools such as frontend password decryption.
+ * Kernel-local user helpers. Password decrypt/validation SPI lives in console.
  */
 package com.innospots.nexus.kernel.user.tools;

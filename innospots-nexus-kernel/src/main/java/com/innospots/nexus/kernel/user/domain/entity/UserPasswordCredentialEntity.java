@@ -13,7 +13,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-import com.innospots.nexus.core.entity.BaseEntity;
+import com.innospots.nexus.core.persistence.entity.BaseEntity;
 
 /**
  * Password credential persistence entity for users registered with local
@@ -23,12 +23,12 @@ import com.innospots.nexus.core.entity.BaseEntity;
 @Setter
 @Entity
 @Table(name = UserPasswordCredentialEntity.TABLE_NAME, indexes = {
-        @Index(name = "uk_nx_user_password_user_id", columnList = "user_id", unique = true)
+        @Index(name = "uk_nx_tenant_user_password_user", columnList = "tenant_user_id", unique = true)
 })
 @TableName(UserPasswordCredentialEntity.TABLE_NAME)
 public class UserPasswordCredentialEntity extends BaseEntity {
 
-    public static final String TABLE_NAME = "nx_user_password";
+    public static final String TABLE_NAME = "nx_tenant_user_password";
 
     /**
      * Password credential identifier.
@@ -40,14 +40,14 @@ public class UserPasswordCredentialEntity extends BaseEntity {
 
     @Override
     public String idPrefix() {
-        return "upc";
+        return "tpc";
     }
 
     /**
-     * User identifier.
+     * Tenant-realm user identifier.
      */
     @Column(length = 32, nullable = false)
-    private String userId;
+    private String tenantUserId;
 
     /**
      * Hashed password value.
