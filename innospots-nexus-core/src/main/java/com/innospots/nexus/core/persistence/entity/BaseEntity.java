@@ -1,7 +1,8 @@
-package com.innospots.nexus.core.entity;
+package com.innospots.nexus.core.domain.entity;
 
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.innospots.nexus.core.persistence.handler.AuditMetaObjectHandler;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
@@ -34,21 +35,21 @@ public class BaseEntity {
     /** Record creation timestamp, set once on insert and never updated. */
     @TableField(fill = FieldFill.INSERT)
     @Column(updatable = false)
-    private LocalDateTime createdTime;
+    protected LocalDateTime createdTime;
 
     /** Record last-update timestamp, refreshed on every insert and update. */
     @TableField(fill = FieldFill.INSERT_UPDATE)
     @Column
-    private LocalDateTime updatedTime;
+    protected LocalDateTime updatedTime;
 
     /** Identity of the user who created the record. Immutable after insert. */
     @TableField(fill = FieldFill.INSERT)
     @Column(length = 64, updatable = false)
-    private String createdBy;
+    protected String createdBy;
 
     /** Identity of the user who last updated the record. */
     @TableField(fill = FieldFill.INSERT_UPDATE)
     @Column(length = 64)
-    private String updatedBy;
+    protected String updatedBy;
 
 }

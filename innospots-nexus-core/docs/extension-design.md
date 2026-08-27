@@ -9,16 +9,16 @@
 ## 2. 设计原则
 
 1. **代码是扩展结构事实源。** 扩展、模块、页面和菜单通过 Java 接口、发现注解或
-   Java SPI 暴露；页面使用的接口 URL 来自对应页面 DSL。
+   Java SPI 暴露；页面使用的接口 URL 来自对应页面 UiSpec。
 2. **安装与启停分离。** 把扩展 JAR 加入应用依赖或运行时 classpath 即完成安装；系统
    启动时发现并注册扩展，管理端控制是否启用。
 3. **扩展与模块分层。** 一个扩展是安装和启停单元，一个扩展可以贡献多个
    `moduleKey`；模块是资源归属和权限目录的一级边界。
 4. **所属关系显式。** 扩展拥有模块，模块分别拥有页面树和菜单树；页面树表达页面领域
-   关系，菜单页面节点通过 `pageKey` 引用模块页面，页面 DSL 中的 URL 引用归属于该页面。
+   关系，菜单页面节点通过 `pageKey` 引用模块页面，页面 UiSpec 中的 URL 引用归属于该页面。
 5. **声明与渲染解耦。** 扩展只声明 `pageKey` 和 `pagePath`。渲染模块通过
-   `moduleKey + pageKey` 定位 DSL 文件，扩展不保存 DSL 内容或文件路径。
-6. **资源声明与权限分配分离。** 扩展和页面 DSL 只提供资源事实，不声明角色、用户组或
+   `moduleKey + pageKey` 定位 UiSpec 文件，扩展不保存 UiSpec 内容或文件路径。
+6. **资源声明与权限分配分离。** 扩展和页面 UiSpec 只提供资源事实，不声明角色、用户组或
    授权策略。权限模块在管理端统一为页面及页面 URL 分配角色权限。
 7. **显式、稳定、失败关闭。** 模块、菜单和页面使用稳定 key，页面接口使用明确的页面
    与 URL 复合身份；重复、悬空引用或无法解析的加载入口会阻止该扩展激活。
@@ -33,7 +33,7 @@ ConsoleExtensionProvider
 │   └── modules
 │       ├── ExtensionModuleDeclaration (moduleKey = "sales")
 │       │   ├── page tree
-│       │   │   └── PageDslDeclaration
+│       │   │   └── UiSpecPageDeclaration
 │       │   │       ├── pageKey
 │       │   │       ├── pagePath
 │       │   │       └── children
@@ -55,13 +55,32 @@ module -> page tree
 page -> child pages
 module -> menu tree
 menu -> child menu nodes or pageKey reference
-moduleKey + pageKey -> DSL renderer
-page DSL -> referenced URLs
+moduleKey + pageKey -> UiSpec renderer
+page UiSpec -> referenced URLs
 qualified pageKey + request URL -> role permission check
 ```
 
 页面先归属于模块，菜单再通过 `pageKey` 引用模块页面。`pagePath` 只负责路由匹配，不参与
 菜单和页面的关联。
+
+### 3.1 Core 扩展包职责
+
+扩展运行时实现位于 `innospots-nexus-core` 的
+`com.innospots.nexus.core.extension` 命名空间下，按变化原因拆分子包：
+
+| 子包 | 职责 | 主要类型 |
+|------|------|----------|
+| `contract` | 对外扩展入口契约和发现注解 | `ConsoleExtensionProvider`、`ConsoleExtensionEntry` |
+| `declaration` | 扩展、模块、页面、菜单的不可变声明 | `ExtensionDescriptor`、`ExtensionModuleDeclaration`、`UiSpecPageDeclaration`、`MenuDeclaration` |
+| `discovery` | 直接装配、注解入口和 Java SPI 的发现归一化 | `ExtensionProviderDiscovery` |
+| `lifecycle` | 内存注册、启停、激活校验和状态快照 | `ExtensionRegistry`、`ExtensionRegistration`、`ExtensionState` |
+| `entity` | 安装注册表持久化实体 | `ExtensionInstallationEntity` |
+| `dao` | 单表 MyBatis-Plus 数据访问 | `ExtensionInstallationDao` |
+| `repository` | 基于 DAO 的注册、状态变更和查询协调 | `ExtensionInstallationRepository` |
+
+`repository` 只依赖 `dao` 完成数据库读写；`lifecycle` 通过可选的
+`ExtensionInstallationRepository` 把启动注册、启用、停用、激活失败等状态同步到安装注册表。
+因此没有持久化适配器时仍可使用纯内存注册表，接入数据库后不会改变扩展声明契约。
 
 ## 4. 扩展与模块模型
 
@@ -88,7 +107,7 @@ public record ExtensionDescriptor(
 | `version` | 扩展版本，用于诊断和兼容性校验，不参与资源身份 |
 | `displayName` | 管理端展示名，可国际化，可随版本变化 |
 | `description` | 国际化扩展用途说明，不参与运行时判定 |
-| `modules` | 扩展拥有的模块，不得为空；同一扩展内 `moduleKey` 不得重复 |
+| `modules` | 扩展拥有的模块，不得为空；`moduleKey` 在系统资源命名空间中全局唯一 |
 
 `extensionKey` 只用于发现、登记、启停、版本和诊断，不直接替代资源的 `moduleKey`。
 
@@ -101,7 +120,7 @@ public record ExtensionModuleDeclaration(
         String moduleKey,
         I18nObject displayName,
         I18nObject description,
-        List<PageDslDeclaration> pages,
+        List<UiSpecPageDeclaration> pages,
         List<MenuDeclaration> menuTree
 ) {
 }
@@ -140,40 +159,45 @@ module:inventory
 页面接口权限使用 `(moduleKey, pageKey, urlPattern)` 作为唯一身份。URL 发生变化时视为
 新的页面接口权限项。
 
-## 5. 页面 DSL、页面关系与菜单
+## 5. 页面 UiSpec、页面关系与菜单
 
 ### 5.1 模块页面声明
 
-模块使用 `PageDslDeclaration` 声明平台页面：
+模块使用 `UiSpecPageDeclaration` 声明平台页面：
 
 ```java
-public record PageDslDeclaration(
+public record UiSpecPageDeclaration(
         String pageKey,
         String pagePath,
-        List<PageDslDeclaration> children
+        List<UiSpecPageDeclaration> children
 ) {
 }
 ```
 
 | 字段 | 作用 |
 |------|------|
-| `pageKey` | 模块内唯一页面标识，同时对应 DSL 配置文件中的 `pageKey` |
+| `pageKey` | 模块内唯一页面标识，同时对应 UiSpec 的 `pageInfo.pageId` |
 | `pagePath` | Console 页面路径模板，用于匹配浏览器路径和提取变量 |
 | `children` | 子页面声明，表达父页面到子页面的单向领域关系 |
 
 模块内页面资源 ID 为 `page:<moduleKey>.<pageKey>`。`pageKey` 发布后保持稳定；
 `pagePath` 可以随页面导航结构调整，但变更时必须避免与其他活动页面产生匹配冲突。
 
-扩展声明不包含 DSL 内容，也不保存 `dslPath`。渲染模块通过 `moduleKey + pageKey` 定位唯一
-DSL 文件，并校验文件内部的 `pageKey` 与声明一致。
+扩展声明不包含 UiSpec 内容，也不保存 `uiSpecPath`。Base 的 `UiSpecLoader` 默认通过
+`ui-spec/{moduleKey}/{pageKey}.yaml` 定位唯一 UiSpec 文件，并校验文件内部的
+`pageInfo.pageId` 与声明一致。应用可以替换加载器，从对象存储、数据库或页面服务读取规约。
 
-DSL 文件既可以来自扩展 JAR 的静态资源，也可以由独立部署的页面服务提供。具体来源、
+UiSpec 模型、配置、解析、加载和校验契约属于 `innospots-nexus-base` 的
+`com.innospots.nexus.base.ui.spec` 包；Console 和渲染运行时只消费这些契约，不重复定义页面
+规约模型。
+
+UiSpec 文件既可以来自扩展 JAR 的静态资源，也可以由独立部署的页面服务提供。具体来源、
 地址和加载协议由渲染运行时管理，不进入扩展声明；两种部署方式使用相同的
 `moduleKey + pageKey` 页面身份和查询契约。
 
 ### 5.2 页面树与声明边界
 
-模块 `pages` 中的节点是页面树根节点，`PageDslDeclaration.children` 直接包含子页面。
+模块 `pages` 中的节点是页面树根节点，`UiSpecPageDeclaration.children` 直接包含子页面。
 每个声明页面最多只有一个父页面；同一个 `pageKey` 不得在页面树中重复出现。注册表递归
 展开页面树后，为子页面生成 `parentPageResourceId`。
 
@@ -191,7 +215,7 @@ page:sales.order-edit
   parent = page:sales.order-detail
 ```
 
-只有具有独立 DSL `pageKey`、需要成为独立 PAGE 资源的页面才进入页面树。一个 DSL 页面
+只有具有独立 UiSpec `pageInfo.pageId`、需要成为独立 PAGE 资源的页面才进入页面树。一个 UiSpec 页面
 内部的弹窗、抽屉、页签、局部组件和内部视图不需要声明，也不产生 PAGE 资源。页面之间
 通过前端链接跳转，不要求它们出现在菜单中。
 
@@ -276,9 +300,9 @@ menu:sales.order-list
   page = page:sales.order-list
 ```
 
-### 5.5 DSL 查询与渲染
+### 5.5 UiSpec 查询与渲染
 
-页面注册表以 `(moduleKey, pageKey)` 为唯一键保存 `PageDslDeclaration`。匹配页面路径后，
+页面注册表以 `(moduleKey, pageKey)` 为唯一键保存 `UiSpecPageDeclaration`。匹配页面路径后，
 宿主向渲染模块提交：
 
 ```java
@@ -290,8 +314,8 @@ public record PageRenderRequest(
 }
 ```
 
-`PageDslDeclaration` 只定义资源身份、领域关系和路径模板。页面标题、描述等展示元数据由
-渲染模块读取 DSL 后提供给资源目录，不在扩展声明中重复维护。
+`UiSpecPageDeclaration` 只定义资源身份、领域关系和路径模板。页面标题、描述等展示元数据由
+渲染模块读取 UiSpec 后提供给资源目录，不在扩展声明中重复维护。
 
 渲染顺序：
 
@@ -299,18 +323,18 @@ public record PageRenderRequest(
 2. 权限模块根据 PAGE/MENU 资源过滤用户可访问的导航与页面；
 3. 页面注册表匹配 `pagePath`，确定 `moduleKey + pageKey`；
 4. 注册表提取命名路径变量，构造 `PageRenderRequest`；
-5. 渲染模块按 `moduleKey + pageKey` 查询唯一 DSL 文件；
-6. 渲染模块校验 DSL 文件内部 `pageKey`，登记该页面引用的接口 URL，并注入
+5. 渲染模块按 `moduleKey + pageKey` 查询唯一 UiSpec 文件；
+6. 渲染模块校验 UiSpec 文件内部 `pageInfo.pageId`，登记该页面引用的接口 URL，并注入
    `pathVariables`；
-7. DSL 文件不存在、pageKey 不一致、URL 引用无效或渲染失败时，记录模块、页面和路径
+7. UiSpec 文件不存在、`pageInfo.pageId` 不一致、URL 引用无效或渲染失败时，记录模块、页面和路径
    变量诊断。
 
 ## 6. 页面接口权限
 
 ### 6.1 页面 URL 权限项
 
-页面 DSL 中的 datasource 和 action 可以引用后端接口 URL。系统加载页面 DSL 后，按页面
-登记这些 URL，并在管理端提供角色权限配置。本文只定义权限协作方式，不定义 DSL 内部
+页面 UiSpec 中的 datasource 和 action 可以引用后端接口 URL。系统加载页面 UiSpec 后，按页面
+登记这些 URL，并在管理端提供角色权限配置。本文只定义权限协作方式，不定义 UiSpec 内部
 字段结构。
 
 一个页面 URL 权限项由以下内容唯一确定：
@@ -343,7 +367,7 @@ X-Nexus-Page-Key: sales.order-list
 ```
 
 Header 只声明请求来源，不能直接作为授权依据。拦截器必须确认扩展和页面处于活动
-状态，并确认实际请求 URL 被该页面 DSL 引用。这样不能通过伪造其他页面的 `pageKey`
+状态，并确认实际请求 URL 被该页面 UiSpec 引用。这样不能通过伪造其他页面的 `pageKey`
 绕过权限。
 
 ### 6.3 统一拦截流程
@@ -387,7 +411,7 @@ public interface ConsoleExtensionProvider {
 扩展入口类型使用专用发现注解标记。注解只标记入口和必要身份，不把复杂菜单、页面
 清单全部塞进注解属性；发现器获得实例后仍调用统一 Provider 接口。
 
-注解扫描由应用适配器或构建期索引完成。`innospots-nexus-console` 不绑定 Spring Boot
+注解扫描由应用适配器或构建期索引完成。`innospots-nexus-core` 不绑定 Spring Boot
 自动配置，也不依赖不受控的全 classpath 反射扫描。
 
 ### 7.3 Java SPI
@@ -396,7 +420,7 @@ public interface ConsoleExtensionProvider {
 应用依赖后，系统启动时即可发现。SPI 是默认的跨运行时插件入口。
 
 SPI 文件位于扩展 JAR 的
-`META-INF/services/com.innospots.nexus.console.extension.ConsoleExtensionProvider`，内容为
+`META-INF/services/com.innospots.nexus.core.extension.contract.ConsoleExtensionProvider`，内容为
 Provider 实现类的全限定名。推荐使用构建期工具生成该文件，避免手写类名漂移。
 
 ### 7.4 去重规则
@@ -445,6 +469,8 @@ JAR 加入依赖/classpath（安装）
 
 注册阶段保存扩展身份、版本、来源、模块清单摘要、发现时间和期望启用状态。禁用扩展
 仍可以在扩展管理中查看，但其菜单、页面、Endpoint 和活动资源不进入运行时。
+安装注册 Repository 提供全量查询和启动对账能力：本次发现结果之外的历史记录转为
+`MISSING`，但保留管理员的 `enabled` 期望值，以便 JAR 恢复后继续按原配置处理。
 
 ### 8.3 原子激活
 
@@ -455,7 +481,7 @@ JAR 加入依赖/classpath（安装）
 3. 构建页面树并校验 `pageKey`、父子关系和 `pagePath` 模板；
 4. 构建菜单树并校验菜单引用的 `pageKey`；
 5. 注册只包含标准 Jakarta REST 注解的 Endpoint；
-6. 由渲染模块校验 `moduleKey + pageKey` 可定位 DSL 且内部 pageKey 一致；
+6. 由渲染模块校验 `moduleKey + pageKey` 可定位 UiSpec 且内部 `pageInfo.pageId` 一致；
 7. 校验页面引用的 URL，并构建活动页面 URL 权限索引；
 8. 原子发布扩展资源到活动注册表。
 
@@ -472,7 +498,7 @@ JAR 加入依赖/classpath（安装）
 - 新请求不能再进入已停用扩展，执行中的请求按运行时适配器策略完成或终止。
 
 重新启用必须重新执行完整激活校验。只有原子发布成功后，状态才变为 `ACTIVE`。
-若底层 REST 运行时或 DSL 渲染模块不支持安全的动态卸载，管理端仍保存启停状态，但界面
+若底层 REST 运行时或 UiSpec 渲染模块不支持安全的动态卸载，管理端仍保存启停状态，但界面
 必须明确提示“重启后生效”，不能伪装成已完成热停用。
 
 ## 9. 权限模块边界
@@ -481,7 +507,7 @@ JAR 加入依赖/classpath（安装）
 
 - 资源 ID、类型、名称和所属 `moduleKey`；
 - 菜单父子关系、页面与菜单关系；
-- 页面 DSL 引用的 URL 及其所属页面；
+- 页面 UiSpec 引用的 URL 及其所属页面；
 - 扩展是否处于活动状态。
 
 扩展不得声明：
@@ -502,10 +528,11 @@ JAR 加入依赖/classpath（安装）
 
 | 模块/适配层 | 职责 |
 |-------------|------|
-| `innospots-nexus-console` | 扩展、模块、菜单、页面和 Provider 契约；保持业务中立 |
-| `innospots-nexus-kernel` | 扩展登记、启停管理、资源目录、角色权限配置和页面 URL 权限拦截 |
-| 应用/运行时适配器 | 接口装配、扩展入口发现、Java SPI、REST 注册和 DSL 渲染模块接入 |
-| DSL 渲染模块 | 定位 DSL、登记页面 URL 引用、注入路径变量并渲染页面 |
+| `innospots-nexus-core` | 扩展、模块、菜单、页面和 Provider 契约；发现、登记、启停和激活校验；保持业务中立 |
+| `innospots-nexus-console` | 管理平台的页面 URL 权限注册与统一请求拦截；不声明扩展权限策略 |
+| `innospots-nexus-kernel` | 扩展管理端、资源目录和角色权限分配业务；不实现扩展发现协议 |
+| 应用/运行时适配器 | 接口装配、扩展入口发现、Java SPI、REST 注册和 UiSpec 渲染模块接入 |
+| UiSpec 渲染模块 | 定位 UiSpec、登记页面 URL 引用、注入路径变量并渲染页面 |
 | 业务扩展 JAR | Provider 实现、模块/页面/菜单声明和 Endpoint |
 
 `innospots-nexus-core` 可以提供业务中立的生命周期、注册表或资源解析基础设施，但不能
@@ -538,13 +565,13 @@ public final class ErpConsoleExtension implements ConsoleExtensionProvider {
                 I18nObject.of(
                         "en", "Sales management",
                         "zh", "销售管理"),
-                List.of(new PageDslDeclaration(
+                List.of(new UiSpecPageDeclaration(
                         "order-list",
                         "/sales/orders",
-                        List.of(new PageDslDeclaration(
+                        List.of(new UiSpecPageDeclaration(
                                 "order-detail",
                                 "/sales/orders/{orderId}",
-                                List.of(new PageDslDeclaration(
+                                List.of(new UiSpecPageDeclaration(
                                         "order-edit",
                                         "/sales/orders/{orderId}/edit",
                                         List.of())))))),
@@ -596,13 +623,13 @@ pathVariables = {
 }
 ```
 
-渲染模块使用 `sales + order-edit` 定位 DSL 文件，并把 `orderId` 注入渲染上下文。菜单只
+渲染模块使用 `sales + order-edit` 定位 UiSpec 文件，并把 `orderId` 注入渲染上下文。菜单只
 引用 `order-list`；详情和编辑页面无需菜单，也不影响其 PAGE 资源归属。
 
 ### 11.3 页面内部视图
 
-如果订单 DSL 内部还有弹窗、抽屉、页签或不具备独立 DSL `pageKey` 的视图，这些内容不
-进入 `PageDslDeclaration.children`，也不生成 PAGE 资源。
+如果订单 UiSpec 内部还有弹窗、抽屉、页签或不具备独立 UiSpec `pageInfo.pageId` 的视图，这些内容不
+进入 `UiSpecPageDeclaration.children`，也不生成 PAGE 资源。
 
 ### 11.4 Endpoint 与页面接口鉴权
 
@@ -623,7 +650,7 @@ public class OrderEndpoint {
 }
 ```
 
-Endpoint 只声明标准 REST 路由。假设 `order-list` 页面 DSL 引用了 `/sales/orders/export`，
+Endpoint 只声明标准 REST 路由。假设 `order-list` 页面 UiSpec 引用了 `/sales/orders/export`，
 页面发起导出请求时携带：
 
 ```http
@@ -640,7 +667,7 @@ X-Nexus-Page-Key: sales.order-list
 2. 把扩展 JAR 加入应用依赖，随应用发布；
 3. 应用启动时发现 Provider，登记 `com.innospots.erp`，首次默认启用；
 4. 激活器校验 `sales`、`inventory` 模块及其全部资源；
-5. REST 适配器注册 Endpoint，DSL 渲染模块校验页面并登记页面 URL 引用；
+5. REST 适配器注册 Endpoint，UiSpec 渲染模块校验页面并登记页面 URL 引用；
 6. Console 获取活动页面树、菜单树、路径模板和页面 URL 权限项；
 7. 管理员在权限模块中为页面及页面 URL 配置角色权限；
 8. 管理员可在扩展管理中停用或重新启用整个扩展。
@@ -654,7 +681,7 @@ X-Nexus-Page-Key: sales.order-list
 - 同一模块内 menu/page 局部 key 唯一；
 - 规范化后的 `type:key` 全局唯一；
 - 页面树无循环，每个页面最多一个父页面；
-- `pageKey` 与 DSL 文件内部 pageKey 一致；
+- `pageKey` 与 UiSpec 文件内部 `pageInfo.pageId` 一致；
 - `pagePath` 以 `/` 开头，路径变量合法且不重复；
 - 静态/变量模板匹配优先级确定，不存在结构相同或同优先级歧义模板；
 - 菜单节点必须在“目录节点”和“页面节点”两种有效字段组合中选择一种；
@@ -679,13 +706,13 @@ X-Nexus-Page-Key: sales.order-list
 - 页面树正确生成单向父子资源关系；
 - 菜单树正确引用模块页面，未被菜单引用的页面仍保留 PAGE 资源；
 - 目录节点和页面节点的有效字段组合可以正确识别，其他组合激活失败；
-- DSL 内部组件和视图不产生独立 PAGE 资源；
+- UiSpec 内部组件和视图不产生独立 PAGE 资源；
 - 静态路径优先于变量模板；
 - 路径变量正确提取、URL 解码并以不可变 Map 传递；
 - 结构相同或同优先级歧义的路径模板失败关闭；
-- 渲染模块可以通过 `moduleKey + pageKey` 唯一定位 DSL；
-- 声明 pageKey 与 DSL 内部 pageKey 不一致时激活失败；
-- 页面 DSL 引用的 URL 可以按完整页面标识正确登记和去重。
+- 渲染模块可以通过 `moduleKey + pageKey` 唯一定位 UiSpec；
+- 声明 `pageKey` 与 UiSpec 内部 `pageInfo.pageId` 不一致时激活失败；
+- 页面 UiSpec 引用的 URL 可以按完整页面标识正确登记和去重。
 
 ### 13.2 发现与生命周期测试
 
