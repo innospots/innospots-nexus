@@ -62,10 +62,14 @@ new exception subclass for each business error; differentiate errors with
 
 The raw-code overload (`build(String, String, ...)`) is reserved for an
 interop boundary such as a plugin, remote provider, persisted historical
-payload, or compatibility adapter. Before accepting a raw code:
+payload, or compatibility adapter. `StatusCodeRules` validates the separate
+module/category/local components used by typed statuses; it is not, by itself,
+a parser or allowlist for arbitrary full-code strings. Before accepting a raw
+code:
 
-1. validate the complete `MODULE + CATEGORY + LOCAL` shape with
-   `StatusCodeRules`;
+1. validate the complete `MODULE + CATEGORY + LOCAL` shape with a dedicated
+   full-code parser or equivalent adapter check (and use `StatusCodeRules` for
+   the individual components);
 2. check it against an explicit allowlist or the owning registry;
 3. preserve the source system in structured logs or metadata rather than
    embedding untrusted text in the public message; and
@@ -73,7 +77,10 @@ payload, or compatibility adapter. Before accepting a raw code:
 
 Ordinary in-repository application calls must not pass
 `status.fullCode()` or a copied string to the raw-code overload when the typed
-status is available.
+status is available. Existing opaque legacy strings that do not have the
+canonical nine-character shape are compatibility debt: accept them only in a
+designated adapter, never allocate new ones, and map them to a canonical typed
+status before a current transport contract when possible.
 
 ### 3.2 Messages, display overrides, and causes
 
@@ -82,7 +89,11 @@ status is available.
   does not change the status identity or HTTP mapping.
 - The status `message()` states what happened. `advice()` states what the
   caller can do next. Keep both English and Chinese values meaningful even
-  when a client currently displays only one locale.
+  when a client currently displays only one locale. A successful status may
+  intentionally have blank advice; a new non-success status must provide both
+  locales. Technical catalogs that currently duplicate English text for both
+  locales are legacy behavior and should be localized when changed without
+  silently changing compatibility keys.
 - Pass the original `Throwable` as the cause when translating a lower-level
   failure. Never replace a useful cause with a newly constructed exception
   that loses diagnostics.
@@ -92,6 +103,11 @@ status is available.
 - Stable status text must not contain request IDs, record IDs, file paths,
   provider responses, user input, or other volatile values. Put such values in
   structured, access-controlled logs or tracing context.
+- A runtime message passed to `NexusException.build(StatusCode, String)` is
+  also a response surface. Apply the same restrictions as `message()`,
+  `advice()`, and `display()`: do not include secrets, credentials, IDs, user
+  input, provider text, SQL, paths, or stack traces. Prefer the status summary
+  and put safe diagnostics in structured context.
 
 ## 4. Throwing, catching, and translating
 
@@ -132,17 +148,20 @@ native failure for the owning boundary to translate.
 
 ### 4.3 Response mapping
 
-Endpoint infrastructure maps `NexusException` centrally to `R.fail(...)` (or
-`R.from(exception)`) and uses the status's HTTP code. Services, operators, and
-domain models must not construct `R` responses or leak stack traces. A public
-response contains the stable code, localized message/advice selected by the
-transport, and safe details only; it does not contain the cause chain or
-internal stack trace.
+Endpoint infrastructure catches `NexusException` centrally and maps it to
+`R.fail(...)` (or `R.from(exception)`). The HTTP transport adapter resolves the
+stable code through the owning status catalog/registry and applies its
+`httpStatusCode()` separately; `R<T>` itself carries code, message, display,
+and data, not an HTTP-status field. Services, operators, and domain models must
+not construct `R` responses or leak stack traces. A public response contains
+the stable code, localized message/advice selected by the transport, and safe
+details only; it does not contain the cause chain or internal stack trace.
 
 Unknown failures reaching the outer boundary must be logged with correlation
-context and mapped to the appropriate generic internal status. The mapping
-must not expose implementation class names, SQL, filesystem paths, or provider
-diagnostics.
+context and mapped to `NexusStatusCode.SYSTEM_ERROR` (or an explicitly
+documented generic internal status owned by another transport boundary). The
+mapping must not expose implementation class names, SQL, filesystem paths, or
+provider diagnostics.
 
 ## 5. Status-code structure
 
@@ -171,7 +190,10 @@ changing one is a compatibility break.
 ### 5.2 Category semantics
 
 Select the category that explains why the operation failed. The current
-`StatusCategory` values are grouped as follows:
+`StatusCategory` values are grouped as follows. Each category also exposes a
+stable human-readable `label()` and an operational `priority()` hint
+(`L`, `M`, `H`, `B`, or `C`); priority is not an HTTP status and does not by
+itself determine retry behavior.
 
 | Category family | Current categories | Use for |
 | --- | --- | --- |
@@ -265,9 +287,10 @@ Use this procedure for every new or changed status.
    sibling files and generated/registry definitions. Never renumber existing
    codes to make a list look contiguous.
 6. **Define stable metadata.** Add an `UPPER_SNAKE_CASE` constant, bilingual
-   message and advice, category, local code, and intentional HTTP mapping.
-   Text must explain the stable condition and a safe next action; do not put
-   runtime IDs, secrets, or provider text in it.
+   message and advice (except an intentional success/no-advice status),
+   category, local code, and intentional HTTP mapping. Text must explain the
+   stable condition and a safe next action; do not put runtime IDs, secrets, or
+   provider text in it.
 7. **Use typed construction.** Throw with the new enum constant. Add raw-code
    registration only when an interop boundary genuinely requires it, and add
    the validation/allowlist entry in the same change.
@@ -291,8 +314,10 @@ Every status catalog or extension should have focused tests that prove:
 - local/full codes are unique within the owning module catalog;
 - enum constants use `UPPER_SNAKE_CASE` and the type ends in
   `StatusCode`;
-- English and Chinese message/advice are nonblank, stable, and do not contain
-  secrets or volatile placeholders;
+- English and Chinese message/advice are nonblank for non-success statuses;
+  intentional success/no-advice statuses are exempt, and legacy locale
+  fallbacks are recorded;
+- category `label()` and `priority()` are intentional and stable;
 - HTTP mapping is intentional and consistent with the boundary contract;
 - `NexusException.build(status)` returns the expected `code()` and preserves a
   supplied cause;

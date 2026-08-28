@@ -152,6 +152,8 @@ under concurrency.
 - The raw string-code overload is only for validated, allowlisted interop or
   compatibility boundaries. Ordinary in-repository calls must not pass copied
   literals or `status.fullCode()` when the typed overload is available.
+  Existing raw-overload call sites are migration debt; do not add new ones and
+  convert them to typed construction when behavior can remain unchanged.
 - Do not create one exception subclass per business error. Differentiate
   business failures through `StatusCode` implementations.
 - All caller/business validation, state checks, and application preconditions
@@ -166,7 +168,8 @@ under concurrency.
   cancellation, and do not routinely catch `Throwable`.
 - Endpoint infrastructure maps `NexusException` centrally to `R.fail(...)` or
   `R.from(...)`; service and operator methods return domain values rather than
-  transport wrappers or stack traces.
+  transport wrappers or stack traces. The transport adapter resolves the
+  status's HTTP mapping separately because `R<T>` carries no HTTP-status field.
 
 The complete taxonomy, catch/translate rules, status structure, ownership,
 extension procedure, and contract-test requirements are defined in
