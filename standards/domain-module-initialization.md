@@ -43,12 +43,20 @@ domain:
   views;
 - any adjacent concept that belongs to another domain and must not be reused as
   a local synonym.
+- the failures that are platform-wide, domain-specific, or technical, and the
+  status-code owner for each one;
+- the difference between a caller/business failure that must use
+  `NexusException` and a pure utility precondition that may remain a native
+  JDK/framework exception below the application boundary.
 
 Construct names in the order defined by [`naming.md`](naming.md): business
 concept, necessary scope/variant, operation or view purpose, then technical
 responsibility. Resolve competing terms before source files are created. Do not
 allow endpoint, entity, DAO, and database names to introduce different words
-for the same concept.
+for the same concept. Status-code ownership, exception translation, and
+extension rules are defined in
+[`exception-status-code.md`](exception-status-code.md); decide those boundaries
+before creating an enum or endpoint contract.
 
 ### 1.3 Use Legacy Projects as Behavioral References
 
@@ -366,7 +374,9 @@ Create domain events only for an actual decoupled interaction. The publishing
 domain owns the event contract.
 
 Create a domain-specific status-code enum only when existing platform status
-codes cannot express the business failure accurately.
+codes cannot express the business failure accurately. Follow
+[`exception-status-code.md`](exception-status-code.md) for code ownership,
+category selection, bilingual metadata, HTTP mapping, and extension safety.
 
 ### 4.5 Domain Gate
 
@@ -380,6 +390,17 @@ Verify:
 - no permission, user, role, menu, or other adjacent concern leaked across
   domain ownership;
 - no speculative model or event package was created.
+
+For every application-visible failure, also verify:
+
+- an existing status code was searched before proposing a new one;
+- platform, domain, or technical ownership is explicit;
+- the module segment and four-digit local code are unique and stable;
+- category, HTTP mapping, English message, and Chinese advice are intentional;
+- exception construction uses a typed `StatusCode`, preserves causes when
+  translating infrastructure failures, and does not create a per-error
+  exception subclass;
+- raw-code interop is absent or validated through an explicit allowlist.
 
 ## 5. Stage Four: Define Conversion Boundaries
 
@@ -546,9 +567,11 @@ Recommended order:
 3. Implement the entity.
 4. Write DAO generic-binding tests.
 5. Implement the DAO.
-6. Write request, VO, enum, and endpoint contract tests.
+6. Write request, VO, enum, status-code, and endpoint contract tests. Include
+   full-code shape, local uniqueness, metadata, HTTP mapping, and typed
+   exception/cause translation tests when the domain adds a failure.
 7. Run them and confirm failure for missing contracts.
-8. Implement the domain records and endpoints.
+8. Implement the domain records, status enum (if needed), and endpoints.
 9. Re-run focused tests until they pass.
 10. Run full project verification.
 
@@ -593,6 +616,8 @@ Also inspect:
 - imports for forbidden framework coupling;
 - entity fields for missing or unrelated data;
 - Endpoint paths and method count for boundary drift;
+- status-code ownership, full-code uniqueness, HTTP mapping, and exception
+  translation against [`exception-status-code.md`](exception-status-code.md);
 - the diff for copied legacy code or mechanical package reproduction.
 
 If the local JDK is older than the configured release, report the mismatch

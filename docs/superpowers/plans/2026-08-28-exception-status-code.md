@@ -43,34 +43,34 @@ behavior; this is a documentation-only change.
   and `R<T>`.
 - Produces: the canonical rules linked by API and domain initialization docs.
 
-- [ ] **Step 1: Add exception taxonomy and construction rules**
+- [x] **Step 1: Add exception taxonomy and construction rules**
 
 Document expected business failures, translated infrastructure failures, pure
 utility programmer misuse, interruption/cancellation, and fatal errors. Cover
 `NexusException.build(StatusCode, ...)`, typed versus raw-code overloads,
 message/display separation, cause preservation, and sensitive-data handling.
 
-- [ ] **Step 2: Add catch, translation, and response rules**
+- [x] **Step 2: Add catch, translation, and response rules**
 
 Define when to rethrow unchanged, when to wrap with a more specific status, how
 to preserve the cause, where unknown failures become a generic system status,
 how to avoid duplicate logging, and how endpoint infrastructure maps
 `NexusException` to `R.fail(...)` without leaking stack traces.
 
-- [ ] **Step 3: Add status-code structure and semantic rules**
+- [x] **Step 3: Add status-code structure and semantic rules**
 
 Document module allocation, category selection, four-digit local codes,
 English/Chinese message and advice, HTTP mapping, enum constant naming,
 uniqueness, and compatibility of full codes. Explicitly distinguish business
 status from transport HTTP status.
 
-- [ ] **Step 4: Add extension procedure and tests**
+- [x] **Step 4: Add extension procedure and tests**
 
 Describe reuse search, ownership decision, module/local allocation, metadata,
 registration/allowlist concerns for raw strings, and required contract tests for
 format, uniqueness, messages, categories, HTTP status, and behavior.
 
-- [ ] **Step 5: Add review checklist and validate the document**
+- [x] **Step 5: Add review checklist and validate the document**
 
 Run:
 
@@ -91,20 +91,20 @@ sections are present with no whitespace errors.
 - Consumes: `standards/exception-status-code.md`.
 - Produces: concise API-specific links and boundary rules.
 
-- [ ] **Step 1: Replace duplicated exception guidance with a cross-reference**
+- [x] **Step 1: Replace duplicated exception guidance with a cross-reference**
 
 Retain the API-layer rule that business failures use `NexusException`, then
 link to the authoritative document for taxonomy, wrapping, and response
 mapping.
 
-- [ ] **Step 2: Clarify pure utility preconditions and status selection**
+- [x] **Step 2: Clarify pure utility preconditions and status selection**
 
 State that JDK/framework precondition exceptions are allowed only for pure
 programmer misuse that does not represent caller or business input. Require a
 typed reusable status code for application-visible failures and prohibit raw
 string codes in ordinary in-repo calls.
 
-- [ ] **Step 3: Validate the API document**
+- [x] **Step 3: Validate the API document**
 
 Run:
 
@@ -125,24 +125,24 @@ contradictory exception rule.
 - Consumes: `standards/exception-status-code.md` and existing stage gates.
 - Produces: pre-creation and verification checks for domain failures.
 
-- [ ] **Step 1: Add status ownership to the domain vocabulary gate**
+- [x] **Step 1: Add status ownership to the domain vocabulary gate**
 
 Require deciding whether a failure is platform-wide, domain-specific, or
 technical before adding a status enum, and require names to follow the domain
 and status-code conventions.
 
-- [ ] **Step 2: Add status-code checks to the domain contract gate**
+- [x] **Step 2: Add status-code checks to the domain contract gate**
 
 Require reuse search, unique module/local allocation, category and HTTP mapping,
 bilingual message/advice, no runtime secrets in text, and no per-error exception
 subclasses.
 
-- [ ] **Step 3: Add extension tests to the verification gate**
+- [x] **Step 3: Add extension tests to the verification gate**
 
 Require contract tests for full-code shape, uniqueness, metadata, and exception
 translation behavior; preserve the existing compile and full-test commands.
 
-- [ ] **Step 4: Validate the workflow document**
+- [x] **Step 4: Validate the workflow document**
 
 Run:
 
@@ -162,7 +162,7 @@ stages and the diff check is clean.
 - Verify: `standards/domain-module-initialization.md`
 - Verify unchanged: `standards/module-skills.md`
 
-- [ ] **Step 1: Check consistency and implementation alignment**
+- [x] **Step 1: Check consistency and implementation alignment**
 
 Search for conflicting code formats, `VO`/`Vo`-style status naming, raw-code
 recommendations, uncaught-cause wording, and module placement that would

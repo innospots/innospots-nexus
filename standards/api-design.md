@@ -82,8 +82,11 @@ public final class ExecutionRecord {
 - Reject required null or invalid values with `NexusException` and the
   corresponding `StatusCode`.
 - Do not use `Objects.requireNonNull()`, `IllegalArgumentException`,
-  `NullPointerException`, or `IllegalStateException` for validation or
-  application logic.
+  `NullPointerException`, or `IllegalStateException` for caller/business
+  validation or application-visible logic. A pure lower-level utility may use
+  a JDK/framework precondition exception for programmer misuse when it never
+  represents user input; translate it at the application boundary if it can
+  escape into an application result.
 - Accept null gracefully for optional parameters:
   - `null -> default` pattern in setters
   - `null -> skip` pattern in collection builders
@@ -137,25 +140,37 @@ under concurrency.
 
 ## Exception Handling
 
-- All business exceptions must use
-  `com.innospots.nexus.base.exception.NexusException`.
-- Prefer `NexusException.build(NexusStatusCode.XXX)` with an existing
-  platform-wide status code.
-- Add a constant to `NexusStatusCode` when a missing status is broadly reusable
-  across modules.
-- Domain-specific business status codes must be enum types implementing
-  `com.innospots.nexus.base.status.StatusCode`. Place them under the business
-  domain's `domain.enums` package and name them `XxxStatusCode`.
+- All expected business, application, and translated infrastructure failures
+  must use `com.innospots.nexus.base.exception.NexusException`.
+- Prefer `NexusException.build(StatusCode, ...)` with an existing typed status;
+  use `NexusStatusCode` for reusable platform failures and a domain or
+  technical `XxxStatusCode` for narrower meanings.
+- Domain-specific status code enums implement
+  `com.innospots.nexus.base.status.StatusCode`, live under the owning domain's
+  `domain.enums` package, and follow the ownership and nine-character format
+  in [`exception-status-code.md`](exception-status-code.md).
+- The raw string-code overload is only for validated, allowlisted interop or
+  compatibility boundaries. Ordinary in-repository calls must not pass copied
+  literals or `status.fullCode()` when the typed overload is available.
 - Do not create one exception subclass per business error. Differentiate
   business failures through `StatusCode` implementations.
-- All validation, state checks, business rules, and internal API precondition
-  failures must throw `NexusException` with the corresponding status code.
-- Project application logic must not explicitly throw
-  `IllegalArgumentException`, `NullPointerException`, or
-  `IllegalStateException`.
-- Wrap checked exceptions into `NexusException` at boundary points, preserving
-  the original cause.
-- Never catch `Exception` silently — log or rethrow.
+- All caller/business validation, state checks, and application preconditions
+  must throw `NexusException` with the corresponding status code. A pure
+  utility may retain a JDK/framework precondition exception for programmer
+  misuse below that boundary; it must not become the public error contract.
+- Wrap checked or provider exceptions at the boundary that owns the
+  translation, preserving the original cause. Rethrow an existing
+  `NexusException` unchanged unless a more specific status is justified.
+- Never catch `Exception` silently, return fabricated success, or log and
+  rethrow the same failure at every layer. Preserve interruption and
+  cancellation, and do not routinely catch `Throwable`.
+- Endpoint infrastructure maps `NexusException` centrally to `R.fail(...)` or
+  `R.from(...)`; service and operator methods return domain values rather than
+  transport wrappers or stack traces.
+
+The complete taxonomy, catch/translate rules, status structure, ownership,
+extension procedure, and contract-test requirements are defined in
+[`exception-status-code.md`](exception-status-code.md).
 
 ```java
 if (role == null) {
