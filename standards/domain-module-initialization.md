@@ -28,7 +28,29 @@ concepts belong in `innospots-nexus-core`.
 Do not create a new Maven module unless its boundary, dependency direction, and
 independent testability are clear.
 
-### 1.2 Use Legacy Projects as Behavioral References
+### 1.2 Establish Domain Vocabulary
+
+Before naming packages or types, write down the small vocabulary needed by the
+domain:
+
+- the primary business concept and any association concepts;
+- the ownership scope (`platform`, tenant, workspace, realm, or another
+  explicitly approved scope);
+- the difference between technical IDs and stable business keys;
+- lifecycle terms and the exact meaning of `state`, `status`, `mode`, and
+  `type` if they appear;
+- the names used for create, update, query, ordering, membership, and runtime
+  views;
+- any adjacent concept that belongs to another domain and must not be reused as
+  a local synonym.
+
+Construct names in the order defined by [`naming.md`](naming.md): business
+concept, necessary scope/variant, operation or view purpose, then technical
+responsibility. Resolve competing terms before source files are created. Do not
+allow endpoint, entity, DAO, and database names to introduce different words
+for the same concept.
+
+### 1.3 Use Legacy Projects as Behavioral References
 
 A legacy project may be inspected to understand:
 
@@ -51,7 +73,7 @@ A legacy project must not be used as a source template. Never:
 Every field, type, endpoint, and dependency must be justified against the
 current module boundaries and developer intent.
 
-### 1.3 Keep the Initial Surface Minimal
+### 1.4 Keep the Initial Surface Minimal
 
 Create only packages with an immediate responsibility. A typical domain may
 contain:
@@ -190,6 +212,12 @@ the table, inheritance, identifier annotations, required fields, lengths,
 nullability, and indexes. Run the test and confirm that it fails for the
 expected missing contract before adding production code.
 
+Entity type, field, table, column, index, and ID-prefix names must follow
+[`naming.md`](naming.md). Lombok, annotation placement, member order, and
+collection rules follow [`code-style.md`](code-style.md). Entity Javadocs must
+describe persistence scope and important invariants according to
+[`code-comments.md`](code-comments.md).
+
 ## 3. Stage Two: Define DAO Contracts
 
 Create the DAO after the entity contract is stable.
@@ -213,6 +241,13 @@ clearly by the inherited operations. Prefer:
 - annotation SQL for explicit single-table queries that are clearer as SQL.
 
 Do not invent speculative queries during initialization.
+
+DAO query verbs and result shapes follow [`naming.md`](naming.md) and the query
+semantics in [`api-design.md`](api-design.md). In particular, use `find` for an
+optional single-result application contract, `list` for collections, `page`
+for pagination, and `count` for counts. A MyBatis-facing DAO method may return
+a nullable entity when required by the mapper contract; normalize absence at
+the operator or service boundary.
 
 Cross-table data must be assembled outside DAOs:
 
@@ -274,6 +309,11 @@ Create separate requests when operations have different mutation rights:
 
 Do not reuse the entity as an endpoint request.
 
+Name each request from the resource followed by its exact operation or query
+purpose, such as `RoleCreateRequest`, `RoleStatusUpdateRequest`, or
+`RolePageRequest`. Do not introduce a generic `XxxRequest` when operations have
+different mutation rights.
+
 Creation requests may include stable business keys. Update requests should
 exclude immutable keys and protected system fields.
 
@@ -312,6 +352,11 @@ Do not expose persistence entities directly. A VO may contain:
 
 Defensively copy child and collection fields in compact constructors.
 
+Use `XxxVo` for the primary view and place a use-case qualifier immediately
+before `Vo` for a distinct projection, such as `RoleOptionVo` or
+`NavigationMenuVo`. Do not use `DTO`, uppercase `VO`, or `Response` for types
+under `domain.vo`.
+
 ### 4.4 Models, Events, and Status Codes
 
 Create `domain.model` only when internal business behavior needs a model that
@@ -349,6 +394,11 @@ requests, models, entities, and VOs.
 
 Do not create a converter merely to copy one or two scalar values. Do not write
 large field-by-field mappings in endpoints, services, or operators.
+
+Converter names and method verbs follow [`naming.md`](naming.md). Structural
+mapping methods should state both representations when the generic contract
+does not already make them obvious, such as `requestToModel` or
+`modelToEntity`.
 
 When methods remain intentionally unimplemented and no conversion occurs yet,
 the converter package may be deferred.
@@ -408,6 +458,10 @@ appearing operational.
 - Use nouns and HTTP semantics consistently.
 - Keep stable identifiers in paths for single-resource operations.
 - Prefer a dedicated ordering request over repeated scalar parameters.
+- Name endpoint methods with the same command/query vocabulary used by the
+  service boundary; do not use vague `process`, `handle`, or `execute` names.
+- Apply the nullability, validation, collection, and compatibility rules in
+  [`api-design.md`](api-design.md).
 
 ### 6.4 Endpoint Size Review
 
@@ -472,6 +526,13 @@ service -> dao
 
 An operator must not depend on another operator or a service. Endpoints must
 not orchestrate DAOs directly.
+
+Use the responsibility definitions in [`naming.md`](naming.md) before choosing
+`Operator`, `Service`, `Manager`, `Registry`, or another technical suffix.
+Constructor injection, logging, and dependency fields follow
+[`code-style.md`](code-style.md). Query/command semantics, transaction
+boundaries, idempotency, lifecycle, and resource ownership follow
+[`api-design.md`](api-design.md).
 
 ## 8. Test-First Initialization Workflow
 

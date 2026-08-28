@@ -124,25 +124,25 @@ the diff check is clean.
 **Files:**
 - Modify: `standards/api-design.md`
 
-- [ ] **Step 1: Clarify contracts and dependency direction**
+- [x] **Step 1: Clarify contracts and dependency direction**
 
 Document when interfaces are justified, implementation naming, constructor
 injection, dependency-field ownership, and public-contract stability.
 
-- [ ] **Step 2: Clarify nullability, validation, and collection contracts**
+- [x] **Step 2: Clarify nullability, validation, and collection contracts**
 
 Keep `Optional` for application-facing absence, explicitly allow nullable
 framework DAO results where required, forbid `Optional` parameters and fields,
 define immutable empty collections, and assign validation/normalization to the
 correct boundary.
 
-- [ ] **Step 3: Add behavior and lifecycle contracts**
+- [x] **Step 3: Add behavior and lifecycle contracts**
 
 Define query/command semantics, idempotency, lifecycle state, resource cleanup,
 thread-safety documentation, and event/callback ownership using current plugin,
 event, session, and resource patterns.
 
-- [ ] **Step 4: Validate the API document**
+- [x] **Step 4: Validate the API document**
 
 Run:
 
@@ -159,18 +159,18 @@ sections exist with no whitespace errors.
 **Files:**
 - Modify: `standards/domain-module-initialization.md`
 
-- [ ] **Step 1: Add terminology and naming decisions to the first gate**
+- [x] **Step 1: Add terminology and naming decisions to the first gate**
 
 Require domain vocabulary, ownership qualifiers, stable-key terminology, and
 planned type-role suffixes before source types are created.
 
-- [ ] **Step 2: Align later stage gates through cross-references**
+- [x] **Step 2: Align later stage gates through cross-references**
 
 Reference the authoritative naming, style, comments, and API rules when
 checking entities, requests, views, converters, endpoints, operators, services,
 and tests. Preserve the existing compile and full-verification commands.
 
-- [ ] **Step 3: Validate the workflow document**
+- [x] **Step 3: Validate the workflow document**
 
 Run:
 
@@ -192,12 +192,12 @@ errors are reported.
 - Verify: `standards/domain-module-initialization.md`
 - Verify unchanged: `standards/module-skills.md`
 
-- [ ] **Step 1: Check forbidden placeholders and stale contradictions**
+- [x] **Step 1: Check forbidden placeholders and stale contradictions**
 
 Run focused searches for placeholder language, conflicting Lombok requirements,
 ambiguous `Optional` requirements, and inconsistent `VO`/`Vo` spellings.
 
-- [ ] **Step 2: Check scope and formatting**
+- [x] **Step 2: Check scope and formatting**
 
 Run:
 
@@ -211,7 +211,7 @@ git diff -- standards
 Expected: only the five approved standards files plus design/plan tracking are
 part of this task; existing unrelated Java changes remain untouched.
 
-- [ ] **Step 3: Record verification outcome**
+- [x] **Step 3: Record verification outcome**
 
 Confirm that no Java source changed, so the repository's mandatory
 `mvn clean compile` gate is not triggered. If any Java source is unexpectedly

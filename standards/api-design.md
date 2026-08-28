@@ -6,7 +6,12 @@
   `from()`, `named()`.
 - Return immutable collections: `List.copyOf()`, `Map.copyOf()`. Never
   expose internal mutable references.
-- Use `Optional<T>` for return values that may be absent (not for parameters).
+- Use `Optional<T>` for application-facing single-value results whose absence
+  is an expected outcome. Framework-facing DAO methods may return nullable
+  entities when that is the mapper contract; service/operator boundaries must
+  normalize or reject that absence before exposing it further.
+- Never use `Optional` for parameters, fields, record components, collection
+  elements, or collection return values.
 - Use `record` for simple data carriers with built-in equals/hashCode/toString.
 
 ```java
@@ -20,6 +25,37 @@ public static DataRequest<T> create(String target, DataOperation operation) {
     return new DataRequest<>(target, operation);
 }
 ```
+
+## Contract and Implementation Boundaries
+
+Introduce an interface when at least one of these conditions is true:
+
+- it is a public module, plugin, adapter, or SPI boundary;
+- multiple implementations are required or intentionally supported;
+- callers must be isolated from a runtime-specific implementation;
+- the contract owns a lifecycle or resource boundary that implementations must
+  honor.
+
+Do not create an interface for every concrete class merely to enable mocking.
+For one stable internal implementation, depend on the concrete type until a
+real substitution boundary appears.
+
+- Name a contract after its capability, such as `ResourceStore`,
+  `PasswordDecryptor`, or `PluginManager`.
+- Name the standard implementation `DefaultXxx` only when the contract admits
+  other valid implementations. Use a strategy-specific qualifier when it adds
+  information, such as `ClasspathPluginDiscovery` or
+  `RsaPasswordDecryptor`.
+- Keep transport interfaces in `endpoint`, reusable non-HTTP module contracts
+  in `api`, and extension contracts in a focused `contract` package only when
+  that separation represents a real boundary.
+- Constructor-inject dependencies into concrete implementations and keep
+  required dependency fields `final`. Do not expose dependency setters.
+- A public contract must not return its implementation's mutable state,
+  framework session, DAO, entity manager, or other infrastructure internals.
+
+Naming details are defined in [`naming.md`](naming.md); source construction and
+Lombok rules are defined in [`code-style.md`](code-style.md).
 
 ## Immutability
 
@@ -51,6 +87,12 @@ public final class ExecutionRecord {
 - Accept null gracefully for optional parameters:
   - `null -> default` pattern in setters
   - `null -> skip` pattern in collection builders
+- Prefer empty immutable collections to `null` for collection results.
+- Do not return `null` from a collection-returning public method.
+- Do not nest absence representations such as `Optional<List<T>>`; return an
+  empty list when no values exist.
+- State nullable framework results in the DAO method Javadoc when the generic
+  mapper signature cannot express nullability.
 
 ```java
 public void validateRoleCode(String roleCode) {
@@ -66,6 +108,32 @@ public SimpleCondition factor(Factor factor) {
     return this;
 }
 ```
+
+## Validation and Normalization
+
+Place each rule at the narrowest boundary that owns it:
+
+- A record compact constructor or domain type enforces invariants required for
+  every valid instance and performs defensive collection copies.
+- A request's `validate()` method checks request-local field combinations that
+  do not require persistence or another domain.
+- An operator validates direct data-operation preconditions and translates
+  mapper absence into the appropriate status code.
+- A service validates workflow, authorization, cross-record, and cross-domain
+  rules.
+- An endpoint validates only transport concerns that cannot be expressed by
+  Jakarta REST binding, then delegates application behavior.
+
+Normalization must be deterministic and documented. Normalize transport
+defaults, casing, whitespace, pagination, and collection emptiness before a
+value becomes a stable business key or persisted state. Do not silently repair
+an invalid value when the caller needs to know that the contract was violated.
+
+Validation methods that reject input throw `NexusException` with a suitable
+`StatusCode`. Boolean probes use names such as `isValid` and must not mutate
+state. Never rely only on database constraint failures for validation that the
+application can express clearly, but retain database constraints for integrity
+under concurrency.
 
 ## Exception Handling
 
@@ -239,6 +307,36 @@ public class RoleEntity extends WorkspaceBaseEntity {
   `com.innospots.nexus.base.domain.response.PageResult<T>`.
 - Service and operator methods must not return endpoint wrapper `R<T>`.
 
+## Query and Command Semantics
+
+Method names and return types must make the operation shape predictable. The
+authoritative verb vocabulary is defined in [`naming.md`](naming.md).
+
+- Queries do not mutate business state. `find` returns an optional single
+  result, `list` returns a finite collection, `page` returns `PageResult<T>`,
+  and `count` returns a number.
+- Commands use a precise business verb and return the value callers need to
+  continue. Do not return an entity merely because the persistence framework
+  produced one.
+- A `create` operation fails on a duplicate stable key unless its contract is
+  explicitly idempotent. Do not silently reinterpret create as update.
+- `update` changes only documented mutable attributes. Immutable stable keys
+  are not accepted in update requests.
+- `replace` treats the supplied value or association set as complete. It must
+  define whether omission removes existing members.
+- `delete` defines whether a missing target is success or a not-found failure.
+  Apply the choice consistently within the same public resource boundary.
+- `register`, `subscribe`, `start`, `stop`, `close`, and similar lifecycle
+  operations must document repeated-call behavior.
+- A method must not hide expensive I/O, blocking, publication, or persistence
+  behind a property-like name.
+
+Use idempotency where retries are a normal boundary behavior, including
+declarative synchronization and registration. An idempotent operation produces
+the same externally visible state when repeated with the same effective input;
+it does not have to return the same object instance. Protect idempotency with
+stable keys and database/runtime uniqueness, not only a read-then-write check.
+
 ## Domain Events and EventBus
 
 - `com.innospots.nexus.base.events.EventBus` is the in-process event bus for
@@ -270,6 +368,12 @@ public class RoleEntity extends WorkspaceBaseEntity {
 - Event handlers must be registered and unregistered through
   `EventBus.subscribe(...)` and `EventBus.unsubscribe(...)` at the owning
   module's lifecycle boundary.
+- The registration owner is responsible for cleanup. A returned `Subscription`
+  or equivalent handle must be closed/unsubscribed when the owning component
+  stops.
+- Event payloads and event type strings are compatibility contracts. Add data
+  compatibly and do not rename a published event type as part of an internal
+  refactor.
 
 ```java
 public record RoleCreatedEvent(String roleId, String roleCode)
@@ -356,3 +460,82 @@ public UiDatasource param(String key, Object value) {
     return this;
 }
 ```
+
+## Lifecycle and Resource Ownership
+
+Types that own threads, executors, subscriptions, class loaders, schedulers,
+network clients, or other closeable resources must expose and document a clear
+lifecycle.
+
+- Construction establishes valid local state but must not silently start
+  long-running background work unless the type's factory contract says so.
+- `initialize` prepares dependencies and registrations; `start` begins active
+  work; `stop` halts work while preserving restartable state when supported;
+  `destroy` or `close` releases resources permanently.
+- Lifecycle operations define their allowed states and repeated-call behavior.
+  Prefer safe idempotent cleanup.
+- The type that creates or registers a resource owns its cleanup unless the
+  API explicitly transfers ownership.
+- Release resources in reverse acquisition order when dependencies exist.
+- Do not swallow cleanup failures. Preserve the primary failure and attach or
+  log secondary cleanup failures with enough context to diagnose them.
+- Do not publish a started/stopped success event until the corresponding state
+  transition succeeds.
+
+Use `AutoCloseable` or a focused handle such as `Subscription` when lexical or
+explicit cleanup improves correctness. Avoid finalizers and do not rely on
+garbage collection for external resource release.
+
+## Thread Safety and Concurrency
+
+- Immutable records and snapshots are preferred at thread boundaries.
+- A mutable public type must state whether it is thread-safe, confined to one
+  thread, or requires external synchronization when concurrent use is
+  plausible.
+- Protect one invariant with one clear synchronization strategy. Do not mix
+  synchronized blocks, atomics, and concurrent collections without explaining
+  which state each mechanism protects.
+- Do not call unknown plugin, event-handler, or callback code while holding an
+  internal lock. Copy the required registrations first, then invoke callbacks.
+- State transitions that coordinate multiple fields must be atomic from the
+  caller's perspective.
+- Return immutable snapshots rather than live mutable views of registries,
+  routing tables, configuration, or metrics.
+- Cancellation and interruption must be propagated or deliberately restored;
+  do not silently consume `InterruptedException`.
+
+## Public Contract Compatibility
+
+Treat the following as public compatibility surfaces when they cross a module,
+plugin, persistence, or transport boundary:
+
+- public type names, packages, method signatures, generic bounds, and declared
+  semantics;
+- REST paths, parameter names, request/response fields, enum values, and status
+  codes;
+- table/column names, stable business keys, entity ID prefixes, and index-backed
+  uniqueness assumptions;
+- event type strings, configuration keys, plugin IDs, capability keys, tag
+  names, and serialized field names.
+
+Do not change one of these surfaces as a mechanical rename or internal
+refactor. Document the migration, compatibility adapter, data migration, or
+version boundary first. Additive changes must still define defaults for older
+callers and persisted data.
+
+Deprecations use `@Deprecated` and Javadoc `@deprecated` together, identify the
+replacement, and remain for an explicitly agreed compatibility period. Do not
+keep an obsolete alias indefinitely without a removal decision.
+
+## API Review Checklist
+
+- Does the abstraction have a real contract boundary, or is an interface being
+  added mechanically?
+- Are null, absence, empty collections, ownership, and mutation explicit?
+- Is validation placed at the boundary that owns the rule?
+- Do query and command names match their result and side effects?
+- Are transaction, idempotency, lifecycle, cleanup, and repeated calls defined?
+- Is concurrent access safe or clearly constrained?
+- Are domain events published only after successful state changes and cleaned
+  up by their registration owner?
+- Has every affected public identifier been checked for compatibility impact?
