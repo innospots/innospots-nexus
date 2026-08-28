@@ -17,6 +17,7 @@ import com.innospots.nexus.core.plugin.contract.CapabilityProvider;
 import com.innospots.nexus.core.plugin.contract.Plugin;
 import com.innospots.nexus.core.plugin.declaration.PluginDefinition;
 import com.innospots.nexus.core.plugin.discovery.DiscoveredPlugin;
+import com.innospots.nexus.core.plugin.discovery.PluginCatalog;
 import com.innospots.nexus.core.plugin.lifecycle.PluginState;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,7 +45,7 @@ class DefaultPluginManagerTest {
                 Map.of(),
                 Map.of(),
                 getClass().getClassLoader());
-        DefaultPluginManager manager = DefaultPluginManager.create(config, discovered);
+        DefaultPluginManager manager = DefaultPluginManager.create(config, PluginCatalog.of(discovered));
 
         manager.start();
 

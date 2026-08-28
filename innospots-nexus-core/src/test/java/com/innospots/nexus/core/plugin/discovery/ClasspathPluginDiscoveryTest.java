@@ -40,6 +40,20 @@ class ClasspathPluginDiscoveryTest {
     }
 
     @Test
+    void supportsStaticClasspathDiscoveryAndImmutableCatalogLookup() throws Exception {
+        ClassLoader classLoader = serviceClassLoader(SamplePlugin.class.getName());
+
+        PluginCatalog catalog = PluginCatalog.discover(classLoader);
+
+        assertThat(catalog.plugins()).hasSize(1);
+        assertThat(catalog.plugin("sample-discovery")).isPresent();
+        assertThat(catalog.definitions()).extracting(PluginDefinition::id)
+                .containsExactly("sample-discovery");
+        assertThatThrownBy(() -> catalog.plugins().clear())
+                .isInstanceOf(UnsupportedOperationException.class);
+    }
+
+    @Test
     void rejectsDuplicatePluginIdsBeforeLifecycleRuns() throws Exception {
         ClassLoader classLoader = serviceClassLoader(
                 SamplePlugin.class.getName(),

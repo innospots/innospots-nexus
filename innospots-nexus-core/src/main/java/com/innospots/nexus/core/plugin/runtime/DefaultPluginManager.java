@@ -20,6 +20,7 @@ import com.innospots.nexus.core.plugin.dependency.DependencyResolution;
 import com.innospots.nexus.core.plugin.dependency.DependencyResolver;
 import com.innospots.nexus.core.plugin.discovery.ClasspathPluginDiscovery;
 import com.innospots.nexus.core.plugin.discovery.DiscoveredPlugin;
+import com.innospots.nexus.core.plugin.discovery.PluginCatalog;
 import com.innospots.nexus.core.plugin.event.DefaultPluginEventBus;
 import com.innospots.nexus.core.plugin.lifecycle.ManagedPlugin;
 import com.innospots.nexus.core.plugin.lifecycle.PluginRuntimeInfo;
@@ -51,6 +52,16 @@ public final class DefaultPluginManager implements PluginManager {
     /** Creates a manager that discovers plugins on the first start call. */
     public static DefaultPluginManager create(PluginRuntimeConfig config) {
         return new DefaultPluginManager(config, null);
+    }
+
+    /** Creates a manager from a precomputed immutable discovery catalog. */
+    public static DefaultPluginManager create(PluginRuntimeConfig config, PluginCatalog catalog) {
+        if (catalog == null) {
+            throw NexusException.build(
+                    PluginStatusCode.PLUGIN_DISCOVERY_FAILED,
+                    "plugin catalog is required");
+        }
+        return new DefaultPluginManager(config, catalog.plugins());
     }
 
     static DefaultPluginManager create(PluginRuntimeConfig config, List<DiscoveredPlugin> discoveries) {

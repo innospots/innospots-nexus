@@ -220,7 +220,9 @@ com.innospots.nexus.core.plugin
 │   ├── ConfigurationManager
 │   └── SecretValue
 ├── discovery
-│   └── ClasspathPluginDiscovery
+│   ├── ClasspathPluginDiscovery
+│   ├── DiscoveredPlugin
+│   └── PluginCatalog
 ├── dependency
 │   ├── DependencyResolver
 │   └── DependencyResolution
@@ -301,7 +303,50 @@ Java `ServiceLoader` 会聚合指定 ClassLoader 可见范围内所有 JAR 和 c
 发现阶段可以加载 Plugin 类并执行其公共无参构造函数与 `definition()`，但不执行
 `initialize/start`，也不调用任何 CapabilityProviderFactory。
 
-### 7.3 发现失败规则
+### 7.3 Discovery 与全局管理的静态性边界
+
+这里的“静态管理”需要区分三种含义：
+
+| 层次 | 是否静态 | 说明 |
+|------|----------|------|
+| PluginDefinition 声明 | 是 | 由插件实现类通过 Java 代码固定声明，随插件 JAR 发布；修改后重新构建 JAR |
+| 一次启动的发现结果 | 是 | `ClasspathPluginDiscovery` 在一个 Runtime 首次初始化时执行一次；通过全局校验后形成不可变的 `DiscoveredPlugin` 快照 |
+| JVM 级 Discovery/PluginManager 单例 | 否 | 不使用静态字段保存 ClassLoader、Plugin、Provider、Context、Registry 或生命周期状态 |
+
+因此，Discovery 是**无状态的实例操作**，由 `DefaultPluginManager` 在第一次 `start()`、`plugins()` 或
+`plugin(...)` 调用时创建并执行。发现结果只在当前 `PluginManager` 实例内缓存；同一个 ClassLoader 创建
+两个 Runtime 时，两个 Runtime 各自拥有独立的发现快照和生命周期，不共享状态。
+
+本文所说的“全局校验”和“全局能力注册”中的“全局”，均指**单个 PluginManager Runtime 内全局**：
+
+- 覆盖该 Runtime 发现的全部 PluginDefinition；
+- 覆盖该 Runtime 内全部 CapabilityProvider；
+- 用于保证 plugin id、API、默认路由和依赖关系的一致性；
+- 不跨越不同 PluginManager、不同 ClassLoader 或不同应用进程。
+
+Discovery 快照可以视为启动期间的静态目录，但 CapabilityRegistry、PluginEventBus、ResourceScope、
+PluginState 和 Provider 实例仍然是运行时对象，必须由 `PluginManager` 实例管理。静态 JVM 单例会带来
+ClassLoader 强引用泄漏、测试之间相互污染、无法同时运行隔离 Runtime 以及关闭后状态残留等问题，因此
+V1 不提供 `Plugins.get(...)`、静态 Registry 或静态 Manager。
+
+如果宿主希望整个应用只运行一套插件 Runtime，可以把一个 `PluginManager` 交给应用生命周期容器按
+application scope 管理；这属于宿主的对象生命周期配置，不改变 Core 中“实例化、显式传递、可关闭”的
+设计。V1 不支持运行中修改 Classpath；新增、删除或替换插件需要创建新的 Runtime（通常伴随进程重启）。
+
+需要在宿主启动流程中显式完成发现时，可以使用静态风格的工厂方法创建目录快照：
+
+```java
+PluginCatalog catalog = PluginCatalog.discover(Application.class.getClassLoader());
+
+try (PluginManager plugins = DefaultPluginManager.create(runtimeConfig, catalog)) {
+    plugins.start();
+}
+```
+
+该方法只是一次性的便捷入口，不建立 JVM 全局缓存；`PluginCatalog` 由调用方持有，并且只能交给
+一个 `PluginManager` Runtime 使用。需要测试或自定义发现结果时，可使用 `PluginCatalog.of(...)`。
+
+### 7.4 发现失败规则
 
 以下情况在任何插件初始化前终止本次发现：
 
@@ -1546,6 +1591,11 @@ try (PluginManager plugins = DefaultPluginManager.create(config)) {
 
 Core 不提供全局静态 `Plugins.get(...)`。应用通过构造参数显式传递 CapabilityManager，保证测试
 可替换、生命周期清楚，并允许同一 JVM 创建多个 Runtime。
+
+`DefaultPluginManager` 是一个 Runtime 内的应用级协调器：它只管理自己发现的插件、自己的
+`CapabilityRegistry`、`PluginEventBus`、依赖解析器和生命周期状态。这里的“全局管理”是 Runtime
+范围的全局管理，不是 JVM 范围的静态管理。宿主可以在应用容器中将它配置为单例 Bean，但 Core
+本身不持有静态引用，也不自动把多个 Manager 合并成一个全局注册表。
 
 ## 18. 并发、一致性和失败隔离
 

@@ -36,6 +36,11 @@ public final class ClasspathPluginDiscovery {
         this.classLoader = classLoader;
     }
 
+    /** Performs one static-style discovery operation without retaining a global mutable cache. */
+    public static List<DiscoveredPlugin> discover(ClassLoader classLoader) {
+        return new ClasspathPluginDiscovery(classLoader).discover();
+    }
+
     /**
      * Discovers and globally validates visible plugins.
      *
