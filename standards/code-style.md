@@ -62,6 +62,65 @@ import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.json.Jsons;
 ```
 
+## Source File Organization
+
+Keep members in a predictable order so a reader can find contracts and state
+without scanning the entire file:
+
+1. static constants;
+2. static mutable state, only when the design explicitly requires it;
+3. instance fields;
+4. constructors and static factories;
+5. public methods;
+6. protected methods;
+7. private methods;
+8. nested types.
+
+Within a group, keep related members together and order lifecycle methods in
+execution order, such as `initialize`, `start`, `stop`, `destroy`. Do not sort
+methods mechanically when doing so separates a public operation from its small
+private helpers.
+
+- Declare one field or local variable per statement.
+- Put one annotation per line when a declaration has multiple annotations.
+- Keep the declaration immediately after its annotations and Javadoc; do not
+  insert blank lines between them.
+- Keep variable scope as narrow as practical and declare a value near its first
+  use.
+- Prefer `final` fields for dependencies and state that is not replaced after
+  construction.
+- Avoid mutable static state. When process-wide runtime state is necessary,
+  encapsulate its lifecycle and thread-safety in a specifically named type.
+
+## Multiline Formatting
+
+- Break a method declaration or invocation by parameter when it exceeds the
+  line-width limit. Indent continuation lines by 8 spaces.
+- Put a fluent chain's dots at the beginning of continuation lines. Keep one
+  operation per line when the chain expresses multiple filtering or mapping
+  stages.
+- For a multiline record header, put one component per line and align the
+  closing parenthesis with the declaration.
+- Keep short lambdas inline only when the expression is immediately readable.
+  Use a block lambda for multiple statements or when a comment is required.
+- Use the diamond operator when the compiler can infer generic arguments.
+- Avoid nested ternary expressions. Use a named local variable or ordinary
+  conditional statements when branching is not obvious.
+
+```java
+public record PluginRuntimeInfo(
+        String pluginId,
+        PluginState state,
+        Instant startedAt
+) {
+}
+
+return registrations.stream()
+        .filter(CapabilityRegistration::active)
+        .map(CapabilityRegistration::provider)
+        .toList();
+```
+
 ## Lombok
 
 - Implementation classes that use constructor injection should prefer
@@ -70,14 +129,25 @@ import com.innospots.nexus.base.json.Jsons;
 - Operator and service classes must use Lombok `@Slf4j` for logging. Do not
   declare hand-written logger fields, and do not use the invalid `@Sl4j`
   spelling.
-- Every concrete non-`record` class under a `domain` package must use Lombok
-  `@Getter` and `@Setter`. Do not write JavaBean getters and setters manually.
+- Mutable persistence entities must use Lombok `@Getter` and `@Setter`. Mutable
+  configuration-file binding objects and declarative UI/specification objects
+  should use the same annotations when a binding framework requires JavaBean
+  accessors.
+- Internal domain models are not automatically mutable. Immutable or
+  behavior-oriented models should expose only the accessors and state changes
+  their contract requires; use `@Getter` without `@Setter`, records, or
+  explicit behavior methods as appropriate.
 - Types under `domain.request` and `domain.vo` must be Java records, so Lombok
   `@Getter` and `@Setter` do not apply to them.
 - Keep Lombok imports in the third-party import group, before
   `com.innospots.*` project imports.
 - Lombok only removes accessor boilerplate. Domain classes should still expose
   explicit methods for validation, state transitions, and business behavior.
+- Do not use `@Data` on domain or persistence types. It generates equality,
+  string, constructor, and mutation behavior too broadly for entities and
+  security-sensitive objects.
+- Do not use Lombok-generated `toString` behavior for credentials, secrets,
+  tokens, password material, or other sensitive values.
 
 ## Domain Types
 
@@ -215,3 +285,72 @@ public interface RoleDao extends BaseMapper<RoleEntity> {
     // Relationship identifiers and role rows are queried separately in batches.
 }
 ```
+
+## Dependency Fields and Construction
+
+- Prefer constructor injection with `final` fields. A dependency must be
+  visible in the constructor contract and must not be replaced after creation.
+- Use `@RequiredArgsConstructor` for ordinary service, operator, handler, and
+  runtime implementation classes when it produces the intended constructor.
+- Use an explicit constructor when parameters require validation, defensive
+  copying, normalization, or explanation that Lombok cannot express clearly.
+- Do not use field injection or mutable public dependency fields.
+- Keep optional collaborators explicit. Do not represent a required dependency
+  with a nullable field merely to simplify tests.
+
+```java
+@Slf4j
+@RequiredArgsConstructor
+public final class PermissionGrantService {
+
+    private final PermissionGrantDao permissionGrantDao;
+    private final EventBus eventBus;
+}
+```
+
+## Collections and State
+
+- Prefer immutable empty collections (`List.of()`, `Set.of()`, `Map.of()`) over
+  `null` when absence and emptiness have the same meaning.
+- Defensively copy caller-owned collections at construction or boundary entry
+  with `List.copyOf`, `Set.copyOf`, or `Map.copyOf`.
+- Do not expose an internal mutable collection from an accessor. Return an
+  immutable view or snapshot according to the API contract.
+- Use a collection type that communicates semantics: `Set` for uniqueness,
+  `List` for stable order and duplicates, and `Map` for keyed lookup.
+- Preserve deterministic iteration order when output, dependency resolution,
+  routing priority, or tests depend on it.
+- Keep mutation local to the type that owns the state. Do not pass a mutable
+  collection between layers and rely on undocumented shared mutation.
+
+## Logging and Diagnostics
+
+- Use Lombok `@Slf4j` in concrete services, operators, handlers, managers, and
+  other runtime classes that log. Do not declare handwritten logger fields.
+- Do not use `System.out`, `System.err`, or `Throwable#printStackTrace` in
+  production code.
+- Log stable identifiers and lifecycle transitions rather than complete domain
+  objects. Never log passwords, secrets, tokens, decrypted payloads, or
+  sensitive configuration values.
+- Use parameterized logging (`log.info("Started plugin {}", pluginId)`) instead
+  of string concatenation.
+- Do not both log and rethrow the same failure at every layer. Log where useful
+  context is added or where the failure is finally handled.
+
+## Literals and Expressions
+
+- Give repeated or domain-significant literals a named constant. A literal
+  that is obvious and local, such as zero in an emptiness check, does not need
+  a constant.
+- Use enum constants for closed domain states and types instead of comparing
+  unexplained strings throughout business code.
+- Keep expressions readable. Extract a named predicate or local variable when
+  a condition mixes multiple business rules.
+- Use `equals` from a known non-null value for nullable enum/string comparison,
+  such as `PluginState.ACTIVE.equals(state)`.
+- Do not use comments to compensate for unclear expressions; name the concept
+  and then comment only the non-obvious reason.
+
+Architectural boundaries, null handling, immutability contracts, and exception
+behavior are defined in [`api-design.md`](api-design.md). Identifier and member
+names are defined in [`naming.md`](naming.md).

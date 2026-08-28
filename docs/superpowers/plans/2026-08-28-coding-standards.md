@@ -22,13 +22,13 @@ MyBatis-Plus, MapStruct, Lombok, Maven verification policy.
 **Files:**
 - Modify: `standards/naming.md`
 
-- [ ] **Step 1: Preserve existing project-specific suffix and package rules**
+- [x] **Step 1: Preserve existing project-specific suffix and package rules**
 
 Review the current type table, domain-first package layout, and file naming
 rules. Retain `Endpoint`, `Dao`, `Entity`, `Request`, `Vo`, `Converter`,
 `StatusCode`, `Event`, and `EventHandler` conventions.
 
-- [ ] **Step 2: Add the naming derivation rules**
+- [x] **Step 2: Add the naming derivation rules**
 
 Add business vocabulary, qualifier ordering, technical responsibility
 suffixes, request/view names, method verbs, fields and parameters, boolean and
@@ -37,13 +37,13 @@ names. Use current examples such as `PlatformUserPasswordEntity`,
 `RoleStatusUpdateRequest`, `CapabilityRegistry`, `PluginManager`,
 `ClasspathPluginDiscovery`, and `hasAvailableThread`.
 
-- [ ] **Step 3: Add negative examples and a naming checklist**
+- [x] **Step 3: Add negative examples and a naming checklist**
 
 Make vague names (`CommonUtils`, `DataManager`, `process`, `flag`) and redundant
 names (`RoleBusinessService`, `RoleDataDao`) explicitly discouraged. End with a
 short decision checklist.
 
-- [ ] **Step 4: Validate the naming document**
+- [x] **Step 4: Validate the naming document**
 
 Run:
 
@@ -60,25 +60,25 @@ errors.
 **Files:**
 - Modify: `standards/code-style.md`
 
-- [ ] **Step 1: Add source layout and multiline formatting rules**
+- [x] **Step 1: Add source layout and multiline formatting rules**
 
 Document member order, one declaration per line, annotation placement, method
 chain wrapping, record formatting, lambda clarity, and local-variable scope.
 
-- [ ] **Step 2: Correct and clarify Lombok rules**
+- [x] **Step 2: Correct and clarify Lombok rules**
 
 Require `@Getter`/`@Setter` for mutable persistence entities and configuration
 binders, allow immutable or behavior-oriented internal models to expose only
 the accessors they need, and preserve `@Slf4j` plus constructor injection
 guidance.
 
-- [ ] **Step 3: Add implementation hygiene rules**
+- [x] **Step 3: Add implementation hygiene rules**
 
 Cover dependency fields, logging, immutable collection exposure, magic values,
 and avoidance of `System.out` or hidden global mutable state. Cross-reference
 API design for architectural boundaries.
 
-- [ ] **Step 4: Validate the style document**
+- [x] **Step 4: Validate the style document**
 
 Run:
 
@@ -95,19 +95,19 @@ errors are reported.
 **Files:**
 - Modify: `standards/code-comments.md`
 
-- [ ] **Step 1: Define documentation ownership**
+- [x] **Step 1: Define documentation ownership**
 
 Add package-level documentation, contract/implementation documentation, record
 component and enum documentation, overridden-method rules, and public API
 expectations.
 
-- [ ] **Step 2: Define useful inline and TODO comments**
+- [x] **Step 2: Define useful inline and TODO comments**
 
 Require comments for rationale, lifecycle, concurrency, security, compatibility,
 and non-obvious side effects. Require focused TODOs that identify missing
 behavior or boundary; prohibit commented-out code and change-history comments.
 
-- [ ] **Step 3: Validate the comment document**
+- [x] **Step 3: Validate the comment document**
 
 Run:
 
