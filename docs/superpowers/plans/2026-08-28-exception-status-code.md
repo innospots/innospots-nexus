@@ -168,7 +168,7 @@ Search for conflicting code formats, `VO`/`Vo`-style status naming, raw-code
 recommendations, uncaught-cause wording, and module placement that would
 violate `AGENTS.md`.
 
-- [ ] **Step 2: Run repository verification**
+- [x] **Step 2: Run repository verification**
 
 Run:
 
@@ -184,7 +184,7 @@ Expected: Maven commands succeed on Java 25, tests report zero failures, the
 working tree is clean after commit, and only the intended documentation files
 are changed.
 
-- [ ] **Step 3: Confirm source scope**
+- [x] **Step 3: Confirm source scope**
 
 Run:
 
