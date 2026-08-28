@@ -7,6 +7,10 @@ import com.innospots.nexus.core.plugin.capability.CapabilityKey;
  */
 public interface CapabilityProviderContext extends PluginContext {
 
-    /** Returns the capability key currently being initialized. */
+    /**
+     * Returns the capability key currently being initialized.
+     *
+     * @return declared capability identity
+     */
     CapabilityKey capability();
 }

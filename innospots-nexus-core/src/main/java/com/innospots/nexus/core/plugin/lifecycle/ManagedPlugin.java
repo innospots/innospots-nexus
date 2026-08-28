@@ -51,7 +51,14 @@ public final class ManagedPlugin {
     private List<ProviderHolder<?>> providers = List.of();
     private PluginConfig config;
 
-    /** Creates a managed lifecycle wrapper around one discovered plugin. */
+    /**
+     * Creates a managed lifecycle wrapper around one discovered plugin.
+     *
+     * @param discovered discovered plugin instance and immutable definition
+     * @param config configuration snapshot used for each start
+     * @param registry capability registry shared by the runtime
+     * @param eventBus runtime-local event bus
+     */
     public ManagedPlugin(
             DiscoveredPlugin discovered,
             PluginConfig config,
@@ -70,7 +77,14 @@ public final class ManagedPlugin {
         this.logger = System.getLogger("plugin." + discovered.definition().id());
     }
 
-    /** Creates a managed plugin whose configuration is resolved only when that plugin starts. */
+    /**
+     * Creates a managed plugin whose configuration is resolved only when that plugin starts.
+     *
+     * @param discovered discovered plugin instance and immutable definition
+     * @param configSupplier lazy configuration resolver
+     * @param registry capability registry shared by the runtime
+     * @param eventBus runtime-local event bus
+     */
     public ManagedPlugin(
             DiscoveredPlugin discovered,
             Supplier<PluginConfig> configSupplier,
@@ -108,7 +122,13 @@ public final class ManagedPlugin {
 
         try {
             phase = "config-resolve";
-            config = configSupplier.get();
+            PluginConfig resolvedConfig = configSupplier.get();
+            if (resolvedConfig == null) {
+                throw NexusException.build(
+                        PluginStatusCode.PLUGIN_CONFIG_INVALID,
+                        "plugin config supplier returned null: " + discovered.definition().id());
+            }
+            config = resolvedConfig;
             resources = new DefaultResourceScope();
             PluginEventBus scopedEvents = eventBus.scoped(resources);
             PluginContext pluginContext = new DefaultPluginContext(
@@ -169,25 +189,42 @@ public final class ManagedPlugin {
         phase = "capability-withdraw";
         registry.unregisterPlugin(discovered.definition().id());
         Throwable failure = null;
+        String failurePhase = null;
 
         phase = "provider-destroy";
         List<ProviderHolder<?>> reverse = new ArrayList<>(providers);
         Collections.reverse(reverse);
         for (ProviderHolder<?> holder : reverse) {
+            Throwable previous = failure;
             failure = runCleanup(holder.provider()::destroy, failure);
+            if (previous == null && failure != null) {
+                failurePhase = phase;
+            }
         }
 
         phase = "plugin-stop";
+        Throwable previous = failure;
         failure = runCleanup(discovered.plugin()::stop, failure);
+        if (previous == null && failure != null) {
+            failurePhase = phase;
+        }
         phase = "resource-close";
         ResourceScope currentResources = resources;
-        failure = runCleanup(currentResources::close, failure);
+        if (currentResources != null) {
+            previous = failure;
+            failure = runCleanup(currentResources::close, failure);
+            if (previous == null && failure != null) {
+                failurePhase = phase;
+            }
+        }
         providers = List.of();
         resources = null;
+        config = null;
 
         if (failure != null) {
             state = PluginState.FAILED;
-            lastError = failure.getMessage();
+            phase = failurePhase == null ? phase : failurePhase;
+            lastError = PluginStatusCode.PLUGIN_STOP_FAILED.fullCode();
             eventBus.publish(new PluginFailedEvent(
                     discovered.definition().id(),
                     phase,
@@ -203,17 +240,36 @@ public final class ManagedPlugin {
         eventBus.publish(new PluginStoppedEvent(discovered.definition().id(), Instant.now()));
     }
 
-    /** Marks this plugin as waiting for its required capabilities. */
+    /**
+     * Marks this plugin as waiting for its required capabilities.
+     *
+     * @param dependencies dependency diagnostics for the current declaration snapshot
+     */
     public synchronized void waiting(Map<CapabilityKey, DependencyResolution> dependencies) {
-        if (state != PluginState.ACTIVE && state != PluginState.FAILED) {
+        if (dependencies == null) {
+            throw NexusException.build(
+                    PluginStatusCode.PLUGIN_DEPENDENCY_MISSING,
+                    "dependency diagnostics are required");
+        }
+        if (state != PluginState.ACTIVE && state != PluginState.STARTING
+                && state != PluginState.STOPPING && state != PluginState.FAILED) {
             this.dependencies = Map.copyOf(dependencies);
             state = PluginState.WAITING;
             phase = "dependency-wait";
         }
     }
 
-    /** Updates dependency diagnostics without mutating lifecycle state. */
+    /**
+     * Updates dependency diagnostics without mutating lifecycle state.
+     *
+     * @param dependencies dependency diagnostics for the current declaration snapshot
+     */
     public synchronized void dependencies(Map<CapabilityKey, DependencyResolution> dependencies) {
+        if (dependencies == null) {
+            throw NexusException.build(
+                    PluginStatusCode.PLUGIN_DEPENDENCY_MISSING,
+                    "dependency diagnostics are required");
+        }
         this.dependencies = Map.copyOf(dependencies);
     }
 
@@ -260,8 +316,9 @@ public final class ManagedPlugin {
         }
         providers = List.of();
         resources = null;
+        config = null;
         state = PluginState.FAILED;
-        lastError = original.getMessage();
+        lastError = errorCode(original);
         eventBus.publish(new PluginFailedEvent(
                 discovered.definition().id(), phase, errorCode(original), Instant.now()));
     }

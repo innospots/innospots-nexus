@@ -22,7 +22,9 @@ Capability + Tags 路由
 加载、配置、Capability 注册、路由或生命周期实现。Console 将来如需管理插件，只能调用 Core
 提供的管理接口和只读诊断模型。
 
-本文是开发设计依据，不代表所有类型已经实现。
+本文同时作为 `innospots-nexus-core` 插件运行时的实现依据。当前 V1 代码已覆盖本文定义的
+Plugin SPI、Classpath 发现、静态目录快照、配置解析、Capability 注册/路由、事件总线、资源托管
+和生命周期管理；后续扩展仍需遵守本文的模块边界与失败语义。
 
 ## 2. 当前工程约束
 
@@ -333,7 +335,8 @@ V1 不提供 `Plugins.get(...)`、静态 Registry 或静态 Manager。
 application scope 管理；这属于宿主的对象生命周期配置，不改变 Core 中“实例化、显式传递、可关闭”的
 设计。V1 不支持运行中修改 Classpath；新增、删除或替换插件需要创建新的 Runtime（通常伴随进程重启）。
 
-需要在宿主启动流程中显式完成发现时，可以使用静态风格的工厂方法创建目录快照：
+需要在宿主启动流程中显式完成发现时，可以使用静态风格的工厂方法创建目录快照。该快照会复用
+Classpath Discovery 的 plugin id、API version、Capability API 和默认路由前置校验：
 
 ```java
 PluginCatalog catalog = PluginCatalog.discover(Application.class.getClassLoader());
@@ -344,7 +347,8 @@ try (PluginManager plugins = DefaultPluginManager.create(runtimeConfig, catalog)
 ```
 
 该方法只是一次性的便捷入口，不建立 JVM 全局缓存；`PluginCatalog` 由调用方持有，并且只能交给
-一个 `PluginManager` Runtime 使用。需要测试或自定义发现结果时，可使用 `PluginCatalog.of(...)`。
+一个 `PluginManager` Runtime 使用。需要测试或自定义发现结果时，可使用 `PluginCatalog.of(...)`，
+该工厂同样执行 plugin id、API version 和 Capability API 的全局校验。
 
 ### 7.4 发现失败规则
 
@@ -1546,7 +1550,8 @@ public interface PluginManager extends AutoCloseable {
 ```
 
 `start()` 完成全量 SPI 发现和批量启动；重复调用幂等。`close()` 按逆启动顺序关闭全部 ACTIVE
-插件并保持幂等。
+插件并保持幂等。`close()` 完成后 Manager 进入终态，释放发现、生命周期和事件订阅引用；后续
+`start`、查询和 Capability 访问都会被拒绝，重复 `close()` 仍然安全无副作用。
 
 ## 17. 宿主接入
 

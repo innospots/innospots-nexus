@@ -8,6 +8,10 @@ package com.innospots.nexus.core.plugin.contract;
 @FunctionalInterface
 public interface CapabilityProviderFactory<T extends CapabilityProvider> {
 
-    /** Creates a new provider for one plugin start cycle. */
+    /**
+     * Creates a new provider for one plugin start cycle.
+     *
+     * @return fresh, uninitialized provider instance
+     */
     T create();
 }

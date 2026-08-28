@@ -20,12 +20,21 @@ public final class CapabilityRegistry implements CapabilityManager {
             new AtomicReference<>(Map.of());
     private final CapabilityRouter router;
 
-    /** Creates an empty registry using the configured fallback routes. */
+    /**
+     * Creates an empty registry using the configured fallback routes.
+     *
+     * @param defaultRoutes tags to use when a lookup does not specify tags
+     */
     public CapabilityRegistry(Map<CapabilityKey, Tags> defaultRoutes) {
         this.router = new CapabilityRouter(defaultRoutes);
     }
 
-    /** Atomically publishes all registrations supplied for a successfully started plugin. */
+    /**
+     * Atomically publishes all registrations supplied for a successfully started plugin.
+     *
+     * @param registrations provider registrations to publish as one snapshot
+     * @throws NexusException when a registration is invalid or violates a configured route
+     */
     public synchronized void registerAll(List<CapabilityRegistration<?>> registrations) {
         if (registrations == null) {
             throw NexusException.build(
@@ -56,8 +65,18 @@ public final class CapabilityRegistry implements CapabilityManager {
         snapshot.set(replacement);
     }
 
-    /** Atomically removes every registration owned by one plugin. */
+    /**
+     * Atomically removes every registration owned by one plugin.
+     *
+     * @param pluginId stable owner identifier
+     * @throws NexusException when the owner identifier is blank
+     */
     public synchronized void unregisterPlugin(String pluginId) {
+        if (pluginId == null || pluginId.isBlank()) {
+            throw NexusException.build(
+                    PluginStatusCode.CAPABILITY_TYPE_MISMATCH,
+                    "plugin id must not be blank");
+        }
         Map<CapabilityKey, List<CapabilityRegistration<?>>> mutable = mutableCopy(snapshot.get());
         mutable.replaceAll((key, values) -> values.stream()
                 .filter(value -> !value.pluginId().equals(pluginId))
@@ -66,8 +85,18 @@ public final class CapabilityRegistry implements CapabilityManager {
         snapshot.set(immutableCopy(mutable));
     }
 
-    /** Returns whether at least one active provider exists for the key. */
+    /**
+     * Returns whether at least one active provider exists for the key.
+     *
+     * @param key logical capability identity
+     * @return whether at least one provider is registered
+     */
     public boolean contains(CapabilityKey key) {
+        if (key == null) {
+            throw NexusException.build(
+                    PluginStatusCode.CAPABILITY_TYPE_MISMATCH,
+                    "capability key must not be null");
+        }
         return !snapshot.get().getOrDefault(key, List.of()).isEmpty();
     }
 
@@ -90,12 +119,21 @@ public final class CapabilityRegistry implements CapabilityManager {
         return registrations(type).stream().map(CapabilityRegistration::provider).toList();
     }
 
-    /** Returns one immutable registry snapshot for dependency and diagnostic calculations. */
+    /**
+     * Returns one immutable registry snapshot for dependency and diagnostic calculations.
+     *
+     * @return immutable capability-to-registration snapshot
+     */
     public Map<CapabilityKey, List<CapabilityRegistration<?>>> snapshot() {
         return snapshot.get();
     }
 
     private <T extends CapabilityProvider> List<CapabilityRegistration<T>> registrations(CapabilityType<T> type) {
+        if (type == null) {
+            throw NexusException.build(
+                    PluginStatusCode.CAPABILITY_TYPE_MISMATCH,
+                    "capability type must not be null");
+        }
         List<CapabilityRegistration<?>> raw = snapshot.get().getOrDefault(type.key(), List.of());
         List<CapabilityRegistration<T>> typed = new ArrayList<>(raw.size());
         for (CapabilityRegistration<?> registration : raw) {

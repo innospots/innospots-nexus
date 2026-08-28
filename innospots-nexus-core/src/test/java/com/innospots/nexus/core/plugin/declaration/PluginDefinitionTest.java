@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.core.plugin.capability.CapabilityType;
 import com.innospots.nexus.core.plugin.capability.Tags;
+import com.innospots.nexus.core.plugin.config.ConfigDefinition;
 import com.innospots.nexus.core.plugin.config.ConfigItemDefinition;
 import com.innospots.nexus.core.plugin.config.ConfigType;
 import com.innospots.nexus.core.plugin.contract.CapabilityProvider;
@@ -68,6 +69,8 @@ class PluginDefinitionTest {
                 .isInstanceOf(NexusException.class);
         assertThatThrownBy(() -> Tags.of("Provider", "sample"))
                 .isInstanceOf(NexusException.class);
+        assertThatThrownBy(() -> Tags.of(null, "sample"))
+                .isInstanceOf(NexusException.class);
         assertThatThrownBy(() -> PluginDefinition.builder("SamplePlugin")
                 .name("Sample")
                 .version("1.0.0")
@@ -98,6 +101,23 @@ class PluginDefinitionTest {
         items.clear();
 
         assertThat(definition.config().items()).hasSize(1);
+    }
+
+    @Test
+    void rejectsNullDeclarationEntriesWithNexusExceptions() {
+        List<CapabilityContribution<?>> contributions = new ArrayList<>();
+        contributions.add(null);
+
+        assertThatThrownBy(() -> new PluginDefinition(
+                "sample-plugin",
+                "Sample Plugin",
+                "1.0.0",
+                PluginDefinition.CURRENT_API_VERSION,
+                Tags.of("provider", "sample"),
+                contributions,
+                List.of(),
+                ConfigDefinition.empty()))
+                .isInstanceOf(NexusException.class);
     }
 
     private interface AlphaProvider extends CapabilityProvider {

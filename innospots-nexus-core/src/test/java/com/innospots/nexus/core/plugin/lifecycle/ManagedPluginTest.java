@@ -19,6 +19,7 @@ import com.innospots.nexus.core.plugin.contract.PluginContext;
 import com.innospots.nexus.core.plugin.declaration.PluginDefinition;
 import com.innospots.nexus.core.plugin.discovery.DiscoveredPlugin;
 import com.innospots.nexus.core.plugin.event.DefaultPluginEventBus;
+import com.innospots.nexus.core.plugin.event.PluginFailedEvent;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -123,6 +124,28 @@ class ManagedPluginTest {
         assertThat(calls).hasSize(8);
     }
 
+    @Test
+    void preservesTheFirstStopFailurePhaseInDiagnostics() {
+        DefaultPluginEventBus eventBus = new DefaultPluginEventBus();
+        List<PluginFailedEvent> failures = new ArrayList<>();
+        eventBus.subscribe(PluginFailedEvent.class, failures::add);
+        DestroyFailingPlugin plugin = new DestroyFailingPlugin();
+        PluginDefinition definition = plugin.definition();
+        ManagedPlugin managed = new ManagedPlugin(
+                new DiscoveredPlugin(plugin, definition, Instant.now()),
+                new ConfigurationManager(Map.of(), Map.of(), Map.of(), Map.of()).resolve(definition),
+                new CapabilityRegistry(Map.of()),
+                eventBus);
+
+        managed.start();
+
+        assertThatThrownBy(managed::stop).isInstanceOf(NexusException.class);
+        assertThat(managed.info().phase()).isEqualTo("provider-destroy");
+        assertThat(failures).singleElement()
+                .extracting(PluginFailedEvent::phase)
+                .isEqualTo("provider-destroy");
+    }
+
     private interface FirstProvider extends CapabilityProvider {
     }
 
@@ -221,6 +244,27 @@ class ManagedPluginTest {
 
         private SuccessfulPlugin(List<String> calls) {
             super(calls, false);
+        }
+    }
+
+    private static final class DestroyFailingPlugin implements Plugin {
+
+        @Override
+        public PluginDefinition definition() {
+            return PluginDefinition.builder("destroy-failure")
+                    .name("Destroy Failure")
+                    .version("1.0.0")
+                    .tags(Tags.of("fixture", "lifecycle"))
+                    .provide(FIRST, DestroyFailingProvider::new)
+                    .build();
+        }
+    }
+
+    private static final class DestroyFailingProvider implements FirstProvider {
+
+        @Override
+        public void destroy() {
+            throw new RuntimeException("expected destroy failure");
         }
     }
 }

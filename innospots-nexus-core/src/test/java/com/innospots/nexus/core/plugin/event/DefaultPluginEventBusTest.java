@@ -4,6 +4,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
 
+import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.core.plugin.resource.DefaultResourceScope;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,6 +44,28 @@ class DefaultPluginEventBusTest {
 
         bus.publish(new SampleEvent());
         assertThat(calls).hasValue(0);
+    }
+
+    @Test
+    void closesSubscriberReferencesAndRejectsNewSubscriptions() {
+        DefaultPluginEventBus bus = new DefaultPluginEventBus();
+        AtomicInteger calls = new AtomicInteger();
+        bus.subscribe(SampleEvent.class, event -> calls.incrementAndGet());
+
+        bus.close();
+        bus.publish(new SampleEvent());
+
+        assertThat(calls).hasValue(0);
+        assertThatThrownBy(() -> bus.subscribe(SampleEvent.class, event -> calls.incrementAndGet()))
+                .isInstanceOf(NexusException.class);
+    }
+
+    @Test
+    void rejectsNullScopedResourceOwnership() {
+        DefaultPluginEventBus bus = new DefaultPluginEventBus();
+
+        assertThatThrownBy(() -> bus.scoped(null))
+                .isInstanceOf(NexusException.class);
     }
 
     private record SampleEvent() implements PluginEvent {

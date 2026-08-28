@@ -2,6 +2,7 @@ package com.innospots.nexus.core.plugin.runtime;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -32,13 +33,14 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
  */
 public final class DefaultPluginManager implements PluginManager {
 
-    private final PluginRuntimeConfig config;
+    private PluginRuntimeConfig config;
     private final CapabilityRegistry registry;
     private final DefaultPluginEventBus eventBus = new DefaultPluginEventBus();
     private final List<String> startupOrder = new ArrayList<>();
     private List<DiscoveredPlugin> suppliedDiscoveries;
     private Map<String, ManagedPlugin> managedPlugins;
     private DependencyResolver dependencyResolver;
+    private volatile boolean closed;
 
     private DefaultPluginManager(PluginRuntimeConfig config, List<DiscoveredPlugin> suppliedDiscoveries) {
         if (config == null) {
@@ -49,12 +51,23 @@ public final class DefaultPluginManager implements PluginManager {
         this.registry = new CapabilityRegistry(config.defaultRoutes());
     }
 
-    /** Creates a manager that discovers plugins on the first start call. */
+    /**
+     * Creates a manager that discovers plugins on the first start call.
+     *
+     * @param config host runtime configuration
+     * @return independent plugin manager instance
+     */
     public static DefaultPluginManager create(PluginRuntimeConfig config) {
         return new DefaultPluginManager(config, null);
     }
 
-    /** Creates a manager from a precomputed immutable discovery catalog. */
+    /**
+     * Creates a manager from a precomputed immutable discovery catalog.
+     *
+     * @param config host runtime configuration
+     * @param catalog static discovery snapshot to consume
+     * @return independent plugin manager instance
+     */
     public static DefaultPluginManager create(PluginRuntimeConfig config, PluginCatalog catalog) {
         if (catalog == null) {
             throw NexusException.build(
@@ -68,11 +81,18 @@ public final class DefaultPluginManager implements PluginManager {
         return new DefaultPluginManager(config, discoveries);
     }
 
+    /**
+     * Discovers and starts eligible plugins in dependency-aware passes.
+     *
+     * @throws NexusException when discovery fails or a required plugin cannot be activated
+     */
     @Override
     public synchronized void start() {
+        ensureOpen();
         initializeIfNecessary();
         Set<String> attempted = new LinkedHashSet<>();
         List<String> startedThisCall = new ArrayList<>();
+        List<NexusException> startupFailures = new ArrayList<>();
         boolean progressed;
         do {
             progressed = false;
@@ -98,6 +118,7 @@ public final class DefaultPluginManager implements PluginManager {
                     progressed = true;
                 } catch (NexusException exception) {
                     // Ordinary plugin failure is isolated; required-plugin verification below decides host outcome.
+                    startupFailures.add(exception);
                 }
             }
         } while (progressed);
@@ -109,14 +130,26 @@ public final class DefaultPluginManager implements PluginManager {
                 .toList();
         if (!inactiveRequired.isEmpty()) {
             rollbackStarted(startedThisCall);
-            throw NexusException.build(
-                    PluginStatusCode.PLUGIN_START_FAILED,
-                    "required plugins did not become active: " + inactiveRequired);
+            NexusException failure = NexusException.build(
+                    PluginStatusCode.PLUGIN_START_FAILED.fullCode(),
+                    "required plugins did not become active: " + inactiveRequired,
+                    startupFailures.isEmpty() ? null : startupFailures.getFirst());
+            for (int index = 1; index < startupFailures.size(); index++) {
+                failure.addSuppressed(startupFailures.get(index));
+            }
+            throw failure;
         }
     }
 
+    /**
+     * Starts one plugin after resolving its current dependency diagnostics.
+     *
+     * @param pluginId stable plugin identifier
+     * @throws NexusException when the plugin is unknown, blocked, or fails to start
+     */
     @Override
     public synchronized void start(String pluginId) {
+        ensureOpen();
         initializeIfNecessary();
         ManagedPlugin plugin = requirePlugin(pluginId);
         Map<CapabilityKey, DependencyResolution> dependencies = dependencyResolver.resolve(plugin.definition());
@@ -135,8 +168,15 @@ public final class DefaultPluginManager implements PluginManager {
         }
     }
 
+    /**
+     * Stops one active plugin after checking that no active dependent loses its last provider.
+     *
+     * @param pluginId stable plugin identifier
+     * @throws NexusException when the plugin is unknown, in use, or fails to stop
+     */
     @Override
     public synchronized void stop(String pluginId) {
+        ensureOpen();
         initializeIfNecessary();
         ManagedPlugin target = requirePlugin(pluginId);
         if (target.info().state() != PluginState.ACTIVE) {
@@ -147,30 +187,56 @@ public final class DefaultPluginManager implements PluginManager {
         startupOrder.remove(pluginId);
     }
 
+    /**
+     * Returns all current plugin runtime snapshots sorted by id.
+     *
+     * @return immutable runtime snapshot list
+     */
     @Override
     public synchronized List<PluginRuntimeInfo> plugins() {
+        ensureOpen();
         initializeIfNecessary();
         return managedPlugins.values().stream()
                 .map(ManagedPlugin::info)
-                .sorted(java.util.Comparator.comparing(PluginRuntimeInfo::id))
+                .sorted(Comparator.comparing(PluginRuntimeInfo::id))
                 .toList();
     }
 
+    /**
+     * Finds one current plugin runtime snapshot.
+     *
+     * @param pluginId stable plugin identifier
+     * @return matching snapshot, or empty when not discovered
+     */
     @Override
     public synchronized Optional<PluginRuntimeInfo> plugin(String pluginId) {
+        ensureOpen();
         initializeIfNecessary();
         ManagedPlugin plugin = managedPlugins.get(pluginId);
         return plugin == null ? Optional.empty() : Optional.of(plugin.info());
     }
 
+    /** Returns the active capability lookup boundary for this manager. */
     @Override
-    public CapabilityManager capabilities() {
+    public synchronized CapabilityManager capabilities() {
+        ensureOpen();
         return registry;
     }
 
+    /**
+     * Stops active plugins in reverse startup order and releases runtime references.
+     *
+     * @throws NexusException when one or more plugin stops fail; all stop attempts are still made
+     */
     @Override
     public synchronized void close() {
+        if (closed) {
+            return;
+        }
         if (managedPlugins == null) {
+            eventBus.close();
+            config = null;
+            closed = true;
             return;
         }
         List<String> reverse = new ArrayList<>(startupOrder);
@@ -188,6 +254,12 @@ public final class DefaultPluginManager implements PluginManager {
             }
         }
         startupOrder.clear();
+        managedPlugins = null;
+        dependencyResolver = null;
+        suppliedDiscoveries = null;
+        eventBus.close();
+        config = null;
+        closed = true;
         if (first != null) {
             throw first;
         }
@@ -207,6 +279,8 @@ public final class DefaultPluginManager implements PluginManager {
                 config.runtimeVariables());
         validateRequiredPlugins(discoveries);
         validateDefaultRoutes(discoveries);
+        ConfigurationManager.validateEnvironmentNames(
+                discoveries.stream().map(DiscoveredPlugin::definition).toList());
         Map<String, ManagedPlugin> created = new LinkedHashMap<>();
         for (DiscoveredPlugin discovery : discoveries) {
             created.put(discovery.definition().id(), new ManagedPlugin(
@@ -220,6 +294,14 @@ public final class DefaultPluginManager implements PluginManager {
                 discoveries.stream().map(DiscoveredPlugin::definition).toList(),
                 registry);
         suppliedDiscoveries = null;
+    }
+
+    private void ensureOpen() {
+        if (closed) {
+            throw NexusException.build(
+                    PluginStatusCode.PLUGIN_STOP_FAILED,
+                    "plugin manager is already closed");
+        }
     }
 
     private void validateRequiredPlugins(List<DiscoveredPlugin> discoveries) {

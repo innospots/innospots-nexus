@@ -69,6 +69,25 @@ class CapabilityRegistryTest {
         assertThat(registry.findAll(MESSAGE)).containsExactly(first);
     }
 
+    @Test
+    void rejectsNullPublicInputsWithNexusExceptions() {
+        CapabilityRegistry registry = new CapabilityRegistry(Map.of());
+
+        assertThatThrownBy(() -> registry.contains(null)).isInstanceOf(NexusException.class);
+        assertThatThrownBy(() -> registry.find(null, Tags.empty())).isInstanceOf(NexusException.class);
+        assertThatThrownBy(() -> registry.unregisterPlugin(null)).isInstanceOf(NexusException.class);
+    }
+
+    @Test
+    void routerRejectsNullSelectionInputsWithNexusExceptions() {
+        CapabilityRouter router = new CapabilityRouter(Map.of());
+
+        assertThatThrownBy(() -> router.select(null, Tags.empty(), List.of()))
+                .isInstanceOf(NexusException.class);
+        assertThatThrownBy(() -> router.select(MESSAGE, Tags.empty(), null))
+                .isInstanceOf(NexusException.class);
+    }
+
     private interface MessageProvider extends CapabilityProvider {
 
         String name();

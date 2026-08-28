@@ -1,6 +1,7 @@
 package com.innospots.nexus.core.plugin.discovery;
 
 import java.net.URLClassLoader;
+import java.util.Arrays;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -64,6 +65,45 @@ class ClasspathPluginDiscoveryTest {
                 .hasMessageContaining("sample-discovery");
     }
 
+    @Test
+    void catalogFactorySortsAndValidatesStaticDiscoveryEntries() {
+        DiscoveredPlugin second = new DiscoveredPlugin(
+                new OtherPlugin(),
+                fixtureDefinition("zeta-discovery"),
+                java.time.Instant.now());
+        DiscoveredPlugin first = new DiscoveredPlugin(
+                new SamplePlugin(),
+                fixtureDefinition("alpha-discovery"),
+                java.time.Instant.now());
+
+        PluginCatalog catalog = PluginCatalog.of(Arrays.asList(second, first));
+
+        assertThat(catalog.plugins()).extracting(item -> item.definition().id())
+                .containsExactly("alpha-discovery", "zeta-discovery");
+        assertThatThrownBy(() -> PluginCatalog.of(Arrays.asList(first, null)))
+                .isInstanceOf(NexusException.class);
+
+        DiscoveredPlugin incompatible = new DiscoveredPlugin(
+                new OtherPlugin(),
+                PluginDefinition.builder("incompatible-discovery")
+                        .name("Incompatible Discovery")
+                        .version("1.0.0")
+                        .apiVersion(PluginDefinition.CURRENT_API_VERSION + 1)
+                        .tags(Tags.of("fixture", "discovery"))
+                        .build(),
+                java.time.Instant.now());
+        assertThatThrownBy(() -> PluginCatalog.of(Arrays.asList(incompatible)))
+                .isInstanceOf(NexusException.class)
+                .hasMessageContaining("apiVersion");
+    }
+
+    @Test
+    void rejectsInvalidDiscoveredPluginRecords() {
+        assertThatThrownBy(() -> new DiscoveredPlugin(null, fixtureDefinition("invalid-discovery"),
+                java.time.Instant.now()))
+                .isInstanceOf(NexusException.class);
+    }
+
     private ClassLoader serviceClassLoader(String... implementationClasses) throws Exception {
         Path serviceFile = classpathRoot.resolve(
                 "META-INF/services/com.innospots.nexus.core.plugin.contract.Plugin");
@@ -91,6 +131,14 @@ class ClasspathPluginDiscoveryTest {
         @Override
         public PluginDefinition definition() {
             return fixtureDefinition("sample-discovery");
+        }
+    }
+
+    public static final class OtherPlugin implements Plugin {
+
+        @Override
+        public PluginDefinition definition() {
+            return fixtureDefinition("zeta-discovery");
         }
     }
 

@@ -26,7 +26,11 @@ public final class ClasspathPluginDiscovery {
 
     private final ClassLoader classLoader;
 
-    /** Creates a discovery operation for the supplied class loader. */
+    /**
+     * Creates a discovery operation for the supplied class loader.
+     *
+     * @param classLoader loader whose visible ServiceLoader entries are inspected
+     */
     public ClasspathPluginDiscovery(ClassLoader classLoader) {
         if (classLoader == null) {
             throw NexusException.build(
@@ -36,7 +40,12 @@ public final class ClasspathPluginDiscovery {
         this.classLoader = classLoader;
     }
 
-    /** Performs one static-style discovery operation without retaining a global mutable cache. */
+    /**
+     * Performs one static-style discovery operation without retaining a global mutable cache.
+     *
+     * @param classLoader loader whose visible ServiceLoader entries are inspected
+     * @return immutable, validated discovery snapshot
+     */
     public static List<DiscoveredPlugin> discover(ClassLoader classLoader) {
         return new ClasspathPluginDiscovery(classLoader).discover();
     }
@@ -62,7 +71,7 @@ public final class ClasspathPluginDiscovery {
             }
         } catch (NexusException exception) {
             throw exception;
-        } catch (ServiceConfigurationError | RuntimeException exception) {
+        } catch (ServiceConfigurationError | RuntimeException | LinkageError exception) {
             throw NexusException.build(
                     PluginStatusCode.PLUGIN_DISCOVERY_FAILED.fullCode(),
                     "failed to discover classpath plugins",
@@ -74,7 +83,7 @@ public final class ClasspathPluginDiscovery {
         return List.copyOf(discovered);
     }
 
-    private static void validate(List<DiscoveredPlugin> discovered) {
+    static void validate(List<DiscoveredPlugin> discovered) {
         Set<String> pluginIds = new HashSet<>();
         Map<CapabilityKey, Class<?>> capabilityApis = new HashMap<>();
         for (DiscoveredPlugin item : discovered) {

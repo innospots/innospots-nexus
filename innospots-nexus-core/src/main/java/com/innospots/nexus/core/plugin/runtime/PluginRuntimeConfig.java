@@ -29,11 +29,11 @@ public record PluginRuntimeConfig(
 
     /** Defensively copies configuration and rejects contradictory enablement. */
     public PluginRuntimeConfig {
-        requiredPluginIds = requiredPluginIds == null ? Set.of() : Set.copyOf(requiredPluginIds);
-        disabledPluginIds = disabledPluginIds == null ? Set.of() : Set.copyOf(disabledPluginIds);
-        hostConfig = hostConfig == null ? Map.of() : Map.copyOf(hostConfig);
-        runtimeVariables = runtimeVariables == null ? Map.of() : Map.copyOf(runtimeVariables);
-        defaultRoutes = defaultRoutes == null ? Map.of() : Map.copyOf(defaultRoutes);
+        requiredPluginIds = immutablePluginIds(requiredPluginIds, "required");
+        disabledPluginIds = immutablePluginIds(disabledPluginIds, "disabled");
+        hostConfig = immutableStringMap(hostConfig, "host configuration");
+        runtimeVariables = immutableStringMap(runtimeVariables, "runtime variables");
+        defaultRoutes = immutableRoutes(defaultRoutes);
         if (!java.util.Collections.disjoint(requiredPluginIds, disabledPluginIds)) {
             throw NexusException.build(
                     PluginStatusCode.PLUGIN_CONFIG_INVALID,
@@ -41,8 +41,55 @@ public record PluginRuntimeConfig(
         }
     }
 
-    /** Returns the configured class loader or the supplied runtime fallback. */
+    /**
+     * Returns the configured class loader or the supplied runtime fallback.
+     *
+     * @param fallback loader used when no plugin-specific loader was configured
+     * @return effective plugin class loader
+     */
     public ClassLoader resolvedClassLoader(ClassLoader fallback) {
         return pluginClassLoader == null ? fallback : pluginClassLoader;
+    }
+
+    private static Set<String> immutablePluginIds(Set<String> source, String kind) {
+        if (source == null) {
+            return Set.of();
+        }
+        for (String pluginId : source) {
+            if (pluginId == null || pluginId.isBlank()) {
+                throw NexusException.build(
+                        PluginStatusCode.PLUGIN_CONFIG_INVALID,
+                        kind + " plugin ids must not be blank");
+            }
+        }
+        return Set.copyOf(source);
+    }
+
+    private static Map<String, String> immutableStringMap(Map<String, String> source, String kind) {
+        if (source == null) {
+            return Map.of();
+        }
+        for (Map.Entry<String, String> entry : source.entrySet()) {
+            if (entry.getKey() == null || entry.getValue() == null) {
+                throw NexusException.build(
+                        PluginStatusCode.PLUGIN_CONFIG_INVALID,
+                        kind + " keys and values must not be null");
+            }
+        }
+        return Map.copyOf(source);
+    }
+
+    private static Map<CapabilityKey, Tags> immutableRoutes(Map<CapabilityKey, Tags> source) {
+        if (source == null) {
+            return Map.of();
+        }
+        for (Map.Entry<CapabilityKey, Tags> entry : source.entrySet()) {
+            if (entry.getKey() == null || entry.getValue() == null) {
+                throw NexusException.build(
+                        PluginStatusCode.PLUGIN_CONFIG_INVALID,
+                        "default capability routes must not contain null entries");
+            }
+        }
+        return Map.copyOf(source);
     }
 }

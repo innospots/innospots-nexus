@@ -2,6 +2,7 @@ package com.innospots.nexus.core.plugin.config;
 
 import java.time.Duration;
 import java.time.format.DateTimeParseException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -22,7 +23,14 @@ public final class ConfigurationManager {
     private final Map<String, String> systemProperties;
     private final Map<String, String> runtimeVariables;
 
-    /** Creates a resolver with sources ordered from host through runtime precedence. */
+    /**
+     * Creates a resolver with sources ordered from host through runtime precedence.
+     *
+     * @param hostConfig host-provided flattened configuration
+     * @param environment process environment values
+     * @param systemProperties JVM system properties
+     * @param runtimeVariables highest-priority runtime overrides
+     */
     public ConfigurationManager(
             Map<String, String> hostConfig,
             Map<String, String> environment,
@@ -35,7 +43,13 @@ public final class ConfigurationManager {
         this.runtimeVariables = immutable(runtimeVariables);
     }
 
-    /** Creates a resolver backed by current process environment and system properties. */
+    /**
+     * Creates a resolver backed by current process environment and system properties.
+     *
+     * @param hostConfig host-provided flattened configuration
+     * @param runtimeVariables highest-priority runtime overrides
+     * @return a resolver using the current process sources
+     */
     public static ConfigurationManager standard(
             Map<String, String> hostConfig,
             Map<String, String> runtimeVariables
@@ -47,8 +61,17 @@ public final class ConfigurationManager {
         return new ConfigurationManager(hostConfig, System.getenv(), properties, runtimeVariables);
     }
 
-    /** Resolves and validates one plugin's isolated configuration snapshot. */
+    /**
+     * Resolves and validates one plugin's isolated configuration snapshot.
+     *
+     * @param definition immutable plugin declaration whose schema is resolved
+     * @return typed configuration limited to the plugin namespace
+     * @throws NexusException when an unknown key, missing required value, or conversion error is found
+     */
     public PluginConfig resolve(PluginDefinition definition) {
+        if (definition == null) {
+            throw invalid("plugin definition is required for configuration resolution");
+        }
         String prefix = "plugins." + definition.id() + ".";
         Map<String, ConfigItemDefinition> items = definition.config().items().stream()
                 .collect(Collectors.toUnmodifiableMap(ConfigItemDefinition::key, item -> item));
@@ -84,16 +107,60 @@ public final class ConfigurationManager {
         return new DefaultPluginConfig(typed, display);
     }
 
-    /** Maps one full plugin key to its deterministic environment variable name. */
+    /**
+     * Maps one full plugin key to its deterministic environment variable name.
+     *
+     * @param pluginId stable plugin identifier
+     * @param itemKey plugin-local configuration key
+     * @return deterministic environment variable name
+     * @throws NexusException when either key is blank
+     */
     public static String environmentName(String pluginId, String itemKey) {
+        if (pluginId == null || pluginId.isBlank() || itemKey == null || itemKey.isBlank()) {
+            throw invalid("plugin id and config key are required for environment mapping");
+        }
         return "NEXUS_PLUGIN_" + (pluginId + "." + itemKey)
                 .replace('-', '_')
                 .replace('.', '_')
                 .toUpperCase(java.util.Locale.ROOT);
     }
 
+    /**
+     * Validates environment variable mappings across all discovered plugin definitions.
+     *
+     * @param definitions plugin declarations to validate as one classpath snapshot
+     * @throws NexusException when two logical keys map to one environment name
+     */
+    public static void validateEnvironmentNames(Collection<PluginDefinition> definitions) {
+        if (definitions == null) {
+            throw invalid("plugin definitions are required for environment validation");
+        }
+        Map<String, String> names = new HashMap<>();
+        for (PluginDefinition definition : definitions) {
+            if (definition == null) {
+                throw invalid("plugin definition must not be null");
+            }
+            for (ConfigItemDefinition item : definition.config().items()) {
+                String fullKey = definition.id() + "." + item.key();
+                String environmentName = environmentName(definition.id(), item.key());
+                String previous = names.putIfAbsent(environmentName, fullKey);
+                if (previous != null && !previous.equals(fullKey)) {
+                    throw invalid("plugin config environment name conflict: " + previous + ", " + fullKey);
+                }
+            }
+        }
+    }
+
     private static Map<String, String> immutable(Map<String, String> source) {
-        return source == null ? Map.of() : Map.copyOf(source);
+        if (source == null) {
+            return Map.of();
+        }
+        for (Map.Entry<String, String> entry : source.entrySet()) {
+            if (entry.getKey() == null || entry.getValue() == null) {
+                throw invalid("configuration source keys and values must not be null");
+            }
+        }
+        return Map.copyOf(source);
     }
 
     private static void rejectUnknown(

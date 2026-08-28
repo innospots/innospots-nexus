@@ -2,6 +2,8 @@ package com.innospots.nexus.core.plugin.runtime;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -130,6 +132,61 @@ class DefaultPluginManagerTest {
 
         assertThatThrownBy(manager::start).isInstanceOf(NexusException.class);
         assertThat(starts).isEmpty();
+    }
+
+    @Test
+    void preservesRequiredPluginFailureCauseAfterStartupRollback() {
+        Plugin failing = new Plugin() {
+            @Override
+            public PluginDefinition definition() {
+                return PluginDefinition.builder("required-failure")
+                        .name("Required Failure")
+                        .version("1.0.0")
+                        .tags(Tags.of("fixture", "failure"))
+                        .build();
+            }
+
+            @Override
+            public void start() {
+                throw new RuntimeException("expected required startup failure");
+            }
+        };
+        DefaultPluginManager manager = DefaultPluginManager.create(
+                runtimeConfig(Set.of("required-failure"), Set.of(), Map.of()),
+                List.of(discovered(failing)));
+
+        assertThatThrownBy(manager::start)
+                .isInstanceOf(NexusException.class)
+                .hasCauseInstanceOf(NexusException.class);
+    }
+
+    @Test
+    void closeMakesManagerTerminalAndReleasesRuntimeOperations() {
+        List<String> starts = new ArrayList<>();
+        DefaultPluginManager manager = DefaultPluginManager.create(
+                runtimeConfig(Set.of(), Set.of(), Map.of()),
+                PluginCatalog.of(List.of(discovered(new SourcePlugin(starts)))));
+
+        manager.start();
+        manager.close();
+
+        assertThatThrownBy(manager::start).isInstanceOf(NexusException.class);
+        assertThatThrownBy(manager::plugins).isInstanceOf(NexusException.class);
+    }
+
+    @Test
+    void rejectsNullAndBlankRuntimeConfigurationEntries() {
+        Set<String> invalidIds = new HashSet<>();
+        invalidIds.add(null);
+        assertThatThrownBy(() -> new PluginRuntimeConfig(
+                invalidIds, Set.of(), Map.of(), Map.of(), Map.of(), getClass().getClassLoader()))
+                .isInstanceOf(NexusException.class);
+
+        Map<String, String> invalidConfig = new HashMap<>();
+        invalidConfig.put(null, "value");
+        assertThatThrownBy(() -> new PluginRuntimeConfig(
+                Set.of(), Set.of(), invalidConfig, Map.of(), Map.of(), getClass().getClassLoader()))
+                .isInstanceOf(NexusException.class);
     }
 
     private PluginRuntimeConfig runtimeConfig(

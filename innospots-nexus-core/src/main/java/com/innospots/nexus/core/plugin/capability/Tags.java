@@ -35,6 +35,11 @@ public final class Tags {
 
     /** Creates tags containing one attribute. */
     public static Tags of(String name, String value) {
+        if (name == null || value == null) {
+            throw NexusException.build(
+                    PluginStatusCode.PLUGIN_DEFINITION_INVALID,
+                    "tag name and value must not be null");
+        }
         return new Tags(Map.of(name, value));
     }
 

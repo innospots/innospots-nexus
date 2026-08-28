@@ -55,14 +55,19 @@ public record PluginDefinition(
         if (apiVersion < 1 || tags == null || tags.isEmpty() || config == null) {
             invalid("plugin apiVersion, tags and config are required: " + id);
         }
-        capabilities = capabilities == null ? List.of() : List.copyOf(capabilities);
-        requirements = requirements == null ? List.of() : List.copyOf(requirements);
+        capabilities = immutableCapabilities(capabilities);
+        requirements = immutableRequirements(requirements);
         config = snapshotConfig(config);
         requireUniqueCapabilities(capabilities);
         requireUniqueRequirements(requirements);
     }
 
-    /** Creates a fluent declaration builder. */
+    /**
+     * Creates a fluent declaration builder.
+     *
+     * @param id stable lowercase kebab-case plugin identifier
+     * @return mutable declaration builder
+     */
     public static Builder builder(String id) {
         return new Builder(id);
     }
@@ -76,6 +81,20 @@ public record PluginDefinition(
         }
     }
 
+    private static List<CapabilityContribution<?>> immutableCapabilities(
+            List<CapabilityContribution<?>> source
+    ) {
+        if (source == null) {
+            return List.of();
+        }
+        for (CapabilityContribution<?> contribution : source) {
+            if (contribution == null) {
+                invalid("plugin capability contribution must not be null");
+            }
+        }
+        return List.copyOf(source);
+    }
+
     private static void requireUniqueRequirements(List<CapabilityRequirement> requirements) {
         Set<CapabilityKey> keys = new HashSet<>();
         for (CapabilityRequirement requirement : requirements) {
@@ -83,6 +102,18 @@ public record PluginDefinition(
                 invalid("duplicate requirement in plugin definition");
             }
         }
+    }
+
+    private static List<CapabilityRequirement> immutableRequirements(List<CapabilityRequirement> source) {
+        if (source == null) {
+            return List.of();
+        }
+        for (CapabilityRequirement requirement : source) {
+            if (requirement == null) {
+                invalid("plugin capability requirement must not be null");
+            }
+        }
+        return List.copyOf(source);
     }
 
     private static ConfigDefinition snapshotConfig(ConfigDefinition source) {
@@ -124,31 +155,58 @@ public record PluginDefinition(
             this.id = id;
         }
 
-        /** Sets the display name. */
+        /**
+         * Sets the display name.
+         *
+         * @param name human-readable plugin name
+         * @return this builder
+         */
         public Builder name(String name) {
             this.name = name;
             return this;
         }
 
-        /** Sets the release version. */
+        /**
+         * Sets the release version.
+         *
+         * @param version plugin release version
+         * @return this builder
+         */
         public Builder version(String version) {
             this.version = version;
             return this;
         }
 
-        /** Overrides the plugin API major version. */
+        /**
+         * Overrides the plugin API major version.
+         *
+         * @param apiVersion plugin protocol major version
+         * @return this builder
+         */
         public Builder apiVersion(int apiVersion) {
             this.apiVersion = apiVersion;
             return this;
         }
 
-        /** Sets routing tags inherited by every provider. */
+        /**
+         * Sets routing tags inherited by every provider.
+         *
+         * @param tags provider routing identity
+         * @return this builder
+         */
         public Builder tags(Tags tags) {
             this.tags = tags;
             return this;
         }
 
-        /** Adds one type-safe provider factory. */
+        /**
+         * Adds one type-safe provider factory.
+         *
+         * @param type capability API and logical identity
+         * @param factory factory that creates a fresh provider
+         * @param <T> provider contract type
+         * @return this builder
+         */
         public <T extends CapabilityProvider> Builder provide(
                 CapabilityType<T> type,
                 CapabilityProviderFactory<? extends T> factory
@@ -157,7 +215,13 @@ public record PluginDefinition(
             return this;
         }
 
-        /** Adds a capability requirement using its declared type. */
+        /**
+         * Adds a capability requirement using its declared type.
+         *
+         * @param type required capability type
+         * @param required whether absence blocks startup
+         * @return this builder
+         */
         public Builder require(CapabilityType<?> type, boolean required) {
             if (type == null) {
                 invalid("requirement capability type is required");
@@ -166,7 +230,12 @@ public record PluginDefinition(
             return this;
         }
 
-        /** Sets the configuration schema. */
+        /**
+         * Sets the configuration schema.
+         *
+         * @param config plugin-local configuration schema
+         * @return this builder
+         */
         public Builder config(ConfigDefinition config) {
             this.config = config;
             return this;

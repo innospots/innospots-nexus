@@ -5,7 +5,11 @@ package com.innospots.nexus.core.plugin.contract;
  */
 public interface CapabilityProvider {
 
-    /** Initializes the provider after its factory creates a fresh instance. */
+    /**
+     * Initializes the provider after its factory creates a fresh instance.
+     *
+     * @param context provider-scoped runtime services
+     */
     default void initialize(CapabilityProviderContext context) {
     }
 

@@ -7,10 +7,18 @@ import com.innospots.nexus.core.plugin.declaration.PluginDefinition;
  */
 public interface Plugin {
 
-    /** Returns an immutable, side-effect-free plugin definition. */
+    /**
+     * Returns an immutable, side-effect-free plugin definition.
+     *
+     * @return declaration used during discovery and preflight validation
+     */
     PluginDefinition definition();
 
-    /** Initializes plugin-level state for one start cycle. */
+    /**
+     * Initializes plugin-level state for one start cycle.
+     *
+     * @param context runtime services scoped to this plugin start cycle
+     */
     default void initialize(PluginContext context) {
     }
 

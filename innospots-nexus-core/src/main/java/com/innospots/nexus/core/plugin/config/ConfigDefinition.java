@@ -13,7 +13,11 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
  */
 public interface ConfigDefinition {
 
-    /** Returns declared configuration items. */
+    /**
+     * Returns declared configuration items in declaration order.
+     *
+     * @return immutable configuration item collection
+     */
     Collection<ConfigItemDefinition> items();
 
     /** Returns an empty configuration schema. */
@@ -34,32 +38,62 @@ public interface ConfigDefinition {
         private Builder() {
         }
 
-        /** Starts a string item declaration. */
+        /**
+         * Starts a string item declaration.
+         *
+         * @param key plugin-local configuration key
+         * @return item builder
+         */
         public ItemBuilder string(String key) {
             return item(key, ConfigType.STRING);
         }
 
-        /** Starts an integer item declaration. */
+        /**
+         * Starts an integer item declaration.
+         *
+         * @param key plugin-local configuration key
+         * @return item builder
+         */
         public ItemBuilder integer(String key) {
             return item(key, ConfigType.INTEGER);
         }
 
-        /** Starts a long item declaration. */
+        /**
+         * Starts a long item declaration.
+         *
+         * @param key plugin-local configuration key
+         * @return item builder
+         */
         public ItemBuilder longNumber(String key) {
             return item(key, ConfigType.LONG);
         }
 
-        /** Starts a boolean item declaration. */
+        /**
+         * Starts a boolean item declaration.
+         *
+         * @param key plugin-local configuration key
+         * @return item builder
+         */
         public ItemBuilder bool(String key) {
             return item(key, ConfigType.BOOLEAN);
         }
 
-        /** Starts a duration item declaration. */
+        /**
+         * Starts a duration item declaration.
+         *
+         * @param key plugin-local configuration key
+         * @return item builder
+         */
         public ItemBuilder duration(String key) {
             return item(key, ConfigType.DURATION);
         }
 
-        /** Starts a secret item declaration. */
+        /**
+         * Starts a secret item declaration.
+         *
+         * @param key plugin-local configuration key
+         * @return item builder
+         */
         public ItemBuilder secret(String key) {
             return item(key, ConfigType.SECRET).secret();
         }
@@ -105,31 +139,53 @@ public interface ConfigDefinition {
             this.type = type;
         }
 
-        /** Marks the item as required. */
+        /**
+         * Marks the item as required.
+         *
+         * @return this item builder
+         */
         public ItemBuilder required() {
             this.required = true;
             return this;
         }
 
-        /** Sets a textual default converted during configuration resolution. */
+        /**
+         * Sets a textual default converted during configuration resolution.
+         *
+         * @param defaultValue textual default value
+         * @return this item builder
+         */
         public ItemBuilder defaultValue(String defaultValue) {
             this.defaultValue = defaultValue;
             return this;
         }
 
-        /** Marks diagnostics for this item as secret. */
+        /**
+         * Marks diagnostics for this item as secret.
+         *
+         * @return this item builder
+         */
         public ItemBuilder secret() {
             this.secret = true;
             return this;
         }
 
-        /** Sets a human-readable item description. */
+        /**
+         * Sets a human-readable item description.
+         *
+         * @param description display description
+         * @return this item builder
+         */
         public ItemBuilder description(String description) {
             this.description = description;
             return this;
         }
 
-        /** Finishes this item and returns to the schema builder. */
+        /**
+         * Finishes this item and returns to the schema builder.
+         *
+         * @return owning schema builder
+         */
         public Builder end() {
             parent.add(new ConfigItemDefinition(
                     key,

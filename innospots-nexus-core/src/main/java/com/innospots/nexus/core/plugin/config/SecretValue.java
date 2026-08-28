@@ -26,7 +26,13 @@ public final class SecretValue implements AutoCloseable {
         return new SecretValue(value.toCharArray());
     }
 
-    /** Executes an operation against a temporary defensive copy of the characters. */
+    /**
+     * Executes an operation against a temporary defensive copy of the characters.
+     *
+     * @param operation function that consumes the temporary character copy
+     * @param <T> operation result type
+     * @return operation result
+     */
     public synchronized <T> T use(java.util.function.Function<char[], T> operation) {
         if (operation == null) {
             throw NexusException.build(PluginStatusCode.PLUGIN_CONFIG_INVALID, "secret operation is required");

@@ -1,6 +1,7 @@
 package com.innospots.nexus.core.plugin.config;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -59,6 +60,37 @@ class ConfigurationManagerTest {
         assertThatThrownBy(() -> missing.resolve(definition()))
                 .isInstanceOf(NexusException.class)
                 .hasMessageContaining("endpoint");
+    }
+
+    @Test
+    void rejectsEnvironmentNameCollisionsAcrossPluginDefinitions() {
+        PluginDefinition first = PluginDefinition.builder("foo-bar")
+                .name("Foo Bar")
+                .version("1.0.0")
+                .tags(Tags.of("fixture", "config"))
+                .config(ConfigDefinition.builder().string("x").end().build())
+                .build();
+        PluginDefinition second = PluginDefinition.builder("foo")
+                .name("Foo")
+                .version("1.0.0")
+                .tags(Tags.of("fixture", "config"))
+                .config(ConfigDefinition.builder().string("bar.x").end().build())
+                .build();
+
+        assertThatThrownBy(() -> ConfigurationManager.validateEnvironmentNames(List.of(first, second)))
+                .isInstanceOf(NexusException.class)
+                .hasMessageContaining("environment");
+    }
+
+    @Test
+    void rejectsNullDefinitionsAndEnvironmentNamePartsWithNexusExceptions() {
+        ConfigurationManager manager = new ConfigurationManager(Map.of(), Map.of(), Map.of(), Map.of());
+
+        assertThatThrownBy(() -> manager.resolve(null)).isInstanceOf(NexusException.class);
+        assertThatThrownBy(() -> ConfigurationManager.environmentName(null, "endpoint"))
+                .isInstanceOf(NexusException.class);
+        assertThatThrownBy(() -> ConfigurationManager.environmentName("config-fixture", null))
+                .isInstanceOf(NexusException.class);
     }
 
     private static PluginDefinition definition() {

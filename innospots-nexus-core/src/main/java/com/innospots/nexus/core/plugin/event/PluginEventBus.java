@@ -7,9 +7,20 @@ import java.util.function.Consumer;
  */
 public interface PluginEventBus {
 
-    /** Registers a typed event observer. */
+    /**
+     * Registers a typed event observer.
+     *
+     * @param eventType event class accepted by the handler
+     * @param handler observer invoked on the publishing thread
+     * @param <E> event type
+     * @return idempotent subscription handle
+     */
     <E extends PluginEvent> Subscription subscribe(Class<E> eventType, Consumer<E> handler);
 
-    /** Publishes an observation without propagating observer failures. */
+    /**
+     * Publishes an observation without propagating observer failures.
+     *
+     * @param event event to publish; {@code null} is ignored
+     */
     void publish(PluginEvent event);
 }
