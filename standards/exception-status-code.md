@@ -46,8 +46,8 @@ input.
 
 ### 3.1 Typed status codes are the default
 
-Use the typed overloads and let the status supply the stable code, category,
-message, advice, and HTTP mapping:
+Use the typed overloads and let the status define the stable code, category,
+message, advice, and HTTP mapping used by the owning boundary:
 
 ```java
 throw NexusException.build(NexusStatusCode.INVALID_PARAMETER);
