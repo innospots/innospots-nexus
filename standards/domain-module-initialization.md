@@ -242,12 +242,12 @@ clearly by the inherited operations. Prefer:
 
 Do not invent speculative queries during initialization.
 
-DAO query verbs and result shapes follow [`naming.md`](naming.md) and the query
-semantics in [`api-design.md`](api-design.md). In particular, use `find` for an
-optional single-result application contract, `list` for collections, `page`
-for pagination, and `count` for counts. A MyBatis-facing DAO method may return
-a nullable entity when required by the mapper contract; normalize absence at
-the operator or service boundary.
+MyBatis-facing DAO methods may use `select`, `insert`, `update`, and `delete`
+verbs to align with `BaseMapper`, such as `selectByRoleCode`. Application-facing
+operators and services use the `find`, `list`, `page`, and `count` vocabulary
+defined by [`naming.md`](naming.md) and [`api-design.md`](api-design.md). A DAO
+method may return a nullable entity when required by the mapper contract;
+normalize absence at the operator or service boundary.
 
 Cross-table data must be assembled outside DAOs:
 

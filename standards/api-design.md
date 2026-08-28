@@ -341,17 +341,25 @@ stable keys and database/runtime uniqueness, not only a read-then-write check.
 
 - `com.innospots.nexus.base.events.EventBus` is the in-process event bus for
   domain event publication and subscription.
-- Use domain events to decouple business modules. A module must not directly
-  depend on another business module's service, operator, or DAO when the
-  interaction can be expressed as a domain event.
-- The publishing business domain owns the event contract. Place it under the
-  publisher's `domain.event` package, name it `XxxEvent`, and implement
+- Use domain events to decouple collaborators without changing the permitted
+  module dependency direction. Event publication is not a reason for one
+  sibling business module to depend on another.
+- The publishing business domain owns the event contract when consumers may
+  legally depend on that domain. Place it under the publisher's `domain.event`
+  package, name it `XxxEvent`, and implement
   `com.innospots.nexus.base.events.DomainEvent`.
+- Parallel business modules such as kernel and platform must not import each
+  other's event types. Coordinate them through an application/adapter module
+  that may depend on both, or through a deliberately shared lower-layer
+  contract only when the contract is genuinely business-neutral. Do not move a
+  concrete business event into core or console merely to bypass dependency
+  rules.
 - Domain events should be immutable records containing only the data consumers
   need. Do not expose DAO, service, mutable entity, or infrastructure objects
   through an event.
-- Consumers define `XxxEventHandler` types in their own business domain's
-  `handler` package and implement `EventHandler<XxxEvent>`.
+- Consumers that are allowed to reference the event contract define
+  `XxxEventHandler` types in their own domain's `handler` package and implement
+  `EventHandler<XxxEvent>`.
 - Publishers depend only on the event contract and `EventBus`; they must not
   depend on consumer handlers or consumer implementation types.
 - Publish an event only after the originating state change completes
@@ -398,8 +406,8 @@ public final class RoleCreatedEventHandler
 
 ## Domain Conversion
 
-- Structural conversion among request, VO, model, and entity types must use
-  MapStruct.
+- Non-trivial or repeated structural conversion among request, VO, model, and
+  entity types must use MapStruct.
 - Business-domain converter interfaces belong under `converter`, use the
   `*Converter` suffix, and declare
   `@Mapper(config = BaseMapperConfig.class)`.
@@ -408,6 +416,9 @@ public final class RoleCreatedEventHandler
   as required.
 - Keep bulk field copying and repeated Domain POJO conversion out of endpoint,
   service, and operator classes.
+- Direct construction is acceptable for one or two scalar values when the
+  mapping is local, obvious, and not repeated. Do not create a converter only
+  to hide a constructor call of that size.
 - Domain-owned behavior, validation, calculations, and scalar formatting are
   not bean conversion and may remain on the domain type.
 

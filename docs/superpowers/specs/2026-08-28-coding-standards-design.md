@@ -21,7 +21,7 @@ The update derives conventions from the current `base`, `core`, `console`,
 include:
 
 - domain roles such as `RoleEntity`, `RoleDao`, `RoleCreateRequest`,
-  `RoleOptionVo`, and `RoleCreatedEvent`;
+  `RoleOptionVo`, and `TenantCreatedEvent`;
 - platform infrastructure roles such as `PluginManager`, `CapabilityRegistry`,
   `CapabilityRouter`, `CapabilityProvider`, and `ClasspathPluginDiscovery`;
 - behavior-oriented methods such as `findByUserId`, `listActiveTenantIds`,

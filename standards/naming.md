@@ -202,7 +202,11 @@ Method names describe observable behavior, not implementation steps.
 | `snapshot` | returns a point-in-time immutable copy | `snapshot()` |
 
 Do not use `getAll`; use `list`. Do not use `queryXxx` when `find`, `list`,
-`page`, or `count` states the result shape more precisely.
+`page`, or `count` states the application-facing result shape more precisely.
+MyBatis-facing DAO methods are the persistence-layer exception: they may use
+`select`, `insert`, `update`, and `delete` to align with `BaseMapper`, such as
+`selectByRoleCode`. Operators and services translate those persistence verbs
+into the application vocabulary.
 
 ### Command and lifecycle verbs
 
@@ -330,7 +334,7 @@ Do not use `getAll`; use `list`. Do not use `queryXxx` when `find`, `list`,
     locations.
 
 ```text
-com.innospots.nexus.console
+com.innospots.nexus.kernel
   └── role
       ├── endpoint
       ├── dao

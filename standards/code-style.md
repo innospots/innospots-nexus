@@ -222,8 +222,8 @@ public class RoleEndpoint {
 
 ## MapStruct Converters
 
-- All structural conversion between Domain POJOs, including request, VO,
-  model, and entity types, must use MapStruct.
+- Non-trivial structural conversion between Domain POJOs, including request,
+  VO, model, and entity types, must use MapStruct.
 - Place business converters in the business domain's `converter` package and
   name them `*Converter`.
 - Every converter must use `@Mapper(config = BaseMapperConfig.class)`.
@@ -234,8 +234,9 @@ public class RoleEndpoint {
   methods inherited from `BaseBeanConverter`.
 - Endpoint, service, and operator classes must not contain large blocks of
   field-by-field copying or repeated Domain POJO conversion logic.
-- Small scalar transformations and behavior intrinsic to a domain object do
-  not require a converter.
+- Direct construction is acceptable for one or two scalar values when the
+  mapping is local, obvious, and not repeated. Small scalar transformations and
+  behavior intrinsic to a domain object do not require a converter.
 
 ```java
 @Mapper(config = BaseMapperConfig.class)
@@ -304,7 +305,7 @@ public interface RoleDao extends BaseMapper<RoleEntity> {
 public final class PermissionGrantService {
 
     private final PermissionGrantDao permissionGrantDao;
-    private final EventBus eventBus;
+    private final PermissionResourceDao permissionResourceDao;
 }
 ```
 
@@ -346,8 +347,9 @@ public final class PermissionGrantService {
   unexplained strings throughout business code.
 - Keep expressions readable. Extract a named predicate or local variable when
   a condition mixes multiple business rules.
-- Use `equals` from a known non-null value for nullable enum/string comparison,
-  such as `PluginState.ACTIVE.equals(state)`.
+- Compare enums by identity, which is null-safe: `state == PluginState.ACTIVE`.
+  For nullable Strings, invoke `equals` from the known non-null literal, such
+  as `"ACTIVE".equals(status)`.
 - Do not use comments to compensate for unclear expressions; name the concept
   and then comment only the non-obvious reason.
 
