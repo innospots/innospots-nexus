@@ -75,7 +75,8 @@
 ### Task 5: Verify module boundaries and documentation
 
 **Files:**
-- Modify: `innospots-nexus-core/docs/extension-design.md` only if implementation names or boundaries differ from the approved design.
+- Reference: `innospots-nexus-core/docs/archive/extension-design.md` as the historical baseline.
+- Modify: `innospots-nexus-core/docs/plugin-extension-design.md` only if implementation names or boundaries differ from the current design.
 
 - [x] Run `mvn -pl innospots-nexus-core,innospots-nexus-console -am test`.
 - [x] Run `mvn clean compile` after all Java changes.

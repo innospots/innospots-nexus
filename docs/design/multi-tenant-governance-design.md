@@ -1709,7 +1709,7 @@ gantt
 | 文档 | 路径 | 关系 |
 |------|------|------|
 | Console UI 权限设计 | `innospots-nexus-kernel/docs/permission-design.md` | 权限目录 + 授权唯一模型（resource = permission） |
-| 扩展系统设计 | `innospots-nexus-core/docs/extension-design.md` | 扩展模块与权限目录来源 |
+| 插件扩展系统设计 | `innospots-nexus-core/docs/plugin-extension-design.md` | 插件、扩展模块与权限目录来源 |
 | 领域模块初始化规范 | `standards/domain-module-initialization.md` | 新 domain 包开发流程 |
 | 模块职责指南 | `AGENTS.md` | 模块边界与依赖规则 |
 
