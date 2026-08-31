@@ -1,8 +1,11 @@
 package com.innospots.nexus.core.plugin.support;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
+import com.innospots.nexus.core.plugin.config.PluginConfig;
+import com.innospots.nexus.core.plugin.declaration.PluginDefinition;
 import com.innospots.nexus.core.plugin.lifecycle.PluginRuntimeInfo;
 import com.innospots.nexus.core.plugin.runtime.PluginManager;
 
@@ -69,6 +72,31 @@ public final class PluginTestLog {
             return;
         }
         values.forEach(value -> info(String.valueOf(value)));
+    }
+
+    public void dumpDefinition(PluginDefinition definition) {
+        section("plugin definition");
+        info("id=%s name=%s version=%s apiVersion=%s tags=%s",
+                definition.id(),
+                definition.name(),
+                definition.version(),
+                definition.apiVersion(),
+                definition.tags());
+        info("capabilities=%s", definition.capabilities());
+        info("requirements=%s", definition.requirements());
+        info("config items=%s", definition.config().items());
+    }
+
+    public void dumpConfig(PluginConfig config) {
+        section("resolved plugin config");
+        info("%s", config);
+    }
+
+    public void dumpLifecycle(String title, List<String> calls) {
+        section(title);
+        for (int index = 0; index < calls.size(); index++) {
+            info("%02d. %s", index + 1, calls.get(index));
+        }
     }
 
     private static String summarizeDependencies(
