@@ -1,0 +1,638 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:innospots:nexus:plugin-dsl:v1",
+  "title": "Nexus Plugin DSL v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "properties": {
+    "apiVersion": {
+      "const": "nexus.plugin/v1"
+    },
+    "kind": {
+      "const": "Plugin"
+    },
+    "metadata": {
+      "$ref": "#/$defs/metadata"
+    },
+    "spec": {
+      "$ref": "#/$defs/spec"
+    }
+  },
+  "$defs": {
+    "pluginId": {
+      "type": "string",
+      "maxLength": 256,
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*(?:\\.[a-z][a-z0-9]*(?:-[a-z0-9]+)*)+$"
+    },
+    "logicalType": {
+      "type": "string",
+      "maxLength": 128,
+      "pattern": "^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*$"
+    },
+    "kebabId": {
+      "type": "string",
+      "maxLength": 128,
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+    },
+    "localKey": {
+      "type": "string",
+      "maxLength": 128,
+      "pattern": "^[a-z][A-Za-z0-9]*$"
+    },
+    "nonBlank": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024,
+      "pattern": "\\S"
+    },
+    "i18n": {
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 32,
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "\\S"
+        }
+      }
+    },
+    "tags": {
+      "type": "object",
+      "maxProperties": 64,
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*$": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pluginId", "version"],
+      "properties": {
+        "pluginId": {
+          "$ref": "#/$defs/pluginId"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[^\\s]+$"
+        }
+      }
+    },
+    "spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["apiVersion", "displayName"],
+      "properties": {
+        "apiVersion": {
+          "const": 1
+        },
+        "displayName": {
+          "$ref": "#/$defs/i18n"
+        },
+        "description": {
+          "$ref": "#/$defs/i18n"
+        },
+        "tags": {
+          "$ref": "#/$defs/tags"
+        },
+        "config": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "items": {
+            "$ref": "#/$defs/configItem"
+          }
+        },
+        "requirements": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "items": {
+            "$ref": "#/$defs/requirement"
+          }
+        },
+        "capabilities": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "items": {
+            "$ref": "#/$defs/capability"
+          }
+        },
+        "contributions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": {
+            "$ref": "#/$defs/contribution"
+          }
+        }
+      },
+      "anyOf": [
+        {
+          "required": ["capabilities"]
+        },
+        {
+          "required": ["contributions"]
+        }
+      ]
+    },
+    "configItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "type"],
+      "properties": {
+        "key": {
+          "$ref": "#/$defs/localKey"
+        },
+        "type": {
+          "enum": [
+            "STRING",
+            "BOOLEAN",
+            "INTEGER",
+            "LONG",
+            "DECIMAL",
+            "DURATION",
+            "URI",
+            "ENUM",
+            "SECRET"
+          ]
+        },
+        "required": {
+          "type": "boolean",
+          "default": false
+        },
+        "default": {
+          "type": ["string", "number", "integer", "boolean"]
+        },
+        "description": {
+          "$ref": "#/$defs/nonBlank"
+        },
+        "enumValues": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "ENUM"
+              }
+            },
+            "required": ["type"]
+          },
+          "then": {
+            "required": ["enumValues"]
+          },
+          "else": {
+            "not": {
+              "required": ["enumValues"]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "SECRET"
+              }
+            },
+            "required": ["type"]
+          },
+          "then": {
+            "not": {
+              "required": ["default"]
+            }
+          }
+        }
+      ]
+    },
+    "requirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "majorVersion"],
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/logicalType"
+        },
+        "majorVersion": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "required": {
+          "type": "boolean",
+          "default": true
+        },
+        "tags": {
+          "$ref": "#/$defs/tags"
+        }
+      }
+    },
+    "capability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "majorVersion", "providerId", "bind"],
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/logicalType"
+        },
+        "majorVersion": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "providerId": {
+          "$ref": "#/$defs/kebabId"
+        },
+        "tags": {
+          "$ref": "#/$defs/tags"
+        },
+        "config": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "items": {
+            "$ref": "#/$defs/configItem"
+          }
+        },
+        "bind": {
+          "$ref": "#/$defs/bind"
+        },
+        "exposures": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "items": {
+            "$ref": "#/$defs/exposure"
+          }
+        }
+      }
+    },
+    "bind": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/javaBind"
+        },
+        {
+          "$ref": "#/$defs/httpBind"
+        },
+        {
+          "$ref": "#/$defs/processBind"
+        },
+        {
+          "$ref": "#/$defs/mcpBind"
+        },
+        {
+          "$ref": "#/$defs/contractBind"
+        }
+      ]
+    },
+    "javaBind": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "class"],
+      "properties": {
+        "kind": {
+          "const": "java"
+        },
+        "class": {
+          "type": "string",
+          "maxLength": 512,
+          "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*(?:\\.[A-Za-z_$][A-Za-z0-9_$]*)+$"
+        }
+      }
+    },
+    "httpBind": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "baseUrl", "method", "invokePath", "operation"],
+      "properties": {
+        "kind": {
+          "const": "http"
+        },
+        "baseUrl": {
+          "type": "string",
+          "format": "uri",
+          "maxLength": 2048,
+          "pattern": "^https?://"
+        },
+        "method": {
+          "$ref": "#/$defs/httpMethod"
+        },
+        "invokePath": {
+          "$ref": "#/$defs/absolutePath"
+        },
+        "operation": {
+          "$ref": "#/$defs/kebabId"
+        }
+      }
+    },
+    "processBind": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "command", "protocol", "invoke", "operation"],
+      "properties": {
+        "kind": {
+          "const": "process"
+        },
+        "command": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 128,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          }
+        },
+        "protocol": {
+          "$ref": "#/$defs/protocolId"
+        },
+        "invoke": {
+          "$ref": "#/$defs/logicalType"
+        },
+        "operation": {
+          "$ref": "#/$defs/kebabId"
+        }
+      }
+    },
+    "mcpBind": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "server", "tool", "operation"],
+      "properties": {
+        "kind": {
+          "const": "mcp"
+        },
+        "server": {
+          "$ref": "#/$defs/kebabId"
+        },
+        "tool": {
+          "$ref": "#/$defs/mcpName"
+        },
+        "operation": {
+          "$ref": "#/$defs/kebabId"
+        }
+      }
+    },
+    "contractBind": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "resolver"],
+      "properties": {
+        "kind": {
+          "const": "contract"
+        },
+        "resolver": {
+          "$ref": "#/$defs/kebabId"
+        }
+      }
+    },
+    "exposure": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/httpExposure"
+        },
+        {
+          "$ref": "#/$defs/commandExposure"
+        },
+        {
+          "$ref": "#/$defs/mcpExposure"
+        }
+      ]
+    },
+    "httpExposure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "method", "path", "operation"],
+      "properties": {
+        "kind": {
+          "const": "http"
+        },
+        "method": {
+          "$ref": "#/$defs/httpMethod"
+        },
+        "path": {
+          "$ref": "#/$defs/absolutePath"
+        },
+        "operation": {
+          "$ref": "#/$defs/kebabId"
+        },
+        "requestSchema": {
+          "$ref": "#/$defs/jsonSchemaObject"
+        },
+        "responseSchema": {
+          "$ref": "#/$defs/jsonSchemaObject"
+        }
+      }
+    },
+    "commandExposure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "commandId", "operation"],
+      "properties": {
+        "kind": {
+          "const": "command"
+        },
+        "commandId": {
+          "$ref": "#/$defs/logicalType"
+        },
+        "operation": {
+          "$ref": "#/$defs/kebabId"
+        },
+        "paramsSchema": {
+          "$ref": "#/$defs/jsonSchemaObject"
+        }
+      }
+    },
+    "mcpExposure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "name", "operation", "inputSchema"],
+      "properties": {
+        "kind": {
+          "const": "mcp"
+        },
+        "name": {
+          "$ref": "#/$defs/mcpName"
+        },
+        "operation": {
+          "$ref": "#/$defs/kebabId"
+        },
+        "description": {
+          "$ref": "#/$defs/nonBlank"
+        },
+        "inputSchema": {
+          "$ref": "#/$defs/jsonSchemaObject"
+        }
+      }
+    },
+    "httpMethod": {
+      "enum": ["GET", "POST", "PUT", "PATCH", "DELETE"]
+    },
+    "absolutePath": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2048,
+      "pattern": "^/(?!.*(?:^|/)\\.\\.?(?:/|$))[^?#]*$"
+    },
+    "mcpName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+    },
+    "protocolId": {
+      "type": "string",
+      "minLength": 4,
+      "maxLength": 128,
+      "pattern": "^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*/v[1-9][0-9]*$"
+    },
+    "jsonSchemaObject": {
+      "type": "object",
+      "maxProperties": 256
+    },
+    "contribution": {
+      "$ref": "#/$defs/consoleContribution"
+    },
+    "consoleContribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "majorVersion", "modules"],
+      "properties": {
+        "type": {
+          "const": "console"
+        },
+        "majorVersion": {
+          "const": 1
+        },
+        "modules": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 128,
+          "items": {
+            "$ref": "#/$defs/consoleModule"
+          }
+        }
+      }
+    },
+    "consoleModule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["moduleKey", "displayName", "pages"],
+      "properties": {
+        "moduleKey": {
+          "$ref": "#/$defs/kebabId"
+        },
+        "displayName": {
+          "$ref": "#/$defs/i18n"
+        },
+        "description": {
+          "$ref": "#/$defs/i18n"
+        },
+        "pages": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "items": {
+            "$ref": "#/$defs/page"
+          }
+        },
+        "menuTree": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "items": {
+            "$ref": "#/$defs/menu"
+          }
+        }
+      }
+    },
+    "page": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pageKey", "pagePath"],
+      "properties": {
+        "pageKey": {
+          "$ref": "#/$defs/kebabId"
+        },
+        "pagePath": {
+          "$ref": "#/$defs/absolutePath"
+        },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "items": {
+            "$ref": "#/$defs/page"
+          }
+        }
+      }
+    },
+    "menu": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["menuKey", "title"],
+      "properties": {
+        "menuKey": {
+          "$ref": "#/$defs/kebabId"
+        },
+        "title": {
+          "$ref": "#/$defs/i18n"
+        },
+        "icon": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "orderIndex": {
+          "type": "integer",
+          "default": 0
+        },
+        "pageKey": {
+          "$ref": "#/$defs/kebabId"
+        },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "items": {
+            "$ref": "#/$defs/menu"
+          }
+        }
+      },
+      "oneOf": [
+        {
+          "required": ["pageKey"],
+          "not": {
+            "required": ["children"]
+          }
+        },
+        {
+          "required": ["children"],
+          "not": {
+            "required": ["pageKey"]
+          }
+        }
+      ]
+    }
+  }
+}
