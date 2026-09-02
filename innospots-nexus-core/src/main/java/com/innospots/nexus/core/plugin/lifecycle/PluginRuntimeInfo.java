@@ -10,7 +10,7 @@ import com.innospots.nexus.core.plugin.declaration.CapabilityRequirement;
 import com.innospots.nexus.core.plugin.dependency.DependencyResolution;
 
 /**
- * Immutable sanitized operational snapshot that never retains runtime objects or configuration values.
+ * 不可变且已脱敏的运行快照，不保留运行时对象或配置值。
  */
 public record PluginRuntimeInfo(
         String id,
@@ -28,7 +28,17 @@ public record PluginRuntimeInfo(
         String lastError
 ) {
 
-    /** Defensively copies every diagnostic collection. */
+    /** 返回语义更明确的插件稳定身份别名。 */
+    public String pluginId() {
+        return id;
+    }
+
+    /** 返回插件展示名称别名。 */
+    public String displayName() {
+        return name;
+    }
+
+    /** 防御性复制所有诊断集合。 */
     public PluginRuntimeInfo {
         providedCapabilities = List.copyOf(providedCapabilities);
         requirements = List.copyOf(requirements);

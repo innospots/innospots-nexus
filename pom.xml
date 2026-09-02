@@ -20,6 +20,8 @@
         <module>innospots-nexus-console</module>
         <module>innospots-nexus-kernel</module>
         <module>innospots-nexus-platform</module>
+        <module>innospots-nexus-spring</module>
+        <module>innospots-nexus-quarkus</module>
     </modules>
 
     <properties>

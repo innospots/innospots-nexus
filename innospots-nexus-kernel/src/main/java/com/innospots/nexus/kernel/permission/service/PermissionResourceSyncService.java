@@ -18,44 +18,43 @@ import com.innospots.nexus.base.ui.spec.UiSpec;
 import com.innospots.nexus.base.ui.spec.action.UiAction;
 import com.innospots.nexus.base.ui.spec.datasource.UiDatasource;
 import com.innospots.nexus.base.ui.spec.loader.UiSpecLoader;
-import com.innospots.nexus.core.extension.declaration.ExtensionDescriptor;
-import com.innospots.nexus.core.extension.declaration.ExtensionModuleDeclaration;
-import com.innospots.nexus.core.extension.declaration.MenuDeclaration;
-import com.innospots.nexus.core.extension.declaration.UiSpecPageDeclaration;
-import com.innospots.nexus.console.extension.service.ExtensionRegistry;
+import com.innospots.nexus.console.plugin.contribution.ConsoleContributionCatalog;
+import com.innospots.nexus.console.plugin.contribution.ConsoleModuleDeclaration;
+import com.innospots.nexus.console.plugin.contribution.MenuDeclaration;
+import com.innospots.nexus.console.plugin.contribution.UiSpecPageDeclaration;
 import com.innospots.nexus.console.permission.dao.PermissionResourceDao;
 import com.innospots.nexus.console.permission.domain.entity.PermissionResourceEntity;
 import com.innospots.nexus.console.permission.domain.enums.PermissionResourceType;
 import com.innospots.nexus.console.permission.domain.vo.PermissionResourceSyncVo;
 
 /**
- * 将已激活扩展和 UiSpec 声明显式同步为规范化权限资源目录。
+ * 将已激活 Console Contribution 和 UiSpec 声明显式同步为规范化权限资源目录。
  *
- * <p>扩展和 UiSpec 是唯一事实源，本服务只负责发现、校验并维护项目内的索引记录。同步不会自动
+ * <p>Console Contribution 和 UiSpec 是唯一事实源，本服务只负责发现、校验并维护项目内的索引记录。同步不会自动
  * 授权，也不会在模块加载时隐式写入数据库。</p>
  */
 public final class PermissionResourceSyncService {
 
     private final PermissionResourceDao resourceDao;
-    private final ExtensionRegistry extensionRegistry;
+    private final ConsoleContributionCatalog contributionCatalog;
     private final UiSpecLoader uiSpecLoader;
 
     /** 创建权限资源目录同步服务。 */
     public PermissionResourceSyncService(
             PermissionResourceDao resourceDao,
-            ExtensionRegistry extensionRegistry,
+            ConsoleContributionCatalog contributionCatalog,
             UiSpecLoader uiSpecLoader
     ) {
         this.resourceDao = require(resourceDao, "resourceDao");
-        this.extensionRegistry = require(extensionRegistry, "extensionRegistry");
+        this.contributionCatalog = require(contributionCatalog, "contributionCatalog");
         this.uiSpecLoader = require(uiSpecLoader, "uiSpecLoader");
     }
 
     /**
-     * 同步当前项目中所有已激活扩展的模块、菜单、页面、action 和 datasource。
+     * 同步当前项目中所有已激活插件贡献的模块、菜单、页面、action 和 datasource。
      *
      * <p>方法先在内存中完成全部来源校验，再在事务中插入或更新目录；来源中已不存在的资源标记为
-     * DISABLED，以保留历史授权记录但阻止其继续产生权限。</p>
+     * 禁用，以保留历史授权记录但阻止其继续产生权限。</p>
      *
      * @return 本次创建、更新和禁用的资源数量
      */
@@ -94,11 +93,13 @@ public final class PermissionResourceSyncService {
 
     private List<ResourceDefinition> discover() {
         Map<String, ResourceDefinition> definitions = new LinkedHashMap<>();
-        for (ExtensionDescriptor extension : extensionRegistry.activeDescriptors()) {
-            for (ExtensionModuleDeclaration module : extension.modules()) {
-                add(definitions, moduleDefinition(extension, module));
-                collectMenus(definitions, extension, module, module.menuTree(), null);
-                collectPages(definitions, extension, module, module.pages(), null);
+        for (ConsoleContributionCatalog.ActiveConsoleContribution active
+                : contributionCatalog.activeContributions()) {
+            String ownerPluginId = active.ownerPluginId();
+            for (ConsoleModuleDeclaration module : active.contribution().modules()) {
+                add(definitions, moduleDefinition(ownerPluginId, module));
+                collectMenus(definitions, ownerPluginId, module, module.menuTree(), null);
+                collectPages(definitions, ownerPluginId, module, module.pages(), null);
             }
         }
         return List.copyOf(definitions.values());
@@ -106,8 +107,8 @@ public final class PermissionResourceSyncService {
 
     private void collectMenus(
             Map<String, ResourceDefinition> definitions,
-            ExtensionDescriptor extension,
-            ExtensionModuleDeclaration module,
+            String ownerPluginId,
+            ConsoleModuleDeclaration module,
             List<MenuDeclaration> menus,
             String parentResourceKey
     ) {
@@ -118,7 +119,7 @@ public final class PermissionResourceSyncService {
                     ? null
                     : pageIdentity(module.moduleKey(), menu.pageKey());
             add(definitions, new ResourceDefinition(
-                    extension.extensionKey(),
+                    ownerPluginId,
                     module.moduleKey(),
                     PermissionResourceType.MENU,
                     resourceKey,
@@ -130,14 +131,14 @@ public final class PermissionResourceSyncService {
                     null,
                     display(menu.title(), menu.menuKey()),
                     order++));
-            collectMenus(definitions, extension, module, menu.children(), resourceKey);
+            collectMenus(definitions, ownerPluginId, module, menu.children(), resourceKey);
         }
     }
 
     private void collectPages(
             Map<String, ResourceDefinition> definitions,
-            ExtensionDescriptor extension,
-            ExtensionModuleDeclaration module,
+            String ownerPluginId,
+            ConsoleModuleDeclaration module,
             List<UiSpecPageDeclaration> pages,
             String parentResourceKey
     ) {
@@ -148,7 +149,7 @@ public final class PermissionResourceSyncService {
             UiSpec spec = uiSpecLoader.load(module.moduleKey(), page.pageKey());
             validatePageSpec(module, page, spec);
             add(definitions, new ResourceDefinition(
-                    extension.extensionKey(),
+                    ownerPluginId,
                     module.moduleKey(),
                     PermissionResourceType.PAGE,
                     pageResourceKey,
@@ -160,33 +161,33 @@ public final class PermissionResourceSyncService {
                     null,
                     display(spec.pageInfo().title(), page.pageKey()),
                     order++));
-            collectActions(definitions, extension, module, spec, pageIdentity,
+            collectActions(definitions, ownerPluginId, module, spec, pageIdentity,
                     pageResourceKey);
-            collectDatasources(definitions, extension, module, spec, pageIdentity,
+            collectDatasources(definitions, ownerPluginId, module, spec, pageIdentity,
                     pageResourceKey);
-            collectPages(definitions, extension, module, page.children(), pageResourceKey);
+            collectPages(definitions, ownerPluginId, module, page.children(), pageResourceKey);
         }
     }
 
     private void collectActions(
             Map<String, ResourceDefinition> definitions,
-            ExtensionDescriptor extension,
-            ExtensionModuleDeclaration module,
+            String ownerPluginId,
+            ConsoleModuleDeclaration module,
             UiSpec spec,
             String pageIdentity,
             String pageResourceKey
     ) {
         int order = 0;
         for (UiAction action : spec.actionDefinitions().values()) {
-            collectAction(definitions, extension, module, action, spec.datasources(),
+            collectAction(definitions, ownerPluginId, module, action, spec.datasources(),
                     pageIdentity, pageResourceKey, order++);
         }
     }
 
     private void collectAction(
             Map<String, ResourceDefinition> definitions,
-            ExtensionDescriptor extension,
-            ExtensionModuleDeclaration module,
+            String ownerPluginId,
+            ConsoleModuleDeclaration module,
             UiAction action,
             Map<String, UiDatasource> datasources,
             String pageIdentity,
@@ -203,7 +204,7 @@ public final class PermissionResourceSyncService {
         }
         String resourceKey = "action:" + pageIdentity + "." + actionId;
         add(definitions, new ResourceDefinition(
-                extension.extensionKey(),
+                ownerPluginId,
                 module.moduleKey(),
                 PermissionResourceType.ACTION,
                 resourceKey,
@@ -217,15 +218,15 @@ public final class PermissionResourceSyncService {
                 order));
         int childOrder = 0;
         for (UiAction child : action.children()) {
-            collectAction(definitions, extension, module, child, datasources,
+            collectAction(definitions, ownerPluginId, module, child, datasources,
                     pageIdentity, pageResourceKey, childOrder++);
         }
     }
 
     private void collectDatasources(
             Map<String, ResourceDefinition> definitions,
-            ExtensionDescriptor extension,
-            ExtensionModuleDeclaration module,
+            String ownerPluginId,
+            ConsoleModuleDeclaration module,
             UiSpec spec,
             String pageIdentity,
             String pageResourceKey
@@ -246,7 +247,7 @@ public final class PermissionResourceSyncService {
                 invalid("Multiple datasources match " + requestIdentity + " on " + pageIdentity);
             }
             add(definitions, new ResourceDefinition(
-                    extension.extensionKey(),
+                    ownerPluginId,
                     module.moduleKey(),
                     PermissionResourceType.DATASOURCE,
                     "datasource:" + pageIdentity + "." + datasourceKey,
@@ -262,11 +263,11 @@ public final class PermissionResourceSyncService {
     }
 
     private ResourceDefinition moduleDefinition(
-            ExtensionDescriptor extension,
-            ExtensionModuleDeclaration module
+            String ownerPluginId,
+            ConsoleModuleDeclaration module
     ) {
         return new ResourceDefinition(
-                extension.extensionKey(),
+                ownerPluginId,
                 module.moduleKey(),
                 PermissionResourceType.MODULE,
                 module.resourceKey(),
@@ -276,12 +277,12 @@ public final class PermissionResourceSyncService {
                 null,
                 null,
                 null,
-                display(extension.displayName(), module.moduleKey()),
+                display(module.displayName(), module.moduleKey()),
                 0);
     }
 
     private void validatePageSpec(
-            ExtensionModuleDeclaration module,
+            ConsoleModuleDeclaration module,
             UiSpecPageDeclaration page,
             UiSpec spec
     ) {
@@ -319,7 +320,7 @@ public final class PermissionResourceSyncService {
         String parentId = definition.parentResourceKey() == null
                 ? null
                 : resourceId(resources, definition.parentResourceKey());
-        entity.setExtensionKey(definition.extensionKey());
+        entity.setOwnerPluginId(definition.ownerPluginId());
         entity.setModuleKey(definition.moduleKey());
         entity.setResourceType(definition.type().name());
         entity.setResourceKey(definition.resourceKey());
@@ -343,7 +344,7 @@ public final class PermissionResourceSyncService {
         String parentId = definition.parentResourceKey() == null
                 ? null
                 : resourceId(resources, definition.parentResourceKey());
-        return !Objects.equals(entity.getExtensionKey(), definition.extensionKey())
+        return !Objects.equals(entity.getOwnerPluginId(), definition.ownerPluginId())
                 || !Objects.equals(entity.getModuleKey(), definition.moduleKey())
                 || !Objects.equals(entity.getResourceType(), definition.type().name())
                 || !Objects.equals(entity.getParentResourceId(), parentId)
@@ -448,7 +449,7 @@ public final class PermissionResourceSyncService {
     }
 
     private record ResourceDefinition(
-            String extensionKey,
+            String ownerPluginId,
             String moduleKey,
             PermissionResourceType type,
             String resourceKey,

@@ -6,23 +6,24 @@ import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
 /**
- * One immutable routing attribute.
+ * 一个不可变的路由标签属性。
  *
- * @param name tag name
- * @param value tag value
+ * @param name 标签名称
+ * @param value 标签值
  */
 public record Tag(String name, String value) {
 
-    private static final Pattern PART_PATTERN = Pattern.compile("[a-z][a-z0-9]*(?:-[a-z0-9]+)*");
+    private static final Pattern NAME_PATTERN = Pattern.compile("[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*");
 
-    /** Validates the lowercase kebab-case name and value. */
+    /**
+     * @throws NexusException 名称格式非法、值为空或超出长度限制时抛出
+     */
     public Tag {
-        if (name == null || value == null
-                || !PART_PATTERN.matcher(name).matches()
-                || !PART_PATTERN.matcher(value).matches()) {
+        if (name == null || value == null || name.length() > 64 || value.length() > 64
+                || value.isBlank() || !NAME_PATTERN.matcher(name).matches()) {
             throw NexusException.build(
                     PluginStatusCode.PLUGIN_DEFINITION_INVALID,
-                    "tag name and value must use lowercase kebab-case");
+                    "tag name must use lowercase dotted or kebab-case and tag value must be non-blank");
         }
     }
 }

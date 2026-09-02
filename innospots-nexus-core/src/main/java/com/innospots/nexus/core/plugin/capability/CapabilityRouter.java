@@ -8,16 +8,16 @@ import com.innospots.nexus.core.plugin.contract.CapabilityProvider;
 import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
 /**
- * Applies explicit tags, configured defaults, and unique-provider fallback without order-based selection.
+ * 应用显式标签、配置默认路由和唯一 Provider 回退，不依赖注册顺序选择 Provider。
  */
 public final class CapabilityRouter {
 
     private final Map<CapabilityKey, Tags> defaultRoutes;
 
     /**
-     * Creates a router with immutable default routes.
+     * 使用不可变默认路由创建路由器。
      *
-     * @param defaultRoutes tags to use when callers omit explicit tags
+     * @param defaultRoutes 调用方未提供显式标签时使用的路由标签
      */
     public CapabilityRouter(Map<CapabilityKey, Tags> defaultRoutes) {
         if (defaultRoutes == null) {
@@ -35,14 +35,14 @@ public final class CapabilityRouter {
     }
 
     /**
-     * Selects zero or one provider and rejects every ambiguous candidate set.
+     * 选择零个或一个 Provider，并拒绝所有存在歧义的候选集合。
      *
-     * @param type requested capability type
-     * @param requiredTags explicit routing tags; {@code null} means use the configured default
-     * @param registrations active registrations for the requested capability
-     * @param <T> provider contract type
-     * @return the selected registration, or {@code null} when no provider matches
-     * @throws NexusException when the type or registrations are invalid, or selection is ambiguous
+     * @param type 请求的 Capability 类型
+     * @param requiredTags 显式路由标签；{@code null} 表示使用配置的默认路由
+     * @param registrations 请求 Capability 的活动注册记录
+     * @param <T> Provider 契约类型
+     * @return 选中的注册记录；没有匹配 Provider 时返回 {@code null}
+     * @throws NexusException 类型或注册记录非法，或选择结果存在歧义时抛出
      */
     public <T extends CapabilityProvider> CapabilityRegistration<T> select(
             CapabilityType<T> type,

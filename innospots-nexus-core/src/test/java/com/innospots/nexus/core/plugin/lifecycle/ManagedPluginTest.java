@@ -45,7 +45,7 @@ class ManagedPluginTest {
 
         assertThatThrownBy(managed::start)
                 .isInstanceOf(NexusException.class)
-                .hasMessageContaining("lifecycle-fixture");
+                .hasMessageContaining("com.example.lifecycle-fixture");
 
         assertThat(registry.findAll(FIRST)).isEmpty();
         assertThat(registry.findAll(SECOND)).isEmpty();
@@ -91,7 +91,7 @@ class ManagedPluginTest {
     }
 
     @Test
-    void rollsBackLinkageErrorsAndDoesNotRestartFailedPlugin() {
+    void rollsBackLinkageErrorsAndAllowsRetryAfterCompleteCleanup() {
         List<String> calls = new ArrayList<>();
         Plugin plugin = new RecordingPlugin(calls, false) {
             @Override
@@ -121,7 +121,23 @@ class ManagedPluginTest {
                 "resource-close");
 
         assertThatThrownBy(managed::start).isInstanceOf(NexusException.class);
-        assertThat(calls).hasSize(8);
+        assertThat(calls).containsExactly(
+                "plugin-initialize",
+                "first-initialize",
+                "second-initialize",
+                "plugin-start",
+                "second-destroy",
+                "first-destroy",
+                "plugin-stop",
+                "resource-close",
+                "plugin-initialize",
+                "first-initialize",
+                "second-initialize",
+                "plugin-start",
+                "second-destroy",
+                "first-destroy",
+                "plugin-stop",
+                "resource-close");
     }
 
     @Test
@@ -207,7 +223,7 @@ class ManagedPluginTest {
 
         @Override
         public PluginDefinition definition() {
-            return PluginDefinition.builder("lifecycle-fixture")
+            return PluginDefinition.builder("com.example.lifecycle-fixture")
                     .name("Lifecycle Fixture")
                     .version("1.0.0")
                     .tags(Tags.of("fixture", "lifecycle"))
@@ -251,7 +267,7 @@ class ManagedPluginTest {
 
         @Override
         public PluginDefinition definition() {
-            return PluginDefinition.builder("destroy-failure")
+            return PluginDefinition.builder("com.example.destroy-failure")
                     .name("Destroy Failure")
                     .version("1.0.0")
                     .tags(Tags.of("fixture", "lifecycle"))

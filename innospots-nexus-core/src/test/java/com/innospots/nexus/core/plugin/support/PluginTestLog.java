@@ -10,8 +10,8 @@ import com.innospots.nexus.core.plugin.lifecycle.PluginRuntimeInfo;
 import com.innospots.nexus.core.plugin.runtime.PluginManager;
 
 /**
- * Test-facing logger that prints structured plugin diagnostics to both System.Logger and stdout
- * so Maven Surefire output remains readable without an SLF4J binding.
+ * 面向测试的结构化插件诊断记录器，同时写入 System.Logger 和标准输出，避免 Maven Surefire
+ * 在没有 SLF4J 绑定时丢失可读诊断。
  */
 public final class PluginTestLog {
 
@@ -77,8 +77,8 @@ public final class PluginTestLog {
     public void dumpDefinition(PluginDefinition definition) {
         section("plugin definition");
         info("id=%s name=%s version=%s apiVersion=%s tags=%s",
-                definition.id(),
-                definition.name(),
+                definition.pluginId(),
+                definition.displayName().defaultValue(),
                 definition.version(),
                 definition.apiVersion(),
                 definition.tags());

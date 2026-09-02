@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: nexus-console
+  datasource:
+    url: jdbc:h2:mem:nexus-console;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:nexus/schema/plugin-installation-h2.sql
+
+server:
+  port: 8081
+
+# nexus.plugin.* / plugins.* 配置方式同 innospots-nexus-spring-app

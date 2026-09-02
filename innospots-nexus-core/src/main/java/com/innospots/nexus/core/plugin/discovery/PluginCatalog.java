@@ -2,20 +2,24 @@ package com.innospots.nexus.core.plugin.discovery;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.core.plugin.capability.CapabilityKey;
+import com.innospots.nexus.core.plugin.declaration.CapabilityContribution;
 import com.innospots.nexus.core.plugin.declaration.PluginDefinition;
 import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
 /**
- * Immutable discovery snapshot for one plugin runtime.
+ * 一个插件运行时使用的不可变发现快照。
  *
- * <p>The catalog is static metadata after creation, but its discovered plugin instances belong to
- * the runtime that consumes it and must not be shared by multiple managers.</p>
+ * <p>目录创建后只包含静态元数据，但其中的插件实例属于消费它的运行时，不能由多个管理器共享。</p>
  */
 public final class PluginCatalog {
 
@@ -37,48 +41,70 @@ public final class PluginCatalog {
             }
             copied.add(plugin);
         }
-        copied.sort(Comparator.comparing(item -> item.definition().id()));
+        copied.sort(Comparator.comparing(item -> item.definition().pluginId()));
+        validateGlobalConstraints(copied);
         this.plugins = List.copyOf(copied);
-        ClasspathPluginDiscovery.validate(this.plugins);
         Map<String, DiscoveredPlugin> index = new LinkedHashMap<>();
         for (DiscoveredPlugin plugin : this.plugins) {
-            index.put(plugin.definition().id(), plugin);
+            index.put(plugin.definition().pluginId(), plugin);
         }
         this.byId = Map.copyOf(index);
     }
 
     /**
-     * Discovers and globally validates all plugins visible to the supplied class loader.
+     * 根据发现列表创建目录，并执行全局 pluginId 与 Capability API 冲突校验。
      *
-     * @param classLoader loader whose visible ServiceLoader entries are inspected
-     * @return immutable discovery catalog
-     */
-    public static PluginCatalog discover(ClassLoader classLoader) {
-        return new PluginCatalog(new ClasspathPluginDiscovery(classLoader).discover());
-    }
-
-    /**
-     * Creates a catalog from a discovery list and applies the same global validation as classpath discovery.
-     *
-     * @param plugins discovered plugin instances and definitions
-     * @return immutable catalog sorted by plugin id
+     * @param plugins 已发现的插件实例和定义
+     * @return 按插件标识排序的不可变目录
      */
     public static PluginCatalog of(List<DiscoveredPlugin> plugins) {
         return new PluginCatalog(plugins);
     }
 
-    /** Returns the immutable discovery list in deterministic plugin-id order. */
+    /** 返回按插件标识确定性排序的不可变发现列表。 */
     public List<DiscoveredPlugin> plugins() {
         return plugins;
     }
 
-    /** Finds one discovered plugin by stable id. */
+    /**
+     * 按稳定标识查找一个已发现插件。
+     *
+     * @param pluginId 稳定的插件标识
+     * @return 匹配的已发现插件；未找到时返回空 Optional
+     */
     public Optional<DiscoveredPlugin> plugin(String pluginId) {
         return Optional.ofNullable(byId.get(pluginId));
     }
 
-    /** Returns immutable definition snapshots for diagnostics and preflight validation. */
+    /**
+     * 返回用于诊断和预检校验的不可变插件定义快照。
+     *
+     * @return 按发现顺序排列的插件定义列表
+     */
     public List<PluginDefinition> definitions() {
         return plugins.stream().map(DiscoveredPlugin::definition).toList();
+    }
+
+    private static void validateGlobalConstraints(List<DiscoveredPlugin> discovered) {
+        Set<String> pluginIds = new HashSet<>();
+        Map<CapabilityKey, Class<?>> capabilityApis = new HashMap<>();
+        for (DiscoveredPlugin item : discovered) {
+            PluginDefinition definition = item.definition();
+            if (!pluginIds.add(definition.pluginId())) {
+                throw NexusException.build(PluginStatusCode.PLUGIN_DUPLICATE,
+                        "duplicate plugin id: " + definition.pluginId());
+            }
+            if (definition.apiVersion() != PluginDefinition.CURRENT_API_VERSION) {
+                throw NexusException.build(PluginStatusCode.PLUGIN_API_INCOMPATIBLE,
+                        "unsupported plugin apiVersion for " + definition.pluginId() + ": " + definition.apiVersion());
+            }
+            for (CapabilityContribution<?> contribution : definition.capabilities()) {
+                Class<?> previous = capabilityApis.putIfAbsent(contribution.type().key(), contribution.type().api());
+                if (previous != null && previous != contribution.type().api()) {
+                    throw NexusException.build(PluginStatusCode.CAPABILITY_TYPE_MISMATCH,
+                            "different API classes declared for " + contribution.type().key());
+                }
+            }
+        }
     }
 }

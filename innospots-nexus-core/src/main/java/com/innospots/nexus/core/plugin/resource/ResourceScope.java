@@ -1,28 +1,28 @@
 package com.innospots.nexus.core.plugin.resource;
 
 /**
- * Per-start-cycle ownership boundary that releases registered resources in reverse order.
+ * 每次启动周期的资源所有权边界，按注册逆序释放资源。
  */
 public interface ResourceScope extends AutoCloseable {
 
     /**
-     * Registers and returns an auto-closeable resource.
+     * 注册并返回一个可自动关闭的资源。
      *
-     * @param resource resource owned by this start cycle
-     * @param <T> resource type
-     * @return the same resource for fluent use
+     * @param resource 当前启动周期拥有的资源
+     * @param <T> 资源类型
+     * @return 用于流式调用的原资源
      */
     <T extends AutoCloseable> T manage(T resource);
 
     /**
-     * Registers a disposer for a resource without an AutoCloseable contract.
+     * 为不实现 AutoCloseable 的资源注册释放器。
      *
-     * @param disposer cleanup action invoked at most once
-     * @return idempotent registration handle
+     * @param disposer 最多执行一次的清理操作
+     * @return 可幂等取消的注册句柄
      */
     ResourceRegistration add(Runnable disposer);
 
-    /** Releases all registered resources. */
+    /** 释放所有已注册资源。 */
     @Override
     void close();
 }

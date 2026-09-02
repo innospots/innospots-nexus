@@ -1,9 +1,9 @@
 package com.innospots.nexus.core.plugin.event;
 
-/** An idempotent event subscription handle. */
+/** 可幂等取消的事件订阅句柄。 */
 public interface Subscription extends AutoCloseable {
 
-    /** Removes the subscription at most once. */
+    /** 最多移除该订阅一次。 */
     @Override
     void close();
 }

@@ -1,0 +1,22 @@
+quarkus:
+  application:
+    name: nexus-app
+  http:
+    port: 8080
+  datasource:
+    db-kind: h2
+    username: sa
+    password: ""
+    jdbc:
+      url: jdbc:h2:mem:nexus;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
+
+mybatis:
+  mapper-packages: com.innospots.nexus.core
+  initial-sql: classpath:nexus/schema/plugin-installation-h2.sql
+
+mybatis-plus:
+  meta-object-handler: com.innospots.nexus.core.persistence.handler.AuditMetaObjectHandler
+
+# nexus.plugin.* / nexus.plugins.* 默认值见 NexusPluginHostConfig；可按环境覆盖
+# plugins.<pluginId>.<key> 示例：
+# plugins.com.example.message-wecom.corp-id=ww-demo

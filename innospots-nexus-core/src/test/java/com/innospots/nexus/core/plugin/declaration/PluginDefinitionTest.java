@@ -2,10 +2,12 @@ package com.innospots.nexus.core.plugin.declaration;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.base.i18n.I18nObject;
 import com.innospots.nexus.core.plugin.capability.CapabilityType;
 import com.innospots.nexus.core.plugin.capability.Tags;
 import com.innospots.nexus.core.plugin.config.ConfigDefinition;
@@ -25,7 +27,7 @@ class PluginDefinitionTest {
 
     @Test
     void buildsImmutableDefinitionWithMultipleCapabilities() {
-        PluginDefinition definition = PluginDefinition.builder("sample-plugin")
+        PluginDefinition definition = PluginDefinition.builder("com.example.sample")
                 .name("Sample Plugin")
                 .version("1.0.0")
                 .tags(Tags.of("provider", "sample"))
@@ -34,7 +36,7 @@ class PluginDefinitionTest {
                 .require(ALPHA, false)
                 .build();
 
-        assertThat(definition.id()).isEqualTo("sample-plugin");
+        assertThat(definition.pluginId()).isEqualTo("com.example.sample");
         assertThat(definition.capabilities())
                 .extracting(contribution -> contribution.type().key())
                 .containsExactly(ALPHA.key(), BETA.key());
@@ -44,10 +46,58 @@ class PluginDefinitionTest {
     }
 
     @Test
-    void rejectsDuplicateCapabilityKeyBeforeFactoriesRun() {
+    void exposesReverseDomainPluginIdentityAndProviderIdentity() {
+        PluginDefinition definition = PluginDefinition.builder("com.example.message")
+                .displayName(I18nObject.of("zh-CN", "消息插件"))
+                .description(I18nObject.of("zh-CN", "消息能力"))
+                .version("1.0.0")
+                .tags(Tags.of("channel", "message"))
+                .provide(ALPHA, "wecom", Tags.of("provider", "wecom"),
+                        ConfigDefinition.empty(), AlphaProviderImpl::new)
+                .build();
+
+        assertThat(definition.pluginId()).isEqualTo("com.example.message");
+        assertThat(definition.displayName().cnValue()).isEqualTo("消息插件");
+        assertThat(definition.capabilities().getFirst().providerId()).isEqualTo("wecom");
+        assertThat(definition.capabilities().getFirst().tags().asMap())
+                .containsExactly(Map.entry("provider", "wecom"));
+    }
+
+    @Test
+    void rejectsDuplicateProviderIdAcrossCapabilityTypes() {
+        assertThatThrownBy(() -> PluginDefinition.builder("com.example.message")
+                .displayName(I18nObject.of("消息插件"))
+                .version("1.0.0")
+                .tags(Tags.empty())
+                .provide(ALPHA, "shared", Tags.empty(), ConfigDefinition.empty(), AlphaProviderImpl::new)
+                .provide(BETA, "shared", Tags.empty(), ConfigDefinition.empty(), BetaProviderImpl::new)
+                .build())
+                .isInstanceOf(NexusException.class)
+                .hasMessageContaining("providerId");
+    }
+
+    @Test
+    void rejectsPluginIdsThatAreNotReverseDomainNames() {
+        assertThatThrownBy(() -> PluginDefinition.builder("message-plugin")
+                .displayName(I18nObject.of("消息插件"))
+                .version("1.0.0")
+                .build())
+                .isInstanceOf(NexusException.class)
+                .hasMessageContaining("reverse-domain");
+    }
+
+    @Test
+    void requirementTagsAreDefensivelyCopied() {
+        CapabilityRequirement requirement = new CapabilityRequirement(ALPHA.key(), Tags.of("region", "cn"), true);
+        assertThat(requirement.requiredTags()).isEqualTo(Tags.of("region", "cn"));
+        assertThat(requirement.requiredTags().asMap()).isUnmodifiable();
+    }
+
+    @Test
+    void rejectsDuplicateProviderIdentityBeforeFactoriesRun() {
         int[] factoryCalls = {0};
 
-        assertThatThrownBy(() -> PluginDefinition.builder("sample-plugin")
+        assertThatThrownBy(() -> PluginDefinition.builder("com.example.sample")
                 .name("Sample Plugin")
                 .version("1.0.0")
                 .tags(Tags.of("provider", "sample"))
@@ -58,7 +108,7 @@ class PluginDefinitionTest {
                 .provide(ALPHA, AlphaProviderImpl::new)
                 .build())
                 .isInstanceOf(NexusException.class)
-                .hasMessageContaining("duplicate capability");
+                .hasMessageContaining("duplicate providerId");
 
         assertThat(factoryCalls[0]).isZero();
     }
@@ -92,7 +142,7 @@ class PluginDefinitionTest {
         List<ConfigItemDefinition> items = new ArrayList<>();
         items.add(new ConfigItemDefinition("endpoint", ConfigType.STRING, false, null, false, null));
 
-        PluginDefinition definition = PluginDefinition.builder("sample-plugin")
+        PluginDefinition definition = PluginDefinition.builder("com.example.sample")
                 .name("Sample Plugin")
                 .version("1.0.0")
                 .tags(Tags.of("provider", "sample"))
@@ -109,7 +159,7 @@ class PluginDefinitionTest {
         contributions.add(null);
 
         assertThatThrownBy(() -> new PluginDefinition(
-                "sample-plugin",
+                "com.example.sample",
                 "Sample Plugin",
                 "1.0.0",
                 PluginDefinition.CURRENT_API_VERSION,

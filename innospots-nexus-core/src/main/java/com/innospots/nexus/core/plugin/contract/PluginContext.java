@@ -7,49 +7,49 @@ import com.innospots.nexus.core.plugin.event.PluginEventBus;
 import com.innospots.nexus.core.plugin.resource.ResourceScope;
 
 /**
- * Read-only runtime services exposed to one plugin start cycle.
+ * 一次插件启动周期内向插件暴露的只读运行时服务。
  */
 public interface PluginContext {
 
     /**
-     * Returns the immutable definition snapshot.
+     * 返回不可变插件定义快照。
      *
-     * @return plugin declaration
+     * @return 插件声明
      */
     PluginDefinition definition();
 
     /**
-     * Returns validated configuration scoped to this plugin.
+     * 返回限定在当前插件作用域内的已校验配置。
      *
-     * @return plugin-local configuration view
+     * @return 插件本地配置视图
      */
     PluginConfig config();
 
     /**
-     * Returns the read-only capability lookup boundary.
+     * 返回只读 Capability 查询边界。
      *
-     * @return active capability lookup service
+     * @return 活动 Capability 查询服务
      */
     CapabilityManager capabilities();
 
     /**
-     * Returns the event-bus view bound to this plugin resource scope.
+     * 返回绑定到当前插件资源作用域的事件总线视图。
      *
-     * @return scoped event bus
+     * @return 插件作用域事件总线
      */
     PluginEventBus events();
 
     /**
-     * Returns this start cycle's resource ownership scope.
+     * 返回当前启动周期的资源所有权作用域。
      *
-     * @return resource ownership scope
+     * @return 资源所有权作用域
      */
     ResourceScope resources();
 
     /**
-     * Returns a logger named for the current plugin.
+     * 返回使用当前插件命名的日志记录器。
      *
-     * @return plugin logger
+     * @return 插件日志记录器
      */
     System.Logger logger();
 }

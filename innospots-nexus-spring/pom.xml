@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.innospots</groupId>
+        <artifactId>innospots-nexus-parent</artifactId>
+        <version>${revision}</version>
+        <relativePath>../innospots-nexus-parent/pom.xml</relativePath>
+    </parent>
+
+    <artifactId>innospots-nexus-spring-parent</artifactId>
+    <packaging>pom</packaging>
+
+    <name>innospots-nexus-spring-parent</name>
+    <description>Spring Boot runtime assembly aggregator for innospots-nexus.</description>
+
+    <properties>
+        <spring-boot.version>4.1.1</spring-boot.version>
+    </properties>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>${spring-boot.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <modules>
+        <module>innospots-nexus-spring-app</module>
+        <module>innospots-nexus-spring-console</module>
+    </modules>
+</project>

@@ -5,15 +5,15 @@ import com.innospots.nexus.core.plugin.contract.CapabilityProvider;
 import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
 /**
- * Type-safe link between a logical capability identity and its Java API.
+ * Capability 逻辑身份与 Java API 之间的类型安全关联。
  *
- * @param key stable capability key
- * @param api capability contract shared by host and plugin
- * @param <T> provider contract type
+ * @param key 稳定的 Capability 标识
+ * @param api 宿主与插件共享的 Capability 契约
+ * @param <T> Provider 契约类型
  */
 public record CapabilityType<T extends CapabilityProvider>(CapabilityKey key, Class<T> api) {
 
-    /** Validates key and API contract. */
+    /** 校验 Capability 标识和 API 契约。 */
     public CapabilityType {
         if (key == null || api == null || !api.isInterface() || !CapabilityProvider.class.isAssignableFrom(api)) {
             throw NexusException.build(
@@ -23,13 +23,13 @@ public record CapabilityType<T extends CapabilityProvider>(CapabilityKey key, Cl
     }
 
     /**
-     * Creates a capability type.
+     * 创建一个 Capability 类型。
      *
-     * @param name capability name
-     * @param majorVersion API major version
-     * @param api shared Java API
-     * @param <T> provider contract type
-     * @return validated capability type
+     * @param name Capability 名称
+     * @param majorVersion API 主版本
+     * @param api 共享的 Java API
+     * @param <T> Provider 契约类型
+     * @return 已校验的 Capability 类型
      */
     public static <T extends CapabilityProvider> CapabilityType<T> of(
             String name,

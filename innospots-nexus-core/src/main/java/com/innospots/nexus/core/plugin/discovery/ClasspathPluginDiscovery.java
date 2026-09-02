@@ -1,113 +1,184 @@
 package com.innospots.nexus.core.plugin.discovery;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Enumeration;
 import java.util.List;
-import java.util.Map;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
-import java.util.Set;
 
 import com.innospots.nexus.base.exception.NexusException;
-import com.innospots.nexus.core.plugin.capability.CapabilityKey;
+import com.innospots.nexus.core.plugin.capability.CapabilityTypeRegistry;
 import com.innospots.nexus.core.plugin.contract.Plugin;
-import com.innospots.nexus.core.plugin.declaration.CapabilityContribution;
+import com.innospots.nexus.core.plugin.contribution.PluginContributionDecoderRegistry;
+import com.innospots.nexus.core.plugin.declaration.JacksonPluginManifestParser;
 import com.innospots.nexus.core.plugin.declaration.PluginDefinition;
+import com.innospots.nexus.core.plugin.declaration.PluginManifest;
+import com.innospots.nexus.core.plugin.declaration.PluginManifestParser;
+import com.innospots.nexus.core.plugin.declaration.PluginSource;
 import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
-/**
- * Discovers every Plugin visible to one class loader through Java ServiceLoader.
- * Discovery reads definitions but deliberately never invokes provider factories or lifecycle methods.
- */
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/** 通过 Java SPI 和全部 plugin.yaml 资源发现插件，并统一编译为 Plugin。 */
 public final class ClasspathPluginDiscovery {
 
+    private static final Logger logger = LoggerFactory.getLogger(ClasspathPluginDiscovery.class);
+
+    /** YAML 资源标准路径。 */
+    public static final String MANIFEST_RESOURCE = "META-INF/nexus/plugin.yaml";
+
     private final ClassLoader classLoader;
+    private final PluginContributionDecoderRegistry contributionDecoders;
+    private final PluginManifestParser manifestParser;
 
     /**
-     * Creates a discovery operation for the supplied class loader.
+     * 使用空 Contribution Decoder 表创建发现器。
      *
-     * @param classLoader loader whose visible ServiceLoader entries are inspected
+     * @param classLoader 用于 SPI 与 YAML 资源枚举的类加载器
+     * @throws com.innospots.nexus.base.exception.NexusException 依赖为 {@code null} 时
      */
     public ClasspathPluginDiscovery(ClassLoader classLoader) {
-        if (classLoader == null) {
-            throw NexusException.build(
-                    PluginStatusCode.PLUGIN_DISCOVERY_FAILED,
-                    "plugin classLoader is required");
+        this(classLoader, PluginContributionDecoderRegistry.builder().build(), new JacksonPluginManifestParser());
+    }
+
+    /**
+     * 使用宿主注册的 Contribution Decoder 编译 YAML。
+     *
+     * @param classLoader          类加载器
+     * @param contributionDecoders 已注册的 Contribution 解码器
+     * @throws com.innospots.nexus.base.exception.NexusException 依赖为 {@code null} 时
+     */
+    public ClasspathPluginDiscovery(
+            ClassLoader classLoader,
+            PluginContributionDecoderRegistry contributionDecoders
+    ) {
+        this(classLoader, contributionDecoders, new JacksonPluginManifestParser());
+    }
+
+    /**
+     * 使用自定义解析器创建发现器，便于宿主注入受控解析策略。
+     *
+     * @param classLoader          类加载器
+     * @param contributionDecoders 已注册的 Contribution 解码器
+     * @param manifestParser       YAML 清单解析器
+     * @throws com.innospots.nexus.base.exception.NexusException 依赖为 {@code null} 时
+     */
+    public ClasspathPluginDiscovery(
+            ClassLoader classLoader,
+            PluginContributionDecoderRegistry contributionDecoders,
+            PluginManifestParser manifestParser
+    ) {
+        if (classLoader == null || contributionDecoders == null || manifestParser == null) {
+            throw NexusException.build(PluginStatusCode.PLUGIN_DISCOVERY_FAILED,
+                    "plugin classLoader and discovery services are required");
         }
         this.classLoader = classLoader;
+        this.contributionDecoders = contributionDecoders;
+        this.manifestParser = manifestParser;
     }
 
     /**
-     * Performs one static-style discovery operation without retaining a global mutable cache.
+     * 返回有效目录与单插件拒绝诊断。
      *
-     * @param classLoader loader whose visible ServiceLoader entries are inspected
-     * @return immutable, validated discovery snapshot
+     * @return 发现报告，包含有效目录和拒绝列表
      */
-    public static List<DiscoveredPlugin> discover(ClassLoader classLoader) {
-        return new ClasspathPluginDiscovery(classLoader).discover();
-    }
-
-    /**
-     * Discovers and globally validates visible plugins.
-     *
-     * @return deterministic immutable plugin list sorted by plugin id
-     */
-    public List<DiscoveredPlugin> discover() {
+    public PluginDiscoveryReport discoverReport() {
         List<DiscoveredPlugin> discovered = new ArrayList<>();
-        try {
-            for (ServiceLoader.Provider<Plugin> provider : ServiceLoader.load(Plugin.class, classLoader).stream()
-                    .toList()) {
+        List<RejectedPluginDefinition> rejected = new ArrayList<>();
+        CapabilityTypeRegistry.Builder capabilityTypes = CapabilityTypeRegistry.builder();
+        discoverJava(discovered, rejected, capabilityTypes);
+        PluginDefinitionCompiler compiler = new PluginDefinitionCompiler(
+                capabilityTypes, contributionDecoders, classLoader);
+        discoverYaml(discovered, rejected, compiler);
+        PluginCatalog catalog = PluginCatalog.of(discovered);
+        logger.info("Plugin discovery completed: valid={}, rejected={}",
+                discovered.size(), rejected.size());
+        if (logger.isDebugEnabled()) {
+            discovered.forEach(item -> logger.debug("Discovered plugin: id={}, source={}, version={}",
+                    item.definition().pluginId(),
+                    item.source().sourceType(),
+                    item.definition().version()));
+        }
+        rejected.forEach(item -> logger.warn(
+                "Rejected plugin definition: source={}, claimedPluginId={}, reason={}",
+                item.source().location(),
+                item.claimedPluginId(),
+                item.diagnostics().isEmpty() ? "unknown" : item.diagnostics().getFirst()));
+        return new PluginDiscoveryReport(catalog, rejected);
+    }
+
+    private void discoverJava(
+            List<DiscoveredPlugin> discovered,
+            List<RejectedPluginDefinition> rejected,
+            CapabilityTypeRegistry.Builder capabilityTypes
+    ) {
+        for (ServiceLoader.Provider<Plugin> provider : ServiceLoader.load(Plugin.class, classLoader).stream().toList()) {
+            Instant now = Instant.now();
+            PluginSource source = PluginSource.java(provider.type().getName(), now);
+            try {
                 Plugin plugin = provider.get();
                 PluginDefinition definition = plugin.definition();
                 if (definition == null) {
-                    throw NexusException.build(
-                            PluginStatusCode.PLUGIN_DEFINITION_INVALID,
-                            "plugin returned null definition: " + provider.type().getName());
+                    throw invalid("plugin returned null definition: " + provider.type().getName());
                 }
-                discovered.add(new DiscoveredPlugin(plugin, definition, Instant.now()));
+                capabilityTypes.registerFrom(definition);
+                discovered.add(new DiscoveredPlugin(plugin, definition, now, source));
+            } catch (NexusException exception) {
+                rejected.add(new RejectedPluginDefinition(source, null, List.of(exception.getMessage())));
+            } catch (ServiceConfigurationError | RuntimeException | LinkageError exception) {
+                rejected.add(new RejectedPluginDefinition(source, null, List.of(exception.toString())));
             }
-        } catch (NexusException exception) {
-            throw exception;
-        } catch (ServiceConfigurationError | RuntimeException | LinkageError exception) {
-            throw NexusException.build(
-                    PluginStatusCode.PLUGIN_DISCOVERY_FAILED.fullCode(),
-                    "failed to discover classpath plugins",
-                    exception);
         }
-
-        validate(discovered);
-        discovered.sort(Comparator.comparing(item -> item.definition().id()));
-        return List.copyOf(discovered);
     }
 
-    static void validate(List<DiscoveredPlugin> discovered) {
-        Set<String> pluginIds = new HashSet<>();
-        Map<CapabilityKey, Class<?>> capabilityApis = new HashMap<>();
-        for (DiscoveredPlugin item : discovered) {
-            PluginDefinition definition = item.definition();
-            if (!pluginIds.add(definition.id())) {
-                throw NexusException.build(
-                        PluginStatusCode.PLUGIN_DUPLICATE,
-                        "duplicate plugin id: " + definition.id());
-            }
-            if (definition.apiVersion() != PluginDefinition.CURRENT_API_VERSION) {
-                throw NexusException.build(
-                        PluginStatusCode.PLUGIN_API_INCOMPATIBLE,
-                        "unsupported plugin apiVersion for " + definition.id() + ": " + definition.apiVersion());
-            }
-            for (CapabilityContribution<?> contribution : definition.capabilities()) {
-                Class<?> previous = capabilityApis.putIfAbsent(
-                        contribution.type().key(),
-                        contribution.type().api());
-                if (previous != null && previous != contribution.type().api()) {
-                    throw NexusException.build(
-                            PluginStatusCode.CAPABILITY_TYPE_MISMATCH,
-                            "different API classes declared for " + contribution.type().key());
+    private void discoverYaml(
+            List<DiscoveredPlugin> discovered,
+            List<RejectedPluginDefinition> rejected,
+            PluginDefinitionCompiler compiler
+    ) {
+        List<ParsedYamlManifest> pending = new ArrayList<>();
+        try {
+            Enumeration<URL> resources = classLoader.getResources(MANIFEST_RESOURCE);
+            while (resources.hasMoreElements()) {
+                URL resource = resources.nextElement();
+                Instant now = Instant.now();
+                PluginSource source = PluginSource.yaml(resource.toExternalForm(), now);
+                try (InputStream input = resource.openStream()) {
+                    PluginManifest manifest = manifestParser.parse(input);
+                    compiler.registerDeclaredTypes(manifest);
+                    pending.add(new ParsedYamlManifest(manifest, source, now));
+                } catch (NexusException exception) {
+                    rejected.add(new RejectedPluginDefinition(source, null, List.of(exception.getMessage())));
+                } catch (IOException | RuntimeException | LinkageError exception) {
+                    rejected.add(new RejectedPluginDefinition(source, null, List.of(exception.toString())));
                 }
             }
+            for (ParsedYamlManifest item : pending) {
+                try {
+                    PluginDefinition definition = compiler.compile(item.manifest(), item.source());
+                    discovered.add(new DiscoveredPlugin(
+                            new ManifestPlugin(definition), definition, item.discoveredAt(), item.source()));
+                } catch (NexusException exception) {
+                    rejected.add(new RejectedPluginDefinition(item.source(), null, List.of(exception.getMessage())));
+                } catch (RuntimeException | LinkageError exception) {
+                    rejected.add(new RejectedPluginDefinition(item.source(), null, List.of(exception.toString())));
+                }
+            }
+        } catch (IOException exception) {
+            throw NexusException.build(PluginStatusCode.PLUGIN_DISCOVERY_FAILED.fullCode(),
+                    "cannot enumerate plugin YAML resources", exception);
         }
+    }
+
+    private record ParsedYamlManifest(PluginManifest manifest, PluginSource source, Instant discoveredAt) {
+    }
+
+    private static NexusException invalid(String message) {
+        return NexusException.build(PluginStatusCode.PLUGIN_DEFINITION_INVALID, message);
     }
 }

@@ -1,5 +1,5 @@
 package com.innospots.nexus.core.plugin.event;
 
-/** Marker contract for immutable in-process plugin observations. */
+/** 进程内不可变插件运行观测事件的标记契约。 */
 public interface PluginEvent {
 }

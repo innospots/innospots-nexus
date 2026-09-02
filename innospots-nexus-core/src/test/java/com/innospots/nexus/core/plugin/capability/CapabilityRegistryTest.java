@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.core.plugin.contract.CapabilityProvider;
+import com.innospots.nexus.core.plugin.lifecycle.PluginAvailability;
+import com.innospots.nexus.core.plugin.lifecycle.PluginAvailabilityIndex;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -23,11 +25,13 @@ class CapabilityRegistryTest {
         CapabilityRegistry registry = new CapabilityRegistry(Map.of(
                 MESSAGE.key(), Tags.of("mode", "robot")));
         registry.registerAll(List.of(
-                new CapabilityRegistration<>(MESSAGE, app, "wecom-app", Tags.of("mode", "app")),
-                new CapabilityRegistration<>(MESSAGE, robot, "wecom-robot", Tags.of("mode", "robot"))));
+                new CapabilityRegistration<>(MESSAGE, app, "com.example.wecom-app", Tags.of("mode", "app")),
+                new CapabilityRegistration<>(MESSAGE, robot, "com.example.wecom-robot", Tags.of("mode", "robot"))));
 
         assertThat(registry.require(MESSAGE, Tags.of("mode", "app"))).isSameAs(app);
         assertThat(registry.require(MESSAGE, Tags.empty())).isSameAs(robot);
+        MessageProvider byName = registry.require("message.push", 1, Tags.of("mode", "app"));
+        assertThat(byName).isSameAs(app);
         assertThat(registry.findAll(MESSAGE)).containsExactly(app, robot);
     }
 
@@ -36,16 +40,16 @@ class CapabilityRegistryTest {
         CapabilityRegistry registry = new CapabilityRegistry(Map.of());
         registry.registerAll(List.of(
                 new CapabilityRegistration<>(
-                        MESSAGE, new NamedMessageProvider("one"), "one", Tags.of("channel", "wecom")),
+                        MESSAGE, new NamedMessageProvider("one"), "com.example.one", Tags.of("channel", "wecom")),
                 new CapabilityRegistration<>(
-                        MESSAGE, new NamedMessageProvider("two"), "two", Tags.of("channel", "wecom"))));
+                        MESSAGE, new NamedMessageProvider("two"), "com.example.two", Tags.of("channel", "wecom"))));
 
         assertThatThrownBy(() -> registry.require(MESSAGE, Tags.of("channel", "wecom")))
                 .isInstanceOf(NexusException.class)
-                .hasMessageContaining("one")
-                .hasMessageContaining("two");
+                .hasMessageContaining("com.example.one")
+                .hasMessageContaining("com.example.two");
 
-        registry.unregisterPlugin("one");
+        registry.unregisterPlugin("com.example.one");
 
         assertThat(registry.require(MESSAGE, Tags.of("channel", "wecom")).name()).isEqualTo("two");
     }
@@ -56,17 +60,36 @@ class CapabilityRegistryTest {
         CapabilityRegistry registry = new CapabilityRegistry(Map.of(
                 MESSAGE.key(), Tags.of("channel", "wecom")));
         registry.registerAll(List.of(new CapabilityRegistration<>(
-                MESSAGE, first, "first", Tags.of("channel", "wecom"))));
+                MESSAGE, first, "com.example.first", Tags.of("channel", "wecom"))));
 
         assertThatThrownBy(() -> registry.registerAll(List.of(new CapabilityRegistration<>(
                 MESSAGE,
                 new NamedMessageProvider("second"),
-                "second",
+                "com.example.second",
                 Tags.of("channel", "wecom")))))
                 .isInstanceOf(NexusException.class)
                 .hasMessageContaining("default route");
 
         assertThat(registry.findAll(MESSAGE)).containsExactly(first);
+    }
+
+    @Test
+    void hidesRegisteredProvidersUntilAvailabilityIsActive() {
+        MessageProvider provider = new NamedMessageProvider("hidden");
+        PluginAvailabilityIndex availabilityIndex = new PluginAvailabilityIndex();
+        PluginAvailability availability = new PluginAvailability();
+        availabilityIndex.register("com.example.hidden", availability);
+        CapabilityRegistry registry = new CapabilityRegistry(Map.of(), availabilityIndex);
+        registry.registerAll(List.of(new CapabilityRegistration<>(
+                MESSAGE, provider, "com.example.hidden", Tags.of("mode", "app"))));
+
+        assertThat(registry.findAll(MESSAGE)).isEmpty();
+        assertThat(registry.contains(MESSAGE.key())).isFalse();
+
+        availability.activate();
+
+        assertThat(registry.findAll(MESSAGE)).containsExactly(provider);
+        assertThat(registry.contains(MESSAGE.key())).isTrue();
     }
 
     @Test

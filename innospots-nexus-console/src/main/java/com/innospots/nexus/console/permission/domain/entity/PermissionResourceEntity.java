@@ -14,9 +14,9 @@ import lombok.Setter;
 import com.innospots.nexus.core.persistence.entity.WorkspaceBaseEntity;
 
 /**
- * 由扩展和 UiSpec 生成的规范化权限目录记录。
+ * 由插件 Console Contribution 和 UiSpec 生成的规范化权限目录记录。
  *
- * <p>扩展声明和 UiSpec 才是资源事实源，本实体只是项目内用于检索、展示、授权和请求匹配的索引。
+ * <p>插件声明和 UiSpec 才是资源事实源，本实体只是项目内用于检索、展示、授权和请求匹配的索引。
  * 它不保存完整页面定义，也不替代 UiSpec。</p>
  */
 @Getter
@@ -26,7 +26,7 @@ import com.innospots.nexus.core.persistence.entity.WorkspaceBaseEntity;
         @Index(name = "uk_nx_permission_resource_project_key",
                 columnList = "workspace_id,resource_key", unique = true),
         @Index(name = "idx_nx_permission_resource_source",
-                columnList = "workspace_id,extension_key,module_key,resource_type,status"),
+                columnList = "workspace_id,owner_plugin_id,module_key,resource_type,status"),
         @Index(name = "idx_nx_permission_resource_parent",
                 columnList = "workspace_id,parent_resource_id,sort_order"),
         @Index(name = "idx_nx_permission_resource_request",
@@ -44,9 +44,9 @@ public class PermissionResourceEntity extends WorkspaceBaseEntity {
     @Column(length = 32, nullable = false)
     private String resourceId;
 
-    /** 提供该资源的扩展 key。 */
-    @Column(length = 128, nullable = false)
-    private String extensionKey;
+    /** 提供该资源的插件稳定身份。 */
+    @Column(name = "owner_plugin_id", length = 256, nullable = false)
+    private String ownerPluginId;
 
     /** 资源所属模块 key。 */
     @Column(length = 128, nullable = false)
@@ -84,7 +84,7 @@ public class PermissionResourceEntity extends WorkspaceBaseEntity {
     @Column(length = 512)
     private String requestUrl;
 
-    /** 从扩展或 UiSpec 元数据复制的单值展示名称。 */
+    /** 从插件或 UiSpec 元数据复制的单值展示名称。 */
     @Column(length = 256)
     private String displayName;
 

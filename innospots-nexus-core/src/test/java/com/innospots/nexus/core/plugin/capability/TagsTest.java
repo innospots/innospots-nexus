@@ -57,7 +57,9 @@ class TagsTest {
                 .isInstanceOf(NexusException.class);
         assertThatThrownBy(() -> Tags.from(null))
                 .isInstanceOf(NexusException.class);
-        assertThatThrownBy(() -> Tags.from(Map.of("channel", "WeCom")))
+        assertThat(Tags.from(Map.of("channel", "WeCom")).get("channel"))
+                .contains("WeCom");
+        assertThatThrownBy(() -> Tags.from(Map.of("channel.name", "")))
                 .isInstanceOf(NexusException.class);
     }
 

@@ -14,7 +14,6 @@ class ConsolePackageSkeletonTest {
                 "com.innospots.nexus.console.role",
                 "com.innospots.nexus.console.menu",
                 "com.innospots.nexus.console.permission",
-                "com.innospots.nexus.console.extension",
                 "com.innospots.nexus.console.logger",
                 "com.innospots.nexus.console.dictionary"
         };

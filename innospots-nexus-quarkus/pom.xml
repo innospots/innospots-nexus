@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.innospots</groupId>
+        <artifactId>innospots-nexus-parent</artifactId>
+        <version>${revision}</version>
+        <relativePath>../innospots-nexus-parent/pom.xml</relativePath>
+    </parent>
+
+    <artifactId>innospots-nexus-quarkus-parent</artifactId>
+    <packaging>pom</packaging>
+
+    <name>innospots-nexus-quarkus-parent</name>
+    <description>Quarkus runtime assembly aggregator for innospots-nexus.</description>
+
+    <modules>
+        <module>innospots-nexus-quarkus-app</module>
+        <module>innospots-nexus-quarkus-console</module>
+    </modules>
+</project>

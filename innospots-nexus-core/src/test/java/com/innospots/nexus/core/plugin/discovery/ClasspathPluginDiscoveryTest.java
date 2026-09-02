@@ -32,10 +32,10 @@ class ClasspathPluginDiscoveryTest {
         SamplePlugin.definitionCalls = 0;
         ClassLoader classLoader = serviceClassLoader(SamplePlugin.class.getName());
 
-        var plugins = new ClasspathPluginDiscovery(classLoader).discover();
+        var plugins = new ClasspathPluginDiscovery(classLoader).discoverReport().validCatalog().plugins();
 
         assertThat(plugins).hasSize(1);
-        assertThat(plugins.getFirst().definition().id()).isEqualTo("sample-discovery");
+        assertThat(plugins.getFirst().definition().pluginId()).isEqualTo("com.example.sample-discovery");
         assertThat(SamplePlugin.definitionCalls).isEqualTo(1);
         assertThat(SamplePlugin.factoryCalls).isZero();
     }
@@ -44,12 +44,12 @@ class ClasspathPluginDiscoveryTest {
     void supportsStaticClasspathDiscoveryAndImmutableCatalogLookup() throws Exception {
         ClassLoader classLoader = serviceClassLoader(SamplePlugin.class.getName());
 
-        PluginCatalog catalog = PluginCatalog.discover(classLoader);
+        PluginCatalog catalog = new ClasspathPluginDiscovery(classLoader).discoverReport().validCatalog();
 
         assertThat(catalog.plugins()).hasSize(1);
-        assertThat(catalog.plugin("sample-discovery")).isPresent();
-        assertThat(catalog.definitions()).extracting(PluginDefinition::id)
-                .containsExactly("sample-discovery");
+        assertThat(catalog.plugin("com.example.sample-discovery")).isPresent();
+        assertThat(catalog.definitions()).extracting(PluginDefinition::pluginId)
+                .containsExactly("com.example.sample-discovery");
         assertThatThrownBy(() -> catalog.plugins().clear())
                 .isInstanceOf(UnsupportedOperationException.class);
     }
@@ -60,7 +60,7 @@ class ClasspathPluginDiscoveryTest {
                 SamplePlugin.class.getName(),
                 DuplicatePlugin.class.getName());
 
-        assertThatThrownBy(() -> new ClasspathPluginDiscovery(classLoader).discover())
+        assertThatThrownBy(() -> new ClasspathPluginDiscovery(classLoader).discoverReport())
                 .isInstanceOf(NexusException.class)
                 .hasMessageContaining("sample-discovery");
     }
@@ -69,23 +69,23 @@ class ClasspathPluginDiscoveryTest {
     void catalogFactorySortsAndValidatesStaticDiscoveryEntries() {
         DiscoveredPlugin second = new DiscoveredPlugin(
                 new OtherPlugin(),
-                fixtureDefinition("zeta-discovery"),
+                fixtureDefinition("com.example.zeta-discovery"),
                 java.time.Instant.now());
         DiscoveredPlugin first = new DiscoveredPlugin(
                 new SamplePlugin(),
-                fixtureDefinition("alpha-discovery"),
+                fixtureDefinition("com.example.alpha-discovery"),
                 java.time.Instant.now());
 
         PluginCatalog catalog = PluginCatalog.of(Arrays.asList(second, first));
 
-        assertThat(catalog.plugins()).extracting(item -> item.definition().id())
-                .containsExactly("alpha-discovery", "zeta-discovery");
+        assertThat(catalog.plugins()).extracting(item -> item.definition().pluginId())
+                .containsExactly("com.example.alpha-discovery", "com.example.zeta-discovery");
         assertThatThrownBy(() -> PluginCatalog.of(Arrays.asList(first, null)))
                 .isInstanceOf(NexusException.class);
 
         DiscoveredPlugin incompatible = new DiscoveredPlugin(
                 new OtherPlugin(),
-                PluginDefinition.builder("incompatible-discovery")
+                PluginDefinition.builder("com.example.incompatible-discovery")
                         .name("Incompatible Discovery")
                         .version("1.0.0")
                         .apiVersion(PluginDefinition.CURRENT_API_VERSION + 1)
@@ -122,7 +122,7 @@ class ClasspathPluginDiscoveryTest {
         @Override
         public PluginDefinition definition() {
             definitionCalls++;
-            return fixtureDefinition("sample-discovery");
+            return fixtureDefinition("com.example.sample-discovery");
         }
     }
 
@@ -130,7 +130,7 @@ class ClasspathPluginDiscoveryTest {
 
         @Override
         public PluginDefinition definition() {
-            return fixtureDefinition("sample-discovery");
+            return fixtureDefinition("com.example.sample-discovery");
         }
     }
 
@@ -138,7 +138,7 @@ class ClasspathPluginDiscoveryTest {
 
         @Override
         public PluginDefinition definition() {
-            return fixtureDefinition("zeta-discovery");
+            return fixtureDefinition("com.example.zeta-discovery");
         }
     }
 

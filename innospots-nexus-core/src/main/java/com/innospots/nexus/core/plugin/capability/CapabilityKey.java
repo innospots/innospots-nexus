@@ -6,16 +6,18 @@ import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
 /**
- * Stable logical identity of a capability API major version.
+ * Capability API 主版本的稳定逻辑身份。
  *
- * @param name lowercase dotted capability name
- * @param majorVersion positive major API version
+ * @param name 小写点分 Capability 名称
+ * @param majorVersion 正整数形式的 API 主版本
  */
 public record CapabilityKey(String name, int majorVersion) {
 
     private static final Pattern NAME_PATTERN = Pattern.compile("[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*");
 
-    /** Validates the stable capability identity. */
+    /**
+     * @throws NexusException 名称格式非法或主版本小于 1 时抛出
+     */
     public CapabilityKey {
         if (name == null || !NAME_PATTERN.matcher(name).matches() || majorVersion < 1) {
             throw NexusException.build(

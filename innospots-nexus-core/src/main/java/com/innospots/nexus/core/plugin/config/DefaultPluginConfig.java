@@ -1,5 +1,7 @@
 package com.innospots.nexus.core.plugin.config;
 
+import java.math.BigDecimal;
+import java.net.URI;
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -9,7 +11,7 @@ import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
 /**
- * Immutable typed configuration snapshot for one plugin.
+ * 一个插件的不可变类型化配置快照。
  */
 final class DefaultPluginConfig implements PluginConfig {
 
@@ -51,16 +53,34 @@ final class DefaultPluginConfig implements PluginConfig {
     }
 
     @Override
+    public BigDecimal getDecimal(String key, BigDecimal defaultValue) {
+        Object value = values.get(key);
+        return value instanceof BigDecimal decimal ? decimal : defaultValue;
+    }
+
+    @Override
     public Duration getDuration(String key, Duration defaultValue) {
         Object value = values.get(key);
         return value instanceof Duration duration ? duration : defaultValue;
     }
 
     @Override
+    public URI getUri(String key, URI defaultValue) {
+        Object value = values.get(key);
+        return value instanceof URI uri ? uri : defaultValue;
+    }
+
+    @Override
+    public String getEnum(String key, String defaultValue) {
+        Object value = values.get(key);
+        return value instanceof String text ? text : defaultValue;
+    }
+
+    @Override
     public SecretValue requireSecret(String key) {
         Object value = values.get(key);
         if (value instanceof SecretValue secret) {
-            // Callers own the returned handle and cannot clear the runtime's retained snapshot.
+            // 调用方拥有返回句柄，但不能清除运行时保留的配置快照。
             return secret.copy();
         }
         throw invalid("required secret config is missing: " + key);

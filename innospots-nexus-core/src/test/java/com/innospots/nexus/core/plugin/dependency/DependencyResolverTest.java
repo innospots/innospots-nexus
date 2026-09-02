@@ -26,13 +26,13 @@ class DependencyResolverTest {
 
     @Test
     void reportsDeclaredButUnavailableRequiredDependencies() {
-        PluginDefinition consumer = PluginDefinition.builder("dependency-consumer")
+        PluginDefinition consumer = PluginDefinition.builder("com.example.dependency-consumer")
                 .name("Dependency Consumer")
                 .version("1.0.0")
                 .tags(Tags.of("fixture", "dependency"))
                 .require(PROVIDER, true)
                 .build();
-        PluginDefinition producer = PluginDefinition.builder("dependency-producer")
+        PluginDefinition producer = PluginDefinition.builder("com.example.dependency-producer")
                 .name("Dependency Producer")
                 .version("1.0.0")
                 .tags(Tags.of("fixture", "dependency"))
@@ -46,7 +46,7 @@ class DependencyResolverTest {
         assertThat(resolver.canStart(before)).isFalse();
 
         registry.registerAll(List.of(new com.innospots.nexus.core.plugin.capability.CapabilityRegistration<>(
-                PROVIDER, new ProviderImpl(), "dependency-producer", Tags.of("fixture", "dependency"))));
+                PROVIDER, new ProviderImpl(), "com.example.dependency-producer", Tags.of("fixture", "dependency"))));
 
         Map<CapabilityKey, DependencyResolution> after = resolver.resolve(consumer);
         log.dumpMap("after provider is active", after);
@@ -55,7 +55,7 @@ class DependencyResolverTest {
 
     @Test
     void treatsOptionalMissingDependenciesAsStartable() {
-        PluginDefinition consumer = PluginDefinition.builder("optional-consumer")
+        PluginDefinition consumer = PluginDefinition.builder("com.example.optional-consumer")
                 .name("Optional Consumer")
                 .version("1.0.0")
                 .tags(Tags.of("fixture", "dependency"))
@@ -74,7 +74,7 @@ class DependencyResolverTest {
     @Test
     void rejectsNullPublicInputsWithNexusExceptions() {
         CapabilityRegistry registry = new CapabilityRegistry(Map.of());
-        PluginDefinition definition = PluginDefinition.builder("dependency-fixture")
+        PluginDefinition definition = PluginDefinition.builder("com.example.dependency-fixture")
                 .name("Dependency Fixture")
                 .version("1.0.0")
                 .tags(Tags.of("fixture", "dependency"))

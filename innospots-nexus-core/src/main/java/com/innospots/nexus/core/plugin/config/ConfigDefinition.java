@@ -1,5 +1,7 @@
 package com.innospots.nexus.core.plugin.config;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -9,28 +11,36 @@ import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
 /**
- * Immutable schema of configuration keys accepted by one plugin.
+ * 一个插件允许使用的配置键不可变 schema。
  */
 public interface ConfigDefinition {
 
     /**
-     * Returns declared configuration items in declaration order.
+     * 按声明顺序返回配置项。
      *
-     * @return immutable configuration item collection
+     * @return 不可变配置项集合
      */
     Collection<ConfigItemDefinition> items();
 
-    /** Returns an empty configuration schema. */
+    /**
+     * 返回空配置 schema。
+     *
+     * @return 不包含任何配置项的 schema
+     */
     static ConfigDefinition empty() {
         return () -> List.of();
     }
 
-    /** Creates a fluent configuration schema builder. */
+    /**
+     * 创建流式配置 schema 构建器。
+     *
+     * @return 新的 schema 构建器
+     */
     static Builder builder() {
         return new Builder();
     }
 
-    /** Fluent builder for an immutable configuration schema. */
+    /** 不可变配置 schema 的流式构建器。 */
     final class Builder {
 
         private final Map<String, ConfigItemDefinition> items = new LinkedHashMap<>();
@@ -39,66 +49,101 @@ public interface ConfigDefinition {
         }
 
         /**
-         * Starts a string item declaration.
+         * 开始声明字符串配置项。
          *
-         * @param key plugin-local configuration key
-         * @return item builder
+         * @param key 插件本地配置键
+         * @return 配置项构建器
          */
         public ItemBuilder string(String key) {
             return item(key, ConfigType.STRING);
         }
 
         /**
-         * Starts an integer item declaration.
+         * 开始声明整数配置项。
          *
-         * @param key plugin-local configuration key
-         * @return item builder
+         * @param key 插件本地配置键
+         * @return 配置项构建器
          */
         public ItemBuilder integer(String key) {
             return item(key, ConfigType.INTEGER);
         }
 
         /**
-         * Starts a long item declaration.
+         * 开始声明长整数配置项。
          *
-         * @param key plugin-local configuration key
-         * @return item builder
+         * @param key 插件本地配置键
+         * @return 配置项构建器
          */
         public ItemBuilder longNumber(String key) {
             return item(key, ConfigType.LONG);
         }
 
         /**
-         * Starts a boolean item declaration.
+         * 开始声明布尔配置项。
          *
-         * @param key plugin-local configuration key
-         * @return item builder
+         * @param key 插件本地配置键
+         * @return 配置项构建器
          */
         public ItemBuilder bool(String key) {
             return item(key, ConfigType.BOOLEAN);
         }
 
         /**
-         * Starts a duration item declaration.
+         * 开始声明时长配置项。
          *
-         * @param key plugin-local configuration key
-         * @return item builder
+         * @param key 插件本地配置键
+         * @return 配置项构建器
          */
         public ItemBuilder duration(String key) {
             return item(key, ConfigType.DURATION);
         }
 
         /**
-         * Starts a secret item declaration.
+         * 开始声明十进制定点数配置项。
          *
-         * @param key plugin-local configuration key
-         * @return item builder
+         * @param key 插件本地配置键
+         * @return 配置项构建器
+         */
+        public ItemBuilder decimal(String key) {
+            return item(key, ConfigType.DECIMAL);
+        }
+
+        /**
+         * 开始声明绝对 URI 配置项。
+         *
+         * @param key 插件本地配置键
+         * @return 配置项构建器
+         */
+        public ItemBuilder uri(String key) {
+            return item(key, ConfigType.URI);
+        }
+
+        /**
+         * 开始声明枚举配置项。
+         *
+         * @param key         插件本地配置键
+         * @param enumValues  允许取值列表
+         * @return 配置项构建器
+         */
+        public ItemBuilder enumeration(String key, String... enumValues) {
+            return item(key, ConfigType.ENUM).enumValues(enumValues);
+        }
+
+        /**
+         * 开始声明密文配置项。
+         *
+         * @param key 插件本地配置键
+         * @return 配置项构建器
          */
         public ItemBuilder secret(String key) {
             return item(key, ConfigType.SECRET).secret();
         }
 
-        /** Builds the immutable schema in declaration order. */
+        /**
+         * 按声明顺序构建不可变 schema。
+         *
+         * @return 不可变配置 schema
+         */
         public ConfigDefinition build() {
             List<ConfigItemDefinition> snapshot = List.copyOf(items.values());
             return () -> snapshot;
@@ -122,7 +167,7 @@ public interface ConfigDefinition {
         }
     }
 
-    /** Builder for one item that returns to its owning schema builder through {@link #end()}. */
+    /** 单个配置项的构建器，通过 {@link #end()} 返回所属 schema 构建器。 */
     final class ItemBuilder {
 
         private final Builder parent;
@@ -132,6 +177,7 @@ public interface ConfigDefinition {
         private String defaultValue;
         private boolean secret;
         private String description;
+        private List<String> enumValues = List.of();
 
         private ItemBuilder(Builder parent, String key, ConfigType type) {
             this.parent = parent;
@@ -140,9 +186,9 @@ public interface ConfigDefinition {
         }
 
         /**
-         * Marks the item as required.
+         * 将配置项标记为必填。
          *
-         * @return this item builder
+         * @return 当前配置项构建器
          */
         public ItemBuilder required() {
             this.required = true;
@@ -150,10 +196,10 @@ public interface ConfigDefinition {
         }
 
         /**
-         * Sets a textual default converted during configuration resolution.
+         * 设置在配置解析时转换的文本默认值。
          *
-         * @param defaultValue textual default value
-         * @return this item builder
+         * @param defaultValue 文本默认值
+         * @return 当前配置项构建器
          */
         public ItemBuilder defaultValue(String defaultValue) {
             this.defaultValue = defaultValue;
@@ -161,9 +207,9 @@ public interface ConfigDefinition {
         }
 
         /**
-         * Marks diagnostics for this item as secret.
+         * 将该配置项的诊断信息标记为密文。
          *
-         * @return this item builder
+         * @return 当前配置项构建器
          */
         public ItemBuilder secret() {
             this.secret = true;
@@ -171,10 +217,10 @@ public interface ConfigDefinition {
         }
 
         /**
-         * Sets a human-readable item description.
+         * 设置面向用户的配置项说明。
          *
-         * @param description display description
-         * @return this item builder
+         * @param description 展示说明
+         * @return 当前配置项构建器
          */
         public ItemBuilder description(String description) {
             this.description = description;
@@ -182,9 +228,22 @@ public interface ConfigDefinition {
         }
 
         /**
-         * Finishes this item and returns to the schema builder.
+         * 设置枚举配置项允许的值。
          *
-         * @return owning schema builder
+         * @param enumValues 允许取值列表；{@code null} 视为空列表
+         * @return 当前配置项构建器
+         */
+        public ItemBuilder enumValues(String... enumValues) {
+            this.enumValues = enumValues == null
+                    ? List.of()
+                    : new ArrayList<>(Arrays.asList(enumValues));
+            return this;
+        }
+
+        /**
+         * 完成当前配置项并返回 schema 构建器。
+         *
+         * @return 所属 schema 构建器
          */
         public Builder end() {
             parent.add(new ConfigItemDefinition(
@@ -193,7 +252,8 @@ public interface ConfigDefinition {
                     required,
                     defaultValue,
                     secret,
-                    description));
+                    description,
+                    enumValues));
             return parent;
         }
     }

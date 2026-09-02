@@ -6,38 +6,72 @@ import java.util.Optional;
 import com.innospots.nexus.core.plugin.contract.CapabilityProvider;
 
 /**
- * Type-safe read boundary for selecting active capability providers.
+ * 用于选择活动 Capability Provider 的类型安全读取边界。
  */
 public interface CapabilityManager {
 
     /**
-     * Returns exactly one active provider matching the requested type and tags.
+     * 返回一个与请求类型和标签匹配的活动 Provider。
      *
-     * @param type capability type including its Java API
-     * @param requiredTags tags that a provider must contain; {@code null} means no explicit tags
-     * @param <T> provider contract type
-     * @return the selected provider
-     * @throws com.innospots.nexus.base.exception.NexusException when no provider exists or selection is ambiguous
+     * @param name Capability 逻辑名称
+     * @param majorVersion API 主版本
+     * @param requiredTags Provider 必须包含的标签；{@code null} 表示没有显式标签
+     * @param <T> Provider 契约类型
+     * @return 选中的 Provider
+     * @throws com.innospots.nexus.base.exception.NexusException 没有 Provider 或选择存在歧义时抛出
+     */
+    <T extends CapabilityProvider> T require(String name, int majorVersion, Tags requiredTags);
+
+    /**
+     * 返回一个与请求类型和标签匹配的活动 Provider。
+     *
+     * @param type 包含 Java API 的 Capability 类型
+     * @param requiredTags Provider 必须包含的标签；{@code null} 表示没有显式标签
+     * @param <T> Provider 契约类型
+     * @return 选中的 Provider
+     * @throws com.innospots.nexus.base.exception.NexusException 没有 Provider 或选择存在歧义时抛出
      */
     <T extends CapabilityProvider> T require(CapabilityType<T> type, Tags requiredTags);
 
     /**
-     * Finds an active provider matching the requested type and tags.
+     * 查找与请求类型和标签匹配的活动 Provider。
      *
-     * @param type capability type including its Java API
-     * @param requiredTags tags that a provider must contain; {@code null} means no explicit tags
-     * @param <T> provider contract type
-     * @return the provider, or empty when no provider matches
-     * @throws com.innospots.nexus.base.exception.NexusException when selection is ambiguous
+     * @param name Capability 逻辑名称
+     * @param majorVersion API 主版本
+     * @param requiredTags Provider 必须包含的标签；{@code null} 表示没有显式标签
+     * @param <T> Provider 契约类型
+     * @return 匹配的 Provider；没有匹配项时返回空 Optional
+     * @throws com.innospots.nexus.base.exception.NexusException 选择存在歧义时抛出
+     */
+    <T extends CapabilityProvider> Optional<T> find(String name, int majorVersion, Tags requiredTags);
+
+    /**
+     * 查找与请求类型和标签匹配的活动 Provider。
+     *
+     * @param type 包含 Java API 的 Capability 类型
+     * @param requiredTags Provider 必须包含的标签；{@code null} 表示没有显式标签
+     * @param <T> Provider 契约类型
+     * @return 匹配的 Provider；没有匹配项时返回空 Optional
+     * @throws com.innospots.nexus.base.exception.NexusException 选择存在歧义时抛出
      */
     <T extends CapabilityProvider> Optional<T> find(CapabilityType<T> type, Tags requiredTags);
 
     /**
-     * Returns all active providers registered for a capability type.
+     * 返回指定 Capability 类型已注册的全部活动 Provider。
      *
-     * @param type capability type including its Java API
-     * @param <T> provider contract type
-     * @return immutable provider list in registration order
+     * @param name Capability 逻辑名称
+     * @param majorVersion API 主版本
+     * @param <T> Provider 契约类型
+     * @return 按注册顺序排列的不可变 Provider 列表
+     */
+    <T extends CapabilityProvider> List<T> findAll(String name, int majorVersion);
+
+    /**
+     * 返回指定 Capability 类型已注册的全部活动 Provider。
+     *
+     * @param type 包含 Java API 的 Capability 类型
+     * @param <T> Provider 契约类型
+     * @return 按注册顺序排列的不可变 Provider 列表
      */
     <T extends CapabilityProvider> List<T> findAll(CapabilityType<T> type);
 }

@@ -1,0 +1,43 @@
+package com.innospots.nexus.quarkus.plugin.config;
+
+import java.util.List;
+
+import io.smallrye.config.ConfigMapping;
+import io.smallrye.config.WithDefault;
+import io.smallrye.config.WithName;
+
+/**
+ * 插件宿主安装与启停策略配置映射。
+ *
+ * <p>绑定 {@code nexus.plugin.*} 与 {@code nexus.plugins.*}。
+ * 插件实例键 {@code plugins.*} 由 {@link PluginHostConfigBinder} 单独汇总。</p>
+ */
+@ConfigMapping(prefix = "nexus")
+public interface NexusPluginHostConfig {
+
+    /**
+     * 首次 classpath 发现时是否自动安装并期望启用。
+     *
+     * <p>映射键：{@code nexus.plugin.auto-install}。</p>
+     */
+    @WithName("plugin.auto-install")
+    @WithDefault("false")
+    boolean autoInstall();
+
+    /** {@code nexus.plugins.*} 启停策略分组。 */
+    Plugins plugins();
+
+    /**
+     * {@code nexus.plugins.*} 启停策略。
+     */
+    interface Plugins {
+
+        /** 启动时必须 ACTIVE 的插件 ID 列表。 */
+        @WithDefault("")
+        List<String> required();
+
+        /** 永不自动启动的插件 ID 列表。 */
+        @WithDefault("")
+        List<String> disabled();
+    }
+}

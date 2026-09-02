@@ -7,8 +7,8 @@ import com.innospots.nexus.console.permission.domain.enums.PermissionResourceTyp
 public record PermissionResourceVo(
         /** 资源记录主键。 */
         String resourceId,
-        /** 来源扩展 key。 */
-        String extensionKey,
+        /** 来源插件稳定身份。 */
+        String ownerPluginId,
         /** 所属模块 key。 */
         String moduleKey,
         /** 资源类型。 */
@@ -44,7 +44,7 @@ public record PermissionResourceVo(
     public static PermissionResourceVo from(PermissionResourceEntity entity) {
         return new PermissionResourceVo(
                 entity.getResourceId(),
-                entity.getExtensionKey(),
+                entity.getOwnerPluginId(),
                 entity.getModuleKey(),
                 PermissionResourceType.valueOf(entity.getResourceType()),
                 entity.getResourceKey(),

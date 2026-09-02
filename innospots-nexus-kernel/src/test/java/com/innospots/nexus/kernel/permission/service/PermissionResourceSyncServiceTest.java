@@ -1,7 +1,6 @@
 package com.innospots.nexus.kernel.permission.service;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
@@ -13,12 +12,17 @@ import com.innospots.nexus.base.ui.spec.UiSpec;
 import com.innospots.nexus.base.ui.spec.action.ActionType;
 import com.innospots.nexus.base.ui.spec.action.UiAction;
 import com.innospots.nexus.base.ui.spec.datasource.UiDatasource;
-import com.innospots.nexus.core.extension.contract.ConsoleExtensionProvider;
-import com.innospots.nexus.core.extension.declaration.ExtensionDescriptor;
-import com.innospots.nexus.core.extension.declaration.ExtensionModuleDeclaration;
-import com.innospots.nexus.core.extension.declaration.MenuDeclaration;
-import com.innospots.nexus.core.extension.declaration.UiSpecPageDeclaration;
-import com.innospots.nexus.console.extension.service.ExtensionRegistry;
+import com.innospots.nexus.core.plugin.capability.ProviderRef;
+import com.innospots.nexus.core.plugin.config.PluginConfig;
+import com.innospots.nexus.core.plugin.contribution.PluginContributionContext;
+import com.innospots.nexus.core.plugin.lifecycle.PluginAvailability;
+import com.innospots.nexus.console.plugin.contribution.ConsoleContributionCatalog;
+import com.innospots.nexus.console.plugin.contribution.ConsolePluginContribution;
+import com.innospots.nexus.console.plugin.contribution.ConsolePluginContributionHandler;
+import com.innospots.nexus.console.plugin.contribution.ConsoleModuleDeclaration;
+import com.innospots.nexus.console.plugin.contribution.MenuDeclaration;
+import com.innospots.nexus.console.plugin.contribution.UiSpecPageDeclaration;
+import com.innospots.nexus.console.plugin.contribution.ReservedPluginResourceCatalog;
 import com.innospots.nexus.console.permission.dao.PermissionResourceDao;
 import com.innospots.nexus.console.permission.domain.entity.PermissionResourceEntity;
 import com.innospots.nexus.console.permission.domain.enums.PermissionResourceType;
@@ -42,9 +46,7 @@ class PermissionResourceSyncServiceTest {
     @Test
     void buildsCatalogueFromActiveExtensionAndUiSpecAndIsIdempotent() {
         TLC.workspaceId("100");
-        ExtensionRegistry registry = new ExtensionRegistry();
-        registry.register(new SalesExtension());
-        registry.activate("com.example.sales");
+        ConsoleContributionCatalog registry = activeCatalog();
 
         UiSpec spec = UiSpec.page(PageInfo.of("orders", I18nObject.of("en", "Orders")))
                 .datasource("list", UiDatasource.get("/api/orders"))
@@ -90,9 +92,7 @@ class PermissionResourceSyncServiceTest {
     @Test
     void updatesChangedResourceMetadata() {
         TLC.workspaceId("100");
-        ExtensionRegistry registry = new ExtensionRegistry();
-        registry.register(new SalesExtension());
-        registry.activate("com.example.sales");
+        ConsoleContributionCatalog registry = activeCatalog();
 
         UiSpec firstSpec = UiSpec.page(PageInfo.of("orders", I18nObject.of("en", "Orders")))
                 .datasource("list", UiDatasource.get("/api/orders"));
@@ -128,13 +128,24 @@ class PermissionResourceSyncServiceTest {
         verify(resourceDao).updateById(any(PermissionResourceEntity.class));
     }
 
-    private static ExtensionDescriptor descriptor() {
-        return new ExtensionDescriptor(
-                "com.example.sales",
-                "1.0.0",
-                I18nObject.of("en", "Sales"),
-                I18nObject.of("en", "Sales extension"),
-                List.of(new ExtensionModuleDeclaration(
+    private static ConsoleContributionCatalog activeCatalog() {
+        ConsoleContributionCatalog catalog = new ConsoleContributionCatalog();
+        ConsolePluginContributionHandler handler = new ConsolePluginContributionHandler(
+                catalog, new ReservedPluginResourceCatalog(List.of()));
+        PluginAvailability availability = new PluginAvailability();
+        var prepared = handler.prepare(
+                new PluginContributionContext(
+                        new ProviderRef("com.example.sales", "contribution-console-1"),
+                        emptyConfig(), availability),
+                contribution());
+        prepared.stage();
+        prepared.commit();
+        availability.activate();
+        return catalog;
+    }
+
+    private static ConsolePluginContribution contribution() {
+        return new ConsolePluginContribution(List.of(new ConsoleModuleDeclaration(
                         "sales",
                         I18nObject.of("en", "Sales"),
                         I18nObject.of("en", "Sales module"),
@@ -147,16 +158,15 @@ class PermissionResourceSyncServiceTest {
                                 "orders")))));
     }
 
-    private static final class SalesExtension implements ConsoleExtensionProvider {
-
-        @Override
-        public ExtensionDescriptor descriptor() {
-            return PermissionResourceSyncServiceTest.descriptor();
-        }
-
-        @Override
-        public Collection<Class<?>> endpointTypes() {
-            return List.of();
-        }
+    private static PluginConfig emptyConfig() {
+        return new PluginConfig() {
+            @Override public java.util.Optional<String> get(String key) { return java.util.Optional.empty(); }
+            @Override public String require(String key) { throw new IllegalArgumentException(key); }
+            @Override public int getInt(String key, int defaultValue) { return defaultValue; }
+            @Override public long getLong(String key, long defaultValue) { return defaultValue; }
+            @Override public boolean getBoolean(String key, boolean defaultValue) { return defaultValue; }
+            @Override public java.time.Duration getDuration(String key, java.time.Duration defaultValue) { return defaultValue; }
+            @Override public com.innospots.nexus.core.plugin.config.SecretValue requireSecret(String key) { throw new IllegalArgumentException(key); }
+        };
     }
 }

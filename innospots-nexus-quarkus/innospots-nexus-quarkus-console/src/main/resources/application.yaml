@@ -1,0 +1,20 @@
+quarkus:
+  application:
+    name: nexus-console
+  http:
+    port: 8081
+  datasource:
+    db-kind: h2
+    username: sa
+    password: ""
+    jdbc:
+      url: jdbc:h2:mem:nexus-console;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
+
+mybatis:
+  mapper-packages: com.innospots.nexus.core
+  initial-sql: classpath:nexus/schema/plugin-installation-h2.sql
+
+mybatis-plus:
+  meta-object-handler: com.innospots.nexus.core.persistence.handler.AuditMetaObjectHandler
+
+# nexus.plugin.* / plugins.* 配置方式同 innospots-nexus-quarkus-app

@@ -9,7 +9,7 @@
 权限资源的事实源统一调整为：
 
 ```text
-扩展模块声明
+插件的 Console Contribution 声明
   -> 模块菜单树
   -> 页面声明
   -> 页面 UiSpec
@@ -18,11 +18,11 @@
 ```
 
 Endpoint 只负责提供标准 REST 能力。页面归属、按钮可见性、数据源 URL 和数据权限边界均由
-扩展声明及页面 UiSpec 描述，与 Java Endpoint 实现解耦。
+插件 Contribution 及页面 UiSpec 描述，与 Java Endpoint 实现解耦。
 
 ## 2. 设计目标
 
-1. 扩展模块是管理平台功能的装配边界，每个模块贡献自己的菜单和页面。
+1. 插件是管理平台功能的装配边界，每个插件通过 Console Contribution 贡献自己的菜单和页面。
 2. 页面由 UiSpec 配置文件加载和渲染，不在 Endpoint 上重复声明页面信息。
 3. 页面 UiSpec 中的 action 和 datasource 自动成为可发现、可授权的资源。
 4. 管理平台按模块展示菜单、页面和按钮，支持给角色和用户组分配权限。
@@ -46,27 +46,29 @@ Endpoint 只负责提供标准 REST 能力。页面归属、按钮可见性、�
 
 ## 4. 模块职责
 
-### 4.1 Core 扩展契约
+### 4.1 Core Plugin V1 契约
 
-`innospots-nexus-core` 提供供外部工程实现和引用的稳定扩展结构：
+`innospots-nexus-core` 提供供外部工程实现和引用的稳定插件结构：
 
-- `ExtensionDescriptor`：扩展身份、版本和模块集合；
-- `ExtensionModuleDeclaration`：模块身份、页面树和菜单树；
-- `MenuDeclaration`：模块菜单树；
-- `UiSpecPageDeclaration`：页面稳定标识和页面路径；
-- `ConsoleExtensionProvider`：扩展贡献入口；
+- `PluginDefinition`：插件身份、版本、能力和 Contribution 集合；
+- `PluginManifest`：`plugin.yaml` 的严格解析结果；
+- `PluginInstallationManager`：安装意图、缺失对账和运行时启停管理；
+- `PluginRuntimeFactory`：按已安装插件装配隔离的运行时；
+- `PluginContribution`：插件向宿主贡献管理平台资源的通用契约；
 
-Core 不执行扩展发现、加载、存储、启停或激活，也不保存角色、用户组和权限分配。
+Core 负责插件发现、编译、安装状态持久化、运行时启停和通用 Contribution 生命周期，
+不保存角色、用户组和权限分配。
 
-### 4.2 Kernel 扩展运行时
+### 4.2 Console Contribution
 
-`innospots-nexus-kernel` 的 `extension` 业务域负责：
+`innospots-nexus-console` 提供管理平台资源的 Contribution 契约和运行时处理器：
 
-- 发现并加载 Core `ConsoleExtensionProvider`；
-- 保存扩展安装记录和描述快照；
-- 注册、启用、停用、激活和缺失扩展对账；
-- 校验模块、菜单、页面树和资源 key；
-- 向权限目录提供已激活扩展声明。
+- `ConsolePluginContribution`：Contribution 类型 `console@1`；
+- `ConsoleModuleDeclaration`：模块、菜单和页面的声明模型；
+- `ConsolePluginContributionHandler`：校验、阶段提交、回滚和资源冲突；
+- `ConsoleContributionCatalog`：只暴露已激活插件的 Console 资源。
+
+Console 不负责插件安装记录，也不实现角色或用户组授权。
 
 ### 4.3 Base 页面 UiSpec 能力
 
@@ -82,26 +84,18 @@ Core 不执行扩展发现、加载、存储、启停或激活，也不保存角
 
 Base 不依赖 Console、Kernel、Servlet、Spring 或数据库，也不包含角色和用户组授权。
 
-### 4.4 Console 边界
+### 4.4 Kernel 权限业务
 
-`innospots-nexus-console` 本阶段只保留通用管理平台契约，不承载 UiSpec、权限目录或授权实现。
-页面渲染、资源清单输出以及 Servlet/Jakarta REST 请求适配由具体应用负责，应用通过 Kernel 提供
-的同步服务、可见性服务和框架无关鉴权器接入。
+`innospots-nexus-kernel` 从 `ConsoleContributionCatalog` 读取已激活的管理平台资源，负责：
 
-Console 不实现角色或用户组管理，也不持久化具体授权关系。
-
-### 4.5 Kernel 权限业务
-
-`innospots-nexus-kernel` 负责：
-
-- 从已激活扩展和已验证 UiSpec 构建权限资源目录；
+- 从已激活插件和已验证 UiSpec 构建权限资源目录；
 - 角色和用户组的菜单、页面、action 授权；
 - datasource 附加查询条件的管理端保存；
-- 当前用户有效授权快照；
-- UiSpec 裁剪和 datasource 请求授权；
-- 权限目录同步、授权替换、解释和审计。
+- 当前用户有效授权快照、UiSpec 裁剪和请求授权。
 
-### 4.6 应用适配层
+Kernel 不依赖插件实现类、插件 DAO 或插件安装表；插件运行时和安装记录由 Core 提供。
+
+### 4.5 应用适配层
 
 具体运行时负责一次性装配：
 
@@ -118,10 +112,10 @@ Kernel 和 Console 不绑定 Spring Boot 自动配置。
 
 ### 5.1 模块、菜单和页面
 
-模块通过扩展声明菜单树和页面树：
+插件通过 `ConsolePluginContribution` 声明模块、菜单树和页面树：
 
 ```java
-new ExtensionModuleDeclaration(
+new ConsoleModuleDeclaration(
         "sales",
         displayName,
         description,
@@ -157,9 +151,9 @@ menu:sales.order-management
 
 ### 5.2 页面 UiSpec
 
-扩展声明不保存 UiSpec 内容和物理路径。默认使用
+Console Contribution 不保存 UiSpec 内容和物理路径。默认使用
 `ui-spec/{moduleKey}/{pageKey}.yaml` 定位 classpath 规约；应用也可以通过替换 `UiSpecLoader`
-从对象存储、数据库或独立页面服务加载。加载后校验 `UiSpec.pageInfo.pageId` 与扩展声明的
+从对象存储、数据库或独立页面服务加载。加载后校验 `UiSpec.pageInfo.pageId` 与插件 Contribution 的
 `pageKey` 一致。
 
 权限发现所需的最小 UiSpec 结构如下：
@@ -223,7 +217,7 @@ actionDefinitions:
 
 | 类型 | 稳定资源 key | 来源 | 是否直接授权 |
 |------|--------------|------|--------------|
-| MODULE | `module:sales` | 扩展模块 | 否，作为管理树根节点 |
+| MODULE | `module:sales` | 插件模块 | 否，作为管理树根节点 |
 | MENU | `menu:sales.order-management` | 菜单声明 | 是 |
 | PAGE | `page:sales.order-list` | 页面声明 | 是 |
 | ACTION | `action:sales.order-list.export` | UiSpec action | 是 |
@@ -252,11 +246,11 @@ DATASOURCE 权限判断。
 
 ### 6.1 发现流程
 
-资源发现只读取已激活扩展：
+资源发现只读取已激活插件的 Console Contribution：
 
 ```text
-ExtensionRegistry.activeDescriptors()
-  -> ExtensionModuleDeclaration
+ConsoleContributionCatalog.activeContributions()
+  -> ConsoleModuleDeclaration
   -> MenuDeclaration / UiSpecPageDeclaration
   -> UiSpecLoader.load(moduleKey, pageKey)
   -> UiSpecParser / UiSpecValidator
@@ -268,9 +262,9 @@ ExtensionRegistry.activeDescriptors()
 
 ### 6.2 初始化校验
 
-扩展激活或资源同步前必须校验：
+插件激活或资源同步前必须校验：
 
-- extension、module、menu、page key 的唯一性；
+- plugin、module、menu、page key 的唯一性；
 - 菜单引用的页面存在于同一模块；
 - `moduleKey + pageKey` 能定位唯一 UiSpec；
 - UiSpec 的 `pageInfo.pageId` 与页面声明一致；
@@ -280,32 +274,32 @@ ExtensionRegistry.activeDescriptors()
 - 资源同步不处理角色或用户组的附加查询条件，相关配置在管理端保存时单独校验；
 - 同一稳定资源 key 不存在冲突定义。
 
-任何校验失败都阻止扩展激活或本次同步，不产生半有效目录。
+任何校验失败都阻止插件激活或本次同步，不产生半有效目录。
 
 ### 6.3 显式同步
 
 资源目录只在管理操作显式触发时同步，不在模块加载时隐式写数据库。同步规则为：
 
-1. 扩展 Provider 通过 SPI 被发现并完成注册；
-2. 扩展、模块和页面声明被激活，`UiSpecLoader` 成功加载对应页面 UiSpec；
+1. 插件通过 Java SPI 或 `plugin.yaml` 被发现、编译并完成注册；
+2. 插件的 Console Contribution 被激活，`UiSpecLoader` 成功加载对应页面 UiSpec；
 3. `UiSpecValidator` 校验页面标识、action、datasource、method、URL 和请求模板；
 4. 管理员显式调用权限目录同步接口；
-5. 同步服务根据扩展声明和 UiSpec 生成 MODULE、MENU、PAGE、ACTION、DATASOURCE 资源；
+5. 同步服务根据插件 Contribution 和 UiSpec 生成 MODULE、MENU、PAGE、ACTION、DATASOURCE 资源；
 6. 新资源插入，元数据变化则更新；
-7. 已从当前扩展版本移除的资源标记为失效，不立即物理删除；
+7. 已从当前插件版本移除的资源标记为失效，不立即物理删除；
 8. 自定义授权和历史审计记录保留；
-9. 同一扩展版本重复同步保持幂等。
+9. 同一插件版本重复同步保持幂等。
 
 `PermissionResourceEntity` 的创建时点是第 5 步生成资源定义并进入同步事务之后：同步服务按当前
 项目上下文、资源类型和稳定 `resourceKey` 查找目录记录，记录不存在时创建实体并 `insert`，记录存在且
-元数据发生变化时 `update`。扩展发现、模块激活和 UiSpec 加载阶段只维护内存中的声明和 manifest，
+元数据发生变化时 `update`。插件发现、模块激活和 UiSpec 加载阶段只维护内存中的声明和 manifest，
 不会直接创建 `PermissionResourceEntity`；用户访问页面、调用 datasource 或保存角色/用户组权限时
 也不会临时创建资源目录记录。
 
 资源目录和授权关系的生命周期必须分开：
 
 ```text
-扩展 + UiSpec
+插件 Console Contribution + UiSpec
   -> 生成并同步 PermissionResourceEntity
 
 管理端角色/用户组设置
@@ -317,26 +311,26 @@ ExtensionRegistry.activeDescriptors()
 
 #### 资源来源
 
-页面权限模型中的资源可以全部由“扩展声明 + UiSpec”生成，不需要扫描 Endpoint，也不需要在
+页面权限模型中的资源可以全部由“插件 Console Contribution + UiSpec”生成，不需要扫描 Endpoint，也不需要在
 Endpoint 上添加权限注解：
 
 | 资源类型 | 来源 | 生成内容 |
 |----------|------|----------|
-| MODULE | `ExtensionModuleDeclaration` | 模块身份和模块根节点 |
+| MODULE | `ConsoleModuleDeclaration` | 模块身份和模块根节点 |
 | MENU | `MenuDeclaration` | 菜单树、标题、图标、顺序和页面引用 |
 | PAGE | `UiSpecPageDeclaration` + `UiSpec.pageInfo` | 页面稳定 key、路由和页面元数据 |
 | ACTION | `UiSpec.actionDefinitions` | 页面按钮和操作 key、显示信息及 datasource 引用 |
 | DATASOURCE | `UiSpec.datasources` | datasource key、HTTP method、URL 和请求模板 |
 
-扩展声明负责模块、菜单和页面的结构身份，UiSpec 负责页面内部的 action 和 datasource。UiSpec 的
-`pageInfo.pageId` 必须与扩展声明的 `pageKey` 一致，否则不能生成 PAGE、ACTION 或 DATASOURCE
+Console Contribution 负责模块、菜单和页面的结构身份，UiSpec 负责页面内部的 action 和 datasource。UiSpec 的
+`pageInfo.pageId` 必须与插件 Contribution 的 `pageKey` 一致，否则不能生成 PAGE、ACTION 或 DATASOURCE
 资源。
 
-角色、用户组、权限授权和 datasource 附加查询条件不属于扩展或 UiSpec 的资源事实源，它们由管理端
-保存到权限存储。未被扩展或 UiSpec 声明的开放 API、回调接口和内部接口，也不自动进入本页面权限
+角色、用户组、权限授权和 datasource 附加查询条件不属于插件或 UiSpec 的资源事实源，它们由管理端
+保存到权限存储。未被插件或 UiSpec 声明的开放 API、回调接口和内部接口，也不自动进入本页面权限
 目录，应由对应应用边界单独保护。
 
-当前同步入口使用已激活的 `ExtensionRegistry`、`UiSpecLoader` 和验证后的页面 manifest，不依赖
+当前同步入口使用已激活的 `ConsoleContributionCatalog`、`UiSpecLoader` 和验证后的页面 manifest，不依赖
 Endpoint 注解或方法扫描。
 
 URL、标题和展示顺序属于可更新元数据。稳定 key 变化视为删除旧资源并创建新资源，不能自动迁移
@@ -364,7 +358,7 @@ URL、标题和展示顺序属于可更新元数据。稳定 key 变化视为删
 管理端按以下结构加载资源：
 
 ```text
-扩展
+插件
   -> 模块
       -> 菜单目录
           -> 页面
@@ -417,7 +411,7 @@ HTTP Request
    `<moduleKey>.<pageKey>`，缺失或格式错误直接拒绝。
 2. 规范化 method 和 URL。URL 使用路径模板匹配，例如实际路径
    `/sales/orders/ORD-1001` 匹配 `/sales/orders/{orderId}`；查询字符串不参与 datasource 身份。
-3. 按 `pageKey` 查找已激活页面，确认页面属于当前项目和当前启用扩展。
+3. 按 `pageKey` 查找已激活页面，确认页面属于当前项目和当前启用插件。
 4. 从当前用户启用角色和所属用户组的授权集合中检查 PAGE 资源。没有 PAGE 权限立即拒绝，
    不继续匹配 datasource。
 5. 在该页面已校验的 UiSpec manifest 中，用 `(method, URL)` 查找唯一 datasource。找不到或
@@ -481,7 +475,7 @@ PAGE grant 只表示可以访问页面，DATASOURCE grant 只表示可以调用�
 ### 8.2 管理端数据范围约束配置
 
 管理端在“角色/用户组 -> datasource -> 数据范围约束”页面维护约束。该配置属于角色或用户组对
-datasource 授权关系的附加数据，保存到权限存储中，不写入 UiSpec 文件，也不由扩展 Provider 预设
+datasource 授权关系的附加数据，保存到权限存储中，不写入 UiSpec 文件，也不由插件 Provider 预设
 或写死在后端代码中。
 
 页面配置的对象是“该角色或用户组访问该 datasource 时，后端需要附加的查询条件”，例如：
@@ -656,7 +650,7 @@ AuthorizationDecision
 
 | 实体 | 表名 | 作用 |
 |------|------|------|
-| `PermissionResourceEntity` | `nx_permission_resource` | 保存扩展发现的 MODULE、MENU、PAGE、ACTION、DATASOURCE 资源 |
+| `PermissionResourceEntity` | `nx_permission_resource` | 保存插件 Contribution 发现的 MODULE、MENU、PAGE、ACTION、DATASOURCE 资源 |
 | `PermissionGrantEntity` | `nx_permission_grant` | 统一保存角色和用户组的功能授权，以及 datasource 附加查询条件 |
 
 不再单独保留 `PermissionEntity`。在新模型中，每个稳定资源本身就是可授权能力，不需要先创建
@@ -670,9 +664,9 @@ AuthorizationDecision
 - MODULE 不直接产生授权记录，只作为资源树根节点；
 - DATASOURCE 都需要独立授权记录；调用时还必须通过 PAGE 权限，与是否存在后续查询适配器无关。
 
-这两张表不能继续合并为一张表。资源目录由扩展和 UiSpec 版本驱动，授权记录由管理员频繁修改，
+这两张表不能继续合并为一张表。资源目录由插件和 UiSpec 版本驱动，授权记录由管理员频繁修改，
 并且一个资源会对应多个角色和用户组。把授权集合保存到资源目录定义中会导致大字段并发覆盖、无法
-按主体查询、无法建立唯一约束，也会把扩展资源同步与管理授权耦合。
+按主体查询、无法建立唯一约束，也会把插件资源同步与管理授权耦合。
 
 ### 10.2 公共字段
 
@@ -699,15 +693,15 @@ UiSpec 执行信息都属于该资源的元数据。
 | 字段 | Java 类型 | 数据库建议 | 必填 | 说明 |
 |------|-----------|------------|------|------|
 | `resourceId` | `String` | `varchar(32)` | 是 | 资源主键，建议前缀 `prs` |
-| `extensionKey` | `String` | `varchar(128)` | 是 | 来源扩展 key |
+| `ownerPluginId` | `String` | `varchar(128)` | 是 | 来源插件 ID |
 | `moduleKey` | `String` | `varchar(128)` | 是 | 所属模块 key |
 | `resourceType` | `String` | `varchar(32)` | 是 | `PermissionResourceType` 的持久化值 |
 | `resourceKey` | `String` | `varchar(256)` | 是 | 项目内稳定资源 key |
 | `parentResourceId` | `String` | `varchar(32)` | 否 | 资源所有权父节点，不表示菜单到页面的引用关系 |
 | `pageKey` | `String` | `varchar(256)` | 否 | 资源所属或引用的页面 key，用于页面资源关联查询 |
-| `displayName` | `String` | `varchar(256)` | 否 | 目录展示名称；完整多语言内容仍由扩展或 UiSpec 提供 |
+| `displayName` | `String` | `varchar(256)` | 否 | 目录展示名称；完整多语言内容仍由插件或 UiSpec 提供 |
 | `sortOrder` | `Integer` | `int` | 是 | 同级资源排序，默认 0 |
-| `status` | `String` | `varchar(32)` | 是 | `BasicStatus` 的持久化值；移除的扩展或 UiSpec 资源改为 DISABLED |
+| `status` | `String` | `varchar(32)` | 是 | `BasicStatus` 的持久化值；移除的插件或 UiSpec 资源改为 DISABLED |
 | `datasourceKey` | `String` | `varchar(128)` | 否 | DATASOURCE 所属页面内的 datasource key |
 | `routePath` | `String` | `varchar(512)` | 否 | PAGE 的页面路由模板 |
 | `requestMethod` | `String` | `varchar(16)` | 否 | DATASOURCE 的 HTTP method |
@@ -718,7 +712,7 @@ UiSpec 执行信息都属于该资源的元数据。
 ```text
 PRIMARY KEY (resource_id)
 UNIQUE (workspace_id, resource_key)
-INDEX (workspace_id, extension_key, module_key, resource_type, status)
+INDEX (workspace_id, owner_plugin_id, module_key, resource_type, status)
 INDEX (workspace_id, parent_resource_id, sort_order)
 ```
 
@@ -739,22 +733,22 @@ MODULE
       -> DATASOURCE
 ```
 
-MENU 到 PAGE 的导航引用由扩展菜单声明和资源实体的 `pageKey` 维护；一个 PAGE 可以被多个菜单引用，
+MENU 到 PAGE 的导航引用由插件菜单声明和资源实体的 `pageKey` 维护；一个 PAGE 可以被多个菜单引用，
 也可以不进入菜单，不把菜单引用塞入通用定义文本中。ACTION 和 DATASOURCE 的所属页面同样使用
 `pageKey` 关联。
 
 #### 来源元数据
 
-`PermissionResourceEntity` 是权限目录索引，不是扩展或 UiSpec 的替代事实源。它只保存管理端展示、
-授权关联和同步所需的规范化字段。完整的页面内容、action 定义和请求模板仍由扩展声明与 UiSpec
+`PermissionResourceEntity` 是权限目录索引，不是插件或 UiSpec 的替代事实源。它只保存管理端展示、
+授权关联和同步所需的规范化字段。完整的页面内容、action 定义和请求模板仍由插件 Contribution 与 UiSpec
 提供。为支持请求拦截，datasource 的 method、URL 路径和页面内 key 会同步到独立字段；这些字段是
 运行索引，不是 UiSpec 快照。
 
 因此当前不需要 `resourceDefinition` 字段，也不需要把每种资源的完整定义再次保存为 YAML。同步时
-直接比较当前扩展与 UiSpec 生成的规范化字段；请求运行时从已加载并校验的 UiSpec manifest 按
+直接比较当前插件与 UiSpec 生成的规范化字段；请求运行时从已加载并校验的 UiSpec manifest 按
 `pageKey + method + URL` 找到 `datasourceKey`，再通过资源 key 查询授权。
 
-如果未来需要在扩展不可用时保留完整页面快照，应另行设计版本化的页面快照存储，不把快照混入当前
+如果未来需要在插件不可用时保留完整页面快照，应另行设计版本化的页面快照存储，不把快照混入当前
 权限资源实体，也不把它作为权限判断的必要输入。
 
 #### Java 实体结构
@@ -769,7 +763,7 @@ public class PermissionResourceEntity extends WorkspaceBaseEntity {
     @TableId(type = IdType.ASSIGN_UUID)
     private String resourceId;
 
-    private String extensionKey;
+    private String ownerPluginId;
     private String moduleKey;
     private String resourceType;
     private String resourceKey;
@@ -1006,10 +1000,10 @@ Entity 按仓库现有约定使用 `String` 持久化枚举值，领域 request�
 
 资源同步事务：
 
-1. 加载并完整校验扩展、菜单、页面和 UiSpec manifest；
+1. 加载并完整校验插件、菜单、页面和 UiSpec manifest；
 2. 在一个事务中按 `resourceKey` 插入或更新资源；
-3. 当前版本已移除的扩展或 UiSpec 资源改为 DISABLED；
-4. 禁止级联删除其授权记录，保留关系用于审计和扩展重新启用；
+3. 当前版本已移除的插件或 UiSpec 资源改为 DISABLED；
+4. 禁止级联删除其授权记录，保留关系用于审计和插件重新启用；
 5. 授权快照只加载 ENABLED 资源，失效资源的历史 grant 不产生权限。
 
 角色或用户组授权全量替换事务：
@@ -1046,8 +1040,8 @@ Kernel 提供 Jakarta REST 管理契约：
 ### 12.1 模块安装和同步
 
 ```text
-发现扩展 Provider
-  -> 注册并激活扩展
+发现插件 Provider
+  -> 注册并激活插件
   -> 校验模块菜单和页面树
   -> 按 moduleKey + pageKey 加载 UiSpec
   -> 校验 action / datasource / URL / 请求模板
@@ -1057,7 +1051,7 @@ Kernel 提供 Jakarta REST 管理契约：
 ### 12.2 管理员授权
 
 ```text
-加载扩展资源树
+加载插件资源树
   -> 选择角色或用户组
   -> 勾选 MENU / PAGE / ACTION / DATASOURCE
   -> 为已授权 datasource 单独配置附加查询条件，或明确保持无额外限制
@@ -1091,8 +1085,8 @@ Kernel 提供 Jakarta REST 管理契约：
 
 以下情况默认拒绝加载或执行：
 
-- 扩展、模块、页面、action 或 datasource 未注册或未激活；
-- UiSpec 的 `pageInfo.pageId` 与扩展声明的 `pageKey` 不一致；
+- 插件、模块、页面、action 或 datasource 未注册或未激活；
+- UiSpec 的 `pageInfo.pageId` 与插件 Contribution 的 `pageKey` 不一致；
 - action 引用未知 datasource；
 - 用户加载页面时缺少 PAGE 权限；
 - 用户调用 datasource 时缺少 PAGE 或 DATASOURCE 权限；
@@ -1162,10 +1156,11 @@ com.innospots.nexus.kernel.permission
 
 迁移后的主要入口应是：
 
-- Kernel `ExtensionRegistry`：已激活模块、菜单和页面声明来源；
+- Core `PluginInstallationManager`：插件安装意图、缺失对账和运行时状态来源；
+- Console `ConsoleContributionCatalog`：已激活模块、菜单和页面声明来源；
 - `UiSpecLoader`：按模块和页面加载 UiSpec；
 - `UiSpecParser` / `UiSpecValidator`：解析、校验 action 和 datasource 引用；
-- `PermissionResourceSyncService`：从已激活扩展和 UiSpec 同步规范化资源目录；
+- `PermissionResourceSyncService`：从已激活插件 Contribution 和 UiSpec 同步规范化资源目录；
 - `PermissionGrantService`：角色/用户组授权全量替换及 datasource 约束保存；
 - `PermissionVisibilityService`：按角色/用户组并集裁剪菜单、页面、action 和 datasource；
 - `RequestAuthorizer`：基于实际请求的页面、datasource 和数据约束判定；
@@ -1176,11 +1171,11 @@ com.innospots.nexus.kernel.permission
 
 ### 15.1 资源发现
 
-- 模块菜单、页面、action 和 datasource 能从扩展与 UiSpec 唯一生成；
+- 模块菜单、页面、action 和 datasource 能从插件 Contribution 与 UiSpec 唯一生成；
 - Endpoint 注解不参与资源发现；
 - URL 变化但 datasource key 不变时授权关系保持；
 - 重复 key、未知引用和 UiSpec `pageInfo.pageId` 不一致时激活失败；
-- 目录同步幂等，移除的扩展资源只失效不物理删除。
+- 目录同步幂等，移除的插件资源只失效不物理删除。
 
 ### 15.2 功能授权
 
@@ -1212,10 +1207,10 @@ com.innospots.nexus.kernel.permission
 
 ## 16. 设计结论
 
-调整后的权限体系以“扩展模块和页面 UiSpec”为唯一页面资源事实源：
+调整后的权限体系以“插件 Console Contribution 和页面 UiSpec”为唯一页面资源事实源：
 
 ```text
-扩展定义模块菜单和页面
+插件 Console Contribution 定义模块菜单和页面
   + UiSpec 定义 action、datasource 和 URL
   + 角色/用户组授予 MENU、PAGE、ACTION、DATASOURCE
   + 管理端页面保存角色/用户组针对 datasource 的附加查询条件
@@ -1224,5 +1219,5 @@ com.innospots.nexus.kernel.permission
 
 这种方式消除了 Endpoint 与页面之间的注解耦合。页面权限随 UiSpec 自动发现，业务接口保持普通
 REST 契约；角色和用户组负责功能及 datasource 授权，数据边界通过管理端页面保存的附加查询条件
-表达，具体查询拼接机制由后续数据访问适配器实现。业务授权仍通过独立的稳定 Handler 扩展，前端
+表达，具体查询拼接机制由后续数据访问适配器实现。业务授权仍通过独立的稳定 Handler 契约，前端
 获得裁剪后的页面体验，服务端仍保留不可绕过的最终控制。

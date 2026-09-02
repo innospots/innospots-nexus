@@ -35,8 +35,8 @@ class CapabilityRouterTest {
         log.info("explicit selection pluginId=%s", explicit.pluginId());
         log.info("default selection pluginId=%s", defaulted.pluginId());
 
-        assertThat(explicit.pluginId()).isEqualTo("app");
-        assertThat(defaulted.pluginId()).isEqualTo("robot");
+        assertThat(explicit.pluginId()).isEqualTo("com.example.app");
+        assertThat(defaulted.pluginId()).isEqualTo("com.example.robot");
     }
 
     @Test
@@ -44,7 +44,7 @@ class CapabilityRouterTest {
         CapabilityRouter router = new CapabilityRouter(Map.of());
         MessageProvider only = new NamedProvider("only");
         List<CapabilityRegistration<MessageProvider>> registrations = List.of(
-                new CapabilityRegistration<>(MESSAGE, only, "only", Tags.of("channel", "wecom")));
+                new CapabilityRegistration<>(MESSAGE, only, "com.example.only", Tags.of("channel", "wecom")));
 
         CapabilityRegistration<MessageProvider> selected = router.select(MESSAGE, Tags.empty(), registrations);
 
@@ -86,7 +86,7 @@ class CapabilityRouterTest {
     }
 
     private static CapabilityRegistration<MessageProvider> registration(String pluginId, Tags tags) {
-        return new CapabilityRegistration<>(MESSAGE, new NamedProvider(pluginId), pluginId, tags);
+        return new CapabilityRegistration<>(MESSAGE, new NamedProvider(pluginId), "com.example." + pluginId, tags);
     }
 
     private interface MessageProvider extends CapabilityProvider {

@@ -1,6 +1,9 @@
 package com.innospots.nexus.core.plugin.config;
 
+import java.math.BigDecimal;
+import java.net.URI;
 import java.time.Duration;
+import java.util.List;
 import java.util.List;
 import java.util.Map;
 
@@ -20,13 +23,13 @@ class ConfigurationManagerTest {
         PluginDefinition definition = definition();
         ConfigurationManager manager = new ConfigurationManager(
                 Map.of(
-                        "plugins.config-fixture.endpoint", "host-endpoint",
-                        "plugins.config-fixture.timeout", "20"),
+                        "plugins.com.example.config-fixture.endpoint", "host-endpoint",
+                        "plugins.com.example.config-fixture.timeout", "20"),
                 Map.of("NEXUS_PLUGIN_CONFIG_FIXTURE_TIMEOUT", "30"),
-                Map.of("plugins.config-fixture.timeout", "40"),
+                Map.of("plugins.com.example.config-fixture.timeout", "40"),
                 Map.of(
-                        "plugins.config-fixture.timeout", "50",
-                        "plugins.config-fixture.token", "runtime-secret"));
+                        "plugins.com.example.config-fixture.timeout", "50",
+                        "plugins.com.example.config-fixture.token", "runtime-secret"));
 
         PluginConfig config = manager.resolve(definition);
 
@@ -44,12 +47,47 @@ class ConfigurationManagerTest {
     }
 
     @Test
+    void resolvesValuesFromDynamicConfigSourcesAtResolveTime() {
+        PluginDefinition definition = definition();
+        ConfigSource database = new ConfigSource() {
+            private int calls;
+
+            @Override
+            public String name() {
+                return "database";
+            }
+
+            @Override
+            public Map<String, String> values() {
+                calls++;
+                return Map.of(
+                        "plugins.com.example.config-fixture.endpoint", "db-endpoint-" + calls,
+                        "plugins.com.example.config-fixture.token", "db-secret");
+            }
+        };
+        ConfigurationManager manager = new ConfigurationManager(
+                Map.of("plugins.com.example.config-fixture.endpoint", "host-endpoint"),
+                List.of(database),
+                Map.of(),
+                Map.of(),
+                Map.of());
+
+        PluginConfig first = manager.resolve(definition);
+        PluginConfig second = manager.resolve(definition);
+
+        assertThat(first.require("endpoint")).isEqualTo("db-endpoint-1");
+        assertThat(second.require("endpoint")).isEqualTo("db-endpoint-2");
+        first.requireSecret("token").close();
+        second.requireSecret("token").close();
+    }
+
+    @Test
     void rejectsUnknownAndMissingPluginConfiguration() {
         ConfigurationManager unknown = new ConfigurationManager(
-                Map.of("plugins.config-fixture.unknown", "value"),
+                Map.of("plugins.com.example.config-fixture.unknown", "value"),
                 Map.of(),
                 Map.of(),
-                Map.of("plugins.config-fixture.token", "secret"));
+                Map.of("plugins.com.example.config-fixture.token", "secret"));
 
         assertThatThrownBy(() -> unknown.resolve(definition()))
                 .isInstanceOf(NexusException.class)
@@ -63,18 +101,71 @@ class ConfigurationManagerTest {
     }
 
     @Test
+    void resolvesDecimalUriAndEnumConfigurationValues() {
+        PluginDefinition definition = PluginDefinition.builder("com.example.typed-config")
+                .name("Typed Config")
+                .version("1.0.0")
+                .tags(Tags.of("fixture", "config"))
+                .config(ConfigDefinition.builder()
+                        .decimal("threshold").defaultValue("0.5").end()
+                        .uri("endpoint").required().end()
+                        .enumeration("mode", "fast", "safe").defaultValue("safe").end()
+                        .build())
+                .build();
+
+        PluginConfig config = new ConfigurationManager(
+                Map.of(
+                        "plugins.com.example.typed-config.endpoint", "https://example.com/a/../b",
+                        "plugins.com.example.typed-config.threshold", "1.25"),
+                Map.of(), Map.of(), Map.of()).resolve(definition);
+
+        assertThat(config.getDecimal("threshold", BigDecimal.ZERO)).isEqualByComparingTo("1.25");
+        assertThat(config.getUri("endpoint", URI.create("https://fallback.example")))
+                .isEqualTo(URI.create("https://example.com/b"));
+        assertThat(config.getEnum("mode", "fast")).isEqualTo("safe");
+    }
+
+    @Test
+    void rejectsInvalidEnumAndRelativeUriValues() {
+        PluginDefinition definition = PluginDefinition.builder("com.example.invalid-typed-config")
+                .name("Invalid Typed Config")
+                .version("1.0.0")
+                .tags(Tags.of("fixture", "config"))
+                .config(ConfigDefinition.builder()
+                        .uri("endpoint").required().end()
+                        .enumeration("mode", "fast", "safe").end()
+                        .build())
+                .build();
+
+        ConfigurationManager invalidUri = new ConfigurationManager(
+                Map.of("plugins.com.example.invalid-typed-config.endpoint", "/relative"),
+                Map.of(), Map.of(), Map.of());
+        assertThatThrownBy(() -> invalidUri.resolve(definition))
+                .isInstanceOf(NexusException.class)
+                .hasMessageContaining("absolute");
+
+        ConfigurationManager invalidEnum = new ConfigurationManager(
+                Map.of("plugins.com.example.invalid-typed-config.endpoint", "https://example.com"),
+                Map.of(), Map.of(),
+                Map.of("plugins.com.example.invalid-typed-config.mode", "turbo"));
+        assertThatThrownBy(() -> invalidEnum.resolve(definition))
+                .isInstanceOf(NexusException.class)
+                .hasMessageContaining("allowed");
+    }
+
+    @Test
     void rejectsEnvironmentNameCollisionsAcrossPluginDefinitions() {
-        PluginDefinition first = PluginDefinition.builder("foo-bar")
+        PluginDefinition first = PluginDefinition.builder("com.example.foo-bar")
                 .name("Foo Bar")
                 .version("1.0.0")
                 .tags(Tags.of("fixture", "config"))
                 .config(ConfigDefinition.builder().string("x").end().build())
                 .build();
-        PluginDefinition second = PluginDefinition.builder("foo")
+        PluginDefinition second = PluginDefinition.builder("com.example.foo.bar")
                 .name("Foo")
                 .version("1.0.0")
                 .tags(Tags.of("fixture", "config"))
-                .config(ConfigDefinition.builder().string("bar.x").end().build())
+                .config(ConfigDefinition.builder().string("x").end().build())
                 .build();
 
         assertThatThrownBy(() -> ConfigurationManager.validateEnvironmentNames(List.of(first, second)))
@@ -89,12 +180,12 @@ class ConfigurationManagerTest {
         assertThatThrownBy(() -> manager.resolve(null)).isInstanceOf(NexusException.class);
         assertThatThrownBy(() -> ConfigurationManager.environmentName(null, "endpoint"))
                 .isInstanceOf(NexusException.class);
-        assertThatThrownBy(() -> ConfigurationManager.environmentName("config-fixture", null))
+        assertThatThrownBy(() -> ConfigurationManager.environmentName("com.example.config-fixture", null))
                 .isInstanceOf(NexusException.class);
     }
 
     private static PluginDefinition definition() {
-        return PluginDefinition.builder("config-fixture")
+        return PluginDefinition.builder("com.example.config-fixture")
                 .name("Config Fixture")
                 .version("1.0.0")
                 .tags(Tags.of("fixture", "config"))

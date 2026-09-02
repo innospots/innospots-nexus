@@ -27,8 +27,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * End-to-end plugin scenarios with structured logging for definition, configuration, discovery,
- * capability routing, lifecycle transitions, and boundary behavior.
+ * 覆盖插件定义、配置、发现、Capability 路由、生命周期转换和边界行为的端到端场景测试，
+ * 同时输出结构化诊断日志。
  */
 class PluginRuntimeScenariosTest {
 
@@ -48,10 +48,10 @@ class PluginRuntimeScenariosTest {
         log.dumpDefinition(plugin.definition());
 
         PluginRuntimeConfig config = new PluginRuntimeConfig(
-                Set.of("scenario-configurable"),
+                Set.of("com.example.scenario-configurable"),
                 Set.of(),
-                Map.of("plugins.scenario-configurable.endpoint", "https://api.example.com"),
-                Map.of("plugins.scenario-configurable.token", "secret-token"),
+                Map.of("plugins.com.example.scenario-configurable.endpoint", "https://api.example.com"),
+                Map.of("plugins.com.example.scenario-configurable.token", "secret-token"),
                 Map.of(),
                 getClass().getClassLoader());
         log.dumpMap("host config", config.hostConfig());
@@ -59,7 +59,8 @@ class PluginRuntimeScenariosTest {
 
         try (DefaultPluginManager manager = DefaultPluginManager.create(
                 config,
-                PluginCatalog.of(List.of(discovered(plugin))))) {
+                PluginCatalog.of(List.of(discovered(plugin))),
+                List.of())) {
             manager.start();
             log.dumpRuntime(manager);
 
@@ -69,7 +70,7 @@ class PluginRuntimeScenariosTest {
             log.info("capability result=%s", message);
 
             assertThat(message).isEqualTo("hello nexus from https://api.example.com");
-            assertThat(manager.plugin("scenario-configurable")).get()
+            assertThat(manager.plugin("com.example.scenario-configurable")).get()
                     .extracting(info -> info.state())
                     .isEqualTo(PluginState.ACTIVE);
             assertThat(lifecycle).contains(
@@ -77,9 +78,9 @@ class PluginRuntimeScenariosTest {
                     "provider-initialize",
                     "plugin-start");
 
-            manager.stop("scenario-configurable");
+            manager.stop("com.example.scenario-configurable");
             log.dumpRuntime(manager);
-            assertThat(manager.plugin("scenario-configurable")).get()
+            assertThat(manager.plugin("com.example.scenario-configurable")).get()
                     .extracting(info -> info.state())
                     .isEqualTo(PluginState.STOPPED);
             assertThat(lifecycle).contains("provider-destroy", "plugin-stop", "resource-close");
@@ -103,7 +104,8 @@ class PluginRuntimeScenariosTest {
 
         try (DefaultPluginManager manager = DefaultPluginManager.create(
                 config,
-                PluginCatalog.of(List.of(discovered(appPlugin), discovered(robotPlugin))))) {
+                PluginCatalog.of(List.of(discovered(appPlugin), discovered(robotPlugin))),
+                List.of())) {
             manager.start();
             log.dumpRuntime(manager);
 
@@ -129,11 +131,12 @@ class PluginRuntimeScenariosTest {
 
         try (DefaultPluginManager manager = DefaultPluginManager.create(
                 runtimeConfig(Map.of()),
-                PluginCatalog.of(List.of(discovered(consumer))))) {
+                PluginCatalog.of(List.of(discovered(consumer))),
+                List.of())) {
             manager.start();
             log.dumpRuntime(manager);
 
-            assertThat(manager.plugin("scenario-audit-consumer")).get()
+            assertThat(manager.plugin("com.example.scenario-audit-consumer")).get()
                     .extracting(info -> info.state())
                     .isEqualTo(PluginState.ACTIVE);
             assertThat(manager.capabilities().findAll(AUDIT)).isEmpty();
@@ -149,7 +152,7 @@ class PluginRuntimeScenariosTest {
 
         PluginRuntimeConfig config = new PluginRuntimeConfig(
                 Set.of(),
-                Set.of("scenario-background"),
+                Set.of("com.example.scenario-background"),
                 Map.of(),
                 Map.of(),
                 Map.of(),
@@ -157,15 +160,16 @@ class PluginRuntimeScenariosTest {
 
         try (DefaultPluginManager manager = DefaultPluginManager.create(
                 config,
-                PluginCatalog.of(List.of(discovered(background), discovered(app))))) {
+                PluginCatalog.of(List.of(discovered(background), discovered(app))),
+                List.of())) {
             manager.start();
             log.dumpRuntime(manager);
 
-            assertThat(manager.plugin("scenario-background")).get()
+            assertThat(manager.plugin("com.example.scenario-background")).get()
                     .extracting(info -> info.state())
                     .isEqualTo(PluginState.DESCRIBED);
             assertThat(lifecycle).doesNotContain("background-start");
-            assertThat(manager.plugin("scenario-greeting-app")).get()
+            assertThat(manager.plugin("com.example.scenario-greeting-app")).get()
                     .extracting(info -> info.state())
                     .isEqualTo(PluginState.ACTIVE);
         }
@@ -179,13 +183,14 @@ class PluginRuntimeScenariosTest {
 
         try (DefaultPluginManager manager = DefaultPluginManager.create(
                 runtimeConfig(Map.of()),
-                PluginCatalog.of(List.of(discovered(plugin))))) {
+                PluginCatalog.of(List.of(discovered(plugin))),
+                List.of())) {
             manager.start();
             int firstInstance = providerInstances.getFirst();
             log.info("first provider instance=%s", firstInstance);
 
-            manager.stop("scenario-restartable");
-            manager.start("scenario-restartable");
+            manager.stop("com.example.scenario-restartable");
+            manager.start("com.example.scenario-restartable");
             int secondInstance = providerInstances.getLast();
             log.info("second provider instance=%s", secondInstance);
             log.dumpRuntime(manager);
@@ -204,16 +209,17 @@ class PluginRuntimeScenariosTest {
 
         try (DefaultPluginManager manager = DefaultPluginManager.create(
                 runtimeConfig(Map.of()),
-                PluginCatalog.of(List.of(discovered(plugin))))) {
+                PluginCatalog.of(List.of(discovered(plugin))),
+                List.of())) {
             manager.start();
 
             log.dumpRuntime(manager);
             log.dumpLifecycle("failure lifecycle", lifecycle);
 
-            assertThat(manager.plugin("scenario-failing")).get()
+            assertThat(manager.plugin("com.example.scenario-failing")).get()
                     .extracting(info -> info.state())
                     .isEqualTo(PluginState.FAILED);
-            assertThat(manager.plugin("scenario-failing")).get()
+            assertThat(manager.plugin("com.example.scenario-failing")).get()
                     .extracting(info -> info.lastError())
                     .isNotNull();
             assertThat(manager.capabilities().findAll(GREETING)).isEmpty();
@@ -233,7 +239,8 @@ class PluginRuntimeScenariosTest {
 
         try (DefaultPluginManager manager = DefaultPluginManager.create(
                 runtimeConfig(Map.of()),
-                PluginCatalog.of(List.of(discovered(app))))) {
+                PluginCatalog.of(List.of(discovered(app))),
+                List.of())) {
             manager.start();
 
             assertThatThrownBy(() -> manager.capabilities().require(
@@ -277,7 +284,7 @@ class PluginRuntimeScenariosTest {
 
         @Override
         public PluginDefinition definition() {
-            return PluginDefinition.builder("scenario-configurable")
+            return PluginDefinition.builder("com.example.scenario-configurable")
                     .name("Scenario Configurable Plugin")
                     .version("1.0.0")
                     .tags(Tags.of("scenario", "configurable"))
@@ -364,14 +371,14 @@ class PluginRuntimeScenariosTest {
     private static final class GreetingAppPlugin extends TaggedGreetingPlugin {
 
         private GreetingAppPlugin(List<String> lifecycle) {
-            super("scenario-greeting-app", "app", lifecycle);
+            super("com.example.scenario-greeting-app", "app", lifecycle);
         }
     }
 
     private static final class GreetingRobotPlugin extends TaggedGreetingPlugin {
 
         private GreetingRobotPlugin(List<String> lifecycle) {
-            super("scenario-greeting-robot", "robot", lifecycle);
+            super("com.example.scenario-greeting-robot", "robot", lifecycle);
         }
     }
 
@@ -393,7 +400,7 @@ class PluginRuntimeScenariosTest {
 
         @Override
         public PluginDefinition definition() {
-            return PluginDefinition.builder("scenario-audit-consumer")
+            return PluginDefinition.builder("com.example.scenario-audit-consumer")
                     .name("Scenario Audit Consumer")
                     .version("1.0.0")
                     .tags(Tags.of("scenario", "consumer"))
@@ -417,7 +424,7 @@ class PluginRuntimeScenariosTest {
 
         @Override
         public PluginDefinition definition() {
-            return PluginDefinition.builder("scenario-background")
+            return PluginDefinition.builder("com.example.scenario-background")
                     .name("Scenario Background Plugin")
                     .version("1.0.0")
                     .tags(Tags.of("scenario", "background"))
@@ -442,7 +449,7 @@ class PluginRuntimeScenariosTest {
 
         @Override
         public PluginDefinition definition() {
-            return PluginDefinition.builder("scenario-restartable")
+            return PluginDefinition.builder("com.example.scenario-restartable")
                     .name("Scenario Restartable Plugin")
                     .version("1.0.0")
                     .tags(Tags.of("scenario", "restartable"))
@@ -503,7 +510,7 @@ class PluginRuntimeScenariosTest {
 
         @Override
         public PluginDefinition definition() {
-            return PluginDefinition.builder("scenario-failing")
+            return PluginDefinition.builder("com.example.scenario-failing")
                     .name("Scenario Failing Plugin")
                     .version("1.0.0")
                     .tags(Tags.of("scenario", "failing"))
