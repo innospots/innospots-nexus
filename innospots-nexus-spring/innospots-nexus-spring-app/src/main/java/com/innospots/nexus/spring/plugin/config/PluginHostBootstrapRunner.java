@@ -3,6 +3,7 @@ package com.innospots.nexus.spring.plugin.config;
 import java.util.List;
 
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.Ordered;
@@ -27,7 +28,7 @@ import com.innospots.nexus.core.plugin.runtime.PluginRuntimeConfig;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class PluginHostBootstrapRunner implements ApplicationRunner {
 
-    private final PluginInstallationDao installationDao;
+    private final ObjectProvider<PluginInstallationDao> installationDao;
     private final PluginRuntimeConfig runtimeConfig;
     private final PluginHostProperties properties;
     private final ObjectProvider<PluginContributionDecoderRegistry> contributionDecoders;
@@ -36,7 +37,7 @@ public class PluginHostBootstrapRunner implements ApplicationRunner {
     private final PluginInstallationManagerHolder managerHolder;
 
     /**
-     * @param installationDao          安装表 DAO
+     * @param installationDao          安装表 DAO；在 {@link #run} 阶段再解析
      * @param runtimeConfig            插件运行时配置
      * @param properties               宿主安装/启停策略
      * @param contributionDecoders     可选 YAML Contribution 解码表
@@ -45,7 +46,7 @@ public class PluginHostBootstrapRunner implements ApplicationRunner {
      * @param managerHolder            安装管理器持有器
      */
     public PluginHostBootstrapRunner(
-            PluginInstallationDao installationDao,
+            ObjectProvider<PluginInstallationDao> installationDao,
             PluginRuntimeConfig runtimeConfig,
             PluginHostProperties properties,
             ObjectProvider<PluginContributionDecoderRegistry> contributionDecoders,
@@ -76,7 +77,7 @@ public class PluginHostBootstrapRunner implements ApplicationRunner {
         PluginInstallationConfig installationConfig =
                 new PluginInstallationConfig(properties.getPlugin().isAutoInstall());
         PluginInstallationManager manager = PluginHostBootstrap.enable(new PluginHostBootstrapRequest(
-                installationDao,
+                installationDao.getObject(),
                 runtimeConfig,
                 installationConfig,
                 decoderRegistry,

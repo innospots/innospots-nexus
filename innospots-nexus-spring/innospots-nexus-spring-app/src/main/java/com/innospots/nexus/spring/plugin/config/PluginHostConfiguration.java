@@ -80,7 +80,7 @@ public class PluginHostConfiguration {
      */
     @Bean
     PluginHostBootstrapRunner pluginHostBootstrapRunner(
-            PluginInstallationDao installationDao,
+            ObjectProvider<PluginInstallationDao> installationDao,
             PluginRuntimeConfig runtimeConfig,
             PluginHostProperties properties,
             ObjectProvider<PluginContributionDecoderRegistry> contributionDecoders,

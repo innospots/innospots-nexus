@@ -2,10 +2,13 @@ package com.innospots.nexus.spring.bootstrap;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.autoconfigure.MybatisPlusAutoConfiguration;
 import com.baomidou.mybatisplus.autoconfigure.MybatisPlusPropertiesCustomizer;
 import com.innospots.nexus.core.persistence.handler.AuditMetaObjectHandler;
 
@@ -16,9 +19,11 @@ import com.innospots.nexus.core.persistence.handler.AuditMetaObjectHandler;
  * {@code application.yaml} 提供。</p>
  */
 @Configuration
+@AutoConfigureAfter({DataSourceAutoConfiguration.class, MybatisPlusAutoConfiguration.class})
 @MapperScan(
-        basePackages = "com.innospots.nexus.core",
-        annotationClass = Mapper.class)
+        basePackages = "com.innospots.nexus.core.plugin.installation.dao",
+        annotationClass = Mapper.class,
+        lazyInitialization = "true")
 public class NexusAppBootstrapConfiguration {
 
     /**
