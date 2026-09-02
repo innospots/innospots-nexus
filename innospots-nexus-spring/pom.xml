@@ -11,10 +11,10 @@
         <relativePath>../innospots-nexus-parent/pom.xml</relativePath>
     </parent>
 
-    <artifactId>innospots-nexus-spring-parent</artifactId>
+    <artifactId>innospots-nexus-spring</artifactId>
     <packaging>pom</packaging>
 
-    <name>innospots-nexus-spring-parent</name>
+    <name>innospots-nexus-spring</name>
     <description>Spring Boot runtime assembly aggregator for innospots-nexus.</description>
 
     <properties>

@@ -6,7 +6,7 @@
 
     <parent>
         <groupId>com.innospots</groupId>
-        <artifactId>innospots-nexus-spring-parent</artifactId>
+        <artifactId>innospots-nexus-spring</artifactId>
         <version>${revision}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>

@@ -6,7 +6,7 @@
 
     <parent>
         <groupId>com.innospots</groupId>
-        <artifactId>innospots-nexus-quarkus-parent</artifactId>
+        <artifactId>innospots-nexus-quarkus</artifactId>
         <version>${revision}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>

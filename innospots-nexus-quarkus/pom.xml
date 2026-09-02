@@ -11,10 +11,10 @@
         <relativePath>../innospots-nexus-parent/pom.xml</relativePath>
     </parent>
 
-    <artifactId>innospots-nexus-quarkus-parent</artifactId>
+    <artifactId>innospots-nexus-quarkus</artifactId>
     <packaging>pom</packaging>
 
-    <name>innospots-nexus-quarkus-parent</name>
+    <name>innospots-nexus-quarkus</name>
     <description>Quarkus runtime assembly aggregator for innospots-nexus.</description>
 
     <modules>
