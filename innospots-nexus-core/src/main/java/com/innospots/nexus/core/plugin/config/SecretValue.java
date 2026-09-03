@@ -50,6 +50,7 @@ public final class SecretValue implements AutoCloseable {
         try {
             return operation.apply(copy);
         } finally {
+            // 临时副本在 finally 中清零，缩短明文驻留窗口。
             Arrays.fill(copy, '\0');
         }
     }

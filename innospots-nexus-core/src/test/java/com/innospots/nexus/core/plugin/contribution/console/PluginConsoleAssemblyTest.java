@@ -1,4 +1,4 @@
-package com.innospots.nexus.console.plugin;
+package com.innospots.nexus.core.plugin.contribution.console;
 
 import java.time.Instant;
 import java.util.List;
@@ -7,14 +7,14 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 import com.innospots.nexus.base.i18n.I18nObject;
-import com.innospots.nexus.console.plugin.contribution.ConsoleContributionCatalog;
-import com.innospots.nexus.console.plugin.contribution.ConsoleModuleDeclaration;
-import com.innospots.nexus.console.plugin.contribution.ConsolePluginContribution;
-import com.innospots.nexus.console.plugin.contribution.ConsolePluginContributionHandler;
-import com.innospots.nexus.console.plugin.contribution.ConsolePluginContributionSnapshotter;
-import com.innospots.nexus.console.plugin.contribution.MenuDeclaration;
-import com.innospots.nexus.console.plugin.contribution.ReservedPluginResourceCatalog;
-import com.innospots.nexus.console.plugin.contribution.UiSpecPageDeclaration;
+import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributionCatalog;
+import com.innospots.nexus.core.plugin.contribution.console.ConsoleModuleDeclaration;
+import com.innospots.nexus.core.plugin.contribution.console.ConsolePluginContribution;
+import com.innospots.nexus.core.plugin.contribution.console.ConsolePluginContributionHandler;
+import com.innospots.nexus.core.plugin.contribution.console.ConsolePluginContributionSnapshotter;
+import com.innospots.nexus.core.plugin.contribution.console.MenuDeclaration;
+import com.innospots.nexus.core.plugin.contribution.console.ReservedPluginResourceCatalog;
+import com.innospots.nexus.core.plugin.contribution.console.UiSpecPageDeclaration;
 import com.innospots.nexus.core.plugin.contribution.PluginContributionSnapshotterRegistry;
 import com.innospots.nexus.core.plugin.contract.Plugin;
 import com.innospots.nexus.core.plugin.declaration.PluginDefinition;

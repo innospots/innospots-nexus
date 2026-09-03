@@ -60,9 +60,11 @@ public final class CapabilityRouter {
                     "capability registrations must not contain null entries");
         }
         Tags explicit = requiredTags == null ? Tags.empty() : requiredTags;
+        // 显式标签优先于宿主默认路由，避免配置覆盖调用方意图。
         Tags routingTags = explicit.isEmpty()
                 ? defaultRoutes.getOrDefault(type.key(), Tags.empty())
                 : explicit;
+        // 无标签请求表示“接受任意 Provider”，因此不按标签过滤候选集。
         List<CapabilityRegistration<T>> matches = routingTags.isEmpty()
                 ? registrations
                 : registrations.stream().filter(item -> item.tags().matches(routingTags)).toList();
@@ -82,6 +84,12 @@ public final class CapabilityRouter {
         return matches.getFirst();
     }
 
+    /**
+     * 在注册完成后校验默认路由不会产生歧义候选。
+     *
+     * @param registrations 当前全部 Capability 注册快照
+     * @throws NexusException 任一默认路由匹配到多个 Provider 时抛出
+     */
     void validateDefaults(Map<CapabilityKey, List<CapabilityRegistration<?>>> registrations) {
         for (Map.Entry<CapabilityKey, Tags> route : defaultRoutes.entrySet()) {
             List<CapabilityRegistration<?>> matches = registrations

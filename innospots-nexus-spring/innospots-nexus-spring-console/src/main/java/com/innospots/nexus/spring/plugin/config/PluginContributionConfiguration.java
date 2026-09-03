@@ -5,11 +5,11 @@ import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.innospots.nexus.console.plugin.contribution.ConsoleContributionCatalog;
-import com.innospots.nexus.console.plugin.contribution.ConsolePluginContributionDecoder;
-import com.innospots.nexus.console.plugin.contribution.ConsolePluginContributionHandler;
-import com.innospots.nexus.console.plugin.contribution.ConsolePluginContributionSnapshotter;
-import com.innospots.nexus.console.plugin.contribution.ReservedPluginResourceCatalog;
+import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributionCatalog;
+import com.innospots.nexus.core.plugin.contribution.console.ConsolePluginContributionDecoder;
+import com.innospots.nexus.core.plugin.contribution.console.ConsolePluginContributionHandler;
+import com.innospots.nexus.core.plugin.contribution.console.ConsolePluginContributionSnapshotter;
+import com.innospots.nexus.core.plugin.contribution.console.ReservedPluginResourceCatalog;
 import com.innospots.nexus.core.plugin.contribution.PluginContributionDecoderRegistry;
 import com.innospots.nexus.core.plugin.contribution.PluginContributionHandler;
 import com.innospots.nexus.core.plugin.contribution.PluginContributionSnapshotterRegistry;

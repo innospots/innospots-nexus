@@ -1,4 +1,4 @@
-package com.innospots.nexus.console.plugin.contribution;
+package com.innospots.nexus.core.plugin.contribution.console;
 
 import java.util.Collection;
 import java.util.List;

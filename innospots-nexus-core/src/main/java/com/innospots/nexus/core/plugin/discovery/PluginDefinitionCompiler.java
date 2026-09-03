@@ -96,6 +96,7 @@ public final class PluginDefinitionCompiler {
         if (manifest == null || source == null || manifest.metadata() == null || manifest.spec() == null) {
             throw invalid(PluginStatusCode.DSL_STRUCTURE_INVALID, "plugin manifest structure is invalid");
         }
+        // 1. 校验 DSL 文档头与协议版本。
         if (!"nexus.plugin/v1".equals(manifest.apiVersion()) || !"Plugin".equals(manifest.kind())) {
             throw invalid(PluginStatusCode.DSL_STRUCTURE_INVALID, "unsupported plugin DSL header");
         }
@@ -109,10 +110,12 @@ public final class PluginDefinitionCompiler {
         if (spec.apiVersion() != PluginDefinition.CURRENT_API_VERSION) {
             throw invalid(PluginStatusCode.PLUGIN_API_INCOMPATIBLE, "unsupported plugin apiVersion");
         }
+        // 2. 编译 Capability Provider 声明并登记类型。
         List<CapabilityContribution<?>> capabilities = new ArrayList<>();
         for (PluginManifest.Capability capability : spec.capabilities()) {
             capabilities.add(compileCapability(capability));
         }
+        // 3. 解析跨插件 Capability 依赖。
         List<CapabilityRequirement> requirements = new ArrayList<>();
         for (PluginManifest.Requirement requirement : spec.requirements()) {
             if (requirement == null || requirement.type() == null || requirement.majorVersion() == null) {
@@ -125,13 +128,16 @@ public final class PluginDefinitionCompiler {
                     Tags.from(requirement.tags()),
                     requirement.required() == null || requirement.required()));
         }
+        // 4. 解码通用 Contribution 声明。
         List<PluginContribution> contributions = new ArrayList<>();
         for (Map<String, Object> declaration : spec.contributions()) {
             contributions.add(decodeContribution(declaration));
         }
+        // 5. 要求插件至少提供一种可运行能力。
         if (capabilities.isEmpty() && contributions.isEmpty()) {
             throw invalid(PluginStatusCode.DSL_STRUCTURE_INVALID, "plugin must declare capability or contribution");
         }
+        // 6. 组装并校验不可变 PluginDefinition。
         return new PluginDefinition(
                 metadata.pluginId(),
                 metadata.version(),

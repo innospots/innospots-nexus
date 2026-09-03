@@ -79,6 +79,7 @@ public final class DependencyResolver {
                     requirement.requiredTags(),
                     requirement.required(),
                     !providerIds.isEmpty(),
+                    // declared：classpath 上是否存在提供者；available：运行时是否已 ACTIVE 并注册。
                     registry.contains(requirement.key(), requirement.requiredTags()),
                     providerIds));
         }

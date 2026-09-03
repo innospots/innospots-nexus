@@ -49,8 +49,8 @@ public class PluginRuntimeConfigFactory {
      */
     public PluginRuntimeConfig create() {
         return new PluginRuntimeConfig(
-                Set.copyOf(hostConfig.plugins().required()),
-                Set.copyOf(hostConfig.plugins().disabled()),
+                Set.copyOf(hostConfig.plugins().required().orElseGet(List::of)),
+                Set.copyOf(hostConfig.plugins().disabled().orElseGet(List::of)),
                 PluginHostConfigBinder.flattenPluginConfig(config),
                 configSources.stream().toList(),
                 Map.of(),

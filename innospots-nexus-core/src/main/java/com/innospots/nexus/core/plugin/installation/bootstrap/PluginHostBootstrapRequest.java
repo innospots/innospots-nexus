@@ -51,6 +51,9 @@ public record PluginHostBootstrapRequest(
     /**
      * 解析用于 classpath 发现的类加载器。
      *
+     * <p>优先使用显式注入的类加载器，再回退到运行时配置、线程上下文和定义类加载器，
+     * 以兼容 Spring/Quarkus 宿主在不同启动阶段的 CL 可见性差异。</p>
+     *
      * @return 非空类加载器
      */
     ClassLoader resolvedClassLoader() {

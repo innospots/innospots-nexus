@@ -14,7 +14,7 @@ import com.innospots.nexus.spring.bootstrap.EnableNexusAppBootstrap;
 @SpringBootApplication
 @EnableNexusAppBootstrap
 @EnableNexusPluginHost
-public class NexusAppServer {
+public class NexusSpringAppServer {
 
     /**
      * 启动应用服务进程。
@@ -22,6 +22,6 @@ public class NexusAppServer {
      * @param args 命令行参数
      */
     public static void main(String[] args) {
-        SpringApplication.run(NexusAppServer.class, args);
+        SpringApplication.run(NexusSpringAppServer.class, args);
     }
 }

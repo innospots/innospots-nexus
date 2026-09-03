@@ -108,6 +108,7 @@ public final class PluginInstallationManager implements AutoCloseable {
         synchronized (lifecycleMonitor) {
             ensureOpen();
             if (runtime != null) {
+                // 对账会改写安装事实，与活动运行态并发执行会导致启停意图与内存状态不一致。
                 throw NexusException.build(PluginStatusCode.PLUGIN_CONCURRENCY_CONFLICT,
                         "cannot reconcile while plugin runtime is active");
             }
@@ -156,6 +157,7 @@ public final class PluginInstallationManager implements AutoCloseable {
         logger.info("Starting plugin installation runtime with {} eligible plugin(s)", eligible.size());
         try {
             manager.start();
+            // 将 JVM 运行态回写安装表，供管理台展示与跨重启诊断（不参与下次是否启动）。
             recordRuntimeDiagnostics(manager.plugins());
             logger.info("Plugin installation runtime started");
         } catch (RuntimeException exception) {
@@ -273,6 +275,7 @@ public final class PluginInstallationManager implements AutoCloseable {
                 runtimeOrThrow().stop(pluginId);
                 return recordCurrentRuntime(pluginId);
             } catch (RuntimeException exception) {
+                // 停止失败不回滚 desiredEnabled=false，避免反复自动重启故障插件。
                 recordRuntimeFailure(pluginId, exception);
                 throw exception;
             }

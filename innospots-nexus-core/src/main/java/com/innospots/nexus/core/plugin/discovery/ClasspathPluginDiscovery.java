@@ -150,6 +150,7 @@ public final class ClasspathPluginDiscovery {
                 PluginSource source = PluginSource.yaml(resource.toExternalForm(), now);
                 try (InputStream input = resource.openStream()) {
                     PluginManifest manifest = manifestParser.parse(input);
+                    // 第一遍：登记全部 YAML capability 的 api 类型，供跨插件 requirements 解析。
                     compiler.registerDeclaredTypes(manifest);
                     pending.add(new ParsedYamlManifest(manifest, source, now));
                 } catch (NexusException exception) {
@@ -158,6 +159,7 @@ public final class ClasspathPluginDiscovery {
                     rejected.add(new RejectedPluginDefinition(source, null, List.of(exception.toString())));
                 }
             }
+            // 第二遍：在完整类型表就绪后编译各 manifest，避免 requirements 引用尚未登记的 capability。
             for (ParsedYamlManifest item : pending) {
                 try {
                     PluginDefinition definition = compiler.compile(item.manifest(), item.source());

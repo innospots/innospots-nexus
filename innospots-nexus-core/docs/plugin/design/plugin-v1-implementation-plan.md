@@ -99,6 +99,8 @@ innospots-nexus-core
     │   ├── domain
     │   ├── repository
     │   └── service
+    ├── contribution
+    │   └── console          # console@1 声明、解码、Handler、Catalog
     ├── lifecycle
     │   └── PluginAvailability
     ├── runtime
@@ -106,9 +108,9 @@ innospots-nexus-core
 
 innospots-nexus-console
 └── com.innospots.nexus.console.plugin
-    ├── contribution
+    ├── converter            # 管理 API 转换
     ├── domain.vo
-    └── endpoint
+    └── endpoint             # PluginManagementEndpoint 等 REST
 ```
 
 不得创建空包。每个阶段只创建当前测试所需类型。

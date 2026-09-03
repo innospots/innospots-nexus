@@ -1,4 +1,4 @@
-package com.innospots.nexus.console.plugin.contribution;
+package com.innospots.nexus.core.plugin.contribution.console;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -30,7 +30,13 @@ public final class ConsolePluginContributionDecoder
         return ConsolePluginContribution.TYPE;
     }
 
-    /** 解码模块、页面与菜单树。 */
+    /**
+     * 解码模块、页面与菜单树。
+     *
+     * @param declaration 已完成结构校验的 YAML 字段映射
+     * @return 不可变 console@1 贡献实例
+     * @throws NexusException 字段缺失、类型不匹配或业务规则违反时抛出
+     */
     @Override
     public ConsolePluginContribution decode(Map<String, Object> declaration) {
         if (declaration == null) {
@@ -165,6 +171,7 @@ public final class ConsolePluginContributionDecoder
         if (map == null) {
             invalid("declaration object is required");
         }
+        // 白名单字段校验在编译期锁定 DSL 形状，避免未知键静默被忽略后留下兼容债务。
         for (String field : map.keySet()) {
             if (!allowed.contains(field)) {
                 invalid("unknown console contribution field: " + field);
@@ -189,6 +196,7 @@ public final class ConsolePluginContributionDecoder
         }
         Number number = (Number) value;
         try {
+            // 通过 BigDecimal 统一拒绝 1.0、科学计数法等 YAML 数字变体，确保整数字段语义稳定。
             BigDecimal decimal = new BigDecimal(number.toString());
             if (decimal.stripTrailingZeros().scale() > 0
                     || decimal.compareTo(BigDecimal.valueOf(Integer.MIN_VALUE)) < 0

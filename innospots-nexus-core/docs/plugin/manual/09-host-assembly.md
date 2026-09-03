@@ -150,11 +150,11 @@ import com.innospots.nexus.core.plugin.installation.config.PluginInstallationCon
 import com.innospots.nexus.core.plugin.installation.dao.PluginInstallationDao;
 import com.innospots.nexus.core.plugin.installation.service.PluginInstallationManager;
 import com.innospots.nexus.core.plugin.runtime.PluginRuntimeConfig;
-import com.innospots.nexus.console.plugin.contribution.ConsoleContributionCatalog;
-import com.innospots.nexus.console.plugin.contribution.ConsolePluginContributionDecoder;
-import com.innospots.nexus.console.plugin.contribution.ConsolePluginContributionHandler;
-import com.innospots.nexus.console.plugin.contribution.ConsolePluginContributionSnapshotter;
-import com.innospots.nexus.console.plugin.contribution.ReservedPluginResourceCatalog;
+import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributionCatalog;
+import com.innospots.nexus.core.plugin.contribution.console.ConsolePluginContributionDecoder;
+import com.innospots.nexus.core.plugin.contribution.console.ConsolePluginContributionHandler;
+import com.innospots.nexus.core.plugin.contribution.console.ConsolePluginContributionSnapshotter;
+import com.innospots.nexus.core.plugin.contribution.console.ReservedPluginResourceCatalog;
 
 public final class PluginHostAssembly {
 

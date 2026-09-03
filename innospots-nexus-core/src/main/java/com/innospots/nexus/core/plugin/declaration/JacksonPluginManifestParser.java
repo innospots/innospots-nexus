@@ -46,17 +46,26 @@ public final class JacksonPluginManifestParser implements PluginManifestParser {
         return mapper.copy();
     }
 
+    /**
+     * 解析一个 UTF-8 YAML 输入流。
+     *
+     * @param input UTF-8 YAML 文档输入流
+     * @return 严格校验后的插件清单
+     * @throws NexusException 输入为空、超出大小限制、语法或结构非法时抛出
+     */
     @Override
     public PluginManifest parse(InputStream input) {
         if (input == null) {
             throw invalidStructure("YAML input is required", null);
         }
         try {
+            // 先按字节上限读取，避免不受控的流把解析器拖入大文档攻击面。
             byte[] bytes = input.readNBytes(MAX_DOCUMENT_BYTES + 1);
             if (bytes.length > MAX_DOCUMENT_BYTES) {
                 throw invalidStructure("plugin YAML exceeds 1 MiB", null);
             }
             String text = new String(bytes, java.nio.charset.StandardCharsets.UTF_8);
+            // YAML 锚点/别名会引入共享可变图，与不可变 DSL 模型不兼容，因此在词法层直接拒绝。
             if (YAML_EXTENSION.matcher(text).find()) {
                 throw invalidSyntax("YAML anchors, aliases and custom tags are not supported", null);
             }
@@ -65,6 +74,7 @@ public final class JacksonPluginManifestParser implements PluginManifestParser {
                 if (manifest == null) {
                     throw invalidStructure("plugin YAML must not be null", null);
                 }
+                // 单文档约束防止多插件拼装在同一个资源里绕过发现边界。
                 if (parser.nextToken() != null) {
                     throw invalidSyntax("plugin YAML must contain exactly one document", null);
                 }

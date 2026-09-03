@@ -10,7 +10,12 @@ public final class ManifestPlugin implements Plugin {
 
     private final PluginDefinition definition;
 
-    /** 创建 YAML 插件适配器。 */
+    /**
+     * 创建 YAML 插件适配器。
+     *
+     * @param definition 已编译的插件定义
+     * @throws NexusException 定义为空时抛出
+     */
     public ManifestPlugin(PluginDefinition definition) {
         if (definition == null) {
             throw NexusException.build(PluginStatusCode.PLUGIN_DEFINITION_INVALID,
@@ -19,6 +24,11 @@ public final class ManifestPlugin implements Plugin {
         this.definition = definition;
     }
 
+    /**
+     * 返回不可变的编译定义。
+     *
+     * @return 插件定义快照
+     */
     @Override
     public PluginDefinition definition() {
         return definition;

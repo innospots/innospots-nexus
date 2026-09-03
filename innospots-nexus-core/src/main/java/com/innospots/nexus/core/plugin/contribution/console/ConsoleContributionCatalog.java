@@ -1,4 +1,4 @@
-package com.innospots.nexus.console.plugin.contribution;
+package com.innospots.nexus.core.plugin.contribution.console;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -14,6 +14,7 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 /** Console Contribution 的活动资源目录，不保存安装事实或 PluginState。 */
 public final class ConsoleContributionCatalog {
 
+    /** 按 ownerPluginId 索引；与 {@link PluginAvailability} 共同决定对外可见性。 */
     private final Map<String, ActiveEntry> active = new LinkedHashMap<>();
 
     /** 返回当前已通过共享 availability 门控的活动贡献。 */
@@ -89,6 +90,7 @@ public final class ConsoleContributionCatalog {
                 active.put(owner.pluginId(), new ActiveEntry(
                         owner.pluginId(), contribution, availability.generation() + 1, availability));
             }
+            // generation 递增供权限同步识别替换提交，而非原地覆盖不可变 contribution。
             committed = true;
         }
 

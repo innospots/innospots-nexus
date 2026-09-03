@@ -99,6 +99,7 @@ public final class PluginCatalog {
                         "unsupported plugin apiVersion for " + definition.pluginId() + ": " + definition.apiVersion());
             }
             for (CapabilityContribution<?> contribution : definition.capabilities()) {
+                // 同一 CapabilityKey 在全局只能绑定一种 API 接口，保证 require(name, version) 可解析。
                 Class<?> previous = capabilityApis.putIfAbsent(contribution.type().key(), contribution.type().api());
                 if (previous != null && previous != contribution.type().api()) {
                     throw NexusException.build(PluginStatusCode.CAPABILITY_TYPE_MISMATCH,

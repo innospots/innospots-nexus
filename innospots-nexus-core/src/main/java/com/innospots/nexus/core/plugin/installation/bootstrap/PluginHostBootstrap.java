@@ -38,6 +38,7 @@ public final class PluginHostBootstrap {
         }
         logger.info("Enabling plugin host");
         ClassLoader classLoader = request.resolvedClassLoader();
+        // 发现阶段：枚举 SPI 与 YAML 并编译为统一 Plugin 目录。
         PluginDiscoveryReport report = new ClasspathPluginDiscovery(
                 classLoader,
                 request.contributionDecoders())
@@ -47,6 +48,7 @@ public final class PluginHostBootstrap {
                 request.runtimeConfig(),
                 request.contributionHandlers(),
                 request.contributionSnapshotters());
+        // 对账与启动阶段：登记安装事实、对齐 MISSING 状态并启动 eligible 插件。
         PluginInstallationManager installationManager = new PluginInstallationManager(
                 repository,
                 runtimeFactory,

@@ -84,6 +84,7 @@ public final class DefaultResourceScope implements ResourceScope {
             closing = new ArrayList<>(registrations);
             registrations.clear();
         }
+        // 在锁外执行 disposer，避免用户清理逻辑回调 manage()/close() 时自死锁。
         if (closing.isEmpty()) {
             logger.debug("Resource scope closed with no managed resources");
             return;

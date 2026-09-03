@@ -1,6 +1,7 @@
 package com.innospots.nexus.quarkus.plugin.config;
 
 import java.util.List;
+import java.util.Optional;
 
 import io.smallrye.config.ConfigMapping;
 import io.smallrye.config.WithDefault;
@@ -32,12 +33,18 @@ public interface NexusPluginHostConfig {
      */
     interface Plugins {
 
-        /** 启动时必须 ACTIVE 的插件 ID 列表。 */
-        @WithDefault("")
-        List<String> required();
+        /**
+         * 启动时必须 ACTIVE 的插件 ID 列表。
+         *
+         * <p>未配置时为空；不要用空字符串作为默认值，SmallRye 会把它当成 null。</p>
+         */
+        Optional<List<String>> required();
 
-        /** 永不自动启动的插件 ID 列表。 */
-        @WithDefault("")
-        List<String> disabled();
+        /**
+         * 永不自动启动的插件 ID 列表。
+         *
+         * <p>未配置时为空。</p>
+         */
+        Optional<List<String>> disabled();
     }
 }

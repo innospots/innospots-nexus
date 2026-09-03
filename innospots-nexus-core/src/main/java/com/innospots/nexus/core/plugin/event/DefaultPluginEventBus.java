@@ -65,6 +65,7 @@ public final class DefaultPluginEventBus implements PluginEventBus {
 
     /** 关闭当前运行时本地总线并释放全部订阅引用。 */
     public void close() {
+        // compareAndSet 保证并发 close 只执行一次清理。
         if (closed.compareAndSet(false, true)) {
             handlers.clear();
         }

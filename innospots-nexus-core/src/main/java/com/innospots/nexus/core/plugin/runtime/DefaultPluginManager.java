@@ -113,6 +113,7 @@ public final class DefaultPluginManager implements PluginManager {
             boolean progressed;
             do {
                 progressed = false;
+                // 多轮扫描：上一轮新启动的插件可能满足本轮等待者的 Capability 依赖。
                 for (ManagedPlugin plugin : managedPlugins.values()) {
                     String pluginId = plugin.definition().pluginId();
                     PluginState state = plugin.info().state();
@@ -143,6 +144,7 @@ public final class DefaultPluginManager implements PluginManager {
                 }
             } while (progressed);
 
+            // required 插件未全部 ACTIVE 时回滚本次启动批次，避免半初始化运行时对外暴露。
             List<String> inactiveRequired = config.requiredPluginIds().stream()
                     .filter(id -> managedPlugins.get(id) == null
                             || managedPlugins.get(id).info().state() != PluginState.ACTIVE)
@@ -322,6 +324,7 @@ public final class DefaultPluginManager implements PluginManager {
                 config.hostConfig(),
                 config.configSources(),
                 config.runtimeVariables());
+        // 构造期完成全部全局预检，避免 ManagedPlugin 启动时才暴露 classpath 级冲突。
         validateRequiredPlugins(discoveries);
         validateDefaultRoutes(discoveries);
         validateContributions(discoveries, catalog);
@@ -366,6 +369,7 @@ public final class DefaultPluginManager implements PluginManager {
                     throw NexusException.build(PluginStatusCode.UNSUPPORTED_CONTRIBUTION_TYPE,
                             "missing contribution handler: " + contribution.type());
                 }
+                // Contribution 无独立 providerId；合成稳定身份供 Handler 与权限同步使用。
                 String providerId = "contribution-" + contribution.type().name().replace('.', '-')
                         + "-" + contribution.type().majorVersion();
                 entries.computeIfAbsent(contribution.type(), ignored -> new ArrayList<>())
@@ -457,6 +461,7 @@ public final class DefaultPluginManager implements PluginManager {
                         .filter(registration -> availabilityIndex.isVisible(registration.pluginId()))
                         .filter(registration -> registration.tags().matches(requirement.requiredTags()))
                         .count();
+                // 单插件 stop 保护：不得移除其他 ACTIVE 插件 required 依赖的最后一个匹配 Provider。
                 if (remaining == 0) {
                     throw NexusException.build(
                             PluginStatusCode.PLUGIN_IN_USE,

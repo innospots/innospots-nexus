@@ -67,8 +67,10 @@ public final class PluginRuntimeFactory {
                 .map(item -> item.definition().pluginId())
                 .collect(java.util.stream.Collectors.toCollection(HashSet::new));
         Set<String> disabled = new HashSet<>(baseConfig.disabledPluginIds());
+        // 未进入 eligible 集合的已发现插件视为 disabled，即使宿主未显式配置。
         allIds.stream().filter(id -> !eligiblePluginIds.contains(id)).forEach(disabled::add);
         Set<String> required = new HashSet<>(baseConfig.requiredPluginIds());
+        // required 仅对本次会尝试启动的插件生效，避免对未安装插件误报启动失败。
         required.retainAll(eligiblePluginIds);
         PluginRuntimeConfig effective = new PluginRuntimeConfig(
                 required,

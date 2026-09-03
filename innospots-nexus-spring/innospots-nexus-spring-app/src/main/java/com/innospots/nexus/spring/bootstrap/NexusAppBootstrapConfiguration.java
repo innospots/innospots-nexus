@@ -9,7 +9,9 @@ import org.springframework.context.annotation.Configuration;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.autoconfigure.MybatisPlusAutoConfiguration;
+import com.baomidou.mybatisplus.autoconfigure.MybatisPlusProperties;
 import com.baomidou.mybatisplus.autoconfigure.MybatisPlusPropertiesCustomizer;
+import com.baomidou.mybatisplus.core.config.GlobalConfig;
 import com.innospots.nexus.core.persistence.handler.AuditMetaObjectHandler;
 
 /**
@@ -23,7 +25,7 @@ import com.innospots.nexus.core.persistence.handler.AuditMetaObjectHandler;
 @MapperScan(
         basePackages = "com.innospots.nexus.core.plugin.installation.dao",
         annotationClass = Mapper.class,
-        lazyInitialization = "true")
+        sqlSessionFactoryRef = "sqlSessionFactory")
 public class NexusAppBootstrapConfiguration {
 
     /**
@@ -40,7 +42,16 @@ public class NexusAppBootstrapConfiguration {
     @Bean
     MybatisPlusPropertiesCustomizer mybatisPlusPropertiesCustomizer(AuditMetaObjectHandler auditMetaObjectHandler) {
         return properties -> {
+            if (properties.getConfiguration() == null) {
+                properties.setConfiguration(new MybatisPlusProperties.CoreConfiguration());
+            }
             properties.getConfiguration().setMapUnderscoreToCamelCase(true);
+            if (properties.getGlobalConfig() == null) {
+                properties.setGlobalConfig(new GlobalConfig());
+            }
+            if (properties.getGlobalConfig().getDbConfig() == null) {
+                properties.getGlobalConfig().setDbConfig(new GlobalConfig.DbConfig());
+            }
             properties.getGlobalConfig().getDbConfig().setIdType(IdType.ASSIGN_UUID);
             properties.getGlobalConfig().setMetaObjectHandler(auditMetaObjectHandler);
         };

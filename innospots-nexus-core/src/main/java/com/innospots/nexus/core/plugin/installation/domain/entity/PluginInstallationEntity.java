@@ -35,11 +35,13 @@ public class PluginInstallationEntity extends BaseEntity {
     /** 数据库表名。 */
     public static final String TABLE_NAME = "nx_plugin_installation";
 
+    /** 安装记录主键。 */
     @TableId(type = IdType.ASSIGN_UUID)
     @Id
     @Column(name = "installation_id", length = 32, nullable = false)
     private String installationId;
 
+    /** 稳定的插件标识；与 classpath 定义一一对应。 */
     @Column(name = "plugin_id", length = 256, nullable = false, updatable = false)
     private String pluginId;
 
@@ -52,19 +54,24 @@ public class PluginInstallationEntity extends BaseEntity {
     @Column(name = "source_location", length = 1024)
     private String sourceLocation;
 
+    /** {@link com.innospots.nexus.core.plugin.installation.domain.enums.PluginPresence} 持久化值。 */
     @Column(name = "presence", length = 16, nullable = false)
     private String presence;
 
+    /** 是否已执行安装动作（与 desiredEnabled 独立）。 */
     @Column(name = "installed", nullable = false)
     private boolean installed;
 
+    /** 管理员期望启用；实际运行态由 JVM 内 {@code PluginState} 决定。 */
     @Column(name = "desired_enabled", nullable = false)
     private boolean desiredEnabled;
 
+    /** 脱敏后的定义 JSON；不含 Secret 与运行时对象。 */
     @Lob
     @Column(name = "definition_snapshot")
     private String definitionSnapshot;
 
+    /** 最近一次运行诊断状态名；不参与下次启动决策。 */
     @Column(name = "last_runtime_state", length = 32)
     private String lastRuntimeState;
 

@@ -8,13 +8,25 @@ package com.innospots.nexus.core.plugin.contribution;
  */
 public interface PreparedPluginContribution extends AutoCloseable {
 
-    /** 预提交资源，必须幂等。 */
+    /**
+     * 预提交资源，必须幂等。
+     *
+     * @throws com.innospots.nexus.base.exception.NexusException 准备或索引失败时
+     */
     void stage();
 
-    /** 提交资源索引，必须幂等且不执行高风险 I/O。 */
+    /**
+     * 提交资源索引，必须幂等且不执行高风险 I/O。
+     *
+     * @throws com.innospots.nexus.base.exception.NexusException 提交失败时
+     */
     void commit();
 
-    /** 回滚已经 stage 或 commit 的资源，必须幂等。 */
+    /**
+     * 回滚已经 stage 或 commit 的资源，必须幂等。
+     *
+     * @throws com.innospots.nexus.base.exception.NexusException 回滚失败时
+     */
     void rollback();
 
     /** 释放句柄和临时资源，必须幂等。 */

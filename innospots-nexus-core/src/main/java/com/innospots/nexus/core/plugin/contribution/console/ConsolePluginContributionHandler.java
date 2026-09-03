@@ -1,4 +1,4 @@
-package com.innospots.nexus.console.plugin.contribution;
+package com.innospots.nexus.core.plugin.contribution.console;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,7 +23,13 @@ public final class ConsolePluginContributionHandler
     private final ConsoleContributionCatalog catalog;
     private final ReservedPluginResourceCatalog reservedResources;
 
-    /** 创建 Console Handler。 */
+    /**
+     * 创建 Console Handler。
+     *
+     * @param catalog           活动 Console 资源目录
+     * @param reservedResources 平台保留资源表，用于拒绝插件抢占系统身份
+     * @throws NexusException 任一目录为空时抛出
+     */
     public ConsolePluginContributionHandler(
             ConsoleContributionCatalog catalog,
             ReservedPluginResourceCatalog reservedResources
@@ -42,7 +48,13 @@ public final class ConsolePluginContributionHandler
         return ConsolePluginContribution.TYPE;
     }
 
-    /** 对模块、页面、菜单、路径和历史归属执行无副作用全局校验。 */
+    /**
+     * 对模块、页面、菜单、路径和历史归属执行无副作用全局校验。
+     *
+     * @param pluginCatalog 当前有效插件目录；单插件 prepare 时可传 {@code null}
+     * @param entries       待校验的 console@1 贡献条目
+     * @throws NexusException 资源冲突、路由冲突或菜单引用非法时抛出
+     */
     @Override
     public void validate(
             PluginCatalog pluginCatalog,
@@ -65,7 +77,14 @@ public final class ConsolePluginContributionHandler
         }
     }
 
-    /** 准备一个插件的 Console 资源，提交前不进入活动目录。 */
+    /**
+     * 准备一个插件的 Console 资源，提交前不进入活动目录。
+     *
+     * @param context      当前插件启动上下文
+     * @param contribution 待准备的贡献声明
+     * @return 可在提交或回滚时关闭的预备资源
+     * @throws NexusException 全局校验失败或目录准备失败时抛出
+     */
     @Override
     public PreparedPluginContribution prepare(
             PluginContributionContext context,
@@ -107,6 +126,7 @@ public final class ConsolePluginContributionHandler
             Set<String> ancestors
     ) {
         for (UiSpecPageDeclaration page : declarations) {
+            // 沿祖先链检测环，避免嵌套 children 形成不可遍历的页面图。
             if (!pages.isEmpty() && ancestors.contains(page.pageKey())) {
                 invalid("page declaration contains a cycle: " + page.pageKey());
             }
@@ -146,10 +166,12 @@ public final class ConsolePluginContributionHandler
                     invalid("menu references an unknown page: " + menu.pageKey());
                 }
                 if (page.hasRequiredPathVariables()) {
+                    // 带必填路径变量的页面只能动态导航，不能作为静态菜单落点。
                     invalid("page with required path variables cannot be a static menu entry: "
                             + menu.pageKey());
                 }
                 if (!referencedPages.add(menu.pageKey())) {
+                    // 一个页面只能被一个菜单项直接引用，避免权限和面包屑归属歧义。
                     invalid("page is referenced by multiple menu entries: " + menu.pageKey());
                 }
             }
@@ -168,6 +190,7 @@ public final class ConsolePluginContributionHandler
             invalid("resource identity is owned by another plugin: " + resourceKey);
         }
         if (previous != null) {
+            // 同一插件重复声明同一资源身份，说明模块/页面/菜单键冲突。
             invalid("duplicate resource identity: " + resourceKey);
         }
     }

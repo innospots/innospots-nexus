@@ -308,7 +308,7 @@ Core 不定义菜单、页面、权限或 UiSpec 语义。
 原 `core.extension.declaration` 中的管理页面声明移动并重命名到 Console：
 
 ```text
-com.innospots.nexus.console.plugin.contribution
+com.innospots.nexus.core.plugin.contribution.console
 ├── ConsolePluginContribution
 ├── ConsoleModuleDeclaration
 ├── MenuDeclaration

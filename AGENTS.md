@@ -38,6 +38,9 @@ is a reference, not a source template.
 - May provide shared persistence entities and public tables, database support,
   scheduling, server lifecycle, session infrastructure, watchers, extension
   boundaries, and other non-management common capabilities.
+- Owns **plugin runtime contracts**: capability, contribution types, declaration
+  models, decoders/handlers/snapshotters, and installation/runtime orchestration
+  (e.g. `console@1` under `core.plugin.contribution.console`).
 - Must remain business-domain neutral. User, role, permission, menu, and other
   concrete business domains do not belong in this module.
 - May depend on middleware APIs and implementations needed for reusable
@@ -46,12 +49,11 @@ is a reference, not a source template.
 
 ### `innospots-nexus-console`
 
-- Foundation and extension contract module for the management platform.
-- Provides business-neutral management-console support such as Jakarta REST
-  endpoint contracts, extension declarations, menu/route contribution models,
-  and shared management-platform abstractions.
-- Management-platform feature modules should depend on this module when they
-  expose console capabilities.
+- Management-console **API surface** module built on Core.
+- Provides Jakarta REST management endpoints, request/response VOs, and
+  converters for console operations (e.g. `PluginManagementEndpoint`).
+- Must **not** own plugin specification or contribution constraint definitions;
+  those belong in `innospots-nexus-core`.
 - Must not implement concrete management business functions. User, role,
   permission, registration, and other management features belong in business
   modules such as `innospots-nexus-kernel`.

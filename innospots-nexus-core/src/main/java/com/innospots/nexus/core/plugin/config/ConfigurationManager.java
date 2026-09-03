@@ -202,6 +202,7 @@ public final class ConfigurationManager {
         rejectUnknown(prefix, items.keySet(), hostConfig);
         rejectUnknown(prefix, items.keySet(), systemProperties);
         rejectUnknown(prefix, items.keySet(), runtimeVariables);
+        // 每个 ConfigSource 在单次解析中只调用一次 values()，避免动态来源产生不一致快照。
         List<Map<String, String>> dynamicValues = configSources.stream()
                 .map(ConfigSource::values)
                 .toList();
@@ -215,6 +216,7 @@ public final class ConfigurationManager {
                 merged.put(item.key(), item.defaultValue());
             }
         }
+        // 合并优先级：default → hostConfig → configSources → env → system props → runtimeVariables
         overlay(prefix, items.keySet(), hostConfig, merged);
         for (Map<String, String> values : dynamicValues) {
             overlay(prefix, items.keySet(), values, merged);

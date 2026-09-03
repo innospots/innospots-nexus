@@ -2,6 +2,8 @@
 
 Core 只定义**契约与运行时**；最终应用（Spring Boot、Quarkus 等）负责把基础设施适配成 `PluginHostBootstrapRequest` 中的依赖。本文说明每类宿主组件**扩展什么、如何实现、何时需要**。
 
+> **模块边界**：插件规范约束（`console@1` 声明模型、Decoder/Handler/Snapshotter、活动目录）在 **`innospots-nexus-core`**（`core.plugin.contribution.console`）；**`innospots-nexus-console`** 仅提供管理 REST（如 `PluginManagementEndpoint`）及 VO/Converter。
+
 > 装配入口见 [09-host-assembly.md](09-host-assembly.md)；插件配置键与加载见 [08-configuration.md](08-configuration.md)。
 
 ## 1. 总览：宿主负责什么

@@ -12,12 +12,19 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
 /**
  * 一个插件的不可变类型化配置快照。
+ *
+ * <p>{@code values} 保存强类型运行时值；{@code displayValues} 保存日志与诊断用的遮罩文本，
+ * 避免 SECRET 明文泄漏到 {@link #toString()}。</p>
  */
 final class DefaultPluginConfig implements PluginConfig {
 
     private final Map<String, Object> values;
     private final Map<String, String> displayValues;
 
+    /**
+     * @param values        已解析的配置值快照
+     * @param displayValues 与 {@code values} 对齐的遮罩显示文本
+     */
     DefaultPluginConfig(Map<String, Object> values, Map<String, String> displayValues) {
         this.values = Map.copyOf(values);
         this.displayValues = Map.copyOf(displayValues);

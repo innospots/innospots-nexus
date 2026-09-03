@@ -323,6 +323,7 @@ public final class ManagedPlugin {
         } finally {
             lifecycleLock.unlock();
         }
+        // 销毁钩子可能在未知插件代码中阻塞；在锁外执行避免死锁其它生命周期操作。
         Throwable failure = null;
         String failurePhase = null;
 
@@ -409,6 +410,7 @@ public final class ManagedPlugin {
         }
         lifecycleLock.lock();
         try {
+            // 进行中的启动/停止/失败状态不可被 waiting() 覆盖，避免与并发 start/stop 交错。
             if (state != PluginState.ACTIVE && state != PluginState.STARTING
                     && state != PluginState.STOPPING && state != PluginState.FAILED) {
                 this.dependencies = Map.copyOf(dependencies);

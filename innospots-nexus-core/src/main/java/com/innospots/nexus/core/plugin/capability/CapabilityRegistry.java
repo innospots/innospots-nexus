@@ -30,6 +30,11 @@ public final class CapabilityRegistry implements CapabilityManager {
     private final CapabilityRouter router;
     private final PluginAvailabilityIndex availabilityIndex;
 
+    /**
+     * 使用默认路由创建注册表；不启用可用性门控（单元测试场景）。
+     *
+     * @param defaultRoutes 查询未指定标签时使用的路由标签
+     */
     public CapabilityRegistry(Map<CapabilityKey, Tags> defaultRoutes) {
         this(defaultRoutes, null);
     }
@@ -67,6 +72,7 @@ public final class CapabilityRegistry implements CapabilityManager {
             List<CapabilityRegistration<?>> current = mutable.computeIfAbsent(
                     registration.type().key(),
                     ignored -> new ArrayList<>());
+            // 同一 CapabilityKey 下所有 Provider 必须绑定同一 API 接口，避免 require() 类型擦除歧义。
             for (CapabilityRegistration<?> existing : current) {
                 if (existing.type().api() != registration.type().api()) {
                     throw NexusException.build(
@@ -78,6 +84,7 @@ public final class CapabilityRegistry implements CapabilityManager {
         }
         Map<CapabilityKey, List<CapabilityRegistration<?>>> replacement = immutableCopy(mutable);
         router.validateDefaults(replacement);
+        // 写时复制：读者始终看到完整不可变快照，无需在读路径上加锁。
         snapshot.set(replacement);
         if (!registrations.isEmpty()) {
             String pluginId = registrations.getFirst().pluginId();
@@ -194,6 +201,7 @@ public final class CapabilityRegistry implements CapabilityManager {
                     PluginStatusCode.CAPABILITY_NOT_FOUND,
                     "capability not found: " + key);
         }
+        // 按名称解析时从已注册 Provider 反推 API 类型，调用方无需提前持有 CapabilityType 实例。
         CapabilityType<?> type = registrations.getFirst().type();
         for (CapabilityRegistration<?> registration : registrations) {
             if (registration.type().api() != type.api()) {

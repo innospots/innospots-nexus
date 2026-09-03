@@ -3,19 +3,47 @@ quarkus:
     name: nexus-app
   http:
     port: 8080
+  log:
+    level: INFO
+    category:
+      "com.innospots.nexus":
+        level: INFO
+      "org.apache.ibatis":
+        level: INFO
+      "com.baomidou.mybatisplus":
+        level: INFO
+      "io.quarkus":
+        level: INFO
+    console:
+      enable: true
+      format: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5p [%c{2.}] (%t) %s%e%n"
+    file:
+      enable: true
+      path: logs/nexus-app.log
+      format: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5p [%c{2.}] (%t) %s%e%n"
+      rotation:
+        max-file-size: 100M
+        max-backup-index: 100
   datasource:
     db-kind: h2
     username: sa
     password: ""
     jdbc:
       url: jdbc:h2:mem:nexus;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
-
-mybatis:
-  mapper-packages: com.innospots.nexus.core
-  initial-sql: classpath:nexus/schema/plugin-installation-h2.sql
-
-mybatis-plus:
-  meta-object-handler: com.innospots.nexus.core.persistence.handler.AuditMetaObjectHandler
+    devservices:
+      enabled: false
+  index-dependency:
+    nexus-core:
+      group-id: com.innospots
+      artifact-id: innospots-nexus-core
+  mybatis:
+    initial-sql: nexus/schema/plugin-installation-h2.sql
+    map-underscore-to-camel-case: true
+  mybatis-plus:
+    global-config:
+      meta-object-handler: com.innospots.nexus.core.persistence.handler.AuditMetaObjectHandler
+      db-config:
+        id-type: ASSIGN_UUID
 
 # nexus.plugin.* / nexus.plugins.* 默认值见 NexusPluginHostConfig；可按环境覆盖
 # plugins.<pluginId>.<key> 示例：
