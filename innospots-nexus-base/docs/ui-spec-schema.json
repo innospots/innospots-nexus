@@ -1,0 +1,436 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://innospots.dev/schemas/ui-spec-schema.json",
+  "title": "UiSpec",
+  "description": "Management platform page specification consumed by frontend renderers. Parsed into com.innospots.nexus.base.ui.spec.UiSpec.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["pageInfo"],
+  "properties": {
+    "pageInfo": { "$ref": "#/$defs/PageInfo" },
+    "pageType": {
+      "type": "string",
+      "default": "general",
+      "description": "Page type hint for the renderer, e.g. general, table, dashboard."
+    },
+    "meta": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Page-level extension metadata."
+    },
+    "variables": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/Variable" },
+      "description": "Named variables for expressions and request templates."
+    },
+    "datasources": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/UiDatasource" },
+      "description": "Named HTTP datasources. Map keys are datasource identifiers."
+    },
+    "components": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/UiComponentSpec" },
+      "description": "Named components. Map keys must equal componentId."
+    },
+    "layout": { "$ref": "#/$defs/UiLayout" },
+    "actionDefinitions": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/UiAction" },
+      "description": "Reusable action definitions. Map keys must equal actionId."
+    },
+    "aiActions": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/UiAction" },
+      "description": "AI action definitions. Same structure as actionDefinitions."
+    },
+    "optionSources": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/SelectOptions" },
+      "description": "Reusable select option sources referenced by FormField.optionSource."
+    }
+  },
+  "$defs": {
+    "I18nObject": {
+      "type": "object",
+      "description": "Locale-to-string map. Keys are locale tags such as en, zh, zh-CN.",
+      "additionalProperties": { "type": "string" },
+      "minProperties": 1
+    },
+    "PageInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pageId"],
+      "properties": {
+        "pageId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Unique page identifier. Must match the pageKey in the resource path."
+        },
+        "title": { "$ref": "#/$defs/I18nObject" },
+        "name": { "$ref": "#/$defs/I18nObject" },
+        "description": { "$ref": "#/$defs/I18nObject" }
+      }
+    },
+    "Variable": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "type": { "type": "string" },
+        "defaultValue": {},
+        "required": { "type": "boolean" }
+      }
+    },
+    "UiDatasource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "url"],
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": ["GET", "POST", "PUT", "PATCH", "DELETE"]
+        },
+        "url": {
+          "type": "string",
+          "minLength": 1
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "headers": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "ApiRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "uri"],
+      "properties": {
+        "uri": {
+          "type": "string",
+          "minLength": 1
+        },
+        "method": {
+          "type": "string",
+          "enum": ["GET", "POST", "PUT", "PATCH", "DELETE"]
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "headers": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "VisibleCondition": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "expression": {
+          "type": "string",
+          "description": "Condition expression. Supports ${variable} placeholders."
+        },
+        "context": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "ComponentType": {
+      "type": "string",
+      "enum": [
+        "alert-card",
+        "banner-card",
+        "chart",
+        "form",
+        "gauge-card",
+        "info-card",
+        "layout",
+        "metric-card",
+        "page",
+        "plain-text",
+        "table",
+        "text-card"
+      ]
+    },
+    "LayoutType": {
+      "type": "string",
+      "enum": ["grid", "asider", "three-column", "tab"]
+    },
+    "ActionType": {
+      "type": "string",
+      "enum": [
+        "refresh",
+        "api",
+        "download",
+        "link",
+        "component",
+        "modal",
+        "form",
+        "dropdown",
+        "toggle",
+        "status",
+        "page",
+        "pop",
+        "closeModal",
+        "ai",
+        "import"
+      ]
+    },
+    "ActionStyle": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "variant": { "type": "string" },
+        "color": { "type": "string" },
+        "size": { "type": "string" },
+        "properties": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "ActionConfirm": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "title": { "$ref": "#/$defs/I18nObject" },
+        "message": { "$ref": "#/$defs/I18nObject" }
+      }
+    },
+    "FeedbackItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "status": { "type": "string" },
+        "message": { "$ref": "#/$defs/I18nObject" }
+      }
+    },
+    "ActionFeedback": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/FeedbackItem" }
+        }
+      }
+    },
+    "UiAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["actionId", "actionType"],
+      "properties": {
+        "actionId": { "type": "string", "minLength": 1 },
+        "actionType": { "$ref": "#/$defs/ActionType" },
+        "label": { "$ref": "#/$defs/I18nObject" },
+        "icon": { "type": "string" },
+        "scope": { "type": "string" },
+        "target": { "type": "string" },
+        "tooltip": { "$ref": "#/$defs/I18nObject" },
+        "visibleIf": { "$ref": "#/$defs/VisibleCondition" },
+        "style": { "$ref": "#/$defs/ActionStyle" },
+        "datasourceKey": { "type": "string" },
+        "request": { "$ref": "#/$defs/ApiRequest" },
+        "confirm": { "$ref": "#/$defs/ActionConfirm" },
+        "feedback": { "$ref": "#/$defs/ActionFeedback" },
+        "children": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/UiAction" }
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "OptionItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "value": {},
+        "label": { "$ref": "#/$defs/I18nObject" },
+        "icon": { "type": "string" },
+        "disabled": { "type": "boolean", "default": false },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "FormFieldValidation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "required": { "type": "boolean" },
+        "minLength": { "type": "integer", "minimum": 0 },
+        "maxLength": { "type": "integer", "minimum": 0 },
+        "pattern": { "type": "string" },
+        "message": { "$ref": "#/$defs/I18nObject" }
+      }
+    },
+    "FormField": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "field": { "type": "string" },
+        "name": { "type": "string" },
+        "label": { "$ref": "#/$defs/I18nObject" },
+        "type": { "type": "string" },
+        "required": { "type": "boolean" },
+        "placeholder": { "$ref": "#/$defs/I18nObject" },
+        "options": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/OptionItem" }
+        },
+        "datasource": { "type": "string" },
+        "valueField": { "type": "string" },
+        "labelField": { "type": "string" },
+        "validation": { "$ref": "#/$defs/FormFieldValidation" },
+        "maxLength": { "type": "integer", "minimum": 0 },
+        "span": { "type": "integer", "minimum": 1 },
+        "defaultValue": {},
+        "hidden": { "type": "boolean" },
+        "visibleIf": { "$ref": "#/$defs/VisibleCondition" },
+        "multiple": { "type": "boolean" },
+        "mode": { "type": "string" },
+        "optionSource": { "type": "string" },
+        "selectionType": { "type": "string" },
+        "min": { "type": "integer" },
+        "max": { "type": "integer" },
+        "format": { "type": "string" },
+        "layout": { "type": "string" },
+        "readonly": { "type": "boolean" },
+        "copyable": { "type": "boolean" },
+        "style": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "SelectOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/OptionItem" }
+        },
+        "datasource": { "$ref": "#/$defs/ApiRequest" },
+        "valueField": { "type": "string" },
+        "labelField": { "type": "string" }
+      }
+    },
+    "TableColumn": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "title": { "type": "string" },
+        "label": { "$ref": "#/$defs/I18nObject" },
+        "field": { "type": "string" },
+        "valueType": { "type": "string" },
+        "sortable": { "type": "boolean" },
+        "copyable": { "type": "boolean" },
+        "width": { "type": "integer", "minimum": 0 },
+        "action": { "$ref": "#/$defs/UiAction" },
+        "properties": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "UiTable": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "pagination": { "type": "boolean" },
+        "pageSize": { "type": "integer", "minimum": 1 },
+        "displayMode": { "type": "string" },
+        "columns": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/TableColumn" }
+        },
+        "rowAction": { "$ref": "#/$defs/UiAction" }
+      }
+    },
+    "ComponentRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["componentId"],
+      "properties": {
+        "componentId": { "type": "string", "minLength": 1 },
+        "span": { "type": "integer", "minimum": 1 },
+        "area": { "type": "string" },
+        "properties": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "UiLayout": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "layoutId": { "type": "string" },
+        "type": { "$ref": "#/$defs/LayoutType" },
+        "gap": { "type": "integer", "minimum": 0 },
+        "components": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ComponentRef" }
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "UiComponentSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["componentId", "type"],
+      "properties": {
+        "componentId": { "type": "string", "minLength": 1 },
+        "type": { "$ref": "#/$defs/ComponentType" },
+        "title": { "$ref": "#/$defs/I18nObject" },
+        "description": { "$ref": "#/$defs/I18nObject" },
+        "datasource": { "type": "string" },
+        "style": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "height": {},
+        "width": { "type": "string" },
+        "visibleIf": { "$ref": "#/$defs/VisibleCondition" },
+        "icon": { "type": "string" },
+        "table": { "$ref": "#/$defs/UiTable" },
+        "formFields": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/FormField" }
+        },
+        "layout": { "$ref": "#/$defs/UiLayout" },
+        "actions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/UiAction" }
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    }
+  }
+}
