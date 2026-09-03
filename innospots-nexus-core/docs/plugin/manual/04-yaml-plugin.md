@@ -131,7 +131,78 @@ requirements:
       channel: wecom
 ```
 
-## 8. 发现与拒绝
+## 8. `console@1` 页面与菜单声明
+
+YAML 插件可以通过 `spec.contributions` 声明控制台模块、页面树和菜单树：
+
+```yaml
+apiVersion: nexus.plugin/v1
+kind: Plugin
+metadata:
+  pluginId: com.example.sales-console
+  version: "1.0.0"
+spec:
+  apiVersion: 1
+  displayName:
+    zh-CN: 销售控制台
+    en-US: Sales Console
+  contributions:
+    - type: console
+      majorVersion: 1
+      modules:
+        - moduleKey: sales
+          displayName:
+            zh-CN: 销售
+            en-US: Sales
+          description:
+            zh-CN: 销售管理
+            en-US: Sales administration
+          pages:
+            - pageKey: order-list
+              pagePath: /sales/orders
+              children:
+                - pageKey: order-detail
+                  pagePath: /sales/orders/{orderId}
+          menuTree:
+            - menuKey: sales-root
+              title:
+                zh-CN: 销售
+                en-US: Sales
+              icon: shopping-cart
+              orderIndex: 10
+              children:
+                - menuKey: order-list
+                  title:
+                    zh-CN: 订单列表
+                    en-US: Order List
+                  icon: list
+                  orderIndex: 10
+                  pageKey: order-list
+```
+
+字段要点：
+
+- `modules[].pages` 必填且非空，表示页面树根节点列表。
+- `pages[].children` 表示页面父子关系，不从 `pagePath` 自动推导。
+- `modules[].menuTree` 可选；未进入菜单的页面仍然是合法 PAGE 资源。
+- 菜单节点二选一：目录节点使用 `children`，页面入口节点使用 `pageKey`。
+- `pageKey`、`menuKey` 在各自 module 内必须唯一；`moduleKey` 在运行时全局唯一。
+
+路径与 UiSpec 约束：
+
+- `pagePath` 必须以 `/` 开头，不能带 query 或 fragment。
+- `{variable}` 必须占完整路径段，例如 `/orders/{orderId}` 合法，`/orders/{orderId}.html` 非法。
+- 仅变量名不同但模板结构相同的路径视为冲突，例如 `/orders/{id}` 与 `/orders/{orderId}`。
+- 默认 UiSpec 文件路径为 `ui-spec/<moduleKey>/<pageKey>.yaml`。
+- UiSpec 中的 `pageInfo.pageId` 必须与声明里的 `pageKey` 一致。
+
+静态菜单限制：
+
+- 带必填路径变量的页面不能直接作为静态菜单入口。
+- 一个页面最多被一个静态菜单节点引用。
+- `orderIndex` 只影响同级显示顺序，不参与资源身份。
+
+## 9. 发现与拒绝
 
 - 结构/绑定错误：该 YAML 进入 `rejectedDefinitions`，其他插件不受影响。
 - 与 Java SPI 重复 `pluginId`：整个 Catalog 失败。

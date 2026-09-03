@@ -6,11 +6,11 @@
 |------|------|
 | [01-discovery-and-bootstrap.md](01-discovery-and-bootstrap.md) | 系统启动后如何发现插件、涉及哪些类、初始化序列 |
 | [02-development-workflow.md](02-development-workflow.md) | 二次开发总流程：定义 → 实现 → 配置 → 装配 |
-| [03-java-plugin.md](03-java-plugin.md) | Java SPI 插件写法与声明 API |
-| [04-yaml-plugin.md](04-yaml-plugin.md) | YAML 插件文件格式与字段说明 |
+| [03-java-plugin.md](03-java-plugin.md) | Java SPI 插件写法、声明 API 与 `console@1` Java 声明 |
+| [04-yaml-plugin.md](04-yaml-plugin.md) | YAML 插件文件格式、字段说明与 `console@1` YAML 声明 |
 | [05-runtime-lifecycle.md](05-runtime-lifecycle.md) | 注册后的初始化、调用、停止与销毁 |
 | [06-capability-usage.md](06-capability-usage.md) | Capability 声明、路由与宿主/插件内调用 |
-| [07-exposure-and-contribution.md](07-exposure-and-contribution.md) | Exposure（V1 未实现）与 `console@1` Contribution |
+| [07-exposure-and-contribution.md](07-exposure-and-contribution.md) | Exposure（V1 未实现）与 `console@1` Contribution、页面树和菜单树规则 |
 | [08-configuration.md](08-configuration.md) | 插件配置：schema、来源、优先级、文件/Nacos/环境变量如何接入 |
 | [09-host-assembly.md](09-host-assembly.md) | 应用宿主如何装配安装管理与运行时 |
 | [10-host-extension-guide.md](10-host-extension-guide.md) | 宿主各组件扩展点与实现方式（DAO、注册表、运行时配置） |

@@ -1,0 +1,12 @@
+pageInfo:
+  pageId: role-main
+  title:
+    en: Role Management
+    zh: 角色管理
+  name:
+    en: Role
+    zh: 角色
+  description:
+    en: Manage console roles and role bindings.
+    zh: 管理控制台角色及角色绑定。
+pageType: general

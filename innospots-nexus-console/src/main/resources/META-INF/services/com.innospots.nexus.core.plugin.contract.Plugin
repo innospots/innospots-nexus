@@ -1,0 +1,6 @@
+com.innospots.nexus.console.menu.entry.MenuEntryPlugin
+com.innospots.nexus.console.dictionary.entry.DictionaryEntryPlugin
+com.innospots.nexus.console.logger.entry.LoggerEntryPlugin
+com.innospots.nexus.console.permission.entry.PermissionEntryPlugin
+com.innospots.nexus.console.role.entry.RoleEntryPlugin
+com.innospots.nexus.console.plugin.entry.PluginManagementEntryPlugin

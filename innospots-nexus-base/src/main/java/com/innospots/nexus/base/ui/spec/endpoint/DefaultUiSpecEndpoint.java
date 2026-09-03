@@ -13,7 +13,7 @@ import java.util.Map;
  * Default {@link UiSpecEndpoint} that loads a classpath specification and
  * runs it through a configured filter chain.
  */
-public final class DefaultUiSpecEndpoint implements UiSpecEndpoint {
+public class DefaultUiSpecEndpoint implements UiSpecEndpoint {
 
     private final UiSpecLoader loader;
     private final UiSpecFilterChain filterChain;

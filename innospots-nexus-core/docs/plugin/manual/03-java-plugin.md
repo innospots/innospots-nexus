@@ -71,11 +71,69 @@ public final class MyPlugin implements Plugin {
 | `provide(type, providerId, tags, config, factory)` | 完整 Capability 声明 |
 | `require(type, required)` | Capability 依赖 |
 | `require(type, required, tags)` | 带标签约束的依赖 |
-| `contribute(PluginContribution)` | 如 `console@1` |
+| `contribute(PluginContribution)` | 添加 `console@1` 等静态贡献声明 |
 
 `provide` 的 `factory` 类型为 `CapabilityProviderFactory`，常用方法引用 `WeComSender::new`（要求 public 无参构造）。
 
-## 4. 实现 CapabilityProvider
+## 4. 声明 `console@1` 页面与菜单
+
+Java SPI 插件可以直接构造 `ConsolePluginContribution`，把控制台模块、页面树和菜单树挂到
+`PluginDefinition.Builder.contribute(...)`：
+
+```java
+import java.util.List;
+
+import com.innospots.nexus.base.i18n.I18nObject;
+import com.innospots.nexus.core.plugin.contribution.console.ConsoleModuleDeclaration;
+import com.innospots.nexus.core.plugin.contribution.console.ConsolePluginContribution;
+import com.innospots.nexus.core.plugin.contribution.console.MenuDeclaration;
+import com.innospots.nexus.core.plugin.contribution.console.UiSpecPageDeclaration;
+
+public final class ConsolePlugin implements Plugin {
+
+    @Override
+    public PluginDefinition definition() {
+        return PluginDefinition.builder("com.example.sales-console")
+                .name("Sales Console")
+                .version("1.0.0")
+                .contribute(new ConsolePluginContribution(List.of(
+                        new ConsoleModuleDeclaration(
+                                "sales",
+                                I18nObject.of("zh-CN", "销售"),
+                                I18nObject.of("zh-CN", "销售管理"),
+                                List.of(new UiSpecPageDeclaration(
+                                        "order-list",
+                                        "/sales/orders",
+                                        List.of(new UiSpecPageDeclaration(
+                                                "order-detail",
+                                                "/sales/orders/{orderId}",
+                                                List.of())))),
+                                List.of(MenuDeclaration.directory(
+                                        "sales-root",
+                                        I18nObject.of("zh-CN", "销售"),
+                                        "shopping-cart",
+                                        10,
+                                        List.of(MenuDeclaration.page(
+                                                "order-list",
+                                                I18nObject.of("zh-CN", "订单列表"),
+                                                "list",
+                                                10,
+                                                "order-list")))))))
+                .build();
+    }
+}
+```
+
+声明要点：
+
+- `ConsolePluginContribution` 的 `modules` 不能为空。
+- `ConsoleModuleDeclaration.pages` 必填，表达页面树；`menuTree` 可选，表达静态导航。
+- `UiSpecPageDeclaration.pageKey` 必须和 `ui-spec/<moduleKey>/<pageKey>.yaml` 中的
+  `pageInfo.pageId` 对齐。
+- `MenuDeclaration` 只能二选一：目录节点使用 `children`，页面入口使用 `pageKey`。
+- 带必填路径变量的页面，例如 `/sales/orders/{orderId}`，可以是合法 PAGE，但不能直接做静态菜单入口。
+
+## 5. 实现 CapabilityProvider
 
 ```java
 public final class WeComSender implements MessageSender {
@@ -101,14 +159,16 @@ public final class WeComSender implements MessageSender {
 }
 ```
 
-## 5. 约束
+## 6. 约束
 
 - `definition()` 必须无副作用、可重复调用；发现阶段只会调用一次。
 - `pluginId`、`providerId` 格式见 [04-yaml-plugin.md](04-yaml-plugin.md) 标识符一节（与 YAML 相同规则）。
 - 同一插件内 `providerId` 不能重复。
 - V1 不支持在 Java 定义里写 `exposures` 或远程 bind。
+- Java `console@1` 声明中的页面与菜单规则，与 YAML `contributions` 完全一致。
+- 页面树负责表达领域归属；菜单树负责表达导航结构，二者不要互相代替。
 
-## 6. 本地验证
+## 7. 本地验证
 
 ```java
 ClassLoader cl = ...; // 含插件 JAR
@@ -116,4 +176,4 @@ var report = new ClasspathPluginDiscovery(cl, decoders).discoverReport();
 assertThat(report.rejectedDefinitions()).isEmpty();
 ```
 
-参考测试：`ClasspathPluginDiscoveryTest`、`ManagedPluginTest`。
+参考测试：`ClasspathPluginDiscoveryTest`、`ManagedPluginTest`、`PluginConsoleAssemblyTest`。

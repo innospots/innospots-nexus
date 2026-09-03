@@ -1,0 +1,12 @@
+pageInfo:
+  pageId: logger-main
+  title:
+    en: Audit Logs
+    zh: 审计日志
+  name:
+    en: Logger
+    zh: 日志
+  description:
+    en: Review console audit and invocation logs.
+    zh: 查看控制台审计与调用日志。
+pageType: general

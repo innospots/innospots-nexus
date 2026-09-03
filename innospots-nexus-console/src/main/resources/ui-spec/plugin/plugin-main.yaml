@@ -1,0 +1,12 @@
+pageInfo:
+  pageId: plugin-main
+  title:
+    en: Plugin Management
+    zh: 插件管理
+  name:
+    en: Plugins
+    zh: 插件
+  description:
+    en: Install, enable, and monitor console plugins.
+    zh: 安装、启用并监控控制台插件。
+pageType: general

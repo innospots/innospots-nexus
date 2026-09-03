@@ -1,0 +1,12 @@
+pageInfo:
+  pageId: permission-main
+  title:
+    en: Permission Management
+    zh: 权限管理
+  name:
+    en: Permission
+    zh: 权限
+  description:
+    en: Manage console permission resources and grants.
+    zh: 管理控制台权限资源与授权。
+pageType: general

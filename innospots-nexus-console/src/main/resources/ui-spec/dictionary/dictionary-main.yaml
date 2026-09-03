@@ -1,0 +1,12 @@
+pageInfo:
+  pageId: dictionary-main
+  title:
+    en: Dictionary Management
+    zh: 字典管理
+  name:
+    en: Dictionary
+    zh: 字典
+  description:
+    en: Manage console dictionaries and dictionary items.
+    zh: 管理控制台字典及字典项。
+pageType: general

@@ -1,0 +1,12 @@
+pageInfo:
+  pageId: menu-main
+  title:
+    en: Menu Management
+    zh: 菜单管理
+  name:
+    en: Menu
+    zh: 菜单
+  description:
+    en: Manage console navigation menus.
+    zh: 管理控制台导航菜单。
+pageType: general

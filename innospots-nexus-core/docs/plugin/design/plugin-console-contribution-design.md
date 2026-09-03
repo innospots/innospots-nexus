@@ -43,10 +43,117 @@ public record ConsoleModuleDeclaration(
 }
 ```
 
+```java
+public record UiSpecPageDeclaration(
+        String pageKey,
+        String pagePath,
+        List<UiSpecPageDeclaration> children
+) {
+}
+```
+
+```java
+public record MenuDeclaration(
+        String menuKey,
+        I18nObject title,
+        String icon,
+        int orderIndex,
+        String pageKey,
+        List<MenuDeclaration> children
+) {
+}
+```
+
 Contribution 不重复 pluginId、version、displayName 或 description，这些来自所属 PluginDefinition。
 
 一个插件最多声明一份 `console@1`，但可以包含多个 module。没有管理页面的插件可以不声明；只有
 Console Contribution、没有 Capability 的插件也合法。
+
+### 3.1 YAML 声明形状
+
+```yaml
+contributions:
+  - type: console
+    majorVersion: 1
+    modules:
+      - moduleKey: sales
+        displayName:
+          zh-CN: 销售
+          en-US: Sales
+        description:
+          zh-CN: 销售管理
+          en-US: Sales administration
+        pages:
+          - pageKey: order-list
+            pagePath: /sales/orders
+            children:
+              - pageKey: order-detail
+                pagePath: /sales/orders/{orderId}
+        menuTree:
+          - menuKey: sales-root
+            title:
+              zh-CN: 销售
+              en-US: Sales
+            icon: shopping-cart
+            orderIndex: 10
+            children:
+              - menuKey: order-list
+                title:
+                  zh-CN: 订单列表
+                  en-US: Order List
+                icon: list
+                orderIndex: 10
+                pageKey: order-list
+```
+
+声明层面只负责：
+
+- 标识模块身份 `moduleKey`；
+- 建立页面树 `pages`；
+- 建立静态菜单树 `menuTree`；
+- 把页面身份关联到独立 UiSpec 文件。
+
+声明层面不负责：
+
+- 内嵌 UiSpec 组件树；
+- 声明页面 Java Endpoint；
+- 在 Contribution 中写权限主体、角色或授权策略。
+
+### 3.2 Java 声明形状
+
+```java
+PluginDefinition.builder("com.example.sales-console")
+        .name("Sales Console")
+        .version("1.0.0")
+        .contribute(new ConsolePluginContribution(List.of(
+                new ConsoleModuleDeclaration(
+                        "sales",
+                        I18nObject.of("zh-CN", "销售"),
+                        I18nObject.of("zh-CN", "销售管理"),
+                        List.of(new UiSpecPageDeclaration(
+                                "order-list",
+                                "/sales/orders",
+                                List.of(new UiSpecPageDeclaration(
+                                        "order-detail",
+                                        "/sales/orders/{orderId}",
+                                        List.of())))),
+                        List.of(MenuDeclaration.directory(
+                                "sales-root",
+                                I18nObject.of("zh-CN", "销售"),
+                                "shopping-cart",
+                                10,
+                                List.of(MenuDeclaration.page(
+                                        "order-list",
+                                        I18nObject.of("zh-CN", "订单列表"),
+                                        "list",
+                                        10,
+                                        "order-list")))))))
+        .build();
+```
+
+Java 和 YAML 的语义必须完全一致。宿主在发现阶段可以同时处理 Java SPI 和 YAML 插件，但最终进入
+运行时的都是同一组 `ConsolePluginContribution`、`ConsoleModuleDeclaration`、
+`UiSpecPageDeclaration` 和 `MenuDeclaration` 不可变声明对象。
 
 ## 4. 资源身份
 
@@ -131,6 +238,30 @@ uiSpec.pageInfo.pageId == pageKey
 HTTP method 不参与当前页面权限身份。同一个 URL 被不同页面引用时产生不同权限项；同一页面重复引用同一
 规范化 URL 时去重。
 
+### 7.1 页面与 UiSpec 的映射约束
+
+每个进入 `pages` 树的节点都必须能唯一定位一个 UiSpec 文件：
+
+```text
+ui-spec/<moduleKey>/<pageKey>.yaml
+```
+
+例如：
+
+```text
+moduleKey = sales
+pageKey = order-list
+=> ui-spec/sales/order-list.yaml
+```
+
+该 UiSpec 文件中的：
+
+```text
+pageInfo.pageId
+```
+
+必须与 `pageKey` 严格一致，否则声明无效。这样页面身份、资源权限和前端渲染入口都以同一稳定键对齐。
+
 ## 8. YAML 示例
 
 ```yaml
@@ -169,6 +300,37 @@ contributions:
 ```
 
 `message-detail` 是合法 PAGE，但不进入静态菜单，因为路径包含必填变量。
+
+## 8.1 Java 示例
+
+```java
+new ConsolePluginContribution(List.of(
+        new ConsoleModuleDeclaration(
+                "wecom",
+                I18nObject.of("zh-CN", "企业微信"),
+                I18nObject.of("zh-CN", "企业微信管理"),
+                List.of(new UiSpecPageDeclaration(
+                        "settings",
+                        "/wecom/settings",
+                        List.of(new UiSpecPageDeclaration(
+                                "message-detail",
+                                "/wecom/messages/{messageId}",
+                                List.of())))),
+                List.of(MenuDeclaration.directory(
+                        "wecom",
+                        I18nObject.of("zh-CN", "企业微信"),
+                        "wecom",
+                        10,
+                        List.of(MenuDeclaration.page(
+                                "settings",
+                                I18nObject.of("zh-CN", "设置"),
+                                "settings",
+                                10,
+                                "settings")))))))
+```
+
+推荐优先使用 `MenuDeclaration.directory(...)` 和 `MenuDeclaration.page(...)` 工厂方法，让目录节点与
+页面入口节点的互斥关系在构造时更直观。
 
 ## 9. Handler 和活动目录
 
