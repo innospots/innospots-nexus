@@ -25,9 +25,8 @@ class KernelModuleBoundaryTest {
     }
 
     @Test
-    void kernelKeepsTenantDomainsAndPermissionCatalogSync() throws ClassNotFoundException {
-        assertThat(Class.forName("com.innospots.nexus.kernel.permission.service.PermissionResourceSyncService"))
-                .isNotInterface();
+    void kernelKeepsTenantDomainsWithoutPermissionCatalogSync() throws ClassNotFoundException {
+        assertTypeAbsent("com.innospots.nexus.kernel.permission.service.PermissionResourceSyncService");
         assertThat(Class.forName("com.innospots.nexus.kernel.user.operator.UserOperator"))
                 .isNotInterface();
         assertThat(Class.forName("com.innospots.nexus.kernel.member.domain.entity.TenantMemberEntity"))

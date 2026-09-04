@@ -9,9 +9,21 @@ spring:
   sql:
     init:
       mode: always
-      schema-locations: classpath:nexus/schema/plugin-installation-h2.sql
+      schema-locations: classpath:nexus/schema/plugin-installation-h2.sql,classpath:nexus/schema/console-catalog-h2.sql
 
 server:
   port: 8081
+
+nexus:
+  workspace:
+    default-id: default
+  plugins:
+    required:
+      - com.innospots.nexus.console.menu
+      - com.innospots.nexus.console.dictionary
+      - com.innospots.nexus.console.logger
+      - com.innospots.nexus.console.permission
+      - com.innospots.nexus.console.role
+      - com.innospots.nexus.console.plugin-management
 
 # nexus.plugin.* / plugins.* 配置方式同 innospots-nexus-spring-app

@@ -5,8 +5,8 @@ import com.innospots.nexus.core.plugin.installation.service.PluginInstallationMa
 /**
  * 持有已启用的 {@link PluginInstallationManager}。
  *
- * <p>在 {@link PluginHostBootstrapRunner} 完成 {@code ApplicationRunner} 阶段后写入，
- * 供 REST 与业务代码访问。使用 {@code volatile} 保证启动线程与请求线程之间的可见性。</p>
+ * <p>在启动编排完成后写入，供延迟 Bean 与 REST 端点读取。
+ * 使用 {@code volatile} 保证启动线程与请求线程之间的可见性。</p>
  */
 public class PluginInstallationManagerHolder {
 
@@ -17,7 +17,7 @@ public class PluginInstallationManagerHolder {
      *
      * @param manager 已启动的安装管理器
      */
-    void setManager(PluginInstallationManager manager) {
+    public void setManager(PluginInstallationManager manager) {
         this.manager = manager;
     }
 

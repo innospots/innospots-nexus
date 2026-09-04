@@ -14,10 +14,10 @@ import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.base.thread.TLC;
 import com.innospots.nexus.console.permission.dao.PermissionGrantDao;
-import com.innospots.nexus.console.permission.dao.PermissionResourceDao;
+import com.innospots.nexus.core.plugin.contribution.console.catalog.dao.ConsoleCatalogResourceDao;
 import com.innospots.nexus.console.permission.domain.entity.PermissionGrantEntity;
-import com.innospots.nexus.console.permission.domain.entity.PermissionResourceEntity;
-import com.innospots.nexus.console.permission.domain.enums.PermissionResourceType;
+import com.innospots.nexus.core.plugin.contribution.console.catalog.domain.entity.ConsoleCatalogResourceEntity;
+import com.innospots.nexus.core.plugin.contribution.console.catalog.domain.enums.CatalogResourceType;
 import com.innospots.nexus.console.permission.domain.enums.PermissionSubjectType;
 import com.innospots.nexus.console.permission.domain.request.PermissionGrantItemRequest;
 import com.innospots.nexus.console.permission.domain.request.PermissionGrantReplaceRequest;
@@ -26,12 +26,12 @@ import com.innospots.nexus.console.permission.domain.request.PermissionGrantRepl
 public final class PermissionGrantService {
 
     private final PermissionGrantDao grantDao;
-    private final PermissionResourceDao resourceDao;
+    private final ConsoleCatalogResourceDao resourceDao;
 
     /** 创建授权服务。 */
     public PermissionGrantService(
             PermissionGrantDao grantDao,
-            PermissionResourceDao resourceDao
+            ConsoleCatalogResourceDao resourceDao
     ) {
         this.grantDao = require(grantDao, "grantDao");
         this.resourceDao = require(resourceDao, "resourceDao");
@@ -56,7 +56,7 @@ public final class PermissionGrantService {
         require(request, "request");
         validateSubject(subjectType, subjectId, request);
         String workspaceId = currentWorkspaceId();
-        List<PermissionResourceEntity> resources = resources(workspaceId, request.grants());
+        List<ConsoleCatalogResourceEntity> resources = resources(workspaceId, request.grants());
         validateParents(workspaceId, resources);
         // 全量替换保证撤销的资源不会残留，同时事务保证删除和新增一起提交。
         grantDao.delete(Wrappers.<PermissionGrantEntity>lambdaQuery()
@@ -65,7 +65,7 @@ public final class PermissionGrantService {
                 .eq(PermissionGrantEntity::getSubjectId, subjectId));
         for (int i = 0; i < request.grants().size(); i++) {
             PermissionGrantItemRequest item = request.grants().get(i);
-            PermissionResourceEntity resource = resources.get(i);
+            ConsoleCatalogResourceEntity resource = resources.get(i);
             PermissionGrantEntity grant = new PermissionGrantEntity();
             grant.setWorkspaceId(workspaceId);
             grant.setSubjectType(subjectType.name());
@@ -103,27 +103,26 @@ public final class PermissionGrantService {
         return new PermissionGrantReplaceRequest(grants);
     }
 
-    private List<PermissionResourceEntity> resources(
+    private List<ConsoleCatalogResourceEntity> resources(
             String workspaceId,
             List<PermissionGrantItemRequest> items
     ) {
         List<String> ids = items.stream().map(PermissionGrantItemRequest::resourceId).toList();
-        List<PermissionResourceEntity> found = ids.isEmpty()
+        List<ConsoleCatalogResourceEntity> found = ids.isEmpty()
                 ? List.of()
-                : resourceDao.selectList(Wrappers.<PermissionResourceEntity>lambdaQuery()
-                        .eq(PermissionResourceEntity::getWorkspaceId, workspaceId)
-                        .in(PermissionResourceEntity::getResourceId, ids));
+                : resourceDao.selectList(Wrappers.<ConsoleCatalogResourceEntity>lambdaQuery()
+                        .in(ConsoleCatalogResourceEntity::getResourceId, ids));
         if (found.size() != ids.size()) {
             invalid("Unknown permission resource");
         }
-        Map<String, PermissionResourceEntity> byId = found.stream()
+        Map<String, ConsoleCatalogResourceEntity> byId = found.stream()
                 .collect(Collectors.toMap(
-                        PermissionResourceEntity::getResourceId,
+                        ConsoleCatalogResourceEntity::getResourceId,
                         value -> value));
-        List<PermissionResourceEntity> ordered = ids.stream()
+        List<ConsoleCatalogResourceEntity> ordered = ids.stream()
                 .map(byId::get)
                 .toList();
-        for (PermissionResourceEntity resource : ordered) {
+        for (ConsoleCatalogResourceEntity resource : ordered) {
             if (!isGrantable(resource)) {
                 invalid("Resource cannot be granted: " + resource.getResourceKey());
             }
@@ -131,29 +130,28 @@ public final class PermissionGrantService {
         return ordered;
     }
 
-    private void validateParents(String workspaceId, List<PermissionResourceEntity> resources) {
+    private void validateParents(String workspaceId, List<ConsoleCatalogResourceEntity> resources) {
         Set<String> selectedIds = resources.stream()
-                .map(PermissionResourceEntity::getResourceId)
+                .map(ConsoleCatalogResourceEntity::getResourceId)
                 .collect(Collectors.toSet());
         Set<String> parentIds = resources.stream()
-                .map(PermissionResourceEntity::getParentResourceId)
+                .map(ConsoleCatalogResourceEntity::getParentResourceId)
                 .filter(value -> value != null && !value.isBlank())
                 .collect(Collectors.toSet());
         if (parentIds.isEmpty()) {
             return;
         }
-        Map<String, PermissionResourceEntity> parents = resourceDao.selectList(
-                        Wrappers.<PermissionResourceEntity>lambdaQuery()
-                                .eq(PermissionResourceEntity::getWorkspaceId, workspaceId)
-                                .in(PermissionResourceEntity::getResourceId, parentIds))
+        Map<String, ConsoleCatalogResourceEntity> parents = resourceDao.selectList(
+                        Wrappers.<ConsoleCatalogResourceEntity>lambdaQuery()
+                                .in(ConsoleCatalogResourceEntity::getResourceId, parentIds))
                 .stream()
-                .collect(Collectors.toMap(PermissionResourceEntity::getResourceId, value -> value));
-        for (PermissionResourceEntity resource : resources) {
+                .collect(Collectors.toMap(ConsoleCatalogResourceEntity::getResourceId, value -> value));
+        for (ConsoleCatalogResourceEntity resource : resources) {
             String parentId = resource.getParentResourceId();
             if (parentId == null || parentId.isBlank()) {
                 continue;
             }
-            PermissionResourceEntity parent = parents.get(parentId);
+            ConsoleCatalogResourceEntity parent = parents.get(parentId);
             if (parent == null || !BasicStatus.ENABLED.name().equals(parent.getStatus())) {
                 invalid("Unknown permission resource parent");
             }
@@ -178,12 +176,12 @@ public final class PermissionGrantService {
 
     private String normalizeConstraint(
             String value,
-            PermissionResourceEntity resource
+            ConsoleCatalogResourceEntity resource
     ) {
         if (value == null || value.isBlank()) {
             return null;
         }
-        if (!PermissionResourceType.DATASOURCE.name().equals(resource.getResourceType())) {
+        if (!CatalogResourceType.DATASOURCE.name().equals(resource.getResourceType())) {
             invalid("Only datasource grants may contain constraints");
         }
         if (value.length() > 10000) {
@@ -192,9 +190,9 @@ public final class PermissionGrantService {
         return value;
     }
 
-    private boolean isGrantable(PermissionResourceEntity resource) {
+    private boolean isGrantable(ConsoleCatalogResourceEntity resource) {
         return resource != null
-                && !PermissionResourceType.MODULE.name().equals(resource.getResourceType())
+                && !CatalogResourceType.MODULE.name().equals(resource.getResourceType())
                 && BasicStatus.ENABLED.name().equals(resource.getStatus());
     }
 

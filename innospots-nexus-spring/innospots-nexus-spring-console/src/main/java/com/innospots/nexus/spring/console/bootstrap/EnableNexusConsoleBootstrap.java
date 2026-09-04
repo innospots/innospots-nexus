@@ -9,6 +9,7 @@ import java.lang.annotation.Target;
 import org.springframework.context.annotation.Import;
 
 import com.innospots.nexus.spring.bootstrap.NexusAppBootstrapConfiguration;
+import com.innospots.nexus.spring.bootstrap.NexusStartupConfiguration;
 
 /**
  * 显式启用管理控制台启动引导装配。
@@ -21,7 +22,9 @@ import com.innospots.nexus.spring.bootstrap.NexusAppBootstrapConfiguration;
 @Documented
 @Import({
         NexusAppBootstrapConfiguration.class,
-        NexusConsoleBootstrapConfiguration.class
+        NexusStartupConfiguration.class,
+        NexusConsoleBootstrapConfiguration.class,
+        ConsoleCatalogConfiguration.class
 })
 public @interface EnableNexusConsoleBootstrap {
 }

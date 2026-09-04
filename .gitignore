@@ -30,3 +30,4 @@ replay_pid*
 
 *.iml
 logs
+.vscode

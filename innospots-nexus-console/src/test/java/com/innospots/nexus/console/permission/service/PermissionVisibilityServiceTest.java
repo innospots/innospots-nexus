@@ -6,10 +6,10 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 import com.innospots.nexus.console.permission.dao.PermissionGrantDao;
-import com.innospots.nexus.console.permission.dao.PermissionResourceDao;
+import com.innospots.nexus.core.plugin.contribution.console.catalog.dao.ConsoleCatalogResourceDao;
 import com.innospots.nexus.console.permission.domain.entity.PermissionGrantEntity;
-import com.innospots.nexus.console.permission.domain.entity.PermissionResourceEntity;
-import com.innospots.nexus.console.permission.domain.enums.PermissionResourceType;
+import com.innospots.nexus.core.plugin.contribution.console.catalog.domain.entity.ConsoleCatalogResourceEntity;
+import com.innospots.nexus.core.plugin.contribution.console.catalog.domain.enums.CatalogResourceType;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubject;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,41 +21,41 @@ class PermissionVisibilityServiceTest {
 
     @Test
     void returnsGrantedTreeAndDoesNotExposeOrphanedActions() {
-        PermissionResourceEntity module = resource("module", PermissionResourceType.MODULE,
+        ConsoleCatalogResourceEntity module = resource("module", CatalogResourceType.MODULE,
                 "module:sales", null);
-        PermissionResourceEntity menu = resource("menu", PermissionResourceType.MENU,
+        ConsoleCatalogResourceEntity menu = resource("menu", CatalogResourceType.MENU,
                 "menu:sales.orders", "module");
-        PermissionResourceEntity page = resource("page", PermissionResourceType.PAGE,
+        ConsoleCatalogResourceEntity page = resource("page", CatalogResourceType.PAGE,
                 "page:sales.orders", "module");
-        PermissionResourceEntity action = resource("action", PermissionResourceType.ACTION,
+        ConsoleCatalogResourceEntity action = resource("action", CatalogResourceType.ACTION,
                 "action:sales.orders.approve", "page");
-        PermissionResourceEntity datasource = resource("datasource",
-                PermissionResourceType.DATASOURCE,
+        ConsoleCatalogResourceEntity datasource = resource("datasource",
+                CatalogResourceType.DATASOURCE,
                 "datasource:sales.orders.approve", "page");
-        List<PermissionResourceEntity> resources = List.of(module, menu, page, action, datasource);
-        PermissionResourceDao resourceDao = mock(PermissionResourceDao.class);
+        List<ConsoleCatalogResourceEntity> resources = List.of(module, menu, page, action, datasource);
+        ConsoleCatalogResourceDao resourceDao = mock(ConsoleCatalogResourceDao.class);
         when(resourceDao.selectList(any())).thenReturn(resources);
         PermissionGrantDao grantDao = mock(PermissionGrantDao.class);
         when(grantDao.selectList(any())).thenReturn(
                 List.of(grant("menu"), grant("page"), grant("action"), grant("datasource")),
                 List.of());
 
-        List<PermissionResourceEntity> visible = new PermissionVisibilityService(
+        List<ConsoleCatalogResourceEntity> visible = new PermissionVisibilityService(
                 resourceDao, grantDao).visible(
                 "1",
                 new AuthorizationSubject("user-1", Set.of("role-1"), Set.of(), false));
 
-        assertThat(visible).extracting(PermissionResourceEntity::getResourceId)
+        assertThat(visible).extracting(ConsoleCatalogResourceEntity::getResourceId)
                 .containsExactly("module", "menu", "page", "action", "datasource");
     }
 
-    private static PermissionResourceEntity resource(
+    private static ConsoleCatalogResourceEntity resource(
             String id,
-            PermissionResourceType type,
+            CatalogResourceType type,
             String resourceKey,
             String parentId
     ) {
-        PermissionResourceEntity resource = new PermissionResourceEntity();
+        ConsoleCatalogResourceEntity resource = new ConsoleCatalogResourceEntity();
         resource.setResourceId(id);
         resource.setResourceType(type.name());
         resource.setResourceKey(resourceKey);

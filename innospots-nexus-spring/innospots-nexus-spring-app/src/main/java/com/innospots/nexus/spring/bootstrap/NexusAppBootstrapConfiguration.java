@@ -23,7 +23,10 @@ import com.innospots.nexus.core.persistence.handler.AuditMetaObjectHandler;
 @Configuration
 @AutoConfigureAfter({DataSourceAutoConfiguration.class, MybatisPlusAutoConfiguration.class})
 @MapperScan(
-        basePackages = "com.innospots.nexus.core.plugin.installation.dao",
+        basePackages = {
+                "com.innospots.nexus.core.plugin.installation.dao",
+                "com.innospots.nexus.core.plugin.contribution.console.catalog.dao"
+        },
         annotationClass = Mapper.class,
         sqlSessionFactoryRef = "sqlSessionFactory")
 public class NexusAppBootstrapConfiguration {

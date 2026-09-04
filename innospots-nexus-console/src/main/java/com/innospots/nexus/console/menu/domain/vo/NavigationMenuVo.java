@@ -7,14 +7,18 @@ import com.innospots.nexus.console.menu.domain.enums.MenuOpenMode;
 /**
  * Read-only navigation node delivered to the management frontend.
  *
- * @param menuKey      stable menu key
- * @param menuName     display name
- * @param routePath    internal navigation path
- * @param componentKey logical frontend component identifier
- * @param externalUrl  external destination
- * @param icon         optional icon identifier
- * @param openMode     browser target mode
- * @param children     nested visible navigation nodes
+ * @param menuKey       stable menu key
+ * @param menuName      display name
+ * @param routePath     internal navigation path
+ * @param componentKey  logical frontend component identifier
+ * @param externalUrl   external destination
+ * @param icon          optional icon identifier
+ * @param openMode      browser target mode
+ * @param resourceId    permission resource id
+ * @param ownerPluginId source plugin id
+ * @param moduleKey     console module key
+ * @param pageKey       linked page identity
+ * @param children      nested visible navigation nodes
  */
 public record NavigationMenuVo(
         String menuKey,
@@ -24,6 +28,10 @@ public record NavigationMenuVo(
         String externalUrl,
         String icon,
         MenuOpenMode openMode,
+        String resourceId,
+        String ownerPluginId,
+        String moduleKey,
+        String pageKey,
         List<NavigationMenuVo> children
 ) {
 

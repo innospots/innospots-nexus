@@ -1,7 +1,7 @@
 package com.innospots.nexus.console.permission.domain.vo;
 
-import com.innospots.nexus.console.permission.domain.entity.PermissionResourceEntity;
-import com.innospots.nexus.console.permission.domain.enums.PermissionResourceType;
+import com.innospots.nexus.core.plugin.contribution.console.catalog.domain.entity.ConsoleCatalogResourceEntity;
+import com.innospots.nexus.core.plugin.contribution.console.catalog.domain.enums.CatalogResourceType;
 
 /** 面向管理端和前端的权限资源目录视图。 */
 public record PermissionResourceVo(
@@ -12,7 +12,7 @@ public record PermissionResourceVo(
         /** 所属模块 key。 */
         String moduleKey,
         /** 资源类型。 */
-        PermissionResourceType resourceType,
+        CatalogResourceType resourceType,
         /** 稳定资源 key。 */
         String resourceKey,
         /** 资源父节点主键。 */
@@ -41,12 +41,12 @@ public record PermissionResourceVo(
      * @param entity 持久化资源记录
      * @return 资源目录视图
      */
-    public static PermissionResourceVo from(PermissionResourceEntity entity) {
+    public static PermissionResourceVo from(ConsoleCatalogResourceEntity entity) {
         return new PermissionResourceVo(
                 entity.getResourceId(),
                 entity.getOwnerPluginId(),
                 entity.getModuleKey(),
-                PermissionResourceType.valueOf(entity.getResourceType()),
+                CatalogResourceType.valueOf(entity.getResourceType()),
                 entity.getResourceKey(),
                 entity.getParentResourceId(),
                 entity.getPageKey(),

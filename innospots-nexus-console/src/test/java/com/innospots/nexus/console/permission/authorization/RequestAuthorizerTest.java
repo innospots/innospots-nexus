@@ -6,10 +6,10 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 import com.innospots.nexus.console.permission.dao.PermissionGrantDao;
-import com.innospots.nexus.console.permission.dao.PermissionResourceDao;
+import com.innospots.nexus.core.plugin.contribution.console.catalog.dao.ConsoleCatalogResourceDao;
 import com.innospots.nexus.console.permission.domain.entity.PermissionGrantEntity;
-import com.innospots.nexus.console.permission.domain.entity.PermissionResourceEntity;
-import com.innospots.nexus.console.permission.domain.enums.PermissionResourceType;
+import com.innospots.nexus.core.plugin.contribution.console.catalog.domain.entity.ConsoleCatalogResourceEntity;
+import com.innospots.nexus.core.plugin.contribution.console.catalog.domain.enums.CatalogResourceType;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -20,11 +20,11 @@ class RequestAuthorizerTest {
 
     @Test
     void checksPageThenDatasourceAndMergesRoleAndOrgUnitConstraints() {
-        PermissionResourceEntity page = resource(
-                "page-1", PermissionResourceType.PAGE, "page:sales.orders");
+        ConsoleCatalogResourceEntity page = resource(
+                "page-1", CatalogResourceType.PAGE, "page:sales.orders");
         page.setPageKey("sales.orders");
-        PermissionResourceEntity datasource = resource(
-                "datasource-1", PermissionResourceType.DATASOURCE,
+        ConsoleCatalogResourceEntity datasource = resource(
+                "datasource-1", CatalogResourceType.DATASOURCE,
                 "datasource:sales.orders.approve");
         datasource.setPageKey("sales.orders");
         datasource.setDatasourceKey("approve");
@@ -34,7 +34,7 @@ class RequestAuthorizerTest {
         PermissionGrantEntity roleGrant = grant("datasource-1", "region = EAST");
         PermissionGrantEntity orgUnitGrant = grant("datasource-1", "tenant = NORTH");
 
-        PermissionResourceDao resourceDao = mock(PermissionResourceDao.class);
+        ConsoleCatalogResourceDao resourceDao = mock(ConsoleCatalogResourceDao.class);
         when(resourceDao.selectList(any())).thenReturn(List.of(page), List.of(datasource));
         PermissionGrantDao grantDao = mock(PermissionGrantDao.class);
         when(grantDao.selectList(any())).thenReturn(
@@ -60,9 +60,9 @@ class RequestAuthorizerTest {
 
     @Test
     void deniesBeforeDatasourceLookupWhenPageGrantIsMissing() {
-        PermissionResourceEntity page = resource(
-                "page-1", PermissionResourceType.PAGE, "page:sales.orders");
-        PermissionResourceDao resourceDao = mock(PermissionResourceDao.class);
+        ConsoleCatalogResourceEntity page = resource(
+                "page-1", CatalogResourceType.PAGE, "page:sales.orders");
+        ConsoleCatalogResourceDao resourceDao = mock(ConsoleCatalogResourceDao.class);
         when(resourceDao.selectList(any())).thenReturn(List.of(page));
         PermissionGrantDao grantDao = mock(PermissionGrantDao.class);
         when(grantDao.selectList(any())).thenReturn(List.of());
@@ -79,12 +79,12 @@ class RequestAuthorizerTest {
         assertThat(decision.denyReason()).isEqualTo("Page permission is required");
     }
 
-    private static PermissionResourceEntity resource(
+    private static ConsoleCatalogResourceEntity resource(
             String resourceId,
-            PermissionResourceType type,
+            CatalogResourceType type,
             String resourceKey
     ) {
-        PermissionResourceEntity resource = new PermissionResourceEntity();
+        ConsoleCatalogResourceEntity resource = new ConsoleCatalogResourceEntity();
         resource.setResourceId(resourceId);
         resource.setResourceType(type.name());
         resource.setResourceKey(resourceKey);

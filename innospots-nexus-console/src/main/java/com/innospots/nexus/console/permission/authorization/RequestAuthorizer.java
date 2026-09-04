@@ -7,10 +7,10 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 
 import com.innospots.nexus.base.domain.enums.BasicStatus;
 import com.innospots.nexus.console.permission.dao.PermissionGrantDao;
-import com.innospots.nexus.console.permission.dao.PermissionResourceDao;
+import com.innospots.nexus.core.plugin.contribution.console.catalog.dao.ConsoleCatalogResourceDao;
 import com.innospots.nexus.console.permission.domain.entity.PermissionGrantEntity;
-import com.innospots.nexus.console.permission.domain.entity.PermissionResourceEntity;
-import com.innospots.nexus.console.permission.domain.enums.PermissionResourceType;
+import com.innospots.nexus.core.plugin.contribution.console.catalog.domain.entity.ConsoleCatalogResourceEntity;
+import com.innospots.nexus.core.plugin.contribution.console.catalog.domain.enums.CatalogResourceType;
 import com.innospots.nexus.console.permission.domain.enums.PermissionSubjectType;
 
 /**
@@ -21,12 +21,12 @@ import com.innospots.nexus.console.permission.domain.enums.PermissionSubjectType
  */
 public final class RequestAuthorizer {
 
-    private final PermissionResourceDao resourceDao;
+    private final ConsoleCatalogResourceDao resourceDao;
     private final PermissionGrantDao grantDao;
 
     /** 使用权限目录和授权记录存储创建请求鉴权器。 */
     public RequestAuthorizer(
-            PermissionResourceDao resourceDao,
+            ConsoleCatalogResourceDao resourceDao,
             PermissionGrantDao grantDao
     ) {
         this.resourceDao = resourceDao;
@@ -49,7 +49,7 @@ public final class RequestAuthorizer {
         }
         String pageKey = request.pageKey().trim();
         // pageKey 来自请求头，页面权限是所有 datasource 请求的第一道边界。
-        PermissionResourceEntity page = page(request.workspaceId(), pageKey);
+        ConsoleCatalogResourceEntity page = page(pageKey);
         if (page == null) {
             return AuthorizationDecision.deny("Page is not available");
         }
@@ -59,12 +59,12 @@ public final class RequestAuthorizer {
         }
 
         // 只有唯一的 method + URL 映射才可继续，避免同一路径对应多个 datasource 时出现歧义。
-        List<PermissionResourceEntity> matches = datasources(
-                request.workspaceId(), pageKey, request.method(), request.path());
+        List<ConsoleCatalogResourceEntity> matches = datasources(
+                pageKey, request.method(), request.path());
         if (matches.size() != 1) {
             return AuthorizationDecision.deny("Datasource is not uniquely registered");
         }
-        PermissionResourceEntity datasource = matches.getFirst();
+        ConsoleCatalogResourceEntity datasource = matches.getFirst();
         List<PermissionGrantEntity> grants = grants(
                 request.workspaceId(), datasource.getResourceId(), request.subject());
         if (!request.subject().administrator() && grants.isEmpty()) {
@@ -80,33 +80,30 @@ public final class RequestAuthorizer {
                 request.workspaceId(), pageKey, datasource.getDatasourceKey(), constraints));
     }
 
-    private PermissionResourceEntity page(String workspaceId, String pageKey) {
-        List<PermissionResourceEntity> pages = resourceDao.selectList(
-                Wrappers.<PermissionResourceEntity>lambdaQuery()
-                        .eq(PermissionResourceEntity::getWorkspaceId, workspaceId)
-                        .eq(PermissionResourceEntity::getResourceType,
-                                PermissionResourceType.PAGE.name())
-                        .eq(PermissionResourceEntity::getResourceKey, "page:" + pageKey)
-                        .eq(PermissionResourceEntity::getStatus, BasicStatus.ENABLED.name()));
+    private ConsoleCatalogResourceEntity page(String pageKey) {
+        List<ConsoleCatalogResourceEntity> pages = resourceDao.selectList(
+                Wrappers.<ConsoleCatalogResourceEntity>lambdaQuery()
+                        .eq(ConsoleCatalogResourceEntity::getResourceType,
+                                CatalogResourceType.PAGE.name())
+                        .eq(ConsoleCatalogResourceEntity::getResourceKey, "page:" + pageKey)
+                        .eq(ConsoleCatalogResourceEntity::getStatus, BasicStatus.ENABLED.name()));
         return pages.size() == 1 ? pages.getFirst() : null;
     }
 
-    private List<PermissionResourceEntity> datasources(
-            String workspaceId,
+    private List<ConsoleCatalogResourceEntity> datasources(
             String pageKey,
             String method,
             String path
     ) {
         String actualMethod = method.trim().toUpperCase();
         String actualPath = normalizePath(path);
-        List<PermissionResourceEntity> candidates = resourceDao.selectList(
-                Wrappers.<PermissionResourceEntity>lambdaQuery()
-                        .eq(PermissionResourceEntity::getWorkspaceId, workspaceId)
-                        .eq(PermissionResourceEntity::getPageKey, pageKey)
-                        .eq(PermissionResourceEntity::getResourceType,
-                                PermissionResourceType.DATASOURCE.name())
-                        .eq(PermissionResourceEntity::getRequestMethod, actualMethod)
-                        .eq(PermissionResourceEntity::getStatus, BasicStatus.ENABLED.name()));
+        List<ConsoleCatalogResourceEntity> candidates = resourceDao.selectList(
+                Wrappers.<ConsoleCatalogResourceEntity>lambdaQuery()
+                        .eq(ConsoleCatalogResourceEntity::getPageKey, pageKey)
+                        .eq(ConsoleCatalogResourceEntity::getResourceType,
+                                CatalogResourceType.DATASOURCE.name())
+                        .eq(ConsoleCatalogResourceEntity::getRequestMethod, actualMethod)
+                        .eq(ConsoleCatalogResourceEntity::getStatus, BasicStatus.ENABLED.name()));
         return candidates.stream()
                 .filter(value -> matches(value.getRequestUrl(), actualPath))
                 .toList();

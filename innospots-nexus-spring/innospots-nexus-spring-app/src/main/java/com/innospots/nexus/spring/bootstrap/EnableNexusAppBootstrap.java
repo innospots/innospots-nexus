@@ -19,6 +19,6 @@ import org.springframework.context.annotation.Import;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Import(NexusAppBootstrapConfiguration.class)
+@Import({NexusAppBootstrapConfiguration.class, NexusStartupConfiguration.class})
 public @interface EnableNexusAppBootstrap {
 }

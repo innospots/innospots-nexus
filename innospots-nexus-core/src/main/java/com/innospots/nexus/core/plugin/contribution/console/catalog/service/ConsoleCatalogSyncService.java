@@ -1,4 +1,4 @@
-package com.innospots.nexus.kernel.permission.service;
+package com.innospots.nexus.core.plugin.contribution.console.catalog.service;
 
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -6,9 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import jakarta.transaction.Transactional;
 
 import com.innospots.nexus.base.domain.enums.BasicStatus;
 import com.innospots.nexus.base.exception.NexusException;
@@ -22,26 +19,25 @@ import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributionC
 import com.innospots.nexus.core.plugin.contribution.console.ConsoleModuleDeclaration;
 import com.innospots.nexus.core.plugin.contribution.console.MenuDeclaration;
 import com.innospots.nexus.core.plugin.contribution.console.UiSpecPageDeclaration;
-import com.innospots.nexus.console.permission.dao.PermissionResourceDao;
-import com.innospots.nexus.console.permission.domain.entity.PermissionResourceEntity;
-import com.innospots.nexus.console.permission.domain.enums.PermissionResourceType;
-import com.innospots.nexus.console.permission.domain.vo.PermissionResourceSyncVo;
+import com.innospots.nexus.core.plugin.contribution.console.catalog.dao.ConsoleCatalogResourceDao;
+import com.innospots.nexus.core.plugin.contribution.console.catalog.domain.entity.ConsoleCatalogResourceEntity;
+import com.innospots.nexus.core.plugin.contribution.console.catalog.domain.enums.CatalogResourceType;
+import com.innospots.nexus.core.plugin.contribution.console.catalog.domain.model.CatalogSyncResult;
 
 /**
- * 将已激活 Console Contribution 和 UiSpec 声明显式同步为规范化权限资源目录。
+ * 将已激活 Console Contribution 和 UiSpec 同步为宿主级目录索引。
  *
- * <p>Console Contribution 和 UiSpec 是唯一事实源，本服务只负责发现、校验并维护项目内的索引记录。同步不会自动
- * 授权，也不会在模块加载时隐式写入数据库。</p>
+ * <p>Console Contribution 和 UiSpec 是唯一事实源；同步不会自动授权。</p>
  */
-public final class PermissionResourceSyncService {
+public final class ConsoleCatalogSyncService {
 
-    private final PermissionResourceDao resourceDao;
+    private final ConsoleCatalogResourceDao resourceDao;
     private final ConsoleContributionCatalog contributionCatalog;
     private final UiSpecLoader uiSpecLoader;
 
-    /** 创建权限资源目录同步服务。 */
-    public PermissionResourceSyncService(
-            PermissionResourceDao resourceDao,
+    /** 创建 Console 目录同步服务。 */
+    public ConsoleCatalogSyncService(
+            ConsoleCatalogResourceDao resourceDao,
             ConsoleContributionCatalog contributionCatalog,
             UiSpecLoader uiSpecLoader
     ) {
@@ -51,18 +47,13 @@ public final class PermissionResourceSyncService {
     }
 
     /**
-     * 同步当前项目中所有已激活插件贡献的模块、菜单、页面、action 和 datasource。
-     *
-     * <p>方法先在内存中完成全部来源校验，再在事务中插入或更新目录；来源中已不存在的资源标记为
-     * 禁用，以保留历史授权记录但阻止其继续产生权限。</p>
+     * 同步当前宿主全部 ACTIVE 插件贡献的模块、菜单、页面、action 和 datasource。
      *
      * @return 本次创建、更新和禁用的资源数量
      */
-    @Transactional
-    public PermissionResourceSyncVo sync() {
-        String workspaceId = currentWorkspaceId();
+    public CatalogSyncResult sync() {
         List<ResourceDefinition> definitions = discover();
-        Map<String, PermissionResourceEntity> existing = loadExisting(workspaceId);
+        Map<String, ConsoleCatalogResourceEntity> existing = loadExisting();
         int created = 0;
         int updated = 0;
         Set<String> activeKeys = new HashSet<>();
@@ -70,25 +61,25 @@ public final class PermissionResourceSyncService {
         // 先发现完整资源集合，确保任意定义校验失败时不会留下半套目录。
         for (ResourceDefinition definition : definitions) {
             activeKeys.add(definition.resourceKey());
-            PermissionResourceEntity entity = existing.get(definition.resourceKey());
+            ConsoleCatalogResourceEntity entity = existing.get(definition.resourceKey());
             boolean isNew = entity == null;
             if (isNew) {
-                entity = new PermissionResourceEntity();
+                entity = new ConsoleCatalogResourceEntity();
             }
             if (isNew) {
-                apply(entity, definition, existing, workspaceId);
+                apply(entity, definition, existing);
                 resourceDao.insert(entity);
                 existing.put(definition.resourceKey(), entity);
                 created++;
             } else if (changed(entity, definition, existing)) {
-                apply(entity, definition, existing, workspaceId);
+                apply(entity, definition, existing);
                 resourceDao.updateById(entity);
                 updated++;
             }
         }
 
         int disabled = disableMissing(existing, activeKeys);
-        return new PermissionResourceSyncVo(created, updated, disabled);
+        return new CatalogSyncResult(created, updated, disabled);
     }
 
     private List<ResourceDefinition> discover() {
@@ -121,7 +112,7 @@ public final class PermissionResourceSyncService {
             add(definitions, new ResourceDefinition(
                     ownerPluginId,
                     module.moduleKey(),
-                    PermissionResourceType.MENU,
+                    CatalogResourceType.MENU,
                     resourceKey,
                     parentResourceKey == null ? module.resourceKey() : parentResourceKey,
                     pageKey,
@@ -151,7 +142,7 @@ public final class PermissionResourceSyncService {
             add(definitions, new ResourceDefinition(
                     ownerPluginId,
                     module.moduleKey(),
-                    PermissionResourceType.PAGE,
+                    CatalogResourceType.PAGE,
                     pageResourceKey,
                     parentResourceKey == null ? module.resourceKey() : parentResourceKey,
                     pageIdentity,
@@ -206,7 +197,7 @@ public final class PermissionResourceSyncService {
         add(definitions, new ResourceDefinition(
                 ownerPluginId,
                 module.moduleKey(),
-                PermissionResourceType.ACTION,
+                CatalogResourceType.ACTION,
                 resourceKey,
                 pageResourceKey,
                 pageIdentity,
@@ -249,7 +240,7 @@ public final class PermissionResourceSyncService {
             add(definitions, new ResourceDefinition(
                     ownerPluginId,
                     module.moduleKey(),
-                    PermissionResourceType.DATASOURCE,
+                    CatalogResourceType.DATASOURCE,
                     "datasource:" + pageIdentity + "." + datasourceKey,
                     pageResourceKey,
                 pageIdentity,
@@ -269,7 +260,7 @@ public final class PermissionResourceSyncService {
         return new ResourceDefinition(
                 ownerPluginId,
                 module.moduleKey(),
-                PermissionResourceType.MODULE,
+                CatalogResourceType.MODULE,
                 module.resourceKey(),
                 null,
                 null,
@@ -296,27 +287,23 @@ public final class PermissionResourceSyncService {
     private void add(Map<String, ResourceDefinition> definitions, ResourceDefinition definition) {
         ResourceDefinition previous = definitions.putIfAbsent(definition.resourceKey(), definition);
         if (previous != null && !previous.equals(definition)) {
-            invalid("Conflicting permission resource: " + definition.resourceKey());
+            invalid("Conflicting catalog resource: " + definition.resourceKey());
         }
     }
 
-    private Map<String, PermissionResourceEntity> loadExisting(String workspaceId) {
-        Map<String, PermissionResourceEntity> result = new LinkedHashMap<>();
-        for (PermissionResourceEntity entity : resourceDao.selectList(
-                Wrappers.<PermissionResourceEntity>lambdaQuery()
-                        .eq(PermissionResourceEntity::getWorkspaceId, workspaceId))) {
+    private Map<String, ConsoleCatalogResourceEntity> loadExisting() {
+        Map<String, ConsoleCatalogResourceEntity> result = new LinkedHashMap<>();
+        for (ConsoleCatalogResourceEntity entity : resourceDao.selectList(null)) {
             result.put(entity.getResourceKey(), entity);
         }
         return result;
     }
 
     private void apply(
-            PermissionResourceEntity entity,
+            ConsoleCatalogResourceEntity entity,
             ResourceDefinition definition,
-            Map<String, PermissionResourceEntity> resources,
-            String workspaceId
+            Map<String, ConsoleCatalogResourceEntity> resources
     ) {
-        entity.setWorkspaceId(workspaceId);
         String parentId = definition.parentResourceKey() == null
                 ? null
                 : resourceId(resources, definition.parentResourceKey());
@@ -337,9 +324,9 @@ public final class PermissionResourceSyncService {
     }
 
     private boolean changed(
-            PermissionResourceEntity entity,
+            ConsoleCatalogResourceEntity entity,
             ResourceDefinition definition,
-            Map<String, PermissionResourceEntity> resources
+            Map<String, ConsoleCatalogResourceEntity> resources
     ) {
         String parentId = definition.parentResourceKey() == null
                 ? null
@@ -360,11 +347,11 @@ public final class PermissionResourceSyncService {
     }
 
     private int disableMissing(
-            Map<String, PermissionResourceEntity> existing,
+            Map<String, ConsoleCatalogResourceEntity> existing,
             Set<String> activeKeys
     ) {
         int disabled = 0;
-        for (PermissionResourceEntity entity : existing.values()) {
+        for (ConsoleCatalogResourceEntity entity : existing.values()) {
             if (!activeKeys.contains(entity.getResourceKey())
                     && BasicStatus.ENABLED.name().equals(entity.getStatus())) {
                 entity.setStatus(BasicStatus.DISABLED.name());
@@ -376,12 +363,12 @@ public final class PermissionResourceSyncService {
     }
 
     private String resourceId(
-            Map<String, PermissionResourceEntity> resources,
+            Map<String, ConsoleCatalogResourceEntity> resources,
             String resourceKey
     ) {
-        PermissionResourceEntity parent = resources.get(resourceKey);
+        ConsoleCatalogResourceEntity parent = resources.get(resourceKey);
         if (parent == null || parent.getResourceId() == null) {
-            invalid("Missing parent permission resource: " + resourceKey);
+            invalid("Missing parent catalog resource: " + resourceKey);
         }
         return parent.getResourceId();
     }
@@ -421,14 +408,6 @@ public final class PermissionResourceSyncService {
         return value.trim();
     }
 
-    private static String currentWorkspaceId() {
-        String workspaceId = TLC.workspaceId();
-        if (workspaceId == null || workspaceId.isBlank()) {
-            invalid("Workspace context is required");
-        }
-        return workspaceId;
-    }
-
     private static String currentSecurityRealm() {
         String realm = TLC.securityRealm();
         if (realm == null || realm.isBlank()) {
@@ -451,7 +430,7 @@ public final class PermissionResourceSyncService {
     private record ResourceDefinition(
             String ownerPluginId,
             String moduleKey,
-            PermissionResourceType type,
+            CatalogResourceType type,
             String resourceKey,
             String parentResourceKey,
             String pageKey,

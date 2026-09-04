@@ -12,6 +12,7 @@ import jakarta.ws.rs.core.MediaType;
 
 import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.core.plugin.contribution.console.catalog.service.ConsoleCatalogSyncService;
 import com.innospots.nexus.console.plugin.converter.PluginManagementConverter;
 import com.innospots.nexus.console.plugin.domain.vo.PluginManagementVo;
 import com.innospots.nexus.core.plugin.installation.domain.model.PluginManagementView;
@@ -26,10 +27,11 @@ public final class PluginManagementEndpoint {
 
     private final PluginInstallationManager manager;
     private final PluginManagementConverter converter;
+    private final ConsoleCatalogSyncService syncService;
 
     /** 创建只依赖 Core 安装管理器的插件管理接口。 */
     public PluginManagementEndpoint(PluginInstallationManager manager) {
-        this(manager, PluginManagementConverter.INSTANCE);
+        this(manager, PluginManagementConverter.INSTANCE, null);
     }
 
     /** 创建可注入转换器的插件管理接口，便于无数据库测试。 */
@@ -37,12 +39,22 @@ public final class PluginManagementEndpoint {
             PluginInstallationManager manager,
             PluginManagementConverter converter
     ) {
+        this(manager, converter, null);
+    }
+
+    /** 创建含目录同步能力的插件管理接口。 */
+    public PluginManagementEndpoint(
+            PluginInstallationManager manager,
+            PluginManagementConverter converter,
+            ConsoleCatalogSyncService syncService
+    ) {
         if (manager == null || converter == null) {
             throw NexusException.build(PluginStatusCode.PLUGIN_CONFIG_INVALID,
                     "plugin manager and converter are required");
         }
         this.manager = manager;
         this.converter = converter;
+        this.syncService = syncService;
     }
 
     /** 查询全部插件聚合视图。 */
@@ -71,14 +83,18 @@ public final class PluginManagementEndpoint {
     @POST
     @Path("/{pluginId}/enable")
     public R<PluginManagementVo> enable(@PathParam("pluginId") String pluginId) {
-        return R.ok(converter.toVo(manager.enable(pluginId)));
+        PluginManagementVo result = converter.toVo(manager.enable(pluginId));
+        syncCatalog();
+        return R.ok(result);
     }
 
     /** 停用插件但保留安装事实。 */
     @POST
     @Path("/{pluginId}/disable")
     public R<PluginManagementVo> disable(@PathParam("pluginId") String pluginId) {
-        return R.ok(converter.toVo(manager.disable(pluginId)));
+        PluginManagementVo result = converter.toVo(manager.disable(pluginId));
+        syncCatalog();
+        return R.ok(result);
     }
 
     /** 重试处于 FAILED 的插件。 */
@@ -86,5 +102,11 @@ public final class PluginManagementEndpoint {
     @Path("/{pluginId}/retry")
     public R<PluginManagementVo> retry(@PathParam("pluginId") String pluginId) {
         return R.ok(converter.toVo(manager.retryStart(pluginId)));
+    }
+
+    private void syncCatalog() {
+        if (syncService != null) {
+            syncService.sync();
+        }
     }
 }

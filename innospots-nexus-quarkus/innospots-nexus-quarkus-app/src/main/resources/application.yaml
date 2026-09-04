@@ -37,7 +37,7 @@ quarkus:
       group-id: com.innospots
       artifact-id: innospots-nexus-core
   mybatis:
-    initial-sql: nexus/schema/plugin-installation-h2.sql
+    initial-sql: nexus/schema/plugin-installation-h2.sql,nexus/schema/console-catalog-h2.sql
     map-underscore-to-camel-case: true
   mybatis-plus:
     global-config:

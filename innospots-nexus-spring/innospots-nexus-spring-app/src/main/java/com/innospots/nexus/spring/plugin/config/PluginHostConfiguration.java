@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,10 +11,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.core.env.Environment;
 
 import com.innospots.nexus.core.plugin.config.ConfigSource;
-import com.innospots.nexus.core.plugin.contribution.PluginContributionDecoderRegistry;
-import com.innospots.nexus.core.plugin.contribution.PluginContributionHandler;
-import com.innospots.nexus.core.plugin.contribution.PluginContributionSnapshotterRegistry;
-import com.innospots.nexus.core.plugin.installation.dao.PluginInstallationDao;
 import com.innospots.nexus.core.plugin.installation.service.PluginInstallationManager;
 import com.innospots.nexus.core.plugin.runtime.PluginRuntimeConfig;
 
@@ -24,7 +19,8 @@ import com.innospots.nexus.core.plugin.runtime.PluginRuntimeConfig;
  *
  * <p>由 {@link EnableNexusPluginHost} 显式引入。
  * Contribution 相关 Bean 由 console 模块可选注入；未引入时使用空注册表。
- * 插件子系统在 {@link PluginHostBootstrapRunner} 的 {@code ApplicationRunner} 阶段启用。</p>
+ * 插件子系统在 {@link com.innospots.nexus.spring.bootstrap.NexusStartupConfiguration}
+ * 组装的 {@link com.innospots.nexus.core.bootstrap.NexusStartup} 中启用。</p>
  *
  * @see PluginHostProperties
  * @see PluginHostConfigBinder
@@ -57,7 +53,7 @@ public class PluginHostConfiguration {
     }
 
     /**
-     * 持有 {@link org.springframework.boot.ApplicationRunner} 阶段 enable 后的安装管理器。
+     * 持有启动编排完成后 enable 的安装管理器。
      *
      * @return 进程级安装管理器持有器
      */
@@ -67,38 +63,7 @@ public class PluginHostConfiguration {
     }
 
     /**
-     * 在容器就绪后启用插件子系统。
-     *
-     * @param installationDao          安装表 DAO
-     * @param runtimeConfig            插件运行时配置
-     * @param properties               宿主安装策略
-     * @param contributionDecoders     可选 YAML Contribution 解码表
-     * @param contributionHandlers     运行时 Contribution 处理器列表
-     * @param contributionSnapshotters 可选对账快照序列化表
-     * @param managerHolder            安装管理器持有器
-     * @return 插件宿主启动 Runner
-     */
-    @Bean
-    PluginHostBootstrapRunner pluginHostBootstrapRunner(
-            ObjectProvider<PluginInstallationDao> installationDao,
-            PluginRuntimeConfig runtimeConfig,
-            PluginHostProperties properties,
-            ObjectProvider<PluginContributionDecoderRegistry> contributionDecoders,
-            List<PluginContributionHandler<?>> contributionHandlers,
-            ObjectProvider<PluginContributionSnapshotterRegistry> contributionSnapshotters,
-            PluginInstallationManagerHolder managerHolder) {
-        return new PluginHostBootstrapRunner(
-                installationDao,
-                runtimeConfig,
-                properties,
-                contributionDecoders,
-                contributionHandlers,
-                contributionSnapshotters,
-                managerHolder);
-    }
-
-    /**
-     * 延迟暴露已 enable 的安装管理器，避免在 Runner 执行前物化依赖方 Bean。
+     * 延迟暴露已 enable 的安装管理器，避免在启动编排执行前物化依赖方 Bean。
      *
      * @param holder 安装管理器持有器
      * @return 已启用的安装管理器

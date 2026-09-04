@@ -23,6 +23,7 @@ import com.innospots.nexus.console.menu.domain.request.MenuUpdateRequest;
 import com.innospots.nexus.console.menu.domain.vo.MenuOptionVo;
 import com.innospots.nexus.console.menu.domain.vo.MenuVo;
 import com.innospots.nexus.console.menu.domain.vo.NavigationMenuVo;
+import com.innospots.nexus.console.navigation.endpoint.NavigationMenuEndpoint;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -58,7 +59,6 @@ class MenuEndpointContractsTest {
     @Test
     void endpointMethodsRemainExplicitlyUnimplemented() {
         MenuEndpoint menuEndpoint = new MenuEndpoint();
-        NavigationMenuEndpoint navigationEndpoint = new NavigationMenuEndpoint();
 
         assertThatThrownBy(() -> menuEndpoint.listMenuTree(new MenuTreeRequest()))
                 .isInstanceOf(UnsupportedOperationException.class);
@@ -77,8 +77,6 @@ class MenuEndpointContractsTest {
         assertThatThrownBy(() -> menuEndpoint.deleteMenu("menu-1"))
                 .isInstanceOf(UnsupportedOperationException.class);
         assertThatThrownBy(menuEndpoint::listMenuOptions)
-                .isInstanceOf(UnsupportedOperationException.class);
-        assertThatThrownBy(navigationEndpoint::listNavigationMenus)
                 .isInstanceOf(UnsupportedOperationException.class);
     }
 
@@ -110,7 +108,7 @@ class MenuEndpointContractsTest {
                 true, BasicStatus.ENABLED, 1, true, null, null, null);
         NavigationMenuVo navigation = new NavigationMenuVo(
                 "home", "Home", "/home", "home-page", null, "home",
-                MenuOpenMode.INTERNAL, null);
+                MenuOpenMode.INTERNAL, "menu-1", "plugin-1", "home", "home.home-main", null);
 
         assertThat(orderRequest.menuIds()).isEqualTo(List.of());
         assertThat(menu.children()).isEqualTo(List.of());
