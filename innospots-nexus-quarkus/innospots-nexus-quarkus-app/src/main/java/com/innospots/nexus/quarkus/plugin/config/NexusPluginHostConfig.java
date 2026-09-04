@@ -22,7 +22,7 @@ public interface NexusPluginHostConfig {
      * <p>映射键：{@code nexus.plugin.auto-install}。</p>
      */
     @WithName("plugin.auto-install")
-    @WithDefault("false")
+    @WithDefault("true")
     boolean autoInstall();
 
     /** {@code nexus.plugins.*} 启停策略分组。 */

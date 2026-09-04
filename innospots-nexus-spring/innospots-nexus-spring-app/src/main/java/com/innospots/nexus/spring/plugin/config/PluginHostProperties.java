@@ -50,7 +50,7 @@ public class PluginHostProperties {
     public static class Plugin {
 
         /** 首次 classpath 发现时是否自动安装并期望启用。 */
-        private boolean autoInstall;
+        private boolean autoInstall = true;
 
         /** 是否自动安装首次发现的插件。 */
         public boolean isAutoInstall() {

@@ -45,6 +45,31 @@ quarkus:
       db-config:
         id-type: ASSIGN_UUID
 
-# nexus.plugin.* / nexus.plugins.* 默认值见 NexusPluginHostConfig；可按环境覆盖
-# plugins.<pluginId>.<key> 示例：
+# ---------------------------------------------------------------------------
+# Nexus 插件宿主策略（应用服务默认骨架，无控制台内置 required 列表）
+#
+# 绑定类: com.innospots.nexus.quarkus.plugin.config.NexusPluginHostConfig
+# 装配类:
+#   - PluginRuntimeConfigFactory     → PluginRuntimeConfig（启停策略）
+#   - PluginHostStartupTaskProducer  → PluginInstallationConfig（安装策略）
+# ---------------------------------------------------------------------------
+nexus:
+  plugin:
+    # nexus.plugin.auto-install
+    # 含义: classpath 首次发现插件时，是否自动写入 nx_plugin_installation 并期望启用。
+    # 默认: true（PluginHostProperties / NexusPluginHostConfig）
+    auto-install: true
+
+  plugins:
+    # nexus.plugins.required
+    # 含义: 启动后必须 ACTIVE 的插件 ID；未满足则宿主启动失败。
+    # required: []
+
+    # nexus.plugins.disabled
+    # 含义: 永不自动启动的插件 ID；与 required 不能重叠。
+    # disabled: []
+
+# plugins.<pluginId>.<key>
+# 含义: 单个插件实例的运行参数，由 PluginHostConfigBinder 汇总进 hostConfig。
+# 示例:
 # plugins.com.example.message-wecom.corp-id=ww-demo

@@ -37,6 +37,7 @@ quarkus:
       group-id: com.innospots
       artifact-id: innospots-nexus-core
   mybatis:
+    # plugin 安装表 + 宿主级目录索引（core 提供 DDL）
     initial-sql: nexus/schema/plugin-installation-h2.sql,nexus/schema/console-catalog-h2.sql
     map-underscore-to-camel-case: true
   mybatis-plus:
@@ -45,10 +46,31 @@ quarkus:
       db-config:
         id-type: ASSIGN_UUID
 
+# ---------------------------------------------------------------------------
+# Nexus 插件宿主与控制台策略
+#
+# 绑定类: com.innospots.nexus.quarkus.plugin.config.NexusPluginHostConfig
+# 装配类:
+#   - PluginRuntimeConfigFactory     → PluginRuntimeConfig（启停策略）
+#   - PluginHostStartupTaskProducer  → PluginInstallationConfig（安装策略）
+#
+# workspace 隔离不由本文件配置；请求进入后由鉴权 Filter 写入 TLC.workspaceId()，
+# 用于授权（nx_permission_grant）、导航裁剪等。目录索引（nx_console_catalog_resource）
+# 为宿主全局，不按 workspace 分表。
+# ---------------------------------------------------------------------------
 nexus:
-  workspace:
-    default-id: default
+  plugin:
+    # nexus.plugin.auto-install
+    # 含义: classpath 首次发现插件时，是否自动写入 nx_plugin_installation 并期望启用。
+    # 默认: true（PluginHostProperties / NexusPluginHostConfig）
+    # 说明: 仅影响「发现 → 登记」；与 required 独立。
+    auto-install: true
+
   plugins:
+    # nexus.plugins.required
+    # 含义: 宿主启动后这些插件必须处于 ACTIVE，否则启动失败并回滚。
+    # 装配: PluginRuntimeConfig.requiredPluginIds → DefaultPluginManager
+    # 常量: BuiltinConsoleEntryPlugins.REQUIRED_PLUGIN_IDS
     required:
       - com.innospots.nexus.console.menu
       - com.innospots.nexus.console.dictionary
@@ -57,4 +79,11 @@ nexus:
       - com.innospots.nexus.console.role
       - com.innospots.nexus.console.plugin-management
 
-# nexus.plugin.* / plugins.* 配置方式同 innospots-nexus-quarkus-app
+    # nexus.plugins.disabled
+    # 含义: 永不自动启动的插件 ID；与 required 不能重叠。
+    # disabled: []
+
+# plugins.<pluginId>.<key>
+# 含义: 单个插件实例的运行参数，由 PluginHostConfigBinder 汇总进 hostConfig。
+# 示例:
+# plugins.com.example.message-wecom.corp-id=ww-demo
