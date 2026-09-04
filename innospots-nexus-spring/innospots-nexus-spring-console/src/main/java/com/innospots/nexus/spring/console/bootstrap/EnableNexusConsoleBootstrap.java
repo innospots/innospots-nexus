@@ -8,22 +8,30 @@ import java.lang.annotation.Target;
 
 import org.springframework.context.annotation.Import;
 
-import com.innospots.nexus.spring.bootstrap.NexusAppBootstrapConfiguration;
+import com.innospots.nexus.spring.bootstrap.NexusAppPersistenceConfiguration;
 import com.innospots.nexus.spring.bootstrap.NexusStartupConfiguration;
+import com.innospots.nexus.spring.catalog.config.ConsoleCatalogConfiguration;
+import com.innospots.nexus.spring.plugin.config.NexusAppPluginDaoConfiguration;
 
 /**
  * 显式启用管理控制台启动引导装配。
  *
- * <p>复用应用服务引导，并引入控制台专属引导配置。
- * 与 {@link com.innospots.nexus.spring.console.EnableNexusConsole} 配合使用。</p>
+ * <p>分层引入：</p>
+ * <ul>
+ *   <li>应用层：{@link NexusAppPersistenceConfiguration}、{@link NexusAppPluginDaoConfiguration}、
+ *       {@link NexusStartupConfiguration}</li>
+ *   <li>控制台层：{@link NexusConsolePersistenceConfiguration}（各域 DAO）、
+ *       {@link ConsoleCatalogConfiguration}（目录/导航服务）</li>
+ * </ul>
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Import({
-        NexusAppBootstrapConfiguration.class,
+        NexusAppPersistenceConfiguration.class,
+        NexusAppPluginDaoConfiguration.class,
         NexusStartupConfiguration.class,
-        NexusConsoleBootstrapConfiguration.class,
+        NexusConsolePersistenceConfiguration.class,
         ConsoleCatalogConfiguration.class
 })
 public @interface EnableNexusConsoleBootstrap {

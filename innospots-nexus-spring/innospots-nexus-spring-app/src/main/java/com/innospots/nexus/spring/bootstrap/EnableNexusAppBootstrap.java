@@ -6,19 +6,27 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.innospots.nexus.spring.plugin.config.EnableNexusPluginHost;
 import org.springframework.context.annotation.Import;
+
+import com.innospots.nexus.spring.plugin.config.NexusAppPluginDaoConfiguration;
 
 /**
  * 显式启用应用服务启动引导装配。
  *
- * <p>引入内存 H2 数据源、插件安装表 DDL，并通过 {@link org.mybatis.spring.annotation.MapperScan}
- * 注册 Core 模块中的 {@link com.innospots.nexus.core.plugin.installation.dao.PluginInstallationDao}。
- * 与 {@link EnableNexusPluginHost} 配合使用。</p>
+ * <p>分层引入：</p>
+ * <ul>
+ *   <li>{@link NexusAppPersistenceConfiguration} — MyBatis-Plus 公共行为</li>
+ *   <li>{@link NexusAppPluginDaoConfiguration} — Core 插件安装 DAO</li>
+ *   <li>{@link NexusStartupConfiguration} — 宿主启动编排</li>
+ * </ul>
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Import({NexusAppBootstrapConfiguration.class, NexusStartupConfiguration.class})
+@Import({
+        NexusAppPersistenceConfiguration.class,
+        NexusAppPluginDaoConfiguration.class,
+        NexusStartupConfiguration.class
+})
 public @interface EnableNexusAppBootstrap {
 }

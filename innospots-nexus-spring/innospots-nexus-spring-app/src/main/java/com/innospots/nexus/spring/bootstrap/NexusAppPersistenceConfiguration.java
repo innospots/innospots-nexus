@@ -1,7 +1,5 @@
 package com.innospots.nexus.spring.bootstrap;
 
-import org.apache.ibatis.annotations.Mapper;
-import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -15,21 +13,14 @@ import com.baomidou.mybatisplus.core.config.GlobalConfig;
 import com.innospots.nexus.core.persistence.handler.AuditMetaObjectHandler;
 
 /**
- * 应用服务启动引导装配。
+ * 应用服务 MyBatis-Plus 公共运行态装配。
  *
- * <p>扫描 Core Mapper 并注册 MyBatis-Plus 默认行为；数据源、端口与 DDL 由
- * {@code application.yaml} 提供。</p>
+ * <p>归属 {@code innospots-nexus-spring-app}；各模块 DAO 扫描见对应
+ * {@code *DaoConfiguration}。数据源与 DDL 由 {@code application.yaml} 提供。</p>
  */
 @Configuration
 @AutoConfigureAfter({DataSourceAutoConfiguration.class, MybatisPlusAutoConfiguration.class})
-@MapperScan(
-        basePackages = {
-                "com.innospots.nexus.core.plugin.installation.dao",
-                "com.innospots.nexus.core.plugin.contribution.console.catalog.dao"
-        },
-        annotationClass = Mapper.class,
-        sqlSessionFactoryRef = "sqlSessionFactory")
-public class NexusAppBootstrapConfiguration {
+public class NexusAppPersistenceConfiguration {
 
     /**
      * MyBatis-Plus 审计字段自动填充处理器。

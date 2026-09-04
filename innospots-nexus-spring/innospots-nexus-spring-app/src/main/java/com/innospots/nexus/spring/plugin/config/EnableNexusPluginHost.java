@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Import;
  *
  * <p>在应用主配置类上标注，引入 {@link PluginHostConfiguration}。
  * 须配合 {@link com.innospots.nexus.spring.bootstrap.EnableNexusAppBootstrap} 提供
- * {@link com.innospots.nexus.core.plugin.installation.dao.PluginInstallationDao} 等基础设施，
+ * {@link NexusAppPluginDaoConfiguration} 与 {@link com.innospots.nexus.core.plugin.installation.dao.PluginInstallationDao}，
  * 或自行注册等价 Bean。</p>
  *
  * <p>管理控制台请使用 {@link com.innospots.nexus.spring.console.EnableNexusConsole}。</p>

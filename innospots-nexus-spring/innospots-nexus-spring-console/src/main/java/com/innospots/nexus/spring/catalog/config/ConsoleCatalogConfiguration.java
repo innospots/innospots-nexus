@@ -1,4 +1,4 @@
-package com.innospots.nexus.spring.console.bootstrap;
+package com.innospots.nexus.spring.catalog.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,21 +11,24 @@ import com.innospots.nexus.base.ui.spec.parser.JacksonUiSpecParser;
 import com.innospots.nexus.console.catalog.bootstrap.ConsoleCatalogSyncStartupTask;
 import com.innospots.nexus.console.catalog.endpoint.ConsoleCatalogEndpoint;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogService;
-import com.innospots.nexus.core.plugin.contribution.console.catalog.service.ConsoleCatalogSyncService;
 import com.innospots.nexus.console.navigation.endpoint.NavigationMenuEndpoint;
 import com.innospots.nexus.console.navigation.service.NavigationMenuAssembler;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubjectResolver;
 import com.innospots.nexus.console.permission.dao.PermissionGrantDao;
-import com.innospots.nexus.core.plugin.contribution.console.catalog.dao.ConsoleCatalogResourceDao;
 import com.innospots.nexus.console.permission.service.PermissionVisibilityService;
 import com.innospots.nexus.console.plugin.converter.PluginManagementConverter;
 import com.innospots.nexus.console.plugin.endpoint.PluginManagementEndpoint;
 import com.innospots.nexus.core.bootstrap.NexusStartupTask;
 import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributionCatalog;
+import com.innospots.nexus.core.plugin.contribution.console.catalog.dao.ConsoleCatalogResourceDao;
+import com.innospots.nexus.core.plugin.contribution.console.catalog.service.ConsoleCatalogSyncService;
 import com.innospots.nexus.spring.plugin.config.PluginInstallationManagerHolder;
 
 /**
- * 管理控制台目录、导航与启动同步装配。
+ * Console 目录、导航与同步服务装配。
+ *
+ * <p>归属 {@code innospots-nexus-spring-console}；DAO 扫描见
+ * {@link ConsoleCatalogDaoConfiguration} 与 {@link com.innospots.nexus.spring.permission.config.ConsolePermissionDaoConfiguration}。</p>
  */
 @Configuration
 public class ConsoleCatalogConfiguration {
@@ -40,10 +43,10 @@ public class ConsoleCatalogConfiguration {
     }
 
     /**
-     * 权限资源目录同步服务。
+     * 宿主级目录同步服务。
      */
     @Bean
-    ConsoleCatalogSyncService permissionResourceSyncService(
+    ConsoleCatalogSyncService consoleCatalogSyncService(
             ConsoleCatalogResourceDao resourceDao,
             ConsoleContributionCatalog contributionCatalog,
             UiSpecLoader uiSpecLoader) {
