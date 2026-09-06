@@ -1,0 +1,8 @@
+dsl: '1.0'
+
+page:
+  id: plugin-main
+  name: pluginMain
+  title: Plugin Management
+  description: Install, enable, and monitor console plugins.
+  type: general

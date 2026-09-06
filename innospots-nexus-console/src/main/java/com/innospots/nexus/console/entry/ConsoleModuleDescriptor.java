@@ -6,8 +6,8 @@ import com.innospots.nexus.base.i18n.I18nObject;
  * Immutable metadata for one built-in console module entry plugin.
  *
  * @param pluginId    reverse-domain plugin identity
- * @param moduleKey   console module key and UiSpec directory name
- * @param pageKey     UiSpec page key, normally {@code {moduleKey}-main}
+ * @param moduleKey   console module key and PageDsl directory name
+ * @param pageKey     PageDsl page key, normally {@code {moduleKey}-main}
  * @param pagePath    frontend route path
  * @param menuKey     menu entry key within the module
  * @param menuIcon    optional menu icon

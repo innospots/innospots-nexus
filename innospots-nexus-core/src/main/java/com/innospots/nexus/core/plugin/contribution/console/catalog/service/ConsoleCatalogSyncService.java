@@ -11,10 +11,13 @@ import com.innospots.nexus.base.domain.enums.BasicStatus;
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.base.thread.TLC;
-import com.innospots.nexus.base.ui.spec.UiSpec;
-import com.innospots.nexus.base.ui.spec.action.UiAction;
-import com.innospots.nexus.base.ui.spec.datasource.UiDatasource;
-import com.innospots.nexus.base.ui.spec.loader.UiSpecLoader;
+import com.innospots.nexus.base.ui.spec.PageDsl;
+import com.innospots.nexus.base.ui.spec.action.ActionConfig;
+import com.innospots.nexus.base.ui.spec.action.ActionOrList;
+import com.innospots.nexus.base.ui.spec.datasource.DataSourceConfig;
+import com.innospots.nexus.base.ui.spec.datasource.HttpDataSource;
+import com.innospots.nexus.base.ui.spec.datasource.ServiceDataSource;
+import com.innospots.nexus.base.ui.spec.loader.PageDslLoader;
 import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributionCatalog;
 import com.innospots.nexus.core.plugin.contribution.console.ConsoleModuleDeclaration;
 import com.innospots.nexus.core.plugin.contribution.console.MenuDeclaration;
@@ -25,25 +28,25 @@ import com.innospots.nexus.core.plugin.contribution.console.catalog.domain.enums
 import com.innospots.nexus.core.plugin.contribution.console.catalog.domain.model.CatalogSyncResult;
 
 /**
- * 将已激活 Console Contribution 和 UiSpec 同步为宿主级目录索引。
+ * 将已激活 Console Contribution 和 PageDsl 同步为宿主级目录索引。
  *
- * <p>Console Contribution 和 UiSpec 是唯一事实源；同步不会自动授权。</p>
+ * <p>Console Contribution 和 PageDsl 是唯一事实源；同步不会自动授权。</p>
  */
 public final class ConsoleCatalogSyncService {
 
     private final ConsoleCatalogResourceDao resourceDao;
     private final ConsoleContributionCatalog contributionCatalog;
-    private final UiSpecLoader uiSpecLoader;
+    private final PageDslLoader pageDslLoader;
 
     /** 创建 Console 目录同步服务。 */
     public ConsoleCatalogSyncService(
             ConsoleCatalogResourceDao resourceDao,
             ConsoleContributionCatalog contributionCatalog,
-            UiSpecLoader uiSpecLoader
+            PageDslLoader pageDslLoader
     ) {
         this.resourceDao = require(resourceDao, "resourceDao");
         this.contributionCatalog = require(contributionCatalog, "contributionCatalog");
-        this.uiSpecLoader = require(uiSpecLoader, "uiSpecLoader");
+        this.pageDslLoader = require(pageDslLoader, "pageDslLoader");
     }
 
     /**
@@ -137,8 +140,8 @@ public final class ConsoleCatalogSyncService {
         for (UiSpecPageDeclaration page : pages) {
             String pageIdentity = pageIdentity(module.moduleKey(), page.pageKey());
             String pageResourceKey = page.resourceKey(module.moduleKey());
-            UiSpec spec = uiSpecLoader.load(module.moduleKey(), page.pageKey());
-            validatePageSpec(module, page, spec);
+            PageDsl document = pageDslLoader.load(module.moduleKey(), page.pageKey());
+            validatePageSpec(module, page, document);
             add(definitions, new ResourceDefinition(
                     ownerPluginId,
                     module.moduleKey(),
@@ -150,11 +153,11 @@ public final class ConsoleCatalogSyncService {
                     page.pagePath(),
                     null,
                     null,
-                    display(spec.pageInfo().title(), page.pageKey()),
+                    display(document.getPage() == null ? null : document.getPage().getTitle(), page.pageKey()),
                     order++));
-            collectActions(definitions, ownerPluginId, module, spec, pageIdentity,
+            collectActions(definitions, ownerPluginId, module, document, pageIdentity,
                     pageResourceKey);
-            collectDatasources(definitions, ownerPluginId, module, spec, pageIdentity,
+            collectDatasources(definitions, ownerPluginId, module, document, pageIdentity,
                     pageResourceKey);
             collectPages(definitions, ownerPluginId, module, page.children(), pageResourceKey);
         }
@@ -164,14 +167,17 @@ public final class ConsoleCatalogSyncService {
             Map<String, ResourceDefinition> definitions,
             String ownerPluginId,
             ConsoleModuleDeclaration module,
-            UiSpec spec,
+            PageDsl document,
             String pageIdentity,
             String pageResourceKey
     ) {
         int order = 0;
-        for (UiAction action : spec.actionDefinitions().values()) {
-            collectAction(definitions, ownerPluginId, module, action, spec.datasources(),
-                    pageIdentity, pageResourceKey, order++);
+        for (Map.Entry<String, ActionOrList> entry : document.actions().entrySet()) {
+            String actionName = requireText(entry.getKey(), "actionName");
+            for (ActionConfig action : entry.getValue().actions()) {
+                collectAction(definitions, ownerPluginId, module, actionName, action,
+                        document.dataSources(), pageIdentity, pageResourceKey, order++);
+            }
         }
     }
 
@@ -179,21 +185,22 @@ public final class ConsoleCatalogSyncService {
             Map<String, ResourceDefinition> definitions,
             String ownerPluginId,
             ConsoleModuleDeclaration module,
-            UiAction action,
-            Map<String, UiDatasource> datasources,
+            String actionName,
+            ActionConfig action,
+            Map<String, DataSourceConfig> dataSources,
             String pageIdentity,
             String pageResourceKey,
             int order
     ) {
-        String actionId = requireText(action == null ? null : action.actionId(), "actionId");
-        if (action.request() != null) {
-            invalid("Inline action request is not supported: " + actionId);
+        requireText(actionName, "actionName");
+        if (action == null || !hasText(action.getAction())) {
+            invalid("Action registry name is required: " + actionName);
         }
-        if (action.datasourceKey() != null && !action.datasourceKey().isBlank()
-                && !datasources.containsKey(action.datasourceKey())) {
-            invalid("Action references an unknown datasource: " + actionId);
+        String datasourceKey = resolveDatasourceKey(action);
+        if (datasourceKey != null && !dataSources.containsKey(datasourceKey)) {
+            invalid("Action references an unknown datasource: " + actionName);
         }
-        String resourceKey = "action:" + pageIdentity + "." + actionId;
+        String resourceKey = "action:" + pageIdentity + "." + actionName;
         add(definitions, new ResourceDefinition(
                 ownerPluginId,
                 module.moduleKey(),
@@ -201,38 +208,45 @@ public final class ConsoleCatalogSyncService {
                 resourceKey,
                 pageResourceKey,
                 pageIdentity,
-                action.datasourceKey(),
+                datasourceKey,
                 null,
                 null,
                 null,
-                display(action.label(), actionId),
+                display(action.getId(), actionName),
                 order));
-        int childOrder = 0;
-        for (UiAction child : action.children()) {
-            collectAction(definitions, ownerPluginId, module, child, datasources,
-                    pageIdentity, pageResourceKey, childOrder++);
-        }
     }
 
     private void collectDatasources(
             Map<String, ResourceDefinition> definitions,
             String ownerPluginId,
             ConsoleModuleDeclaration module,
-            UiSpec spec,
+            PageDsl document,
             String pageIdentity,
             String pageResourceKey
     ) {
         Map<String, String> requestIdentities = new LinkedHashMap<>();
         int order = 0;
-        for (Map.Entry<String, UiDatasource> entry : spec.datasources().entrySet()) {
+        for (Map.Entry<String, DataSourceConfig> entry : document.dataSources().entrySet()) {
             String datasourceKey = requireText(entry.getKey(), "datasourceKey");
-            UiDatasource datasource = entry.getValue();
-            if (datasource == null) {
+            DataSourceConfig dataSource = entry.getValue();
+            if (dataSource == null) {
                 invalid("Datasource definition is required: " + datasourceKey);
             }
-            String method = requireText(datasource.getMethod(), "datasource.method")
-                    .toUpperCase();
-            String url = normalizePath(requireText(datasource.getUrl(), "datasource.url"));
+            String method;
+            String url;
+            if (dataSource instanceof HttpDataSource httpDataSource) {
+                if (httpDataSource.getRequest() == null) {
+                    invalid("HTTP datasource request is required: " + datasourceKey);
+                }
+                method = requireText(httpDataSource.getRequest().getMethod(), "datasource.method")
+                        .toUpperCase();
+                url = normalizePath(requireText(httpDataSource.getRequest().getUrl(), "datasource.url"));
+            } else if (dataSource instanceof ServiceDataSource serviceDataSource) {
+                method = "SERVICE";
+                url = "/" + requireText(serviceDataSource.getService(), "datasource.service");
+            } else {
+                continue;
+            }
             String requestIdentity = method + " " + url;
             if (requestIdentities.put(requestIdentity, datasourceKey) != null) {
                 invalid("Multiple datasources match " + requestIdentity + " on " + pageIdentity);
@@ -243,13 +257,13 @@ public final class ConsoleCatalogSyncService {
                     CatalogResourceType.DATASOURCE,
                     "datasource:" + pageIdentity + "." + datasourceKey,
                     pageResourceKey,
-                pageIdentity,
-                datasourceKey,
-                null,
-                method,
-                url,
-                datasourceKey,
-                order++));
+                    pageIdentity,
+                    datasourceKey,
+                    null,
+                    method,
+                    url,
+                    datasourceKey,
+                    order++));
         }
     }
 
@@ -275,11 +289,11 @@ public final class ConsoleCatalogSyncService {
     private void validatePageSpec(
             ConsoleModuleDeclaration module,
             UiSpecPageDeclaration page,
-            UiSpec spec
+            PageDsl document
     ) {
-        if (spec == null || spec.pageInfo() == null
-                || !page.pageKey().equals(spec.pageInfo().pageId())) {
-            invalid("UiSpec pageInfo.pageId does not match "
+        if (document == null || document.getPage() == null
+                || !page.pageKey().equals(document.getPage().getId())) {
+            invalid("PageDsl page.id does not match "
                     + module.moduleKey() + "." + page.pageKey());
         }
     }
@@ -393,12 +407,37 @@ public final class ConsoleCatalogSyncService {
                 : path;
     }
 
-    private static String display(Object value, String fallback) {
-        if (value instanceof com.innospots.nexus.base.i18n.I18nObject i18n
-                && i18n.defaultValue() != null && !i18n.defaultValue().isBlank()) {
-            return i18n.defaultValue();
+    private static String display(com.innospots.nexus.base.i18n.I18nObject value, String fallback) {
+        if (value != null && value.defaultValue() != null && !value.defaultValue().isBlank()) {
+            return value.defaultValue();
         }
         return fallback;
+    }
+
+    private static String display(String value, String fallback) {
+        if (value != null && !value.isBlank()) {
+            return value;
+        }
+        return fallback;
+    }
+
+    private static String resolveDatasourceKey(ActionConfig action) {
+        if (action.getParams() == null) {
+            return null;
+        }
+        Object dataSource = action.getParams().get("dataSource");
+        if (dataSource == null) {
+            return null;
+        }
+        String key = String.valueOf(dataSource);
+        if (key.isBlank()) {
+            return null;
+        }
+        return key;
+    }
+
+    private static boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 
     private static String requireText(String value, String field) {

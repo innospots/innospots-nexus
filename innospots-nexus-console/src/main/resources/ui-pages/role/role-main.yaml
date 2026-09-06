@@ -1,0 +1,8 @@
+dsl: '1.0'
+
+page:
+  id: role-main
+  name: roleMain
+  title: Role Management
+  description: Manage console roles and role bindings.
+  type: general

@@ -1,0 +1,8 @@
+dsl: '1.0'
+
+page:
+  id: permission-main
+  name: permissionMain
+  title: Permission Management
+  description: Manage console permission resources and grants.
+  type: general

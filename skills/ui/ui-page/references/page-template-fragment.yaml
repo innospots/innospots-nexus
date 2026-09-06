@@ -1,0 +1,14 @@
+dsl: '1.0'
+
+page:
+  id: fragment-demo
+  title: 片段示例
+
+children:
+  - type: Card
+    props:
+      title: 固定卡片
+  - type: Alert
+    props:
+      message: 内联提示
+      variant: info

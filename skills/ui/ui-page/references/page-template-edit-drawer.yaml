@@ -1,0 +1,121 @@
+# 抽屉内编辑页 — 由 overlay.open page.pageId 引用
+# 列表页见 page-template-list-drawer.yaml
+
+dsl: '1.0'
+
+page:
+  id: example-edit-drawer
+  name: exampleEditDrawer
+  title: 编辑示例
+  type: form
+
+dataSources:
+  detail:
+    type: service
+    service: example.detail
+    params:
+      id: ${params.id}
+
+actions:
+  loadDetail:
+    - action: reload
+      params:
+        dataSource: detail
+    - action: form.setValues
+      params:
+        values: ${data.detail}
+        form: edit
+
+  save:
+    - id: saveResult
+      action: request
+      params:
+        method: PUT
+        url: /api/examples/${params.id}
+        body: ${form}
+    - action: if
+      params:
+        condition: ${actions.saveResult != null && actions.saveResult.ok == false}
+        then:
+          - action: message
+            params:
+              type: error
+              text: 保存失败
+        else:
+          - action: overlay.close
+            params:
+              payload:
+                success: true
+
+  cancel:
+    - action: overlay.close
+      params:
+        payload:
+          success: false
+
+lifecycle:
+  onInit:
+    - action: if
+      params:
+        condition: ${params.id != null}
+        then:
+          - action: call
+            params:
+              name: loadDetail
+
+body:
+  type: Page
+  children:
+    - type: Form
+      props:
+        name: edit
+        layout: vertical
+        initialValues:
+          name: ''
+          status: active
+      children:
+        - type: Input
+          props:
+            name: name
+            label: 名称
+            rules:
+              - required: true
+                message: 请输入名称
+        - type: Select
+          props:
+            name: status
+            label: 状态
+            options:
+              - label: 启用
+                value: active
+              - label: 停用
+                value: inactive
+        - type: Flex
+          props:
+            gap: middle
+            justify: end
+          children:
+            - type: Button
+              props:
+                text: 取消
+              events:
+                onClick:
+                  action: call
+                  params:
+                    name: cancel
+            - type: Button
+              props:
+                text: 保存
+                variant: primary
+                submit: true
+      events:
+        onSubmit:
+          action: call
+          params:
+            name: save
+
+    - type: Alert
+      props:
+        message: 加载中…
+        variant: info
+      when: ${params.id != null && dataStatus.detail.loading}

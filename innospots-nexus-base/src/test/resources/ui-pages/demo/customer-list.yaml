@@ -1,0 +1,177 @@
+dsl: '1.0'
+
+requires:
+  runtime: '>=0.1.0'
+  components:
+    Page: '>=1.0'
+    Form: '>=1.0'
+    Table: '>=1.0'
+
+page:
+  id: customer-list
+  name: customerList
+  title: 客户管理
+  description: 客户查询、查看、编辑和删除页面
+  type: list
+  permission: customer:view
+
+meta:
+  version: '1.0.0'
+  author: platform-team
+  tags:
+    - customer
+    - admin
+  status: active
+
+state:
+  ready: false
+  keyword: ''
+  status: ''
+  page: 1
+  pageSize: 20
+  total: 0
+  selectedId: null
+  form: {}
+
+dataSources:
+  statusOptions:
+    type: static
+    value:
+      - label: 全部
+        value: ''
+      - label: 正常
+        value: active
+
+  customers:
+    type: service
+    service: customer.list
+    autoLoad: true
+    params:
+      keyword: ${state.keyword}
+      page: ${state.page}
+      pageSize: ${state.pageSize}
+
+  customerDetail:
+    type: http
+    request:
+      method: GET
+      url: /api/customers/${state.selectedId}
+    autoLoad: false
+
+actions:
+  search:
+    - action: reload
+      params:
+        dataSource: customers
+
+  resetSearch:
+    - action: resetState
+    - action: reload
+      params:
+        dataSource: customers
+
+  deleteRow:
+    - id: confirmDelete
+      action: confirm
+      permission: customer:delete
+      params:
+        title: 确认删除
+        content: "确定删除客户吗？"
+    - action: if
+      params:
+        condition: ${actions.confirmDelete}
+        then:
+          - action: message
+            params:
+              type: success
+              text: 删除成功
+
+components:
+  searchForm:
+    type: Form
+    props:
+      name: search
+      layout: inline
+    events:
+      onSubmit:
+        - action: call
+          params:
+            name: search
+    children:
+      - type: Input
+        props:
+          name: keyword
+          label: 关键词
+      - type: Button
+        props:
+          text: 查询
+          variant: primary
+          submit: true
+
+  rowActions:
+    type: Flex
+    props:
+      gap: 8
+    children:
+      - type: Button
+        props:
+          text: 删除
+          danger: true
+        permission:
+          code: customer:delete
+          denied: disabled
+        events:
+          onClick:
+            - action: call
+              params:
+                name: deleteRow
+
+  extensionPanel:
+    source:
+      type: service
+      service: customer.extensionPanel
+      params:
+        customerId: ${state.selectedId}
+    placeholder:
+      type: Alert
+      props:
+        message: 扩展信息加载中
+        variant: info
+
+lifecycle:
+  onInit:
+    - action: setState
+      params:
+        ready: true
+  onLoad: []
+  onReady: []
+  onShow: []
+  onHide: []
+  onDestroy: []
+
+body:
+  type: Page
+  props:
+    title: 客户管理
+  children:
+    - component: searchForm
+    - type: Alert
+      when: ${dataStatus.customers.error != null}
+      props:
+        message: 客户数据加载失败
+        variant: error
+    - type: Table
+      props:
+        rowKey: id
+        dataSource: ${data.customers}
+        loading: ${dataStatus.customers.loading}
+      events:
+        onChange:
+          - action: setState
+            params:
+              page: ${event.current}
+              pageSize: ${event.pageSize}
+          - action: reload
+            params:
+              dataSource: customers
+    - component: extensionPanel

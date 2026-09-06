@@ -1,0 +1,8 @@
+dsl: '1.0'
+
+page:
+  id: dictionary-main
+  name: dictionaryMain
+  title: Dictionary Management
+  description: Manage console dictionaries and dictionary items.
+  type: general

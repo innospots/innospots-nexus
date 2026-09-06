@@ -4,10 +4,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
-import com.innospots.nexus.base.ui.spec.config.UiSpecConfig;
-import com.innospots.nexus.base.ui.spec.loader.ClasspathUiSpecLoader;
-import com.innospots.nexus.base.ui.spec.loader.UiSpecLoader;
-import com.innospots.nexus.base.ui.spec.parser.JacksonUiSpecParser;
+import com.innospots.nexus.base.ui.spec.config.PageDslConfig;
+import com.innospots.nexus.base.ui.spec.loader.ClasspathPageDslLoader;
+import com.innospots.nexus.base.ui.spec.loader.PageDslLoader;
+import com.innospots.nexus.base.ui.spec.parser.JacksonPageDslParser;
 import com.innospots.nexus.console.catalog.bootstrap.ConsoleCatalogSyncStartupTask;
 import com.innospots.nexus.console.catalog.endpoint.ConsoleCatalogEndpoint;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogService;
@@ -34,12 +34,12 @@ import com.innospots.nexus.spring.plugin.config.PluginInstallationManagerHolder;
 public class ConsoleCatalogConfiguration {
 
     /**
-     * UiSpec 加载器。
+     * PageDsl 加载器。
      */
     @Bean
-    UiSpecLoader uiSpecLoader() {
-        UiSpecConfig config = UiSpecConfig.defaults();
-        return new ClasspathUiSpecLoader(config, new JacksonUiSpecParser(config), null);
+    PageDslLoader pageDslLoader() {
+        PageDslConfig config = PageDslConfig.defaults();
+        return new ClasspathPageDslLoader(config, new JacksonPageDslParser(config), null);
     }
 
     /**
@@ -49,8 +49,8 @@ public class ConsoleCatalogConfiguration {
     ConsoleCatalogSyncService consoleCatalogSyncService(
             ConsoleCatalogResourceDao resourceDao,
             ConsoleContributionCatalog contributionCatalog,
-            UiSpecLoader uiSpecLoader) {
-        return new ConsoleCatalogSyncService(resourceDao, contributionCatalog, uiSpecLoader);
+            PageDslLoader pageDslLoader) {
+        return new ConsoleCatalogSyncService(resourceDao, contributionCatalog, pageDslLoader);
     }
 
     /**

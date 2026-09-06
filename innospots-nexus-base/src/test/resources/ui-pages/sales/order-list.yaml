@@ -1,0 +1,19 @@
+dsl: '1.0'
+
+page:
+  id: order-list
+  title: Orders
+  type: list
+
+dataSources:
+  orders:
+    type: http
+    request:
+      method: GET
+      url: /api/orders
+
+actions:
+  refresh:
+    - action: reload
+      params:
+        dataSource: orders

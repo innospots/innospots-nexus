@@ -1,0 +1,8 @@
+dsl: '1.0'
+
+page:
+  id: menu-main
+  name: menuMain
+  title: Menu Management
+  description: Manage console navigation menus.
+  type: general

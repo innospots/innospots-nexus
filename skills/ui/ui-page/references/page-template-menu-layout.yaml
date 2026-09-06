@@ -1,0 +1,122 @@
+# blank 外壳工作区 — 页内 Menu + 主内容区
+# Shell 菜单不在 PageDsl；本页自建侧栏导航（仅 layout.type: blank 场景）
+
+dsl: '1.0'
+
+page:
+  id: example-menu-layout
+  name: exampleMenuLayout
+  title: 工作区示例
+  type: workspace
+
+state:
+  siderCollapsed: false
+  currentMenu: dashboard
+
+dataSources:
+  menus:
+    type: static
+    value:
+      - key: dashboard
+        label: 概览
+      - key: reports
+        label: 报表
+      - key: settings
+        label: 设置
+
+actions:
+  onMenuSelect:
+    - action: setState
+      params:
+        currentMenu: ${event}
+    - action: navigate
+      params:
+        to: /workspace/${event}
+
+body:
+  type: Layout
+  children:
+    - type: Sider
+      props:
+        width: 220
+        collapsible: true
+        collapsed: ${state.siderCollapsed}
+      events:
+        onCollapse:
+          - action: setState
+            params:
+              siderCollapsed: ${event}
+      children:
+        - type: Menu
+          props:
+            mode: inline
+            items: ${data.menus}
+            selectedKey: ${state.currentMenu}
+          events:
+            onSelect:
+              action: call
+              params:
+                name: onMenuSelect
+
+    - type: Layout
+      children:
+        - type: Header
+          children:
+            - type: Flex
+              props:
+                justify: space-between
+                align: center
+              children:
+                - type: Text
+                  props:
+                    text: 工作区
+                    strong: true
+                - type: Button
+                  props:
+                    text: 返回列表
+                    variant: link
+                  events:
+                    onClick:
+                      - action: navigate
+                        params:
+                          to: /examples/list
+
+        - type: Content
+          children:
+            - type: Page
+              props:
+                title: ${state.currentMenu}
+              children:
+                - type: Alert
+                  props:
+                    message: 当前菜单：${state.currentMenu}
+                    variant: info
+                - type: Grid
+                  props:
+                    columns: 3
+                    gap: 16
+                  children:
+                    - type: Card
+                      props:
+                        title: 指标 A
+                      children:
+                        - type: Statistic
+                          props:
+                            title: 数量
+                            value: 128
+                    - type: Card
+                      props:
+                        title: 指标 B
+                      children:
+                        - type: Statistic
+                          props:
+                            title: 数量
+                            value: 64
+                    - type: Card
+                      props:
+                        title: 指标 C
+                      children:
+                        - type: Statistic
+                          props:
+                            title: 数量
+                            value: 32

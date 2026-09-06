@@ -1,0 +1,15 @@
+dsl: '1.0'
+
+page:
+  id: fragment-list
+  title: Fragment List
+  type: list
+
+children:
+  - type: Card
+    props:
+      title: 固定卡片
+  - type: Alert
+    props:
+      message: 内联提示
+      variant: info

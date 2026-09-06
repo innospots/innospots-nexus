@@ -1,0 +1,176 @@
+dsl: '1.0'
+
+page:
+  id: example-list
+  name: exampleList
+  title: 示例列表
+  type: list
+  permission: example:view
+
+state:
+  keyword: ''
+  page: 1
+  pageSize: 20
+
+dataSources:
+  statusOptions:
+    type: static
+    value:
+      - label: 启用
+        value: active
+      - label: 停用
+        value: inactive
+
+  items:
+    type: service
+    service: example.list
+    autoLoad: true
+    params:
+      keyword: ${state.keyword}
+      page: ${state.page}
+      pageSize: ${state.pageSize}
+
+actions:
+  search:
+    - action: setState
+      params:
+        keyword: ${event.keyword}
+        page: 1
+    - action: reload
+      params:
+        dataSource: items
+
+  resetSearch:
+    - action: resetState
+    - action: reload
+      params:
+        dataSource: items
+
+  deleteRow:
+    - id: cfm
+      action: confirm
+      params:
+        title: 确认删除
+        content: 删除「${row.name}」后不可恢复
+    - action: if
+      params:
+        condition: ${actions.cfm}
+        then:
+          - action: request
+            params:
+              method: DELETE
+              url: /api/examples/${row.id}
+          - action: message
+            params:
+              type: success
+              text: 删除成功
+          - action: reload
+            params:
+              dataSource: items
+
+components:
+  searchForm:
+    type: Form
+    props:
+      name: search
+      layout: inline
+    children:
+      - type: Input
+        props:
+          name: keyword
+          label: 关键词
+          placeholder: 请输入
+      - type: Select
+        props:
+          name: status
+          label: 状态
+          options: ${data.statusOptions}
+          allowClear: true
+      - type: Button
+        props:
+          text: 查询
+          variant: primary
+          submit: true
+      - type: Button
+        props:
+          text: 重置
+        events:
+          onClick:
+            action: call
+            params:
+              name: resetSearch
+    events:
+      onSubmit:
+        action: call
+        params:
+          name: search
+
+body:
+  type: Page
+  props:
+    title: 示例列表
+  children:
+    - type: Card
+      children:
+        - component: searchForm
+
+    - type: Flex
+      props:
+        justify: space-between
+        align: center
+      children:
+        - type: Text
+          props:
+            text: 共 ${data.items.length} 条
+            type: secondary
+        - type: Flex
+          props:
+            gap: middle
+          children:
+            - type: Button
+              props:
+                text: 新建
+                variant: primary
+              events:
+                onClick:
+                  - action: navigate
+                    params:
+                      to: /examples/new
+
+    - type: Table
+      props:
+        dataSource: ${data.items}
+        rowKey: id
+        loading: ${dataStatus.items.loading}
+        columns:
+          - title: 名称
+            dataIndex: name
+          - title: 状态
+            dataIndex: status
+          - title: 操作
+            cell:
+              type: Flex
+              props:
+                gap: 8
+              children:
+                - type: Button
+                  props:
+                    text: 详情
+                    variant: link
+                    size: small
+                  events:
+                    onClick:
+                      - action: navigate
+                        params:
+                          to: /examples/${row.id}/detail
+                - type: Button
+                  props:
+                    text: 删除
+                    variant: link
+                    size: small
+                    danger: true
+                  events:
+                    onClick:
+                      action: call
+                      params:
+                        name: deleteRow

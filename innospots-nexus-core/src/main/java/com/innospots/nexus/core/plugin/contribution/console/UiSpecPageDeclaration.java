@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
-/** 由 UiSpec pageInfo.pageId 唯一对应的页面身份声明。 */
+/** 由 PageDsl page.id 唯一对应的页面身份声明。 */
 public record UiSpecPageDeclaration(
         String pageKey,
         String pagePath,

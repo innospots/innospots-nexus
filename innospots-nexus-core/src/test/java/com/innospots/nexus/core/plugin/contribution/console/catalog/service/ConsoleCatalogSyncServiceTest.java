@@ -2,18 +2,19 @@ package com.innospots.nexus.core.plugin.contribution.console.catalog.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import com.innospots.nexus.base.i18n.I18nObject;
 import com.innospots.nexus.base.thread.TLC;
-import com.innospots.nexus.base.ui.spec.PageInfo;
-import com.innospots.nexus.base.ui.spec.UiSpec;
-import com.innospots.nexus.base.ui.spec.action.ActionType;
-import com.innospots.nexus.base.ui.spec.action.UiAction;
-import com.innospots.nexus.base.ui.spec.datasource.UiDatasource;
-import com.innospots.nexus.base.ui.spec.loader.UiSpecLoader;
+import com.innospots.nexus.base.ui.spec.HttpRequest;
+import com.innospots.nexus.base.ui.spec.PageDsl;
+import com.innospots.nexus.base.ui.spec.PageMeta;
+import com.innospots.nexus.base.ui.spec.action.ActionConfig;
+import com.innospots.nexus.base.ui.spec.action.ActionOrList;
+import com.innospots.nexus.base.ui.spec.datasource.HttpDataSource;
+import com.innospots.nexus.base.ui.spec.loader.PageDslLoader;
 import com.innospots.nexus.core.plugin.capability.ProviderRef;
 import com.innospots.nexus.core.plugin.config.PluginConfig;
 import com.innospots.nexus.core.plugin.contribution.PluginContributionContext;
@@ -45,15 +46,18 @@ class ConsoleCatalogSyncServiceTest {
     }
 
     @Test
-    void buildsCatalogueFromActiveExtensionAndUiSpecAndIsIdempotent() {
+    void buildsCatalogueFromActiveExtensionAndPageDslAndIsIdempotent() {
         ConsoleContributionCatalog registry = activeCatalog();
 
-        UiSpec spec = UiSpec.page(PageInfo.of("orders", I18nObject.of("en", "Orders")))
-                .datasource("list", UiDatasource.get("/api/orders"))
-                .datasource("approve", UiDatasource.post("/api/orders/{orderId}/approve"))
-                .actionDefinition(UiAction.of("approve", ActionType.API)
-                        .datasourceKey("approve"));
-        UiSpecLoader loader = (moduleKey, pageKey) -> spec;
+        PageDsl document = ordersPage(
+                httpDataSource("GET", "/api/orders"),
+                httpDataSource("POST", "/api/orders/{orderId}/approve"));
+        ActionConfig approve = new ActionConfig();
+        approve.setAction("reload");
+        approve.setParams(Map.of("dataSource", "approve"));
+        document.getActions().put("approve", new ActionOrList(List.of(approve)));
+
+        PageDslLoader loader = (moduleKey, pageKey) -> document;
         ConsoleCatalogResourceDao resourceDao = mock(ConsoleCatalogResourceDao.class);
         List<ConsoleCatalogResourceEntity> inserted = new ArrayList<>();
         doAnswer(invocation -> {
@@ -93,12 +97,10 @@ class ConsoleCatalogSyncServiceTest {
     void updatesChangedResourceMetadata() {
         ConsoleContributionCatalog registry = activeCatalog();
 
-        UiSpec firstSpec = UiSpec.page(PageInfo.of("orders", I18nObject.of("en", "Orders")))
-                .datasource("list", UiDatasource.get("/api/orders"));
-        UiSpec secondSpec = UiSpec.page(PageInfo.of("orders", I18nObject.of("en", "Orders")))
-                .datasource("list", UiDatasource.post("/api/orders/search"));
-        UiSpec[] current = {firstSpec};
-        UiSpecLoader loader = (moduleKey, pageKey) -> current[0];
+        PageDsl firstDocument = ordersPage(httpDataSource("GET", "/api/orders"));
+        PageDsl secondDocument = ordersPage(httpDataSource("POST", "/api/orders/search"));
+        PageDsl[] current = {firstDocument};
+        PageDslLoader loader = (moduleKey, pageKey) -> current[0];
         ConsoleCatalogResourceDao resourceDao = mock(ConsoleCatalogResourceDao.class);
         List<ConsoleCatalogResourceEntity> stored = new ArrayList<>();
         doAnswer(invocation -> {
@@ -112,7 +114,7 @@ class ConsoleCatalogSyncServiceTest {
         ConsoleCatalogSyncService service = new ConsoleCatalogSyncService(
                 resourceDao, registry, loader);
         service.sync();
-        current[0] = secondSpec;
+        current[0] = secondDocument;
 
         CatalogSyncResult result = service.sync();
 
@@ -125,6 +127,28 @@ class ConsoleCatalogSyncServiceTest {
                     assertThat(value.getRequestUrl()).isEqualTo("/api/orders/search");
                 });
         verify(resourceDao).updateById(any(ConsoleCatalogResourceEntity.class));
+    }
+
+    private static PageDsl ordersPage(HttpDataSource list, HttpDataSource approve) {
+        PageDsl document = PageDsl.of(PageMeta.of("orders", "Orders"));
+        document.getDataSources().put("list", list);
+        document.getDataSources().put("approve", approve);
+        return document;
+    }
+
+    private static PageDsl ordersPage(HttpDataSource list) {
+        PageDsl document = PageDsl.of(PageMeta.of("orders", "Orders"));
+        document.getDataSources().put("list", list);
+        return document;
+    }
+
+    private static HttpDataSource httpDataSource(String method, String url) {
+        HttpDataSource dataSource = new HttpDataSource();
+        HttpRequest request = new HttpRequest();
+        request.setMethod(method);
+        request.setUrl(url);
+        dataSource.setRequest(request);
+        return dataSource;
     }
 
     private static ConsoleContributionCatalog activeCatalog() {
@@ -146,12 +170,12 @@ class ConsoleCatalogSyncServiceTest {
     private static ConsolePluginContribution contribution() {
         return new ConsolePluginContribution(List.of(new ConsoleModuleDeclaration(
                         "sales",
-                        I18nObject.of("en", "Sales"),
-                        I18nObject.of("en", "Sales module"),
+                        com.innospots.nexus.base.i18n.I18nObject.of("en", "Sales"),
+                        com.innospots.nexus.base.i18n.I18nObject.of("en", "Sales module"),
                         List.of(new UiSpecPageDeclaration("orders", "/orders", List.of())),
                         List.of(MenuDeclaration.page(
                                 "orders",
-                                I18nObject.of("en", "Orders"),
+                                com.innospots.nexus.base.i18n.I18nObject.of("en", "Orders"),
                                 null,
                                 0,
                                 "orders")))));

@@ -1,0 +1,8 @@
+dsl: '1.0'
+
+page:
+  id: logger-main
+  name: loggerMain
+  title: Audit Logs
+  description: Review console audit and invocation logs.
+  type: general

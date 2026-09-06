@@ -1,0 +1,809 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+$id: "https://pactor.dev/schema/page-dsl-1.0.schema.yaml"
+
+title: Pactor Page DSL
+description: Pactor Page DSL 1.0 Schema
+type: object
+
+required:
+  - dsl
+  - page
+
+additionalProperties: false
+
+properties:
+
+  dsl:
+    type: string
+    const: "1.0"
+    description: DSL specification version
+
+  requires:
+    $ref: "#/$defs/requires"
+
+  page:
+    $ref: "#/$defs/page"
+
+  meta:
+    type: object
+    description: DSL metadata. Runtime should not depend on this object.
+    additionalProperties: true
+
+  state:
+    type: object
+    description: Initial page state
+    additionalProperties:
+      $ref: "#/$defs/jsonValue"
+
+  dataSources:
+    type: object
+    description: Named page data sources
+    additionalProperties:
+      $ref: "#/$defs/dataSource"
+
+  actions:
+    type: object
+    description: Named reusable page actions
+    additionalProperties:
+      $ref: "#/$defs/actionOrList"
+
+  components:
+    type: object
+    description: Named reusable DSL components
+    additionalProperties:
+      $ref: "#/$defs/renderable"
+
+  lifecycle:
+    $ref: "#/$defs/lifecycle"
+
+  body:
+    $ref: "#/$defs/node"
+
+  children:
+    $ref: "#/$defs/children"
+
+
+$defs:
+
+  # ============================================================
+  # JSON VALUE
+  # ============================================================
+
+  jsonValue:
+    oneOf:
+
+      - type: "null"
+
+      - type: boolean
+
+      - type: number
+
+      - type: string
+
+      - type: array
+        items:
+          $ref: "#/$defs/jsonValue"
+
+      - type: object
+        additionalProperties:
+          $ref: "#/$defs/jsonValue"
+
+
+  # ============================================================
+  # EXPRESSION
+  # ============================================================
+
+  expression:
+    type: string
+    minLength: 1
+    description: |
+      Runtime expression.
+
+      Examples:
+        ${state.keyword}
+        ${data.users}
+        ${row.id}
+        ${state.enabled ? 'yes' : 'no'}
+
+  expressionOrBoolean:
+    oneOf:
+
+      - type: boolean
+
+      - $ref: "#/$defs/expression"
+
+
+  # ============================================================
+  # REQUIRES
+  # ============================================================
+
+  requires:
+    type: object
+    additionalProperties: false
+
+    properties:
+
+      runtime:
+        type: string
+        minLength: 1
+        description: Required runtime semantic version range
+
+      components:
+        type: object
+        description: Required component versions
+
+        additionalProperties:
+          type: string
+          minLength: 1
+
+
+  # ============================================================
+  # PAGE
+  # ============================================================
+
+  page:
+    type: object
+
+    required:
+      - id
+
+    additionalProperties: false
+
+    properties:
+
+      id:
+        type: string
+        minLength: 1
+        pattern: "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+        description: Unique page id using kebab-case
+
+      name:
+        type: string
+        minLength: 1
+        pattern: "^[a-z][A-Za-z0-9]*$"
+        description: Page logical name using camelCase
+
+      title:
+        type: string
+
+      description:
+        type: string
+
+      type:
+        type: string
+        examples:
+          - list
+          - detail
+          - form
+          - dashboard
+          - settings
+
+      permission:
+        $ref: "#/$defs/permission"
+
+
+  # ============================================================
+  # PERMISSION
+  # ============================================================
+
+  permission:
+    oneOf:
+
+      # permission: customer:view
+      - type: string
+        minLength: 1
+
+      # permission:
+      #   - customer:edit
+      #   - customer:admin
+      - type: array
+
+        minItems: 1
+        uniqueItems: true
+
+        items:
+          type: string
+          minLength: 1
+
+      # permission:
+      #   code: customer:edit
+      #   denied: disabled
+      - type: object
+
+        required:
+          - code
+
+        additionalProperties: false
+
+        properties:
+
+          code:
+            type: string
+            minLength: 1
+
+          denied:
+            type: string
+            enum:
+              - hidden
+              - disabled
+              - readonly
+            default: hidden
+
+
+  # ============================================================
+  # HTTP REQUEST
+  # ============================================================
+
+  httpRequest:
+    type: object
+
+    required:
+      - url
+
+    additionalProperties: false
+
+    properties:
+
+      method:
+        type: string
+        enum:
+          - GET
+          - POST
+          - PUT
+          - PATCH
+          - DELETE
+          - HEAD
+          - OPTIONS
+        default: GET
+
+      url:
+        type: string
+        minLength: 1
+
+      params:
+        type: object
+        additionalProperties: true
+
+      headers:
+        type: object
+        additionalProperties: true
+
+      body: {}
+
+      timeout:
+        type: integer
+        minimum: 0
+
+
+  # ============================================================
+  # PAGINATION
+  # ============================================================
+
+  pagination:
+    type: object
+
+    additionalProperties: false
+
+    properties:
+
+      page: {}
+
+      pageSize: {}
+
+      totalField:
+        type: string
+
+      dataField:
+        type: string
+
+
+  # ============================================================
+  # DATA SOURCE - STATIC
+  # ============================================================
+
+  staticDataSource:
+    type: object
+
+    required:
+      - type
+      - value
+
+    additionalProperties: false
+
+    properties:
+
+      type:
+        const: static
+
+      value: {}
+
+      autoLoad:
+        type: boolean
+
+      pagination:
+        $ref: "#/$defs/pagination"
+
+      valueField:
+        type: string
+
+      labelField:
+        type: string
+
+      disabledField:
+        type: string
+
+
+  # ============================================================
+  # DATA SOURCE - SERVICE
+  # ============================================================
+
+  serviceDataSource:
+    type: object
+
+    required:
+      - type
+      - service
+
+    additionalProperties: false
+
+    properties:
+
+      type:
+        const: service
+
+      service:
+        type: string
+        minLength: 1
+
+      params:
+        type: object
+        additionalProperties: true
+
+      autoLoad:
+        type: boolean
+
+      pagination:
+        $ref: "#/$defs/pagination"
+
+      valueField:
+        type: string
+
+      labelField:
+        type: string
+
+      disabledField:
+        type: string
+
+
+  # ============================================================
+  # DATA SOURCE - HTTP
+  # ============================================================
+
+  httpDataSource:
+    type: object
+
+    required:
+      - type
+      - request
+
+    additionalProperties: false
+
+    properties:
+
+      type:
+        const: http
+
+      request:
+        $ref: "#/$defs/httpRequest"
+
+      autoLoad:
+        type: boolean
+
+      pagination:
+        $ref: "#/$defs/pagination"
+
+      valueField:
+        type: string
+
+      labelField:
+        type: string
+
+      disabledField:
+        type: string
+
+
+  # ============================================================
+  # DATA SOURCE - COMPUTED
+  #
+  # Protocol-reserved type.
+  # Runtime implementation may vary.
+  # ============================================================
+
+  computedDataSource:
+    type: object
+
+    required:
+      - type
+
+    properties:
+
+      type:
+        const: computed
+
+      expression:
+        $ref: "#/$defs/expression"
+
+      dependsOn:
+        type: array
+        uniqueItems: true
+        items:
+          type: string
+
+    additionalProperties: true
+
+
+  # ============================================================
+  # DATA SOURCE - RESOURCE
+  #
+  # Protocol-reserved type.
+  # Runtime implementation may vary.
+  # ============================================================
+
+  resourceDataSource:
+    type: object
+
+    required:
+      - type
+
+    properties:
+
+      type:
+        const: resource
+
+      resource:
+        type: string
+
+      params:
+        type: object
+        additionalProperties: true
+
+    additionalProperties: true
+
+
+  # ============================================================
+  # DATA SOURCE
+  # ============================================================
+
+  dataSource:
+    oneOf:
+
+      - $ref: "#/$defs/staticDataSource"
+
+      - $ref: "#/$defs/serviceDataSource"
+
+      - $ref: "#/$defs/httpDataSource"
+
+      - $ref: "#/$defs/computedDataSource"
+
+      - $ref: "#/$defs/resourceDataSource"
+
+
+  # ============================================================
+  # ACTION
+  # ============================================================
+
+  action:
+    type: object
+
+    required:
+      - action
+
+    additionalProperties: false
+
+    properties:
+
+      id:
+        type: string
+        minLength: 1
+        pattern: "^[a-z][A-Za-z0-9]*$"
+
+      action:
+        type: string
+        minLength: 1
+        description: Action Registry name
+
+      params:
+        type: object
+        additionalProperties: true
+
+      condition:
+        $ref: "#/$defs/expressionOrBoolean"
+
+      permission:
+        $ref: "#/$defs/permission"
+
+
+  # ============================================================
+  # ACTION / ACTION LIST
+  # ============================================================
+
+  actionOrList:
+    oneOf:
+
+      - $ref: "#/$defs/action"
+
+      - type: array
+        items:
+          $ref: "#/$defs/action"
+
+
+  # ============================================================
+  # EVENTS
+  # ============================================================
+
+  events:
+    type: object
+
+    propertyNames:
+      pattern: "^on[A-Z][A-Za-z0-9]*$"
+
+    additionalProperties:
+      $ref: "#/$defs/actionOrList"
+
+
+  # ============================================================
+  # DSL SOURCE - SERVICE
+  # ============================================================
+
+  dslServiceSource:
+    type: object
+
+    required:
+      - type
+      - service
+
+    additionalProperties: false
+
+    properties:
+
+      type:
+        const: service
+
+      service:
+        type: string
+        minLength: 1
+
+      params:
+        type: object
+        additionalProperties: true
+
+
+  # ============================================================
+  # DSL SOURCE - HTTP
+  # ============================================================
+
+  dslHttpSource:
+    type: object
+
+    required:
+      - type
+      - request
+
+    additionalProperties: false
+
+    properties:
+
+      type:
+        const: http
+
+      request:
+        $ref: "#/$defs/httpRequest"
+
+
+  # ============================================================
+  # DSL SOURCE
+  # ============================================================
+
+  dslSource:
+    oneOf:
+
+      - $ref: "#/$defs/dslServiceSource"
+
+      - $ref: "#/$defs/dslHttpSource"
+
+
+  # ============================================================
+  # DYNAMIC DSL REFERENCE
+  # ============================================================
+
+  sourceRef:
+    type: object
+
+    required:
+      - source
+
+    additionalProperties: false
+
+    properties:
+
+      source:
+        $ref: "#/$defs/dslSource"
+
+      placeholder:
+        $ref: "#/$defs/node"
+
+
+  # ============================================================
+  # COMPONENT NODE
+  #
+  # Example:
+  #
+  # type: Button
+  # props:
+  #   text: Save
+  #
+  # ============================================================
+
+  componentNode:
+    type: object
+
+    required:
+      - type
+
+    additionalProperties: false
+
+    properties:
+
+      type:
+        type: string
+        minLength: 1
+        pattern: "^[A-Z][A-Za-z0-9._-]*$"
+        description: Component Registry type
+
+      id:
+        type: string
+        minLength: 1
+
+      props:
+        type: object
+        description: |
+          Component properties.
+
+          Core DSL schema intentionally does not validate
+          component-specific props.
+
+          Props validation should be provided by the
+          corresponding Component Registry schema.
+        additionalProperties: true
+
+      children:
+        $ref: "#/$defs/children"
+
+      events:
+        $ref: "#/$defs/events"
+
+      permission:
+        $ref: "#/$defs/permission"
+
+      when:
+        $ref: "#/$defs/expressionOrBoolean"
+
+
+  # ============================================================
+  # NAMED COMPONENT REFERENCE NODE
+  #
+  # Example:
+  #
+  # component: searchForm
+  #
+  # ============================================================
+
+  componentReferenceNode:
+    type: object
+
+    required:
+      - component
+
+    additionalProperties: false
+
+    properties:
+
+      component:
+        type: string
+        minLength: 1
+        pattern: "^[a-z][A-Za-z0-9]*$"
+
+      id:
+        type: string
+        minLength: 1
+
+      props:
+        type: object
+        additionalProperties: true
+
+      children:
+        $ref: "#/$defs/children"
+
+      events:
+        $ref: "#/$defs/events"
+
+      permission:
+        $ref: "#/$defs/permission"
+
+      when:
+        $ref: "#/$defs/expressionOrBoolean"
+
+
+  # ============================================================
+  # DSL NODE
+  #
+  # type and component are mutually exclusive because each
+  # alternative requires one and rejects unknown properties.
+  # ============================================================
+
+  node:
+    oneOf:
+
+      - $ref: "#/$defs/componentNode"
+
+      - $ref: "#/$defs/componentReferenceNode"
+
+
+  # ============================================================
+  # RENDERABLE
+  # ============================================================
+
+  renderable:
+    oneOf:
+
+      - $ref: "#/$defs/node"
+
+      - $ref: "#/$defs/sourceRef"
+
+
+  # ============================================================
+  # CHILDREN
+  #
+  # Normally children is an array.
+  #
+  # A whole dynamic DSL source may also be used.
+  # ============================================================
+
+  children:
+    oneOf:
+
+      - type: array
+        items:
+          $ref: "#/$defs/renderable"
+
+      - $ref: "#/$defs/sourceRef"
+
+
+  # ============================================================
+  # LIFECYCLE
+  # ============================================================
+
+  lifecycle:
+    type: object
+
+    additionalProperties: false
+
+    properties:
+
+      onInit:
+        $ref: "#/$defs/actionOrList"
+
+      onLoad:
+        $ref: "#/$defs/actionOrList"
+
+      onReady:
+        $ref: "#/$defs/actionOrList"
+
+      onShow:
+        $ref: "#/$defs/actionOrList"
+
+      onHide:
+        $ref: "#/$defs/actionOrList"
+
+      onDestroy:
+        $ref: "#/$defs/actionOrList"

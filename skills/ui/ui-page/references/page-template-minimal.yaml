@@ -1,0 +1,12 @@
+dsl: '1.0'
+
+page:
+  id: example-minimal
+  title: 最小页面
+
+body:
+  type: Page
+  children:
+    - type: Alert
+      props:
+        message: Hello
