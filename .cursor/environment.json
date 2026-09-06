@@ -1,0 +1,14 @@
+{
+  "name": "innospots-nexus",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "install": "mvn -B -ntp clean install",
+  "terminals": [
+    {
+      "name": "spring-app",
+      "command": "mvn -B -ntp -pl innospots-nexus-spring/innospots-nexus-spring-app spring-boot:run"
+    }
+  ],
+  "ports": [8080]
+}
