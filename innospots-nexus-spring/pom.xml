@@ -34,6 +34,7 @@
     </build>
 
     <modules>
+        <module>innospots-nexus-spring-service</module>
         <module>innospots-nexus-spring-app</module>
         <module>innospots-nexus-spring-console</module>
     </modules>

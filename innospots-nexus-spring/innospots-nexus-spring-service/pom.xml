@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.innospots</groupId>
+        <artifactId>innospots-nexus-spring</artifactId>
+        <version>${revision}</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>innospots-nexus-spring-service</artifactId>
+
+    <name>innospots-nexus-spring-service</name>
+    <description>Spring adapter boundary for standardized Nexus services.</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.innospots</groupId>
+            <artifactId>innospots-nexus-service-http</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.innospots</groupId>
+            <artifactId>innospots-nexus-service-websocket</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.innospots</groupId>
+            <artifactId>innospots-nexus-service-stream</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.innospots</groupId>
+            <artifactId>innospots-nexus-service-transfer</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.innospots</groupId>
+            <artifactId>innospots-nexus-service-observability</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.innospots</groupId>
+            <artifactId>innospots-nexus-service-governance</artifactId>
+        </dependency>
+    </dependencies>
+</project>

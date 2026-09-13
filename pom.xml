@@ -16,6 +16,7 @@
         <module>innospots-nexus-bom</module>
         <module>innospots-nexus-parent</module>
         <module>innospots-nexus-base</module>
+        <module>innospots-nexus-service</module>
         <module>innospots-nexus-core</module>
         <module>innospots-nexus-plugin</module>
         <module>innospots-nexus-console</module>

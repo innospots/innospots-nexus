@@ -18,6 +18,8 @@
     <description>Quarkus runtime assembly aggregator for innospots-nexus.</description>
 
     <modules>
+        <module>innospots-nexus-quarkus-service</module>
+        <module>innospots-nexus-quarkus-service-deployment</module>
         <module>innospots-nexus-quarkus-app</module>
         <module>innospots-nexus-quarkus-console</module>
     </modules>

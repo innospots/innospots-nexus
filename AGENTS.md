@@ -57,6 +57,25 @@ is a reference, not a source template.
   - Spring / Servlet bindings
   - Business domain entities and service workflows
 
+### `innospots-nexus-service`
+
+- Aggregates eight framework-neutral libraries: contract, runtime, http,
+  websocket, stream, transfer, observability, and governance.
+- Contract depends on base; runtime depends on contract; protocol/transfer
+  modules depend on runtime; observability and governance depend on contract.
+- Runtime consumes extension contracts without depending on observability or
+  governance implementations. Protocol modules must not require each other.
+- Must not depend on Spring, Quarkus, Servlet, Reactor, Mutiny, persistence,
+  or console/kernel/platform business modules.
+- Reuses base snapshots, status/exception contracts, and ResourceStore.
+  Core file metadata integration belongs at an assembly boundary.
+- Owns technical audit events/output integration, not business audit storage
+  or queries, which remain in kernel/platform.
+- Spring and Quarkus bindings belong in innospots-nexus-spring-service and
+  innospots-nexus-quarkus-service under their respective framework aggregators.
+- Neutral libraries inherit innospots-nexus-parent directly; the service POM
+  is an aggregator, not their build parent.
+
 ### `innospots-nexus-core`
 
 - Extends `innospots-nexus-base` with business-neutral middleware, database,

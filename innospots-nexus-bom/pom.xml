@@ -48,6 +48,8 @@
         <amqp-client.version>5.26.0</amqp-client.version>
         <kafka-clients.version>4.1.0</kafka-clients.version>
         <micrometer.version>1.15.5</micrometer.version>
+        <opentelemetry.version>1.65.0</opentelemetry.version>
+        <resilience4j.version>2.4.0</resilience4j.version>
         <quartz.version>2.5.2</quartz.version>
         <ulid-creator.version>5.2.4</ulid-creator.version>
     </properties>
@@ -124,6 +126,67 @@
             <dependency>
                 <groupId>com.innospots</groupId>
                 <artifactId>innospots-nexus-quarkus-console</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.innospots</groupId>
+                <artifactId>innospots-nexus-service-contract</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.innospots</groupId>
+                <artifactId>innospots-nexus-service-runtime</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.innospots</groupId>
+                <artifactId>innospots-nexus-service-http</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.innospots</groupId>
+                <artifactId>innospots-nexus-service-websocket</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.innospots</groupId>
+                <artifactId>innospots-nexus-service-stream</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.innospots</groupId>
+                <artifactId>innospots-nexus-service-transfer</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.innospots</groupId>
+                <artifactId>innospots-nexus-service-observability</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.innospots</groupId>
+                <artifactId>innospots-nexus-service-governance</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.innospots</groupId>
+                <artifactId>innospots-nexus-spring-service</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.innospots</groupId>
+                <artifactId>innospots-nexus-quarkus-service</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.innospots</groupId>
+                <artifactId>innospots-nexus-quarkus-service-deployment</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.innospots</groupId>
+                <artifactId>innospots-nexus-service-adapter-test</artifactId>
                 <version>${revision}</version>
             </dependency>
 
@@ -276,6 +339,21 @@
                 <groupId>io.micrometer</groupId>
                 <artifactId>micrometer-core</artifactId>
                 <version>${micrometer.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-api</artifactId>
+                <version>${opentelemetry.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-sdk-testing</artifactId>
+                <version>${opentelemetry.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.resilience4j</groupId>
+                <artifactId>resilience4j-circuitbreaker</artifactId>
+                <version>${resilience4j.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.github.f4b6a3</groupId>

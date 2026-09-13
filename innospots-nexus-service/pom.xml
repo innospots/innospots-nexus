@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.innospots</groupId>
+        <artifactId>innospots-nexus-parent</artifactId>
+        <version>${revision}</version>
+        <relativePath>../innospots-nexus-parent/pom.xml</relativePath>
+    </parent>
+
+    <artifactId>innospots-nexus-service</artifactId>
+    <packaging>pom</packaging>
+
+    <name>innospots-nexus-service</name>
+    <description>Framework-neutral service access and governance aggregator.</description>
+
+    <modules>
+        <module>innospots-nexus-service-contract</module>
+        <module>innospots-nexus-service-runtime</module>
+        <module>innospots-nexus-service-http</module>
+        <module>innospots-nexus-service-websocket</module>
+        <module>innospots-nexus-service-stream</module>
+        <module>innospots-nexus-service-transfer</module>
+        <module>innospots-nexus-service-observability</module>
+        <module>innospots-nexus-service-governance</module>
+        <module>innospots-nexus-service-adapter-test</module>
+    </modules>
+</project>
