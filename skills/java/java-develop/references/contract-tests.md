@@ -390,6 +390,53 @@ void assemblesCrossTableViewInBatches() {
 
 ---
 
+## MapStruct 转换器测试
+
+非平凡或重复的 entity ↔ record/VO 映射须有 `{Domain}ConverterTest`（行为单测，非 `ContractsTest` 族）。
+
+```java
+package com.innospots.nexus.kernel.role.converter;
+
+import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+class RoleConverterTest {
+
+    private final RoleConverter converter = Mappers.getMapper(RoleConverter.class);
+
+    @Test
+    void mapsEntityToView() {
+        RoleEntity entity = new RoleEntity();
+        entity.setRoleId("rol-1");
+        entity.setRoleCode("ADMIN");
+        entity.setRoleName("Admin");
+
+        RoleView view = converter.toView(entity);
+
+        assertThat(view.roleId()).isEqualTo("rol-1");
+        assertThat(view.roleCode()).isEqualTo("ADMIN");
+    }
+
+    @Test
+    void returnsEmptyListWhenSourceIsNull() {
+        assertThat(converter.toViews(null)).isEmpty();
+    }
+}
+```
+
+| 断言点 | 说明 |
+|--------|------|
+| 关键字段映射 | 稳定键、展示字段、枚举转换 |
+| null 安全 | 集合返回空而非 null（与 api-design 一致） |
+| 防御拷贝 | 转换后不暴露可变内部集合（若 VO 含集合） |
+| 编译期 | MapStruct 生成类存在；改接口后 `mvn clean compile` 必须通过 |
+
+平凡一对一字段可用契约测试锁 record 形状代替；复杂映射必须单测。
+
+---
+
 ## 契约测试组织约定
 
 | 约定 | 说明 |

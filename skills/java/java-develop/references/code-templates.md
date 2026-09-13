@@ -88,13 +88,19 @@ package com.innospots.nexus.kernel.role.dao;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 
+import org.apache.ibatis.annotations.Mapper;
+
 import com.innospots.nexus.kernel.role.domain.entity.RoleEntity;
 
 import java.util.List;
 
 /**
  * 工作空间角色的单表持久化访问。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
+@Mapper
 public interface RoleDao extends BaseMapper<RoleEntity> {
 
     /**
@@ -131,7 +137,8 @@ public interface RoleDao extends BaseMapper<RoleEntity> {
 - 用 lambda 方法引用而非字符串列名
 - 每个方法只访问一张表，**无 join**
 - 可空返回在 Javadoc 中声明
-- **不得**创建 Mapper XML
+- **不得**创建 Mapper XML、`beans.xml`；业务配置用 `*.yaml`，禁止新建 `*.properties`
+- 复杂动态条件优先 operator 内 wrapper；单 Dao `default` 方法宜 ≤7 个（见 persistence-mybatis.md）
 
 ### 跨表读取的组装模式
 

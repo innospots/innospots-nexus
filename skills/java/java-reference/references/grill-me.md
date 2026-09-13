@@ -8,13 +8,34 @@
 
 ---
 
+## 安装（未安装时必须先执行）
+
+`java:project`（新建 Maven 模块）与 `java:design`（新设计工作）**开始前**必须先能调用
+`grill-me`。若当前环境未安装该技能，Agent **不得**跳过或代行设计决策，须先安装并按技能全文执行：
+
+```bash
+npx skills use "https://github.com/mattpocock/skills" --skill "grill-me"
+```
+
+安装后：
+
+1. **立即**按生成技能中的完整说明执行（`Read its complete output`）。
+2. 若终端输出过长，先**重定向到临时文件**再读取全文。
+3. 技能若提供 **supporting-files** 目录，其中的**相对路径一律以该目录为根**解析
+   （`Resolve relative paths from the supporting-files directory it provides`）。
+4. grill-me 会话结束且开发者确认一致后，方可进入 `java:project` 或 `java:design`。
+
+---
+
 ## 何时调用
 
 在**重大决策尚未固化、存在多个可行分支**时调用。Agent 自行查证事实，把**决策**留给开发者。
 
 | 阶段 | 调用时机 | 审查对象示例 |
 |------|---------|-------------|
-| 设计前 | 新业务域、跨模块能力、边界模糊 | `skills/java/`、目标模块、`docs/design/*.md` |
+| **`java:project` 之前（必经）** | **新建 Maven 模块、调整 reactor、改依赖方向** | `pom.xml`、`module-layout.md`、目标模块路径 |
+| **`java:design` 之前（必经）** | **新业务域、新设计、新增模块对应的设计** | `skills/java/`、目标模块、`docs/design/*.md` |
+| 设计前 | 跨模块能力、边界仍模糊 | 同上 |
 | 设计后 / 开发前 | 四步法草稿完成，准备交 `java:develop` | 归属表、词汇表、契约骨架 |
 | 工程结构变更前 | 新建模块、改依赖方向、拆合模块 | `pom.xml`、`module-layout.md`、目标模块源码 |
 | 升级方案前 | JDK / Spring / Jakarta / 模块迁移 | 升级范围、影响模块、回滚策略 |
@@ -49,13 +70,15 @@
 ## 与各 Java 技能的衔接
 
 ```text
-（可选）grill-me  压力测试方案/边界
+grill-me          新建模块 / 新设计前必经（未安装则先安装）
     ↓
-java:reference    查规范红线
+java:project      需要新建 Maven 模块时（按需）
     ↓
-（可选）grill-me  设计四步法结论评审
+java:reference    查规范红线（贯穿）
     ↓
-java:design       定归属、词汇、边界、契约
+java:design       定归属、词汇、边界、契约（新设计必经）
+    ↓
+（可选）grill-me  四步法结论交 develop 前复审
     ↓
 java:develop      测试先行（契约红灯）→ 六阶段实现 → mvn test
     ↓
@@ -67,8 +90,8 @@ java:check        验证出口
 | 技能 | grill-me 角色 |
 |------|----------------|
 | `java:reference` | 规范问题不走 grill-me；**边界/归属/方案歧义**时建议先 grill |
-| `java:design` | **主入口**：非平凡设计开始前或四步法完成后各可开一轮 |
-| `java:project` | 新建模块、改 reactor 拓扑、动依赖方向**之前** |
+| `java:design` | **开始前必经**；四步法完成后交 develop 前可再开一轮复审 |
+| `java:project` | **新建模块、改 reactor、动依赖方向之前必经** |
 | `java:develop` | 默认不调用；阶段零未通过时回到 design，必要时 grill；测试策略分歧时回到 design → `test-scope.md` |
 | `java:check` | 不用于合入门禁；可选用于大变更前的方案复审 |
 | `java:dependency-upgrade` | JDK / Spring / 大依赖迁移方案定稿**之前**；组件替换路径不唯一时 |

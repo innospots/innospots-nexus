@@ -23,16 +23,32 @@
 
 ```text
 java-<name>/
-├── SKILL.md          入口：定位、流程、红线、路由
+├── README.md         给人读：是什么、怎么用、输入/输出、边界（本文件体系）
+├── SKILL.md          AI 入口：定位、流程、红线、路由
 └── references/       详细参考：按主题拆分的执行手册
 
 java-reference/
+├── README.md
 ├── SKILL.md          规范总索引（java:reference）
 ├── standards/        规范权威原文（7 份，随技能包安装）
 └── references/       专题参考、模块 API 索引
 ```
 
-`SKILL.md` 保持精简（入口与红线），细节放 `references/`，避免上下文膨胀。
+- **`README.md`** — 开发者手册：模块定位、使用方式、输入输出、适用与不适用场景。
+- **`SKILL.md`** — 代理执行入口，保持精简；细节放 `references/`，避免上下文膨胀。
+
+### 各技能 README 入口
+
+| 技能 | 开发者手册 |
+|------|-----------|
+| `java:reference` | [java-reference/README.md](java-reference/README.md) |
+| `java:project` | [java-project/README.md](java-project/README.md) |
+| `java:design` | [java-design/README.md](java-design/README.md) |
+| `java:develop` | [java-develop/README.md](java-develop/README.md) |
+| `java:check` | [java-check/README.md](java-check/README.md) |
+| `java:spring` | [java-spring/README.md](java-spring/README.md) |
+| `java:project-upgrade` | [java-project-upgrade/README.md](java-project-upgrade/README.md) |
+| `java:dependency-upgrade` | [java-dependency-upgrade/README.md](java-dependency-upgrade/README.md) |
 
 ## 路由原则
 
@@ -67,30 +83,76 @@ java-reference/
 
 两者可连续执行，但**分提交、分验证**；不要与功能开发混在同一变更里。
 
-## 典型工作流
+## 标准开发流程（功能交付）
 
-### 新建业务领域
+功能从立项到合入的**完整链路**如下。`java:reference` 可在任意阶段查阅规范，但不改变主顺序。
 
 ```text
-（可选）grill-me  新域/跨模块时压力测试边界与假设
-    ↓
-java:reference  查规范红线
-    ↓
-java:design     定归属、建词汇、划边界、定契约
-    ↓
-（可选）grill-me  四步法结论交 develop 前评审
-    ↓
-java:develop    测试先行：契约测试红灯 → 实现 → 单测转绿；每批 mvn clean compile；交付前 mvn test
-    ↓
-java:check      L0–L5 全量验证
+① grill-me          新建模块 / 新设计前必经
+        ↓
+② java:project      需要新建 Maven 模块时（按需）
+        ↓
+③ java:design       新增模块 / 新领域 / 契约变更
+        ↓
+④ java:develop      实现与测试
+        ↓
+⑤ java:check        验证出口
 ```
 
-### 修 Bug / 改功能
+### grill-me 安装（未安装时）
+
+`java:project` 与 `java:design` **开始前**必须先能调用 `grill-me`。未安装时 Agent 须先执行：
+
+```bash
+npx skills use "https://github.com/mattpocock/skills" --skill "grill-me"
+```
+
+然后**按生成技能的完整说明执行**（输出过长则先重定向到临时文件再读全文）；若提供
+**supporting-files** 目录，相对路径从该目录解析。会话结束且开发者确认后，方可进入
+`java:project` 或 `java:design`。详见 [grill-me.md](java-reference/references/grill-me.md)。
+
+### 各步判据
+
+| 步骤 | 是否必经 | 何时执行 |
+|------|---------|---------|
+| **grill-me** | **新建 Maven 模块或启动新设计时必经** | 在 `java:project` / `java:design` 动手前；未安装则先安装 |
+| **java:project** | 按需 | 需要**新建 Maven 模块**、调整 reactor、登记 BOM、建包根与 POM 时，在 design 之前 |
+| **java:design** | **新增模块 / 新业务领域 / 重大契约变更时必经** | grill-me 之后；产出设计文档（或 L0 结论块）与测试范围 |
+| **java:develop** | 必经 | 测试先行 → 实现；每批 `mvn clean compile`；交付前 `mvn test` |
+| **java:check** | 必经 | L0–L5 全量验证，统一出口 |
+
+**简记：**
+
+- **新建模块** → `grill-me` → `java:project` → `java:design` → `java:develop` → `java:check`。
+- **新领域（无新模块）** → `grill-me` → `java:design` → `java:develop` → `java:check`。
+- **已有域小改动、契约清晰** → 可跳过 grill-me 与 project；仍 `develop` → `check`（契约不清时补 design L0）。
+
+涉及 Spring 运行时组装时，在 project / design 阶段对照 `java:spring`；不插入 develop 与 check 之间。
+
+### 新建业务领域（示例）
 
 ```text
-java:develop    先写复现测试 → 在拥有失败语义的边界修改 → mvn test
+grill-me          必经；未安装则 npx skills use … --skill grill-me
     ↓
-java:check      聚焦测试 + 全量验证
+java:project      需要新 Maven 模块时：注册模块、parent、BOM、包根
+    ↓
+java:reference    查规范红线（贯穿）
+    ↓
+java:design       四步法 + 设计文档/测试范围
+    ↓
+java:develop      契约测试红灯 → 实现 → 单测转绿；mvn clean compile；mvn test
+    ↓
+java:check        L0–L5 全量验证
+```
+
+### 修 Bug / 改功能（已有域）
+
+```text
+java:design       仅当失败语义/契约不清时（可用 L0 结论块）；否则可跳过
+    ↓
+java:develop      先写复现测试 → 修改 → mvn test
+    ↓
+java:check        聚焦测试 + 全量验证
 ```
 
 ### 工程版本号升级（revision）
@@ -141,6 +203,14 @@ java:check            与升级前基线对比
 | 单元测试规约 | `java-develop/references/test-conventions.md` |
 | 契约测试写法 | `java-develop/references/contract-tests.md` |
 | 测试范围（设计） | `java-design/references/test-scope.md` |
+| 设计产出物（格式/目录） | `java-design/references/design-deliverables.md` |
+| 实现交付物（格式/目录） | `java-develop/references/develop-deliverables.md` |
+| 工程交付物（POM/模块） | `java-project/references/project-deliverables.md` |
+| 设计四步法门禁 | `java-design/references/design-four-steps.md` |
+| 设计场景与 L0–L3 | `java-design/references/design-scenarios.md` |
+| 持久化契约（设计） | `java-design/references/persistence-contract.md` |
+| 领域事件（设计） | `java-design/references/event-contract.md` |
+| MyBatis-Plus 实现 | `java-develop/references/persistence-mybatis.md` |
 | 方案压力测试 | `java-reference/references/grill-me.md` |
 | 模块 API 索引 | `java-reference/references/modules/<artifact-id>/README.md` |
 
@@ -150,6 +220,13 @@ java:check            与升级前基线对比
 
 ## grill-me（跨技能）
 
-`grill-me` 用于重大方案与决策的压力测试，**不产出代码**。调用时机与各技能衔接见
-`java-reference/references/grill-me.md`。简记：**设计前、结构变更前、升级方案定稿前**
-建议调用；**develop 执行中、check 验证中**默认不调用。
+`grill-me` 用于重大方案与决策的压力测试，**不产出代码**。在标准开发流程中位于**最前段**：
+**`java:project`（新建模块）与 `java:design`（新设计）开始前必经**。未安装时先执行
+`npx skills use "https://github.com/mattpocock/skills" --skill "grill-me"` 并按技能全文操作。
+调用时机与各技能衔接见 `java-reference/references/grill-me.md`。
+
+简记：
+
+- **必经**：新建 Maven 模块、新业务域设计、新增模块对应的设计工作。
+- **按需**：升级方案定稿前、design 交 develop 前复审。
+- **不调用**：develop 执行中、check 验证中、已有域 trivial 改动且契约已定。

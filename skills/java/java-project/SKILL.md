@@ -10,7 +10,7 @@ description: |
   触发词：新建模块、工程结构、模块划分、POM 配置、Maven、BOM、parent、依赖引用、
   最小依赖、console、kernel、platform、spring、quarkus、构建配置、编译基线。
 category: java
-version: 1.1.0
+version: 1.2.0
 ---
 
 # 工程创建、结构、构建与项目配置
@@ -20,6 +20,8 @@ version: 1.1.0
 负责**新建工程或对已有工程进行调整**时的约定与标准：模块怎么划、POM 怎么写、
 依赖怎么引、版本谁管、构建怎么跑。
 
+交付物形态、模块类型决策与清单见 [project-deliverables.md](references/project-deliverables.md)。
+
 **本技能不是**「当前 innospots-nexus 仓库依赖关系说明书」。仓库现状以各模块
 `pom.xml` 与 `mvn dependency:tree` 为准；本技能给出**应遵循的规范**与选型表。
 
@@ -27,17 +29,27 @@ version: 1.1.0
 不得以存量为由在新代码中复制冗余模式（见 `dependency-conventions.md` →「规范与存量 POM」）。
 
 不负责类与接口的设计（`java:design`），也不负责实现代码（`java:develop`）。
+**默认不新建 Maven 模块**——新业务域优先在 kernel/platform 内加领域包（见 project-deliverables）。
 
 权威依赖约定见 [dependency-conventions.md](references/dependency-conventions.md)。
 
-## grill-me（结构变更前）
+## grill-me（结构变更前，必经）
 
-以下操作**之前**建议调用 `grill-me` 压力测试方案（见 `java:reference` →
-`grill-me.md`）：
+以下操作**之前必须先**完成 `grill-me` 压力测试（见 `java:reference` →
+[grill-me.md](../java-reference/references/grill-me.md)）：
 
 - 新建 Maven 模块或调整 reactor 拓扑
 - 改变模块间依赖方向（含 kernel/platform 协作方式）
 - 拆分/合并模块、引入新的 application/adapter 层
+
+**未安装 `grill-me` 时不得开始上述操作。** 先执行：
+
+```bash
+npx skills use "https://github.com/mattpocock/skills" --skill "grill-me"
+```
+
+按生成技能的**完整说明**执行（输出过长则重定向到临时文件再读）；相对路径从
+**supporting-files** 目录解析。开发者确认 grill-me 结论后，方可改 POM / 注册模块。
 
 纯 POM 版本对齐、插件版本升级、单模块内配置微调无需 grill。
 
@@ -94,13 +106,17 @@ innospots-nexus-spring / innospots-nexus-quarkus
 
 ## 新建模块流程
 
-1. **确认边界** — 模块边界、依赖方向、可独立测试性三者都清楚才建新模块；否则并入现有模块。
-2. 在根 `pom.xml`（或所属聚合器）的 `<modules>` 中注册。
-3. 配置 `<parent>`（见下表）。
-4. 按 [dependency-conventions.md](references/dependency-conventions.md) 只声明**最小**直接依赖，不写 `<version>`。
-5. 若新模块要被其他模块依赖，在 **`innospots-nexus-bom`** 的 `dependencyManagement` 中登记（见 [build-config.md](references/build-config.md) →「登记新内部模块」）。
-6. 建 `src/main/java`、`src/test/java` 与包根 `com.innospots.nexus.<module>`。
-7. 运行 `mvn clean compile` 与 `mvn -q help:effective-pom` 验证。
+完整步骤与交付清单见 [project-deliverables.md](references/project-deliverables.md)。
+
+1. **grill-me** — 结构变更类必经；结论写入 PR 或 ADR。
+2. **确认边界与模块类型** — 三者都清楚才建新 Maven 模块；否则在现有模块内加领域包。
+3. 在根 `pom.xml`（或所属聚合器）的 `<modules>` 中注册。
+4. 配置 `<parent>`（见下表）；POM 模板见 [build-config.md](references/build-config.md)。
+5. 按 [dependency-conventions.md](references/dependency-conventions.md) 只声明**最小**直接依赖，不写 `<version>`。
+6. 若新模块要被其他模块依赖，在 **`innospots-nexus-bom`** 的 `dependencyManagement` 中登记。
+7. 建 `src/main/java`、`src/test/java` 与**包根 only** `com.innospots.nexus.<module>`（不预建领域子包）。
+8. `mvn validate` → `mvn -pl <module> -am clean compile` → `mvn -q help:effective-pom` → `dependency:tree`。
+9. 交 **`java:design`**（领域包与契约），再 `java:develop`。
 
 ### parent 与 relativePath
 
@@ -134,5 +150,9 @@ mvn -pl <module> -am clean install # 单模块及其依赖构建
 mvn versions:display-dependency-updates   # 依赖升级候选（需人工评估）
 ```
 
-详细配置模板与插件说明见 [build-config.md](references/build-config.md)；
-依赖引用规范见 [dependency-conventions.md](references/dependency-conventions.md)。
+## 详细参考
+
+- [project-deliverables.md](references/project-deliverables.md) — 交付物、模块类型、流程、清单
+- [dependency-conventions.md](references/dependency-conventions.md) — 依赖引用、可运行应用组装
+- [build-config.md](references/build-config.md) — parent/BOM/插件、POM 模板、排错
+- [module-layout.md](references/module-layout.md) — 模块职责与包结构

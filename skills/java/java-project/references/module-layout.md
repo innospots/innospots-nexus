@@ -1,6 +1,7 @@
 # 模块结构与职责边界
 
 > 本文档说明**模块职责与包结构约定**，供新建/调整工程时选型。
+> **工程交付物、新建 Maven 模块流程与清单**见 [project-deliverables.md](project-deliverables.md)。
 > Maven 依赖应引哪个 artifact、如何最小声明，见
 > [dependency-conventions.md](dependency-conventions.md)。
 

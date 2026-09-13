@@ -6,7 +6,8 @@
 
 以下情形**必须**先出方案再动手，不得边写边定。
 其中非平凡项建议在方案定稿前附加 **`grill-me`** 做压力测试（见 `java:reference` →
-`grill-me.md`），确认设计树无遗漏后再进入 `java:design` 四步法或 `java:develop`。
+`grill-me.md`），确认设计树无遗漏后再进入 `java:design` 四步法；**不得**跳过设计直接 `java:develop`。
+需新建 Maven 模块时在设计定稿后走 `java:project`，再 `java:develop`。
 
 | 情形 | 原因 |
 |------|------|

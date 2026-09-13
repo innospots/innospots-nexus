@@ -5,6 +5,19 @@
 
 四类共用同一条硬约束：**每批 Java 源文件改动后立即 `mvn clean compile`。**
 
+交付物形态与文件树见 [develop-deliverables.md](develop-deliverables.md)。
+
+### 专题索引
+
+| 主题 | 文件 |
+|------|------|
+| 实现交付物与交付清单 | [develop-deliverables.md](develop-deliverables.md) |
+| 新领域逐步实施 | [domain-initialization.md](domain-initialization.md) |
+| 领域事件 | [domain-events.md](domain-events.md) |
+| 集成测试 `*IT` | [integration-tests.md](integration-tests.md) |
+| MyBatis-Plus / yaml / 禁 XML | [persistence-mybatis.md](persistence-mybatis.md) |
+| 插件 vs kernel 归属 | `java:reference` → [module-ownership.md](../../java-reference/references/module-ownership.md) |
+
 ---
 
 ## 通用前置：先理解再动手
@@ -55,6 +68,8 @@
 | 在端点里直接写业务逻辑 | 委托 service / operator |
 | 在 operator 里调用另一个 operator | 上提到 service |
 | 新增 DAO 方法带 join | 单表 + 分批组装 |
+| 新增 mapper.xml / beans.xml / `*.properties` | LambdaWrapper + Dao `default` + `*.yaml`（见 persistence-mybatis.md） |
+| 巨型单 Dao 堆满自定义 SQL | 拆多表 Dao 或动态条件放 operator |
 | 把实体直接返回给前端 | 用 VO record + MapStruct |
 | 预建 `service` 但只有一个转发方法 | 直接 `endpoint → operator → dao` |
 | 为凑结构创建空包 | 只在有实际职责时建包 |

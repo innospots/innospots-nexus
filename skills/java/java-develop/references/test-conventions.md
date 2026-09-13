@@ -157,23 +157,11 @@ mvn -pl <module> test -DfailIfNoSpecifiedTests=false -Dtest='Role*Test'
 
 ## 与领域初始化的配合
 
-契约测试在领域初始化的第 1、4、6 步写成，并在实现之前确认红灯：
-
-```text
-第 1 步  写实体契约测试
-第 2 步  运行确认红灯
-第 3 步  实现实体
-第 4 步  写 DAO 泛型绑定测试
-第 5 步  实现 DAO
-第 6 步  写 Request/VO/枚举/状态码/端点契约测试
-第 7 步  运行确认红灯
-第 8 步  实现领域 record、状态枚举与端点
-第 9 步  重跑聚焦测试直到通过
-第 10 步 跑全量工程验证
-```
+测试先行**统一顺序**见 [develop-deliverables.md](develop-deliverables.md) 与
+[domain-initialization.md](domain-initialization.md)（与六阶段 checklist 对齐，避免多份编号冲突）。
 
 完整验证交由 `java:check` 执行；开发阶段每批功能改动后至少 `mvn clean compile`，
-交付前必须 `mvn test`。`java:check` 还会执行 `mvn validate`、`mvn test`、
+交付前必须 `mvn test`（含 `*IT` 时用 `verify`）。`java:check` 还会执行 `mvn validate`、
 `mvn -q help:effective-pom`、`git diff --check`。
 
 ---

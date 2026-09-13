@@ -24,7 +24,7 @@
 | 层 | 设计阶段至少明确 |
 |----|-----------------|
 | Entity | 表名、基类、主键、索引、必填与长度 → 契约测试 |
-| DAO | `BaseMapper` 绑定、单表约束 → 契约测试 |
+| DAO | `BaseMapper` 绑定、单表约束、无 mapper.xml → 契约测试；可复用 `default` 方法是否行为单测（见 persistence-contract） |
 | Request/VO/枚举 | record 形状、校验不变量 → 契约 + 拒绝路径单测 |
 | StatusCode | 九字符、双语、类别、HTTP 映射 → 契约测试 |
 | Endpoint | 路径、HTTP 注解、`R<T>`、推迟行为 → 契约测试 |
@@ -38,5 +38,6 @@
 - [ ] 新公共类型/端点是否列入契约测试清单？
 - [ ] 是否避免「实现后再补测试」而无测试先行计划？
 - [ ] 修 Bug 类需求是否已要求复现测试？
+- [ ] 持久化相关：资源侧无新增 XML/properties；Dao 清单与 [persistence-contract.md](persistence-contract.md) 一致？
 
 实现与测试编写统一在 **`java:develop`** 完成；**`java:check`** 负责最终核验。
