@@ -1,7 +1,7 @@
 package com.innospots.nexus.console.permission.domain.vo;
 
-import com.innospots.nexus.core.plugin.contribution.console.catalog.domain.entity.ConsoleCatalogResourceEntity;
-import com.innospots.nexus.core.plugin.contribution.console.catalog.domain.enums.CatalogResourceType;
+import com.innospots.nexus.console.catalog.domain.entity.ConsoleCatalogResourceEntity;
+import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
 
 /** 面向管理端和前端的权限资源目录视图。 */
 public record PermissionResourceVo(

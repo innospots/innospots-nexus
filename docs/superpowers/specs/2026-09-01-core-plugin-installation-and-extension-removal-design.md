@@ -1,7 +1,7 @@
 # Core Plugin Installation and Extension Removal Design
 
 > 本文保留为改造决策记录。现行规范已经拆分到
-> `innospots-nexus-core/docs/plugin-installation-design.md`、
+> `innospots-nexus-plugin/docs/plugin/design/plugin-installation-design.md`、
 > `plugin-runtime-design.md` 和 `plugin-console-contribution-design.md`；如有冲突，以拆分后的现行规范为准。
 
 ## 1. 文档定位

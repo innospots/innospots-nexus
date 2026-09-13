@@ -11,7 +11,7 @@ import jakarta.ws.rs.core.MediaType;
 import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.status.NexusStatusCode;
-import com.innospots.nexus.base.thread.TLC;
+import com.innospots.nexus.base.thread.SessionContext;
 import com.innospots.nexus.console.menu.domain.vo.NavigationMenuVo;
 import com.innospots.nexus.console.navigation.service.NavigationMenuAssembler;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubjectResolver;
@@ -45,10 +45,7 @@ public final class NavigationMenuEndpoint {
      */
     @GET
     public R<List<NavigationMenuVo>> listNavigationMenus() {
-        String workspaceId = TLC.workspaceId();
-        if (workspaceId == null || workspaceId.isBlank()) {
-            throw NexusException.build(NexusStatusCode.CONFIG_ERROR, "Workspace context is required");
-        }
+        String workspaceId = SessionContext.requireWorkspaceId();
         return R.ok(subjectResolver.resolve()
                 .map(subject -> assembler.navigationMenus(workspaceId, subject))
                 .orElseGet(List::of));

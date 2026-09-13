@@ -9,11 +9,13 @@
 
 | 范围 | 基类 | 判定 |
 |------|------|------|
-| workspace（租户 + 工作区） | `WorkspaceBaseEntity` | **默认选择**，工作区持有的业务记录 |
+| project（工作区 + 项目） | `ProjectBaseEntity` | 工作区内需要业务隔离的记录 |
+| workspace（租户 + 工作区） | `WorkspaceBaseEntity` | **默认选择**，工作区共享的业务记录 |
 | tenant（仅租户，不含工作区） | `TenantBaseEntity` | 租户级但不属于某个工作区 |
 | 平台级 / realm 全局 | `BaseEntity` | 需求明确标明是平台范围或全局（用户、凭据、服务注册） |
 
-**禁止**新造 `ProjectBaseEntity` 或 `projectId` 隔离列。
+作用域层级：`Tenant → Workspace（资源共享）→ Project（业务隔离）`。
+`projectId` 仅出现在继承 `ProjectBaseEntity` 的实体上；不得在无项目语义的表上随意加列。
 
 范围选择错误的典型代价：唯一索引漏掉租户/工作区维度导致跨租户串数据；
 或反过来把真正全局的数据套上工作区隔离导致系统级查询无法进行。
@@ -63,7 +65,8 @@
 5. 树查询需要的兄弟排序 → `idx_`
 
 命名：`uk_<表名概念>_<用途>` / `idx_<表名概念>_<用途>`，表名作用域明确。
-工作区唯一性索引含 `workspace_id`，租户唯一性索引含 `tenant_id`。
+工作区唯一性索引含 `workspace_id`，租户唯一性索引含 `tenant_id`，
+项目唯一性索引含 `workspace_id` + `project_id`（或 `project_id` 参与稳定业务键）。
 
 ---
 

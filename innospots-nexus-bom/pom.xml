@@ -88,6 +88,11 @@
             </dependency>
             <dependency>
                 <groupId>com.innospots</groupId>
+                <artifactId>innospots-nexus-plugin</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.innospots</groupId>
                 <artifactId>innospots-nexus-console</artifactId>
                 <version>${revision}</version>
             </dependency>

@@ -20,9 +20,10 @@ ordinary code changes.
 - Existing skills documentation may remain temporarily out of date between
   developer-requested scans.
 
-When a scan is explicitly requested, each selected module uses a `skills/`
-directory under `src/main/resources/skills/` containing a `SKILL.md` and a
-`references/` subdirectory with per-package reference documentation.
+When a scan is explicitly requested, each selected Java module is documented
+under `skills/java/java-reference/references/modules/<artifact-id>/` with a
+`SKILL.md` and a `references/` subdirectory containing per-package reference
+documentation. The `java-reference` skill indexes these module references.
 
 ## SKILL.md Format
 

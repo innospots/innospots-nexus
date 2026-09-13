@@ -8,14 +8,13 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import com.innospots.nexus.base.thread.TLC;
 import com.innospots.nexus.core.persistence.entity.BaseEntity;
+import com.innospots.nexus.core.persistence.entity.ProjectBaseEntity;
 import com.innospots.nexus.core.persistence.entity.TenantBaseEntity;
 import com.innospots.nexus.core.persistence.entity.WorkspaceBaseEntity;
 import com.innospots.nexus.core.persistence.handler.AuditMetaObjectHandler;
 import com.innospots.nexus.core.persistence.id.DbPrimaryGenerator;
 import com.innospots.nexus.core.resource.domain.entity.MetaResourceEntity;
 import com.innospots.nexus.core.server.domain.entity.ServiceRegistryEntity;
-import com.innospots.nexus.core.session.domain.entity.ConversationEntity;
-import com.innospots.nexus.core.session.domain.entity.SessionMessageEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -52,6 +51,18 @@ class CoreEntityContractsTest {
     }
 
     @Test
+    void projectEntityDefinesProjectScopeFillField() throws NoSuchFieldException {
+        assertThat(ProjectBaseEntity.class.getAnnotation(MappedSuperclass.class)).isNotNull();
+        assertThat(ProjectBaseEntity.class.getSuperclass()).isEqualTo(WorkspaceBaseEntity.class);
+
+        TableField projectId = ProjectBaseEntity.class.getDeclaredField("projectId")
+                .getAnnotation(TableField.class);
+
+        assertThat(projectId.fill()).isEqualTo(FieldFill.INSERT_UPDATE);
+        assertColumnNameIsImplicit(ProjectBaseEntity.class.getDeclaredField("projectId"));
+    }
+
+    @Test
     void workspaceEntityDefinesWorkspaceScopeFillField() throws NoSuchFieldException {
         assertThat(WorkspaceBaseEntity.class.getAnnotation(MappedSuperclass.class)).isNotNull();
         assertThat(TenantBaseEntity.class.getAnnotation(MappedSuperclass.class)).isNotNull();
@@ -83,7 +94,7 @@ class CoreEntityContractsTest {
             TLC.userName("alice");
             TLC.tenantId("tnt01");
             TLC.workspaceId("wks01");
-            ConversationEntity entity = new ConversationEntity();
+            MetaResourceEntity entity = new MetaResourceEntity();
 
             new AuditMetaObjectHandler().insertFill(SystemMetaObject.forObject(entity));
 
@@ -99,9 +110,25 @@ class CoreEntityContractsTest {
     }
 
     @Test
+    void auditMetaObjectHandlerFillsProjectIdOnProjectScopedEntities() {
+        try {
+            TLC.tenantId("tnt01");
+            TLC.workspaceId("wks01");
+            TLC.projectId("prj01");
+            ProjectScopedEntity entity = new ProjectScopedEntity();
+
+            new AuditMetaObjectHandler().insertFill(SystemMetaObject.forObject(entity));
+
+            assertThat(entity.getTenantId()).isEqualTo("tnt01");
+            assertThat(entity.getWorkspaceId()).isEqualTo("wks01");
+            assertThat(entity.getProjectId()).isEqualTo("prj01");
+        } finally {
+            TLC.clear();
+        }
+    }
+
+    @Test
     void concreteEntitiesDefinePersistenceEntityAndTableAnnotations() {
-        assertPersistenceTable(ConversationEntity.class, ConversationEntity.TABLE_NAME);
-        assertPersistenceTable(SessionMessageEntity.class, SessionMessageEntity.TABLE_NAME);
         assertPersistenceTable(MetaResourceEntity.class, MetaResourceEntity.TABLE_NAME);
         assertPersistenceTable(ServiceRegistryEntity.class, ServiceRegistryEntity.TABLE_NAME);
 
@@ -111,20 +138,7 @@ class CoreEntityContractsTest {
     }
 
     @Test
-    void sessionEntitiesUseAssignedUuidIdentifiersAndNewTableNames() throws NoSuchFieldException {
-        assertThat(ConversationEntity.class.getAnnotation(TableName.class).value()).isEqualTo("nx_conversation");
-        assertThat(SessionMessageEntity.class.getAnnotation(TableName.class).value()).isEqualTo("nx_session_message");
-
-        TableId conversationId = ConversationEntity.class.getDeclaredField("conversationId").getAnnotation(TableId.class);
-        TableId messageId = SessionMessageEntity.class.getDeclaredField("messageId").getAnnotation(TableId.class);
-        assertThat(conversationId.type()).isEqualTo(IdType.ASSIGN_UUID);
-        assertThat(messageId.type()).isEqualTo(IdType.ASSIGN_UUID);
-    }
-
-    @Test
     void primaryKeyFieldsDefineBothMybatisPlusAndPersistenceIdentifiers() throws NoSuchFieldException {
-        assertPersistenceId(ConversationEntity.class.getDeclaredField("conversationId"));
-        assertPersistenceId(SessionMessageEntity.class.getDeclaredField("messageId"));
         assertPersistenceId(MetaResourceEntity.class.getDeclaredField("resourceId"));
         assertPersistenceId(ServiceRegistryEntity.class.getDeclaredField("serviceRegistryId"));
     }
@@ -152,8 +166,6 @@ class CoreEntityContractsTest {
 
     @Test
     void concreteEntityPrimaryKeysUseAssignedUuidStringIdentifiersWithLength32() throws NoSuchFieldException {
-        assertStringAssignedUuidPrimaryKey(ConversationEntity.class.getDeclaredField("conversationId"));
-        assertStringAssignedUuidPrimaryKey(SessionMessageEntity.class.getDeclaredField("messageId"));
         assertStringAssignedUuidPrimaryKey(MetaResourceEntity.class.getDeclaredField("resourceId"));
         assertStringAssignedUuidPrimaryKey(ServiceRegistryEntity.class.getDeclaredField("serviceRegistryId"));
     }
@@ -162,8 +174,6 @@ class CoreEntityContractsTest {
     void databasePrimaryGeneratorUsesEntityPrefixes() {
         DbPrimaryGenerator generator = new DbPrimaryGenerator();
 
-        assertThat(generator.nextUUID(new ConversationEntity())).startsWith("cnv").hasSize(29);
-        assertThat(generator.nextUUID(new SessionMessageEntity())).startsWith("msg").hasSize(29);
         assertThat(generator.nextUUID(new MetaResourceEntity())).startsWith("res").hasSize(29);
         assertThat(generator.nextUUID(new ServiceRegistryEntity())).startsWith("srv").hasSize(29);
         assertThat(generator.nextUUID(new BaseEntity())).hasSize(26);
@@ -175,8 +185,7 @@ class CoreEntityContractsTest {
                 BaseEntity.class,
                 TenantBaseEntity.class,
                 WorkspaceBaseEntity.class,
-                ConversationEntity.class,
-                SessionMessageEntity.class,
+                ProjectBaseEntity.class,
                 MetaResourceEntity.class,
                 ServiceRegistryEntity.class
         );
@@ -229,6 +238,10 @@ class CoreEntityContractsTest {
         assertThat(field.getAnnotation(Id.class))
                 .as("%s.%s @Id", field.getDeclaringClass().getSimpleName(), field.getName())
                 .isNotNull();
+    }
+
+    @MappedSuperclass
+    static class ProjectScopedEntity extends ProjectBaseEntity {
     }
 
     private static void assertStringAssignedUuidPrimaryKey(Field field) {

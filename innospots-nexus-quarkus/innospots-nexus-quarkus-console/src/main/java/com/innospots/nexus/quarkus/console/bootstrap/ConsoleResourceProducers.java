@@ -7,7 +7,7 @@ import jakarta.inject.Inject;
 
 import com.innospots.nexus.console.catalog.endpoint.ConsoleCatalogEndpoint;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogService;
-import com.innospots.nexus.core.plugin.contribution.console.catalog.service.ConsoleCatalogSyncService;
+import com.innospots.nexus.console.catalog.service.ConsoleCatalogSyncService;
 import com.innospots.nexus.console.navigation.endpoint.NavigationMenuEndpoint;
 import com.innospots.nexus.console.navigation.service.NavigationMenuAssembler;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubjectResolver;

@@ -11,8 +11,8 @@ import java.util.stream.Collectors;
 import com.innospots.nexus.console.menu.domain.enums.MenuOpenMode;
 import com.innospots.nexus.console.menu.domain.vo.NavigationMenuVo;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubject;
-import com.innospots.nexus.core.plugin.contribution.console.catalog.domain.entity.ConsoleCatalogResourceEntity;
-import com.innospots.nexus.core.plugin.contribution.console.catalog.domain.enums.CatalogResourceType;
+import com.innospots.nexus.console.catalog.domain.entity.ConsoleCatalogResourceEntity;
+import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
 import com.innospots.nexus.console.permission.service.PermissionVisibilityService;
 
 /** 从持久化权限目录组装当前用户可见的导航菜单树。 */

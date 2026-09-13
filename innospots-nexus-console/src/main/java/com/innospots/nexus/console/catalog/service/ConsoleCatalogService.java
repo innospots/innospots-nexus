@@ -12,9 +12,9 @@ import com.innospots.nexus.base.domain.enums.BasicStatus;
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.console.catalog.domain.vo.CatalogNodeVo;
-import com.innospots.nexus.core.plugin.contribution.console.catalog.dao.ConsoleCatalogResourceDao;
-import com.innospots.nexus.core.plugin.contribution.console.catalog.domain.entity.ConsoleCatalogResourceEntity;
-import com.innospots.nexus.core.plugin.contribution.console.catalog.domain.enums.CatalogResourceType;
+import com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao;
+import com.innospots.nexus.console.catalog.domain.entity.ConsoleCatalogResourceEntity;
+import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
 
 /** 从宿主级目录索引组装权限设置树。 */
 public final class ConsoleCatalogService {

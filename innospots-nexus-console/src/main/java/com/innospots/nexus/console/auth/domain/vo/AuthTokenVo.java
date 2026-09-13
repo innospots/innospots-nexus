@@ -11,6 +11,8 @@ import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
  * @param refreshToken    refresh token
  * @param tenantId        set on TENANT business tokens
  * @param tenantMemberId  set on TENANT business tokens
+ * @param workspaceId     set when a workspace is active
+ * @param projectId       set when a project is active
  */
 public record AuthTokenVo(
         SecurityRealm realm,
@@ -18,6 +20,8 @@ public record AuthTokenVo(
         String accessToken,
         String refreshToken,
         String tenantId,
-        String tenantMemberId
+        String tenantMemberId,
+        String workspaceId,
+        String projectId
 ) {
 }

@@ -11,9 +11,12 @@ import org.junit.jupiter.api.Test;
 import com.innospots.nexus.console.auth.domain.request.AuthLoginRequest;
 import com.innospots.nexus.console.auth.domain.request.PasswordChangeRequest;
 import com.innospots.nexus.console.auth.domain.request.PasswordResetRequest;
+import com.innospots.nexus.console.auth.domain.request.SelectProjectRequest;
 import com.innospots.nexus.console.auth.domain.request.SelectTenantRequest;
+import com.innospots.nexus.console.auth.domain.request.SelectWorkspaceRequest;
 import com.innospots.nexus.console.auth.domain.request.TenantRegisterRequest;
 import com.innospots.nexus.console.auth.domain.request.TokenRefreshRequest;
+import com.innospots.nexus.console.scope.endpoint.TenantScopeEndpoint;
 import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
 import com.innospots.nexus.console.auth.domain.vo.AuthTokenVo;
 
@@ -44,13 +47,23 @@ class AuthEndpointContractsTest {
     }
 
     @Test
+    void tenantScopeEndpointSupportsWorkspaceAndProjectSelection() throws NoSuchMethodException {
+        assertThat(TenantScopeEndpoint.class.getAnnotation(Path.class).value()).isEqualTo("/tenant/scope");
+        assertHttpMethod(TenantScopeEndpoint.class, "selectWorkspace", POST.class, SelectWorkspaceRequest.class);
+        assertHttpMethod(TenantScopeEndpoint.class, "selectProject", POST.class, SelectProjectRequest.class);
+    }
+
+    @Test
     void authRequestsAndTokenAreRecords() {
         assertRecordComponents(AuthLoginRequest.class, "login", "encryptedPassword");
         assertRecordComponents(TenantRegisterRequest.class,
                 "userName", "displayName", "email", "mobile", "region", "timeZone", "language", "encryptedPassword");
         assertRecordComponents(SelectTenantRequest.class, "tenantId");
+        assertRecordComponents(SelectWorkspaceRequest.class, "tenantId", "workspaceId");
+        assertRecordComponents(SelectProjectRequest.class, "tenantId", "workspaceId", "projectId");
         assertRecordComponents(AuthTokenVo.class,
-                "realm", "tokenType", "accessToken", "refreshToken", "tenantId", "tenantMemberId");
+                "realm", "tokenType", "accessToken", "refreshToken",
+                "tenantId", "tenantMemberId", "workspaceId", "projectId");
         assertThat(SecurityRealm.values()).containsExactly(SecurityRealm.PLATFORM, SecurityRealm.TENANT);
     }
 

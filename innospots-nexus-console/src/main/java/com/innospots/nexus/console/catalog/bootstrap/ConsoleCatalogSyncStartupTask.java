@@ -1,6 +1,6 @@
 package com.innospots.nexus.console.catalog.bootstrap;
 
-import com.innospots.nexus.core.plugin.contribution.console.catalog.service.ConsoleCatalogSyncService;
+import com.innospots.nexus.console.catalog.service.ConsoleCatalogSyncService;
 import com.innospots.nexus.core.bootstrap.NexusStartupContext;
 import com.innospots.nexus.core.bootstrap.NexusStartupTask;
 

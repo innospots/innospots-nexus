@@ -28,6 +28,7 @@ public final class TLC {
     public static final String SECURITY_REALM = "securityRealm";
     public static final String TENANT_MEMBER_ID = "tenantMemberId";
     public static final String PLATFORM_USER_ID = "platformUserId";
+    public static final String PROJECT_ID = "projectId";
 
     private static final ThreadLocal<Map<String, Object>> CONTEXT = ThreadLocal.withInitial(LinkedHashMap::new);
 
@@ -102,6 +103,16 @@ public final class TLC {
     /** Returns the platform user ID from context, or null. */
     public static String platformUserId() {
         return getString(PLATFORM_USER_ID);
+    }
+
+    /** Sets the project ID in context. Passing null removes the entry. */
+    public static void projectId(String projectId) {
+        put(PROJECT_ID, projectId);
+    }
+
+    /** Returns the project ID from context, or null. */
+    public static String projectId() {
+        return getString(PROJECT_ID);
     }
 
     /**

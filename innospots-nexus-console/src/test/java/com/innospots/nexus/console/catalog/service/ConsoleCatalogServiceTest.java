@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import com.innospots.nexus.console.catalog.domain.vo.CatalogNodeVo;
-import com.innospots.nexus.core.plugin.contribution.console.catalog.domain.entity.ConsoleCatalogResourceEntity;
-import com.innospots.nexus.core.plugin.contribution.console.catalog.domain.enums.CatalogResourceType;
+import com.innospots.nexus.console.catalog.domain.entity.ConsoleCatalogResourceEntity;
+import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -32,11 +32,11 @@ class ConsoleCatalogServiceTest {
                 .isEqualTo(CatalogResourceType.MENU);
     }
 
-    private static com.innospots.nexus.core.plugin.contribution.console.catalog.dao.ConsoleCatalogResourceDao permissionResourceDao(
+    private static com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao permissionResourceDao(
             List<ConsoleCatalogResourceEntity> resources
     ) {
-        com.innospots.nexus.core.plugin.contribution.console.catalog.dao.ConsoleCatalogResourceDao dao =
-                mock(com.innospots.nexus.core.plugin.contribution.console.catalog.dao.ConsoleCatalogResourceDao.class);
+        com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao dao =
+                mock(com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao.class);
         when(dao.selectList(any())).thenReturn(resources);
         return dao;
     }

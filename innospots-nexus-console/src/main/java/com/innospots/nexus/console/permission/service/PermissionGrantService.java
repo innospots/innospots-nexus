@@ -12,12 +12,14 @@ import jakarta.transaction.Transactional;
 import com.innospots.nexus.base.domain.enums.BasicStatus;
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.status.NexusStatusCode;
+import com.innospots.nexus.base.thread.SessionContext;
 import com.innospots.nexus.base.thread.TLC;
+import com.innospots.nexus.base.util.Checks;
 import com.innospots.nexus.console.permission.dao.PermissionGrantDao;
-import com.innospots.nexus.core.plugin.contribution.console.catalog.dao.ConsoleCatalogResourceDao;
+import com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao;
 import com.innospots.nexus.console.permission.domain.entity.PermissionGrantEntity;
-import com.innospots.nexus.core.plugin.contribution.console.catalog.domain.entity.ConsoleCatalogResourceEntity;
-import com.innospots.nexus.core.plugin.contribution.console.catalog.domain.enums.CatalogResourceType;
+import com.innospots.nexus.console.catalog.domain.entity.ConsoleCatalogResourceEntity;
+import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
 import com.innospots.nexus.console.permission.domain.enums.PermissionSubjectType;
 import com.innospots.nexus.console.permission.domain.request.PermissionGrantItemRequest;
 import com.innospots.nexus.console.permission.domain.request.PermissionGrantReplaceRequest;
@@ -33,8 +35,8 @@ public final class PermissionGrantService {
             PermissionGrantDao grantDao,
             ConsoleCatalogResourceDao resourceDao
     ) {
-        this.grantDao = require(grantDao, "grantDao");
-        this.resourceDao = require(resourceDao, "resourceDao");
+        this.grantDao = Checks.notNull(grantDao, "grantDao");
+        this.resourceDao = Checks.notNull(resourceDao, "resourceDao");
     }
 
     /**
@@ -53,7 +55,7 @@ public final class PermissionGrantService {
             String subjectId,
             PermissionGrantReplaceRequest request
     ) {
-        require(request, "request");
+        Checks.notNull(request, "request");
         validateSubject(subjectType, subjectId, request);
         String workspaceId = currentWorkspaceId();
         List<ConsoleCatalogResourceEntity> resources = resources(workspaceId, request.grants());
@@ -201,9 +203,8 @@ public final class PermissionGrantService {
             String subjectId,
             PermissionGrantReplaceRequest request
     ) {
-        if (subjectType == null || subjectId == null || subjectId.isBlank()) {
-            invalid("Permission subject is required");
-        }
+        Checks.notNull(subjectType, "subjectType");
+        Checks.notBlank(subjectId, "subjectId");
         if (request == null) {
             return;
         }
@@ -216,19 +217,8 @@ public final class PermissionGrantService {
         }
     }
 
-    private static <T> T require(T value, String field) {
-        if (value == null) {
-            invalid(field + " is required");
-        }
-        return value;
-    }
-
     private static String currentWorkspaceId() {
-        String workspaceId = TLC.workspaceId();
-        if (workspaceId == null || workspaceId.isBlank()) {
-            invalid("Workspace context is required");
-        }
-        return workspaceId;
+        return SessionContext.requireWorkspaceId();
     }
 
     private static String currentSecurityRealm() {

@@ -11,7 +11,7 @@ import org.springframework.core.annotation.Order;
 
 import com.innospots.nexus.core.bootstrap.NexusStartup;
 import com.innospots.nexus.core.bootstrap.NexusStartupTask;
-import com.innospots.nexus.core.bootstrap.PluginHostStartupTask;
+import com.innospots.nexus.core.plugin.bootstrap.PluginHostStartupTask;
 import com.innospots.nexus.core.plugin.contribution.PluginContributionDecoderRegistry;
 import com.innospots.nexus.core.plugin.contribution.PluginContributionHandler;
 import com.innospots.nexus.core.plugin.contribution.PluginContributionSnapshotterRegistry;

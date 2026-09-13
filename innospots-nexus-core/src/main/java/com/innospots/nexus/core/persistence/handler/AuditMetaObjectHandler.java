@@ -11,17 +11,17 @@ import java.time.LocalDateTime;
 
 /**
  * MyBatis-Plus meta-object handler that auto-fills audit fields on
- * entities extending {@link BaseEntity}, {@link TenantBaseEntity}, or
- * {@link WorkspaceBaseEntity}.
- * <p>Reads user identity, tenant ID, and workspace ID from {@link
- * com.innospots.nexus.base.thread.TLC thread-local context}, so no
+ * entities extending {@link BaseEntity}, {@link TenantBaseEntity},
+ * {@link WorkspaceBaseEntity}, or {@link ProjectBaseEntity}.
+ * <p>Reads user identity, tenant ID, workspace ID, and project ID from
+ * {@link com.innospots.nexus.base.thread.TLC thread-local context}, so no
  * explicit field assignment is needed at the repository layer.</p>
  */
 public class AuditMetaObjectHandler implements MetaObjectHandler {
 
     /**
      * Fills createdAt, updatedAt, createdBy, updatedBy on insert.
-     * Also fills tenantId and workspaceId when present in TLC.
+     * Also fills tenantId, workspaceId, and projectId when present in TLC.
      */
     @Override
     public void insertFill(MetaObject metaObject) {
@@ -37,7 +37,7 @@ public class AuditMetaObjectHandler implements MetaObjectHandler {
 
     /**
      * Fills updatedAt and updatedBy on update.
-     * Also refreshes tenantId and workspaceId from TLC when present.
+     * Also refreshes tenantId, workspaceId, and projectId from TLC when present.
      */
     @Override
     public void updateFill(MetaObject metaObject) {
@@ -62,6 +62,7 @@ public class AuditMetaObjectHandler implements MetaObjectHandler {
     private void fillScope(MetaObject metaObject, boolean insert) {
         String tenantId = TLC.tenantId();
         String workspaceId = TLC.workspaceId();
+        String projectId = TLC.projectId();
         if (tenantId != null) {
             if (insert) {
                 fillStrategy(metaObject, "tenantId", tenantId);
@@ -74,6 +75,13 @@ public class AuditMetaObjectHandler implements MetaObjectHandler {
                 fillStrategy(metaObject, "workspaceId", workspaceId);
             } else {
                 setFieldValByName("workspaceId", workspaceId, metaObject);
+            }
+        }
+        if (projectId != null) {
+            if (insert) {
+                fillStrategy(metaObject, "projectId", projectId);
+            } else {
+                setFieldValByName("projectId", projectId, metaObject);
             }
         }
     }

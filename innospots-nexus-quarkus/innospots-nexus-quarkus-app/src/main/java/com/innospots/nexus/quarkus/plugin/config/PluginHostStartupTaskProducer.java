@@ -8,7 +8,7 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
 
-import com.innospots.nexus.core.bootstrap.PluginHostStartupTask;
+import com.innospots.nexus.core.plugin.bootstrap.PluginHostStartupTask;
 import com.innospots.nexus.core.plugin.contribution.PluginContributionDecoderRegistry;
 import com.innospots.nexus.core.plugin.contribution.PluginContributionHandler;
 import com.innospots.nexus.core.plugin.contribution.PluginContributionSnapshotterRegistry;

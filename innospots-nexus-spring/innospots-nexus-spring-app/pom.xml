@@ -23,6 +23,10 @@
             <artifactId>innospots-nexus-core</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.innospots</groupId>
+            <artifactId>innospots-nexus-plugin</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>

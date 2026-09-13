@@ -7,7 +7,7 @@ import jakarta.inject.Inject;
 
 import com.innospots.nexus.core.bootstrap.NexusStartup;
 import com.innospots.nexus.core.bootstrap.NexusStartupTask;
-import com.innospots.nexus.core.bootstrap.PluginHostStartupTask;
+import com.innospots.nexus.core.plugin.bootstrap.PluginHostStartupTask;
 
 /**
  * Quarkus 启动编排 Bean 生产器。

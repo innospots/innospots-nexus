@@ -23,6 +23,10 @@
             <artifactId>innospots-nexus-core</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.innospots</groupId>
+            <artifactId>innospots-nexus-plugin</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.jboss.logmanager</groupId>
             <artifactId>log4j2-jboss-logmanager</artifactId>
         </dependency>

@@ -8,10 +8,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 class OrganizationContractsTest {
 
     @Test
-    void definesOrganizationProfile() {
-        OrganizationInfo organization = new OrganizationInfo(1L, "Innospots", "innospots", "zh-CN", "CNY", "logo", BasicStatus.ENABLED);
+    void definesTenantBusinessProfile() {
+        OrganizationSnapshot organization = new OrganizationSnapshot(
+                "tnt01", "innospots", "Innospots", "zh-CN", "CNY", "logo", BasicStatus.ENABLED);
 
-        assertThat(organization.organizationId()).isEqualTo(1L);
+        assertThat(organization.tenantId()).isEqualTo("tnt01");
         assertThat(organization.defaultLocale()).isEqualTo("zh-CN");
         assertThat(organization.status()).isEqualTo(BasicStatus.ENABLED);
     }

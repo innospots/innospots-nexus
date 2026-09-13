@@ -12,8 +12,8 @@ import jakarta.ws.rs.core.MediaType;
 import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexus.console.catalog.domain.vo.CatalogNodeVo;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogService;
-import com.innospots.nexus.core.plugin.contribution.console.catalog.domain.model.CatalogSyncResult;
-import com.innospots.nexus.core.plugin.contribution.console.catalog.service.ConsoleCatalogSyncService;
+import com.innospots.nexus.console.catalog.domain.model.CatalogSyncResult;
+import com.innospots.nexus.console.catalog.service.ConsoleCatalogSyncService;
 import com.innospots.nexus.console.permission.domain.vo.PermissionResourceSyncVo;
 
 /** 权限设置页目录树与显式同步接口。 */

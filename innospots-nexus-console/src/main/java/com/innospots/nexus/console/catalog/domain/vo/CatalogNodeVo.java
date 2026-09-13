@@ -2,7 +2,7 @@ package com.innospots.nexus.console.catalog.domain.vo;
 
 import java.util.List;
 
-import com.innospots.nexus.core.plugin.contribution.console.catalog.domain.enums.CatalogResourceType;
+import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
 
 /**
  * 权限设置页的插件功能树节点。

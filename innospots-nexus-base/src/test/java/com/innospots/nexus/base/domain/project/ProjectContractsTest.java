@@ -8,15 +8,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ProjectContractsTest {
 
     @Test
-    void definesProjectProfile() {
-        ProjectInfo project = ProjectInfo.named(100L, "Nexus", "nexus")
-                .organizationId(1L)
-                .description("AI platform foundation")
-                .status(BasicStatus.ENABLED);
+    void definesProjectProfileUnderWorkspace() {
+        ProjectSnapshot project = new ProjectSnapshot(
+                "tnt01", "wks01", "prj01", "nexus", "Nexus", "AI platform foundation", BasicStatus.ENABLED);
 
-        assertThat(project.projectId()).isEqualTo(100L);
-        assertThat(project.projectCode()).isEqualTo("nexus");
-        assertThat(project.organizationId()).isEqualTo(1L);
+        assertThat(project.projectId()).isEqualTo("prj01");
+        assertThat(project.workspaceId()).isEqualTo("wks01");
+        assertThat(project.tenantId()).isEqualTo("tnt01");
         assertThat(project.status()).isEqualTo(BasicStatus.ENABLED);
     }
 }

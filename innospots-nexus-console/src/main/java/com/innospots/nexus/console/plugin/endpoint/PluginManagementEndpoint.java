@@ -12,7 +12,7 @@ import jakarta.ws.rs.core.MediaType;
 
 import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexus.base.exception.NexusException;
-import com.innospots.nexus.core.plugin.contribution.console.catalog.service.ConsoleCatalogSyncService;
+import com.innospots.nexus.console.catalog.service.ConsoleCatalogSyncService;
 import com.innospots.nexus.console.plugin.converter.PluginManagementConverter;
 import com.innospots.nexus.console.plugin.domain.vo.PluginManagementVo;
 import com.innospots.nexus.core.plugin.installation.domain.model.PluginManagementView;

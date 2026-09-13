@@ -11,9 +11,9 @@ class IdentityContractsTest {
 
     @Test
     void definesUserRoleAndGroupModels() {
-        RoleInfo role = RoleInfo.of("r1", "Admin", "admin", BasicStatus.ENABLED);
-        UserGroupInfo group = new UserGroupInfo(10L, "AI Team", "ai-team", null, 1L, List.of(2L, 3L), BasicStatus.ENABLED);
-        UserInfo user = UserInfo.simple(7L, "yxy", "YXY")
+        RoleSnapshot role = RoleSnapshot.of("r1", "Admin", "admin", BasicStatus.ENABLED);
+        UserGroupSnapshot group = new UserGroupSnapshot(10L, "AI Team", "ai-team", null, 1L, List.of(2L, 3L), BasicStatus.ENABLED);
+        UserSnapshot user = UserSnapshot.simple(7L, "yxy", "YXY")
                 .email("yxy@example.com")
                 .role(role)
                 .group(group);

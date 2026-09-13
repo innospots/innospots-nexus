@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @MapperScan(
-        basePackages = "com.innospots.nexus.core.plugin.contribution.console.catalog.dao",
+        basePackages = "com.innospots.nexus.console.catalog.dao",
         annotationClass = Mapper.class,
         sqlSessionFactoryRef = "sqlSessionFactory")
 public class ConsoleCatalogDaoConfiguration {

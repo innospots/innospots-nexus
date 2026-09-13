@@ -15,7 +15,7 @@
     <packaging>jar</packaging>
 
     <name>innospots-nexus-core</name>
-    <description>Core platform module for domain, application, extension, and port boundaries.</description>
+    <description>Business-neutral platform infrastructure: persistence, scheduling, server lifecycle, and shared resource metadata.</description>
 
     <dependencies>
         <dependency>

@@ -11,6 +11,8 @@ import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
  * @param userId          platform or tenant user identifier
  * @param tenantId        tenant on BUSINESS tokens
  * @param tenantMemberId  tenant member on BUSINESS tokens
+ * @param workspaceId     active workspace on scoped BUSINESS tokens
+ * @param projectId       active project on scoped BUSINESS tokens
  * @param expiresAt       epoch-second expiry
  */
 public record TokenClaims(
@@ -20,6 +22,8 @@ public record TokenClaims(
         String userId,
         String tenantId,
         String tenantMemberId,
+        String workspaceId,
+        String projectId,
         long expiresAt
 ) {
 }

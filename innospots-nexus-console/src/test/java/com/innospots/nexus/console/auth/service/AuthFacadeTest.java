@@ -6,10 +6,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
+import com.innospots.nexus.base.domain.enums.BasicStatus;
+import com.innospots.nexus.base.domain.organization.OrganizationSnapshot;
+import com.innospots.nexus.base.domain.tenant.TenantSnapshot;
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.status.NexusStatusCode;
+import com.innospots.nexus.base.thread.SessionContext;
+import com.innospots.nexus.base.thread.TLC;
 import com.innospots.nexus.base.util.CryptoUtils;
 import com.innospots.nexus.console.auth.api.CredentialStore;
 import com.innospots.nexus.console.auth.api.MembershipDirectory;
@@ -24,11 +30,21 @@ import com.innospots.nexus.console.auth.domain.request.SelectTenantRequest;
 import com.innospots.nexus.console.auth.domain.request.TokenRefreshRequest;
 import com.innospots.nexus.console.auth.domain.vo.AuthTokenVo;
 import com.innospots.nexus.console.config.AuthConfig;
+import com.innospots.nexus.console.scope.api.ProjectScopeDirectory;
+import com.innospots.nexus.console.scope.api.TenantScopeDirectory;
+import com.innospots.nexus.console.scope.api.WorkspaceScopeDirectory;
+import com.innospots.nexus.console.scope.domain.model.TenantScope;
+import com.innospots.nexus.console.scope.service.SessionScopeBinder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class AuthFacadeTest {
+
+    @AfterEach
+    void tearDown() {
+        TLC.clear();
+    }
 
     @Test
     void platformLoginIssuesBusinessTokenForMatchingPassword() {
@@ -43,9 +59,12 @@ class AuthFacadeTest {
         assertThat(token.refreshToken()).isNotBlank();
         assertThat(token.tenantId()).isNull();
         assertThat(token.tenantMemberId()).isNull();
+        assertThat(token.workspaceId()).isNull();
+        assertThat(token.projectId()).isNull();
         TokenClaims claims = harness.issuer().parse(token.accessToken());
         assertThat(claims.userId()).isEqualTo("pus-ops");
         assertThat(claims.purpose()).isEqualTo("ACCESS");
+        assertThat(TLC.userName()).isEqualTo("ops");
     }
 
     @Test
@@ -86,6 +105,8 @@ class AuthFacadeTest {
         assertThat(business.tokenType()).isEqualTo("BUSINESS");
         assertThat(business.tenantId()).isEqualTo("tnt-b");
         assertThat(business.tenantMemberId()).isEqualTo("tmb-b");
+        assertThat(SessionContext.tenant()).isPresent();
+        assertThat(SessionContext.organization()).isPresent();
     }
 
     @Test
@@ -101,6 +122,7 @@ class AuthFacadeTest {
         assertThat(token.tokenType()).isEqualTo("BUSINESS");
         assertThat(token.tenantId()).isEqualTo("tnt-a");
         assertThat(token.tenantMemberId()).isEqualTo("tmb-a");
+        assertThat(SessionContext.tenantId()).isEqualTo("tnt-a");
     }
 
     @Test
@@ -118,10 +140,17 @@ class AuthFacadeTest {
     }
 
     @Test
-    void logoutCompletesWithoutPersistingUsers() {
-        AuthHarness harness = AuthHarness.platformUser("ops", "Secret123");
+    void logoutClearsSessionScope() {
+        AuthHarness harness = AuthHarness.tenantUser(
+                "bob",
+                "Secret123",
+                List.of(new TenantMembership("tnt-a", "tmb-a")));
+        harness.facade().login(SecurityRealm.TENANT, new AuthLoginRequest("bob", "Secret123"));
 
         harness.facade().logout();
+
+        assertThat(SessionContext.tenant()).isEmpty();
+        assertThat(TLC.tenantId()).isNull();
     }
 
     private record AuthHarness(AuthFacade facade, TokenIssuer issuer) {
@@ -148,14 +177,24 @@ class AuthFacadeTest {
         private static AuthHarness harness(InMemoryDirectory directory) {
             AuthConfig config = new AuthConfig();
             TokenIssuer issuer = new TokenIssuer(config);
+            AuthTokenPairIssuer tokenPairIssuer = new AuthTokenPairIssuer(issuer);
+            SessionScopeBinder sessionScopeBinder = new SessionScopeBinder(
+                    directory, directory, directory);
             AuthFacade facade = new AuthFacade(
-                    directory, directory, directory, encrypted -> encrypted, issuer);
+                    directory,
+                    directory,
+                    directory,
+                    encrypted -> encrypted,
+                    issuer,
+                    tokenPairIssuer,
+                    sessionScopeBinder);
             return new AuthHarness(facade, issuer);
         }
     }
 
     private static final class InMemoryDirectory
-            implements UserDirectory, CredentialStore, MembershipDirectory {
+            implements UserDirectory, CredentialStore, MembershipDirectory,
+            TenantScopeDirectory, WorkspaceScopeDirectory, ProjectScopeDirectory {
 
         private final Map<String, AuthUser> users = new HashMap<>();
         private final Map<String, CredentialRecord> passwords = new HashMap<>();
@@ -199,6 +238,34 @@ class AuthFacadeTest {
         @Override
         public List<TenantMembership> listActiveMemberships(String tenantUserId) {
             return new ArrayList<>(memberships.getOrDefault(tenantUserId, List.of()));
+        }
+
+        @Override
+        public Optional<TenantScope> findByTenantId(String tenantId) {
+            if (tenantId == null) {
+                return Optional.empty();
+            }
+            TenantSnapshot tenant = new TenantSnapshot(tenantId, tenantId, tenantId, BasicStatus.ENABLED);
+            OrganizationSnapshot organization = new OrganizationSnapshot(
+                    tenantId, tenantId, tenantId, null, null, null, BasicStatus.ENABLED);
+            return Optional.of(new TenantScope(tenant, organization));
+        }
+
+        @Override
+        public Optional<com.innospots.nexus.base.domain.workspace.WorkspaceSnapshot> findWorkspace(
+                String tenantId,
+                String workspaceId
+        ) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<com.innospots.nexus.base.domain.project.ProjectSnapshot> findProject(
+                String tenantId,
+                String workspaceId,
+                String projectId
+        ) {
+            return Optional.empty();
         }
     }
 }

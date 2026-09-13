@@ -7,8 +7,9 @@ innospots-nexus (root, packaging=pom)
 ├── innospots-nexus-bom        依赖版本清单（无代码）
 ├── innospots-nexus-parent     构建 parent（无代码）
 ├── innospots-nexus-base       纯 Java 基础
-├── innospots-nexus-core       业务中立的基础设施
-├── innospots-nexus-console    管理台契约与扩展
+├── innospots-nexus-core       业务中立的平台基础设施
+├── innospots-nexus-plugin     插件运行时与 Page DSL
+├── innospots-nexus-console    管理台契约与 catalog 索引
 ├── innospots-nexus-kernel     核心管理业务能力
 └── innospots-nexus-platform   运营域平台能力
 ```
@@ -16,8 +17,8 @@ innospots-nexus (root, packaging=pom)
 依赖方向严格单向：
 
 ```text
-base  →  core  →  console  →  kernel
-                          ↘ platform
+base  →  core  →  plugin  →  console  →  kernel
+                                    ↘ platform
 ```
 
 `kernel` 与 `platform` 是 `console` 下的两个平行业务模块，**互不依赖**。
@@ -52,7 +53,7 @@ base  →  core  →  console  →  kernel
 | 线程 | `thread` | `ThreadPoolBuilder`、`TLC` |
 | 国际化 | `i18n` | 注解与转换器 |
 | 配置 | `config` | `NexusConfig` |
-| UI 规格 | `ui.spec` | `UiSpec` 及其解析 |
+| 资源 SPI | `resources` | `ResourceStore`、`MetaResource`、`FileResource` |
 | 领域原语 | `domain.{identity,organization,project,field,condition,dictionary,request,data}` | 共享业务中立的数据契约 |
 
 **硬约束**：
@@ -65,23 +66,35 @@ base  →  core  →  console  →  kernel
 
 **定位**：在 base 之上扩展业务中立的中间件、数据库与平台基础设施支持。
 
-**可包含**：共享持久化实体与公共表、数据库支持、调度、服务生命周期、会话基础设施、
-watcher、扩展边界，以及其他非管理类的通用能力。
+**可包含**：共享持久化基类、审计填充、Quartz 调度、服务节点注册、watcher、启动 SPI、
+文件元数据（`nx_meta_resource`）与存储注册表。
 
 **硬约束**：
 
-- 必须保持业务中立：用户、角色、权限、菜单等具体业务域不属于此模块
+- 必须保持业务中立：用户、角色、权限、菜单、catalog 索引等不属于此模块
 - 可以依赖所需的中间件 API 与实现，但**不得绑定 Spring Boot 自动配置**
-- 业务专属基础设施应放在其业务模块或独立 adapter / plugin / extension / application 模块
+- 不含插件运行时与 Page DSL（见 `innospots-nexus-plugin`）
+
+### innospots-nexus-plugin
+
+**定位**：classpath 插件运行时、贡献解码与 Page DSL。
+
+**可包含**：插件发现/安装/生命周期、`console@1` 贡献契约、Pactor Page DSL 1.0。
+
+**硬约束**：
+
+- 不持久化 console catalog 索引表（`nx_console_catalog_resource` 属于 console）
+- 不绑定 Spring / Quarkus 自动配置
 
 ### innospots-nexus-console
 
 **定位**：管理平台的地基与扩展契约模块，为管理台特性模块提供业务中立的支撑。
 
-**可包含**：Jakarta REST 端点契约、扩展声明、菜单/路由贡献模型、共享管理台抽象。
+**可包含**：Jakarta REST 端点契约、console catalog 索引持久化与同步、VO/转换器。
 
 **硬约束**：
 
+- 不拥有插件规范与 contribution 约束定义（属于 `innospots-nexus-plugin`）
 - 不实现具体管理业务功能；用户、角色、权限、注册等属于 `kernel` 之类的业务模块
 - 管理台特性模块暴露管理能力时依赖此模块
 

@@ -16,7 +16,7 @@ import com.innospots.nexus.core.persistence.entity.WorkspaceBaseEntity;
 /**
  * Console-scoped role persistence entity. Ownership is PLATFORM, TENANT, or WORKSPACE.
  *
- * @see com.innospots.nexus.base.domain.identity.RoleInfo
+ * @see com.innospots.nexus.base.domain.identity.RoleSnapshot
  */
 @Getter
 @Setter

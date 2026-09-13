@@ -1,25 +1,42 @@
 package com.innospots.nexus.core.bootstrap;
 
-import com.innospots.nexus.core.plugin.installation.service.PluginInstallationManager;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
 
 /**
- * 启动编排过程中的跨步骤上下文。
+ * Cross-step context passed through startup task execution.
  */
 public final class NexusStartupContext {
 
-    private PluginInstallationManager installationManager;
+    private final Map<String, Object> attributes = new LinkedHashMap<>();
 
-    /** 返回插件安装管理器；插件宿主任务完成前可能为 {@code null}。 */
-    public PluginInstallationManager installationManager() {
-        return installationManager;
+    /**
+     * Stores a startup attribute.
+     *
+     * @param key   attribute key
+     * @param value attribute value; {@code null} removes the key
+     */
+    public void putAttribute(String key, Object value) {
+        if (value == null) {
+            attributes.remove(key);
+        } else {
+            attributes.put(key, value);
+        }
     }
 
     /**
-     * 由插件宿主启动任务写入安装管理器。
+     * Reads a typed startup attribute.
      *
-     * @param installationManager 已启用的安装管理器
+     * @param key  attribute key
+     * @param type expected value type
+     * @return attribute value when present and type-compatible
      */
-    void attachInstallationManager(PluginInstallationManager installationManager) {
-        this.installationManager = installationManager;
+    public <T> Optional<T> getAttribute(String key, Class<T> type) {
+        Object value = attributes.get(key);
+        if (type.isInstance(value)) {
+            return Optional.of(type.cast(value));
+        }
+        return Optional.empty();
     }
 }

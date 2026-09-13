@@ -11,12 +11,13 @@ is a reference, not a source template.
 - Ask for or infer the current developer intent before creating new behavior.
 - Keep the foundation lightweight and dependency-minimal.
 - **代码生成完成后必须编译验证** — 每次修改完 Java 源文件后，立即运行 `mvn clean compile` 确保没有不可编译的代码。禁止生成不能编译的通代码。
-- Do not create, update, or synchronize module `SKILL.md` files or their
-  `references/` documentation as part of ordinary code development.
-- Skills documentation may be generated or refreshed only when a developer
-  explicitly requests a module or project directory scan. That operation must
-  update the selected documentation set together, rather than incrementally
-  following individual code changes.
+- Do not create, update, or synchronize module API reference docs under
+  `skills/java/java-reference/references/modules/` as part of ordinary code
+  development.
+- Module API reference documentation may be generated or refreshed only when a
+  developer explicitly requests a module or project directory scan. That
+  operation must update the selected documentation set together, rather than
+  incrementally following individual code changes.
 
 ## Module Responsibilities
 
@@ -26,34 +27,82 @@ is a reference, not a source template.
   utility packages.
 - Provides reusable capabilities such as exceptions, status codes, response
   wrappers, domain-event contracts, MapStruct support, JSON helpers, ID
-  generation, cryptography, HTTP utilities, and other dependency-light tools.
-- Must not contain business-domain logic.
+  generation, cryptography, HTTP utilities, condition DSL, execution SPI,
+  in-process events, and other dependency-light tools.
+- Owns **transport/session snapshots** (`UserSnapshot`, `TenantSnapshot`,
+  `OrganizationSnapshot`, `WorkspaceSnapshot`, `ProjectSnapshot`, etc.)
+  as shared serializable shapes; kernel owns business entities and workflows.
+- Scope hierarchy: **Tenant → Workspace (shared resources) → Project (business
+  isolation)**. `OrganizationSnapshot` is the tenant business profile, not
+  kernel `OrganizationUnit`.
+- Must not contain business-domain logic or persistence bindings.
 - Must remain middleware-free and must not depend on database, messaging,
   scheduling, Servlet, Spring, Quarkus, or other runtime infrastructure.
+- Module API reference lives under
+  `skills/java/java-reference/references/modules/innospots-nexus-base/`
+  (not under `src/main/resources/skills/`).
+- **Reserved without current consumers:** `domain.condition` (filter DSL),
+  `execution` (executor SPI). Do not remove without an explicit boundary
+  decision; wire a real consumer or document as experimental before expanding.
+- **New public APIs** in base require at least two upper-module consumers,
+  unless explicitly marked experimental or reserved.
+- **Forbidden in base** (belong in core, adapters, or business modules):
+  - Cache (local or distributed)
+  - Retry / circuit breaker
+  - Jakarta Bean Validation
+  - Scheduling runtime (Quartz/cron logic; scheduling enums may live in core)
+  - Messaging middleware (Kafka and similar)
+  - ORM / JDBC / connection pools
+  - Spring / Servlet bindings
+  - Business domain entities and service workflows
 
 ### `innospots-nexus-core`
 
 - Extends `innospots-nexus-base` with business-neutral middleware, database,
   and platform infrastructure support.
-- May provide shared persistence entities and public tables, database support,
-  scheduling, server lifecycle, session infrastructure, watchers, extension
-  boundaries, and other non-management common capabilities.
-- Owns **plugin runtime contracts**: capability, contribution types, declaration
-  models, decoders/handlers/snapshotters, and installation/runtime orchestration
-  (e.g. `console@1` under `core.plugin.contribution.console`).
-- Must remain business-domain neutral. User, role, permission, menu, and other
-  concrete business domains do not belong in this module.
+- Owns shared persistence base entities (`BaseEntity` → `TenantBaseEntity` →
+  `WorkspaceBaseEntity` → `ProjectBaseEntity`), audit fill, ID generation,
+  Quartz scheduling, service-node registry, watcher runtime, startup SPI, and
+  workspace-scoped file metadata (`nx_meta_resource` + `MetaResourceService`).
+- Must remain business-domain neutral. User, role, permission, menu, catalog
+  index, and other management-console concerns do not belong in this module.
 - May depend on middleware APIs and implementations needed for reusable
-  platform support, but must not bind itself to Spring Boot
-  auto-configuration.
+  platform support, but must not bind itself to Spring Boot auto-configuration.
+- **Forbidden in core** (belong in plugin, console, kernel, platform, or
+  adapters):
+  - Classpath plugin runtime, contribution decoders, Page DSL, plugin
+    installation tables
+  - Jakarta REST endpoints and console VOs
+  - User/role/permission/menu/dictionary business entities and workflows
+  - Auth/session conversation or chat product domains
+  - Spring / Quarkus / Servlet bindings
+- **New public APIs** in core require at least two upper-module consumers,
+  unless explicitly marked experimental.
+- Binary storage SPI stays in `base.resources.ResourceStore`; core binds stores
+  to persisted metadata via `core.resource.storage.ResourceStorageRegistry`.
+
+### `innospots-nexus-plugin`
+
+- Extends `innospots-nexus-core` with classpath plugin runtime and contribution
+  processing.
+- Owns plugin discovery, declaration, lifecycle, installation, capability
+  routing, contribution decode/validate/snapshot, and **Pactor Page DSL 1.0**
+  under `core.plugin.contribution.console.ui.spec`.
+- Owns `console@1` contribution contracts and runtime handlers; it does **not**
+  own the persisted console catalog index (`nx_console_catalog_resource` — that
+  belongs in `innospots-nexus-console`).
+- Must remain business-domain neutral and middleware-binding-free (no Spring
+  Boot auto-configuration).
+- Package names remain under `com.innospots.nexus.core.plugin` for compatibility;
+  the Maven artifact is `innospots-nexus-plugin`.
 
 ### `innospots-nexus-console`
 
-- Management-console **API surface** module built on Core.
-- Provides Jakarta REST management endpoints, request/response VOs, and
-  converters for console operations (e.g. `PluginManagementEndpoint`).
+- Management-console **API surface** module built on Core and Plugin.
+- Provides Jakarta REST management endpoints, request/response VOs, converters,
+  and the persisted **console catalog index** (`console.catalog.*`).
 - Must **not** own plugin specification or contribution constraint definitions;
-  those belong in `innospots-nexus-core`.
+  those belong in `innospots-nexus-plugin`.
 - Must not implement concrete management business functions. User, role,
   permission, registration, and other management features belong in business
   modules such as `innospots-nexus-kernel`.
@@ -89,17 +138,20 @@ is a reference, not a source template.
 - Shared Java module dependencies belong in `innospots-nexus-parent`, not in the
   root aggregator or BOM.
 - `innospots-nexus-core` may depend on `innospots-nexus-base`.
-- `innospots-nexus-console` may depend on `innospots-nexus-core` and the
+- `innospots-nexus-plugin` may depend on `innospots-nexus-core` and the
   transitive base foundation.
+- `innospots-nexus-console` may depend on `innospots-nexus-core`,
+  `innospots-nexus-plugin`, and the transitive base foundation.
 - `innospots-nexus-kernel` may depend on `innospots-nexus-console`,
   `innospots-nexus-core`, and their transitive base foundation.
 - `innospots-nexus-platform` may depend on `innospots-nexus-console`,
   `innospots-nexus-core`, and their transitive base foundation.
 - The primary dependency direction is
-  `innospots-nexus-base -> innospots-nexus-core -> innospots-nexus-console`,
-  then `console -> innospots-nexus-kernel` and `console -> innospots-nexus-platform`
-  in parallel. Kernel and platform must not depend on each other. Dependencies
-  must not point back toward a higher layer.
+  `innospots-nexus-base -> innospots-nexus-core -> innospots-nexus-plugin ->
+  innospots-nexus-console`, then `console -> innospots-nexus-kernel` and
+  `console -> innospots-nexus-platform` in parallel. Kernel and platform must
+  not depend on each other. Dependencies must not point back toward a higher
+  layer.
 - `innospots-nexus-core` may provide concrete business-neutral middleware and
   database support, but must not bind itself to Spring Boot
   auto-configuration.

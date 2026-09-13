@@ -4,10 +4,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
-import com.innospots.nexus.base.ui.spec.config.PageDslConfig;
-import com.innospots.nexus.base.ui.spec.loader.ClasspathPageDslLoader;
-import com.innospots.nexus.base.ui.spec.loader.PageDslLoader;
-import com.innospots.nexus.base.ui.spec.parser.JacksonPageDslParser;
+import com.innospots.nexus.core.plugin.contribution.console.ui.spec.config.PageDslConfig;
+import com.innospots.nexus.core.plugin.contribution.console.ui.spec.loader.ClasspathPageDslLoader;
+import com.innospots.nexus.core.plugin.contribution.console.ui.spec.loader.PageDslLoader;
+import com.innospots.nexus.core.plugin.contribution.console.ui.spec.parser.JacksonPageDslParser;
 import com.innospots.nexus.console.catalog.bootstrap.ConsoleCatalogSyncStartupTask;
 import com.innospots.nexus.console.catalog.endpoint.ConsoleCatalogEndpoint;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogService;
@@ -20,8 +20,8 @@ import com.innospots.nexus.console.plugin.converter.PluginManagementConverter;
 import com.innospots.nexus.console.plugin.endpoint.PluginManagementEndpoint;
 import com.innospots.nexus.core.bootstrap.NexusStartupTask;
 import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributionCatalog;
-import com.innospots.nexus.core.plugin.contribution.console.catalog.dao.ConsoleCatalogResourceDao;
-import com.innospots.nexus.core.plugin.contribution.console.catalog.service.ConsoleCatalogSyncService;
+import com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao;
+import com.innospots.nexus.console.catalog.service.ConsoleCatalogSyncService;
 import com.innospots.nexus.spring.plugin.config.PluginInstallationManagerHolder;
 
 /**

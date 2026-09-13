@@ -1,6 +1,6 @@
 package com.innospots.nexus.core.quartz.converter;
 
-import com.innospots.nexus.base.domain.enums.TimePeriod;
+import com.innospots.nexus.core.quartz.enums.TimePeriod;
 import org.quartz.CronExpression;
 
 import java.time.DayOfWeek;

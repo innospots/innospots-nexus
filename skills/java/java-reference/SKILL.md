@@ -113,6 +113,15 @@ version: 1.0.0
 3. 若为实施任务，转交对应技能，并把本技能的红线清单作为前置约束带过去
 4. 所有产出最终都要过 `java:check`
 
+## 模块 API 参考
+
+按 Java 模块划分的 API 快照，位于 `references/modules/<artifact-id>/`。
+仅开发者显式请求扫描时生成或刷新（见 `standards/module-skills.md`）。
+
+| 模块 | 入口 |
+|------|------|
+| `innospots-nexus-base` | [`references/modules/innospots-nexus-base/SKILL.md`](references/modules/innospots-nexus-base/SKILL.md) |
+
 ## 详细参考
 
 - [quick-constraints.md](references/quick-constraints.md) — 按场景组织的硬性约束速查表
