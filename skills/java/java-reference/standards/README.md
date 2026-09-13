@@ -5,8 +5,11 @@
 
 消费入口：`java:reference`（`SKILL.md` 索引与 `references/` 专题参考）→ 本目录原文。
 
-包结构（领域优先）的专题说明在 `../references/package-structure.md`（非本目录条文，但与
-`naming.md`「包命名」、`domain-module-initialization.md` §1.4 配套）。
+专题参考（非本目录条文，但与 standards 配套）在 `../references/`：
+
+- [package-structure.md](../references/package-structure.md) — 领域优先包结构
+- [persistence-config.md](../references/persistence-config.md) — 持久化与 yaml 配置细则
+- [testing-index.md](../references/testing-index.md) — 测试文档路由
 
 | 文件 | 管辖 |
 |------|------|

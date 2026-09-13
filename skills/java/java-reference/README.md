@@ -82,6 +82,8 @@ java:check
 | 规范章节地图 | [standards-index.md](references/standards-index.md) |
 | 模块归属 | [module-ownership.md](references/module-ownership.md) |
 | 包结构 | [package-structure.md](references/package-structure.md) |
+| 持久化与配置 | [persistence-config.md](references/persistence-config.md) |
+| 测试规范路由 | [testing-index.md](references/testing-index.md) |
 | 方案压力测试 | [grill-me.md](references/grill-me.md) |
 | 仓库模块职责 | 根目录 [AGENTS.md](../../../AGENTS.md) |
 | 技能体系总览 | [skills/java/README.md](../README.md) |

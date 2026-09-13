@@ -171,6 +171,7 @@ public class RoleEntity extends WorkspaceBaseEntity {
 
 - HTTP API 边界必须使用 `*Endpoint` 后缀，并放在 `endpoint` 包中。
 - 新领域初始化默认使用具体 endpoint 类。仅当开发者明确要求独立传输契约时才声明接口。
+- **`innospots-nexus-console` 例外：** 管理台 REST **传输契约**可声明为 `interface *Endpoint`，由 `kernel` 或 `platform` 提供实现类。这不属于「仅为 mock 建接口」；须满足：契约与 VO 留在 console、实现不含 console 业务工作流、路径与 `R<T>` 形状在 console 锁定。详见 [`api-contract.md`](../references/api-contract.md)「Console 传输契约」。
 - 使用 Jakarta REST（`jakarta.ws.rs`）注解声明资源路径、HTTP 方法、媒体类型和请求参数。
 - 保持 endpoint 签名面向传输。将校验、编排、事务处理和持久化委托给 service 或 operator 边界。
 - 有意延后的具体方法必须包含聚焦的 `TODO`，并抛出 `NexusException.build(合适的 StatusCode)`（如暂无专用码可用 `NexusStatusCode.SYSTEM_ERROR`），而非 `UnsupportedOperationException` 或返回伪造数据。
@@ -189,6 +190,8 @@ public class RoleEntity extends WorkspaceBaseEntity {
 - 禁止在 DAO 方法、注解 SQL、mapper XML 及其他持久化语句中使用 SQL join。
 - 仅当显式单表查询比 wrapper 更清晰时，才使用 `@Select` 等注解 SQL。
 - 不要创建 MyBatis mapper XML 文件或 XML 语句定义。
+- 业务与应用配置使用 `resources/**/*.yaml` + Java `@Configuration` / 配置绑定类；**禁止**新增业务级 `*.properties`、`beans.xml` 及 XML 装配（见 [`code-style.md`](code-style.md)「配置与资源文件」）。
+- 每个持久化业务表对应一个 `*Dao`；Dao 过大时拆表/拆 Dao 或上提 Operator，勿用 XML 堆砌（细则见 [`persistence-config.md`](../references/persistence-config.md)）。
 - DAO 方法应仅表达直接数据库操作。跨 DAO 协调和业务决策属于 operator 或 service 类型。
 - 跨表读取必须使用独立批量查询，并在 operator 或 service 中组装结果。先收集标识符或稳定键，再批量查询各表，最后在内存中映射。
 - 禁止 N+1 查询模式。不要为每条记录发起一次关联表查询。

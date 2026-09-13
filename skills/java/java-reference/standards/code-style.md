@@ -172,6 +172,8 @@ public class RoleEndpoint {
 
 ## MapStruct 转换器
 
+- **注意：** MapStruct 的 `@Mapper(config = BaseMapperConfig.class)` 仅用于**对象映射**，
+  与 MyBatis 的 Mapper 接口 / `mapper.xml` **无关**；持久化访问只用 `*Dao extends BaseMapper<Entity>`。
 - Domain POJO（含 request、VO、model 和 entity 类型）之间的非平凡结构转换必须使用 MapStruct。
 - 将业务 converter 放在业务领域的 `converter` 包，命名为 `*Converter`。
 - 每个 converter 必须使用 `@Mapper(config = BaseMapperConfig.class)`。
@@ -219,6 +221,17 @@ public interface RoleDao extends BaseMapper<RoleEntity> {
     // Relationship identifiers and role rows are queried separately in batches.
 }
 ```
+
+## 配置与资源文件
+
+- 业务与应用配置放在 `src/main/resources` 下的 **`*.yaml` / `*.yml`**（如 `application.yaml`、`config/<domain>.yaml`）。
+- **禁止**新增业务/应用级 `*.properties` 配置文件。测试专用 `src/test/resources` 可沿用既有 properties，但新测试配置优先 yaml。
+- **禁止** Spring `beans.xml`、`mybatis-config.xml` 及任何用 XML 装配 Bean 或定义 SQL 的方式。
+- Bean 与中间件绑定使用 Java `@Configuration` / `@Bean`；MyBatis-Plus 使用 Java 配置类，不用 XML mapper。
+- 配置绑定类型放在模块级 `config` 包（`com.innospots.nexus.<module>.config`），不放在 `domain` 下。
+- 新增配置键属于公共兼容面；废弃须 `@Deprecated` + 文档化迁移。
+
+操作细则见 [`references/persistence-config.md`](../references/persistence-config.md)。
 
 ## 依赖字段与构造
 

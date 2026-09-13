@@ -57,6 +57,33 @@ throw NexusException.build(statusCode, displayOverride, cause);
 - 稳定状态文本不得包含请求 ID、记录 ID、文件路径、提供方响应、用户输入或其他易变值。将这些值放入结构化、访问控制的日志或追踪上下文。
 - 传给 `NexusException.build(StatusCode, String)` 的运行时消息也是响应表面。对 `message()`、`advice()` 和 `display()` 应用相同限制：不要包含密钥、凭证、ID、用户输入、提供方文本、SQL、路径或堆栈跟踪。优先使用状态摘要，将安全诊断放入结构化上下文。
 
+### 3.3 `Checks` 与 `NexusException` 的分工
+
+`com.innospots.nexus.base.util.Checks` 用于**编程式前置条件**与**不变量守卫**。
+所有 `Checks` 方法在失败时抛出 `NexusException`（通常映射为 `NexusStatusCode.INVALID_PARAMETER`
+或等价平台校验码），**不是** JDK 的 `IllegalArgumentException`。
+
+| 场景 | 使用 | 禁止 |
+|------|------|------|
+| 参数/引用非空、非空白、正数、非空集合 | `Checks.notNull` / `notBlank` / `positive` / `notEmpty` | `Objects.requireNonNull`、`IllegalArgumentException` |
+| record 紧凑构造器中的形状守卫（无领域语义） | `Checks.*` 或紧凑构造器内显式 `NexusException` | 裸 `null` 传播 |
+| 业务拒绝：记录不存在、重复键、禁止操作、授权失败 | `NexusException.build(领域 StatusCode)` | 用 `Checks` 表达业务失败 |
+| 工作流/跨记录/授权规则 | service 或 operator 边界选**领域**状态码 | 在深层 helper 随意 `Checks` 代替归属翻译 |
+| 互操作边界解析外部码 | 白名单 + 类型化 `StatusCode` | 复制字面量 `fullCode()` |
+
+**规则：** `Checks` 回答「这个调用在语法上是否合法」；`StatusCode` 回答「在这个业务上下文中为何失败」。
+若失败需要领域 module 前缀的状态码或调用方需区分 not-found / conflict / forbidden，**不得**仅用 `Checks`。
+
+```java
+// 前置条件 — OK
+Checks.notBlank(roleCode, "roleCode");
+
+// 业务拒绝 — 必须用领域码
+if (role == null) {
+    throw NexusException.build(RoleStatusCode.ROLE_NOT_FOUND);
+}
+```
+
 ## 4. 抛出、捕获与翻译
 
 ### 4.1 在归属边界抛出

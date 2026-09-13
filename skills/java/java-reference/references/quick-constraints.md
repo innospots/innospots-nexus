@@ -66,6 +66,7 @@
 禁止创建 Mapper XML 文件与 XML 语句定义；禁止用 XML 装配 Bean 或 SQL。
 自定义查询/更新/插入优先 `Wrappers.lambdaQuery()` / `lambdaUpdate()` 与 Dao `default` 方法；
 单 Dao 过大时拆多表多 Dao 或把动态条件上提 operator，勿用 XML 堆砌。
+细则见 [persistence-config.md](persistence-config.md)；权威条文见 `standards/code-style.md`「配置与资源文件」。
 DAO 方法可用 `select/insert/update/delete` 对齐 `BaseMapper`；面向应用的 operator/service
 必须用 `find/list/page/count` 词汇。
 

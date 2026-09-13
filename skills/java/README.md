@@ -208,9 +208,11 @@ java:check            与升级前基线对比
 | 工程交付物（POM/模块） | `java-project/references/project-deliverables.md` |
 | 设计四步法门禁 | `java-design/references/design-four-steps.md` |
 | 设计场景与 L0–L3 | `java-design/references/design-scenarios.md` |
+| 持久化与配置（reference） | `java-reference/references/persistence-config.md` |
 | 持久化契约（设计） | `java-design/references/persistence-contract.md` |
 | 领域事件（设计） | `java-design/references/event-contract.md` |
 | MyBatis-Plus 实现 | `java-develop/references/persistence-mybatis.md` |
+| 测试规范路由 | `java-reference/references/testing-index.md` |
 | 方案压力测试 | `java-reference/references/grill-me.md` |
 | 模块 API 索引 | `java-reference/references/modules/<artifact-id>/README.md` |
 

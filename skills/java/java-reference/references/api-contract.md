@@ -64,9 +64,9 @@ Lombok 只消除访问器样板，**不替代**领域类的显式行为方法。
 禁止用 `Objects.requireNonNull` / `IllegalArgumentException` /
 `NullPointerException` / `IllegalStateException` / `RuntimeException` /
 `Exception` / `UnsupportedOperationException` 表达调用方或业务校验。
-一律 `NexusException` + 类型化 `StatusCode`，或 `Checks.*`。详见
-[`exception-status-code.md`](../standards/exception-status-code.md) 与
-`java:design` → `exception-contract.md`、`java:develop` → `exception-handling.md`。
+一律 `NexusException` + 类型化 `StatusCode`；**参数/形状前置条件**可用 `Checks.*`
+（内部仍抛 `NexusException`）。分工见 [`exception-status-code.md`](../standards/exception-status-code.md) §3.3。
+设计/实现补充：`java:design` → `exception-contract.md`、`java:develop` → `exception-handling.md`。
 
 ---
 
@@ -94,6 +94,24 @@ Lombok 只消除访问器样板，**不替代**领域类的显式行为方法。
 | replace | 把传入值/关联集视为完整；必须定义「省略是否删除既有成员」 |
 | delete | 必须定义「目标缺失算成功还是未找到」，并在同一公共资源边界内保持一致 |
 | 生命周期 | `register`/`subscribe`/`start`/`stop`/`close` 必须定义重复调用行为 |
+
+---
+
+## Console 传输契约（interface 例外）
+
+`innospots-nexus-console` 可将管理台 REST 边界声明为 **`interface *Endpoint`**，
+由 `innospots-nexus-kernel` 或 `innospots-nexus-platform` 提供 **`class` 实现**。
+
+| 必须 | 禁止 |
+|------|------|
+| 路径、`R<T>`、request/vo record 在 **console** 锁定 | 在 console 写 role/menu 等业务工作流 |
+| 实现类在 kernel/platform，遵守领域优先包结构 | 为单测 mock 在业务域随意抽 endpoint 接口 |
+| 契约测试反射锁定 console 侧 interface | kernel 改路径而不更新 console 契约 |
+
+**新业务域**（kernel/platform 内）仍默认**具体 endpoint 类**；不要机械复制 console 的 interface 模式。
+
+模块分工见 [module-ownership.md](module-ownership.md)；端点索引见
+`references/modules/innospots-nexus-console/references/endpoint-contracts.md`。
 
 ---
 

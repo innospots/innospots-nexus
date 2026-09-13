@@ -42,6 +42,32 @@ base → core → plugin → console → kernel
 | Catalog 持久化索引与同步 | **console** | core、plugin |
 | 插件规范与 contribution 约束定义 | **plugin** | console |
 | 持久化基类、审计填充、ID 生成 | **core** | plugin |
+| 管理台 REST **interface** 契约与 VO | **console** | kernel 内重复定义路径 |
+| 管理台 REST **实现**与工作流 | **kernel** / **platform** | console 内业务 service |
+
+Console 传输契约 interface 模式见 [api-contract.md](api-contract.md)「Console 传输契约」。
+
+插件运行时设计文档：`innospots-nexus-plugin/docs/plugin/design/`（Page DSL、安装、贡献解码）。
+
+---
+
+## 各模块禁止能力（摘要）
+
+完整条文见根目录 [`AGENTS.md`](../../../AGENTS.md)（冲突裁决 #2）。下表供归属评审速查。
+
+| 模块 | 禁止放入（归属 elsewhere） |
+|------|---------------------------|
+| **base** | 业务域逻辑；ORM/JDBC/连接池；Cache；Retry/熔断；Jakarta Bean Validation；调度运行时；消息中间件；Spring/Servlet 绑定；业务实体与工作流 |
+| **core** | 插件运行时/Page DSL/安装表；Jakarta REST 端点与 console VO；用户/角色/权限/菜单/catalog 业务；认证会话/聊天产品域；Spring Boot 自动配置绑定 |
+| **plugin** | Catalog 持久化索引；console 管理 CRUD 实现；kernel/platform 业务实体 |
+| **console** | 插件规范与 contribution 约束定义；完整管理业务工作流（实现在 kernel/platform） |
+| **kernel** | 租户生命周期/企业主体（→ platform）；依赖 platform |
+| **platform** | 租户侧用户/权限/菜单实现（→ kernel）；依赖 kernel |
+
+**base 预留（无当前消费者）：** `domain.condition`（过滤 DSL）、`execution`（执行器 SPI）。
+扩展前须有真实消费者或显式标为 experimental。
+
+**新 public API：** base/core 新 API 通常需 ≥2 个上层模块消费者，除非标为 experimental/reserved。
 
 ---
 
@@ -87,3 +113,5 @@ base → core → plugin → console → kernel
 - [ ] plugin / console / core 边界未混淆
 - [ ] 术语在端点/实体/DAO/数据库/测试间一致
 - [ ] 初始面保持最小（无投机性 model/event/空分层）
+- [ ] 未把 AGENTS 禁止能力放进错误模块（见上表）
+- [ ] console interface 契约与 kernel/platform 实现分工清晰（若涉及管理台 REST）

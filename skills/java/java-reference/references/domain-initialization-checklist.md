@@ -28,8 +28,9 @@
 ## 阶段二：DAO → DAO 门禁
 
 - [ ] `*Dao` extends `BaseMapper<Entity>`；无 Mapper XML
-- [ ] 每个方法单表、无 join
+- [ ] 每个方法单表、无 join；无 mapper.xml / beans.xml
 - [ ] 跨表读：分批查询 + 内存组装（无 N+1）
+- [ ] 业务配置 yaml + Java config；无新增 `*.properties`（见 [persistence-config.md](persistence-config.md)）
 - [ ] DAO 泛型绑定契约测试通过
 
 ## 阶段三：领域契约 → 领域门禁
@@ -67,6 +68,9 @@ mvn clean compile
 ```
 
 全部阶段完成后交 `java:check`（`mvn validate`、`mvn test`、`mvn -q help:effective-pom`）。
+
+若设计声明集成测试边界，见 `java:develop` → [integration-tests.md](../../java-develop/references/integration-tests.md)。
+测试文档路由见 [testing-index.md](testing-index.md)。
 
 ---
 

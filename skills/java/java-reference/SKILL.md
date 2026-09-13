@@ -10,7 +10,7 @@ description: |
   触发词：Java 规范、编码规范、命名规范、代码风格、注释规范、API 设计、
   异常规范、状态码、java 标准、standards。
 category: java
-version: 1.5.2
+version: 1.6.0
 ---
 
 # Java 通用规范与标准
@@ -56,8 +56,10 @@ version: 1.5.2
 | 包结构（领域优先） | [package-structure.md](references/package-structure.md) | 领域 → 功能子模块 → 职责；禁止 service 堆积；单包 ≤15 类 |
 | 作用域层级 | [scope-hierarchy.md](references/scope-hierarchy.md) | Session/Snapshot 与 Entity 基类 |
 | 领域建模 | [domain-modeling.md](references/domain-modeling.md) | 实体/请求/VO/事件建模决策 |
-| API 契约 | [api-contract.md](references/api-contract.md) | 签名、分层、事务、兼容性 |
+| API 契约 | [api-contract.md](references/api-contract.md) | 签名、分层、事务、兼容性；含 Console interface 例外 |
+| 持久化与配置 | [persistence-config.md](references/persistence-config.md) | yaml、禁 XML/properties、Dao 组织细则 |
 | 六阶段 checklist | [domain-initialization-checklist.md](references/domain-initialization-checklist.md) | develop 执行清单 |
+| 测试规范路由 | [testing-index.md](references/testing-index.md) | 设计/实现/检查测试文档索引 |
 | 单元测试规约 | `java:develop` → [test-conventions.md](../java-develop/references/test-conventions.md) | 命名、断言、Mock、独立性 |
 | 契约测试写法 | `java:develop` → [contract-tests.md](../java-develop/references/contract-tests.md) | 实体/DAO/端点/状态码契约测试 |
 | 测试范围（设计） | `java:design` → [test-scope.md](../java-design/references/test-scope.md) | 设计阶段测什么/不测什么 |
@@ -91,7 +93,7 @@ version: 1.5.2
 | 1 | 每批 Java 改动后立即 `mvn clean compile` |
 | 2 | 业务异常一律 `NexusException` + 类型化 `StatusCode`；禁止 JDK/`RuntimeException`/`Exception` 作为失败契约 |
 | 3 | 状态码九字符：`MODULE(3) + CATEGORY(2) + LOCAL(4)` |
-| 4 | DAO 单表、无 join、无 Mapper XML |
+| 4 | DAO 单表、无 join、无 Mapper XML；配置用 yaml，禁 properties/beans.xml |
 | 5 | 端点只用 `jakarta.ws.rs`，返回 `R<T>` |
 | 6 | `domain.request` / `domain.vo` 必须是 record |
 | 7 | `endpoint → service → operator → dao`；operator 不得依赖 service 或其他 operator |
@@ -120,14 +122,22 @@ version: 1.5.2
 | `innospots-nexus-base` | [README.md](references/modules/innospots-nexus-base/README.md) |
 | `innospots-nexus-core` | [README.md](references/modules/innospots-nexus-core/README.md) |
 | `innospots-nexus-console` | [README.md](references/modules/innospots-nexus-console/README.md) |
+| `innospots-nexus-plugin` | 暂无 API 索引；归属见 [module-ownership.md](references/module-ownership.md)；设计见 `innospots-nexus-plugin/docs/plugin/design/` |
+| `innospots-nexus-kernel` | 暂无 API 索引；归属见 [module-ownership.md](references/module-ownership.md)；包结构见 [package-structure.md](references/package-structure.md) |
+| `innospots-nexus-platform` | 暂无 API 索引；归属见 [module-ownership.md](references/module-ownership.md) |
+
+显式扫描请求时可生成 plugin/kernel/platform 索引（见 [`standards/module-skills.md`](standards/module-skills.md)）。
 
 ## 详细参考
 
 - [quick-constraints.md](references/quick-constraints.md)
 - [standards-index.md](references/standards-index.md)
 - [module-ownership.md](references/module-ownership.md)
+- [package-structure.md](references/package-structure.md)
 - [scope-hierarchy.md](references/scope-hierarchy.md)
 - [domain-modeling.md](references/domain-modeling.md)
 - [api-contract.md](references/api-contract.md)
+- [persistence-config.md](references/persistence-config.md)
+- [testing-index.md](references/testing-index.md)
 - [domain-initialization-checklist.md](references/domain-initialization-checklist.md)
 - [grill-me.md](references/grill-me.md)
