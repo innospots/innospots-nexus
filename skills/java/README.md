@@ -226,6 +226,7 @@ java:check            与升级前基线对比
 **`java:project`（新建模块）与 `java:design`（新设计）开始前必经**。未安装时先执行
 `npx skills use "https://github.com/mattpocock/skills" --skill "grill-me"` 并按技能全文操作。
 调用时机与各技能衔接见 `java-reference/references/grill-me.md`。
+最佳实践见 [`docs/grill-me-best-practices.md`](../../docs/grill-me-best-practices.md)。
 
 简记：
 

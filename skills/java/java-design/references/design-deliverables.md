@@ -250,6 +250,7 @@ develop 不得因章节标题不同而遗漏契约。
   `npx skills use "https://github.com/mattpocock/skills" --skill "grill-me"`）。
 - **L2 / L3** 或架构触发项：在文档草案阶段完成 grill-me，结论写入 §12 或 ADR。
 - grill-me 产出的是**双方确认的设计树**，应沉淀到上述文档或 L0 块，而不是只留在聊天记录。
+- 会话技巧与落盘格式见 [`docs/grill-me-best-practices.md`](../../../../docs/grill-me-best-practices.md)。
 
 ---
 
