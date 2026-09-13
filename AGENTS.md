@@ -39,8 +39,9 @@ is a reference, not a source template.
 - Must remain middleware-free and must not depend on database, messaging,
   scheduling, Servlet, Spring, Quarkus, or other runtime infrastructure.
 - Module API reference lives under
-  `skills/java/java-reference/references/modules/innospots-nexus-base/`
-  (not under `src/main/resources/skills/`).
+  `skills/java/java-reference/references/modules/<artifact-id>/README.md`
+  (index only — not a `SKILL.md`; not under `src/main/resources/skills/`).
+  Current indexes: `innospots-nexus-base`, `innospots-nexus-core`.
 - **Reserved without current consumers:** `domain.condition` (filter DSL),
   `execution` (executor SPI). Do not remove without an explicit boundary
   decision; wire a real consumer or document as experimental before expanding.
@@ -106,6 +107,9 @@ is a reference, not a source template.
 - Must not implement concrete management business functions. User, role,
   permission, registration, and other management features belong in business
   modules such as `innospots-nexus-kernel`.
+- Module API reference lives under
+  `skills/java/java-reference/references/modules/innospots-nexus-console/`
+  (not under `src/main/resources/skills/`).
 
 ### `innospots-nexus-kernel`
 
@@ -116,7 +120,11 @@ is a reference, not a source template.
   and other baseline platform functions.
 - Organizes business code by domain first, then by responsibility packages
   such as `endpoint`, `dao`, `domain`, `converter`, `operator`, `service`,
-  `handler`, `interceptor`, and `listener`.
+  `handler`, `interceptor`, and `listener` (`kernel.role.endpoint`, not
+  `kernel.endpoint.role`). Large domains use functional subpackages
+  (`permission.authorization`, `grant.service`); no module-level `service`
+  dumping ground; at most 15 `.java` files per package directory. See
+  `skills/java/java-reference/references/package-structure.md`.
 - Must use the shared infrastructure and contracts from `base`, `core`, and
   `console` rather than reimplementing them.
 
@@ -167,17 +175,17 @@ is a reference, not a source template.
 
 ## Coding Standards
 
-Read the following files under `standards/` for complete rules. AI agents
-must load these files before generating code or documentation.
+Read the following files under `skills/java/java-reference/standards/` for complete rules. AI
+agents must load these files before generating code or documentation.
 
 | File | Content |
 |------|---------|
-| [`standards/code-style.md`](standards/code-style.md) | Braces, indentation, line width, import order |
-| [`standards/code-comments.md`](standards/code-comments.md) | Javadoc tiers (class, method, inline) |
-| [`standards/naming.md`](standards/naming.md) | Naming conventions for Java, packages, files |
-| [`standards/api-design.md`](standards/api-design.md) | Method signatures, immutability, null handling, exceptions |
-| [`standards/domain-module-initialization.md`](standards/domain-module-initialization.md) | Stage-gated workflow for initializing a business domain |
-| [`standards/module-skills.md`](standards/module-skills.md) | SKILL.md and references/ directory format |
+| [`skills/java/java-reference/standards/code-style.md`](skills/java/java-reference/standards/code-style.md) | Braces, indentation, line width, import order |
+| [`skills/java/java-reference/standards/code-comments.md`](skills/java/java-reference/standards/code-comments.md) | Javadoc tiers (class, method, inline) |
+| [`skills/java/java-reference/standards/naming.md`](skills/java/java-reference/standards/naming.md) | Naming conventions for Java, packages, files |
+| [`skills/java/java-reference/standards/api-design.md`](skills/java/java-reference/standards/api-design.md) | Method signatures, immutability, null handling, exceptions |
+| [`skills/java/java-reference/standards/domain-module-initialization.md`](skills/java/java-reference/standards/domain-module-initialization.md) | Stage-gated workflow for initializing a business domain |
+| [`skills/java/java-reference/standards/module-skills.md`](skills/java/java-reference/standards/module-skills.md) | Module API index (`README.md`) and references/ directory format |
 
 ## Verification
 

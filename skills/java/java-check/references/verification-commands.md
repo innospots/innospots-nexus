@@ -202,7 +202,8 @@ git diff --check
 
 ## 升级场景的额外命令
 
-`java:project-upgrade` 与 `java:tool-upgrade` 结束时除上述命令外还需：
+`java:dependency-upgrade`（依赖/JDK/框架）结束时除上述命令外还需；`java:project-upgrade`
+（revision 升版）重点用 `mvn validate`、`help:effective-pom` 确认各模块版本一致：
 
 ```bash
 mvn versions:display-dependency-updates      # 依赖升级候选

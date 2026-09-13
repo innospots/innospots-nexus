@@ -1,19 +1,19 @@
-# Package `http`
+# 包 `http`
 
 ## HttpClientBuilder
 
 **Type:** class
 
-Fluent builder for `CloseableHttpClient` instances with sensible defaults (10s connect timeout, 30s response timeout, redirects enabled).
+`CloseableHttpClient` 实例的流式构建器，含合理默认值（连接超时 10 秒、响应超时 30 秒、启用重定向）。
 
 ## HttpResult
 
 **Type:** record
 
-Immutable result of an HTTP request.
+HTTP 请求的不可变结果。
 
 ## HttpUtils
 
 **Type:** class
 
-Convenience methods for HTTP GET and POST (JSON) requests.
+HTTP GET 与 POST（JSON）请求的便捷方法。

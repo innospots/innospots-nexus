@@ -1,6 +1,6 @@
 # 代码骨架模板
 
-以下模板已满足 `standards/` 的主要约束，可直接套用后按领域替换名称。
+以下模板已满足 `java:reference` 索引的 `standards/` 主要约束，可直接套用后按领域替换名称。
 导入顺序：`java.*`/`jakarta.*` → 第三方（含 Lombok）→ `com.innospots.*`。
 
 ---
@@ -24,8 +24,12 @@ import lombok.Setter;
 import com.innospots.nexus.core.persistence.entity.WorkspaceBaseEntity;
 
 /**
- * A role owned by one workspace. The {@code roleCode} is a stable business key
- * that stays immutable after creation and is unique within the owning workspace.
+ * 归属于某个工作空间的角色。{@code roleCode} 是稳定的业务键，
+ * 创建后不可变更，且在所属工作空间内唯一。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @see com.innospots.nexus.base.domain.identity.RoleSnapshot
  */
 @Getter
 @Setter
@@ -89,15 +93,15 @@ import com.innospots.nexus.kernel.role.domain.entity.RoleEntity;
 import java.util.List;
 
 /**
- * Single-table persistence access for workspace roles.
+ * 工作空间角色的单表持久化访问。
  */
 public interface RoleDao extends BaseMapper<RoleEntity> {
 
     /**
-     * Finds a role by its stable code.
+     * 按稳定编码查找角色。
      *
-     * @param roleCode stable role code
-     * @return matching role or {@code null} when absent
+     * @param roleCode 稳定的角色编码
+     * @return 匹配的角色；不存在时返回 {@code null}
      */
     default RoleEntity selectByRoleCode(String roleCode) {
         return selectOne(Wrappers.<RoleEntity>lambdaQuery()
@@ -105,10 +109,10 @@ public interface RoleDao extends BaseMapper<RoleEntity> {
     }
 
     /**
-     * Lists roles in the given status set.
+     * 列出指定状态集合中的角色。
      *
-     * @param statuses role statuses to include
-     * @return matching roles, empty when none
+     * @param statuses 要包含的角色状态
+     * @return 匹配的角色列表；无匹配时返回空列表
      */
     default List<RoleEntity> selectByStatuses(List<String> statuses) {
         if (statuses == null || statuses.isEmpty()) {
@@ -155,16 +159,16 @@ import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.status.NexusStatusCode;
 
 /**
- * Creates a role inside the current workspace.
+ * 在当前工作空间内创建角色。
  *
- * @param roleCode stable role code, immutable after creation
- * @param roleName display name
- * @param description optional description
+ * @param roleCode 稳定的角色编码，创建后不可变更
+ * @param roleName 显示名称
+ * @param description 可选描述
  */
 public record RoleCreateRequest(String roleCode, String roleName, String description) {
 
     /**
-     * Validates required role attributes.
+     * 校验必填的角色属性。
      */
     public void validate() {
         if (roleCode == null || roleCode.isBlank()) {
@@ -186,7 +190,7 @@ import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.QueryParam;
 
 /**
- * Paginated role query.
+ * 分页角色查询。
  */
 public record RolePageRequest(
         @QueryParam("input") String input,
@@ -196,13 +200,13 @@ public record RolePageRequest(
 ) {
 
     public RolePageRequest {
-        // Normalize invalid pagination to shared defaults before it becomes stable state.
+        // 在分页参数成为稳定状态之前，将无效值归一化为共享默认值。
     }
 
     /**
-     * Returns the effective page number.
+     * 返回有效的页码。
      *
-     * @return one-based page number, never below one
+     * @return 从 1 开始的页码，不会小于 1
      */
     public int effectivePageNo() {
         return pageNo == null || pageNo < 1 ? 1 : pageNo;
@@ -230,13 +234,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Primary management representation of a role.
+ * 角色的主要管理视图表示。
  *
- * @param roleId technical identifier
- * @param roleCode stable business key
- * @param roleName display name
- * @param status business availability status
- * @param createdAt creation timestamp
+ * @param roleId 技术标识
+ * @param roleCode 稳定的业务键
+ * @param roleName 显示名称
+ * @param status 业务可用状态
+ * @param createdAt 创建时间戳
  */
 public record RoleVo(
         String roleId,
@@ -254,15 +258,15 @@ package com.innospots.nexus.kernel.role.domain.vo;
 import java.util.List;
 
 /**
- * Compact projection used by role selectors.
+ * 角色选择器使用的紧凑投影。
  */
 public record RoleOptionVo(String roleId, String roleCode, String roleName) {
 
     /**
-     * Creates an immutable option list from the given roles.
+     * 根据给定角色创建不可变选项列表。
      *
-     * @param roles source roles
-     * @return immutable option list
+     * @param roles 源角色列表
+     * @return 不可变选项列表
      */
     public static List<RoleOptionVo> of(List<RoleVo> roles) {
         if (roles == null) {
@@ -291,14 +295,14 @@ public record RoleOptionVo(String roleId, String roleCode, String roleName) {
 package com.innospots.nexus.kernel.role.domain.enums;
 
 /**
- * Business availability of a role.
+ * 角色的业务可用性。
  */
 public enum RoleStatus {
 
-    /** Available for assignment. */
+    /** 可分配使用。 */
     ENABLED,
 
-    /** Retained but not assignable. */
+    /** 保留但不可分配。 */
     DISABLED
 }
 ```
@@ -311,7 +315,7 @@ import com.innospots.nexus.base.status.StatusCategory;
 import org.springframework.http.HttpStatus; // 仅示例，按实际 HTTP 映射常量来源调整
 
 /**
- * Role-domain failure codes.
+ * 角色领域失败码。
  */
 public enum RoleStatusCode implements StatusCode {
 
@@ -342,7 +346,7 @@ public enum RoleStatusCode implements StatusCode {
 
     @Override
     public String message() {
-        return "The requested role does not exist.";
+        return "请求的角色不存在。";
     }
 
     @Override
@@ -386,7 +390,7 @@ import com.innospots.nexus.kernel.role.domain.request.RoleCreateRequest;
 import com.innospots.nexus.kernel.role.domain.vo.RoleVo;
 
 /**
- * Structural conversion among role request, model, entity, and view types.
+ * 角色请求、模型、实体与视图类型之间的结构转换。
  */
 @Mapper(config = BaseMapperConfig.class)
 public interface RoleConverter extends BaseBeanConverter<Role, RoleEntity> {
@@ -423,7 +427,7 @@ import com.innospots.nexus.kernel.role.domain.entity.RoleEntity;
 import com.innospots.nexus.kernel.role.domain.enums.RoleStatusCode;
 
 /**
- * Direct data operations over the role table.
+ * 角色表的直接数据操作。
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -432,11 +436,11 @@ public final class RoleOperator {
     private final RoleDao roleDao;
 
     /**
-     * Loads a role by identifier.
+     * 按标识加载角色。
      *
-     * @param roleId role identifier
-     * @return matching role
-     * @throws com.innospots.nexus.base.exception.NexusException when the role is absent
+     * @param roleId 角色标识
+     * @return 匹配的角色
+     * @throws com.innospots.nexus.base.exception.NexusException 角色不存在时抛出
      */
     public RoleEntity requireRole(String roleId) {
         RoleEntity role = roleDao.selectById(roleId);
@@ -447,10 +451,10 @@ public final class RoleOperator {
     }
 
     /**
-     * Lists roles matching the given status.
+     * 列出匹配给定状态的角色。
      *
-     * @param status business availability status
-     * @return matching roles, empty when none
+     * @param status 业务可用状态
+     * @return 匹配的角色列表；无匹配时返回空列表
      */
     public List<RoleEntity> listByStatus(String status) {
         List<RoleEntity> roles = roleDao.selectByStatuses(List.of(status));
@@ -492,7 +496,7 @@ import com.innospots.nexus.kernel.role.domain.request.RoleCreateRequest;
 import com.innospots.nexus.kernel.role.operator.RoleOperator;
 
 /**
- * Role lifecycle workflows that coordinate validation, persistence, and events.
+ * 协调校验、持久化与事件的角色生命周期工作流。
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -503,11 +507,11 @@ public final class RoleService {
     private final RoleConverter roleConverter;
 
     /**
-     * Creates a role after rejecting a duplicate stable key.
+     * 在拒绝重复稳定键后创建角色。
      *
-     * @param request create request
-     * @return created role model
-     * @throws NexusException when the role code already exists in the workspace
+     * @param request 创建请求
+     * @return 已创建的角色模型
+     * @throws NexusException 工作空间内角色编码已存在时抛出
      */
     @Transactional
     public Role createRole(RoleCreateRequest request) {
@@ -524,11 +528,11 @@ public final class RoleService {
     }
 
     /**
-     * Pages roles for management screens.
+     * 为管理界面分页查询角色。
      *
-     * @param pageNo one-based page number
-     * @param pageSize page size
-     * @return paginated role models
+     * @param pageNo 从 1 开始的页码
+     * @param pageSize 每页大小
+     * @return 分页角色模型
      */
     public PageResult<Role> pageRoles(int pageNo, int pageSize) {
         List<RoleEntity> entities = roleDao.selectList(null);
@@ -563,13 +567,15 @@ import jakarta.ws.rs.core.MediaType;
 import lombok.RequiredArgsConstructor;
 
 import com.innospots.nexus.base.domain.response.R;
+import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.kernel.role.converter.RoleConverter;
 import com.innospots.nexus.kernel.role.domain.request.RoleCreateRequest;
 import com.innospots.nexus.kernel.role.domain.vo.RoleVo;
 import com.innospots.nexus.kernel.role.service.RoleService;
 
 /**
- * Role lifecycle operations exposed to the management console.
+ * 向管理控制台暴露的角色生命周期操作。
  */
 @Path("/roles")
 @Produces(MediaType.APPLICATION_JSON)
@@ -581,28 +587,28 @@ public class RoleEndpoint {
     private final RoleConverter roleConverter;
 
     /**
-     * Returns one role.
+     * 返回单个角色。
      *
-     * @param roleId role identifier
-     * @return role details
+     * @param roleId 角色标识
+     * @return 角色详情
      */
     @GET
     @Path("/{roleId}")
     public R<RoleVo> getRole(@PathParam("roleId") String roleId) {
-        // TODO Delegate role lookup to RoleService once the query contract is defined.
-        throw new UnsupportedOperationException("Role lookup is not implemented");
+        // TODO 查询契约确定后，将角色查找委托给 RoleService。
+        throw NexusException.build(NexusStatusCode.SYSTEM_ERROR, "角色查找尚未实现");
     }
 
     /**
-     * Creates a role.
+     * 创建角色。
      *
-     * @param request create request
-     * @return created role details
+     * @param request 创建请求
+     * @return 已创建的角色详情
      */
     @POST
     public R<RoleVo> createRole(RoleCreateRequest request) {
-        // TODO Delegate creation to RoleService once the workflow exists.
-        throw new UnsupportedOperationException("Role creation is not implemented");
+        // TODO 工作流就绪后，将创建操作委托给 RoleService。
+        throw NexusException.build(NexusStatusCode.SYSTEM_ERROR, "角色创建尚未实现");
     }
 }
 ```
@@ -614,7 +620,7 @@ public class RoleEndpoint {
 - 类级 `@Path` + `@Produces` + `@Consumes`，方法级 HTTP 注解
 - 所有参数显式注解
 - 每个方法返回 `R<XxxVo>` / `R<PageResult<XxxVo>>` / `R<Void>`
-- 推迟实现：聚焦 `TODO` + `UnsupportedOperationException`，**不返回伪造数据**
+- 推迟实现：聚焦 `TODO` + `NexusException.build(StatusCode)`，**不返回伪造数据**
 - 端点不直接依赖 DAO
 
 ---
@@ -627,10 +633,10 @@ package com.innospots.nexus.kernel.role.domain.event;
 import com.innospots.nexus.base.events.DomainEvent;
 
 /**
- * Published after a role is successfully created.
+ * 角色成功创建后发布。
  *
- * @param roleId technical role identifier
- * @param roleCode stable business key
+ * @param roleId 角色技术标识
+ * @param roleCode 稳定的业务键
  */
 public record RoleCreatedEvent(String roleId, String roleCode) implements DomainEvent {
 
@@ -648,13 +654,13 @@ import com.innospots.nexus.base.events.EventHandler;
 import com.innospots.nexus.kernel.role.domain.event.RoleCreatedEvent;
 
 /**
- * Records an audit entry for a created role.
+ * 为已创建的角色记录审计条目。
  */
 public final class RoleCreatedEventHandler implements EventHandler<RoleCreatedEvent> {
 
     @Override
     public Object handle(RoleCreatedEvent event) {
-        // Delegate to this consumer module's service or operator.
+        // 委托给本消费方模块的 service 或 operator。
         return null;
     }
 }

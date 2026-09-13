@@ -1,13 +1,13 @@
-# Package `domain.request`
+# 包 `domain.request`
 
 ## Pagination
 
 **Type:** class
 
-Shared pagination defaults and normalization for query requests.
+查询请求的共享分页默认值与规范化。
 
 ## SimpleQueryRequest
 
 **Type:** record
 
-Paginated query request with a keyword filter.
+带关键词过滤的分页查询请求。

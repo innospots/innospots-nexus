@@ -1,25 +1,25 @@
-# Package `execution`
+# 包 `execution`
 
 ## ExecutionContext
 
 **Type:** class
 
-Execution context for a single run.
+单次执行的执行上下文。
 
 ## ExecutionRecord
 
 **Type:** class
 
-Immutable record of a completed execution.
+已完成执行的不可变记录。
 
 ## ExecutionStatus
 
 **Type:** enum
 
-Lifecycle states for an execution from creation through to completion.
+执行从创建到完成的生命周期状态。
 
 ## Executor
 
 **Type:** interface
 
-Core execution unit interface.
+核心执行单元接口。

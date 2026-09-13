@@ -2,15 +2,14 @@
 name: java:spring
 display_name: Spring / Spring Boot 专项
 description: |
-  Spring 与 Spring Boot 专项能力。当用户处理 Spring 生态相关工作时使用：
-  Spring Boot 应用与 starter、自动配置、依赖注入与 Bean 生命周期、配置属性与
-  profile、Spring 事务与 AOP、Spring MVC / WebFlux、Spring Data、Spring Security、
-  Spring 测试（@SpringBootTest / MockMvc / Testcontainers）、Actuator 与观测，
-  以及 Spring Boot 2.x→3.x→4.x 的版本差异与迁移要点。
-  触发词：Spring、Spring Boot、Spring MVC、WebFlux、Spring Data、Spring Security、
-  @Autowired、@Configuration、@Bean、自动配置、starter、Actuator、MockMvc。
+  Spring 与 Spring Boot 专项能力。当用户处理本仓库 Spring 运行时组装、依赖版本、
+  配置与迁移评估时使用。强调：Spring 版本跟随 innospots-nexus-bom，禁止模块内联
+  版本；禁止 Spring Data 与 Spring Security（持久化用 MyBatis-Plus，鉴权用
+  kernel/console）。端点仍用 Jakarta REST，不用 Spring MVC。
+  触发词：Spring、Spring Boot、starter、自动配置、BOM、spring-boot 版本、
+  依赖注入、@Configuration、迁移评估。
 category: java
-version: 1.0.0
+version: 1.1.0
 ---
 
 # Spring / Spring Boot 专项能力
@@ -27,15 +26,35 @@ version: 1.0.0
 | `innospots-nexus-base` | **不得**引入任何 Spring 或其他运行时框架依赖 |
 | 其他 Spring 工程、Spring Boot 应用、迁移评估 | 本技能的全部内容适用 |
 
-端点与事务规范的权威定义在 `standards/code-style.md` 与 `standards/api-design.md`，
+端点与事务规范通过 `java:reference` 消费（`quick-constraints.md`、`standards-index.md`），
 **优先级高于** Spring 的惯用写法。
+
+Spring 集成边界未定时（如 filter 与 `SessionContext` 绑定、Boot 自动配置落位），
+在改代码前调用 `grill-me`（见 `java:reference` → `grill-me.md`）。
 
 > 结论：在本仓库内，本技能主要用于「理解 Spring 语义、评估迁移、处理 Spring 相关
 > 依赖或调试 Spring 集成」，而不是用来写端点。
 
 ---
 
+## 依赖与版本（硬约束）
+
+| 必须 | 禁止 |
+|------|------|
+| Spring / Boot 及 starter **版本只来自 `innospots-nexus-bom`** | 在 `innospots-nexus-spring` 子模块 POM 写 `<version>` |
+| 升 Boot 只改 BOM 的 `spring-boot.version` + `dependency:tree` 验证 | 在 spring 聚合 POM 维护第二套 `spring-boot.version` |
+| 持久化用 **MyBatis-Plus**（`mybatis-plus-spring-boot4-starter`） | **Spring Data**（`spring-boot-starter-data-*`、`spring-data-*`） |
+| 认证/授权用 **kernel / console** 领域与 Jakarta 边界 | **Spring Security**（`spring-boot-starter-security`、`spring-security-*`） |
+| 新增 starter 先 `java:design` + BOM 登记 | 绕过 BOM 直接引第三方坐标 |
+
+细则与自检 → [spring-dependencies.md](references/spring-dependencies.md)、
+[`dependency-conventions.md`](../java-project/references/dependency-conventions.md)。
+
+---
+
 ## 版本线（截至 2026-09，以 spring.io 与 endoflife.date 为准）
+
+本仓库**实际使用版本**以 `innospots-nexus-bom` 的 `spring-boot.version` 为准（当前与下表主线一致时仅为巧合），不得在各模块 POM 单独指定。
 
 | Boot | Framework | Java 支持 | 状态 |
 |------|-----------|----------|------|
@@ -54,7 +73,7 @@ version: 1.0.0
 | 2.x → 3.x | Java 17 基线；`javax.*` → `jakarta.*` 全量迁移（Servlet、Persistence、Validation、Annotation）；Spring Framework 6；Hibernate 6；移除部分废弃 API；`spring.factories` 自动配置注册逐步迁向 `AutoConfiguration.imports` |
 | 3.x → 4.x | Spring Framework 7；**代码库模块化**（自动配置类的 public 成员被移除，自定义 starter 需改用新模块结构与文档化扩展点）；JSpecify 全组合空安全；Java 25 一等支持（基线仍为 17）；Jackson 3（Jackson 2 以废弃形式提供）；Hibernate 7；Tomcat 11；若干配置属性重命名；**必须先升到 3.5 再升 4.0** |
 
-大版本升级属于 `java:project-upgrade` 的主流程，本技能只提供版本与差异知识。
+Spring 大版本升级属于 `java:dependency-upgrade` 的主流程，本技能只提供版本与差异知识。
 
 ---
 
@@ -108,32 +127,24 @@ version: 1.0.0
 - 参数校验用 Jakarta Validation（`@Valid` / `@Validated`）
 - 统一异常处理：`@RestControllerAdvice` + `@ExceptionHandler`（**映射到 `R` 的集中处理是本仓库端点基础设施的职责**）
 
-### Spring Data
+### Spring Data / Spring Security（本仓库禁止）
 
-- Repository 方法名派生查询可读性有限，复杂查询用 `@Query` 或 `Specification`
-- 注意 N+1：`@EntityGraph` / join fetch / 批量查询
-- 分页返回 `Page<T>` / `Slice<T>`；深分页考虑基于游标的方式
-- 事务边界放 service，不放 repository
-
-### Spring Security
-
-- 过滤器链顺序决定行为，`SecurityFilterChain` 配置需明确顺序
-- 认证与授权分离；方法级安全用 `@PreAuthorize`
-- **不得**在日志或异常文本中输出凭据、令牌、授权头
-- CSRF、CORS、会话策略需按部署形态显式配置
+- **不得**引入 `spring-boot-starter-data-*`、`spring-data-*`、`spring-boot-starter-security`、`spring-security-*`
+- 从遗留 Spring 工程迁移时：Repository → `*Dao` + `BaseMapper`；Security 过滤器链 → console `permission` / `auth` 域
+- 仅在外部非本仓库项目中讨论 Spring Data / Security 语义时，以下知识作对照：**Spring Data** 用 Repository 派生查询与 `@Query`；**Spring Security** 用 `SecurityFilterChain`——本仓库均不采用
 
 ### 测试
 
 | 场景 | 方案 |
 |------|------|
-| 单元/切片测试 | `@WebMvcTest`、`@DataJpaTest`、`@JsonTest` 等，启动快 |
+| 单元/切片测试 | `@JsonTest` 等；**不用** `@DataJpaTest`（禁止 Spring Data） |
 | 完整上下文 | `@SpringBootTest`，配合 `@MockBean` / `@TestConfiguration` |
 | HTTP 层 | `MockMvc`（MVC）、`WebTestClient`（WebFlux 与 MVC） |
 | 真实依赖 | Testcontainers |
 | 配置隔离 | `@TestPropertySource`、`@ActiveProfiles`、`@DynamicPropertySource` |
 | 上下文复用 | 相同配置复用上下文；避免过度使用 `@DirtiesContext` |
 
-> 本仓库的测试默认用 JUnit 5 + AssertJ + Mockito，见 `java:test`。
+> 本仓库的测试默认用 JUnit 5 + AssertJ + Mockito，见 `java:develop` → `test-conventions.md`。
 
 ### Actuator 与观测
 
@@ -152,7 +163,9 @@ version: 1.0.0
 | 是否误用 Spring 事务注解 | `grep -rn "org.springframework.transaction.annotation" --include=*.java */src/main/java` |
 | `base` 是否引入 Spring | 检查 `innospots-nexus-base/pom.xml` 依赖清单 |
 | `core` 是否绑定自动配置 | 检查是否存在自动配置类或 `AutoConfiguration.imports` |
-| Spring 相关依赖版本来源 | `mvn -q help:effective-pom`、`mvn dependency:tree` |
+| Spring 相关依赖版本来源 | `mvn -q help:effective-pom`、`mvn dependency:tree`（应来自 BOM） |
+| POM 内联 Spring `<version>` | `grep version pom.xml` in `innospots-nexus-spring/` |
+| 禁止的 Spring Data / Security | `grep spring-boot-starter-data\|spring-security` in spring 模块 POM |
 
 这些检查也包含在 `java:check` 的规范巡检中。
 
@@ -162,8 +175,8 @@ version: 1.0.0
 
 | 工作 | 归属 |
 |------|------|
-| Spring Boot 2.x → 3.x、3.x → 4.x 整体迁移 | `java:project-upgrade`（主流程） |
-| 迁移过程中 Jackson / Hibernate / Jakarta 等具体组件 | `java:tool-upgrade`（被调用） |
+| Spring Boot 2.x → 3.x、3.x → 4.x 及连带 Jakarta / Jackson / Hibernate | `java:dependency-upgrade` |
+| 仅升 innospots-nexus 工程 `revision` 版本号 | `java:project-upgrade` |
 | 版本差异知识与 Spring 语义解释 | 本技能 |
 
 ---
@@ -171,4 +184,5 @@ version: 1.0.0
 ## 详细参考
 
 - [spring-boundary.md](references/spring-boundary.md) — 本仓库适用边界与 Jakarta/Quarkus 对照
+- [spring-dependencies.md](references/spring-dependencies.md) — BOM 版本、禁止 Spring Data/Security、允许 starter 白名单
 - [spring-migration-notes.md](references/spring-migration-notes.md) — 版本线、断点与迁移要点

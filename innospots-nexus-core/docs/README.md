@@ -52,6 +52,7 @@ BaseEntity
 
 | 主题 | 位置 |
 |------|------|
+| **模块 API 索引（开发引用）** | [`../../skills/java/java-reference/references/modules/innospots-nexus-core/README.md`](../../skills/java/java-reference/references/modules/innospots-nexus-core/README.md) |
 | 插件运行时、安装、`console@1`、Page DSL | [`../../innospots-nexus-plugin/docs/plugin/manual/README.md`](../../innospots-nexus-plugin/docs/plugin/manual/README.md) |
 | Console catalog 索引（`nx_console_catalog_resource`） | `innospots-nexus-console` 模块 `console.catalog.*` |
 | 模块分层与依赖规则 | [`../../skills/java/java-project/references/module-layout.md`](../../skills/java/java-project/references/module-layout.md) |

@@ -1,61 +1,61 @@
-# Package `domain.condition`
+# 包 `domain.condition`
 
 ## DatabaseFactorStatement
 
 **Type:** class
 
-Renders a `Factor` into a SQL expression string.
+将 `Factor` 渲染为 SQL 表达式字符串。
 
 ## EmbedCondition
 
 **Type:** class
 
-A condition that supports nesting — each `EmbedCondition` can contain child sub-conditions recursively.
+支持嵌套的条件——每个 `EmbedCondition` 可递归包含子条件。
 
 ## Factor
 
 **Type:** class
 
-A single filter criterion composed of a field code, an operator, a value, and an optional value type.
+单个过滤条件，由字段编码、运算符、值及可选值类型组成。
 
 ## FactorStatementBuilder
 
 **Type:** class
 
-Factory that selects the appropriate `IFactorStatement` implementation based on the target `Mode`.
+根据目标 `Mode` 选择相应的 `IFactorStatement` 实现的工厂。
 
 ## IFactorStatement
 
 **Type:** interface
 
-Strategy interface for rendering a `Factor` into a mode-specific expression string (SQL, script, or Java).
+策略接口，将 `Factor` 渲染为特定模式的表达式字符串（SQL、脚本或 Java）。
 
 ## Mode
 
 **Type:** enum
 
-The target output mode for condition statements.
+条件语句的目标输出模式。
 
 ## Operator
 
 **Type:** enum
 
-Comparison operators used in filter conditions.
+过滤条件使用的比较运算符。
 
 ## Relation
 
 **Type:** enum
 
-Logical combinators for joining multiple `Factor` conditions.
+组合多个 `Factor` 条件的逻辑连接符。
 
 ## ScriptFactorStatement
 
 **Type:** class
 
-Renders a `Factor` into a script/expression language (e.
+将 `Factor` 渲染为脚本/表达式形式。
 
 ## SimpleCondition
 
 **Type:** class
 
-A flat list of `Factor` conditions joined by a single `Relation`.
+由单一 `Relation` 连接的 `Factor` 平面列表。

@@ -4,40 +4,70 @@ display_name: Java 规范总索引
 description: |
   Java 通用规范与标准总入口。当用户询问 Java 编码规范、命名规则、注释要求、
   API 设计原则、异常与状态码约定、代码风格，或不确定某个 Java 任务应该走哪个
-  技能时使用。提供 standards/ 下 7 份权威规范的索引、硬性红线速查、规范冲突
-  裁决顺序，以及 9 个 java:* 技能的路由表。
+  技能时使用。提供 skills/java/java-reference/standards/ 下权威规范的索引、专题参考、硬性红线速查、规范
+  冲突裁决顺序，以及 8 个 java:* 技能的路由表；并索引跨技能的 `grill-me` 调用时机。
+  其他 java:* 技能通过本技能复用规范，不得在各自正文中重复规范条文。
   触发词：Java 规范、编码规范、命名规范、代码风格、注释规范、API 设计、
   异常规范、状态码、java 标准、standards。
 category: java
-version: 1.0.0
+version: 1.5.2
 ---
 
 # Java 通用规范与标准
 
 ## 定位
 
-本技能是 `java:*` 技能体系的**规范总索引与路由中枢**，不直接产出代码。
+本技能是 `java:*` 技能体系的**规范总索引、专题参考库与路由中枢**，不直接产出代码。
 
 - 需要查规范原文 → 本技能给出权威文件与章节位置
+- 需要跨技能复用的专题规则 → 本技能 `references/` 下的专题文件
 - 需要动手做事 → 按下方路由表转交对应技能
 - 规范之间打架 → 按「冲突裁决顺序」判定
 
-## 规范源文件
+**其他 `java:*` 技能不得在 SKILL 正文复述规范条文**，应链接到本技能下的
+`references/` 或 `standards/` 原文。
 
-所有规范的唯一权威来源是仓库 `standards/` 目录。任何时候都**以源文件为准**，
-本技能只做索引与速查。
+## 规范源文件（权威原文）
+
+`skills/java/java-reference/standards/` 目录是规范条文的**唯一权威来源**（随 Java 技能包安装）。
+本技能提供索引与专题摘要，疑义一律回源原文。
 
 | 规范文件 | 管辖范围 | 主要使用者 |
 |---------|---------|-----------|
-| [`code-style.md`](../../../standards/code-style.md) | 花括号、缩进、行宽、导入顺序、成员顺序、Lombok、REST 端点、MapStruct、MyBatis-Plus DAO、依赖注入、集合、日志、字面量 | `java:develop`、`java:check` |
-| [`naming.md`](../../../standards/naming.md) | 命名决策顺序、词汇表、类型后缀、方法动词、字段/参数/局部名、缩写、包命名、持久化命名、测试命名 | `java:design`、`java:develop`、`java:test` |
-| [`api-design.md`](../../../standards/api-design.md) | 方法签名、契约与实现边界、不可变性、空值处理、校验、异常、持久化实体、领域模型、REST 契约、DAO 契约、Service/Operator 边界、事务、事件、兼容性 | `java:design`、`java:develop` |
-| [`code-comments.md`](../../../standards/code-comments.md) | 包文档、类型注释、方法注释、行内注释、TODO 规则、禁用注释 | `java:develop`、`java:check` |
-| [`exception-status-code.md`](../../../standards/exception-status-code.md) | 异常分类、`NexusException` 构造、抛出/捕获/翻译、状态码九字符格式、类别语义、HTTP 映射、扩展流程、契约测试 | `java:design`、`java:develop`、`java:test` |
-| [`domain-module-initialization.md`](../../../standards/domain-module-initialization.md) | 新业务领域的六阶段初始化工作流、测试先行顺序、编译门禁、完整验证门禁 | `java:develop`、`java:test` |
-| [`module-skills.md`](../../../standards/module-skills.md) | 模块技能文档的生成策略与 `SKILL.md` / `references/` 格式 | 仅开发者显式请求扫描时使用 |
+| [`code-style.md`](standards/code-style.md) | 格式、Lombok、REST 端点、MapStruct、DAO、日志 | `java:develop`、`java:check` |
+| [`naming.md`](standards/naming.md) | 命名决策、词汇、类型后缀、包与持久化命名 | `java:design`、`java:develop` |
+| [`api-design.md`](standards/api-design.md) | 签名、契约边界、实体、REST/DAO、事务、事件、兼容性 | `java:design`、`java:develop` |
+| [`code-comments.md`](standards/code-comments.md) | 包/类型/方法/行内注释与 TODO | `java:develop`、`java:check` |
+| [`exception-status-code.md`](standards/exception-status-code.md) | 异常、`NexusException`、状态码九字符格式与扩展 | `java:design`、`java:develop` |
+| [`domain-module-initialization.md`](standards/domain-module-initialization.md) | 六阶段领域初始化权威流程 | `java:develop` |
+| [`module-skills.md`](standards/module-skills.md) | 模块 API 参考生成策略（`README.md` 索引，非技能） | 仅开发者显式请求扫描时 |
 
-仓库另有 `AGENTS.md` 定义模块职责与依赖方向，是工程结构的权威来源。
+仓库另有 [`AGENTS.md`](../../../AGENTS.md) 定义模块职责与依赖方向。
+
+## 专题参考（跨技能复用）
+
+按主题组织的执行参考，供 `java:design`、`java:develop`、`java:check` 链接复用：
+
+| 专题 | 文件 | 用途 |
+|------|------|------|
+| 硬性红线速查 | [quick-constraints.md](references/quick-constraints.md) | 按场景的最常违反约束 |
+| 规范章节地图 | [standards-index.md](references/standards-index.md) | 定位规则在哪份 standards 文件的哪一节 |
+| 模块归属 | [module-ownership.md](references/module-ownership.md) | Maven 模块与业务域判定 |
+| 包结构（领域优先） | [package-structure.md](references/package-structure.md) | 领域 → 功能子模块 → 职责；禁止 service 堆积；单包 ≤15 类 |
+| 作用域层级 | [scope-hierarchy.md](references/scope-hierarchy.md) | Session/Snapshot 与 Entity 基类 |
+| 领域建模 | [domain-modeling.md](references/domain-modeling.md) | 实体/请求/VO/事件建模决策 |
+| API 契约 | [api-contract.md](references/api-contract.md) | 签名、分层、事务、兼容性 |
+| 六阶段 checklist | [domain-initialization-checklist.md](references/domain-initialization-checklist.md) | develop 执行清单 |
+| 单元测试规约 | `java:develop` → [test-conventions.md](../java-develop/references/test-conventions.md) | 命名、断言、Mock、独立性 |
+| 契约测试写法 | `java:develop` → [contract-tests.md](../java-develop/references/contract-tests.md) | 实体/DAO/端点/状态码契约测试 |
+| 测试范围（设计） | `java:design` → [test-scope.md](../java-design/references/test-scope.md) | 设计阶段测什么/不测什么 |
+| 方案压力测试 | [grill-me.md](references/grill-me.md) | 重大决策前的 `/grilling` 会话 |
+
+## grill-me（方案压力测试）
+
+规范条文用本技能；**方案、边界、归属有歧义或多种可行路径**时，在动手前先走
+`grill-me`（见 [grill-me.md](references/grill-me.md)）。典型时机：新业务域设计前、
+四步法结论交 develop 前、新建模块前、升级方案定稿前。
 
 ## 技能路由表
 
@@ -46,83 +76,58 @@ version: 1.0.0
 | 查规范、问约定、不确定走哪个技能 | `java:reference` | 只读、不产出代码 |
 | 建工程、改模块结构、配 Maven/POM、调构建 | `java:project` | 动的是**工程骨架** |
 | 做架构/模块/接口/类/技术方案设计 | `java:design` | 动的是**设计决策** |
-| 写功能、改功能、修 Bug、重构 | `java:develop` | 动的是**实现代码** |
-| 写单测、集成测试、回归测试 | `java:test` | 动的是**测试代码** |
-| 编译、跑测试、规范/质量/依赖/安全/性能检查 | `java:check` | 动的是**验证动作** |
+| 写功能、改功能、修 Bug、重构、单元/契约测试 | `java:develop` | 动的是**实现与配套测试代码** |
+| 编译、跑测试、规范/质量/依赖/安全检查 | `java:check` | 动的是**验证动作** |
 | Spring / Spring Boot 专项能力 | `java:spring` | 涉及 **Spring 生态** |
-| JDK / Spring 大版本 / Jakarta / 构建体系升级 | `java:project-upgrade` | 改变**运行或构建基线** |
-| 基础组件、公共依赖、内部 SDK 升级 | `java:tool-upgrade` | 改变**使用的基础组件** |
-
-两个升级技能的唯一区分原则：
-
-```text
-改变项目运行/构建基线  → java:project-upgrade
-改变项目使用的基础组件 → java:tool-upgrade
-```
-
-| 升级示例 | 归属 |
-|---------|------|
-| JDK 17 → 25 | `java:project-upgrade` |
-| Spring Boot 2 → 3、Java EE → Jakarta EE | `java:project-upgrade` |
-| Maven 3 → 4、Gradle 大版本 | `java:project-upgrade` |
-| JUnit 4 → JUnit 5、模块结构调整、语言特性迁移 | `java:project-upgrade` |
-| Jackson 2 → 3、MapStruct、Lombok、SLF4J/Logback | `java:tool-upgrade` |
-| commons-lang3 / commons-io / Guava / HTTP Client | `java:tool-upgrade` |
-| 内部 common SDK、内部 starter、内部基础框架 | `java:tool-upgrade` |
-
-若一次升级同时涉及两者（如 Spring Boot 2→3 连带 Jackson/Hibernate/Jakarta），
-主流程由 `java:project-upgrade` 负责，过程中调用 `java:tool-upgrade` 处理具体
-基础组件迁移。
+| 工程 `${revision}` 升版、发版、避免手改各模块 version | `java:project-upgrade` | 改变**自身产物版本号** |
+| JDK、依赖、Spring/Jakarta、构建插件、第三方与内部 SDK 升级 | `java:dependency-upgrade` | 改变**外部技术栈** |
 
 ## 硬性红线
 
-以下规则无例外，违反即视为不合格。完整清单见
-[quick-constraints.md](references/quick-constraints.md)。
+完整清单见 [quick-constraints.md](references/quick-constraints.md)。摘要：
 
 | # | 红线 |
 |---|------|
-| 1 | 每次修改 Java 源文件后立即运行 `mvn clean compile`，不得延后、不得降低 `maven.compiler.release` 迁就旧 JDK |
-| 2 | 业务异常一律 `NexusException` + 类型化 `StatusCode`，不得为每个错误建异常子类 |
-| 3 | 状态码必须是 `MODULE(3) + CATEGORY(2) + LOCAL(4)` 共九字符，`bisCode()` 与 `fullCode()` 一致 |
-| 4 | DAO 方法只能访问单表，禁止 SQL join、禁止 Mapper XML |
-| 5 | 端点只用 `jakarta.ws.rs` 注解，禁止 Spring MVC 注解，必须返回 `R<T>` |
-| 6 | `domain.request` / `domain.vo` 类型必须是 record |
-| 7 | 依赖方向 `endpoint → service → operator → dao`，operator 不得依赖 service 或另一个 operator |
+| 1 | 每批 Java 改动后立即 `mvn clean compile` |
+| 2 | 业务异常一律 `NexusException` + 类型化 `StatusCode`；禁止 JDK/`RuntimeException`/`Exception` 作为失败契约 |
+| 3 | 状态码九字符：`MODULE(3) + CATEGORY(2) + LOCAL(4)` |
+| 4 | DAO 单表、无 join、无 Mapper XML |
+| 5 | 端点只用 `jakarta.ws.rs`，返回 `R<T>` |
+| 6 | `domain.request` / `domain.vo` 必须是 record |
+| 7 | `endpoint → service → operator → dao`；operator 不得依赖 service 或其他 operator |
 | 8 | 事务只用 `jakarta.transaction.Transactional` |
-| 9 | 不得复制遗留工程源码、遗留 POM 结构或机械复刻包名 |
-| 10 | 未获开发者显式请求时，不得创建/更新/同步模块 `SKILL.md` 与 `references/` 文档 |
+| 9 | 不得复制遗留工程源码或机械复刻包结构 |
+| 10 | 未获显式请求时不得更新模块 API 索引（`README.md`）/ `references/` 文档 |
+| 11 | 新功能必须有配套单元/契约测试；交付前 `mvn test` 通过（见 `java:develop`） |
 
 ## 冲突裁决顺序
 
-当两份规范或规范与既有代码冲突时，按以下顺序裁决，**先命中者优先**：
-
-1. **开发者当前明确意图** — 显式指令覆盖一切默认约定
-2. **`AGENTS.md`** — 仓库最高层约束（模块职责、依赖方向、遗留代码禁令）
-3. **`exception-status-code.md`** — 异常与状态码语义的专属权威
-4. **`api-design.md`** — 契约、边界、不可变性、事务、事件、兼容性
-5. **`naming.md`** / **`code-style.md`** / **`code-comments.md`** — 命名、格式、注释
-6. **`domain-module-initialization.md`** — 领域初始化流程与门禁
-7. **现有代码的既有命名** — 只是词汇证据，**不是**可沿用的先例
-
-裁决后必须在回复中说明命中了哪一条。若冲突无法自行消解，停下来问开发者。
-
-## 使用方式
-
-1. 判断任务类型，查路由表
-2. 若为规范查询，直接打开 `standards/` 对应文件确认原文，不要凭记忆回答
-3. 若为实施任务，转交对应技能，并把本技能的红线清单作为前置约束带过去
-4. 所有产出最终都要过 `java:check`
+1. 开发者当前明确意图
+2. **`AGENTS.md`**
+3. **`exception-status-code.md`**
+4. **`api-design.md`**
+5. **`naming.md`** / **`code-style.md`** / **`code-comments.md`**
+6. **`domain-module-initialization.md`**
+7. 现有代码的既有命名（仅作词汇证据，非先例）
 
 ## 模块 API 参考
 
-按 Java 模块划分的 API 快照，位于 `references/modules/<artifact-id>/`。
-仅开发者显式请求扫描时生成或刷新（见 `standards/module-skills.md`）。
+位于 `references/modules/<artifact-id>/README.md`（**模块 API 索引，不是技能**）。
+仅开发者显式请求扫描时生成（见 [`standards/module-skills.md`](standards/module-skills.md)）。
 
 | 模块 | 入口 |
 |------|------|
-| `innospots-nexus-base` | [`references/modules/innospots-nexus-base/SKILL.md`](references/modules/innospots-nexus-base/SKILL.md) |
+| `innospots-nexus-base` | [README.md](references/modules/innospots-nexus-base/README.md) |
+| `innospots-nexus-core` | [README.md](references/modules/innospots-nexus-core/README.md) |
+| `innospots-nexus-console` | [README.md](references/modules/innospots-nexus-console/README.md) |
 
 ## 详细参考
 
-- [quick-constraints.md](references/quick-constraints.md) — 按场景组织的硬性约束速查表
-- [standards-index.md](references/standards-index.md) — 7 份规范的章节级索引
+- [quick-constraints.md](references/quick-constraints.md)
+- [standards-index.md](references/standards-index.md)
+- [module-ownership.md](references/module-ownership.md)
+- [scope-hierarchy.md](references/scope-hierarchy.md)
+- [domain-modeling.md](references/domain-modeling.md)
+- [api-contract.md](references/api-contract.md)
+- [domain-initialization-checklist.md](references/domain-initialization-checklist.md)
+- [grill-me.md](references/grill-me.md)

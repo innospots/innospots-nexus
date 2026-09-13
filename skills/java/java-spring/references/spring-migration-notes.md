@@ -23,7 +23,8 @@
 
 ## 2.x → 3.x 关键断点
 
-大版本工程升级，主流程归 `java:project-upgrade`。
+Spring 大版本与依赖升级，主流程归 `java:dependency-upgrade`（**只改 BOM 版本**）。
+本仓库禁止 Spring Data / Spring Security；版本与 starter 白名单见 `spring-dependencies.md`。
 
 | 断点 | 影响 |
 |------|------|
@@ -92,8 +93,7 @@
 任何大版本升级都需要：
 
 1. 先跑 `java:check` 建立**升级前基线**（编译 + 测试结果要留存）
-2. 按 `java:project-upgrade` 的流程做兼容性分析与分阶段改造
-3. 具体组件（Jackson、Hibernate、Jakarta 各模块）交给 `java:tool-upgrade`
+2. 按 `java:dependency-upgrade` 的流程做兼容性分析与分阶段改造（含 Jackson、Hibernate、Jakarta）
 4. 升级后再跑 `java:check` 与升级前基线对比
 
 ---

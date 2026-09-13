@@ -1,7 +1,9 @@
 # 变更工作流
 
-覆盖四类日常改动：加功能、改功能、修缺陷、重构。四类共用同一条硬约束：
-**每批 Java 源文件改动后立即 `mvn clean compile`。**
+覆盖四类日常改动：加功能、改功能、修缺陷、重构。规范与红线通过 `java:reference`
+引用，不在此重复。
+
+四类共用同一条硬约束：**每批 Java 源文件改动后立即 `mvn clean compile`。**
 
 ---
 
@@ -17,6 +19,7 @@
 | 现有代码里是否已有同义能力？ | 避免重复造轮子 |
 | 是否有人显式要求了设计/方案？ | 决定是否需要先走 `java:design` |
 
+归属判定见 `java:reference` → `module-ownership.md`。
 回答不了就停下来问，不要猜。
 
 ---
@@ -30,7 +33,8 @@
 4. 最小实现     只实现当前需要的行为，不预建分层
 5. 编译门禁     mvn clean compile
 6. 聚焦测试     直到转绿
-7. 全量验证     交 java:check
+7. 单元测试     新增/更新 `{Type}Test` 或 `{Concept}ContractsTest`，`mvn test` 通过
+8. 全量验证     交 java:check
 ```
 
 ### 分层落位判断
@@ -42,6 +46,7 @@
 | 多步骤、跨 operator、跨领域、事务 | `service` |
 | 结构性字段映射 | `converter`（非平凡或重复时） |
 | 新失败语义 | 先搜现有状态码，必要时按九步流程扩展 |
+| 新公共行为 | 配套单元测试（正常 + 主要拒绝路径） |
 
 ### 加功能时容易犯的错
 
@@ -53,6 +58,7 @@
 | 把实体直接返回给前端 | 用 VO record + MapStruct |
 | 预建 `service` 但只有一个转发方法 | 直接 `endpoint → operator → dao` |
 | 为凑结构创建空包 | 只在有实际职责时建包 |
+| 业务失败抛 `IllegalArgumentException` / `RuntimeException` | `NexusException.build(StatusCode)` 或 `Checks.*` |
 
 ---
 
@@ -92,7 +98,7 @@
 | 症状 | 真正该改的地方 |
 |------|--------------|
 | 缺参数校验导致脏数据 | 该校验规则的拥有边界（record 构造器 / `validate()` / operator / service） |
-| 空指针 | 产生可空值的边界，或应归一化缺失的 operator/service，而不是在 NPE 处加判空 |
+| 空指针 | 产生可空值的边界用 `Checks`/`NexusException` 归一化缺失，而不是依赖 NPE 或抛 JDK 异常 |
 | 事务未生效 | 事务应声明的 service 方法，而不是 DAO |
 | 并发下重复创建 | 稳定键与数据库/运行时唯一性，而不是加个「先查再写」 |
 | 异常信息泄露内部细节 | 状态码 message/advice 与响应映射，而不是调用点 |
@@ -105,6 +111,7 @@
 | 吞掉异常返回默认值 | 隐藏失败，问题后移 |
 | 放宽校验让脏数据通过 | 契约被破坏 |
 | 大范围 `try-catch` 兜住 | 掩盖归属边界 |
+| `catch` 后改抛 `RuntimeException` | 在边界 `NexusException.build(status, cause)` |
 | 加判空但语义仍错 | 症状消失，成因仍在 |
 | 为让测试通过而删断言 | 测试失去价值 |
 | 注释掉失败的测试 | 等同于放弃验证 |
@@ -142,18 +149,19 @@
 |------|------|
 | 重命名类型/方法 | 若属 public 兼容面需迁移方案；遗留坏名不应仅因视觉一致而保留 |
 | 提取方法/类型 | 新类型需符合命名职责后缀表 |
-| 调整包结构 | 先按业务域再按职责；禁止 `impl`/`common`/`misc`/`util` |
+| 调整包结构 | 领域优先 + 功能子模块；禁止 service 堆积；单包 ≤15 类；见 [package-structure.md](../../java-reference/references/package-structure.md)；禁止 `impl`/`common`/`misc`/`util` |
 | 消除重复 | 判定重复是同一概念还是偶然相似 |
 | 拆分类 | 端点约 7 个方法触发边界复审 |
 | 引入接口 | 仅在有真实边界理由时 |
-| 替换工具库 | 属 `java:tool-upgrade` 范围 |
+| 替换依赖库 | 属 `java:dependency-upgrade` 范围 |
 
 ---
 
 ## 每批改动的收尾动作
 
 ```bash
-mvn clean compile                 # 强制，不得跳过
+mvn clean compile                 # 每批改动强制，不得跳过
+mvn test                          # 功能交付前强制（至少受影响模块）
 mvn -pl <module> test             # 聚焦测试
 git diff --check                  # 空白与格式问题
 git status --short                # 是否有意外文件
@@ -173,9 +181,10 @@ git status --short                # 是否有意外文件
 - [ ] 异常在正确的边界抛出，状态码归属正确
 - [ ] 没有吞掉异常、没有伪造成功数据
 - [ ] 日志不含敏感值，未逐层重复记录
-- [ ] 没有裸 `TODO`/`FIXME`，推迟行为有 `UnsupportedOperationException`
+- [ ] 没有裸 `TODO`/`FIXME`，推迟行为用 `NexusException`
+- [ ] 新增 `throw` 均为 `NexusException`（无 JDK 通用异常）
 - [ ] public 类型与方法的 Javadoc 完整
 - [ ] 行内注释解释的是 why
 - [ ] 未改动公共兼容面，或已有迁移方案
-- [ ] 未生成或修改模块 `SKILL.md` 与 `references/` 文档
+- [ ] 未生成或修改模块 API 索引 `README.md` 与 `references/` 文档
 - [ ] 已交 `java:check` 做全量验证

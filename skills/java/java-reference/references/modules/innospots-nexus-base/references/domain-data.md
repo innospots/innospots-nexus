@@ -1,37 +1,37 @@
-# Package `domain.data`
+# 包 `domain.data`
 
 ## DataBody
 
 **Type:** class
 
-A self-timing data payload.
+自带计时的数据载荷。
 
 ## DataOperation
 
 **Type:** enum
 
-The type of data operation to perform on a target datasource.
+在目标数据源上执行的数据操作类型。
 
 ## DataPage
 
 **Type:** record
 
-Immutable paginated data container.
+不可变的分页数据容器。
 
 ## DataRequest
 
 **Type:** class
 
-A request to perform a `DataOperation` on a named target datasource.
+对命名目标数据源执行 `DataOperation` 的请求。
 
 ## DataResponse
 
 **Type:** class
 
-A generic response envelope for data operations.
+数据操作的通用响应封装。
 
 ## DataSchema
 
 **Type:** class
 
-Describes the structure of a data payload: a list of `DomainField`s plus free-form configuration entries.
+描述数据载荷结构：`DomainField` 列表及自由格式的配置项。

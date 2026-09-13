@@ -1,5 +1,9 @@
 # Maven 构建配置参考
 
+> **依赖怎么选、怎么引、怎么避免重复声明** → 见
+> [dependency-conventions.md](dependency-conventions.md)。本文档侧重 parent/BOM
+> 结构与构建插件配置。
+
 ## 三层 POM 分工
 
 | 层 | artifactId | 职责 | 是否含代码 |
@@ -135,7 +139,7 @@ BOM 用属性集中管理版本：
 
 `dependencyManagement` 中登记三类条目：
 
-1. **内部模块**：`innospots-nexus-{base,core,console,kernel,platform}`，版本 `${revision}`
+1. **内部模块**：`innospots-nexus-{base,core,plugin,console,kernel,platform,spring-*,quarkus-*}`，版本 `${revision}`
 2. **第三方 BOM（import）**：`junit-bom`、`jackson-bom`
 3. **第三方普通依赖**：hutool、caffeine、commons-*、httpclient5、lombok、mapstruct、
    jakarta.*、HikariCP、mybatis-plus-*、数据库驱动、lettuce、amqp-client、
@@ -147,6 +151,30 @@ BOM 用属性集中管理版本：
 2. 在 BOM 的 `dependencyManagement` 加条目
 3. 在具体模块 POM 的 `<dependencies>` 声明 `groupId:artifactId`（**不写 version**）
 4. 若该库提供注解处理器且是项目级通用，评估是否加入 parent 的 `annotationProcessorPaths`
+
+### 登记新内部模块
+
+新建 `innospots-nexus-<name>` 且需被其他模块依赖时，在
+`innospots-nexus-bom/pom.xml` 的 `dependencyManagement` 中增加（与现有内部模块并列）：
+
+```xml
+<dependency>
+    <groupId>com.innospots</groupId>
+    <artifactId>innospots-nexus-<name></artifactId>
+    <version>${revision}</version>
+</dependency>
+```
+
+并在根聚合器（或所属聚合器）`<modules>` 中注册该模块。消费方只写：
+
+```xml
+<dependency>
+    <groupId>com.innospots</groupId>
+    <artifactId>innospots-nexus-<name></artifactId>
+</dependency>
+```
+
+内部模块版本统一用 `${revision}`，与 flatten 发布流程一致；**不得在消费方 POM 写 version**。
 
 ---
 
@@ -172,11 +200,12 @@ BOM 用属性集中管理版本：
     <description><!-- 模块职责一句话 --></description>
 
     <dependencies>
+        <!-- 示例：按场景选最上层模块，见 dependency-conventions.md -->
         <dependency>
             <groupId>com.innospots</groupId>
-            <artifactId>innospots-nexus-base</artifactId>
+            <artifactId>innospots-nexus-kernel</artifactId>
         </dependency>
-        <!-- 使用 MapStruct 时需要 -->
+        <!-- 使用 MapStruct 时需要（版本由 BOM 管理） -->
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
@@ -208,8 +237,9 @@ BOM 用属性集中管理版本：
 | 检查未声明/未使用依赖 | `mvn dependency:analyze` |
 | 安装到本地仓库 | `mvn clean install` |
 
-`versions:*` 命令只列出候选，**是否升级必须由 `java:tool-upgrade` / `java:project-upgrade`
-评估后决定**，不得直接套用。
+`versions:*` 命令只列出候选。**第三方依赖**是否升级由 `java:dependency-upgrade` 评估；
+**工程 `${revision}`** 升版用 `java:project-upgrade`（`versions:set` 或改根属性），
+不得直接无分析地套用 `use-latest-versions`。
 
 ---
 

@@ -14,6 +14,8 @@
 | 遗留代码只作行为参考 | diff 中出现遗留源码、遗留 POM 结构、机械复刻的包名 |
 | 依赖方向单向 | `kernel` ↔ `platform` 互引；反向依赖高层 |
 | 未创建投机分层 | 空的 `model`/`service`/`event` 包 |
+| 功能子模块划分合理 | 模块根 `service` 挂多领域；领域内扁平 `service` 堆满编排类 |
+| 单包类型数量 | 任一包目录 >15 个 `.java` 仍不分子包 |
 
 ---
 
@@ -28,7 +30,7 @@
 | 字段语义明确 | `data`/`info`/`item`/`flag`；裸 `timeout`；无后缀的计数 |
 | 布尔命名 | `isEnabled` 字段；`notDisabled` 这类否定式 |
 | 缩写大小写一致 | `pluginID` 与 `pluginId` 混用；`DAO`/`Dao` 混用 |
-| 包名表达边界 | `impl`/`common`/`misc`/`util` 子包；复数包名 |
+| 包名表达边界 | 技术层优先（`endpoint/role`）；`kernel.service.*` 垃圾桶；单包 >15 类；`impl`/`common`/`misc`/`util` 子包；复数包名 |
 | 一概念一词 | 同一个概念在端点/实体/DAO/库中用了不同的词 |
 
 ---
@@ -57,7 +59,8 @@
 | 行内注释解释 why | 复述代码在做什么 |
 | TODO 规范 | 裸 `TODO`/`FIXME`；用 TODO 为伪造成功或吞异常开脱 |
 | 无注释掉的代码 | 存在大段被注释的实现 |
-| 无变更历史 | 作者、日期、工单号写进注释 |
+| 类型注释完整 | 公共类型缺 `@author`/`@date`；有关联却缺 `@see` |
+| 无变更历史 | 方法/行内注释写修改历史、工单号；`@date` 随每次提交改动 |
 | 注释未承诺未实现行为 | 注释描述的行为与实现不符 |
 
 ---
@@ -66,7 +69,7 @@
 
 | 检查项 | 不合格信号 |
 |--------|-----------|
-| 基类与范围正确 | 工作区数据用了 `BaseEntity`；自造 `ProjectBaseEntity` |
+| 基类与范围正确 | 工作区数据用了 `BaseEntity`；未经批准用 `ProjectBaseEntity`；裸加 `projectId` |
 | 主键注解完整 | 缺 `@TableId`/`@Id`/`@Column(length=32)`；operator 手工赋主键 |
 | `TABLE_NAME` 常量复用 | 注解里写字面量，或两处不一致 |
 | 字符串长度为 2 的幂 | 任意长度；该用 `@Lob` 却给了个大长度 |
@@ -111,7 +114,7 @@
 
 | 检查项 | 不合格信号 |
 |--------|-----------|
-| 用 `NexusException` + 类型化 `StatusCode` | `IllegalArgumentException`/`Objects.requireNonNull` 做业务校验；每错误一个异常子类 |
+| 用 `NexusException` + 类型化 `StatusCode` | `IllegalArgumentException`/`RuntimeException`/`Exception`/`UnsupportedOperationException`；`Objects.requireNonNull` 做业务校验；每错误一个异常子类 |
 | 全码九字符 | 长度不符；`bisCode()` 与 `fullCode()` 不一致 |
 | 类别按语义 | 因 HTTP 映射方便而选类别 |
 | 本地码未占用且稳定 | 与既有码冲突；为让列表好看而重排既有码 |

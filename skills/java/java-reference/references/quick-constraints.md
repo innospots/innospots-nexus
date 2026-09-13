@@ -1,7 +1,8 @@
 # 硬性约束速查表
 
-按**工作场景**组织的最常违反、代价最高的约束。每条都给出违规代价与正确做法。
-完整规则回源 `standards/` 对应文件。
+`java:reference` 的跨技能复用速查表。按**工作场景**组织最常违反、代价最高的约束。
+完整规则回源 [`../standards/`](../standards/) 对应文件（通过 [standards-index.md](standards-index.md) 定位）。
+其他 `java:*` 技能链接本文件，不在各自正文中重复。
 
 ---
 
@@ -17,11 +18,27 @@
 
 ---
 
-## 2. 写实体（Entity）
+## 2. 包结构（领域优先）
 
 | 必须 | 禁止 |
 |------|------|
-| 继承 `BaseEntity` / `TenantBaseEntity` / `WorkspaceBaseEntity` | 自建 `ProjectBaseEntity` 或 `projectId` 隔离列 |
+| 业务包先领域后职责：`role/endpoint`、`role/dao`、`role/domain/entity` | 技术层优先：`endpoint/role`、`dao/menu`、`domain/permission/entity` |
+| 同一领域代码聚在一个领域根下（如 `kernel/role/**`） | 为「分层」把多领域塞进同一 `endpoint/`、`dao/` 顶层包 |
+| 大领域按功能子模块：`permission/authorization`、`grant/service` | 模块根 `service` 或单包堆满全部 `*Service` |
+| 单包 ≤15 个 `.java`（达 12 规划拆分） | 单包 16+ 类仍平铺 |
+| `domain` 子包仅用 `entity`/`request`/`vo`/`model`/`enums`/`event` | `role/entity` 缺 `domain` 层；或 `domain/<领域名>/` 套娃 |
+| 初始面最小，按需加 `service`/`operator`/`converter` | 空包、`impl`/`common`/`misc` 逃避归属 |
+
+完整说明：[package-structure.md](package-structure.md)。
+
+---
+
+## 3. 写实体（Entity）
+
+| 必须 | 禁止 |
+|------|------|
+| 默认继承 `WorkspaceBaseEntity`（或 `TenantBaseEntity` / `BaseEntity` 按范围） | 未经设计批准继承 `ProjectBaseEntity`；在无项目语义的表上加 `projectId` |
+| 设计评审批准后可继承 `ProjectBaseEntity`（core 提供） | 自建隔离基类或重复声明继承字段 |
 | 主键 `String` + `@TableId(type = IdType.ASSIGN_UUID)` + `@Id` + `@Column(length = 32, nullable = false)` | 手动赋主键（由 `DbPrimaryGenerator` 经 `IdGenerator.ulid(prefix)` 统一生成） |
 | `public static final String TABLE_NAME`，且 `@Table` 与 `@TableName` 同时引用该常量 | 在注解里重复字面量 |
 | 字符串长度为 2 的幂（16/32/64/128/256/512/1024），无界文本用 `@Lob` | 任意大长度 |
@@ -34,7 +51,7 @@
 
 ---
 
-## 3. 写 DAO
+## 4. 写 DAO
 
 | 必须 | 禁止 |
 |------|------|
@@ -51,7 +68,7 @@ DAO 方法可用 `select/insert/update/delete` 对齐 `BaseMapper`；面向应�
 
 ---
 
-## 4. 写端点（Endpoint）
+## 5. 写端点（Endpoint）
 
 | 必须 | 禁止 |
 |------|------|
@@ -60,7 +77,7 @@ DAO 方法可用 `select/insert/update/delete` 对齐 `BaseMapper`；面向应�
 | 类级 `@Path` + `@Produces` + `@Consumes`，方法级 HTTP 注解 | 把资源路径散落到各方法 |
 | 显式 `@PathParam`/`@QueryParam`/`@HeaderParam`/`@BeanParam` | 依赖运行时隐式绑定 |
 | 返回 `R<XxxVo>` / `R<PageResult<XxxVo>>` / `R<Void>` | 返回裸实体、返回 `Map`、返回 null |
-| 推迟实现：`TODO` + `UnsupportedOperationException` | 返回伪造成功数据或空数据 |
+| 推迟实现：`TODO` + `NexusException.build(StatusCode)` | `UnsupportedOperationException`；返回伪造成功数据 |
 | 端点只做传输，委托 service/operator | 端点直接依赖 DAO、端点内编排事务与持久化 |
 
 service / operator **不得**构造 `R<T>`，只返回领域值或 `PageResult<T>`。
@@ -68,7 +85,7 @@ service / operator **不得**构造 `R<T>`，只返回领域值或 `PageResult<T
 
 ---
 
-## 5. 写 Request / VO
+## 6. 写 Request / VO
 
 | 必须 | 禁止 |
 |------|------|
@@ -83,11 +100,12 @@ service / operator **不得**构造 `R<T>`，只返回领域值或 `PageResult<T
 
 ---
 
-## 6. 抛异常与定义状态码
+## 7. 抛异常与定义状态码
 
 | 必须 | 禁止 |
 |------|------|
 | `NexusException.build(StatusCode)` / `build(StatusCode, cause)` / `build(statusCode, displayOverride, cause)` | 为每个业务错误新建异常子类 |
+| 业务失败一律 `NexusException` + 类型化 `StatusCode`；边界捕获后翻译 | `IllegalArgumentException` / `RuntimeException` / `Exception` / `UnsupportedOperationException` |
 | 全码 `MODULE(3) + CATEGORY(2) + LOCAL(4)` = 9 字符 | 缩短、加分隔符、小写、把 HTTP 状态编进本地段 |
 | `bisCode()` 与 `fullCode()` 返回同一值 | 两者不一致 |
 | 非成功状态提供有意义的中英 message + advice | 只填英文、两 locale 复制粘贴 |
@@ -96,8 +114,8 @@ service / operator **不得**构造 `R<T>`，只返回领域值或 `PageResult<T
 | 状态码按语义选类别 | 因 HTTP 映射方便而选类别 |
 | 新增状态码前先搜索现有目录 | 重复造同义码 |
 
-字符串重载 `build(String, String, ...)` **仅限** interop 边界：需全码解析器 + 显式
-allowlist + 结构化日志保留来源 + 尽量翻译为类型化状态。仓库内普通调用不得传
+字符串重载 `build(String, String, ...)` **仅限**互操作边界：需全码解析器 + 显式
+白名单 + 结构化日志保留来源 + 尽量翻译为类型化状态。仓库内普通调用不得传
 `status.fullCode()` 或复制字面量。
 
 响应与状态文本中禁止出现：密码、令牌、凭据、密钥、授权头、含密钥的完整 SQL、
@@ -107,13 +125,16 @@ allowlist + 结构化日志保留来源 + 尽量翻译为类型化状态。仓�
 
 ---
 
-## 7. 分层与依赖方向
+## 8. 分层与依赖方向
 
 ```text
 endpoint → service → operator → dao
 ```
 
 允许简化：`endpoint → operator → dao`、`service → dao`。
+
+上述分层在**同一领域内**成立；包树仍须**领域优先**（`role/endpoint` → `role/service` →
+`role/operator` → `role/dao`），不得把多个领域挂在 `endpoint/`、`dao/` 顶层下。
 
 | 必须 | 禁止 |
 |------|------|
@@ -123,12 +144,12 @@ endpoint → service → operator → dao
 | 契约按能力命名（`ResourceStore`、`PasswordDecryptor`） | 给每个具体类机械配接口 |
 | `DefaultXxx` 仅在存在其他合法实现时使用 | 单实现也硬套 `Default` 前缀 |
 
-模块依赖方向：`base → core → console → {kernel, platform}`。
+模块依赖方向：`base → core → plugin → console → {kernel, platform}`。
 `kernel` 与 `platform` 平行且互不依赖。反向依赖一律禁止。
 
 ---
 
-## 8. 事务与并发
+## 9. 事务与并发
 
 | 必须 | 禁止 |
 |------|------|
@@ -142,7 +163,7 @@ endpoint → service → operator → dao
 
 ---
 
-## 9. 领域事件
+## 10. 领域事件
 
 | 必须 | 禁止 |
 |------|------|
@@ -157,7 +178,7 @@ endpoint → service → operator → dao
 
 ---
 
-## 10. 命名与注释
+## 11. 命名与注释
 
 | 必须 | 禁止 |
 |------|------|
@@ -168,16 +189,17 @@ endpoint → service → operator → dao
 | 查询动词 `find/list/page/count`，禁用 `getAll`、`queryXxx` | `getAllUsers()` |
 | 常量与枚举常量全大写下划线 | 全大写类型名 |
 | 缩写当单词：`pluginId`、`HttpClientBuilder` | `pluginID` / `pluginId` 混用 |
-| 每个 public 类型与方法有 Javadoc，说明契约与约束 | 复述代码的注释 |
+| 每个 public 类型有 Javadoc：`@author`、`@date`（`yyyy/MM/dd`）；有关联必填 `@see` | 类型缺登记信息；方法/行内写修改历史 |
+| 每个 public/protected 方法有 Javadoc，说明契约与约束 | 复述代码的注释 |
 | 行内注释解释 why | 解释 what |
-| TODO 说明缺什么 + 未来归属，并配 `UnsupportedOperationException` | 裸 `TODO`/`FIXME` |
+| TODO 说明缺什么 + 未来归属，并配 `NexusException` | 裸 `TODO`/`FIXME`；`UnsupportedOperationException` |
 | 测试方法 lowerCamelCase 行为短语 | `test` 前缀、`testCreate1`、`worksCorrectly` |
 
 禁止创建 `impl`/`common`/`misc`/`util` 子包掩盖归属不清；禁止 `CommonUtils`/`BaseHelper`。
 
 ---
 
-## 11. 日志
+## 12. 日志
 
 | 必须 | 禁止 |
 |------|------|
@@ -190,7 +212,7 @@ endpoint → service → operator → dao
 
 ---
 
-## 12. 兼容面（改动前先确认）
+## 13. 兼容面（改动前先确认）
 
 以下属于公共兼容面，机械重命名或内部重构都**不得**顺手改动：
 
@@ -204,10 +226,10 @@ endpoint → service → operator → dao
 
 ---
 
-## 13. 遗留工程与技能文档
+## 14. 遗留工程与技能文档
 
 | 必须 | 禁止 |
 |------|------|
 | 遗留工程只用于理解业务术语、操作流程、生命周期、边界情况 | 复制/移动遗留源文件、机械复刻包结构、沿用遗留 POM |
 | 每个字段/类型/端点/依赖都对当前模块边界与开发者意图给出理由 | 因为遗留实体有所以保留 |
-| 模块 `SKILL.md` 与 `references/` 仅在开发者显式请求整体扫描时更新 | 写功能、修 Bug、重构、构建失败时顺手同步技能文档 |
+| 模块 API 索引 `README.md` 与 `references/` 仅在开发者显式请求整体扫描时更新 | 写功能、修 Bug、重构、构建失败时顺手同步参考文档 |

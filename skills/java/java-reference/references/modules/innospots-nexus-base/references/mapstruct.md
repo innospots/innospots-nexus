@@ -1,19 +1,19 @@
-# Package `mapstruct`
+# 包 `mapstruct`
 
 ## BaseBeanConverter
 
 **Type:** interface
 
-Base MapStruct-like converter interface between domain models and persistence entities.
+领域模型与持久化实体之间的基础 MapStruct 风格转换器接口。
 
 ## BaseMapperConfig
 
 **Type:** interface
 
-Shared MapStruct mapper configuration used by all domain mappers.
+所有领域映射器共享的 MapStruct 映射器配置。
 
 ## BaseMapperSupport
 
 **Type:** class
 
-Utility for mapping collections via a mapping function.
+通过映射函数转换集合的工具。

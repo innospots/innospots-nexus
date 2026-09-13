@@ -1,55 +1,57 @@
-# Package `util`
+# 包 `util`
 
 ## BeanUtils
 
 **Type:** class
 
-Bean property copy and conversion utility wrapping Hutool's `BeanUtil`.
+Bean 属性拷贝与转换工具，封装 Hutool 的 `BeanUtil`。
 
 ## Checks
 
 **Type:** class
 
-Precondition checks that fail with `NexusException` and `NexusStatusCode#INVALID_PARAMETER`.
+前置条件检查，失败时抛出 `NexusException` 及 `NexusStatusCode#INVALID_PARAMETER`。
 
 ## CryptoUtils
 
 **Type:** class
 
-Cryptographic utilities: password hashing (BCrypt), symmetric encryption (AES-GCM), and asymmetric encryption (RSA/OAEP).
+加密工具：密码哈希（BCrypt）、对称加密（AES-GCM）及非对称加密（RSA/OAEP）。
 
 ## DateTimeUtils
 
 **Type:** class
 
-Date and time formatting and parsing utilities.
+日期与时间格式化及解析工具。
 
 ## EnvUtils
 
 **Type:** class
 
-Environment property resolver with override support.
+支持覆盖的环境属性解析器。
 
 ## IdGenerator
 
 **Type:** class
 
-ID generation utilities: Snowflake-based distributed IDs, random IDs with configurable character sets, timestamp-prefixed IDs, and batch generation.
+ID 生成工具：基于 Snowflake 的分布式 ID、**`ulid(prefix)` /
+`monotonicUlid(prefix)`**（主要持久化键生成）、可配置字符集的随机 ID、
+带时间戳前缀的 ID 及批量生成。
 
 ## MetricsSnapshot
 
 **Type:** record
 
-A point-in-time snapshot of a metrics counter/timer.
+指标计数器/计时器的时点快照。
 
 ## MetricsUtils
 
 **Type:** class
 
-Micrometer-based metrics facade.
+基于 Micrometer 的指标门面。
 
 ## StringUtils
 
 **Type:** class
 
-String utilities: blank checks, placeholder replacement (`${key`} and `{{key`}}), camelCase/underscore conversion, and random key generation.
+字符串工具：空白检查、占位符替换（`${key`} 与 `{{key`}}）、camelCase/下划线转换及随机键生成。

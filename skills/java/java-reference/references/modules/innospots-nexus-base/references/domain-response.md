@@ -1,13 +1,14 @@
-# Package `domain.response`
+# 包 `domain.response`
 
 ## PageResult
 
 **Type:** record
 
-Paginated API response wrapper.
+分页 API 响应封装。
 
 ## R
 
 **Type:** record
 
-Generic API response wrapper with success/failure status, result code, message, optional data payload, and internationalized display message for frontend rendering on failures.
+通用 API 响应封装，含成功/失败状态、结果编码、消息、可选数据载荷，
+以及失败时供前端渲染的国际化显示消息。

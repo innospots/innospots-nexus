@@ -1,31 +1,31 @@
-# Package `json`
+# 包 `json`
 
 ## Jsons
 
 **Type:** class
 
-Central JSON utility facade built on Jackson.
+基于 Jackson 的中央 JSON 工具门面。
 
 ## MaskStrategy
 
 **Type:** enum
 
-Predefined masking strategies for sensitive data during JSON serialization.
+JSON 序列化时敏感数据的预定义脱敏策略。
 
 ## MaskValue
 
 **Type:** @interface
 
-Marks a field or accessor for masking during JSON serialization.
+标记字段或访问器在 JSON 序列化时脱敏。
 
 ## MaskingModule
 
 **Type:** class
 
-Jackson `Module` that activates field-level value conversion and masking.
+激活字段级值转换与脱敏的 Jackson `Module`。
 
 ## ValueConverter
 
 **Type:** @interface
 
-Marks a field or accessor for value conversion during JSON serialization.
+标记字段或访问器在 JSON 序列化时进行值转换。

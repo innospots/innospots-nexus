@@ -4,7 +4,7 @@ display_name: Java 质量检查
 description: |
   Java 编译、测试、规范、质量、依赖、安全与性能风险检查。当用户要求验证改动、
   跑编译与测试、做代码评审、检查是否符合编码规范、排查依赖冲突或安全与性能风险、
-  或在提交/合入前做最终核验时使用。是 java:develop / java:design / java:test /
+  或在提交/合入前做最终核验时使用。是 java:develop / java:design /
   两个升级技能的统一出口。
   触发词：编译验证、跑测试、代码检查、代码评审、规范检查、质量检查、
   依赖检查、安全审查、性能风险、回归验证、提交前检查。
@@ -16,8 +16,14 @@ version: 1.0.0
 
 ## 定位
 
-所有 Java 工作的**统一出口**：`java:develop`、`java:design`、`java:test`、
-`java:project-upgrade`、`java:tool-upgrade` 完成后都要过这一关。
+所有 Java 工作的**统一出口**：`java:develop`、`java:design`、
+`java:project-upgrade`、`java:dependency-upgrade` 完成后都要过这一关。
+
+规范核对通过 `java:reference` → `quick-constraints.md` 与 `review-checklist.md`，
+不在本技能正文重复规范条文。
+
+本技能是**验证出口**，不用于方案辩论。大变更合入前若方案未经评审，应回到
+`java:design` + `grill-me`，而非在 check 阶段临时改设计。
 
 ## 验证分层
 
@@ -88,7 +94,8 @@ mvn versions:display-property-updates        # 属性升级候选
 - [ ] `kernel` 与 `platform` 无互相依赖
 - [ ] 新增第三方依赖已完成 `java:design` 的选型评估并登记到 BOM
 
-`versions:*` 只列候选，**是否升级交给 `java:tool-upgrade` 评估**，不得直接套用。
+`versions:*` 只列候选：**依赖/JDK/框架**升级交给 `java:dependency-upgrade`；**工程 revision**
+升版交给 `java:project-upgrade`；不得无分析直接套用。
 
 ### 4. 安全
 
@@ -160,7 +167,7 @@ mvn versions:display-property-updates        # 属性升级候选
 | 禁止 | 说明 |
 |------|------|
 | 为让检查通过而下调 enforcer 或 release | 应报告环境不匹配 |
-| 为让测试通过而削弱断言 | 见 `java:test` |
+| 为让测试通过而削弱断言 | 见 `java:develop` → `test-conventions.md` |
 | 因构建产物陈旧就放宽验证 | 用 `-am` 重新构建上游 |
 | 把阻塞项降级为警告只为"先过一版" | 阻塞就是阻塞 |
 | 只报结论不给位置 | 每个问题必须带 `path:line` 与修正建议 |

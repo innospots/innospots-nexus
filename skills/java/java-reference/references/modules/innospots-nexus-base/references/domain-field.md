@@ -1,31 +1,31 @@
-# Package `domain.field`
+# 包 `domain.field`
 
 ## DomainField
 
 **Type:** class
 
-Describes a field within a domain schema or data structure.
+描述领域模式或数据结构中的字段。
 
 ## FieldScope
 
 **Type:** enum
 
-The role or boundary a field belongs to within a domain schema.
+字段在领域模式中所属的角色或边界。
 
 ## FieldValueType
 
 **Type:** enum
 
-Supported value types for domain fields.
+领域字段支持的值类型。
 
 ## ParamField
 
 **Type:** class
 
-A parameter field with a specific `FieldValueType`, required flag, and optional default value.
+参数字段，含特定 `FieldValueType`、必填标志及可选默认值。
 
 ## SelectOption
 
 **Type:** record
 
-A selectable option with a stored value and a display label.
+可选项，含存储值与显示标签。

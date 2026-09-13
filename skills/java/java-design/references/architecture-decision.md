@@ -4,7 +4,9 @@
 
 ## 何时需要设计评审
 
-以下情形**必须**先出方案再动手，不得边写边定：
+以下情形**必须**先出方案再动手，不得边写边定。
+其中非平凡项建议在方案定稿前附加 **`grill-me`** 做压力测试（见 `java:reference` →
+`grill-me.md`），确认设计树无遗漏后再进入 `java:design` 四步法或 `java:develop`。
 
 | 情形 | 原因 |
 |------|------|
@@ -70,7 +72,7 @@
 - 受影响的模块与包：
 - 公共兼容面变化：
 - 需要的迁移/兼容措施：
-- 需要同步更新的文档：AGENTS.md / standards/* / BOM
+- 需要同步更新的文档：AGENTS.md / skills/java/java-reference/standards/* / java:reference 专题参考 / BOM
 
 ### 验证方式
 

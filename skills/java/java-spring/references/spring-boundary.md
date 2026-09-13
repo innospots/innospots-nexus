@@ -6,14 +6,17 @@
 
 | 位置 | 约束 | 权威来源 |
 |------|------|---------|
-| 管理端 REST 端点 | 只用 `jakarta.ws.rs` 注解 | `standards/code-style.md` → REST Endpoints |
-| 端点返回类型 | 必须 `R<T>` / `R<PageResult<T>>` / `R<Void>` | `standards/api-design.md` → REST Endpoint Contracts |
-| 事务注解 | 只用 `jakarta.transaction.Transactional` | `standards/api-design.md` → Transaction Boundaries |
+| 管理端 REST 端点 | 只用 `jakarta.ws.rs` 注解 | `java:reference` → `quick-constraints.md` §4 |
+| 端点返回类型 | 必须 `R<T>` / `R<PageResult<T>>` / `R<Void>` | `java:reference` → `standards-index.md` → api-design |
+| 事务注解 | 只用 `jakarta.transaction.Transactional` | `java:reference` → `quick-constraints.md` §8 |
 | `innospots-nexus-base` | 不得引入任何 Spring 或其他运行时框架 | `AGENTS.md` |
 | `innospots-nexus-core` | 可依赖中间件 API，但**不得**绑定 Spring Boot 自动配置 | `AGENTS.md` |
-| service / operator | **不得**返回 `R<T>`；异常不在下层转响应 | `standards/api-design.md` |
+| Spring 依赖版本 | 只来自 `innospots-nexus-bom`；spring 模块 POM **禁止** `<version>` | `spring-dependencies.md` |
+| Spring Data | **禁止** `spring-boot-starter-data-*`、`spring-data-*` | 用 MyBatis-Plus + `*Dao` |
+| Spring Security | **禁止** `spring-boot-starter-security`、`spring-security-*` | 用 kernel/console 鉴权 |
+| service / operator | **不得**返回 `R<T>`；异常不在下层转响应 | `java:reference` → `api-contract.md` |
 
-**这些规范优先于 Spring 的惯用写法。** 冲突时以 `standards/` 为准。
+**这些规范优先于 Spring 的惯用写法。** 冲突时以 `java:reference` 索引的 `skills/java/java-reference/standards/` 原文为准。
 
 ---
 
@@ -102,7 +105,8 @@ Spring 严重依赖**代理**（事务、AOP、缓存、异步）。本仓库更
 2. 不落在 `innospots-nexus-core` 的自动配置形态
 3. 不进入 `domain` 包或端点契约
 4. 已通过 `java:design` 的技术选型评估（必要性、传递依赖、许可证、维护活跃度、退出成本）
-5. 版本已登记到 `innospots-nexus-bom`
+5. 版本已登记到 `innospots-nexus-bom`，且模块 POM **不写** `<version>`
+6. **不是** Spring Data 或 Spring Security 相关 starter（见 `spring-dependencies.md`）
 
 若只是需要一个 Spring 生态的**库**（如某客户端、工具类）而非 Spring 容器本身，
 评估是否能用更轻量的替代——本仓库的基调是「轻量、依赖最少」。
