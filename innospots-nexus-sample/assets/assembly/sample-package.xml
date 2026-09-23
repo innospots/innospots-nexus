@@ -1,0 +1,60 @@
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.2.0 https://maven.apache.org/xsd/assembly-2.2.0.xsd">
+    <!--
+      发行包根目录名 = ${project.build.finalName}（与各 sample 模块 artifactId 一致）
+      <artifactId>/
+        bin/     共享 startup|shutdown|restart + 本模块 setenv.sh
+        config/  src/main/resources
+        lib/     runtime 依赖 + 本模块 thin jar
+        logs/    空目录（运行期日志）
+    -->
+    <id>dist</id>
+    <formats>
+        <format>tar.gz</format>
+    </formats>
+    <includeBaseDirectory>true</includeBaseDirectory>
+    <fileSets>
+        <fileSet>
+            <fileMode>755</fileMode>
+            <lineEnding>unix</lineEnding>
+            <directory>${project.parent.basedir}/assets/bin</directory>
+            <outputDirectory>bin</outputDirectory>
+            <includes>
+                <include>startup.sh</include>
+                <include>shutdown.sh</include>
+                <include>restart.sh</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <fileMode>755</fileMode>
+            <lineEnding>unix</lineEnding>
+            <directory>${project.basedir}/bin</directory>
+            <outputDirectory>bin</outputDirectory>
+            <includes>
+                <include>setenv.sh</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/src/main/resources</directory>
+            <outputDirectory>config</outputDirectory>
+            <includes>
+                <include>**/*</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/logs</directory>
+            <outputDirectory>logs</outputDirectory>
+            <includes>
+                <include>**/*</include>
+            </includes>
+        </fileSet>
+    </fileSets>
+    <dependencySets>
+        <dependencySet>
+            <useProjectArtifact>true</useProjectArtifact>
+            <outputDirectory>lib</outputDirectory>
+            <scope>runtime</scope>
+        </dependencySet>
+    </dependencySets>
+</assembly>

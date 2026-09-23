@@ -19,16 +19,47 @@
 
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>
-        <spring-boot.version>4.1.1</spring-boot.version>
+        <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
     </properties>
 
     <build>
+        <!-- 配置打进发行包 config/，thin jar 仅保留 schema 等 classpath 资源（主类由 bin/setenv.sh 指定） -->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <excludes>
+                    <exclude>**/*.properties</exclude>
+                    <exclude>**/*.yaml</exclude>
+                    <exclude>**/*.yml</exclude>
+                    <exclude>**/*.txt</exclude>
+                    <exclude>**/*.xml</exclude>
+                </excludes>
+            </resource>
+        </resources>
         <pluginManagement>
             <plugins>
                 <plugin>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-maven-plugin</artifactId>
-                    <version>${spring-boot.version}</version>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>${maven-assembly-plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>make-assembly</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>single</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <outputDirectory>${project.parent.basedir}/dist</outputDirectory>
+                        <appendAssemblyId>false</appendAssemblyId>
+                        <descriptors>
+                            <descriptor>${project.parent.basedir}/assets/assembly/sample-package.xml</descriptor>
+                        </descriptors>
+                        <finalName>${project.artifactId}</finalName>
+                        <updateOnly>false</updateOnly>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>

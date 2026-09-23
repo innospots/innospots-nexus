@@ -3,7 +3,8 @@ spring:
     name: nexus-console
   config:
     import:
-      - classpath:nexus/console-application.yaml
+      - optional:classpath:nexus/console-application.yaml
+      - optional:file:./config/nexus/console-application.yaml
   datasource:
     url: jdbc:h2:mem:nexus-console;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
     driver-class-name: org.h2.Driver
