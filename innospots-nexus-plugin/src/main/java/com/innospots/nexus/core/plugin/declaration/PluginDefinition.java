@@ -37,6 +37,8 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
  * @param capabilities 插件提供的 Capability 声明
  * @param requirements 插件依赖的 Capability 声明
  * @param contributions 插件提交给宿主的通用扩展声明
+ * @author Smars
+ * @date 2026/09/13
  */
 public record PluginDefinition(
         String pluginId,

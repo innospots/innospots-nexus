@@ -11,6 +11,8 @@ import com.innospots.nexus.core.plugin.installation.service.PluginInstallationMa
 
 /**
  * 内置启动任务：启用插件子系统。
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class PluginHostStartupTask implements NexusStartupTask {
 

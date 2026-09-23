@@ -5,13 +5,16 @@ import com.innospots.nexus.core.server.domain.model.ServiceInfo;
 import com.innospots.nexus.core.server.domain.model.ServiceLifecycle;
 import lombok.Setter;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 
 /**
- * Holds the local node's service registration state and provides
- * leader detection, heartbeat invalidation, and shard computation.
- * <p>All state fields are {@code volatile} for visibility across threads.</p>
+ * 持有本地节点的服务注册状态，并提供 Leader 判定、心跳失效检测与分片计算。
+ * <p>所有状态字段为 {@code volatile}，保证跨线程可见性。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @see ServiceInfo
+ * @see ServiceLifecycle
  */
 public class ServiceNodeHolder {
 
@@ -27,30 +30,35 @@ public class ServiceNodeHolder {
     private volatile int availableServicesSize;
 
     /**
-     * @param maxValidSeconds max seconds since last heartbeat before a node is considered invalid
+     * @param maxValidSeconds 自上次心跳起超过该秒数则视为节点无效
      */
     public ServiceNodeHolder(long maxValidSeconds) {
         this.maxValidSeconds = maxValidSeconds;
     }
 
-    /** Returns the mutable lifecycle state for the local node. */
+    /** 返回本地节点的可变生命周期状态。 */
     public ServiceLifecycle lifecycle() {
         return lifecycle;
     }
 
-    /** Records the current time as the node startup instant. */
+    /** 将当前时间记录为节点启动时刻。 */
     public void markStartup() {
         startupTime = LocalDateTime.now();
     }
 
-    /** Returns the recorded startup time, or null if not yet marked. */
+    /**
+     * 返回已记录的启动时间；尚未标记时返回 {@code null}。
+     *
+     * @return 启动时间
+     */
     public LocalDateTime startupTime() {
         return startupTime;
     }
 
     /**
-     * Register or update the current node's service info.
-     * Leader status is derived from the service role.
+     * 注册或更新当前节点的服务信息；Leader 状态由服务角色推导。
+     *
+     * @param service 服务信息
      */
     public void register(ServiceInfo service) {
         this.currentService = service;
@@ -59,7 +67,7 @@ public class ServiceNodeHolder {
         lifecycle.setLeader(this.leader);
     }
 
-    /** Unregister the current node and reset leader state. */
+    /** 注销当前节点并重置 Leader 状态。 */
     public void unregister() {
         this.currentService = null;
         this.leader = false;
@@ -67,20 +75,24 @@ public class ServiceNodeHolder {
         lifecycle.setLeader(false);
     }
 
-    /** Returns true if a service has been registered on this node. */
+    /** 当前节点已注册服务时返回 {@code true}。 */
     public boolean isRegistered() {
         return currentService != null;
     }
 
-    /** Returns the current service info, or null if not registered. */
+    /**
+     * 返回当前服务信息；未注册时返回 {@code null}。
+     *
+     * @return 当前服务信息
+     */
     public ServiceInfo currentService() {
         return currentService;
     }
 
     /**
-     * Current node is leader AND heartbeat is still within the valid window.
+     * 当前节点为 Leader 且心跳仍在有效窗口内。
      *
-     * @return true if the node is the active leader
+     * @return 是否为活跃 Leader
      */
     public boolean isLeader() {
         return leader
@@ -89,29 +101,38 @@ public class ServiceNodeHolder {
     }
 
     /**
-     * A remote service is considered invalid when its heartbeat has
-     * exceeded {@code maxValidSeconds}.
+     * 远程服务心跳超过 {@code maxValidSeconds} 时视为无效。
+     *
+     * @param service 待检查的服务
+     * @return 是否无效
      */
     public boolean isInvalid(ServiceInfo service) {
         return service != null && service.elapsedSecondsSinceUpdate() > maxValidSeconds;
     }
 
-    /** Returns the node position in the cluster (0-based), or -1 if unset. */
+    /**
+     * 返回节点在集群中的位置（从 0 起）；未设置时返回 -1。
+     *
+     * @return 节点位置
+     */
     public int position() {
         return position;
     }
 
-    /** Returns the total number of available services in the cluster. */
+    /**
+     * 返回集群中可用服务总数。
+     *
+     * @return 可用服务数
+     */
     public int availableServicesSize() {
         return availableServicesSize;
     }
 
     /**
-     * Computes the range of sharding keys assigned to this node based
-     * on its position in the cluster, using ceiling division.
+     * 根据节点在集群中的位置，用向上取整除法计算分配给本节点的分片键范围。
      *
-     * @param totalKeys total number of shard keys
-     * @return array of key indices, or empty if position is not set or total is zero
+     * @param totalKeys 分片键总数
+     * @return 键索引数组；位置未设置或总数为 0 时返回空数组
      */
     public int[] computeShardingKeys(int totalKeys) {
         if (position < 0 || availableServicesSize <= 0 || totalKeys <= 0) {

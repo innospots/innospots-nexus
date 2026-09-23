@@ -11,7 +11,10 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Deserializes {@link PermissionConfig} from string, array, or object forms.
+ * 从字符串、数组或对象形式反序列化 {@link PermissionConfig}。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class PermissionConfigDeserializer extends JsonDeserializer<PermissionConfig> {
 

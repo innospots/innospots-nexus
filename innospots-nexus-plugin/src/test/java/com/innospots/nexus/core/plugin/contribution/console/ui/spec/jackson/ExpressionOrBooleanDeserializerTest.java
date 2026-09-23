@@ -12,7 +12,9 @@ import lombok.Setter;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests {@link ExpressionOrBooleanDeserializer} for expression strings and boolean literals.
+ * 测试 {@link ExpressionOrBooleanDeserializer} 对表达式字符串与布尔字面量的反序列化。
+ * @author Smars
+ * @date 2026/09/13
  */
 class ExpressionOrBooleanDeserializerTest {
 

@@ -4,13 +4,15 @@ import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.status.NexusStatusCode;
 
 /**
- * Immutable configuration for locating and parsing Pactor page DSL files.
+ * 定位与解析 Pactor 页面 DSL 文件的不可变配置。
  *
- * <p>Default resources live under {@code ui-pages/{moduleKey}/{pageKey}.yaml}.</p>
+ * <p>默认资源位于 {@code ui-pages/{moduleKey}/{pageKey}.yaml}。</p>
  *
- * @param basePath classpath base directory
- * @param fileSuffix page file suffix, typically {@code .yaml}
- * @param failOnUnknownProperties whether unknown YAML fields fail parsing
+ * @param basePath classpath 基础目录
+ * @param fileSuffix 页面文件后缀，通常为 {@code .yaml}
+ * @param failOnUnknownProperties 未知 YAML 字段是否导致解析失败
+ * @author Smars
+ * @date 2026/09/13
  */
 public record PageDslConfig(
         String basePath,
@@ -18,7 +20,7 @@ public record PageDslConfig(
         boolean failOnUnknownProperties
 ) {
 
-    /** Creates a validated configuration. */
+    /** 创建并校验配置。 */
     public PageDslConfig {
         basePath = normalizeBasePath(basePath);
         if (!".yaml".equals(fileSuffix) && !".yml".equals(fileSuffix)) {
@@ -26,17 +28,21 @@ public record PageDslConfig(
         }
     }
 
-    /** Returns the strict default configuration for {@code *.yaml} resources. */
+    /**
+     * 返回 {@code *.yaml} 资源的严格默认配置。
+     *
+     * @return 默认配置
+     */
     public static PageDslConfig defaults() {
         return new PageDslConfig("ui-pages", ".yaml", true);
     }
 
     /**
-     * Builds the classpath resource path for one module page.
+     * 构建一个模块页面的 classpath 资源路径。
      *
-     * @param moduleKey owning module key
-     * @param pageKey page key matching {@code page.id}
-     * @return classpath resource path
+     * @param moduleKey 所属模块键
+     * @param pageKey 与 {@code page.id} 匹配的页面键
+     * @return classpath 资源路径
      */
     public String resourcePath(String moduleKey, String pageKey) {
         requireSegment(moduleKey, "moduleKey");

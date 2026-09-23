@@ -12,13 +12,16 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * Converts common scheduling time parameters into Quartz cron expressions.
+ * 将常见调度时间参数转换为 Quartz Cron 表达式。
  * <p>
- * Quartz cron uses six required fields:
- * {@code second minute hour day-of-month month day-of-week}. This converter
- * keeps the mapping explicit so callers can provide domain-level time
- * parameters without hand-building cron strings.
+ * Quartz Cron 使用六个必填字段：
+ * {@code second minute hour day-of-month month day-of-week}。本转换器显式保持映射关系，
+ * 调用方可提供领域级时间参数而无需手工拼接 Cron 字符串。
  * </p>
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @see TimePeriod
  */
 public final class CronConverter {
 
@@ -26,16 +29,20 @@ public final class CronConverter {
     }
 
     /**
-     * Converts a generic period plus period values into a Quartz cron expression.
+     * 将通用周期与周期值转换为 Quartz Cron 表达式。
      * <p>
-     * Value rules:
-     * {@link TimePeriod#MINUTE} expects one interval in minutes;
-     * {@link TimePeriod#HOUR} accepts one interval or multiple selected hours;
-     * {@link TimePeriod#DAY} accepts an optional day interval;
-     * {@link TimePeriod#WEEK} accepts day-of-week values such as {@code 1},
-     * {@code MON}, or {@code MONDAY};
-     * {@link TimePeriod#MONTH} accepts days of month from 1 to 31.
+     * 取值规则：
+     * {@link TimePeriod#MINUTE} 期望一个分钟间隔；
+     * {@link TimePeriod#HOUR} 接受一个间隔或多个选定小时；
+     * {@link TimePeriod#DAY} 接受可选的天间隔；
+     * {@link TimePeriod#WEEK} 接受星期值，如 {@code 1}、{@code MON} 或 {@code MONDAY}；
+     * {@link TimePeriod#MONTH} 接受 1 至 31 的月中日期。
      * </p>
+     *
+     * @param timePeriod  周期类型
+     * @param periodTimes 周期取值列表
+     * @param localTime   本地时刻
+     * @return Quartz Cron 表达式
      */
     public static String convert(TimePeriod timePeriod, List<String> periodTimes, LocalTime localTime) {
         if (timePeriod == null) {
@@ -51,7 +58,10 @@ public final class CronConverter {
     }
 
     /**
-     * Builds a cron expression that fires every {@code minutes} minutes.
+     * 构建每 {@code minutes} 分钟触发一次的 Cron 表达式。
+     *
+     * @param minutes 分钟间隔
+     * @return Cron 表达式
      */
     public static String everyMinutes(int minutes) {
         if (minutes < 1 || minutes > 59) {
@@ -61,8 +71,12 @@ public final class CronConverter {
     }
 
     /**
-     * Builds a cron expression that fires every {@code hours} hours.
-     * <p>If {@code localTime} is null, the minute and second fields default to midnight.</p>
+     * 构建每 {@code hours} 小时触发一次的 Cron 表达式。
+     * <p>{@code localTime} 为 {@code null} 时，分秒字段默认为午夜。</p>
+     *
+     * @param hours     小时间隔
+     * @param localTime 本地时刻
+     * @return Cron 表达式
      */
     public static String everyHours(int hours, LocalTime localTime) {
         if (hours < 1 || hours > 23) {
@@ -73,8 +87,12 @@ public final class CronConverter {
     }
 
     /**
-     * Builds a cron expression that fires at selected hours each day.
-     * <p>The minute and second fields are taken from {@code localTime}; null uses midnight.</p>
+     * 构建在每天选定小时触发的 Cron 表达式。
+     * <p>分秒字段取自 {@code localTime}；为 {@code null} 时使用午夜。</p>
+     *
+     * @param hours     小时集合
+     * @param localTime 本地时刻
+     * @return Cron 表达式
      */
     public static String hourlyAt(Collection<Integer> hours, LocalTime localTime) {
         if (hours == null || hours.isEmpty()) {
@@ -89,7 +107,11 @@ public final class CronConverter {
     }
 
     /**
-     * Builds a cron expression that fires every {@code days} days at {@code localTime}.
+     * 构建每 {@code days} 天在 {@code localTime} 触发一次的 Cron 表达式。
+     *
+     * @param days      天间隔
+     * @param localTime 本地时刻
+     * @return Cron 表达式
      */
     public static String daily(int days, LocalTime localTime) {
         if (days < 1 || days > 31) {
@@ -100,7 +122,11 @@ public final class CronConverter {
     }
 
     /**
-     * Builds a cron expression that fires on selected weekdays at {@code localTime}.
+     * 构建在选定星期几于 {@code localTime} 触发的 Cron 表达式。
+     *
+     * @param daysOfWeek 星期集合
+     * @param localTime  本地时刻
+     * @return Cron 表达式
      */
     public static String weekly(Collection<DayOfWeek> daysOfWeek, LocalTime localTime) {
         if (daysOfWeek == null || daysOfWeek.isEmpty()) {
@@ -118,7 +144,11 @@ public final class CronConverter {
     }
 
     /**
-     * Builds a cron expression that fires on selected days of month at {@code localTime}.
+     * 构建在选定月中日期于 {@code localTime} 触发的 Cron 表达式。
+     *
+     * @param daysOfMonth 月中日期集合
+     * @param localTime   本地时刻
+     * @return Cron 表达式
      */
     public static String monthly(Collection<Integer> daysOfMonth, LocalTime localTime) {
         if (daysOfMonth == null || daysOfMonth.isEmpty()) {
@@ -136,7 +166,7 @@ public final class CronConverter {
         if (periodTimes == null || periodTimes.isEmpty()) {
             return hourlyAt(List.of(0), localTime);
         }
-        // A single hour value is treated as an interval; multiple values are exact hours.
+        // 单个小时值视为间隔；多个值表示精确小时
         if (periodTimes.size() == 1) {
             return everyHours(firstInt(periodTimes, "hours"), localTime);
         }
@@ -187,7 +217,10 @@ public final class CronConverter {
     }
 
     /**
-     * Accepts legacy-style numeric weekdays and readable names for external configuration.
+     * 接受遗留风格的数字星期与可读名称，供外部配置使用。
+     *
+     * @param value 星期值
+     * @return 对应的 {@link DayOfWeek}
      */
     private static DayOfWeek parseDayOfWeek(String value) {
         if (value == null || value.isBlank()) {
@@ -240,7 +273,10 @@ public final class CronConverter {
     }
 
     /**
-     * Ensures every generated expression is accepted by Quartz before returning it.
+     * 返回前确保生成的表达式被 Quartz 接受。
+     *
+     * @param cronExpression Cron 表达式
+     * @return 校验通过的表达式
      */
     private static String validate(String cronExpression) {
         if (!CronExpression.isValidExpression(cronExpression)) {

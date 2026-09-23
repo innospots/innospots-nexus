@@ -3,7 +3,7 @@ package com.innospots.nexus.service.contract.audit;
 import java.util.function.Consumer;
 
 /**
- * Observes host transaction completion for REQUIRED audit.
+ * 观察 REQUIRED 审计所需的主机事务完成状态。
  *
  * @author Smars
  * @date 2026/09/13
@@ -12,16 +12,16 @@ import java.util.function.Consumer;
 public interface CommitObserver {
 
     /**
-     * Returns the current commit state.
+     * 返回当前提交状态。
      *
-     * @return state
+     * @return 提交状态
      */
     CommitState currentState();
 
     /**
-     * Registers a callback invoked after completion.
+     * 注册完成后调用的回调。
      *
-     * @param callback completion callback
+     * @param callback 完成回调
      */
     void afterCompletion(Consumer<CommitState> callback);
 }

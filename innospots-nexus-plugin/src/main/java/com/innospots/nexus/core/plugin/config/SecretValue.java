@@ -9,6 +9,8 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
  * 可关闭的内存密文包装器，其文本表示始终为遮罩值。
  *
  * <p>所有公开方法均为线程安全；{@link #use} 与 {@link #copy} 不会暴露内部缓冲区。
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class SecretValue implements AutoCloseable {
 

@@ -6,13 +6,13 @@ import com.innospots.nexus.service.contract.policy.OperationPolicy;
 import com.innospots.nexus.service.contract.security.ResourceRef;
 
 /**
- * Runtime invocation envelope passed to interceptors.
+ * 传递给拦截器的运行时调用封装。
  *
- * @param invocationId unique invocation identifier
- * @param operationId  stable operation identifier
- * @param service      current service context
- * @param policy       resolved operation policy
- * @param resource     target resource
+ * @param invocationId 唯一调用标识
+ * @param operationId  稳定操作标识
+ * @param service      当前服务上下文
+ * @param policy       已解析操作策略
+ * @param resource     目标资源
  * @author Smars
  * @date 2026/09/13
  * @see ServiceInterceptor

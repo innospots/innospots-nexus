@@ -16,7 +16,9 @@ import lombok.Setter;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests {@link DslRenderableDeserializer} for component, reference, and source-ref shapes.
+ * 测试 {@link DslRenderableDeserializer} 对组件、引用与来源引用形态的反序列化。
+ * @author Smars
+ * @date 2026/09/13
  */
 class DslRenderableDeserializerTest {
 

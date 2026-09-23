@@ -7,12 +7,14 @@ import com.innospots.nexus.base.domain.enums.BasicStatus;
 import com.innospots.nexus.base.domain.request.SimpleQueryRequest;
 
 /**
- * Paginated dictionary item query bound from management-console query parameters.
+ * 由管理控制台查询参数绑定的分页字典项查询。
  *
- * @param input    fuzzy item name or value
- * @param status   optional lifecycle status
- * @param pageNo   1-indexed page number
- * @param pageSize page size
+ * @author Smars
+ * @date 2026/09/13
+ * @param input    字典项名称或值的模糊匹配
+ * @param status   可选 生命周期状态
+ * @param pageNo   从 1 开始的页码
+ * @param pageSize 分页大小
  */
 public record DictionaryItemPageRequest(
         @QueryParam("input") String input,

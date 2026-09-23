@@ -1,31 +1,14 @@
 # 包 `json`
 
-## Jsons
-
-**Type:** class
-
-基于 Jackson 的中央 JSON 工具门面。
-
 ## MaskStrategy
 
-**Type:** enum
+**类型：** enum
 
-JSON 序列化时敏感数据的预定义脱敏策略。
+JSON 序列化时敏感数据的预定义脱敏策略。 每种策略定义字符串值的转换方式：保留固定数量的前导和/或尾部字符， 其余部分用星号遮蔽。
 
-## MaskValue
+### 枚举常量
 
-**Type:** @interface
-
-标记字段或访问器在 JSON 序列化时脱敏。
-
-## MaskingModule
-
-**Type:** class
-
-激活字段级值转换与脱敏的 Jackson `Module`。
-
-## ValueConverter
-
-**Type:** @interface
-
-标记字段或访问器在 JSON 序列化时进行值转换。
+| 常量 | 说明 |
+|------|------|
+| `PHONE` | 138****1234 — 保留前 3 位、后 4 位 |
+| `EMAIL` | a***@example.com — 保留 @ 前第 1 位，域名完整保留 |

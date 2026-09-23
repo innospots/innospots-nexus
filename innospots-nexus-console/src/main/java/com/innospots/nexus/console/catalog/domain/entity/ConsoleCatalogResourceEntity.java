@@ -18,6 +18,9 @@ import com.innospots.nexus.core.persistence.entity.BaseEntity;
  *
  * <p>由 ACTIVE 插件 Contribution 与 UiSpec 同步生成；授权关系在 console 的
  * {@code nx_permission_grant} 中按 workspace 维护。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @Getter
 @Setter
@@ -84,7 +87,12 @@ public class ConsoleCatalogResourceEntity extends BaseEntity {
 
     @Column(length = 32, nullable = false)
     private String securityRealm;
+    /**
+     * 返回主键前缀。
+     * @return 操作结果
+     */
 
+    
     @Override
     public String idPrefix() {
         return "ccr";

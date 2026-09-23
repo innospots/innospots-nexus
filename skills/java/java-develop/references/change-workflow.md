@@ -140,14 +140,20 @@
 
 ---
 
-## 类型四：重构
+## 类型四：重构 / 去冗余 / 死代码
+
+权威流程与门禁见 `java:reference` →
+[code-quality-constraints.md](../../java-reference/references/code-quality-constraints.md)。
+**先分析是否值得改**（重复是否同一概念、删旧路径是否安全），再动手；不为「漂亮」大改。
 
 ```text
-1. 定目标       明确重构后的边界，而非"让代码好看"
+1. 定目标       外部可见行为或已批准的迁移；写明要删的旧路径
 2. 锁行为       用测试固定现有外部可见行为
-3. 小步改       每批后 mvn clean compile
-4. 守契约       公共兼容面改动必须先出迁移方案
-5. 验证         全量 mvn test + java:check
+3. 列候选       重复实现、转发层、wrapper、双轨 API、死代码
+4. 引用确认     删 public 类型前全仓库 + 配置/插件/SPI（见 code-quality-constraints）
+5. 小步替换     合并 owner → 删转发/旧 API → 每批 mvn clean compile
+6. 守契约       公共兼容面改动必须先出迁移方案
+7. 验证         全量 mvn test + java:check（清单 §O）
 ```
 
 ### 重构红线
@@ -169,6 +175,17 @@
 | 拆分类 | 端点约 7 个方法触发边界复审 |
 | 引入接口 | 仅在有真实边界理由时 |
 | 替换依赖库 | 属 `java:dependency-upgrade` 范围 |
+| 删 wrapper/adapter | 调用方直用 owning API；勿留空壳类 |
+| 合并重复 operator 方法 | 保留单一 owner，删除副本 |
+| 死代码删除 | 仅在经过引用确认后删除；与功能开发分 commit 叙述清楚 |
+
+### 重构时优先删除（在引用确认后）
+
+- 仅转发一行的 service 方法或整类
+- 单实现 `*Impl` 与「为 mock」而建的接口
+- 注释掉的历史实现块
+- 迁移完成后仍存在的旧 endpoint/方法别名
+- 无读取方的配置键与无订阅方的事件类型
 
 ---
 

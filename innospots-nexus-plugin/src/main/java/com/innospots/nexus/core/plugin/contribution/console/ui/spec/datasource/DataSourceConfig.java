@@ -5,15 +5,17 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.innospots.nexus.core.plugin.contribution.console.ui.spec.PaginationConfig;
 
 /**
- * Named page data source configuration.
+ * 命名页面数据源配置。
  *
- * <p>The {@code type} discriminator selects one of the permitted implementations. Option field
- * mappings ({@link #getValueField()}, {@link #getLabelField()}, {@link #getDisabledField()})
- * normalize backend records into select options at runtime.</p>
+ * <p>{@code type} 鉴别器选择允许的实现之一。选项字段映射
+ * （{@link #getValueField()}、{@link #getLabelField()}、{@link #getDisabledField()}）
+ * 在运行时将后端记录规范化为下拉选项。</p>
  *
  * @see StaticDataSource
  * @see ServiceDataSource
  * @see HttpDataSource
+ * @author Smars
+ * @date 2026/09/13
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", visible = true)
 @JsonSubTypes({
@@ -31,44 +33,44 @@ public sealed interface DataSourceConfig permits
         ResourceDataSource {
 
     /**
-     * Returns the data source type discriminator.
+     * 返回数据源类型鉴别器。
      *
-     * @return source type
+     * @return 数据源类型
      */
     String getType();
 
     /**
-     * Returns whether the runtime should load this source automatically.
+     * 返回运行时是否应自动加载此数据源。
      *
-     * @return auto-load flag
+     * @return 自动加载标志
      */
     Boolean getAutoLoad();
 
     /**
-     * Returns optional pagination bindings.
+     * 返回可选的分页绑定配置。
      *
-     * @return pagination config
+     * @return 分页配置
      */
     PaginationConfig getPagination();
 
     /**
-     * Returns the backend value field for option normalization.
+     * 返回用于选项规范化的后端值字段名。
      *
-     * @return value field
+     * @return 值字段名
      */
     String getValueField();
 
     /**
-     * Returns the backend label field for option normalization.
+     * 返回用于选项规范化的后端标签字段名。
      *
-     * @return label field
+     * @return 标签字段名
      */
     String getLabelField();
 
     /**
-     * Returns the backend disabled field for option normalization.
+     * 返回用于选项规范化的后端禁用字段名。
      *
-     * @return disabled field
+     * @return 禁用字段名
      */
     String getDisabledField();
 }

@@ -6,7 +6,10 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Static in-document data source for enums, fixed configuration, and demo data.
+ * 文档内静态数据源，用于枚举、固定配置与演示数据。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @Getter
 @Setter

@@ -14,12 +14,16 @@
     <artifactId>innospots-nexus-service-governance</artifactId>
 
     <name>innospots-nexus-service-governance</name>
-    <description>Traffic control, rate limiting, isolation and circuit breaking policies.</description>
+    <description>流量控制、限流、隔离与熔断策略。</description>
 
     <dependencies>
         <dependency>
             <groupId>com.innospots</groupId>
             <artifactId>innospots-nexus-service-contract</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-circuitbreaker</artifactId>
         </dependency>
     </dependencies>
 </project>

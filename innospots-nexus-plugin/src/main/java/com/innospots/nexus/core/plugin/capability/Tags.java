@@ -13,6 +13,8 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
  * 不可变且按名称排序的路由标签。
  *
  * <p>实例线程安全，可自由跨线程共享；迭代顺序稳定，便于诊断输出。
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class Tags {
 

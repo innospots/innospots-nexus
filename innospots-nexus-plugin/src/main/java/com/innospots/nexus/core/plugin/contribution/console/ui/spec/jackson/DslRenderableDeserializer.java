@@ -10,7 +10,10 @@ import com.innospots.nexus.core.plugin.contribution.console.ui.spec.node.DslRend
 import java.io.IOException;
 
 /**
- * Deserializes one renderable DSL fragment.
+ * 反序列化一个可渲染 DSL 片段。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class DslRenderableDeserializer extends JsonDeserializer<DslRenderable> {
 

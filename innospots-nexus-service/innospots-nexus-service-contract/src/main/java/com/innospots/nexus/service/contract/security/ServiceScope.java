@@ -3,11 +3,11 @@ package com.innospots.nexus.service.contract.security;
 import com.innospots.nexus.base.util.Checks;
 
 /**
- * Tenant, workspace, and project scope. Workspace requires tenant; project requires workspace.
+ * 租户、工作区与项目作用域。工作区需要租户；项目需要工作区。
  *
- * @param tenantId    tenant identifier, nullable for platform requests
- * @param workspaceId workspace identifier
- * @param projectId   project identifier
+ * @param tenantId    租户标识，平台请求可为空
+ * @param workspaceId 工作区标识
+ * @param projectId   项目标识
  * @author Smars
  * @date 2026/09/13
  * @see ServicePrincipal
@@ -27,9 +27,9 @@ public record ServiceScope(String tenantId, String workspaceId, String projectId
     }
 
     /**
-     * Returns an empty platform scope.
+     * 返回空平台作用域。
      *
-     * @return platform scope
+     * @return 平台作用域
      */
     public static ServiceScope platform() {
         return new ServiceScope(null, null, null);

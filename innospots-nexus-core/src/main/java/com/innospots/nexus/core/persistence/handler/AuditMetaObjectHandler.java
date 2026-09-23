@@ -3,25 +3,26 @@ package com.innospots.nexus.core.persistence.handler;
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import com.innospots.nexus.base.thread.TLC;
 import com.innospots.nexus.core.persistence.entity.BaseEntity;
-import com.innospots.nexus.core.persistence.entity.TenantBaseEntity;
-import com.innospots.nexus.core.persistence.entity.WorkspaceBaseEntity;
 import org.apache.ibatis.reflection.MetaObject;
 
 import java.time.LocalDateTime;
 
 /**
- * MyBatis-Plus meta-object handler that auto-fills audit fields on
- * entities extending {@link BaseEntity}, {@link TenantBaseEntity},
- * {@link WorkspaceBaseEntity}, or {@link ProjectBaseEntity}.
- * <p>Reads user identity, tenant ID, workspace ID, and project ID from
- * {@link com.innospots.nexus.base.thread.TLC thread-local context}, so no
- * explicit field assignment is needed at the repository layer.</p>
+ * MyBatis-Plus 元对象处理器，为继承 {@link BaseEntity} 或 kernel 租户域基类的实体自动填充审计字段。
+ * <p>从 {@link com.innospots.nexus.base.thread.TLC 线程本地上下文} 读取用户身份、租户 ID、
+ * 工作区 ID 与项目 ID，仓储层无需显式赋值。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @see BaseEntity
  */
 public class AuditMetaObjectHandler implements MetaObjectHandler {
 
     /**
-     * Fills createdAt, updatedAt, createdBy, updatedBy on insert.
-     * Also fills tenantId, workspaceId, and projectId when present in TLC.
+     * 插入时填充 createdAt、updatedAt、createdBy、updatedBy；
+     * TLC 中存在时同时填充 tenantId、workspaceId、projectId。
+     *
+     * @param metaObject 元对象
      */
     @Override
     public void insertFill(MetaObject metaObject) {
@@ -36,19 +37,20 @@ public class AuditMetaObjectHandler implements MetaObjectHandler {
     }
 
     /**
-     * Fills updatedAt and updatedBy on update.
-     * Also refreshes tenantId, workspaceId, and projectId from TLC when present.
+     * 更新时填充 updatedAt、updatedBy；作用域列在插入后不可变。
+     *
+     * @param metaObject 元对象
      */
     @Override
     public void updateFill(MetaObject metaObject) {
         setFieldValByName("updatedAt", LocalDateTime.now(), metaObject);
         setFieldValByName("updatedBy", currentUserName(), metaObject);
-        fillScope(metaObject, false);
     }
 
     /**
-     * Resolves the current user name from TLC.
-     * Falls back to user ID (as string) if user name is not set.
+     * 从 TLC 解析当前用户名；未设置用户名时回退为用户 ID 字符串。
+     *
+     * @return 当前用户标识
      */
     private String currentUserName() {
         String userName = TLC.userName();

@@ -15,7 +15,9 @@ import lombok.Setter;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests {@link ActionOrListMapDeserializer} for named page actions.
+ * 测试 {@link ActionOrListMapDeserializer} 对命名页面动作的反序列化。
+ * @author Smars
+ * @date 2026/09/13
  */
 class ActionOrListMapDeserializerTest {
 

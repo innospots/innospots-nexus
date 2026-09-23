@@ -1,62 +1,48 @@
 # 包 `thread`
 
-## SessionContext
-
-**Type:** class
-
-`TLC` 的类型化门面，用于用户与作用域快照。
-
-绑定顺序：`bindUser` → `bindTenant` → `bindWorkspace` → `bindProject`（可选）。
-
-| 方法 | 说明 |
-|--------|-------------|
-| `bindUser` / `clearUser` | 用户快照及 TLC 身份键 |
-| `bindTenant` | `TenantSnapshot` + `OrganizationSnapshot`（`tenantId` 必须一致） |
-| `bindWorkspace` | `WorkspaceSnapshot`；同步 `tenantId` / `workspaceId` 到 TLC |
-| `bindProject` | `ProjectSnapshot` 或清除；同步租户/工作区/项目到 TLC |
-| `requireUser` / `user()` | 当前用户快照 |
-| `tenant()` / `organization()` / `workspace()` / `project()` | 可选的作用域快照 |
-| `tenantId()` / `workspaceId()` / `projectId()` | TLC 作用域键 |
-| `requireWorkspaceId()` | 工作区缺失时失败 |
-
-## TLC
-
-**Type:** class
-
-线程本地上下文映射，用于追踪 ID、租户/工作区/项目 ID、用户身份、
-会话/对话 ID、安全域及平台/租户成员 ID。
-
-| 键常量 | 说明 |
-|--------------|-------------|
-| `TRACE_ID` | 分布式追踪 |
-| `TENANT_ID` / `WORKSPACE_ID` / `PROJECT_ID` | 作用域隔离键 |
-| `USER_ID` / `USER_NAME` | 已认证用户（`userId` 为 `Long`） |
-| `SESSION_ID` / `CONVERSATION_ID` | 会话追踪 |
-| `SECURITY_REALM` | 认证域 |
-| `TENANT_MEMBER_ID` / `PLATFORM_USER_ID` | 成员标识 |
-
-使用 `TLC.scope(Map)` 配合 try-with-resources 进行作用域注入。
-
-## AsyncExecutors
-
-**Type:** class
-
-由单例 `NexusThreadPoolExecutor` 支撑的全局异步执行器门面。
-
-## NexusThreadFactory
-
-**Type:** class
-
-命名 `ThreadFactory`（默认前缀 `nexus-worker`），带序号。
-
 ## NexusThreadPoolExecutor
 
-**Type:** class
+**类型：** class
 
-将 `TLC` 从提交线程传播到工作线程的 `ThreadPoolExecutor`。
+自定义 {@link ThreadPoolExecutor}，在提交线程与工作线程之间捕获并传播 {@link TLC} 上下文。
 
-## ThreadPoolBuilder
+### 方法
 
-**Type:** class
+#### `poolName() → String`
 
-`NexusThreadPoolExecutor` 实例的流式构建器。
+- **说明：** 返回可读性良好的线程池名称。
+- **返回：** 线程池名称
+
+#### `hasAvailableThread() → boolean`
+
+- **说明：** 判断是否至少有一个线程可立即处理任务。
+- **返回：** 有可用线程时返回 {@code true}
+
+#### `availableThreadCount() → int`
+
+- **说明：** 返回当前未在执行任务的线程数。
+- **返回：** 可用线程数
+
+#### `execute(Runnable command) → void`
+
+
+#### `submit(Runnable task) → Future<?>`
+
+
+#### `submit(Callable<T> task) → Future<T>`
+
+## Scope
+
+**类型：** record
+
+可自动关闭的作用域，在 close 时恢复先前的上下文。 由 {@link TLC#scope(Map)} 内部使用。
+
+### 组件（record）
+
+| 名称 | 类型 | 说明 |
+|------|------|------|
+| `previous` | `Map<String, Object>` | 关闭时需恢复的先前上下文 |
+
+### 方法
+
+#### `close() → void`

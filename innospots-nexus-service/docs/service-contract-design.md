@@ -1,12 +1,12 @@
 # 服务框架契约与类型设计
 
-状态：可实施规格 v1.2，2026-09-13。归属、决策状态以[主方案](service-framework-design.md)为准。开发用法以[开发体验](service-developer-experience-design.md)为准。代码块只定义签名/数据形状，省略 import、Javadoc、构造校验及实现；不同 public 类型分别落文件，不可整段作为一个源文件编译。源文件落点以[实施附录](service-implementation-design.md)为准。
+**契约参考**：公共类型、SPI 与状态码。边界与决策见 [总览](service-framework-design.md)；业务用法见 [开发体验](service-developer-experience-design.md)。下文代码块为签名/数据形状（省略 import 与校验）；每 public 类型单独源文件。模块落点见 [模块清单](service-implementation-design.md)。
 
-## 1. 包与文件归属
+## 1. 包与类型归属
 
-前缀 `com.innospots.nexus.service` 下的计划文件如下。config record 放各模块根 `config`，不在业务 domain 下。每行是一个包，含包文档后仍不得超过 15 个文件。
+前缀 `com.innospots.nexus.service`。config record 在各模块 `config` 包。每个包含 `package-info` 后仍 ≤ 15 个 `.java` 文件。
 
-| 模块 | 包后缀 | 计划类型 |
+| 模块 | 包后缀 | 主要类型 |
 |---|---|---|
 | contract | contract.context | ServiceContext、ServiceContextAccessor、RequestMetadata、ContextAttributes、AttributeKey |
 | contract | contract.security | ServicePrincipal、PrincipalType、ServiceScope、ResourceRef、AuthenticationResult、SecurityProvider、PermissionProvider、PermissionCheck、PermissionDecision |
@@ -284,7 +284,7 @@ CompletionStage<Void> cancel(String sessionId, CancellationReason reason);
 CompletionStage<Void> close();
 ```
 
-`open` 自动捕获当前已认证 context 与事件 `Type`。返回值类型是 `StreamSink`；需要 publisher 时再转为 `StreamSession`（同一实例）。`emit/fail(sessionId, …)` 校验：当前 principal+scope 与创建时 owner/scope 一致，且 `data` 可赋给捕获 Type，否则 `NEX040006` / `NEX010001`。管理查询只返回不可变快照。无当前上下文时按 id 写入失败 `SRV080001`。
+`open` 自动捕获当前已认证 context 与事件 `Type`。返回值类型是 `StreamSink`；需要 publisher 时再转为 `StreamSession`（同一实例）。`emit/fail(sessionId, …)` 校验：当前 principal+scope 与创建时 owner/scope 一致，且 `data` 可赋给捕获 Type，否则 `AIO040006` / `AIO010001`。管理查询只返回不可变快照。无当前上下文时按 id 写入失败 `SRV080001`。
 
 `emit(T data)` 默认 type 为 `message`。`isCancelled()` 反映绑定的 `CancellationToken`，业务无需轮询，但长循环可检查。
 
@@ -292,7 +292,7 @@ StreamSnapshot 字段为 `sessionId, ownerId, scope, state, createdAt, lastActiv
 
 StreamChannelFactory 签名：`<T> StreamChannel<T> create(StreamConfig config, CancellationToken token, ToLongFunction<T> sizeEstimator)`；工厂不负责查身份，实例必须按运行时附录实现单订阅与有界背压。
 
-`emit` 成功表示接受到有界队列，不表示对端收到；REJECT 以 SRV100003 失败，CLOSE 先终止通道再以同码失败；DROP_* 必须显式配置且返回丢弃结果。新 value 为 null → NEX010001。`complete/fail/cancel` 完成 stage 表示本地 drain/取消和资源回收完成，不保证远端应用消费。
+`emit` 成功表示接受到有界队列，不表示对端收到；REJECT 以 SRV100003 失败，CLOSE 先终止通道再以同码失败；DROP_* 必须显式配置且返回丢弃结果。新 value 为 null → AIO010001。`complete/fail/cancel` 完成 stage 表示本地 drain/取消和资源回收完成，不保证远端应用消费。
 
 Level 2 业务只使用 `StreamSink` 与 `StreamManager`。`StreamChannel` / `StreamChannelFactory` 属 SPI。业务可忽略 emit 返回值，但丢弃/拒绝始终有指标，关键事件生产者应处理异步结果。
 
@@ -336,7 +336,7 @@ MessageDescriptor 字段：`type, inputType, outputType, permissionKeys, resourc
 
 WebSocketRegistry：
 
-- `CompletionStage<Void> send(String connectionId,WebSocketMessage<?> message)`：内部 Codec 验证该连接允许的输出类型；未找到 NEX130005；检查调用主体/资源范围。
+- `CompletionStage<Void> send(String connectionId,WebSocketMessage<?> message)`：内部 Codec 验证该连接允许的输出类型；未找到 AIO130005；检查调用主体/资源范围。
 - `CompletionStage<BroadcastResult> sendToSession(String sessionId,WebSocketMessage<?> message)`：按 scope+realm+sessionId 查快照，再逐连接检查和有界发送；不在注册表锁内 I/O。
 - `CompletionStage<Void> close(String connectionId,WebSocketClose close)`：本地幂等；不存在返回完成，未授权仍失败。
 - `List<ConnectionSnapshot> listByPrincipal(ServicePrincipal principal,ServiceScope scope)`：有数量限制，仅内部查询。
@@ -425,7 +425,7 @@ public interface ServiceMeters {
 }
 ```
 
-`name` 必须在 `service.observability.business-meters` 注册，否则启动失败或调用失败 `NEX080002`。tag 键必须属于该名称的白名单，禁止 principalId/resourceId/requestId/IP/path。未启用 metrics 时这些调用为空操作。
+`name` 必须在 `service.observability.business-meters` 注册，否则启动失败或调用失败 `AIO080002`。tag 键必须属于该名称的白名单，禁止 principalId/resourceId/requestId/IP/path。未启用 metrics 时这些调用为空操作。
 
 TraceProvider：`TraceHandle start(InvocationContext, TraceSnapshot parent)`；TraceHandle 提供 `TraceSnapshot snapshot()`、`finish(InvocationOutcome)`。提取和注入 W3C Context 在框架/OTel 边界完成，ServiceContext 不承载 OTel Scope 对象。可选 `@Traced` 创建子 Span，由适配器在拦截器中调用 TraceProvider，业务不持有 Tracer。
 
@@ -469,18 +469,18 @@ public record ProblemDetailVo(
 
 Problem profile 遵循 [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457.html) 的标准成员和扩展字段形式；legacy profile 继续 R 的字段，关联 ID 放响应头，错误附加数据仅在明确启用时放 R.data，保持旧接口兼容。
 
-以下 SRV 为本规格锁定的新命名空间。M1 将 `ServiceStatusCode` 与契约测试一并落地；local 在全 SRV 命名空间唯一，不得与 NEX/PLG 抢 module 段。
+以下 SRV 为服务框架命名空间，由 `ServiceStatusCode` 与契约测试登记；local 在 SRV 内唯一，不得与 AIO/PLG 抢 module 段。
 
 | 场景/常量 | 完整码 | category / local | HTTP | retryable | 英文 / 中文稳定消息 | 拒绝或翻译边界 |
 |---|---|---|---|---|---|---|
-| INVALID_PARAMETER | NEX010001 | 01 / 0001 | 400 | false | Invalid parameter / 参数无效 | 形状校验 |
-| RESOURCE_NOT_FOUND | NEX130005 | 13 / 0005 | 404 | false | Resource not found / 资源不存在 | 文件/连接查找 |
-| NO_PERMISSION | NEX040006 | 04 / 0006 | 403 | false | No permission / 没有权限 | 授权器 |
-| AUTHENTICATION_FAILED | NEX040007 | 04 / 0007 | 401 | false | Authentication failed / 认证失败 | 安全适配 |
-| LIMIT_EXCEEDED | NEX100012 | 10 / 0012 | 429 | true | Limit exceeded / 超出限制 | 本地速率限制 |
-| CONFIG_ERROR | NEX080002 | 08 / 0002 | 500 | false | Configuration error / 配置错误 | 启动/策略解析 |
-| SERIALIZATION_FAILED | NEX030003 | 03 / 0003 | 500 | false | Serialization failed / 序列化失败 | 服务端输出编码 |
-| SYSTEM_ERROR | NEX030017 | 03 / 0017 | 500 | false | System error / 系统错误 | 未知异常外边界 |
+| INVALID_PARAMETER | AIO010001 | 01 / 0001 | 400 | false | Invalid parameter / 参数无效 | 形状校验 |
+| RESOURCE_NOT_FOUND | AIO130005 | 13 / 0005 | 404 | false | Resource not found / 资源不存在 | 文件/连接查找 |
+| NO_PERMISSION | AIO040006 | 04 / 0006 | 403 | false | No permission / 没有权限 | 授权器 |
+| AUTHENTICATION_FAILED | AIO040007 | 04 / 0007 | 401 | false | Authentication failed / 认证失败 | 安全适配 |
+| LIMIT_EXCEEDED | AIO100012 | 10 / 0012 | 429 | true | Limit exceeded / 超出限制 | 本地速率限制 |
+| CONFIG_ERROR | AIO080002 | 08 / 0002 | 500 | false | Configuration error / 配置错误 | 启动/策略解析 |
+| SERIALIZATION_FAILED | AIO030003 | 03 / 0003 | 500 | false | Serialization failed / 序列化失败 | 服务端输出编码 |
+| SYSTEM_ERROR | AIO030017 | 03 / 0017 | 500 | false | System error / 系统错误 | 未知异常外边界 |
 | CONTEXT_UNAVAILABLE | SRV080001 | 08 / 0001 | 500 | false | Service context unavailable / 服务上下文不可用 | context accessor |
 | DEADLINE_EXCEEDED | SRV100002 | 10 / 0002 | 504 | false | Deadline exceeded / 执行已超时 | deadline 控制器 |
 | BUFFER_OVERFLOW | SRV100003 | 10 / 0003 | 503 | false | Buffer capacity exceeded / 缓冲容量已满 | channel/发送队列 |
@@ -601,8 +601,11 @@ public record WebSocketRuntimeConfig(
         Duration pingInterval,
         Duration pongTimeout,
         Duration idleTimeout,
-        Duration messageTimeout
+        Duration messageTimeout,
+        boolean inboundGovernanceEnabled
 ) {}
+
+// MessageDescriptor 另含可选治理键：rateLimitKey、bulkheadKey、circuitKey、timeoutPolicyKey
 
 public final class InterceptorOrders {
     public static final int CONTROL = 0;

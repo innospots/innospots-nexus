@@ -11,15 +11,17 @@ import com.innospots.nexus.base.json.Jsons;
 import com.innospots.nexus.console.logger.domain.context.InvocationLogContext;
 import com.innospots.nexus.console.logger.dao.AuditLogDao;
 import com.innospots.nexus.console.logger.domain.entity.AuditLogEntity;
+import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
 
 /**
- * Audit log data operator that persists intercepted invocations into the
- * audit-log domain.
- * <p>Receives a framework-independent {@link InvocationLogContext} assembled by
- * an interceptor adapter, maps it onto an {@link AuditLogEntity}, and writes it
- * through {@link AuditLogDao}. The operator owns no business workflow: it only
- * translates the context into the domain's persistence model.</p>
+ * 将被拦截调用持久化到审计日志领域的数据操作器。
+ * <p>接收由拦截器适配器组装的框架无关 {@link InvocationLogContext}，
+ * 将其映射到 {@link AuditLogEntity} 并写入
+ * {@link AuditLogDao}。该 Operator 不拥有业务工作流：它仅
+ * 将上下文转换为领域的持久化模型。</p>
  *
+ * @author Smars
+ * @date 2026/09/13
  * @see InvocationLogContext
  * @see AuditLogEntity
  */
@@ -34,18 +36,19 @@ public class InvocationLogOperator {
     private final AuditLogDao auditLogDao;
 
     /**
-     * Persists an intercepted invocation as an audit-log record.
-     * <p>Audit records are append-only and must survive independently of the
-     * audited operation's outcome, so this write intentionally runs without a
-     * declarative transaction and never joins the surrounding one.</p>
+     * 将被拦截调用持久化为审计日志记录。
+     * <p>审计记录仅追加，且必须独立于
+     * 被审计操作的结果而存在，因此本写入刻意在无
+     * 声明式事务中运行且从不加入外层事务。</p>
      *
-     * @param context assembled invocation data, never null
+     * @param context 已组装的调用数据，永不为 null
      */
     public void record(InvocationLogContext context) {
         if (context == null) {
             return;
         }
         AuditLogEntity entity = new AuditLogEntity();
+        ConsoleOwnershipScope.stamp(entity, ConsoleOwnershipScope.captureForAudit());
         entity.setAction(context.action());
         entity.setPath(buildPath(context));
         entity.setOperatedTime(toLocalDateTime(context.startTime()));
@@ -87,8 +90,8 @@ public class InvocationLogOperator {
         try {
             return Jsons.toJson(arguments);
         } catch (RuntimeException e) {
-            // Argument payloads may hold non-serializable types; a failed
-            // serialization must not break audit persistence.
+            // 参数载荷可能包含不可序列化类型；序列化失败
+            // 不得破坏审计持久化。
             log.warn("Failed to serialize invocation arguments for audit log", e);
             return null;
         }

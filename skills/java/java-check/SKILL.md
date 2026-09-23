@@ -4,12 +4,13 @@ display_name: Java 质量检查
 description: |
   Java 编译、测试、规范、质量、依赖、安全与性能风险检查。当用户要求验证改动、
   跑编译与测试、做代码评审、检查是否符合编码规范、排查依赖冲突或安全与性能风险、
-  或在提交/合入前做最终核验时使用。是 java:develop / java:design /
-  两个升级技能的统一出口。
+  检查 AGENTS.md 是否符合仓库规范、或在提交/合入前做最终核验时使用。是
+  java:develop / java:design / java:project 两个升级技能的统一出口。
   触发词：编译验证、跑测试、代码检查、代码评审、规范检查、质量检查、
-  依赖检查、安全审查、性能风险、回归验证、提交前检查。
+  依赖检查、安全审查、性能风险、回归验证、提交前检查、AGENTS 检查、
+  冗余代码、死代码、过度抽象、结构简化评审。
 category: java
-version: 1.0.0
+version: 1.2.0
 ---
 
 # 编译、测试、规范、质量、依赖、安全与性能检查
@@ -17,9 +18,12 @@ version: 1.0.0
 ## 定位
 
 所有 Java 工作的**统一出口**：`java:develop`、`java:design`、
-`java:project-upgrade`、`java:dependency-upgrade` 完成后都要过这一关。
+`java:project`、`java:project-upgrade`、`java:dependency-upgrade` 完成后都要过这一关。
 
 规范核对通过 `java:reference` → `quick-constraints.md` 与 `review-checklist.md`，
+结构简化与防过度设计通过 `java:reference` →
+[code-quality-constraints.md](../java-reference/references/code-quality-constraints.md)（清单 §O），
+**AGENTS 合规**通过 [agents-compliance-checklist.md](references/agents-compliance-checklist.md)，
 不在本技能正文重复规范条文。
 
 本技能是**验证出口**，不用于方案辩论。大变更合入前若方案未经评审，应回到
@@ -35,7 +39,7 @@ L1  基线校验      mvn validate                      ← enforcer：Maven / J
 L2  测试         mvn test                          ← 单元测试 + 契约测试
 L3  POM 核验     mvn -q help:effective-pom          ← 依赖版本与合并结果
 L4  工作区       git diff --check / git status --short
-L5  静态巡检     规范 / 依赖 / 安全 / 性能（人工 + 工具）
+L5  静态巡检     规范 / 依赖 / 安全 / 性能 / 结构冗余（人工 + 工具）
 ```
 
 | 层 | 命令 | 失败时 |
@@ -45,7 +49,7 @@ L5  静态巡检     规范 / 依赖 / 安全 / 性能（人工 + 工具）
 | L2 | `mvn test` | 区分「本次改动引起」「既有无关问题」「本地依赖产物过期（用 `-am`）」 |
 | L3 | `mvn -q help:effective-pom` | 检查依赖版本是否来自 BOM、是否被意外覆盖 |
 | L4 | `git diff --check` | 修掉空白与格式问题 |
-| L5 | 检查清单 | 逐项过清单，产出报告 |
+| L5 | 检查清单 | 逐项过清单，产出报告（含 **AGENTS 合规**） |
 
 ## 五类检查
 
@@ -74,6 +78,29 @@ L5  静态巡检     规范 / 依赖 / 安全 / 性能（人工 + 工具）
 | 事件 | 成功后发布；订阅有清理；kernel/platform 不互引 |
 
 详见 [review-checklist.md](references/review-checklist.md)。
+
+### 2.1 AGENTS 合规
+
+当 diff 涉及 `AGENTS.md`、新建 Maven 模块、L2 设计「AGENTS 对齐」节，或
+`java:project` / `java:design` 交付后，**必须**执行 AGENTS 专项检查。
+对照根 [`AGENTS.md`](../../../AGENTS.md) 与
+[agents-compliance-checklist.md](references/agents-compliance-checklist.md)：
+
+| 面 | 检查项 |
+|----|-------|
+| 文档结构 | 核心约束、Agent 工作流、模块职责、依赖规则、DDD、编码规范、验证 |
+| Agent 工作流 | grill-me 触发条件、Java 技能路由表、典型链路 |
+| 模块 vs 工程 | 新模块在 AGENTS 有职责节；代码/POM 不违反「不得拥有」 |
+| 依赖 vs POM | 单向链、BOM、kernel/platform 隔离、新 artifact 已登记 |
+| 设计对齐 | L2「AGENTS 对齐」表与四步法、grill-me 结论一致 |
+| 模板 | 按 [`agents-template.md`](../java-reference/references/agents-template.md) 生成，无残留占位符 |
+
+- [ ] 根 `AGENTS.md` 必需章节完整（见 checklist §A）
+- [ ] 新建模块已在根 AGENTS 增补职责与依赖规则（或 PR 明确说明为何不修订）
+- [ ] 模块补充 `AGENTS.md`（若有）声明上位文件且无冲突
+- [ ] POM / 源码与 AGENTS 模块边界一致
+
+报告须含 **「AGENTS 合规」** 专节（格式见 agents-compliance-checklist §报告格式）。
 
 ### 3. 依赖与构建卫生
 
@@ -124,6 +151,19 @@ mvn versions:display-property-updates        # 属性升级候选
 | 资源泄漏 | 线程、执行器、订阅、客户端是否有明确生命周期与清理 |
 | 重复计算 | 循环内是否重复查询同一稳定数据 |
 
+### 6. 结构、冗余与过度设计
+
+对照 [code-quality-constraints.md](../java-reference/references/code-quality-constraints.md) 与
+[review-checklist.md](references/review-checklist.md) §O：
+
+- [ ] diff 规模与需求描述匹配；「小需求、大 diff」已要求回到 design/develop 收敛
+- [ ] 无新增仅转发 service/wrapper、无单实现 `*Impl`、无仅为 mock 的接口
+- [ ] 无注释掉的大段实现、无 AI 复述型注释、无长期双轨 API
+- [ ] 重复逻辑已合并到单一 owner；删除项经过引用确认（非「搜不到就删」）
+- [ ] 无投机性空包、无未消费事件/配置/状态码
+
+多数项为**警告**；若引入错误模块边界、public 双轨兼容面或无迁移的旧路径并存，升级为**阻塞**。
+
 ## 输出报告格式
 
 检查完成后按以下结构汇总，便于开发者快速定位：
@@ -154,6 +194,19 @@ mvn versions:display-property-updates        # 属性升级候选
 ## 遗留项
 
 需要开发者决策、本次未处理的问题。
+
+## AGENTS 合规
+
+（当本次检查包含 AGENTS 项时填写；否则写 N/A）
+
+| 项 | 结果 | 说明 |
+|----|------|------|
+| 文档结构 | ✅ / ❌ | |
+| Agent 工作流 | ✅ / ❌ | |
+| 模块职责 vs 工程 | ✅ / ❌ | |
+| 依赖规则 vs POM | ✅ / ❌ | |
+| 设计对齐节 | ✅ / N/A | |
+| 模板一致性 | ✅ / ❌ | |
 ```
 
 级别定义：
@@ -175,4 +228,6 @@ mvn versions:display-property-updates        # 属性升级候选
 ## 详细参考
 
 - [verification-commands.md](references/verification-commands.md) — 完整命令矩阵与结果判读
-- [review-checklist.md](references/review-checklist.md) — 分组评审清单
+- [review-checklist.md](references/review-checklist.md) — 分组评审清单（含 §O 结构冗余）
+- [code-quality-constraints.md](../java-reference/references/code-quality-constraints.md) — 简化、去冗余、防过度设计
+- [agents-compliance-checklist.md](references/agents-compliance-checklist.md) — AGENTS.md 结构、内容与工程一致性

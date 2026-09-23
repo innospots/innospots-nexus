@@ -11,10 +11,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.function.Function;
 
 /**
- * Jackson serializer that applies field-level value conversion.
+ * 应用字段级值转换的 Jackson 序列化器。
  * <p>
- * A delegate serializer may be provided to serialize the converted value,
- * for example to apply masking after conversion.
+ * 可提供委托序列化器来序列化转换后的值，例如在转换后再应用脱敏。
  */
 final class ValueConvertingSerializer extends StdSerializer<Object> {
 

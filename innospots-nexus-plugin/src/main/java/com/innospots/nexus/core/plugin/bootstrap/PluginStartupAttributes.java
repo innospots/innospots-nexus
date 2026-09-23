@@ -4,7 +4,9 @@ import com.innospots.nexus.core.bootstrap.NexusStartupContext;
 import com.innospots.nexus.core.plugin.installation.service.PluginInstallationManager;
 
 /**
- * Startup attribute keys and helpers for the plugin subsystem.
+ * 插件子系统的启动属性键与辅助方法。
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class PluginStartupAttributes {
 
@@ -14,10 +16,10 @@ public final class PluginStartupAttributes {
     }
 
     /**
-     * Returns the installation manager attached by {@link PluginHostStartupTask}.
+     * 返回由 {@link PluginHostStartupTask} 附加的安装管理器。
      *
-     * @param context startup context
-     * @return installation manager when plugin host startup completed
+     * @param context 启动上下文
+     * @return 插件宿主启动完成后的安装管理器
      */
     public static PluginInstallationManager installationManager(NexusStartupContext context) {
         return context.getAttribute(INSTALLATION_MANAGER, PluginInstallationManager.class).orElse(null);

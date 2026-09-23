@@ -4,6 +4,8 @@ import com.innospots.nexus.core.plugin.declaration.PluginDefinition;
 
 /**
  * 用于声明插件及其插件级生命周期的唯一 classpath SPI。
+ * @author Smars
+ * @date 2026/09/13
  */
 public interface Plugin {
 

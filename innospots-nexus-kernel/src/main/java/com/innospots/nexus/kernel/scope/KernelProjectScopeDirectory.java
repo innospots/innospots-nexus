@@ -5,18 +5,19 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 
 import com.innospots.nexus.base.domain.project.ProjectSnapshot;
-import com.innospots.nexus.console.scope.api.ProjectScopeDirectory;
 import com.innospots.nexus.kernel.project.operator.ProjectOperator;
 
 /**
- * Kernel-backed project scope directory.
+ * Kernel 支持的项目作用域目录。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @RequiredArgsConstructor
-public class KernelProjectScopeDirectory implements ProjectScopeDirectory {
+public class KernelProjectScopeDirectory {
 
     private final ProjectOperator projectOperator;
 
-    @Override
     public Optional<ProjectSnapshot> findProject(String tenantId, String workspaceId, String projectId) {
         return projectOperator.findSnapshot(tenantId, workspaceId, projectId);
     }

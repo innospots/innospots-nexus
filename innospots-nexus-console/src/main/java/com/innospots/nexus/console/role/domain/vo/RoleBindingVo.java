@@ -5,13 +5,15 @@ import java.time.LocalDateTime;
 import com.innospots.nexus.console.role.domain.enums.RoleBindingSubjectType;
 
 /**
- * Role binding displayed in assignment management.
+ * 分配管理中展示的角色绑定。
  *
- * @param bindingId   binding identifier
- * @param roleId      bound role identifier
- * @param subjectType USER or ORG_UNIT
- * @param subjectId   subject identifier
- * @param createdAt   assignment time
+ * @author Smars
+ * @date 2026/09/13
+ * @param bindingId   binding 标识符
+ * @param roleId      bound 角色标识符
+ * @param subjectType USER 或 ORG_UNIT
+ * @param subjectId   subject 标识符
+ * @param createdAt   分配时间
  */
 public record RoleBindingVo(
         String bindingId,

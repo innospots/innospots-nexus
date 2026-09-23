@@ -46,6 +46,8 @@ import org.slf4j.LoggerFactory;
 /**
  * 持有一个插件实例、Provider、上下文、资源以及原子生命周期转换。
  * 生命周期转换串行执行，但未知插件代码不会在本对象的生命周期锁内执行。
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class ManagedPlugin {
 

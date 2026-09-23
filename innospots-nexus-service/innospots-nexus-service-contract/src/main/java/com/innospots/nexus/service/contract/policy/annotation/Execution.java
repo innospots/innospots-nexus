@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 import com.innospots.nexus.service.contract.invocation.ExecutionMode;
 
 /**
- * Declares how the annotated method may execute.
+ * 声明被注解方法的执行方式。
  *
  * @author Smars
  * @date 2026/09/13
@@ -21,9 +21,9 @@ import com.innospots.nexus.service.contract.invocation.ExecutionMode;
 public @interface Execution {
 
     /**
-     * Execution mode.
+     * 执行模式。
      *
-     * @return mode
+     * @return 模式
      */
     ExecutionMode value();
 }

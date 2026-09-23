@@ -15,12 +15,19 @@ import com.innospots.nexus.console.catalog.domain.entity.ConsoleCatalogResourceE
 import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
 import com.innospots.nexus.console.permission.service.PermissionVisibilityService;
 
-/** 从持久化权限目录组装当前用户可见的导航菜单树。 */
+/**
+ * 从持久化权限目录组装当前用户可见的导航菜单树。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ */
 public final class NavigationMenuAssembler {
 
     private final PermissionVisibilityService visibilityService;
 
-    /** 创建导航菜单组装器。 */
+    /**
+     * 创建导航菜单组装器。
+     */
     public NavigationMenuAssembler(PermissionVisibilityService visibilityService) {
         if (visibilityService == null) {
             throw new IllegalArgumentException("visibilityService is required");

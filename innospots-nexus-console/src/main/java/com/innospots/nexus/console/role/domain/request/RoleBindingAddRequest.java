@@ -5,10 +5,12 @@ import java.util.List;
 import com.innospots.nexus.console.role.domain.enums.RoleBindingSubjectType;
 
 /**
- * Request for adding USER or ORG_UNIT subjects to a role.
+ * 向角色添加 USER 或 ORG_UNIT 主体的请求。
  *
- * @param subjectType subject kind
- * @param subjectIds  subject identifiers to bind
+ * @author Smars
+ * @date 2026/09/13
+ * @param subjectType 主体类型
+ * @param subjectIds  subject 标识符s to bind
  */
 public record RoleBindingAddRequest(
         RoleBindingSubjectType subjectType,

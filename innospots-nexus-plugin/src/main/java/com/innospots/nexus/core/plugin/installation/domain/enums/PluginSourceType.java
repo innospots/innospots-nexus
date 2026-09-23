@@ -1,6 +1,10 @@
 package com.innospots.nexus.core.plugin.installation.domain.enums;
 
-/** 插件定义来源类型。 */
+/**
+ * 插件定义来源类型。
+ * @author Smars
+ * @date 2026/09/13
+ */
 public enum PluginSourceType {
 
     /** Java SPI 或 classpath 实现类。 */

@@ -13,9 +13,11 @@ import com.innospots.nexus.platform.user.domain.request.PlatformUserCreateReques
 import com.innospots.nexus.platform.user.domain.vo.PlatformUserVo;
 
 /**
- * Ops-domain contract for platform user administration.
- * <p>Public self-registration is not exposed. Accounts are created by
- * administrators only.</p>
+ * 平台用户管理的运维域契约。
+ * <p>不暴露公开自助注册。账号由管理员创建。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @Path("/platform/users")
 @Produces(MediaType.APPLICATION_JSON)
@@ -23,19 +25,19 @@ import com.innospots.nexus.platform.user.domain.vo.PlatformUserVo;
 public interface PlatformUserEndpoint {
 
     /**
-     * Creates a platform user with a local password.
+     * 使用本地密码创建平台用户。
      *
-     * @param request admin create request
-     * @return created user summary
+     * @param request admin create 请求
+     * @return created user 概要
      */
     @POST
     R<PlatformUserVo> createUser(PlatformUserCreateRequest request);
 
     /**
-     * Returns one platform user.
+     * 返回单个平台用户。
      *
-     * @param platformUserId platform-realm user identifier
-     * @return user summary
+     * @param platformUserId platform-realm user 标识符
+     * @return user 概要
      */
     @GET
     @Path("/{platformUserId}")

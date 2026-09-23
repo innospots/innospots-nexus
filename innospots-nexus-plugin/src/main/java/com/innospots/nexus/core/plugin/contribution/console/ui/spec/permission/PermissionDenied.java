@@ -1,16 +1,19 @@
 package com.innospots.nexus.core.plugin.contribution.console.ui.spec.permission;
 
 /**
- * Permission denial behavior when access is not granted.
+ * 未授予访问权限时的拒绝行为。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public enum PermissionDenied {
 
-    /** Hide the protected UI element. */
+    /** 隐藏受保护的 UI 元素。 */
     HIDDEN,
 
-    /** Show the element but prevent interaction. */
+    /** 显示元素但禁止交互。 */
     DISABLED,
 
-    /** Show the element in read-only mode. */
+    /** 以只读模式显示元素。 */
     READONLY
 }

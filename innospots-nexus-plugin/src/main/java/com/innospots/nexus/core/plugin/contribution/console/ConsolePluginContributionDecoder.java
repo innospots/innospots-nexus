@@ -13,7 +13,11 @@ import com.innospots.nexus.base.i18n.I18nObject;
 import com.innospots.nexus.core.plugin.contribution.PluginContributionDecoder;
 import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
-/** 将 YAML 的通用 map 严格解码为不可变 console@1 声明。 */
+/**
+ * 将 YAML 的通用 map 严格解码为不可变 console@1 声明。
+ * @author Smars
+ * @date 2026/09/13
+ */
 public final class ConsolePluginContributionDecoder
         implements PluginContributionDecoder<ConsolePluginContribution> {
 

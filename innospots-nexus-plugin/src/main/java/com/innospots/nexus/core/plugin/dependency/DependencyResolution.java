@@ -14,6 +14,8 @@ import com.innospots.nexus.core.plugin.capability.Tags;
  * @param declared 已发现插件中是否有提供者
  * @param available 当前是否存在活动 Provider
  * @param providerPluginIds 已发现的 Provider 所属插件标识
+ * @author Smars
+ * @date 2026/09/13
  */
 public record DependencyResolution(
         CapabilityKey key,

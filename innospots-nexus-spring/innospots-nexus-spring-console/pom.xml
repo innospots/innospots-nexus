@@ -15,32 +15,30 @@
     <packaging>jar</packaging>
 
     <name>innospots-nexus-spring-console</name>
-    <description>Spring Boot management console assembly for innospots-nexus.</description>
+    <description>innospots-nexus 管理控制台 Spring 装配库（无独立 main，由外部应用引用）。</description>
 
     <dependencies>
         <dependency>
             <groupId>com.innospots</groupId>
-            <artifactId>innospots-nexus-spring-app</artifactId>
+            <artifactId>innospots-nexus-spring-core</artifactId>
         </dependency>
         <dependency>
             <groupId>com.innospots</groupId>
             <artifactId>innospots-nexus-console</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.innospots</groupId>
-            <artifactId>innospots-nexus-kernel</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-log4j2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <mainClass>com.innospots.nexus.spring.console.server.NexusConsoleServer</mainClass>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>

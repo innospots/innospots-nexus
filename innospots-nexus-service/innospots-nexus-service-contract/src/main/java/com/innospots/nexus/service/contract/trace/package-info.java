@@ -1,5 +1,5 @@
 /**
- * Trace snapshot and provider contracts. Empty snapshot uses empty ids, never fabricated zeros.
+ * 追踪快照与提供者契约。空快照使用空标识，绝不伪造零值。
  *
  * @author Smars
  * @date 2026/09/13

@@ -11,6 +11,8 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
  * 宿主显式注册的安全 Contribution 快照器表。
  *
  * <p>构建后不可变，可在多个映射器或持久化路径间安全共享。</p>
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class PluginContributionSnapshotterRegistry {
 

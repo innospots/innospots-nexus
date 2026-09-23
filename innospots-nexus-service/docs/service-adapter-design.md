@@ -1,28 +1,21 @@
 # 框架适配、装配与配置设计
 
-状态：可实施规格 v1.2，2026-09-13。规范冲突处理见[主方案 §9](service-framework-design.md)（D1–D15 已锁定）。开发用法见[开发体验](service-developer-experience-design.md)。本文件是工程实施规格，不表示已存在自动配置或已验证框架兼容。
+说明 Spring / Quarkus **如何把中立运行时接到宿主 Web 栈**。决策 D1–D15 见 [总览 §9](service-framework-design.md)；业务用法见 [开发体验](service-developer-experience-design.md)。缺口（上传绑定、Quarkus 完整 build-time 处理等）见 [待完善](service-future-work.md)。
 
 ## 1. 装配边界
 
-现有两个 service adapter 分别组合六个能力库，不依赖 console/kernel/platform。宿主保留自己的 Web starter/runtime、JSON 和认证设施。不能通过 service adapter 隐式引入 JDBC、console、MyBatis 或全套 IAM。
+两个 adapter 组合 contract/runtime 与 http、stream、websocket、transfer、observability、governance，**不**依赖 console/kernel/platform。宿主保留 Web starter、JSON、认证；adapter 不得隐式引入 JDBC 或全套 IAM。
 
-Spring 的一个 artifact 同时提供 MVC/WebFlux 条件装配；第三方 Web 栈依赖 optional，使用者只引实际选择的一个宿主栈。不得因适配模块存在就把两个 Web Server 一并带入。已有 `spring-app` 是带数据库/插件的宿主，不能作为通用 adapter 的父依赖。
+| 适配器 | 引入方式 |
+|--------|----------|
+| Spring | `innospots-nexus-spring-service`；`@EnableNexusService` 或应用 bootstrap `@Import`；MVC / WebFlux 条件配置分离 |
+| Quarkus | `innospots-nexus-quarkus-service` 扩展 + `innospots-nexus-quarkus-service-deployment` |
 
-Quarkus 的 `quarkus-service` 保持 runtime artifact。**完整的“纯中立注解自动生效”需要一个后续构建期模块**：`innospots-nexus-quarkus-service-deployment`。仅 CDI bean archive 能提供配置和 Provider，不能保证任意中立注解成为 interceptor binding，也不能运行期发现未被构建期注册的端点。不能用一句“CDI 自动拦截”掩盖这个工程增量。
+Spring：Web 栈依赖 optional，应用只引入实际使用的一种。`spring-app` 是完整宿主，不是 adapter 父 POM。
 
-提议工程差异（本次不创建 POM，M0 由 `java:project` 落地）：
+Quarkus：runtime 与 deployment 分离；**runtime POM 不依赖 deployment JAR**。当前 deployment 已注册扩展名；完整 Jandex 扫描与注解 binding 见 [待完善](service-future-work.md)。
 
-```text
-innospots-nexus-quarkus
-├── innospots-nexus-quarkus-service             # 已有：runtime
-└── innospots-nexus-quarkus-service-deployment  # M0 新增：build-time processor
-```
-
-deployment 继承 quarkus 聚合，依赖 quarkus-service runtime 和 Quarkus deployment API；runtime descriptor 指向 deployment 坐标，**runtime POM 不依赖 deployment JAR**。descriptor 是框架元数据，允许框架要求的 `META-INF/quarkus-extension.properties`，它不是被禁止的业务 application.properties。
-
-D7 已锁定：M0 必须用 `java:project` 注册 deployment 模块。在该模块落地前，Quarkus 只能提供显式 CDI binding 的过渡适配，不得宣称需求验收项 4/18 已完全满足。
-
-D8 已锁定：共享黑盒场景放在 `innospots-nexus-service-adapter-test`。该库只依赖 JDK HTTP/WebSocket 客户端与中立契约，不依赖 Spring/Quarkus。两个适配模块以 test 范围引用，并各自提供最小宿主应用把场景跑起来。
+共享黑盒：`innospots-nexus-service-adapter-test`（仅 JDK 客户端 + 中立契约）；Spring / Quarkus 测试依赖它，各自提供最小宿主应用。
 
 ## 2. 适配能力矩阵
 
@@ -51,7 +44,7 @@ Mutiny 2 基于 JDK Flow，Reactor 使用 Reactive Streams，桥接应按实际�
 
 | 包 | 类/资源 | 责任 |
 |---|---|---|
-| config | ServiceAutoConfiguration、ServiceProperties、ServiceRuntimeConfiguration | 中立 Config 构造、SPI唯一性与默认注册 |
+| config | EnableNexusService、ServiceProperties、ServiceCoreConfiguration、ServiceServletConfiguration、ServiceReactiveConfiguration 等 | 显式 Import 或 bootstrap；SPI 唯一性与默认注册 |
 | mvc | ServiceServletFilter、ServiceMvcInterceptor、ServiceReturnValueHandler、ServiceExceptionAdvice、ServiceMvcConfiguration | 生命周期、metadata、结果形态与错误 |
 | webflux | ServiceWebFilter、ServiceReactiveResultHandler、ServiceWebExceptionHandler、ServiceWebFluxConfiguration | Reactor上下文、流式结果和取消 |
 | invocation | ServiceMethodAdvisor、ServiceAnnotationPolicyResolver | 从容器目标类/接口解析意图，不处理路由 |
@@ -60,9 +53,7 @@ Mutiny 2 基于 JDK Flow，Reactor 使用 Reactive Streams，桥接应按实际�
 | security | SpringNativePrincipalProvider | 宿主已认证 Principal/context 到 ServicePrincipal |
 | transfer | ServletUploadAdapter、ReactiveUploadAdapter、SpringDownloadWriter | Multipart与有界二进制转换 |
 | lifecycle | SpringServiceLifecycle | 借用/自建资源区分与关闭 |
-| resources | META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports | 自动配置入口清单 |
-
-自动配置遵循 [Spring Boot 官方约定](https://docs.spring.io/spring-boot/reference/features/developing-auto-configuration.html)：imports 文件列入口类，按 class/bean/property 条件装配；用户提供 SPI bean 则默认实现退让。不得把所有可选依赖类型写进无条件加载类的字段/方法，避免只装 MVC 时 ClassNotFound。
+装配遵循 [Spring Boot 条件配置](https://docs.spring.io/spring-boot/reference/features/developing-auto-configuration.html)：按 class/bean/property 条件加载；用户提供 SPI bean 则默认实现退让。不得把 optional 类型写进无条件类的字段/方法，避免只装 MVC 时 ClassNotFound。
 
 ### 3.1 MVC
 
@@ -136,7 +127,7 @@ WebSockets Next callback 的线程模式与返回类型/原生注解有关，ada
 
 ## 6. 依赖与构建规格
 
-所有依赖版本来自 `innospots-nexus-bom`，插件版本来自 parent/pluginManagement。下表是新增坐标清单与归属，M0 必须输出 effective POM 锁定实际解析版本；本稿不编造未经解析的第三方版本号。
+所有依赖版本来自 `innospots-nexus-bom`；下表为能力坐标归属，实际版本以 `mvn -q help:effective-pom` 为准。
 
 | 能力/坐标 | 所属 | 管理策略 |
 |---|---|---|
@@ -151,11 +142,9 @@ WebSockets Next callback 的线程模式与返回类型/原生注解有关，ada
 | `io.quarkus:quarkus-websockets-next`、`quarkus-security` | quarkus-service runtime | Quarkus BOM |
 | `io.quarkus:quarkus-smallrye-context-propagation` | quarkus-service runtime | Quarkus BOM |
 | `io.quarkus:quarkus-arc-deployment` 等真实用到的部署 API | 新deployment | Quarkus BOM，不流入runtime |
-| JWT/OIDC、MIME探测/病毒扫描SDK | 对应宿主/provider | 二期或环境集成前登记与兼容检查，禁止本期写未经验证的版本 |
+| JWT/OIDC、MIME探测/病毒扫描SDK | 对应宿主/provider | 环境集成前 BOM 登记与兼容检查 |
 
-BOM import 的 properties 不自动成为消费 POM 的 properties。Quarkus Maven 插件版本需在构建 parent/聚合的 pluginManagement 正确管理，并用版本一致性检查对齐 BOM，而不是在子模块引用不存在的属性。已有 Boot/Quarkus/Jackson 组合可能有覆盖，M0 查依赖树、重复类、enforcedPlatform，不改项目基线以绕过问题。
-
-Resilience4j/OTel/Micrometer 的许可证、传递依赖、维护与漏洞信息应在 M0 实际锁版时记录。选型理由是成熟中立库可替换、无需框架 starter；本设计不把尚未做的依赖安全评估写成通过。
+BOM import 的 properties 不自动成为消费 POM 的 properties。变更依赖后须检查依赖树、重复类与 enforcedPlatform。Resilience4j/OTel/Micrometer 为可替换中立库，安全评估在锁版时记录。
 
 ## 7. 配置契约
 
@@ -306,7 +295,7 @@ service:
 
 - 无注解普通 HTTP 仍获得 Level 0 能力。
 - 业务模块不需要依赖本适配 artifact。
-- `innospots-nexus-spring-service` 通过 `AutoConfiguration.imports` 扮演实践文中的 starter；不另建 starter 模块（D5）。
+- `innospots-nexus-spring-service` 即实践文中的 starter 坐标；不另建 starter 模块（D5）。由 `@EnableNexusService` 显式启用。
 - Stream 返回 `StreamSink`/`StreamSession`/`Flow.Publisher` 时由 result handler 处理；后台生产必须走 `ContextExecutor`。
 - WS 路由薄壳留在宿主；Handler 在中立业务模块；注入 `WebSocketService` 而非原生 Session。
 - 业务抛出的非 `NexusException` 在边界映射 `SYSTEM_ERROR`，不把 JDK 消息写入响应体。

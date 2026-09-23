@@ -1,11 +1,13 @@
 package com.innospots.nexus.console.auth.domain.request;
 
 /**
- * Activates a project within the current workspace scope.
+ * 在当前工作区作用域内激活项目。
  *
- * @param tenantId    owning tenant identifier
- * @param workspaceId owning workspace identifier
- * @param projectId   project to activate
+ * @author Smars
+ * @date 2026/09/13
+ * @param tenantId    owning tenant 标识符
+ * @param workspaceId owning workspace 标识符
+ * @param projectId   待激活的项目
  */
 public record SelectProjectRequest(String tenantId, String workspaceId, String projectId) {
 }

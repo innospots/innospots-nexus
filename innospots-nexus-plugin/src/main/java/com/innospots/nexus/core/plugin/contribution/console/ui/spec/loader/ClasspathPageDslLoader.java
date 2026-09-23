@@ -13,10 +13,15 @@ import com.innospots.nexus.core.plugin.contribution.console.ui.spec.config.PageD
 import com.innospots.nexus.core.plugin.contribution.console.ui.spec.parser.PageDslParser;
 
 /**
- * Loads page DSL documents from the classpath using {@link com.innospots.nexus.core.plugin.contribution.console.ui.spec.config.PageDslConfig}.
+ * 使用
+ * {@link com.innospots.nexus.core.plugin.contribution.console.ui.spec.config.PageDslConfig}
+ * 从 classpath 加载页面 DSL 文档。
  *
- * <p>After parsing, the loader verifies that {@code page.id} matches the requested
- * {@code pageKey} to prevent module/page resource mismatches.</p>
+ * <p>解析后，加载器校验 {@code page.id} 与请求的 {@code pageKey} 是否一致，以防模块/页面
+ * 资源不匹配。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class ClasspathPageDslLoader implements PageDslLoader {
 
@@ -25,11 +30,12 @@ public final class ClasspathPageDslLoader implements PageDslLoader {
     private final ClassLoader classLoader;
 
     /**
-     * Creates a classpath loader.
+     * 创建 classpath 加载器。
      *
-     * @param config resource location configuration
-     * @param parser YAML parser
-     * @param classLoader class loader, or {@code null} to use the current thread context loader
+     * @param config 资源定位配置
+     * @param parser YAML 解析器
+     * @param classLoader 类加载器；为 {@code null} 时使用当前线程上下文类加载器
+     * @throws com.innospots.nexus.base.exception.NexusException 配置、解析器或类加载器缺失时
      */
     public ClasspathPageDslLoader(
             PageDslConfig config,

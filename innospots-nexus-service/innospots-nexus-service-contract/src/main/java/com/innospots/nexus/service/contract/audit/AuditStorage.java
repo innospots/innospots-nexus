@@ -4,7 +4,7 @@ import java.time.Duration;
 import java.util.concurrent.CompletionStage;
 
 /**
- * Append-only audit storage. Completion means the implementation's persistence confirmation.
+ * 仅追加的审计存储。完成表示实现方已确认持久化。
  *
  * @author Smars
  * @date 2026/09/13
@@ -14,18 +14,18 @@ import java.util.concurrent.CompletionStage;
 public interface AuditStorage {
 
     /**
-     * Appends {@code event}. Duplicate {@code eventId} values are ignored.
+     * 追加 {@code event}。重复的 {@code eventId} 将被忽略。
      *
-     * @param event audit event
-     * @return completion
+     * @param event 审计事件
+     * @return 完成阶段
      */
     CompletionStage<Void> append(AuditEvent event);
 
     /**
-     * Flushes buffered events within {@code timeout}.
+     * 在 {@code timeout} 内刷新缓冲事件。
      *
-     * @param timeout flush timeout
-     * @return completion
+     * @param timeout 刷新超时
+     * @return 完成阶段
      */
     CompletionStage<Void> flush(Duration timeout);
 }

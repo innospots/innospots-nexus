@@ -13,7 +13,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Deserializes one action or an action array into {@link ActionOrList}.
+ * 将单个动作或动作数组反序列化为 {@link ActionOrList}。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class ActionOrListDeserializer extends JsonDeserializer<ActionOrList> {
 

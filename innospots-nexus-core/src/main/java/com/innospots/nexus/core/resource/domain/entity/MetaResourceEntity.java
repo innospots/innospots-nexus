@@ -11,10 +11,10 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-import com.innospots.nexus.core.persistence.entity.WorkspaceBaseEntity;
+import com.innospots.nexus.core.persistence.entity.OwnershipEntity;
 
 /**
- * Persistence entity for stored file metadata.
+ * 已存储文件元数据的持久化实体（按 {@link OwnershipEntity} 归属列隔离）。
  */
 @Getter
 @Setter
@@ -24,13 +24,11 @@ import com.innospots.nexus.core.persistence.entity.WorkspaceBaseEntity;
         @Index(name = "idx_nx_meta_resource_uri_key", columnList = "uri_key")
 })
 @TableName(MetaResourceEntity.TABLE_NAME)
-public class MetaResourceEntity extends WorkspaceBaseEntity {
+public class MetaResourceEntity extends OwnershipEntity {
 
     public static final String TABLE_NAME = "nx_meta_resource";
 
-    /**
-     * Resource identifier.
-     */
+    /** 资源标识。 */
     @TableId(type = IdType.ASSIGN_UUID)
     @Id
     @Column(length = 32, nullable = false)
@@ -41,63 +39,43 @@ public class MetaResourceEntity extends WorkspaceBaseEntity {
         return "res";
     }
 
-    /**
-     * MIME type.
-     */
+    /** MIME 类型。 */
     @Column(length = 128)
     private String mimeType;
 
-    /**
-     * File size in bytes.
-     */
+    /** 文件大小（字节）。 */
     @Column
     private long fileSize;
 
-    /**
-     * Stored file URI.
-     */
+    /** 已存储文件 URI。 */
     @Column(length = 1024)
     private String fileUri;
 
-    /**
-     * Stable storage key derived from the URI.
-     */
+    /** 由 URI 派生的稳定存储键。 */
     @Column(length = 256)
     private String uriKey;
 
-    /**
-     * Storage backend mode.
-     */
+    /** 存储后端模式。 */
     @Column(length = 32)
     private String storeMode;
 
-    /**
-     * Original resource name.
-     */
+    /** 原始资源名称。 */
     @Column(length = 256)
     private String resourceName;
 
-    /**
-     * Storage region.
-     */
+    /** 存储区域。 */
     @Column(length = 64)
     private String region;
 
-    /**
-     * Directory name in the storage backend.
-     */
+    /** 存储后端中的目录名。 */
     @Column(length = 256)
     private String directoryName;
 
-    /**
-     * Owning module key.
-     */
+    /** 所属模块键。 */
     @Column(length = 128)
     private String moduleKey;
 
-    /**
-     * Owning module name.
-     */
+    /** 所属模块名称。 */
     @Column(length = 64)
     private String module;
 }

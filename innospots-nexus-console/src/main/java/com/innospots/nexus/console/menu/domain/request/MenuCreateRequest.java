@@ -4,20 +4,22 @@ import com.innospots.nexus.console.menu.domain.enums.MenuOpenMode;
 import com.innospots.nexus.console.menu.domain.enums.MenuType;
 
 /**
- * Data required to create a menu node.
+ * 创建菜单节点所需的数据。
  *
- * @param parentId     optional parent menu identifier
- * @param menuKey      stable project-unique menu key
- * @param menuName     display name
- * @param menuType     menu node type
- * @param routePath    internal navigation path
- * @param componentKey logical frontend component identifier
- * @param redirectPath optional redirect path
- * @param externalUrl  external destination for link menus
- * @param icon         optional icon identifier
- * @param openMode     browser target mode
- * @param visible      whether the node appears in navigation
- * @param sortOrder    sibling display order
+ * @author Smars
+ * @date 2026/09/13
+ * @param parentId     可选 parent 菜单标识符
+ * @param menuKey      项目内唯一的稳定菜单键
+ * @param menuName     显示名称
+ * @param menuType     菜单节点类型
+ * @param routePath    内部导航路径
+ * @param componentKey 逻辑前端组件标识符
+ * @param redirectPath 可选 redirect path
+ * @param externalUrl  外部目标地址 for link menus
+ * @param icon         可选 icon 标识符
+ * @param openMode     浏览器打开模式
+ * @param visible      节点是否在导航中可见
+ * @param sortOrder    sibling 显示顺序
  */
 public record MenuCreateRequest(
         String parentId,

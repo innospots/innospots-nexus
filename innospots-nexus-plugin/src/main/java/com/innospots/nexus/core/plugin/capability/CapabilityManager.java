@@ -7,6 +7,8 @@ import com.innospots.nexus.core.plugin.contract.CapabilityProvider;
 
 /**
  * 用于选择活动 Capability Provider 的类型安全读取边界。
+ * @author Smars
+ * @date 2026/09/13
  */
 public interface CapabilityManager {
 

@@ -2,19 +2,18 @@
 
 ## OrganizationSnapshot
 
-**Type:** record
+**类型：** record
 
-面向业务的租户档案（区域设置、货币、品牌）。**不是**内核
-`OrganizationUnit` / `nx_organization_unit`。
+租户面向业务的档案（语言环境、货币、品牌标识）。 这不是 {@code nx_organization_unit}；内部组织树保留在 kernel 中。
 
-| 组件 | 类型 | 说明 |
-|-----------|------|-------------|
-| `tenantId` | `String` | 所属租户 |
-| `organizationCode` | `String` | 稳定的档案编码 |
-| `organizationName` | `String` | 显示名称 |
-| `defaultLocale` | `String` | 默认区域设置 |
+### 组件（record）
+
+| 名称 | 类型 | 说明 |
+|------|------|------|
+| `tenantId` | `String` | 租户 ID |
+| `organizationCode` | `String` | 组织编码 |
+| `organizationName` | `String` | 组织名称 |
+| `defaultLocale` | `String` | 默认语言环境 |
 | `defaultCurrency` | `String` | 默认货币 |
-| `logoKey` | `String` | 品牌资源键 |
-| `status` | `BasicStatus` | 档案可用状态 |
-
-通过 `SessionContext.bindTenant` 与 `TenantSnapshot` 绑定。
+| `logoKey` | `String` | Logo 资源键 |
+| `status` | `BasicStatus` | 状态 |

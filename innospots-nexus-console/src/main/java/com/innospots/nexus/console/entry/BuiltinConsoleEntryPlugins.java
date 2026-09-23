@@ -4,6 +4,9 @@ import java.util.List;
 
 /**
  * 内置控制台 entry 插件身份常量。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class BuiltinConsoleEntryPlugins {
 

@@ -1,62 +1,62 @@
-# Multi-Tenant Governance Phase 2d Implementation Plan
+# 多租户治理 Phase 2d 实施计划
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **面向 agent 工作者：** 必需子技能：使用 superpowers:executing-plans 按任务逐步实施本计划。步骤使用 checkbox（`- [ ]`）语法跟踪进度。
 
-**Goal:** Land console dictionary persistence and JAX-RS contracts, and replace leftover role-member APIs with `nx_role_binding` contracts.
+**目标：** 落地 console dictionary 持久化与 JAX-RS 契约，并将遗留 role-member API 替换为 `nx_role_binding` 契约。
 
-**Architecture:** Console owns dictionary catalogs isolated by `security_realm` + `workspace_id`. Types and items are separate records. Role assignment uses `RoleBindingEntity` (`USER | ORG_UNIT`), not a user-member list.
+**架构：** Console 拥有按 `security_realm` + `workspace_id` 隔离的 dictionary catalog。Type 与 item 为独立记录。Role 分配使用 `RoleBindingEntity`（`USER | ORG_UNIT`），而非 user-member 列表。
 
-**Tech Stack:** Java 25, Maven, Jakarta Persistence + MyBatis-Plus, Jakarta REST, JUnit 5 + AssertJ, Lombok.
+**技术栈：** Java 25、Maven、Jakarta Persistence + MyBatis-Plus、Jakarta REST、JUnit 5 + AssertJ、Lombok。
 
-**Spec:** [docs/design/multi-tenant-governance-design.md](../../design/multi-tenant-governance-design.md) §9.3, §9.8, §10.1, §10.5, §12 Phase 2.
+**规格：** [docs/design/multi-tenant-governance-design.md](../../design/multi-tenant-governance-design.md) §9.3、§9.8、§10.1、§10.5、§12 Phase 2。
 
-## Global Constraints
+## 全局约束
 
-- Domain then responsibility packages; requests/VOs under `domain.request` / `domain.vo`.
-- Concrete endpoint classes (not interfaces) for new domains.
-- Dictionary entities extend `WorkspaceBaseEntity`. Persist `securityRealm` as String 32, not null.
-- Reuse `console.auth.domain.enums.SecurityRealm`. Reuse `RoleBindingSubjectType`.
-- Do not update module `SKILL.md`. Do not commit unless asked.
-- After Java changes: `mvn clean compile`. After the slice: `mvn test`.
+- 先 domain 后职责分包；request/VO 位于 `domain.request` / `domain.vo`。
+- 新 domain 使用具体 endpoint 类（非 interface）。
+- Dictionary entity 继承 `WorkspaceBaseEntity`。`securityRealm` 持久化为 String 32，not null。
+- 复用 `console.auth.domain.enums.SecurityRealm`。复用 `RoleBindingSubjectType`。
+- 不更新模块 `SKILL.md`。除非明确要求，否则不 commit。
+- Java 变更后：`mvn clean compile`。本 slice 完成后：`mvn test`。
 
 ---
 
-### Task 1: Dictionary entities
+### Task 1：Dictionary entity
 
-**Files:**
+**文件：**
 - Test: `innospots-nexus-console/src/test/java/com/innospots/nexus/console/dictionary/domain/entity/DictionaryEntityContractsTest.java`
 - Create: `DictionaryTypeEntity.java`, `DictionaryItemEntity.java`
 
-`nx_dictionary_type` (`dct`): `dictionaryTypeId`, `typeCode` 64, `typeName` 128, `securityRealm` 32, `status` 32, `sortOrder`, `builtIn`. Unique `(workspace_id,security_realm,type_code)`.
+`nx_dictionary_type`（`dct`）：`dictionaryTypeId`、`typeCode` 64、`typeName` 128、`securityRealm` 32、`status` 32、`sortOrder`、`builtIn`。唯一约束 `(workspace_id,security_realm,type_code)`。
 
-`nx_dictionary_item` (`dci`): `dictionaryItemId`, `typeCode` 64, `itemValue` 64, `itemName` 128, `securityRealm` 32, `status` 32, `sortOrder`, `builtIn`. Unique `(workspace_id,security_realm,type_code,item_value)`.
+`nx_dictionary_item`（`dci`）：`dictionaryItemId`、`typeCode` 64、`itemValue` 64、`itemName` 128、`securityRealm` 32、`status` 32、`sortOrder`、`builtIn`。唯一约束 `(workspace_id,security_realm,type_code,item_value)`。
 
-- [x] Completed
+- [x] 已完成
 
-### Task 2: Dictionary DAOs
+### Task 2：Dictionary DAO
 
-`DictionaryTypeDao`, `DictionaryItemDao` extend `BaseMapper`. Contract test: interfaces + BaseMapper.
+`DictionaryTypeDao`、`DictionaryItemDao` 继承 `BaseMapper`。契约测试：interface + BaseMapper。
 
-- [x] Completed
+- [x] 已完成
 
-### Task 3: Dictionary requests, VOs, endpoints
+### Task 3：Dictionary request、VO、endpoint
 
-`DictionaryTypeEndpoint` `@Path("/console/dictionary-types")` page/get/create/update/status/delete/options.
+`DictionaryTypeEndpoint` `@Path("/console/dictionary-types")` page/get/create/update/status/delete/options。
 
-`DictionaryItemEndpoint` `@Path("/console/dictionary-types/{typeCode}/items")` page/create/update/status/delete.
+`DictionaryItemEndpoint` `@Path("/console/dictionary-types/{typeCode}/items")` page/create/update/status/delete。
 
-Concrete classes throw `UnsupportedOperationException` until operators exist (same as `MenuEndpoint`).
+具体类在 operator 存在前抛出 `UnsupportedOperationException`（与 `MenuEndpoint` 相同）。
 
-- [x] Completed
+- [x] 已完成
 
-### Task 4: Role binding endpoint replaces role members
+### Task 4：Role binding endpoint 替换 role members
 
-Replace `RoleMemberEndpoint` and `RoleMember*` request/VO with `RoleBindingEndpoint` `@Path("/console/roles/{roleId}/bindings")` using `RoleBindingSubjectType`. Update `RoleEndpointContractsTest`.
+用 `RoleBindingEndpoint` `@Path("/console/roles/{roleId}/bindings")`（使用 `RoleBindingSubjectType`）替换 `RoleMemberEndpoint` 与 `RoleMember*` request/VO。更新 `RoleEndpointContractsTest`。
 
-- [x] Completed
+- [x] 已完成
 
-### Task 5: Verify
+### Task 5：验证
 
-`mvn clean compile` && `mvn test`.
+`mvn clean compile` && `mvn test`。
 
-- [x] Completed
+- [x] 已完成

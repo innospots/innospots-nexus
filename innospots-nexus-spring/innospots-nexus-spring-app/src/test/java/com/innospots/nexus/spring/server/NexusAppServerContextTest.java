@@ -13,7 +13,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * 验证 Spring Boot 4 下 MyBatis-Plus 自动配置能创建 {@link SqlSessionFactory}，
  * 从而让插件安装 DAO 完成装配。
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+        classes = com.innospots.nexus.spring.bootstrap.NexusAppBootstrapTestApplication.class,
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class NexusAppServerContextTest {
 
     @Autowired

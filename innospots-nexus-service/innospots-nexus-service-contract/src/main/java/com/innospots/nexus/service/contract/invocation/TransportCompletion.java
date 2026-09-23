@@ -3,7 +3,7 @@ package com.innospots.nexus.service.contract.invocation;
 import java.util.concurrent.CompletionStage;
 
 /**
- * Observes transport-level completion for streaming or async invocations.
+ * 观察流式或异步调用的传输层完成。
  *
  * @author Smars
  * @date 2026/09/13
@@ -13,9 +13,9 @@ import java.util.concurrent.CompletionStage;
 public interface TransportCompletion {
 
     /**
-     * Returns the stage completed when the transport finishes.
+     * 返回传输完成时结束的阶段。
      *
-     * @return completion outcome
+     * @return 完成结果
      */
     CompletionStage<InvocationOutcome> completion();
 }

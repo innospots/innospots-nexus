@@ -1,5 +1,5 @@
 /**
- * Audit declaration annotations for application services.
+ * 应用服务的审计声明注解。
  *
  * @author Smars
  * @date 2026/09/13

@@ -13,10 +13,11 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Session/transport snapshot of a user. Contains immutable identity fields
- * ({@code userId}, {@code userName}, {@code realName}) and mutable
- * attributes such as email, avatar, group membership, and assigned roles.
- * Not a kernel domain entity.
+ * 用户的会话/传输快照。包含不可变身份字段（{@code userId}、{@code userName}、{@code realName}）及可变属性如邮箱、头像、组成员与分配角色。非 kernel 领域实体。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @see com.innospots.nexus.base.thread.SessionContext
  */
 public class UserSnapshot {
 
@@ -44,7 +45,9 @@ public class UserSnapshot {
     }
 
     /**
-     * Rebuilds a snapshot from the current {@link TLC} identity keys when present.
+     * 当 {@link TLC} 中存在身份键时，从当前线程上下文重建快照。
+     *
+     * @return 快照可选值，无用户 ID 时为空
      */
     public static Optional<UserSnapshot> fromContextOptional() {
         Long userId = TLC.userId();
@@ -55,9 +58,10 @@ public class UserSnapshot {
     }
 
     /**
-     * Rebuilds a snapshot from the current {@link TLC} identity keys.
+     * 从当前 {@link TLC} 身份键重建快照。
      *
-     * @throws NexusException when {@link TLC#userId()} is absent
+     * @return 用户快照
+     * @throws NexusException 当 {@link TLC#userId()} 缺失时
      */
     public static UserSnapshot fromContext() {
         return fromContextOptional()
@@ -65,8 +69,8 @@ public class UserSnapshot {
     }
 
     /**
-     * Builds a snapshot from token or session claims. Keys align with {@link TLC}
-     * constants ({@link TLC#USER_ID}, {@link TLC#USER_NAME}, etc.).
+     * 从令牌或会话声明构建快照。键与 {@link TLC} 常量
+     * （{@link TLC#USER_ID}、{@link TLC#USER_NAME} 等）对齐。
      */
     public static UserSnapshot fromClaims(Map<String, ?> claims) {
         Checks.notNull(claims, "claims");

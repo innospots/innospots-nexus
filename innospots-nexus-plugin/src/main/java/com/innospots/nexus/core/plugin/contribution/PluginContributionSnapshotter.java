@@ -2,7 +2,11 @@ package com.innospots.nexus.core.plugin.contribution;
 
 import java.util.Map;
 
-/** 将 Contribution 转为不含类、Handler 或 Secret 的安全快照。 */
+/**
+ * 将 Contribution 转为不含类、Handler 或 Secret 的安全快照。
+ * @author Smars
+ * @date 2026/09/13
+ */
 public interface PluginContributionSnapshotter<T extends PluginContribution> {
 
     /**

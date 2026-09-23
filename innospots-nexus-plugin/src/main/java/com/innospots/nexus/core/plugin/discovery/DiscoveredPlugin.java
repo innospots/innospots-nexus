@@ -15,6 +15,8 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
  * @param definition 只读取一次的插件定义快照
  * @param discoveredAt 发现时间
  * @param source 声明来源元数据
+ * @author Smars
+ * @date 2026/09/13
  */
 public record DiscoveredPlugin(
         Plugin plugin,

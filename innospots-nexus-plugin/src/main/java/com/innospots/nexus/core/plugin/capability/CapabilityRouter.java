@@ -9,6 +9,8 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
 /**
  * 应用显式标签、配置默认路由和唯一 Provider 回退，不依赖注册顺序选择 Provider。
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class CapabilityRouter {
 

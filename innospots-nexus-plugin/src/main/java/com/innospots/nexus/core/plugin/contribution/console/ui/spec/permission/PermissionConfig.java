@@ -8,14 +8,17 @@ import java.util.List;
 import lombok.Getter;
 
 /**
- * Permission declaration supporting a single code, any-of codes, or a detailed object form.
+ * 权限声明，支持单个代码、任一匹配代码数组或详细对象形式。
  *
- * <p>YAML examples:</p>
+ * <p>YAML 示例：</p>
  * <pre>
  * permission: customer:view
  * permission: [customer:edit, customer:admin]
  * permission: { code: customer:edit, denied: disabled }
  * </pre>
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @Getter
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
@@ -40,31 +43,31 @@ public final class PermissionConfig {
     }
 
     /**
-     * Creates a single permission code declaration.
+     * 创建单个权限代码声明。
      *
-     * @param code permission code
-     * @return permission config
+     * @param code 权限代码
+     * @return 权限配置
      */
     public static PermissionConfig code(String code) {
         return new PermissionConfig(PermissionKind.CODE, code, List.of(), PermissionDenied.HIDDEN);
     }
 
     /**
-     * Creates an any-of permission declaration.
+     * 创建任一匹配权限声明。
      *
-     * @param codes permission codes
-     * @return permission config
+     * @param codes 权限代码列表
+     * @return 权限配置
      */
     public static PermissionConfig anyOf(List<String> codes) {
         return new PermissionConfig(PermissionKind.ANY_OF, null, codes, PermissionDenied.HIDDEN);
     }
 
     /**
-     * Creates a detailed permission declaration.
+     * 创建详细权限声明。
      *
-     * @param code permission code
-     * @param denied denied behavior
-     * @return permission config
+     * @param code 权限代码
+     * @param denied 拒绝时的行为
+     * @return 权限配置
      */
     public static PermissionConfig detailed(String code, PermissionDenied denied) {
         return new PermissionConfig(PermissionKind.DETAILED, code, List.of(), denied);
@@ -83,11 +86,17 @@ public final class PermissionConfig {
     }
 
     /**
-     * Permission declaration shape.
+     * 权限声明形态。
      */
     public enum PermissionKind {
+
+        /** 单个权限代码。 */
         CODE,
+
+        /** 任一匹配权限代码。 */
         ANY_OF,
+
+        /** 带拒绝行为的详细声明。 */
         DETAILED
     }
 }

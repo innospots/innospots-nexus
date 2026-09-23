@@ -1,6 +1,6 @@
 # 服务框架运行时与协议设计
 
-状态：可实施规格 v1.2，2026-09-13。依赖[主方案](service-framework-design.md)、[开发体验](service-developer-experience-design.md)和[契约附录](service-contract-design.md)。本文件中的默认值是工程初始策略，不是性能测试结果。拦截器 id/order 以契约附录 `InterceptorIds` / `InterceptorOrders` 为准。
+描述**调用链、协议状态机与默认容量策略**（非性能 SLA）。前提：[总览](service-framework-design.md)、[契约](service-contract-design.md)、[开发体验](service-developer-experience-design.md)。拦截器 id/order 以 `InterceptorIds` / `InterceptorOrders` 为准。未实现项见 [待完善](service-future-work.md)。
 
 ## 1. 入口处理与执行顺序
 
@@ -145,7 +145,7 @@ SSE：`Content-Type: text/event-stream`，UTF-8；`id` 为 sessionId+sequence �
 
 heartbeat 默认以 SSE comment `: heartbeat\n\n` 表达，不占业务 sequence、不创建业务审计；StreamEventType.HEARTBEAT 可用于显式事件模式，仍不计业务 outputCount。首事件延迟只统计首个业务事件，stream.open 不算。
 
-NDJSON（二期）：每行一个完整 StreamEvent JSON，`application/x-ndjson`，不能包含未转义物理换行。客户端应按流解析，不把整个 body 拼接后再 parse。共享同一 StreamSession 和错误/取消语义。
+**NDJSON**：每行一个完整 `StreamEvent` JSON，`application/x-ndjson`，行内不得含未转义换行。客户端按流解析。语义与 SSE 共用 `StreamSession` 的生命周期与错误/取消规则（中立编码见 `NdjsonStreamEncoder`；各宿主写回策略见 [待完善](service-future-work.md)）。
 
 响应首字节前失败走普通 HTTP 错误；提交后失败使用 `error` event（data 为安全 ServiceError），再关闭。完成使用 stream.completed，只有成功写完它才能记录传输成功；客户端断开时取消通知本地上游，不保证把 stream.cancelled 发给已离线客户端。
 
@@ -159,7 +159,7 @@ MVC 通过有界 worker 写入且等待写完成才 request 下一批，WebFlux/
 
 业务 sessionId 由应用的 SessionResolver 验证所有权后提供；缺省生成新 ID，不能接受客户端任意 sessionId 并加入该会话。Registry 索引键为 `(realm,scope,sessionId)` 与 `(realm,scope,principalType,principalId)`，不按裸字符串做跨租户查找。
 
-每消息依次：帧/完整消息大小限制 → Codec 形状验证 → 已注册 message type → 当前身份有效性 → resource resolver → message permission → message rate/bulkhead → onMessage → 有界发送。需求把细粒度 WS 权限放二期，但一期也必须实施 message type allowlist 与独立消息权限判定，禁止“握手通过则所有消息放行”。二期增加动态资源约束表达能力。
+每消息依次：帧/完整消息大小限制 → Codec 形状验证 → 已注册 message type → 当前身份有效性 → resource resolver → message permission → message rate/bulkhead → onMessage → 有界发送。必须实施 type allowlist 与**逐消息**权限判定，禁止「握手通过则全部消息放行」。更丰富的动态资源约束见 [待完善](service-future-work.md)。
 
 ### 5.2 顺序与流模式
 
@@ -224,7 +224,9 @@ ETag 必须来自可信版本或内容摘要，不在每次 HEAD/GET 为求 ETag
 
 复合维度使用稳定排序的 striped locks 检查全部 bucket 后一次扣减，任何维度不足都不扣；锁内不执行用户回调。retryAfter 为各不足 bucket 补足所需时间的最大值。配置上限默认 100,000 keys，idle TTL=15m；达到容量时淘汰过期项，仍满则 CAPACITY_EXHAUSTED，不创建无界 Map。
 
-这是每 JVM 的配额；部署 N 节点不会自动得到全局相同 QPS，不在文档中把本地计数当集群限流。此处不新增 Redis。
+默认实现为每 JVM 的配额；部署 N 节点不会自动得到全局相同 QPS。可选 Redis `RateLimitProvider`（模块
+`innospots-nexus-service-governance-redis`，Spring `store=redis`）在共享 Redis 上维护墙钟毫秒时间戳的令牌桶，
+供 HTTP/WebSocket 跨副本累计；runtime 契约仍只依赖 `RateLimitProvider` SPI，不绑定 Lettuce。
 
 ### 7.2 Bulkhead 与超时
 
@@ -238,7 +240,7 @@ Resilience4j core（不引 framework starter）实现 CircuitBreakerProvider。�
 
 仅记录已执行的下游失败/超时；参数、权限、本地限流、bulkhead 拒绝、客户端主动取消不计失败。慢调用按真实 workTermination 时间采样，不按返回 stage 对象耗时。OPEN 到 HALF_OPEN 的探测由调用驱动，支持成功恢复与失败重开。
 
-机制依照 [Resilience4j CircuitBreaker](https://resilience4j.readme.io/docs/circuitbreaker)；上述数值是本项目提议默认，需在 M0 验证版本 API，不声称适合所有业务。治理失败不自动触发请求重试或文件上传重放。
+机制依照 [Resilience4j CircuitBreaker](https://resilience4j.readme.io/docs/circuitbreaker)；上述数值为建议默认，须与 BOM 锁定版本 API 一致。治理失败不自动触发请求重试或文件上传重放。
 
 ## 8. 身份、安全与权限
 
@@ -250,7 +252,7 @@ PermissionProvider 接口承载 RBAC+permission+resource scope。现有 RequestA
 
 CORS 默认 origin 空白名单；带 credentials 不允许 `*`。CSRF 按身份来源：Cookie/Session 必须启用宿主 CSRF/token 或同源防护；纯 Authorization Bearer 可按应用无 Cookie 模式关闭，不能全局无条件关闭。TLS 由容器/受信反代终止，secure scheme 只信任代理配置。Security headers 默认 nosniff、适当 referrer-policy；HSTS 仅确认 HTTPS 部署时启用。
 
-Input Validation 使用宿主 Jakarta Validation 实现，异常转 INVALID_PARAMETER，不引入 base。配置 body/header/frame/file 上限。回放防护是二期 SPI，与幂等不同：签名时间戳/nonce 是安全验证，Idempotency-Key 是业务重复执行控制。
+Input Validation 使用宿主 Jakarta Validation 实现，异常转 INVALID_PARAMETER，不引入 base。配置 body/header/frame/file 上限。回放防护（签名时间戳/nonce）与幂等（Idempotency-Key）不同；回放 SPI 见 [待完善](service-future-work.md)。
 
 ## 9. 日志、Tracing 与 Metrics
 
@@ -292,7 +294,7 @@ Tracing 使用 OTel，适配器配置 instrumentation-owner=`host` 或 `service`
 
 队列默认 4096 项、16MiB，单事件 64KiB、JSON 最大深度 8；append timeout=3s、最多 3 次重试，总预算 10s。重试只针对幂等 append(eventId)，不重试业务。关闭 flush 受应用统一 30s deadline，不为每项再等 30s。
 
-## 11. 二期幂等
+## 11. 幂等（`service.idempotency.enabled`）
 
 仅显式启用的有限 JSON 写请求。key = realm+scope+principal+operationId+Idempotency-Key，fingerprint=规范化输入的 SHA-256，不包含原始凭据。最大 key 128 字符，entry=10,000、完成结果总缓存=32MiB、单结果=64KiB、TTL=10m。
 

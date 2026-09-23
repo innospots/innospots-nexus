@@ -16,9 +16,11 @@ import com.innospots.nexus.kernel.user.domain.request.UserOauthRegisterRequest;
 import com.innospots.nexus.kernel.user.domain.vo.UserProfileVo;
 
 /**
- * OAuth tenant-user data operator backed by MyBatis-Plus DAO objects.
- * <p>Registration creates a login identity only. It does not create a
- * tenant membership.</p>
+ * 基于 MyBatis-Plus DAO 的 OAuth 租户用户数据操作器。
+ * <p>注册仅创建登录身份，不创建租户成员关系。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -28,10 +30,10 @@ public class UserOauthOperator {
     private final UserOauthIdentityDao oauthIdentityDao;
 
     /**
-     * Registers a tenant-realm identity with an OAuth identity binding.
+     * 使用 OAuth 身份绑定注册租户域身份。
      *
-     * @param request OAuth registration request
-     * @return created user profile
+     * @param request OAuth registration 请求
+     * @return created 用户档案
      */
     @Transactional
     public UserProfileVo registerWithOauth(UserOauthRegisterRequest request) {

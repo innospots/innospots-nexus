@@ -5,7 +5,12 @@ import java.time.LocalDateTime;
 
 import com.innospots.nexus.core.plugin.installation.domain.enums.PluginPresence;
 
-/** 插件管理页面使用的正交安装事实、运行状态和来源视图。 */
+/**
+ * 插件管理页面使用的正交安装事实、运行状态和来源视图。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ */
 public record PluginManagementVo(
         String pluginId,
         String version,

@@ -6,7 +6,7 @@ import com.innospots.nexus.base.util.Checks;
 import com.innospots.nexus.service.contract.context.ServiceContext;
 
 /**
- * Captures the current {@link ServiceContext} and reinstalls it around delegated work.
+ * 捕获当前 {@link ServiceContext} 并在委派工作中重新安装。
  *
  * @author Smars
  * @date 2026/09/13
@@ -18,19 +18,19 @@ public final class ContextPropagation {
     private final ThreadBoundServiceContext contexts;
 
     /**
-     * Creates a propagator bound to {@code contexts}.
+     * 创建绑定到 {@code contexts} 的传播器。
      *
-     * @param contexts thread-bound accessor
+     * @param contexts 线程绑定访问器
      */
     public ContextPropagation(ThreadBoundServiceContext contexts) {
         this.contexts = Checks.notNull(contexts, "contexts");
     }
 
     /**
-     * Wraps {@code runnable} so the captured context is installed for the duration of the run.
+     * 包装 {@code runnable}，在运行期间安装已捕获上下文。
      *
-     * @param runnable work to wrap
-     * @return wrapped runnable
+     * @param runnable 待包装工作
+     * @return 包装后的 Runnable
      */
     public Runnable wrap(Runnable runnable) {
         Checks.notNull(runnable, "runnable");
@@ -39,11 +39,11 @@ public final class ContextPropagation {
     }
 
     /**
-     * Wraps {@code callable} so the captured context is installed for the duration of the call.
+     * 包装 {@code callable}，在调用期间安装已捕获上下文。
      *
-     * @param callable work to wrap
-     * @param <V>      result type
-     * @return wrapped callable
+     * @param callable 待包装工作
+     * @param <V>      结果类型
+     * @return 包装后的 Callable
      */
     public <V> Callable<V> wrap(Callable<V> callable) {
         Checks.notNull(callable, "callable");

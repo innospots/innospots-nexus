@@ -8,6 +8,9 @@ import io.quarkus.runtime.annotations.QuarkusMain;
  *
  * <p>使用 {@code application.yaml} 配置独立服务运行参数；插件策略默认值见
  * {@link com.innospots.nexus.quarkus.plugin.config.NexusPluginHostConfig}。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @QuarkusMain
 public class NexusAppServer {
@@ -21,3 +24,4 @@ public class NexusAppServer {
         Quarkus.run(args);
     }
 }
+

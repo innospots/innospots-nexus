@@ -15,7 +15,7 @@
     <packaging>jar</packaging>
 
     <name>innospots-nexus-kernel</name>
-    <description>Functional kernel module built on the management console boundary.</description>
+    <description>基于管理控制台边界构建的功能 kernel 模块。</description>
 
     <dependencies>
         <dependency>

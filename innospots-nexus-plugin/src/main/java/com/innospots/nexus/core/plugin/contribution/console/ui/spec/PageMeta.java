@@ -7,43 +7,44 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Page identity and display metadata declared by {@link PageDsl#page}.
+ * 由 {@link PageDsl#page} 声明的页面标识与展示元数据。
  *
- * <p>{@link #id} is required and should use kebab-case. {@link #name} is optional and should
- * use camelCase when present.</p>
+ * <p>{@link #id} 为必填，应使用 kebab-case。{@link #name} 为可选，存在时应使用 camelCase。</p>
+ * @author Smars
+ * @date 2026/09/13
  */
 @Getter
 @Setter
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class PageMeta {
 
-    /** Unique page identifier in kebab-case, for example {@code customer-list}. */
+    /** kebab-case 唯一页面标识，例如 {@code customer-list}。 */
     private String id;
 
-    /** Programmatic page name in camelCase, for example {@code customerList}. */
+    /** camelCase 程序化页面名称，例如 {@code customerList}。 */
     private String name;
 
-    /** Human-readable page title. */
+    /** 人类可读的页面标题。 */
     private String title;
 
-    /** Optional page description for consoles and tooling. */
+    /** 供控制台与工具使用的可选页面描述。 */
     private String description;
 
-    /** Page mode such as {@code list}, {@code detail}, {@code form}, or {@code dashboard}. */
+    /** 页面模式，如 {@code list}、{@code detail}、{@code form} 或 {@code dashboard}。 */
     private String type;
 
-    /** Optional page-level access permission. */
+    /** 可选的页面级访问权限。 */
     private PermissionConfig permission;
 
-    /** Creates empty page metadata. */
+    /** 创建空页面元数据。 */
     public PageMeta() {
     }
 
     /**
-     * Creates page metadata with the required identifier.
+     * 创建带必填标识的页面元数据。
      *
-     * @param id unique page id in kebab-case
-     * @return page metadata
+     * @param id kebab-case 唯一页面标识
+     * @return 页面元数据
      */
     public static PageMeta of(String id) {
         PageMeta meta = new PageMeta();
@@ -52,11 +53,11 @@ public class PageMeta {
     }
 
     /**
-     * Creates page metadata with identifier and title.
+     * 创建带标识与标题的页面元数据。
      *
-     * @param id unique page id
-     * @param title display title
-     * @return page metadata
+     * @param id 唯一页面标识
+     * @param title 展示标题
+     * @return 页面元数据
      */
     public static PageMeta of(String id, String title) {
         PageMeta meta = of(id);

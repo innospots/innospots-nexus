@@ -6,13 +6,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import jakarta.transaction.Transactional;
 
 import com.innospots.nexus.base.domain.enums.BasicStatus;
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.status.NexusStatusCode;
-import com.innospots.nexus.base.thread.SessionContext;
 import com.innospots.nexus.base.thread.TLC;
 import com.innospots.nexus.base.util.Checks;
 import com.innospots.nexus.console.permission.dao.PermissionGrantDao;
@@ -23,20 +23,33 @@ import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
 import com.innospots.nexus.console.permission.domain.enums.PermissionSubjectType;
 import com.innospots.nexus.console.permission.domain.request.PermissionGrantItemRequest;
 import com.innospots.nexus.console.permission.domain.request.PermissionGrantReplaceRequest;
+import com.innospots.nexus.console.scope.ConsoleOwnership;
+import com.innospots.nexus.console.scope.ConsoleOwnershipGuard;
+import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
 
-/** 管理角色和组织单元授权，并以全量替换方式保存授权结果。 */
+/**
+ * 管理角色和组织单元授权，并以全量替换方式保存授权结果。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ */
 public final class PermissionGrantService {
 
     private final PermissionGrantDao grantDao;
     private final ConsoleCatalogResourceDao resourceDao;
+    private final GrantSubjectAccess grantSubjectAccess;
 
-    /** 创建授权服务。 */
+    /**
+     * 创建授权服务。
+     */
     public PermissionGrantService(
             PermissionGrantDao grantDao,
-            ConsoleCatalogResourceDao resourceDao
+            ConsoleCatalogResourceDao resourceDao,
+            GrantSubjectAccess grantSubjectAccess
     ) {
         this.grantDao = Checks.notNull(grantDao, "grantDao");
         this.resourceDao = Checks.notNull(resourceDao, "resourceDao");
+        this.grantSubjectAccess = Checks.notNull(grantSubjectAccess, "grantSubjectAccess");
     }
 
     /**
@@ -55,27 +68,24 @@ public final class PermissionGrantService {
             String subjectId,
             PermissionGrantReplaceRequest request
     ) {
+        ConsoleOwnership ownership = ConsoleOwnershipGuard.requireWorkspaceScope();
         Checks.notNull(request, "request");
         validateSubject(subjectType, subjectId, request);
-        String workspaceId = currentWorkspaceId();
-        List<ConsoleCatalogResourceEntity> resources = resources(workspaceId, request.grants());
-        validateParents(workspaceId, resources);
+        grantSubjectAccess.ensureSubjectInScope(subjectType, subjectId);
+        List<ConsoleCatalogResourceEntity> resources = resources(request.grants());
+        validateParents(resources);
         // 全量替换保证撤销的资源不会残留，同时事务保证删除和新增一起提交。
-        grantDao.delete(Wrappers.<PermissionGrantEntity>lambdaQuery()
-                .eq(PermissionGrantEntity::getWorkspaceId, workspaceId)
-                .eq(PermissionGrantEntity::getSubjectType, subjectType.name())
-                .eq(PermissionGrantEntity::getSubjectId, subjectId));
+        grantDao.delete(grantScopeQuery(subjectType, subjectId, ownership));
         for (int i = 0; i < request.grants().size(); i++) {
             PermissionGrantItemRequest item = request.grants().get(i);
             ConsoleCatalogResourceEntity resource = resources.get(i);
             PermissionGrantEntity grant = new PermissionGrantEntity();
-            grant.setWorkspaceId(workspaceId);
+            ConsoleOwnershipScope.stamp(grant, ownership);
             grant.setSubjectType(subjectType.name());
             grant.setSubjectId(subjectId);
             grant.setResourceId(resource.getResourceId());
             grant.setConstraintDefinition(normalizeConstraint(
                     item.constraintDefinition(), resource));
-            grant.setSecurityRealm(currentSecurityRealm());
             grantDao.insert(grant);
         }
     }
@@ -91,13 +101,10 @@ public final class PermissionGrantService {
             PermissionSubjectType subjectType,
             String subjectId
     ) {
+        ConsoleOwnership ownership = ConsoleOwnershipGuard.requireWorkspaceScope();
         validateSubject(subjectType, subjectId, null);
-        String workspaceId = currentWorkspaceId();
-        List<PermissionGrantItemRequest> grants = grantDao.selectList(
-                        Wrappers.<PermissionGrantEntity>lambdaQuery()
-                                .eq(PermissionGrantEntity::getWorkspaceId, workspaceId)
-                                .eq(PermissionGrantEntity::getSubjectType, subjectType.name())
-                                .eq(PermissionGrantEntity::getSubjectId, subjectId))
+        grantSubjectAccess.ensureSubjectInScope(subjectType, subjectId);
+        List<PermissionGrantItemRequest> grants = grantDao.selectList(grantScopeQuery(subjectType, subjectId, ownership))
                 .stream()
                 .map(grant -> new PermissionGrantItemRequest(
                         grant.getResourceId(), grant.getConstraintDefinition()))
@@ -105,15 +112,14 @@ public final class PermissionGrantService {
         return new PermissionGrantReplaceRequest(grants);
     }
 
-    private List<ConsoleCatalogResourceEntity> resources(
-            String workspaceId,
-            List<PermissionGrantItemRequest> items
-    ) {
+    private List<ConsoleCatalogResourceEntity> resources(List<PermissionGrantItemRequest> items) {
         List<String> ids = items.stream().map(PermissionGrantItemRequest::resourceId).toList();
+        String realm = currentSecurityRealm();
         List<ConsoleCatalogResourceEntity> found = ids.isEmpty()
                 ? List.of()
                 : resourceDao.selectList(Wrappers.<ConsoleCatalogResourceEntity>lambdaQuery()
-                        .in(ConsoleCatalogResourceEntity::getResourceId, ids));
+                        .in(ConsoleCatalogResourceEntity::getResourceId, ids)
+                        .eq(ConsoleCatalogResourceEntity::getSecurityRealm, realm));
         if (found.size() != ids.size()) {
             invalid("Unknown permission resource");
         }
@@ -125,6 +131,9 @@ public final class PermissionGrantService {
                 .map(byId::get)
                 .toList();
         for (ConsoleCatalogResourceEntity resource : ordered) {
+            if (!realm.equals(resource.getSecurityRealm())) {
+                invalid("Unknown permission resource");
+            }
             if (!isGrantable(resource)) {
                 invalid("Resource cannot be granted: " + resource.getResourceKey());
             }
@@ -132,7 +141,8 @@ public final class PermissionGrantService {
         return ordered;
     }
 
-    private void validateParents(String workspaceId, List<ConsoleCatalogResourceEntity> resources) {
+    private void validateParents(List<ConsoleCatalogResourceEntity> resources) {
+        String realm = currentSecurityRealm();
         Set<String> selectedIds = resources.stream()
                 .map(ConsoleCatalogResourceEntity::getResourceId)
                 .collect(Collectors.toSet());
@@ -145,7 +155,8 @@ public final class PermissionGrantService {
         }
         Map<String, ConsoleCatalogResourceEntity> parents = resourceDao.selectList(
                         Wrappers.<ConsoleCatalogResourceEntity>lambdaQuery()
-                                .in(ConsoleCatalogResourceEntity::getResourceId, parentIds))
+                                .in(ConsoleCatalogResourceEntity::getResourceId, parentIds)
+                                .eq(ConsoleCatalogResourceEntity::getSecurityRealm, realm))
                 .stream()
                 .collect(Collectors.toMap(ConsoleCatalogResourceEntity::getResourceId, value -> value));
         for (ConsoleCatalogResourceEntity resource : resources) {
@@ -217,8 +228,14 @@ public final class PermissionGrantService {
         }
     }
 
-    private static String currentWorkspaceId() {
-        return SessionContext.requireWorkspaceId();
+    private static LambdaQueryWrapper<PermissionGrantEntity> grantScopeQuery(
+            PermissionSubjectType subjectType,
+            String subjectId,
+            ConsoleOwnership ownership
+    ) {
+        return ConsoleOwnershipScope.apply(Wrappers.<PermissionGrantEntity>lambdaQuery()
+                .eq(PermissionGrantEntity::getSubjectType, subjectType.name())
+                .eq(PermissionGrantEntity::getSubjectId, subjectId), ownership);
     }
 
     private static String currentSecurityRealm() {

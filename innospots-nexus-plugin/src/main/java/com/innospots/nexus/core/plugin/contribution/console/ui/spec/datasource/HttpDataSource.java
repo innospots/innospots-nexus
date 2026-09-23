@@ -7,7 +7,10 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * HTTP-backed data source. Use when a page must call a concrete HTTP endpoint directly.
+ * HTTP 后端数据源；页面需直接调用具体 HTTP 端点时使用。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @Getter
 @Setter

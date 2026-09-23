@@ -12,9 +12,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * ID generation utilities: Snowflake-based distributed IDs, random IDs
- * with configurable character sets, timestamp-prefixed IDs, and batch
- * generation.
+ * ID 生成工具，提供 Snowflake 分布式 ID、可配置字符集的随机 ID、
+ * 时间戳前缀 ID 以及批量生成能力。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class IdGenerator {
 
@@ -35,76 +37,138 @@ public final class IdGenerator {
     }
 
     /**
-     * Creates an IdGenerator with explicit datacenter and worker IDs.
-     * Both values are normalized modulo 32 for Snowflake compatibility.
+     * 创建指定数据中心与 worker ID 的生成器。
+     * 两个值均对 32 取模以兼容 Snowflake 节点范围。
+     *
+     * @param datacenterId 数据中心 ID
+     * @param workerId     worker ID
+     * @return 生成器实例
      */
     public static IdGenerator of(long datacenterId, long workerId) {
         return new IdGenerator(datacenterId, workerId);
     }
 
     /**
-     * Creates an IdGenerator deriving IDs from an IP address and port.
+     * 根据 IP 地址与端口派生节点 ID 并创建生成器。
+     *
+     * @param address IP 地址
+     * @param port    端口号
+     * @return 生成器实例
      */
     public static IdGenerator from(String address, int port) {
         return of(port, addressToLong(address));
     }
 
-    /** Reconfigures the global singleton IdGenerator. */
+    /**
+     * 重新配置全局单例生成器。
+     *
+     * @param datacenterId 数据中心 ID
+     * @param workerId     worker ID
+     */
     public static void configureGlobal(long datacenterId, long workerId) {
         global = of(datacenterId, workerId);
     }
 
-    /** Reconfigures the global singleton from IP address and port. */
+    /**
+     * 根据 IP 地址与端口重新配置全局单例生成器。
+     *
+     * @param address IP 地址
+     * @param port    端口号
+     */
     public static void configureGlobal(String address, int port) {
         global = from(address, port);
     }
 
-    /** Returns the next Snowflake ID from the global generator. */
+    /**
+     * 从全局生成器获取下一个 Snowflake ID。
+     *
+     * @return Snowflake ID
+     */
     public static long next() {
         return global.nextId();
     }
 
-    /** Returns the next Snowflake ID as a string from the global generator. */
+    /**
+     * 从全局生成器获取下一个 Snowflake ID 的字符串形式。
+     *
+     * @return Snowflake ID 字符串
+     */
     public static String nextString() {
         return global.nextIdString();
     }
 
-    /** Generates the next Snowflake ID (thread-safe). */
+    /**
+     * 生成下一个 Snowflake ID（线程安全）。
+     *
+     * @return Snowflake ID
+     */
     public synchronized long nextId() {
         return snowflakeGenerator.next();
     }
 
-    /** Generates the next Snowflake ID as a string. */
+    /**
+     * 生成下一个 Snowflake ID 的字符串形式。
+     *
+     * @return Snowflake ID 字符串
+     */
     public String nextIdString() {
         return String.valueOf(nextId());
     }
 
-    /** Generates a random alphanumeric ID (8 chars) with an optional prefix. */
+    /**
+     * 生成 8 位随机字母数字 ID，可带前缀。
+     *
+     * @param prefix 可选前缀
+     * @return 随机 ID
+     */
     public static String random(String prefix) {
         return random(prefix, Type.ALPHANUMERIC, DEFAULT_RANDOM_LENGTH);
     }
 
-    /** Generates a ULID string with an optional prefix. */
+    /**
+     * 生成 ULID 字符串，可带前缀。
+     *
+     * @param prefix 可选前缀
+     * @return ULID 字符串
+     */
     public static String ulid(String prefix) {
         Ulid ulid = UlidCreator.getUlid();
         return prepend(prefix, ulid.toString());
     }
 
-    /** Generates a monotonic ULID string with an optional prefix. */
+    /**
+     * 生成单调递增 ULID 字符串，可带前缀。
+     *
+     * @param prefix 可选前缀
+     * @return 单调 ULID 字符串
+     */
     public static String monotonicUlid(String prefix) {
         Ulid ulid = UlidCreator.getMonotonicUlid();
         return prepend(prefix, ulid.toString());
     }
 
-    /** Generates a random ID with the specified character type and length. */
+    /**
+     * 按指定字符集类型与长度生成随机 ID。
+     *
+     * @param prefix 可选前缀
+     * @param type   字符集类型
+     * @param length 随机部分长度
+     * @return 随机 ID
+     */
     public static String random(String prefix, Type type, int length) {
         validatePositive(length, "length");
         return prepend(prefix, randomPart(charset(type), length));
     }
 
     /**
-     * Generates a timestamp-prefixed ID with a random suffix.
-     * Format: {@code [prefix]yyyyMMddHHmmss[SSS][random]}.
+     * 生成时间戳前缀 ID 并附加随机后缀。
+     * 格式：{@code [prefix]yyyyMMddHHmmss[SSS][random]}。
+     *
+     * @param prefix         可选前缀
+     * @param type           随机部分字符集类型
+     * @param randomLength   随机部分长度
+     * @param includeMillis  是否包含毫秒
+     * @return 时间戳 ID
      */
     public static String timestamp(String prefix, Type type, int randomLength, boolean includeMillis) {
         validatePositive(randomLength, "randomLength");
@@ -113,12 +177,26 @@ public final class IdGenerator {
         return prepend(prefix, timestamp + randomPart(charset(type), randomLength));
     }
 
-    /** Generates a unique ID using current millis + 6 random chars. */
+    /**
+     * 使用当前毫秒时间戳加 6 位随机字符生成唯一 ID。
+     *
+     * @param prefix 可选前缀
+     * @param type   随机部分字符集类型
+     * @return 唯一 ID
+     */
     public static String unique(String prefix, Type type) {
         return prepend(prefix, System.currentTimeMillis() + randomPart(charset(type), 6));
     }
 
-    /** Generates a batch of random IDs. */
+    /**
+     * 批量生成随机 ID。
+     *
+     * @param prefix 可选前缀
+     * @param type   字符集类型
+     * @param length 每个 ID 的随机部分长度
+     * @param count  生成数量
+     * @return ID 列表
+     */
     public static List<String> batch(String prefix, Type type, int length, int count) {
         validatePositive(count, "count");
         List<String> ids = new ArrayList<>(count);
@@ -175,6 +253,12 @@ public final class IdGenerator {
         return address.hashCode();
     }
 
+    /**
+     * 随机 ID 字符集类型。
+     *
+     * @author Smars
+     * @date 2026/09/13
+     */
     public enum Type {
         NUMERIC,
         ALPHANUMERIC,

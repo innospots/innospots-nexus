@@ -27,8 +27,6 @@ class UserPackageContractsTest {
     void userDaoLivesInDaoPackage() throws ClassNotFoundException {
         assertThat(Class.forName("com.innospots.nexus.kernel.user.dao.UserDao"))
                 .isInterface();
-        assertThat(Class.forName("com.innospots.nexus.kernel.user.dao.UserPasswordCredentialDao"))
-                .isInterface();
         assertThat(Class.forName("com.innospots.nexus.kernel.user.dao.UserOauthIdentityDao"))
                 .isInterface();
     }

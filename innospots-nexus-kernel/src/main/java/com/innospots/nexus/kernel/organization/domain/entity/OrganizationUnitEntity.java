@@ -11,12 +11,14 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-import com.innospots.nexus.core.persistence.entity.TenantBaseEntity;
+import com.innospots.nexus.kernel.persistence.entity.TenantBaseEntity;
 import com.innospots.nexus.kernel.organization.domain.enums.OrganizationUnitType;
 
 /**
- * Tenant-internal organization unit. This is not {@code nx_enterprise}.
+ * 租户内部组织单元，不是 {@code nx_enterprise} 企业档案实体。
  *
+ * @author Smars
+ * @date 2026/09/13
  * @see OrganizationUnitType
  */
 @Getter
@@ -32,50 +34,55 @@ public class OrganizationUnitEntity extends TenantBaseEntity {
     public static final String TABLE_NAME = "nx_organization_unit";
 
     /**
-     * Organization unit identifier.
+     * 组织单元标识符。
      */
     @TableId(type = IdType.ASSIGN_UUID)
     @Id
     @Column(length = 32, nullable = false)
     private String unitId;
+    /**
+     * 返回主键前缀。
+     * @return 操作结果
+     */
 
+    
     @Override
     public String idPrefix() {
         return "org";
     }
 
     /**
-     * Parent unit identifier; null for the tree root.
+     * 父单元标识符；树根部为 null。
      */
     @Column(length = 32)
     private String parentId;
 
     /**
-     * Tenant-unique unit code.
+     * 租户内唯一 unit code。
      */
     @Column(length = 64, nullable = false)
     private String unitCode;
 
     /**
-     * Display name.
+     * 显示名称。
      */
     @Column(length = 128, nullable = false)
     private String unitName;
 
     /**
-     * Node type persisted as {@link OrganizationUnitType} name.
+     * 以 {@link OrganizationUnitType} 名称持久化的节点类型。
      */
     @Column(length = 32, nullable = false)
     private String unitType;
 
     /**
-     * Sibling display order.
+     * 同级显示顺序。
      */
     @Column(nullable = false)
     private Integer sortOrder;
 
     /**
-     * Lifecycle status.
+     * 生命周期状态。
      */
     @Column(length = 32, nullable = false)
     private String status;

@@ -1,16 +1,18 @@
 package com.innospots.nexus.kernel.user.domain.request;
 
 /**
- * Request object for registering a tenant-realm user with local password credentials.
+ * 使用本地密码凭证注册租户域用户的请求对象。
  *
- * @param userName          unique login user name
- * @param displayName       display name shown in UI
- * @param email             email address
- * @param mobile            mobile phone number
- * @param region            region preference such as CN
- * @param timeZone          IANA time zone such as Asia/Shanghai
- * @param language          UI language such as zh-CN
- * @param encryptedPassword frontend encrypted password payload
+ * @author Smars
+ * @date 2026/09/13
+ * @param userName          唯一登录用户名
+ * @param displayName       界面展示的显示名称
+ * @param email             邮箱地址
+ * @param mobile            手机号
+ * @param region            地区偏好，例如 CN
+ * @param timeZone          IANA 时区，例如 Asia/Shanghai
+ * @param language          界面语言，例如 zh-CN
+ * @param encryptedPassword 前端加密密码载荷
  */
 public record UserPasswordRegisterRequest(
         String userName,

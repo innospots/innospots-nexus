@@ -11,12 +11,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import com.innospots.nexus.base.domain.data.DataPage;
-import com.innospots.nexus.base.util.CryptoUtils;
-import com.innospots.nexus.console.credential.api.PasswordDecryptor;
+import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
+import com.innospots.nexus.console.credential.password.PasswordDecryptor;
+import com.innospots.nexus.console.credential.password.service.CredentialService;
 import com.innospots.nexus.kernel.user.dao.UserDao;
-import com.innospots.nexus.kernel.user.dao.UserPasswordCredentialDao;
 import com.innospots.nexus.kernel.user.domain.entity.UserEntity;
-import com.innospots.nexus.kernel.user.domain.entity.UserPasswordCredentialEntity;
 import com.innospots.nexus.kernel.user.domain.enums.UserRegisterSource;
 import com.innospots.nexus.kernel.user.domain.enums.UserStatus;
 import com.innospots.nexus.kernel.user.domain.request.UserPageRequest;
@@ -24,26 +23,26 @@ import com.innospots.nexus.kernel.user.domain.request.UserPasswordRegisterReques
 import com.innospots.nexus.kernel.user.domain.vo.UserProfileVo;
 
 /**
- * Tenant-realm user data operator backed by MyBatis-Plus DAO objects.
- * <p>Registration creates a login identity only. Tenant membership is owned
- * by {@code nx_tenant_member} and is not created here.</p>
+ * 基于 MyBatis-Plus DAO 的租户域用户数据操作器。
+ * <p>注册仅创建登录身份。租户成员关系由
+ * {@code nx_tenant_member} 存储且不在此处创建。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @Slf4j
 @RequiredArgsConstructor
 public class UserOperator {
 
-    private static final String DEFAULT_PASSWORD_ALGORITHM = "BCRYPT";
-    private static final int DEFAULT_PASSWORD_VERSION = 1;
-
     private final UserDao userDao;
-    private final UserPasswordCredentialDao passwordCredentialDao;
+    private final CredentialService credentialService;
     private final PasswordDecryptor passwordDecryptor;
 
     /**
-     * Finds a user profile by identifier.
+     * 按标识符查找用户档案。
      *
-     * @param userId tenant-realm user identifier
-     * @return user profile when found
+     * @param userId tenant-realm user 标识符
+     * @return user 找到时返回的档案
      */
     public Optional<UserProfileVo> findById(String userId) {
         if (userId == null) {
@@ -53,10 +52,10 @@ public class UserOperator {
     }
 
     /**
-     * Pages user profiles with optional fuzzy filters.
+     * 使用可选模糊过滤器分页查询用户档案。
      *
-     * @param request user page request
-     * @return user profile page
+     * @param request user page 请求
+     * @return user 档案页面
      */
     public DataPage<UserProfileVo> pageUsers(UserPageRequest request) {
         UserPageRequest pageRequest = request == null ? new UserPageRequest() : request;
@@ -73,10 +72,10 @@ public class UserOperator {
     }
 
     /**
-     * Deletes a user by identifier.
+     * 按标识符删除用户。
      *
-     * @param userId tenant-realm user identifier
-     * @return true when a row was deleted
+     * @param userId tenant-realm user 标识符
+     * @return true 记录删除时间
      */
     @Transactional
     public boolean deleteUser(String userId) {
@@ -87,10 +86,10 @@ public class UserOperator {
     }
 
     /**
-     * Freezes a user by disabling its lifecycle status.
+     * 通过禁用生命周期状态冻结用户。
      *
-     * @param userId tenant-realm user identifier
-     * @return true when a row was updated
+     * @param userId tenant-realm user 标识符
+     * @return true 记录更新时间
      */
     @Transactional
     public boolean freezeUser(String userId) {
@@ -104,10 +103,10 @@ public class UserOperator {
     }
 
     /**
-     * Unfreezes a user by restoring its lifecycle status.
+     * 通过恢复生命周期状态解冻用户。
      *
-     * @param userId tenant-realm user identifier
-     * @return true when a row was updated
+     * @param userId tenant-realm user 标识符
+     * @return true 记录更新时间
      */
     @Transactional
     public boolean unfreezeUser(String userId) {
@@ -121,11 +120,11 @@ public class UserOperator {
     }
 
     /**
-     * Registers a tenant-realm identity with local password credentials.
-     * Does not create a tenant membership.
+     * 使用本地密码凭证注册租户域身份。
+     * 不创建租户成员关系。
      *
-     * @param request registration request with frontend encrypted password
-     * @return created user profile
+     * @param request registration 请求 with 前端加密密码
+     * @return created 用户档案
      */
     @Transactional
     public UserProfileVo registerWithPassword(UserPasswordRegisterRequest request) {
@@ -142,16 +141,7 @@ public class UserOperator {
         userDao.insert(user);
 
         String rawPassword = passwordDecryptor.decrypt(request.encryptedPassword());
-        String passwordSalt = CryptoUtils.generatePasswordSalt();
-        UserPasswordCredentialEntity credential = new UserPasswordCredentialEntity();
-        credential.setTenantUserId(user.getTenantUserId());
-        credential.setPasswordHash(CryptoUtils.encryptPassword(rawPassword, passwordSalt));
-        credential.setPasswordSalt(passwordSalt);
-        credential.setPasswordAlgorithm(DEFAULT_PASSWORD_ALGORITHM);
-        credential.setPasswordVersion(DEFAULT_PASSWORD_VERSION);
-        credential.setForceReset(false);
-        credential.setFailedAttempts(0);
-        passwordCredentialDao.insert(credential);
+        credentialService.enrollPassword(SecurityRealm.TENANT, user.getTenantUserId(), rawPassword);
 
         return toProfile(user);
     }

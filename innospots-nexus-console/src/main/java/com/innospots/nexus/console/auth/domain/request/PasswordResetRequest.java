@@ -1,14 +1,16 @@
 package com.innospots.nexus.console.auth.domain.request;
 
-import com.innospots.nexus.console.credential.domain.enums.VerificationType;
+import com.innospots.nexus.console.credential.password.VerificationType;
 
 /**
- * Password reset using a verification code.
+ * 使用验证码重置密码。
  *
- * @param identity             user_name, email, or mobile
- * @param verificationCode     one-time code
- * @param type                 EMAIL or MOBILE
- * @param newEncryptedPassword frontend encrypted new password
+ * @author Smars
+ * @date 2026/09/13
+ * @param identity             user_name、email 或 mobile
+ * @param verificationCode     一次性验证码
+ * @param type                 EMAIL 或 MOBILE
+ * @param newEncryptedPassword 前端加密的新密码
  */
 public record PasswordResetRequest(
         String identity,

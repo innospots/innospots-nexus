@@ -17,6 +17,9 @@ import com.innospots.nexus.core.plugin.runtime.PluginRuntimeConfig;
  * 组装 {@link PluginRuntimeConfig} 的工厂 Bean。
  *
  * <p>合并宿主策略、{@code plugins.*} 扁平配置与可选 {@link ConfigSource} 列表。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @ApplicationScoped
 public class PluginRuntimeConfigFactory {
@@ -58,3 +61,4 @@ public class PluginRuntimeConfigFactory {
                 null);
     }
 }
+

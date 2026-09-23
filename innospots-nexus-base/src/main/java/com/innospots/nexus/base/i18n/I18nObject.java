@@ -1,21 +1,35 @@
 package com.innospots.nexus.base.i18n;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.innospots.nexus.base.json.I18nObjectDeserializer;
+import com.innospots.nexus.base.json.I18nObjectSerializer;
+
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
 /**
- * A locale-to-value map representing an internationalized string.
- * Provides locale-aware lookup with fallback: exact match (e.g.
- * {@code zh-CN}) → language-only ({@code zh}) → first available value.
+ * 表示国际化字符串的语言环境到值的映射。
+ * 提供带回退的语言环境感知查找：精确匹配（如 {@code zh-CN}）→ 仅语言（{@code zh}）→ 首个可用值。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @see I18nConverter
+ * @see I18nObjectSerializer
  */
+@JsonSerialize(using = I18nObjectSerializer.class)
+@JsonDeserialize(using = I18nObjectDeserializer.class)
 public class I18nObject extends LinkedHashMap<String, String> {
 
     private static final String DEFAULT_LANGUAGE = Locale.US.getLanguage();
 
     /**
-     * Creates an I18nObject with a single value for the default language (en).
+     * 创建仅包含默认语言（en）单个值的 I18nObject。
+     *
+     * @param value 默认值
+     * @return I18nObject 实例
      */
     public static I18nObject of(String value) {
         I18nObject object = new I18nObject();
@@ -24,7 +38,11 @@ public class I18nObject extends LinkedHashMap<String, String> {
     }
 
     /**
-     * Creates an I18nObject with a single locale-value pair.
+     * 创建包含单个语言环境-值对的 I18nObject。
+     *
+     * @param locale 语言环境
+     * @param value  值
+     * @return I18nObject 实例
      */
     public static I18nObject of(String locale, String value) {
         I18nObject object = new I18nObject();
@@ -33,7 +51,10 @@ public class I18nObject extends LinkedHashMap<String, String> {
     }
 
     /**
-     * Creates an I18nObject from an existing locale-value map.
+     * 从现有语言环境-值映射创建 I18nObject。
+     *
+     * @param values 源映射
+     * @return I18nObject 实例
      */
     public static I18nObject of(Map<String, String> values) {
         I18nObject object = new I18nObject();
@@ -44,11 +65,12 @@ public class I18nObject extends LinkedHashMap<String, String> {
     }
 
     /**
-     * Creates an I18nObject from locale-value pairs.
-     * Example: {@code I18nObject.of("en", "Hello", "zh", "你好")}
+     * 从语言环境-值对创建 I18nObject。
+     * 示例：{@code I18nObject.of("en", "Hello", "zh", "你好")}
      *
-     * @param pairs alternating locale, value, locale, value, ...
-     * @throws IllegalArgumentException if the number of arguments is odd
+     * @param pairs 交替的语言环境、值、语言环境、值……
+     * @return I18nObject 实例
+     * @throws IllegalArgumentException 参数个数为奇数时
      */
     public static I18nObject of(String... pairs) {
         if (pairs.length % 2 != 0) {
@@ -62,47 +84,59 @@ public class I18nObject extends LinkedHashMap<String, String> {
     }
 
     /**
-     * Returns the value for the current thread locale.
+     * 返回当前线程语言环境对应的值。
+     *
+     * @return 本地化值
      */
     public String defaultValue() {
         return value(I18nConverter.locale());
     }
 
-    /** Returns the English (US) value. */
+    /**
+     * 返回英语（US）值。
+     *
+     * @return 英文值
+     */
     public String enValue() {
         return value(Locale.US);
     }
 
-    /** Returns the Simplified Chinese value. */
+    /**
+     * 返回简体中文值。
+     *
+     * @return 中文值
+     */
     public String cnValue() {
         return value(Locale.SIMPLIFIED_CHINESE);
     }
 
     /**
-     * Resolves the value for the given locale with the following fallback:
-     * exact match (e.g. zh-CN) -> language-only (zh) -> other locale variants
-     * in the same language group -> first available value.
+     * 按以下回退顺序解析给定语言环境的值：
+     * 精确匹配（如 zh-CN）→ 仅语言（zh）→ 同语言组的其他变体 → 首个可用值。
+     *
+     * @param locale 目标语言环境
+     * @return 解析后的值；映射为空时返回 null
      */
     public String value(Locale locale) {
         if (isEmpty()) {
             return null;
         }
         Locale targetLocale = locale == null ? Locale.getDefault() : locale;
-        // Try exact match first: language-COUNTRY (e.g. "zh-CN")
+        // 优先精确匹配：language-COUNTRY（如 "zh-CN"）
         String value = get(normalizedLocale(targetLocale));
         if (value == null) {
-            // Fall back to language-only key (e.g. "zh")
+            // 回退到仅语言键（如 "zh"）
             value = get(targetLocale.getLanguage());
         }
-        // Fall back to any Chinese variant if target is Chinese
+        // 目标为中文时回退到任意中文变体
         if (value == null && I18nConverter.isChineseLocale(targetLocale)) {
             value = firstValue(I18nConverter.ZH_LOCALES);
         }
-        // Fall back to any English variant if target is English
+        // 目标为英文时回退到任意英文变体
         if (value == null && I18nConverter.isEnglishLocale(targetLocale)) {
             value = firstValue(I18nConverter.EN_LOCALES);
         }
-        // Ultimate fallback: first entry in the map
+        // 最终回退：映射中的第一个条目
         return value == null ? firstValue() : value;
     }
 

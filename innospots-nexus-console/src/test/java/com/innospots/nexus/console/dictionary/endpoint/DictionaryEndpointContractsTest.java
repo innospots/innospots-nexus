@@ -12,7 +12,6 @@ import jakarta.ws.rs.Path;
 import org.junit.jupiter.api.Test;
 
 import com.innospots.nexus.base.domain.enums.BasicStatus;
-import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryItemCreateRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryItemPageRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryItemStatusUpdateRequest;
@@ -26,8 +25,6 @@ import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeOptionVo;
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeVo;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 class DictionaryEndpointContractsTest {
 
     @Test
@@ -45,7 +42,7 @@ class DictionaryEndpointContractsTest {
         assertHttpMethod(DictionaryTypeEndpoint.class, "updateDictionaryTypeStatus",
                 PUT.class, String.class, DictionaryTypeStatusUpdateRequest.class);
         assertHttpMethod(DictionaryTypeEndpoint.class, "deleteDictionaryType", DELETE.class, String.class);
-        assertHttpMethod(DictionaryTypeEndpoint.class, "listDictionaryTypeOptions", GET.class);
+        assertHttpMethod(DictionaryTypeEndpoint.class, "listDictionaryTypeOptions", GET.class, BasicStatus.class);
     }
 
     @Test
@@ -63,43 +60,6 @@ class DictionaryEndpointContractsTest {
                 PUT.class, String.class, String.class, DictionaryItemStatusUpdateRequest.class);
         assertHttpMethod(DictionaryItemEndpoint.class, "deleteDictionaryItem",
                 DELETE.class, String.class, String.class);
-    }
-
-    @Test
-    void endpointMethodsRemainExplicitlyUnimplemented() {
-        DictionaryTypeEndpoint typeEndpoint = new DictionaryTypeEndpoint();
-        DictionaryItemEndpoint itemEndpoint = new DictionaryItemEndpoint();
-
-        assertThatThrownBy(() -> typeEndpoint.pageDictionaryTypes(new DictionaryTypePageRequest()))
-                .isInstanceOf(UnsupportedOperationException.class);
-        assertThatThrownBy(() -> typeEndpoint.getDictionaryType("gender"))
-                .isInstanceOf(UnsupportedOperationException.class);
-        assertThatThrownBy(() -> typeEndpoint.createDictionaryType(
-                new DictionaryTypeCreateRequest("gender", "Gender", SecurityRealm.TENANT, 1)))
-                .isInstanceOf(UnsupportedOperationException.class);
-        assertThatThrownBy(() -> typeEndpoint.updateDictionaryType(
-                "type-1", new DictionaryTypeUpdateRequest("Gender", 1)))
-                .isInstanceOf(UnsupportedOperationException.class);
-        assertThatThrownBy(() -> typeEndpoint.updateDictionaryTypeStatus(
-                "type-1", new DictionaryTypeStatusUpdateRequest(BasicStatus.DISABLED)))
-                .isInstanceOf(UnsupportedOperationException.class);
-        assertThatThrownBy(() -> typeEndpoint.deleteDictionaryType("type-1"))
-                .isInstanceOf(UnsupportedOperationException.class);
-        assertThatThrownBy(typeEndpoint::listDictionaryTypeOptions)
-                .isInstanceOf(UnsupportedOperationException.class);
-        assertThatThrownBy(() -> itemEndpoint.pageDictionaryItems("gender", new DictionaryItemPageRequest()))
-                .isInstanceOf(UnsupportedOperationException.class);
-        assertThatThrownBy(() -> itemEndpoint.createDictionaryItem(
-                "gender", new DictionaryItemCreateRequest("M", "Male", 1)))
-                .isInstanceOf(UnsupportedOperationException.class);
-        assertThatThrownBy(() -> itemEndpoint.updateDictionaryItem(
-                "gender", "item-1", new DictionaryItemUpdateRequest("Male", 1)))
-                .isInstanceOf(UnsupportedOperationException.class);
-        assertThatThrownBy(() -> itemEndpoint.updateDictionaryItemStatus(
-                "gender", "item-1", new DictionaryItemStatusUpdateRequest(BasicStatus.DISABLED)))
-                .isInstanceOf(UnsupportedOperationException.class);
-        assertThatThrownBy(() -> itemEndpoint.deleteDictionaryItem("gender", "item-1"))
-                .isInstanceOf(UnsupportedOperationException.class);
     }
 
     @Test

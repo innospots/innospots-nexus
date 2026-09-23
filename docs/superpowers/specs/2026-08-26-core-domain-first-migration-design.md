@@ -1,34 +1,30 @@
-# Core Domain-First Package Migration Design
+# Core Domain-First 包迁移设计
 
-**Date:** 2026-08-26
+**日期：** 2026-08-26
 
-**Scope:** `innospots-nexus-core`, plus import/package-reference updates in
-`innospots-nexus-kernel` that are required by the core package migration.
+**范围：** `innospots-nexus-core`，以及 core 包迁移所需的
+`innospots-nexus-kernel` import/package-reference 更新。
 
-## Goal
+## 目标
 
-Restructure the core module around domain boundaries so persistence entities
-live under the subpackage that owns their domain, shared persistence support is
-separated from concrete entities, and flat packages no longer mix models,
-events, and services. This is a package-organization refactor: keep existing
-interfaces and behavior, do not introduce a standalone `api` layer, and do not
-add complex logic or new abstractions.
+按 domain boundary 重构 core module，使 persistence entity 位于
+拥有该 domain 的子包，shared persistence support 与 concrete entity 分离，
+flat package 不再混放 model、event 与 service。这是 package-organization refactor：
+保留既有 interface 与 behavior，不引入 standalone `api` 层，
+不添加复杂逻辑或新 abstraction。
 
-## Constraints
+## 约束
 
-- Only core production and core test structure is redesigned.
-- Kernel changes are limited to imports, package declarations, and test
-  references required to compile against the new core packages.
-- No kernel business behavior, persistence shape, or domain package is
-  redesigned.
-- No compatibility classes are retained under the old core packages.
-- Existing user changes in the working tree remain untouched unless they are
-  direct references to a moved core type.
-- No core Maven module, dependency direction, table name, or event type is
-  added or removed.
-- Module skill documentation is not updated as part of this code refactor.
+- 仅 redesign core production 与 core test 结构。
+- Kernel 变更限于 import、package declaration 与
+  编译新 core package 所需的 test reference。
+- 不 redesign kernel business behavior、persistence shape 或 domain package。
+- 不在旧 core package 下保留 compatibility class。
+- working tree 中既有 user 变更保持不变，除非直接引用 moved core type。
+- 不新增或删除 core Maven module、dependency direction、table name 或 event type。
+- 本代码 refactor 不更新 module skill 文档。
 
-## Target Package Structure
+## 目标包结构
 
 ```text
 com.innospots.nexus.core
@@ -101,67 +97,64 @@ com.innospots.nexus.core
         └── WatcherSupervisor
 ```
 
-The existing extension contract/declaration split remains because it already
-separates the SPI boundary from extension metadata. The existing watcher
-interface stays a contract type and its executor/lifecycle implementation stays
-in `runtime`. Quartz records are separated from conversion and scheduler
-orchestration without introducing an adapter or API module.
+既有 extension contract/declaration 拆分保留，因其已分离 SPI boundary 与 extension metadata。
+既有 watcher interface 仍为 contract type，其 executor/lifecycle implementation 仍在
+`runtime`。Quartz record 与 conversion、scheduler orchestration 分离，
+不引入 adapter 或 API module。
 
-## Responsibility and Dependency Rules
+## 职责与依赖规则
 
-### Shared persistence foundation
+### 共享 persistence foundation
 
-`domain.entity.BaseEntity` and `ProjectBaseEntity` are the only shared entity
-parents. They contain audit/project persistence fields and no business-domain
-state. `persistence.handler.AuditMetaObjectHandler` owns MyBatis-Plus fill
-behavior, while `persistence.id.DbPrimaryGenerator` owns identifier
-generation. This removes technical infrastructure from the generic `entity`
-namespace without adding a new abstraction.
+`domain.entity.BaseEntity` 与 `ProjectBaseEntity` 是唯一 shared entity
+parent。它们包含 audit/project persistence field，无 business-domain
+state。`persistence.handler.AuditMetaObjectHandler` 拥有 MyBatis-Plus fill
+behavior，`persistence.id.DbPrimaryGenerator` 拥有 identifier
+generation。这从 generic `entity`
+namespace 移出 technical infrastructure，而不新增 abstraction。
 
 ### Session domain
 
-The session domain owns conversation/message persistence entities, in-memory
-domain models, message classification, creation events, existing repository
-interfaces, and the write service. Repository interfaces remain unchanged in
-shape and the service publishes the existing event types only after a
-successful repository save.
+Session domain 拥有 conversation/message persistence entity、in-memory
+domain model、message classification、creation event、既有 repository
+interface 与 write service。Repository interface shape 不变，
+service 仅在 repository save 成功后发布既有 event type。
 
 ### Resource domain
 
-The resource domain owns `MetaResourceEntity` because it represents project
-resource metadata rather than session or platform registry state. Its table
-name, primary-key field, and ID prefix remain unchanged.
+Resource domain 拥有 `MetaResourceEntity`，因其表示 project
+resource metadata 而非 session 或 platform registry state。table
+name、primary-key field、ID prefix 不变。
 
 ### Server domain
 
-The server domain owns service registry persistence, service metadata models,
-status/role enums, the existing registry interface, and local-node runtime
-coordination.
-`ServiceNodeHolder` is runtime coordination rather than a domain entity, so it
-does not share the `domain.entity` package with `ServiceRegistryEntity`.
+Server domain 拥有 service registry persistence、service metadata model、
+status/role enum、既有 registry interface 与 local-node runtime
+coordination。
+`ServiceNodeHolder` 是 runtime coordination 而非 domain entity，故不与
+`ServiceRegistryEntity` 共享 `domain.entity` package。
 
-### Quartz and watcher infrastructure
+### Quartz 与 watcher infrastructure
 
-Quartz request/model/enumeration types form the scheduler domain surface;
-`CronConverter` is a converter and `QuartzScheduleManager` is the scheduler
-service. The existing watcher interface remains under a contract package while
-supervisor/abstract watcher implementations remain runtime types. No Spring or
-application auto-configuration is introduced.
+Quartz request/model/enumeration type 构成 scheduler domain surface；
+`CronConverter` 是 converter，`QuartzScheduleManager` 是 scheduler
+service。既有 watcher interface 仍在 contract package，
+supervisor/abstract watcher implementation 仍为 runtime type。不引入 Spring 或
+application auto-configuration。
 
-## Logic and Compatibility Rules
+## 逻辑与兼容性规则
 
-The migration does not add business logic, interface abstractions, new
-entities, fields, indexes, table names, or event types. Existing logic is moved
-as-is, with only import/package/Javadoc updates and small mechanical cleanups
-that are necessary to compile after the move. Existing defensive copies,
-identifier generation, audit filling, scheduler lifecycle, watcher lifecycle,
-repository behavior, and event publication remain unchanged.
+迁移不添加 business logic、interface abstraction、新
+entity、field、index、table name 或 event type。既有 logic 原样迁移，
+仅 import/package/Javadoc 更新及编译所需的 small mechanical cleanup。
+既有 defensive copy、identifier generation、audit filling、scheduler lifecycle、watcher lifecycle、
+repository behavior、event publication 不变。
 
-## Migration Map
+## 迁移映射
 
-| Current type | Target package | Reason |
+| 当前类型 | 目标包 | 原因 |
 |---|---|---|
-| `core.domain.entity.BaseEntity` | unchanged | shared persistence parent |
+| `core.domain.entity.BaseEntity` | 不变 | shared persistence parent |
 | `core.entity.ProjectBaseEntity` | `core.domain.entity` | shared persistence parent |
 | `core.entity.AuditMetaObjectHandler` | `core.persistence.handler` | MyBatis infrastructure |
 | `core.entity.DbPrimaryGenerator` | `core.persistence.id` | ID infrastructure |
@@ -172,47 +165,43 @@ repository behavior, and event publication remain unchanged.
 | `core.session.Conversation` | `core.session.domain.model` | session model |
 | `core.session.SessionMessage` | `core.session.domain.model` | session model |
 | `core.session.SessionMessageType` | `core.session.domain.enums` | session enum |
-| `core.session.*CreatedEvent` | `core.session.domain.event` | session event contracts |
-| `core.session.*Repository` | `core.session.repository` | existing repository interfaces |
+| `core.session.*CreatedEvent` | `core.session.domain.event` | session event contract |
+| `core.session.*Repository` | `core.session.repository` | 既有 repository interface |
 | `core.session.SessionService` | `core.session.service` | session workflow |
 | `core.server.ServiceInfo` | `core.server.domain.model` | server metadata model |
 | `core.server.ServiceLifecycle` | `core.server.domain.model` | server state model |
-| `core.server.ServiceRole/Status` | `core.server.domain.enums` | server enums |
-| `core.server.ServiceRegistry` | `core.server.registry` | existing registry interface |
+| `core.server.ServiceRole/Status` | `core.server.domain.enums` | server enum |
+| `core.server.ServiceRegistry` | `core.server.registry` | 既有 registry interface |
 | `core.server.ServiceNodeHolder` | `core.server.runtime` | local runtime coordination |
 | `core.quartz.CronConverter` | `core.quartz.converter` | cron conversion |
 | `core.quartz.QuartzJobRequest` | `core.quartz.domain.request` | scheduler request |
-| `core.quartz.QuartzJobInfo/TriggerInfo` | `core.quartz.domain.model` | scheduler output models |
+| `core.quartz.QuartzJobInfo/TriggerInfo` | `core.quartz.domain.model` | scheduler output model |
 | `core.quartz.ScheduleMode` | `core.quartz.domain.enums` | scheduler enum |
 | `core.quartz.QuartzScheduleManager` | `core.quartz.service` | scheduler orchestration |
-| `core.watcher.IWatcher` | `core.watcher.contract` | existing watcher contract |
+| `core.watcher.IWatcher` | `core.watcher.contract` | 既有 watcher contract |
 | `core.watcher.AbstractWatcher/Supervisor` | `core.watcher.runtime` | watcher runtime |
 
-## Test Strategy
+## 测试策略
 
-1. Move core tests with their production package boundaries and update imports.
-2. Keep entity contract tests for inheritance, JPA/MyBatis annotations, table
-   names, ID lengths/types/prefixes, and audit fill behavior.
-3. Keep session, server, quartz, watcher, and extension contract tests
-   behavior-oriented; update package/import references only.
-4. Update kernel imports and test references for `ProjectBaseEntity` and
-   `DbPrimaryGenerator` only. Verify no old core package references remain.
-5. Run `mvn clean compile` immediately after each Java source edit group, then
-   run `mvn validate`, `mvn test`, and `mvn -q help:effective-pom` when all
-   package migration changes are complete.
+1. core test 随 production package boundary 迁移并更新 import。
+2. 保留 entity contract test：inheritance、JPA/MyBatis annotation、table
+   name、ID length/type/prefix、audit fill behavior。
+3. 保留 session、server、quartz、watcher、extension contract test
+   的行为导向；仅更新 package/import reference。
+4. 仅更新 kernel import 与 test reference（`ProjectBaseEntity`、
+   `DbPrimaryGenerator`）。确认无旧 core package reference。
+5. 每组 Java 源码编辑后立即 `mvn clean compile`，
+   package migration 全部完成后运行 `mvn validate`、`mvn test`、`mvn -q help:effective-pom`。
 
-## Completion Criteria
+## 完成标准
 
-- No concrete persistence entity remains under `com.innospots.nexus.core.entity`.
-- No `core.entity` package remains after the migration.
-- No standalone `api` package is introduced for the migrated modules.
-- No new interface or complex business logic is introduced.
-- Every moved type's package declaration, imports, Javadoc links, and tests are
-  consistent.
-- Kernel compiles using the new core package names without unrelated behavior
-  changes.
-- Existing tables, ID prefixes, event type strings, and public contracts remain
-  stable.
-- Core and full-repository verification commands pass on the configured JDK;
-  if the environment is older than Java 25, report that mismatch rather than
-  lowering the project baseline.
+- 无 concrete persistence entity 留在 `com.innospots.nexus.core.entity`。
+- 迁移后无 `core.entity` package。
+- migrated module 不引入 standalone `api` package。
+- 不引入新 interface 或复杂 business logic。
+- 每个 moved type 的 package declaration、import、Javadoc link、test 一致。
+- Kernel 使用新 core package name 编译，无无关 behavior
+  变更。
+- 既有 table、ID prefix、event type string、public contract 保持稳定。
+- 在 configured JDK 上 core 与全仓库 verification command 通过；
+  若环境低于 Java 25，报告 mismatch 而非降低项目基线。

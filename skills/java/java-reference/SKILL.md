@@ -4,13 +4,13 @@ display_name: Java 规范总索引
 description: |
   Java 通用规范与标准总入口。当用户询问 Java 编码规范、命名规则、注释要求、
   API 设计原则、异常与状态码约定、代码风格，或不确定某个 Java 任务应该走哪个
-  技能时使用。提供 skills/java/java-reference/standards/ 下权威规范的索引、专题参考、硬性红线速查、规范
-  冲突裁决顺序，以及 8 个 java:* 技能的路由表；并索引跨技能的 `grill-me` 调用时机。
-  其他 java:* 技能通过本技能复用规范，不得在各自正文中重复规范条文。
+  技能时使用。提供 standards/ 下权威规范的索引、专题参考、硬性红线速查、规范
+  冲突裁决顺序、8 个 java:* 技能的路由表、AGENTS.md 生成模板，以及跨技能的
+  `grill-me` 调用时机。其他 java:* 技能通过本技能复用规范，不得在各自正文中重复规范条文。
   触发词：Java 规范、编码规范、命名规范、代码风格、注释规范、API 设计、
   异常规范、状态码、java 标准、standards。
 category: java
-version: 1.6.0
+version: 1.8.0
 ---
 
 # Java 通用规范与标准
@@ -51,6 +51,7 @@ version: 1.6.0
 | 专题 | 文件 | 用途 |
 |------|------|------|
 | 硬性红线速查 | [quick-constraints.md](references/quick-constraints.md) | 按场景的最常违反约束 |
+| 结构简化与防过度设计 | [code-quality-constraints.md](references/code-quality-constraints.md) | 冗余、死代码、wrapper、双轨 API、diff 体量 smell |
 | 规范章节地图 | [standards-index.md](references/standards-index.md) | 定位规则在哪份 standards 文件的哪一节 |
 | 模块归属 | [module-ownership.md](references/module-ownership.md) | Maven 模块与业务域判定 |
 | 包结构（领域优先） | [package-structure.md](references/package-structure.md) | 领域 → 功能子模块 → 职责；禁止 service 堆积；单包 ≤15 类 |
@@ -64,12 +65,15 @@ version: 1.6.0
 | 契约测试写法 | `java:develop` → [contract-tests.md](../java-develop/references/contract-tests.md) | 实体/DAO/端点/状态码契约测试 |
 | 测试范围（设计） | `java:design` → [test-scope.md](../java-design/references/test-scope.md) | 设计阶段测什么/不测什么 |
 | 方案压力测试 | [grill-me.md](references/grill-me.md) | 重大决策前的 `/grilling` 会话 |
+| AGENTS 生成模板 | [agents-template.md](references/agents-template.md) | 新建工程/模块/设计时生成或增补 `AGENTS.md` |
 
 ## grill-me（方案压力测试）
 
 规范条文用本技能；**方案、边界、归属有歧义或多种可行路径**时，在动手前先走
-`grill-me`（见 [grill-me.md](references/grill-me.md)）。典型时机：新业务域设计前、
-四步法结论交 develop 前、新建模块前、升级方案定稿前。
+`grill-me`（见 [grill-me.md](references/grill-me.md)）。**优先触发**见
+[`AGENTS.md`](../../../AGENTS.md) → Agent 工作流：通用宽泛问题、新需求、新设计、
+新建工程/模块。典型时机：新业务域设计前、四步法结论交 develop 前、新建模块前、
+升级方案定稿前。
 
 ## 技能路由表
 
@@ -131,6 +135,7 @@ version: 1.6.0
 ## 详细参考
 
 - [quick-constraints.md](references/quick-constraints.md)
+- [code-quality-constraints.md](references/code-quality-constraints.md)
 - [standards-index.md](references/standards-index.md)
 - [module-ownership.md](references/module-ownership.md)
 - [package-structure.md](references/package-structure.md)
@@ -141,3 +146,4 @@ version: 1.6.0
 - [testing-index.md](references/testing-index.md)
 - [domain-initialization-checklist.md](references/domain-initialization-checklist.md)
 - [grill-me.md](references/grill-me.md)
+- [agents-template.md](references/agents-template.md)

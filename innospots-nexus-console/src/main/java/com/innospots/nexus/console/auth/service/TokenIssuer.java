@@ -10,7 +10,10 @@ import com.innospots.nexus.console.auth.domain.model.TokenClaims;
 import com.innospots.nexus.console.config.AuthConfig;
 
 /**
- * Issues and parses AES-GCM compact tokens. Console does not persist users.
+ * 签发并解析 AES-GCM 紧凑令牌。Console 不持久化用户。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @RequiredArgsConstructor
 public class TokenIssuer {
@@ -21,20 +24,20 @@ public class TokenIssuer {
     private final AuthConfig authConfig;
 
     /**
-     * Encrypts claims into a compact token string.
+     * 将声明加密为紧凑令牌字符串。
      *
-     * @param claims token claims
-     * @return AES-GCM compact token
+     * @param claims 令牌声明
+     * @return AES-GCM 紧凑令牌
      */
     public String issue(TokenClaims claims) {
         return CryptoUtils.encryptAesGcm(Jsons.toJson(claims), authConfig.getTokenSecret());
     }
 
     /**
-     * Decrypts a compact token into claims.
+     * 将紧凑令牌解密为声明。
      *
-     * @param token compact token
-     * @return parsed claims
+     * @param token 紧凑令牌
+     * @return parsed 声明
      */
     public TokenClaims parse(String token) {
         if (token == null || token.isBlank()) {
@@ -49,7 +52,7 @@ public class TokenIssuer {
     }
 
     /**
-     * Returns the access-token lifetime in seconds.
+     * 返回访问令牌有效期（秒）。
      *
      * @return access TTL
      */
@@ -58,7 +61,7 @@ public class TokenIssuer {
     }
 
     /**
-     * Returns the refresh-token lifetime in seconds.
+     * 返回刷新令牌有效期（秒）。
      *
      * @return refresh TTL
      */

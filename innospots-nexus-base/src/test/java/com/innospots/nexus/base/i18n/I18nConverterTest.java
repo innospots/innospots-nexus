@@ -31,6 +31,35 @@ class I18nConverterTest {
     }
 
     @Test
+    void translatesFieldFromAnnotationKeyBeforeMemberValue() {
+        I18nConverter.setLocale(Locale.US);
+        I18nConverter.setMessageResolver((key, locale) -> "dict.key".equals(key) ? "From annotation" : null);
+
+        Object translated = I18nConverter.translateAnnotatedField("dict.key", I18nObject.of("en", "From field"));
+
+        assertThat(translated).isEqualTo("From annotation");
+    }
+
+    @Test
+    void recognizesAndParsesI18nObjectShapes() {
+        assertThat(I18nConverter.isI18nObjectShape(I18nObject.of("en", "Name"))).isTrue();
+        assertThat(I18nConverter.isI18nObjectShape(Map.of("en", "Name", "zh-CN", "名称"))).isTrue();
+        assertThat(I18nConverter.isI18nObjectShape(Map.of("name", "Name"))).isFalse();
+
+        I18nObject parsed = I18nConverter.parseI18nObject(Map.of("en", "Name"));
+        assertThat(parsed).containsEntry("en", "Name");
+    }
+
+    @Test
+    void translatesLocaleMapAsI18nObject() {
+        I18nConverter.setLocale(Locale.SIMPLIFIED_CHINESE);
+
+        Object translated = I18nConverter.translate(Map.of("zh-CN", "名称", "en", "Name"));
+
+        assertThat(translated).isEqualTo("名称");
+    }
+
+    @Test
     void translatesNestedMapsListsAndI18nObjects() {
         I18nConverter.setLocale(Locale.US);
         I18nConverter.setMessageResolver((key, locale) -> "Enabled");

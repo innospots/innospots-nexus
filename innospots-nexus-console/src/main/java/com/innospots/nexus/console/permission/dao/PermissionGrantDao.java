@@ -6,7 +6,12 @@ import org.apache.ibatis.annotations.Mapper;
 
 import com.innospots.nexus.console.permission.domain.entity.PermissionGrantEntity;
 
-/** 角色和组织单元授权记录的单表数据访问接口。 */
+/**
+ * 角色和组织单元授权记录的单表数据访问接口。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ */
 @Mapper
 public interface PermissionGrantDao extends BaseMapper<PermissionGrantEntity> {
 }

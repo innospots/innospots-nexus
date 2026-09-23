@@ -3,14 +3,16 @@ package com.innospots.nexus.core.plugin.contribution.console.ui.spec.filter;
 import com.innospots.nexus.core.plugin.contribution.console.ui.spec.PageDsl;
 
 /**
- * Binds request parameters into the page DSL {@code state} map.
+ * 将请求参数绑定到页面 DSL 的 {@code state} 映射。
  *
- * <p>Request parameters override existing state keys because render-time filters typically run
- * after the document is loaded from storage.</p>
+ * <p>请求参数覆盖已有状态键，因渲染时过滤器通常在文档从存储加载后执行。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class StateBindingPageDslFilter implements PageDslFilter {
 
-    /** Creates a state-binding filter. */
+    /** 创建状态绑定过滤器。 */
     public StateBindingPageDslFilter() {
     }
 

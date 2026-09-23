@@ -4,9 +4,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Execution context for a single run. Contains immutable input parameters
- * ({@code inputs}) and a mutable working memory ({@code context}) that
- * executors can read and write during execution.
+ * 单次运行的执行上下文。包含不可变输入参数（{@code inputs}）与执行器可在运行期间读写的可变工作内存（{@code context}）。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @see ExecutionRecord
  */
 public class ExecutionContext {
 
@@ -25,7 +27,7 @@ public class ExecutionContext {
     }
 
     /**
-     * Creates a context with the given execution ID and empty inputs/context maps.
+     * 使用给定执行 ID 及空 inputs/context 映射创建上下文。
      */
     public static ExecutionContext create(String executionId) {
         return new ExecutionContext(executionId);
@@ -36,77 +38,80 @@ public class ExecutionContext {
     }
 
     /**
-     * Sets an input parameter. Inputs are part of the immutable execution boundary.
+     * 设置输入参数。输入属于不可变的执行边界。
      */
     public ExecutionContext input(String key, Object value) {
         inputs.put(key, value);
         return this;
     }
 
-    /** Gets an input parameter by key. */
+    /** 按键获取输入参数。 */
     public Object getInput(String key) {
         return inputs.get(key);
     }
 
-    /** Gets an input parameter as a String, or null. */
+    /** 将输入参数作为 String 获取，不存在时返回 null。 */
     public String getInputString(String key) {
         Object value = getInput(key);
         return value == null ? null : String.valueOf(value);
     }
 
-    /** Gets an input parameter as an Integer, or null. */
+    /** 将输入参数作为 Integer 获取，不存在时返回 null。 */
     public Integer getInputInteger(String key) {
         return toInteger(getInput(key));
     }
 
-    /** Gets an input parameter as a Long, or null. */
+    /** 将输入参数作为 Long 获取，不存在时返回 null。 */
     public Long getInputLong(String key) {
         return toLong(getInput(key));
     }
 
-    /** Returns an unmodifiable view of all input parameters. */
+    /** 返回所有输入参数的不可修改视图。 */
     public Map<String, Object> inputs() {
         return Map.copyOf(inputs);
     }
 
     /**
-     * Puts a value into the mutable working context. Unlike inputs, context
-     * can be read and written by executors during execution.
+     * 向可变工作上下文写入值。与 inputs 不同，context 可在执行期间被执行器读写。
+     *
+     * @param key   上下文键
+     * @param value 上下文值
+     * @return 当前上下文实例，支持链式调用
      */
     public ExecutionContext put(String key, Object value) {
         context.put(key, value);
         return this;
     }
 
-    /** Gets a context value by key. */
+    /** 按键获取上下文值。 */
     public Object get(String key) {
         return context.get(key);
     }
 
-    /** Gets a context value as a String, or null. */
+    /** 将上下文值作为 String 获取，不存在时返回 null。 */
     public String getString(String key) {
         Object value = get(key);
         return value == null ? null : String.valueOf(value);
     }
 
-    /** Gets a context value as an Integer, or null. */
+    /** 将上下文值作为 Integer 获取，不存在时返回 null。 */
     public Integer getInteger(String key) {
         return toInteger(get(key));
     }
 
-    /** Gets a context value as a Long, or null. */
+    /** 将上下文值作为 Long 获取，不存在时返回 null。 */
     public Long getLong(String key) {
         return toLong(get(key));
     }
 
-    /** Returns an unmodifiable view of the mutable context map. */
+    /** 返回可变上下文映射的不可修改视图。 */
     public Map<String, Object> context() {
         return Map.copyOf(context);
     }
 
     /**
-     * Converts a raw value to Integer using type-safe pattern matching:
-     * Integer passthrough, Number -> intValue(), String -> parseInt(), others -> null.
+     * 使用类型安全模式匹配将原始值转为 Integer：
+     * Integer 原样返回，Number 调用 intValue()，String 解析为整数，其余返回 null。
      */
     private static Integer toInteger(Object value) {
         return switch (value) {
@@ -119,8 +124,8 @@ public class ExecutionContext {
     }
 
     /**
-     * Converts a raw value to Long: Long passthrough, Number -> longValue(),
-     * String -> parseLong(), others -> null.
+     * 将原始值转为 Long：Long 原样返回，Number 调用 longValue()，
+     * String 解析为长整数，其余返回 null。
      */
     private static Long toLong(Object value) {
         return switch (value) {

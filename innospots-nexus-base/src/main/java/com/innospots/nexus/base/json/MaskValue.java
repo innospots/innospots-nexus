@@ -6,29 +6,39 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marks a field or accessor for masking during JSON serialization.
- * <p>Masking is activated only when the {@link MaskingModule} is registered
- * on the Jackson {@code ObjectMapper}. Without the module, the annotation
- * is ignored and fields serialize with their original values.</p>
+ * 标记字段或访问器在 JSON 序列化时进行脱敏。
+ * <p>仅当 {@link MaskingModule} 注册到 Jackson {@code ObjectMapper} 时脱敏才生效。
+ * 未注册模块时，该注解被忽略，字段以原始值序列化。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @see MaskStrategy
+ * @see MaskingModule
  */
 @Target({ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface MaskValue {
 
     /**
-     * The masking strategy to apply.
+     * 应用的脱敏策略。
+     *
+     * @return 脱敏策略
      */
     MaskStrategy value() default MaskStrategy.HIDE;
 
     /**
-     * Number of leading characters to keep visible.
-     * Only used when {@link #value()} is {@link MaskStrategy#CUSTOM}.
+     * 保留可见的前导字符数。
+     * 仅在 {@link #value()} 为 {@link MaskStrategy#CUSTOM} 时使用。
+     *
+     * @return 前导保留字符数
      */
     int keepHead() default 0;
 
     /**
-     * Number of trailing characters to keep visible.
-     * Only used when {@link #value()} is {@link MaskStrategy#CUSTOM}.
+     * 保留可见的尾部字符数。
+     * 仅在 {@link #value()} 为 {@link MaskStrategy#CUSTOM} 时使用。
+     *
+     * @return 尾部保留字符数
      */
     int keepTail() default 0;
 }

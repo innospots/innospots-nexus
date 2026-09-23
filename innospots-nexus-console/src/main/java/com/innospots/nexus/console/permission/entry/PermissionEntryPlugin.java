@@ -7,7 +7,10 @@ import com.innospots.nexus.core.plugin.contract.Plugin;
 import com.innospots.nexus.core.plugin.declaration.PluginDefinition;
 
 /**
- * Built-in entry plugin that contributes the permission management main page.
+ * 贡献权限管理主页面的内置 entry 插件。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class PermissionEntryPlugin implements Plugin {
 
@@ -25,7 +28,12 @@ public final class PermissionEntryPlugin implements Plugin {
             I18nObject.of("en", "Permission", "zh", "权限"),
             I18nObject.of("en", "Console permission management.", "zh", "控制台权限管理。"),
             I18nObject.of("en", "Permission Management", "zh", "权限管理"));
+    /**
+     * 返回插件定义。
+     * @return 操作结果
+     */
 
+    
     @Override
     public PluginDefinition definition() {
         return ConsoleModuleEntrySupport.definition(DESCRIPTOR);

@@ -2,6 +2,8 @@ package com.innospots.nexus.core.plugin.resource;
 
 /**
  * 每次启动周期的资源所有权边界，按注册逆序释放资源。
+ * @author Smars
+ * @date 2026/09/13
  */
 public interface ResourceScope extends AutoCloseable {
 

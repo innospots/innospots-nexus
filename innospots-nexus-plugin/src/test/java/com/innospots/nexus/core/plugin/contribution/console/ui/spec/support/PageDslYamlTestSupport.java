@@ -11,7 +11,9 @@ import com.innospots.nexus.core.plugin.contribution.console.ui.spec.config.PageD
 import com.innospots.nexus.core.plugin.contribution.console.ui.spec.parser.JacksonPageDslParser;
 
 /**
- * Shared YAML helpers for Page DSL deserialization tests.
+ * Page DSL 反序列化测试的共享 YAML 辅助工具。
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class PageDslYamlTestSupport {
 
@@ -19,9 +21,9 @@ public final class PageDslYamlTestSupport {
     }
 
     /**
-     * Returns a YAML mapper configured like {@link JacksonPageDslParser}.
+     * 返回与 {@link JacksonPageDslParser} 相同配置的 YAML 映射器。
      *
-     * @return configured mapper
+     * @return 已配置的映射器
      */
     public static ObjectMapper yamlMapper() {
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory()
@@ -32,31 +34,31 @@ public final class PageDslYamlTestSupport {
     }
 
     /**
-     * Returns a strict parser that validates documents after deserialization.
+     * 返回反序列化后校验文档的严格解析器。
      *
-     * @return parser
+     * @return 解析器
      */
     public static JacksonPageDslParser strictParser() {
         return new JacksonPageDslParser(PageDslConfig.defaults());
     }
 
     /**
-     * Parses a full page document through the strict parser.
+     * 通过严格解析器解析完整页面文档。
      *
-     * @param yaml page YAML
-     * @return parsed document
+     * @param yaml 页面 YAML
+     * @return 解析后的文档
      */
     public static PageDsl parsePage(String yaml) {
         return strictParser().parse(yaml);
     }
 
     /**
-     * Deserializes YAML into the requested type without running page validation.
+     * 将 YAML 反序列化为请求类型，不执行页面校验。
      *
-     * @param yaml YAML content
-     * @param type target type
-     * @param <T> target type
-     * @return deserialized value
+     * @param yaml YAML 内容
+     * @param type 目标类型
+     * @param <T> 目标类型
+     * @return 反序列化结果
      */
     public static <T> T read(String yaml, Class<T> type) {
         try {
@@ -67,16 +69,16 @@ public final class PageDslYamlTestSupport {
     }
 
     /**
-     * Serializes a value to YAML using the shared mapper.
+     * 使用共享映射器将值序列化为 YAML。
      *
-     * @param value value to serialize
-     * @return YAML text
+     * @param value 待序列化的值
+     * @return YAML 文本
      */
     public static String write(Object value) {
         try {
             return yamlMapper().writeValueAsString(value);
         } catch (JsonProcessingException exception) {
-            throw new IllegalStateException("Cannot write YAML for " + value.getClass().getSimpleName(), exception);
+            throw new IllegalStateException("Cannot write YAML 的" + value.getClass().getSimpleName(), exception);
         }
     }
 }

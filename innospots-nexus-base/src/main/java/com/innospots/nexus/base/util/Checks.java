@@ -6,8 +6,13 @@ import com.innospots.nexus.base.status.NexusStatusCode;
 import java.util.Collection;
 
 /**
- * Precondition checks that fail with {@link NexusException} and
- * {@link NexusStatusCode#INVALID_PARAMETER}.
+ * 前置条件校验工具，校验失败时抛出携带 {@link NexusStatusCode#INVALID_PARAMETER} 的
+ * {@link NexusException}。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @see NexusException
+ * @see NexusStatusCode
  */
 public final class Checks {
 
@@ -15,13 +20,13 @@ public final class Checks {
     }
 
     /**
-     * Returns {@code value} when it is not null.
+     * 要求值非 null，否则抛出异常。
      *
-     * @param value required value
-     * @param name  parameter name used in the error message
-     * @param <T>   value type
-     * @return the same value
-     * @throws NexusException when {@code value} is null
+     * @param value 待校验值
+     * @param name  参数名，用于错误消息
+     * @param <T>   值类型
+     * @return 原值
+     * @throws NexusException 当 {@code value} 为 null 时
      */
     public static <T> T notNull(T value, String name) {
         if (value == null) {
@@ -31,12 +36,12 @@ public final class Checks {
     }
 
     /**
-     * Returns {@code value} when it is not blank.
+     * 要求字符串非空白，否则抛出异常。
      *
-     * @param value required text
-     * @param name  parameter name used in the error message
-     * @return the same value
-     * @throws NexusException when {@code value} is null or blank
+     * @param value 待校验文本
+     * @param name  参数名，用于错误消息
+     * @return 原值
+     * @throws NexusException 当 {@code value} 为 null 或空白时
      */
     public static String notBlank(String value, String name) {
         if (StringUtils.isBlank(value)) {
@@ -46,11 +51,11 @@ public final class Checks {
     }
 
     /**
-     * Accepts a true expression and rejects a false one.
+     * 要求表达式为 true，否则抛出异常。
      *
-     * @param expression condition that must hold
-     * @param message    error message when the condition is false
-     * @throws NexusException when {@code expression} is false
+     * @param expression 必须为 true 的条件
+     * @param message    条件为 false 时的错误消息
+     * @throws NexusException 当 {@code expression} 为 false 时
      */
     public static void isTrue(boolean expression, String message) {
         if (!expression) {
@@ -59,12 +64,12 @@ public final class Checks {
     }
 
     /**
-     * Returns {@code value} when it is strictly positive.
+     * 要求数值严格为正，否则抛出异常。
      *
-     * @param value required positive number
-     * @param name  parameter name used in the error message
-     * @return the same value
-     * @throws NexusException when {@code value} is zero or negative
+     * @param value 待校验数值
+     * @param name  参数名，用于错误消息
+     * @return 原值
+     * @throws NexusException 当 {@code value} 为零或负数时
      */
     public static long positive(long value, String name) {
         if (value <= 0) {
@@ -74,13 +79,13 @@ public final class Checks {
     }
 
     /**
-     * Returns {@code value} when it is not null and not empty.
+     * 要求集合非 null 且非空，否则抛出异常。
      *
-     * @param value    required collection
-     * @param name     parameter name used in the error message
-     * @param <T>      element type
-     * @return the same collection
-     * @throws NexusException when {@code value} is null or empty
+     * @param value 待校验集合
+     * @param name  参数名，用于错误消息
+     * @param <T>   集合类型
+     * @return 原集合
+     * @throws NexusException 当 {@code value} 为 null 或空时
      */
     public static <T extends Collection<?>> T notEmpty(T value, String name) {
         if (value == null || value.isEmpty()) {

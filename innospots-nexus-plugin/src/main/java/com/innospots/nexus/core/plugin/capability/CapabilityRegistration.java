@@ -12,6 +12,8 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
  * @param providerRef Provider 稳定身份
  * @param tags 合并后的路由标签
  * @param <T> Provider 契约类型
+ * @author Smars
+ * @date 2026/09/13
  */
 public record CapabilityRegistration<T extends CapabilityProvider>(
         CapabilityType<T> type,

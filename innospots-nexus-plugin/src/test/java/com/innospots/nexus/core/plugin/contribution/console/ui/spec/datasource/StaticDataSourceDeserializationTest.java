@@ -9,7 +9,9 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests YAML deserialization for {@link StaticDataSource}.
+ * 测试 {@link StaticDataSource} 的 YAML 反序列化。
+ * @author Smars
+ * @date 2026/09/13
  */
 class StaticDataSourceDeserializationTest {
 

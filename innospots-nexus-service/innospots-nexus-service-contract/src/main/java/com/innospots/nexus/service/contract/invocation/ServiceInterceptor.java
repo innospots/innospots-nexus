@@ -3,7 +3,7 @@ package com.innospots.nexus.service.contract.invocation;
 import java.util.concurrent.CompletionStage;
 
 /**
- * Ordered interceptor around a service invocation. Failed enter skips later interceptors.
+ * 围绕服务调用的有序拦截器。进入失败则跳过后续拦截器。
  *
  * @author Smars
  * @date 2026/09/13
@@ -14,24 +14,24 @@ import java.util.concurrent.CompletionStage;
 public interface ServiceInterceptor {
 
     /**
-     * Returns the interceptor identifier.
+     * 返回拦截器标识。
      *
-     * @return stable id
+     * @return 稳定标识
      */
     String id();
 
     /**
-     * Returns the interceptor order. Lower values run first on enter.
+     * 返回拦截器顺序。较小值在进入时先执行。
      *
-     * @return order
+     * @return 顺序值
      */
     int order();
 
     /**
-     * Enters the interceptor and returns a lease to finish later.
+     * 进入拦截器并返回稍后完成的租约。
      *
-     * @param invocation current invocation
-     * @return lease
+     * @param invocation 当前调用
+     * @return 租约
      */
     CompletionStage<InvocationLease> enter(InvocationContext invocation);
 }

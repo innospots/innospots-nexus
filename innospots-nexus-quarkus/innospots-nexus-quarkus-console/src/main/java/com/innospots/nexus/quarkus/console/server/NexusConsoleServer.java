@@ -7,6 +7,9 @@ import io.quarkus.runtime.annotations.QuarkusMain;
  * Nexus 管理控制台 Quarkus 入口。
  *
  * <p>classpath 包含 {@code innospots-nexus-quarkus-console} 时启动完整控制台装配。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @QuarkusMain
 public class NexusConsoleServer {
@@ -20,3 +23,4 @@ public class NexusConsoleServer {
         Quarkus.run(args);
     }
 }
+

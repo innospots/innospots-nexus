@@ -4,5 +4,9 @@
  * <p>提供 Core Mapper 扫描与 MyBatis-Plus 默认行为；运行参数见
  * {@code quarkus.mybatis.*}、{@code quarkus.index-dependency.nexus-core} 与
  * {@code application.yaml}。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 package com.innospots.nexus.quarkus.bootstrap;
+

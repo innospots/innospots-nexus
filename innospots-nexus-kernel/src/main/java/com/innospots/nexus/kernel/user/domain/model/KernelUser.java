@@ -3,13 +3,15 @@ package com.innospots.nexus.kernel.user.domain.model;
 import com.innospots.nexus.kernel.user.domain.enums.UserStatus;
 
 /**
- * Kernel user aggregate root for identity management.
+ * 身份管理的 Kernel 用户聚合根。
  *
- * @param userId      user identifier
- * @param account     login account
- * @param displayName display name
- * @param email       email address
- * @param status      lifecycle status
+ * @author Smars
+ * @date 2026/09/13
+ * @param userId      user 标识符
+ * @param account     登录账号
+ * @param displayName 显示名称
+ * @param email       邮箱地址
+ * @param status      生命周期状态
  */
 public record KernelUser(
         String userId,

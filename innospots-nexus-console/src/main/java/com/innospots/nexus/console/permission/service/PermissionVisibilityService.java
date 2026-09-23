@@ -8,9 +8,13 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 
 import com.innospots.nexus.base.domain.enums.BasicStatus;
+import com.innospots.nexus.base.thread.TLC;
+import com.innospots.nexus.console.scope.ConsoleOwnership;
+import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
 import com.innospots.nexus.console.permission.dao.PermissionGrantDao;
 import com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao;
 import com.innospots.nexus.console.permission.domain.entity.PermissionGrantEntity;
@@ -19,13 +23,20 @@ import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
 import com.innospots.nexus.console.permission.domain.enums.PermissionSubjectType;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubject;
 
-/** 按当前主体构建菜单、页面、action 和 datasource 的可见资源视图。 */
+/**
+ * 按当前主体构建菜单、页面、action 和 datasource 的可见资源视图。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ */
 public final class PermissionVisibilityService {
 
     private final ConsoleCatalogResourceDao resourceDao;
     private final PermissionGrantDao grantDao;
 
-    /** 创建权限资源可见性服务。 */
+    /**
+     * 创建权限资源可见性服务。
+     */
     public PermissionVisibilityService(
             ConsoleCatalogResourceDao resourceDao,
             PermissionGrantDao grantDao
@@ -96,14 +107,12 @@ public final class PermissionVisibilityService {
     private Set<String> grantedResourceIds(String workspaceId, AuthorizationSubject subject) {
         List<PermissionGrantEntity> grants = new ArrayList<>();
         if (!subject.roleIds().isEmpty()) {
-            grants.addAll(grantDao.selectList(Wrappers.<PermissionGrantEntity>lambdaQuery()
-                    .eq(PermissionGrantEntity::getWorkspaceId, workspaceId)
+            grants.addAll(grantDao.selectList(scopeGrantQuery(workspaceId)
                     .eq(PermissionGrantEntity::getSubjectType, PermissionSubjectType.ROLE.name())
                     .in(PermissionGrantEntity::getSubjectId, subject.roleIds())));
         }
         if (!subject.orgUnitIds().isEmpty()) {
-            grants.addAll(grantDao.selectList(Wrappers.<PermissionGrantEntity>lambdaQuery()
-                    .eq(PermissionGrantEntity::getWorkspaceId, workspaceId)
+            grants.addAll(grantDao.selectList(scopeGrantQuery(workspaceId)
                     .eq(PermissionGrantEntity::getSubjectType, PermissionSubjectType.ORG_UNIT.name())
                     .in(PermissionGrantEntity::getSubjectId, subject.orgUnitIds())));
         }
@@ -111,6 +120,15 @@ public final class PermissionVisibilityService {
                 .map(PermissionGrantEntity::getResourceId)
                 .filter(value -> value != null && !value.isBlank())
                 .collect(Collectors.toSet());
+    }
+
+    private static LambdaQueryWrapper<PermissionGrantEntity> scopeGrantQuery(String workspaceId) {
+        String realm = TLC.securityRealm();
+        if (realm == null || realm.isBlank()) {
+            realm = "TENANT";
+        }
+        ConsoleOwnership ownership = ConsoleOwnershipScope.workspaceOwnership(workspaceId, realm);
+        return ConsoleOwnershipScope.apply(Wrappers.<PermissionGrantEntity>lambdaQuery(), ownership);
     }
 
     private boolean parentVisible(

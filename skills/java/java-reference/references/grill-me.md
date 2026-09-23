@@ -3,9 +3,6 @@
 `grill-me` 是**方案与决策压力测试**技能，通过多轮结构化问答（`/grilling` 会话）
 在动手前消歧义、暴露隐含假设、固化设计树。它**不产出代码**，产出是双方确认的设计结论。
 
-**最佳实践（会前准备、回答方式、结论沉淀、反模式）：**
-[`docs/grill-me-best-practices.md`](../../../../docs/grill-me-best-practices.md)
-
 触发方式：在对话中附加 `grill-me` 技能，或使用 `/grill-me` + 待审查范围（模块路径、
 方案文档、技能目录等）。
 
@@ -34,10 +31,15 @@ npx skills use "https://github.com/mattpocock/skills" --skill "grill-me"
 
 在**重大决策尚未固化、存在多个可行分支**时调用。Agent 自行查证事实，把**决策**留给开发者。
 
+**优先触发**（见 [`AGENTS.md`](../../../../AGENTS.md) → Agent 工作流）：
+
+- 问题**通用、宽泛、不具体**——边界、归属、术语尚未清晰
+- **新需求**、**新设计**、**新建 Maven 工程/模块**
+
 | 阶段 | 调用时机 | 审查对象示例 |
 |------|---------|-------------|
-| **`java:project` 之前（必经）** | **新建 Maven 模块、调整 reactor、改依赖方向** | `pom.xml`、`module-layout.md`、目标模块路径 |
-| **`java:design` 之前（必经）** | **新业务域、新设计、新增模块对应的设计** | `skills/java/`、目标模块、`docs/design/*.md` |
+| **`java:project` 之前（必经）** | **新建 Maven 模块、调整 reactor、改依赖方向** | `AGENTS.md`、`pom.xml`、`module-layout.md`、目标模块路径 |
+| **`java:design` 之前（必经）** | **新业务域、新设计、新增模块对应的设计** | `AGENTS.md`、`skills/java/`、目标模块、`docs/design/*.md` |
 | 设计前 | 跨模块能力、边界仍模糊 | 同上 |
 | 设计后 / 开发前 | 四步法草稿完成，准备交 `java:develop` | 归属表、词汇表、契约骨架 |
 | 工程结构变更前 | 新建模块、改依赖方向、拆合模块 | `pom.xml`、`module-layout.md`、目标模块源码 |

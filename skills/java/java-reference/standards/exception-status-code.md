@@ -122,11 +122,11 @@ endpoint 基础设施集中捕获 `NexusException` 并映射为 `R.fail(...)`（
 MODULE (3 uppercase letters) + CATEGORY (2 digits) + LOCAL (4 digits)
 ```
 
-例如，`NEX080002` 表示 module `NEX`、category `08`、local code `0002`。`StatusCodeRules` 是形态校验的权威来源。状态枚举必须从 `bisCode()` 和 `fullCode()` 返回相同值。
+例如，`AIO080002` 表示 module `AIO`、category `08`、local code `0002`。`StatusCodeRules` 是形态校验的权威来源。状态枚举必须从 `bisCode()` 和 `fullCode()` 返回相同值。
 
 | 段 | 规则 | 含义 |
 | --- | --- | --- |
-| Module | 恰好三个大写 ASCII 字母，如 `NEX` 或 `PLG` | 所属产品/模块或技术边界。 |
+| Module | 恰好三个大写 ASCII 字母，如 `AIO` 或 `PLG` | 所属产品/模块或技术边界。 |
 | Category | 恰好两位十进制数字，由 `StatusCategory` 支撑 | 失败语义，不是 HTTP 状态。 |
 | Local | 恰好四位十进制数字，通常零填充 | module/category 命名空间内的稳定分配。 |
 
@@ -190,7 +190,7 @@ MODULE (3 uppercase letters) + CATEGORY (2 digits) + LOCAL (4 digits)
 
 1. **添加前先搜索。** 搜索 `NexusStatusCode`、领域状态枚举、技术状态枚举和调用点，查找含义相同的已有码。比较 category、HTTP 映射、message、advice 和兼容性预期，而非仅枚举名。
 2. **决定归属。** 将失败分类为平台级、领域特定或技术。在编写枚举前确认 Maven 模块和包。
-3. **预留 module 段。** 使用已有批准的三字母 module 码（`NEX`、`PLG` 或其他注册码）。新 module 段需要注册表/白名单更新和评审；切勿发明与其他 module 冲突的码。
+3. **预留 module 段。** 使用已有批准的三字母 module 码（`AIO`、`PLG` 或其他注册码）。新 module 段需要注册表/白名单更新和评审；切勿发明与其他 module 冲突的码。
 4. **选择 category。** 选择描述失败语义的 `StatusCategory`。若无当前类别适合，在分配 local 码之前单独提议 category 扩展。
 5. **分配 local 码。** 在所属 module 命名空间中选择未使用的四位 local 值。检查该 module 中的所有状态，包括同级文件和生成/注册表定义。切勿重新编号已有码以使列表看起来连续。
 6. **定义稳定元数据。** 添加 `UPPER_SNAKE_CASE` 常量、双语 message 和 advice（有意成功/无 advice 状态除外）、category、local 码和有意 HTTP 映射。文本必须解释稳定条件和安全下一步；不要放入运行时 ID、密钥或提供方文本。

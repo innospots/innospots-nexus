@@ -8,7 +8,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 
 /**
- * Deserializes expression strings or boolean literals.
+ * 反序列化表达式字符串或布尔字面量。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class ExpressionOrBooleanDeserializer extends JsonDeserializer<Object> {
 

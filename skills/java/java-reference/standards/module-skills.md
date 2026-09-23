@@ -78,12 +78,48 @@ skills/java/java-reference/references/modules/<artifact-id>/
 
 类用途说明。
 
-### 方法/字段名
-- **签名：** `methodName(ParamType param) → ReturnType`
+### 组件（record）
+
+| 名称 | 类型 | 说明 |
+|------|------|------|
+| `fieldName` | `FieldType` | 组件含义与约束 |
+
+### 成员变量
+
+| 名称 | 类型 | 说明 |
+|------|------|------|
+| `fieldName` | `FieldType` | 字段含义与约束 |
+
+### 枚举常量
+
+| 常量 | 说明 |
+|------|------|
+| `CONSTANT` | 常量含义 |
+
+### 构造方法
+
+#### `ClassName(ParamType param)`
+- **说明：** 构造器职责与校验行为
+- **参数：**
+  - `param` — 参数说明
+- **异常：**（如适用）
+
+### 方法
+
+#### `methodName(ParamType param) → ReturnType`
 - **说明：** 方法做什么
-- **参数：**（如适用）参数名 + 类型 + 说明
+- **参数：**
+  - `param` — 参数说明
 - **返回：** 返回值说明
+- **异常：**（如适用）
 ```
+
+生成要求：
+
+- **record** 必须列出全部组件（名称、类型、说明）；说明优先取自类型 Javadoc 的 `@param`，其次取自工厂方法/紧凑构造器。
+- **class** 必须列出带 Javadoc 的**成员变量**（名称、类型、说明）。
+- **class / record** 必须列出全部 **public/protected 构造方法**（签名、说明、参数、异常）。
+- **enum** 列出各枚举常量说明（业务含义不显而易见时必填）。
 
 ## 一致性规则
 

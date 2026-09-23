@@ -8,7 +8,9 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests {@link EventMapDeserializer} for component event bindings.
+ * 测试 {@link EventMapDeserializer} 对组件事件绑定的反序列化。
+ * @author Smars
+ * @date 2026/09/13
  */
 class EventMapDeserializerTest {
 

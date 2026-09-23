@@ -6,7 +6,7 @@ import java.util.function.Consumer;
 import com.innospots.nexus.base.util.Checks;
 
 /**
- * Read-only cancellation signal for the current invocation.
+ * 当前调用的只读取消信号。
  *
  * @author Smars
  * @date 2026/09/13
@@ -16,32 +16,31 @@ import com.innospots.nexus.base.util.Checks;
 public interface CancellationToken {
 
     /**
-     * Returns whether cancellation has been requested.
+     * 返回是否已请求取消。
      *
-     * @return {@code true} when cancelled
+     * @return 已取消时为 {@code true}
      */
     boolean isCancelled();
 
     /**
-     * Returns the cancellation reason when cancelled.
+     * 已取消时返回取消原因。
      *
-     * @return reason or empty
+     * @return 原因，未取消时为空
      */
     Optional<CancellationReason> reason();
 
     /**
-     * Registers a listener invoked at most once when cancelled. If already cancelled, the listener
-     * is invoked immediately on the calling thread.
+     * 注册取消时最多调用一次的监听器。若已取消，则在调用线程立即执行。
      *
-     * @param listener cancellation callback
-     * @return registration that can be closed to unsubscribe
+     * @param listener 取消回调
+     * @return 可关闭以取消订阅的注册句柄
      */
     CancellationRegistration onCancel(Consumer<CancellationReason> listener);
 
     /**
-     * Returns a token that is never cancelled.
+     * 返回永不被取消的令牌。
      *
-     * @return never-cancelled token
+     * @return 永不取消的令牌
      */
     static CancellationToken none() {
         return NeverCancelledToken.INSTANCE;

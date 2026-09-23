@@ -4,16 +4,21 @@ import com.innospots.nexus.core.plugin.contribution.console.ui.spec.PageDsl;
 
 import java.util.Map;
 
-/** Render-time API for loading and preparing page DSL documents. */
+/**
+ * 加载与准备页面 DSL 文档的渲染时 API。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ */
 public interface PageDslEndpoint {
 
     /**
-     * Loads and prepares one page DSL document.
+     * 加载并准备一个页面 DSL 文档。
      *
-     * @param moduleKey owning module key
-     * @param pageKey page key matching {@code page.id}
-     * @param parameters runtime request parameters
-     * @return prepared page DSL document
+     * @param moduleKey 所属模块键
+     * @param pageKey 与 {@code page.id} 匹配的页面键
+     * @param parameters 运行时请求参数
+     * @return 已准备的页面 DSL 文档
      */
     PageDsl render(String moduleKey, String pageKey, Map<String, Object> parameters);
 }

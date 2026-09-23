@@ -16,8 +16,11 @@ import lombok.Setter;
 import com.innospots.nexus.core.persistence.entity.BaseEntity;
 
 /**
- * OAuth identity binding for a tenant-realm user and one external identity
- * provider subject.
+ * 租户域用户与单个外部身份的 OAuth 身份绑定
+ * 提供方主体。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @Getter
 @Setter
@@ -32,74 +35,79 @@ public class UserOauthIdentityEntity extends BaseEntity {
     public static final String TABLE_NAME = "nx_tenant_user_oauth";
 
     /**
-     * OAuth identity binding identifier.
+     * OAuth 身份绑定标识符。
      */
     @TableId(type = IdType.ASSIGN_UUID)
     @Id
     @Column(length = 32, nullable = false)
     private String identityId;
+    /**
+     * 返回主键前缀。
+     * @return 操作结果
+     */
 
+    
     @Override
     public String idPrefix() {
         return "toi";
     }
 
     /**
-     * Tenant-realm user identifier.
+     * 租户域用户标识符。
      */
     @Column(length = 32, nullable = false)
     private String tenantUserId;
 
     /**
-     * External identity provider name.
+     * 外部身份提供方名称。
      */
     @Column(length = 64, nullable = false)
     private String provider;
 
     /**
-     * Provider-side unique subject identifier.
+     * 提供方侧唯一主体标识符。
      */
     @Column(length = 256, nullable = false)
     private String providerSubject;
 
     /**
-     * Provider-side account handle.
+     * 提供方侧账号句柄。
      */
     @Column(length = 128)
     private String providerAccount;
 
     /**
-     * Display name reported by the provider.
+     * 提供方上报的显示名称。
      */
     @Column(length = 128)
     private String providerDisplayName;
 
     /**
-     * Email address reported by the provider.
+     * 身份提供方上报的邮箱地址。
      */
     @Column(length = 128)
     private String providerEmail;
 
     /**
-     * Avatar URL reported by the provider.
+     * 提供方上报的头像 URL。
      */
     @Column(length = 512)
     private String providerAvatarUrl;
 
     /**
-     * Storage key of the provider access token.
+     * 提供方访问令牌的存储键。
      */
     @Column(length = 256)
     private String accessTokenKey;
 
     /**
-     * Storage key of the provider refresh token.
+     * 提供方刷新令牌的存储键。
      */
     @Column(length = 256)
     private String refreshTokenKey;
 
     /**
-     * Access token expiry time.
+     * 访问令牌过期时间。
      */
     @Column
     private LocalDateTime tokenExpiresAt;

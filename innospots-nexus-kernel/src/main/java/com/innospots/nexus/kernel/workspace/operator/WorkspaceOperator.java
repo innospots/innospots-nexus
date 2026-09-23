@@ -10,7 +10,10 @@ import com.innospots.nexus.kernel.workspace.dao.WorkspaceDao;
 import com.innospots.nexus.kernel.workspace.domain.entity.WorkspaceEntity;
 
 /**
- * Tenant workspace data operator backed by MyBatis-Plus DAO objects.
+ * 基于 MyBatis-Plus DAO 的租户工作区数据操作器。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @RequiredArgsConstructor
 public class WorkspaceOperator {
@@ -18,11 +21,11 @@ public class WorkspaceOperator {
     private final WorkspaceDao workspaceDao;
 
     /**
-     * Finds a workspace snapshot scoped to the given tenant.
+     * 查找给定租户作用域内的工作区快照。
      *
-     * @param tenantId    owning tenant identifier
-     * @param workspaceId workspace identifier
-     * @return workspace snapshot when found and tenant matches
+     * @param tenantId    owning tenant 标识符
+     * @param workspaceId workspace 标识符
+     * @return workspace 找到且租户匹配时返回的快照
      */
     public Optional<WorkspaceSnapshot> findSnapshot(String tenantId, String workspaceId) {
         if (tenantId == null || workspaceId == null) {

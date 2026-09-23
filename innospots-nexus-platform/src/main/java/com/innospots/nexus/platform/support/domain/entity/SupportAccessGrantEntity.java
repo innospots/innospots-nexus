@@ -17,8 +17,10 @@ import com.innospots.nexus.core.persistence.entity.BaseEntity;
 import com.innospots.nexus.platform.support.domain.enums.SupportAccessStatus;
 
 /**
- * Time-bounded grant allowing a platform user to access one tenant.
+ * 允许平台用户访问单个租户的时间限定授权。
  *
+ * @author Smars
+ * @date 2026/09/13
  * @see SupportAccessStatus
  */
 @Getter
@@ -34,50 +36,55 @@ public class SupportAccessGrantEntity extends BaseEntity {
     public static final String TABLE_NAME = "nx_support_access_grant";
 
     /**
-     * Support-access grant identifier.
+     * 支持访问授权标识符。
      */
     @TableId(type = IdType.ASSIGN_UUID)
     @Id
     @Column(length = 32, nullable = false)
     private String grantId;
+    /**
+     * 返回主键前缀。
+     * @return 操作结果
+     */
 
+    
     @Override
     public String idPrefix() {
         return "sag";
     }
 
     /**
-     * Tenant being accessed.
+     * 被访问的租户。
      */
     @Column(length = 32, nullable = false)
     private String tenantId;
 
     /**
-     * Platform user receiving access.
+     * 获得访问权限的平台用户。
      */
     @Column(length = 32, nullable = false)
     private String platformUserId;
 
     /**
-     * Business reason for the grant.
+     * 授权的业务原因。
      */
     @Column(length = 512, nullable = false)
     private String reason;
 
     /**
-     * Tenant-admin account that approved the grant.
+     * 批准该授权的租户管理员账号。
      */
     @Column(length = 32)
     private String approvedBy;
 
     /**
-     * Absolute expiry time.
+     * 绝对过期时间。
      */
     @Column(nullable = false)
     private LocalDateTime expireAt;
 
     /**
-     * Lifecycle status persisted as {@link SupportAccessStatus} name.
+     * 以 {@link SupportAccessStatus} 名称持久化的生命周期状态。
      */
     @Column(length = 32, nullable = false)
     private String status;

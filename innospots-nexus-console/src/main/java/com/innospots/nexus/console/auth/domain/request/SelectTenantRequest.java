@@ -1,9 +1,11 @@
 package com.innospots.nexus.console.auth.domain.request;
 
 /**
- * Selects the current tenant after identity authentication.
+ * 身份认证后选择当前租户。
  *
- * @param tenantId tenant to activate
+ * @author Smars
+ * @date 2026/09/13
+ * @param tenantId 待激活的租户
  */
 public record SelectTenantRequest(String tenantId) {
 }

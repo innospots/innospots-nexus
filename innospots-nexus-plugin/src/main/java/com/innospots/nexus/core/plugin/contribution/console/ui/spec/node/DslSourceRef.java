@@ -8,10 +8,12 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Dynamic DSL fragment loaded from service or HTTP sources.
+ * 从服务或 HTTP 源加载的动态 DSL 片段。
  *
- * <p>Loads UI structure rather than business data. Use {@link #placeholder} to render a
- * fallback node while the remote DSL is loading.</p>
+ * <p>加载 UI 结构而非业务数据。远程 DSL 加载期间可使用 {@link #placeholder} 渲染回退节点。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @Getter
 @Setter

@@ -6,7 +6,11 @@ import com.innospots.nexus.base.util.IdGenerator;
 import com.innospots.nexus.core.persistence.entity.BaseEntity;
 
 /**
- * MyBatis-Plus primary-key generator for Nexus persistence entities.
+ * Nexus 持久化实体的 MyBatis-Plus 主键生成器。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @see BaseEntity
  */
 public class DbPrimaryGenerator implements IdentifierGenerator {
 

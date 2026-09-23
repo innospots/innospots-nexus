@@ -1,20 +1,31 @@
 package com.innospots.nexus.kernel.organization.domain.enums;
 
 /**
- * Internal organization-tree node type. {@code COMPANY} is the tree root,
- * not the platform enterprise legal profile.
+ * 内部组织树节点类型。{@code COMPANY} 为树根，
+ * 而非平台企业法定档案。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public enum OrganizationUnitType {
 
-    /** Internal tree root for a tenant. */
+    /**
+     * 租户内部树根节点。
+     */
     COMPANY,
 
-    /** Branch or regional node. */
+    /**
+     * 分支或区域节点。
+     */
     BRANCH,
 
-    /** Department node. */
+    /**
+     * 部门节点。
+     */
     DEPARTMENT,
 
-    /** Team node. */
+    /**
+     * 团队节点。
+     */
     TEAM
 }

@@ -14,7 +14,7 @@
     <artifactId>innospots-nexus-service-http</artifactId>
 
     <name>innospots-nexus-service-http</name>
-    <description>HTTP API processing policies and response mapping boundaries.</description>
+    <description>HTTP API 处理策略与响应映射边界。</description>
 
     <dependencies>
         <dependency>

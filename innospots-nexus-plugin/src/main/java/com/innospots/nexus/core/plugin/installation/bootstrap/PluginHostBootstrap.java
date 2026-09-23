@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory;
  *
  * <p>按固定顺序执行 classpath 发现、安装事实对账、运行时创建与 eligible 插件启动。
  * 返回的 {@link PluginInstallationManager} 由宿主持有，用于管理命令、Capability 查询与关闭。</p>
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class PluginHostBootstrap {
 

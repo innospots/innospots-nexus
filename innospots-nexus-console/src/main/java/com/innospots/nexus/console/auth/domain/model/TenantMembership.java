@@ -1,10 +1,12 @@
 package com.innospots.nexus.console.auth.domain.model;
 
 /**
- * Active tenant membership used after tenant-realm identity authentication.
+ * 租户域身份认证后使用的活跃租户成员关系。
  *
- * @param tenantId       tenant identifier
- * @param tenantMemberId tenant member identifier
+ * @author Smars
+ * @date 2026/09/13
+ * @param tenantId       tenant 标识符
+ * @param tenantMemberId tenant member 标识符
  */
 public record TenantMembership(String tenantId, String tenantMemberId) {
 }

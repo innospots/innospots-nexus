@@ -12,29 +12,32 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * One action invocation registered in the runtime action registry.
+ * 在运行时动作注册表中注册的一次动作调用。
  *
- * <p>When {@link #id} is present, the action result is exposed as
- * {@code ${actions.id}} to subsequent steps in the same scope.</p>
+ * <p>当 {@link #id} 存在时，动作结果在同一作用域的后续步骤中可通过
+ * {@code ${actions.id}} 引用。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @Getter
 @Setter
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class ActionConfig {
 
-    /** Optional result name for later expression references. */
+    /** 可选结果名称，供后续表达式引用。 */
     private String id;
 
-    /** Action registry name, for example {@code reload}, {@code setState}, or {@code call}. */
+    /** 动作注册表名称，例如 {@code reload}、{@code setState} 或 {@code call}。 */
     private String action;
 
-    /** Action-specific parameters. Structure depends on the registered action. */
+    /** 动作特定参数；结构取决于已注册的动作。 */
     private Map<String, Object> params = new LinkedHashMap<>();
 
-    /** Optional execution guard. Accepts a boolean literal or expression string. */
+    /** 可选执行守卫；接受布尔字面量或表达式字符串。 */
     @JsonDeserialize(using = ExpressionOrBooleanDeserializer.class)
     private Object condition;
 
-    /** Optional action-level permission. */
+    /** 可选动作级权限。 */
     private PermissionConfig permission;
 }

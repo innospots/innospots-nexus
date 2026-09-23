@@ -15,7 +15,7 @@
     <packaging>jar</packaging>
 
     <name>innospots-nexus-quarkus-console</name>
-    <description>Quarkus management console assembly for innospots-nexus.</description>
+    <description>innospots-nexus 的 Quarkus 管理控制台组装。</description>
 
     <dependencies>
         <dependency>

@@ -1,10 +1,13 @@
 package com.innospots.nexus.core.plugin.contribution.console.ui.spec.node;
 
 /**
- * UI tree node declared by {@code type} or {@code component}.
+ * 以 {@code type} 或 {@code component} 声明的 UI 树节点。
  *
- * <p>This sealed branch covers inline nodes only. Dynamic {@link DslSourceRef} fragments are
- * modeled separately because they load UI structure from remote sources.</p>
+ * <p>此密封分支仅覆盖内联节点。动态 {@link DslSourceRef} 片段单独建模，因其从远程源加载
+ * UI 结构。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public sealed interface DslNode extends DslRenderable permits ComponentNode, ComponentReferenceNode {
 }

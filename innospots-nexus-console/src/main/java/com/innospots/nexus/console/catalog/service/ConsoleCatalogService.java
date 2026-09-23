@@ -16,12 +16,19 @@ import com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao;
 import com.innospots.nexus.console.catalog.domain.entity.ConsoleCatalogResourceEntity;
 import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
 
-/** 从宿主级目录索引组装权限设置树。 */
+/**
+ * 从宿主级目录索引组装权限设置树。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ */
 public final class ConsoleCatalogService {
 
     private final ConsoleCatalogResourceDao resourceDao;
 
-    /** 创建目录树查询服务。 */
+    /**
+     * 创建目录树查询服务。
+     */
     public ConsoleCatalogService(ConsoleCatalogResourceDao resourceDao) {
         if (resourceDao == null) {
             throw NexusException.build(NexusStatusCode.CONFIG_ERROR, "resourceDao is required");

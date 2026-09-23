@@ -16,7 +16,12 @@ import com.innospots.nexus.console.menu.domain.vo.NavigationMenuVo;
 import com.innospots.nexus.console.navigation.service.NavigationMenuAssembler;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubjectResolver;
 
-/** 当前用户可见的侧边栏导航接口。 */
+/**
+ * 当前用户可见的侧边栏导航接口。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ */
 @Path("/console/navigation/menus")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -25,7 +30,9 @@ public final class NavigationMenuEndpoint {
     private final NavigationMenuAssembler assembler;
     private final AuthorizationSubjectResolver subjectResolver;
 
-    /** 创建导航菜单接口。 */
+    /**
+     * 创建导航菜单接口。
+     */
     public NavigationMenuEndpoint(
             NavigationMenuAssembler assembler,
             AuthorizationSubjectResolver subjectResolver

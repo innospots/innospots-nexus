@@ -3,9 +3,11 @@ package com.innospots.nexus.console.dictionary.domain.request;
 import com.innospots.nexus.base.domain.enums.BasicStatus;
 
 /**
- * Request for enabling or disabling a dictionary type.
+ * 启用或禁用字典类型的请求。
  *
- * @param status target type status
+ * @author Smars
+ * @date 2026/09/13
+ * @param status 目标类型状态
  */
 public record DictionaryTypeStatusUpdateRequest(BasicStatus status) {
 }

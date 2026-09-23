@@ -7,7 +7,11 @@ import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.i18n.I18nObject;
 import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
-/** Console 菜单树节点；目录和页面入口互斥。 */
+/**
+ * Console 菜单树节点；目录和页面入口互斥。
+ * @author Smars
+ * @date 2026/09/13
+ */
 public record MenuDeclaration(
         String menuKey,
         I18nObject title,

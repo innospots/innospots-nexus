@@ -3,10 +3,10 @@ package com.innospots.nexus.service.contract.security;
 import com.innospots.nexus.base.util.Checks;
 
 /**
- * Authorization decision. Denials carry a non-sensitive reason code.
+ * 授权决策。拒绝时携带非敏感原因码。
  *
- * @param allowed    whether access is granted
- * @param reasonCode empty when allowed
+ * @param allowed    是否允许访问
+ * @param reasonCode 允许时为空
  * @author Smars
  * @date 2026/09/13
  * @see PermissionProvider
@@ -22,19 +22,19 @@ public record PermissionDecision(boolean allowed, String reasonCode) {
     }
 
     /**
-     * Returns an allow decision.
+     * 返回允许决策。
      *
-     * @return allow
+     * @return 允许
      */
     public static PermissionDecision allow() {
         return new PermissionDecision(true, "");
     }
 
     /**
-     * Returns a deny decision with a non-sensitive reason code.
+     * 返回带非敏感原因码的拒绝决策。
      *
-     * @param reasonCode reason code mapped to NO_PERMISSION externally
-     * @return deny
+     * @param reasonCode 对外映射为 NO_PERMISSION 的原因码
+     * @return 拒绝
      */
     public static PermissionDecision deny(String reasonCode) {
         return new PermissionDecision(false, reasonCode);

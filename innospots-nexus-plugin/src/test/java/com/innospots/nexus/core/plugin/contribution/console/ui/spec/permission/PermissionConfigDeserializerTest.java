@@ -9,7 +9,9 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests {@link PermissionConfigDeserializer} for string, array, and object forms.
+ * 测试 {@link PermissionConfigDeserializer} 对字符串、数组与对象形式的反序列化。
+ * @author Smars
+ * @date 2026/09/13
  */
 class PermissionConfigDeserializerTest {
 

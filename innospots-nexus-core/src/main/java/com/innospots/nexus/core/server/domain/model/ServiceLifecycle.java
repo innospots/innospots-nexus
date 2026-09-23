@@ -6,9 +6,12 @@ import lombok.Setter;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Mutable lifecycle state for a local service node.
- * <p>Thread-safe via {@link AtomicBoolean} and {@code volatile} fields.
- * Tracks whether the node is running, its cluster key, and leader status.</p>
+ * 本地服务节点的可变生命周期状态。
+ * <p>通过 {@link AtomicBoolean} 与 {@code volatile} 字段保证线程安全，
+ * 跟踪节点是否运行、集群键及 Leader 状态。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public class ServiceLifecycle {
 
@@ -19,32 +22,32 @@ public class ServiceLifecycle {
     @Setter
     private volatile boolean leader;
 
-    /** Returns true while the service is running (not shut down). */
+    /** 服务仍在运行（未关闭）时返回 {@code true}。 */
     public boolean isRunning() {
         return running.get();
     }
 
-    /** Returns true after {@link #shutdown()} has been called. */
+    /** 调用 {@link #shutdown()} 后返回 {@code true}。 */
     public boolean isShutdown() {
         return !running.get();
     }
 
-    /** Gracefully marks the service as stopped. */
+    /** 将服务标记为已停止。 */
     public void shutdown() {
         running.set(false);
     }
 
-    /** Returns the cluster-wide server key ({@code host:port}). */
+    /** 返回集群范围的服务键（{@code host:port}）。 */
     public String serverKey() {
         return serverKey;
     }
 
-    /** Returns true if this node is the current leader. */
+    /** 当前节点是否为 Leader 时返回 {@code true}。 */
     public boolean isLeader() {
         return leader;
     }
 
-    /** True once a server key has been assigned via registration. */
+    /** 已通过注册分配服务键时返回 {@code true}。 */
     public boolean isRegistered() {
         return serverKey != null;
     }

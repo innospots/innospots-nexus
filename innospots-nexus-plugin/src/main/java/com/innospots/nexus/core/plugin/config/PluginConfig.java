@@ -9,6 +9,8 @@ import com.innospots.nexus.base.exception.NexusException;
 
 /**
  * 限定在一个插件命名空间内的不可变已校验配置视图。
+ * @author Smars
+ * @date 2026/09/13
  */
 public interface PluginConfig {
 

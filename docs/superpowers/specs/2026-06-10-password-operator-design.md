@@ -1,20 +1,17 @@
-# Password Operator Design
+# Password Operator 设计
 
-## Overview
+## 概述
 
-Add `PasswordOperator` to the kernel user module for password change (with
-old password) and password reset (via verification code). A
-`PasswordVerificationOperator` SPI is declared; the default placeholder
-throws `UnsupportedOperationException`.
+在 kernel user 模块新增 `PasswordOperator`，支持密码修改（需旧密码）与
+密码重置（通过验证码）。声明 `PasswordVerificationOperator` SPI；默认占位实现
+抛出 `UnsupportedOperationException`。
 
-## Root Cause
+## 根因
 
-Users need to change their password when they know the current one, and reset
-their password when they are locked out (via email / mobile verification code).
-Current `UserOperator` only provides registration and lifecycle management, not
-password modification.
+用户需要在知道当前密码时修改密码，在无法登录时通过 email / mobile 验证码
+重置密码。当前 `UserOperator` 仅提供注册与生命周期管理，不含密码修改。
 
-## Directory Impact
+## 目录影响
 
 ```
 innospots-nexus-kernel/src/main/java/com/innospots/nexus/kernel/user/operator/
@@ -24,25 +21,24 @@ innospots-nexus-kernel/src/main/java/com/innospots/nexus/kernel/user/operator/
 └── VerificationType.java          (new)
 ```
 
-## designs
+## 设计
 
 ### PasswordOperator
 
-`com.innospots.nexus.kernel.user.operator.PasswordOperator` is the concrete
-service class that owns password update logic. It does not extend or
-implement any other interface—upper layers depend on it directly.
+`com.innospots.nexus.kernel.user.operator.PasswordOperator` 是拥有密码更新逻辑的
+具体 service 类。它不继承或实现任何其他 interface——上层直接依赖它。
 
-**Dependencies**
+**依赖**
 
-| Field | Type | Source |
+| 字段 | 类型 | 来源 |
 |-------|------|--------|
-| `userDao` | `UserDao` | existing |
-| `passwordCredentialDao` | `UserPasswordCredentialDao` | existing |
-| `passwordDecryptor` | `UserPasswordDecryptor` | existing |
-| `verificationOperator` | `PasswordVerificationOperator` | new |
-| `validator` | `PasswordValidator` | new |
+| `userDao` | `UserDao` | 现有 |
+| `passwordCredentialDao` | `UserPasswordCredentialDao` | 现有 |
+| `passwordDecryptor` | `UserPasswordDecryptor` | 现有 |
+| `verificationOperator` | `PasswordVerificationOperator` | 新增 |
+| `validator` | `PasswordValidator` | 新增 |
 
-**Methods**
+**方法**
 
 ```java
 public class PasswordOperator {
@@ -62,24 +58,24 @@ public class PasswordOperator {
 }
 ```
 
-### Password change flow
+### 密码修改流程
 
-1. Look up `UserEntity` by `userId`.
-2. Look up `UserPasswordCredentialEntity` by `userId`.
-3. Verify `oldPassword` against stored hash (same algorithm as
-   `UserPasswordCredentialDao.selectByUserId`).
-4. Reject if `oldPassword` equals `newPassword`.
-5. Validate `newPassword` strength via `PasswordValidator`.
-6. Hash and save the new password (increment `passwordVersion`, reset
-   `failedAttempts`, clear `lockedUntil` on success).
+1. 按 `userId` 查找 `UserEntity`。
+2. 按 `userId` 查找 `UserPasswordCredentialEntity`。
+3. 对照存储 hash 验证 `oldPassword`（算法与
+   `UserPasswordCredentialDao.selectByUserId` 相同）。
+4. 若 `oldPassword` 等于 `newPassword` 则拒绝。
+5. 通过 `PasswordValidator` 校验 `newPassword` 强度。
+6. Hash 并保存新密码（递增 `passwordVersion`，成功时重置
+   `failedAttempts`，清除 `lockedUntil`）。
 
-### Password reset flow
+### 密码重置流程
 
-1. Resolve `UserEntity` by `identity` (userName / email / mobile).
-2. Verify the verification code via `PasswordVerificationOperator`.
-3. If code is invalid/expired, throw `VerificationCodeException`.
-4. Validate `newPassword` strength.
-5. Hash and save the new password (set `forceReset = true`).
+1. 按 `identity`（userName / email / mobile）解析 `UserEntity`。
+2. 通过 `PasswordVerificationOperator` 验证验证码。
+3. 若验证码无效/过期，抛出 `VerificationCodeException`。
+4. 校验新密码强度。
+5. Hash 并保存新密码（设置 `forceReset = true`）。
 
 ### PasswordVerificationOperator interface
 
@@ -105,9 +101,8 @@ public interface PasswordVerificationOperator {
 }
 ```
 
-Default implementation (`NullPasswordVerificationOperator` in the same
-package) throws `UnsupportedOperationException` for every method. Future
-implementations live outside the kernel module.
+默认实现（同包 `NullPasswordVerificationOperator`）对所有方法抛出
+`UnsupportedOperationException`。未来实现位于 kernel 模块之外。
 
 ### VerificationType enum
 
@@ -118,9 +113,8 @@ public enum VerificationType {
 }
 ```
 
-Indicates the transport channel used for the verification code. When the
-real verification service is added later, `identity` maps to email or
-mobile respectively.
+表示验证码传输通道。后续接入真实 verification service 时，`identity` 分别
+映射到 email 或 mobile。
 
 ### PasswordValidator
 
@@ -150,29 +144,27 @@ public class PasswordValidator {
 }
 ```
 
-Strength requirement: length >= 8, must contain uppercase + lowercase + digit.
+强度要求：长度 >= 8，必须包含大写 + 小写 + 数字。
 
-### Exception types
+### 异常类型
 
-| Exception | When |
+| 异常 | 时机 |
 |-----------|------|
-| `PasswordMismatchException` | Old password does not match stored hash |
-| `PasswordTooYoungException` | New password equals old password |
-| `PasswordStrengthException` | New password fails `PasswordValidator` |
-| `VerificationCodeException` | Verification code invalid / expired |
-| `PasswordResetNotSupportedError` | `NullPasswordVerificationOperator` invoked |
+| `PasswordMismatchException` | 旧密码与存储 hash 不匹配 |
+| `PasswordTooYoungException` | 新密码等于旧密码 |
+| `PasswordStrengthException` | 新密码未通过 `PasswordValidator` |
+| `VerificationCodeException` | 验证码无效 / 过期 |
+| `PasswordResetNotSupportedError` | 调用 `NullPasswordVerificationOperator` |
 
-### Transaction strategy
+### 事务策略
 
-Both `changePassword` and `resetPassword` are `@Transactional`. They only
-touch `nx_user` (for lookups) and `nx_user_password` (credential update),
-so a single Peloton isolation level suffices.
+`changePassword` 与 `resetPassword` 均为 `@Transactional`。它们仅触及
+`nx_user`（查询）与 `nx_user_password`（credential 更新），
+单一 Peloton 隔离级别即可。
 
-### Non-functional decisions
+### 非功能决策
 
-- No rate-limiting or brute-force protection in the kernel layer — handled
-  by the authentication gateway.
-- No password history check (prevent reuse of last N passwords) — deferred
-  to a future enhancement.
-- `PasswordValidator` constants (`MIN_LENGTH`, character class requirements)
-  are public `static final` fields so they can be read by upper-layer tests.
+- kernel 层不做 rate-limiting 或 brute-force 防护 — 由 authentication gateway 处理。
+- 不做 password history check（禁止复用最近 N 个密码）— 延后到未来增强。
+- `PasswordValidator` 常量（`MIN_LENGTH`、字符类要求）
+  为 public `static final` 字段，供上层测试读取。

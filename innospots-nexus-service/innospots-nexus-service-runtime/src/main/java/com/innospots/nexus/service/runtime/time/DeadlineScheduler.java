@@ -12,7 +12,7 @@ import com.innospots.nexus.service.contract.time.Deadline;
 import com.innospots.nexus.service.runtime.cancellation.CancellationSource;
 
 /**
- * Schedules cancellation when a finite deadline elapses.
+ * 有限截止时间到期时调度取消。
  *
  * @author Smars
  * @date 2026/09/13
@@ -24,20 +24,20 @@ public final class DeadlineScheduler {
     private final ScheduledExecutorService executor;
 
     /**
-     * Creates a scheduler using {@code executor}.
+     * 使用 {@code executor} 创建调度器。
      *
-     * @param executor scheduler
+     * @param executor 调度执行器
      */
     public DeadlineScheduler(ScheduledExecutorService executor) {
         this.executor = Checks.notNull(executor, "executor");
     }
 
     /**
-     * Cancels {@code source} when {@code deadline} expires. Unlimited deadlines are ignored.
+     * {@code deadline} 到期时取消 {@code source}。无限制截止时间被忽略。
      *
-     * @param deadline deadline to watch
-     * @param source   cancellation write-side
-     * @return registration that cancels the scheduled task
+     * @param deadline 待监视截止时间
+     * @param source   取消写侧
+     * @return 可取消已调度任务的注册句柄
      */
     public CancellationRegistration schedule(Deadline deadline, CancellationSource source) {
         Checks.notNull(deadline, "deadline");

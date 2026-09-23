@@ -7,7 +7,11 @@ import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.i18n.I18nObject;
 import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
-/** 一个 Console 管理模块及其页面树、菜单树。 */
+/**
+ * 一个 Console 管理模块及其页面树、菜单树。
+ * @author Smars
+ * @date 2026/09/13
+ */
 public record ConsoleModuleDeclaration(
         String moduleKey,
         I18nObject displayName,

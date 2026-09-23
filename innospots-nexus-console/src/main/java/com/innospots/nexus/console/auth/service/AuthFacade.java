@@ -1,128 +1,146 @@
 package com.innospots.nexus.console.auth.service;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.base.util.Checks;
-import com.innospots.nexus.base.util.CryptoUtils;
-import com.innospots.nexus.console.auth.api.CredentialStore;
 import com.innospots.nexus.console.auth.api.MembershipDirectory;
 import com.innospots.nexus.console.auth.api.UserDirectory;
 import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
 import com.innospots.nexus.console.auth.domain.model.AuthUser;
-import com.innospots.nexus.console.auth.domain.model.CredentialRecord;
 import com.innospots.nexus.console.auth.domain.model.TenantMembership;
 import com.innospots.nexus.console.auth.domain.model.TokenClaims;
 import com.innospots.nexus.console.auth.domain.request.AuthLoginRequest;
 import com.innospots.nexus.console.auth.domain.request.SelectTenantRequest;
 import com.innospots.nexus.console.auth.domain.request.TokenRefreshRequest;
+import com.innospots.nexus.console.auth.domain.vo.AuthCaptchaVo;
 import com.innospots.nexus.console.auth.domain.vo.AuthTokenVo;
-import com.innospots.nexus.console.credential.api.PasswordDecryptor;
+import com.innospots.nexus.console.credential.password.PasswordDecryptor;
+import com.innospots.nexus.console.credential.password.service.CredentialService;
 import com.innospots.nexus.console.scope.service.SessionScopeBinder;
 
 /**
- * Orchestrates realm login, tenant selection, and token refresh.
- * User rows stay in platform or kernel; this facade only uses directory ports.
+ * 编排域登录、租户选择与令牌刷新。
+ * 用户行保留在 platform 或 kernel；本门面仅使用目录端口。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @Slf4j
-@RequiredArgsConstructor
 public class AuthFacade {
 
     public static final String TOKEN_TYPE_IDENTITY = "IDENTITY";
     public static final String TOKEN_TYPE_BUSINESS = "BUSINESS";
 
+    private final SecurityRealm realm;
     private final UserDirectory userDirectory;
-    private final CredentialStore credentialStore;
+    private final CredentialService credentialService;
+    private final LoginCaptchaGate loginCaptchaGate;
     private final MembershipDirectory membershipDirectory;
     private final PasswordDecryptor passwordDecryptor;
     private final TokenIssuer tokenIssuer;
     private final AuthTokenPairIssuer tokenPairIssuer;
     private final SessionScopeBinder sessionScopeBinder;
 
+    public AuthFacade(
+            SecurityRealm realm,
+            UserDirectory userDirectory,
+            CredentialService credentialService,
+            LoginCaptchaGate loginCaptchaGate,
+            MembershipDirectory membershipDirectory,
+            PasswordDecryptor passwordDecryptor,
+            TokenIssuer tokenIssuer,
+            AuthTokenPairIssuer tokenPairIssuer,
+            SessionScopeBinder sessionScopeBinder
+    ) {
+        this.realm = Objects.requireNonNull(realm, "realm");
+        this.userDirectory = Objects.requireNonNull(userDirectory, "userDirectory");
+        this.credentialService = Objects.requireNonNull(credentialService, "credentialService");
+        this.loginCaptchaGate = Objects.requireNonNull(loginCaptchaGate, "loginCaptchaGate");
+        this.membershipDirectory = Objects.requireNonNull(membershipDirectory, "membershipDirectory");
+        this.passwordDecryptor = Objects.requireNonNull(passwordDecryptor, "passwordDecryptor");
+        this.tokenIssuer = Objects.requireNonNull(tokenIssuer, "tokenIssuer");
+        this.tokenPairIssuer = Objects.requireNonNull(tokenPairIssuer, "tokenPairIssuer");
+        this.sessionScopeBinder = Objects.requireNonNull(sessionScopeBinder, "sessionScopeBinder");
+    }
+
     /**
-     * Authenticates a realm user and issues a token pair.
-     *
-     * @param realm   PLATFORM or TENANT
-     * @param request login identity and encrypted password
-     * @return issued token pair
+     * 所属安全域（构造时绑定）。
      */
-    public AuthTokenVo login(SecurityRealm realm, AuthLoginRequest request) {
-        Checks.notNull(realm, "realm");
+    public SecurityRealm realm() {
+        return realm;
+    }
+
+    /**
+     * 发放登录用图形验证码。
+     *
+     * @param clientKey 客户端事务键；空白时由服务端生成
+     */
+    public AuthCaptchaVo issueLoginCaptcha(String clientKey) {
+        return loginCaptchaGate.issueForLogin(realm, clientKey);
+    }
+
+    /**
+     * 认证域用户并签发令牌对。
+     *
+     * @param request 登录身份与加密密码
+     * @return issued 令牌对
+     */
+    public AuthTokenVo login(AuthLoginRequest request) {
         Checks.notNull(request, "request");
         Checks.notBlank(request.login(), "login");
         Checks.notBlank(request.encryptedPassword(), "encryptedPassword");
-        AuthUser user = userDirectory.findByLogin(realm, request.login())
-                .orElseThrow(() -> NexusException.build(NexusStatusCode.USER_NOT_FOUND));
-        CredentialRecord credential = credentialStore.findPassword(realm, user.userId())
-                .orElseThrow(() -> NexusException.build(NexusStatusCode.PASSWORD_ERROR));
-        if (credential.lockedUntil() != null && credential.lockedUntil().isAfter(LocalDateTime.now())) {
-            throw NexusException.build(NexusStatusCode.PASSWORD_ERROR);
-        }
+        loginCaptchaGate.verifyIfRequired(realm, request);
         String rawPassword = passwordDecryptor.decrypt(request.encryptedPassword());
-        if (!CryptoUtils.matchesPassword(rawPassword, credential.passwordHash())) {
-            int failed = credential.failedAttempts() == null ? 1 : credential.failedAttempts() + 1;
-            credentialStore.updatePassword(realm, new CredentialRecord(
-                    credential.userId(),
-                    credential.passwordHash(),
-                    credential.passwordSalt(),
-                    credential.passwordAlgorithm(),
-                    failed,
-                    credential.lockedUntil(),
-                    credential.forceReset()));
-            throw NexusException.build(NexusStatusCode.PASSWORD_ERROR);
+        AuthUser user = userDirectory.findByLogin(request.login()).orElse(null);
+        if (user == null) {
+            log.debug("Login rejected: unknown identity in realm {}", realm);
+            throw NexusException.build(NexusStatusCode.AUTHENTICATION_FAILED);
         }
-        credentialStore.updatePassword(realm, new CredentialRecord(
-                credential.userId(),
-                credential.passwordHash(),
-                credential.passwordSalt(),
-                credential.passwordAlgorithm(),
-                0,
-                null,
-                credential.forceReset()));
-        AuthSessionScope scope = resolveLoginScope(realm, user.userId());
+        credentialService.authenticate(realm, user.userId(), rawPassword);
+        AuthSessionScope scope = resolveLoginScope(user.userId());
         AuthTokenVo token = tokenPairIssuer.issue(realm, user.userId(), scope);
         sessionScopeBinder.bindAfterAuth(user, scope);
         return token;
     }
 
     /**
-     * Exchanges a tenant identity for a business token bound to one membership.
+     * 将租户身份交换为绑定单一成员关系的业务令牌。
      *
-     * @param tenantUserId tenant-realm user identifier
-     * @param request      tenant to activate
-     * @return TENANT business token
+     * @param tenantUserId tenant-realm user 标识符
+     * @param request      待激活的租户
+     * @return TENANT 业务令牌
      */
     public AuthTokenVo selectTenant(String tenantUserId, SelectTenantRequest request) {
         Checks.notBlank(tenantUserId, "tenantUserId");
         Checks.notNull(request, "request");
         Checks.notBlank(request.tenantId(), "tenantId");
+        assertRealm(SecurityRealm.TENANT);
+        AuthUser user = userDirectory.findById(tenantUserId)
+                .orElseThrow(() -> NexusException.build(NexusStatusCode.AUTHENTICATION_FAILED));
         TenantMembership membership = membershipDirectory.listActiveMemberships(tenantUserId).stream()
                 .filter(item -> request.tenantId().equals(item.tenantId()))
                 .findFirst()
                 .orElseThrow(() -> NexusException.build(NexusStatusCode.NO_PERMISSION));
-        AuthUser user = new AuthUser(tenantUserId, tenantUserId, "ACTIVE", SecurityRealm.TENANT);
         AuthSessionScope scope = new AuthSessionScope(
                 TOKEN_TYPE_BUSINESS, membership.tenantId(), membership.tenantMemberId(), null, null);
-        AuthTokenVo token = tokenPairIssuer.issue(SecurityRealm.TENANT, tenantUserId, scope);
+        AuthTokenVo token = tokenPairIssuer.issue(realm, tenantUserId, scope);
         sessionScopeBinder.bindAfterAuth(user, scope);
         return token;
     }
 
     /**
-     * Issues a new token pair from a same-realm refresh token.
+     * 从同域刷新令牌签发新令牌对。
      *
-     * @param realm   expected realm
-     * @param request refresh token
-     * @return new token pair
+     * @param request 刷新令牌
+     * @return new 令牌对
      */
-    public AuthTokenVo refresh(SecurityRealm realm, TokenRefreshRequest request) {
-        Checks.notNull(realm, "realm");
+    public AuthTokenVo refresh(TokenRefreshRequest request) {
         Checks.notNull(request, "request");
         Checks.notBlank(request.refreshToken(), "refreshToken");
         TokenClaims claims = tokenIssuer.parse(request.refreshToken());
@@ -131,6 +149,8 @@ public class AuthFacade {
                 || claims.expiresAt() <= Instant.now().getEpochSecond()) {
             throw NexusException.build(NexusStatusCode.AUTHENTICATION_FAILED);
         }
+        AuthUser user = userDirectory.findById(claims.userId())
+                .orElseThrow(() -> NexusException.build(NexusStatusCode.AUTHENTICATION_FAILED));
         AuthSessionScope scope = new AuthSessionScope(
                 claims.tokenType(),
                 claims.tenantId(),
@@ -138,19 +158,19 @@ public class AuthFacade {
                 claims.workspaceId(),
                 claims.projectId());
         AuthTokenVo token = tokenPairIssuer.issue(realm, claims.userId(), scope);
-        sessionScopeBinder.bindFromClaims(claims);
+        sessionScopeBinder.bindAfterAuth(user, scope);
         return token;
     }
 
     /**
-     * Completes logout. Compact tokens remain valid until expiry.
+     * 完成登出。紧凑令牌在过期前仍然有效。
      */
     public void logout() {
         sessionScopeBinder.clear();
         log.debug("Logout requested for a compact token session");
     }
 
-    private AuthSessionScope resolveLoginScope(SecurityRealm realm, String userId) {
+    private AuthSessionScope resolveLoginScope(String userId) {
         if (realm == SecurityRealm.PLATFORM) {
             return new AuthSessionScope(TOKEN_TYPE_BUSINESS, null, null, null, null);
         }
@@ -161,5 +181,11 @@ public class AuthFacade {
                     TOKEN_TYPE_BUSINESS, membership.tenantId(), membership.tenantMemberId(), null, null);
         }
         return new AuthSessionScope(TOKEN_TYPE_IDENTITY, null, null, null, null);
+    }
+
+    private void assertRealm(SecurityRealm expected) {
+        if (realm != expected) {
+            throw NexusException.build(NexusStatusCode.INVALID_PARAMETER.fullCode(), "unsupported operation for realm");
+        }
     }
 }

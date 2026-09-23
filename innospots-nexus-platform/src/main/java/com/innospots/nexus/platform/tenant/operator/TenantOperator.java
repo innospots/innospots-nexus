@@ -13,7 +13,10 @@ import com.innospots.nexus.platform.tenant.domain.entity.TenantEntity;
 import com.innospots.nexus.platform.tenant.domain.enums.TenantStatus;
 
 /**
- * Persists platform tenants and their one-to-one enterprise profiles.
+ * 持久化平台租户及其一对一企业档案。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -23,11 +26,11 @@ public class TenantOperator {
     private final EnterpriseDao enterpriseDao;
 
     /**
-     * Creates a tenant and its enterprise profile in one transaction.
+     * 在一个事务中创建租户及其企业档案。
      *
-     * @param tenant     tenant identity fields
-     * @param enterprise enterprise legal profile; {@code tenantId} is filled after insert
-     * @return persisted tenant
+     * @param tenant     租户身份字段
+     * @param enterprise 企业法定档案；插入后填充 {@code tenantId}
+     * @return persisted 租户
      */
     @Transactional
     public TenantEntity create(TenantEntity tenant, EnterpriseEntity enterprise) {

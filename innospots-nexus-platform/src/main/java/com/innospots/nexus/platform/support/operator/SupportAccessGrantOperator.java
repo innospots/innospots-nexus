@@ -12,7 +12,10 @@ import com.innospots.nexus.platform.support.domain.enums.SupportAccessStatus;
 import com.innospots.nexus.platform.support.domain.request.SupportAccessGrantCreateRequest;
 
 /**
- * Persists platform support-access grants into a tenant.
+ * 将平台支持访问授权持久化到租户。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -21,10 +24,10 @@ public class SupportAccessGrantOperator {
     private final SupportAccessGrantDao supportAccessGrantDao;
 
     /**
-     * Creates a pending grant. Does not activate tenant access until approval.
+     * 创建待审批授权。审批前不激活租户访问。
      *
-     * @param request grant creation data
-     * @return persisted grant
+     * @param request 授权创建数据
+     * @return persisted 授权
      */
     @Transactional
     public SupportAccessGrantEntity create(SupportAccessGrantCreateRequest request) {

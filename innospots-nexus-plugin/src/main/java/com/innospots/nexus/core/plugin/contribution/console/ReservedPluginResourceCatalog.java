@@ -5,7 +5,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-/** 由 Core 安全快照提供的历史插件资源身份保留目录。 */
+/**
+ * 由 Core 安全快照提供的历史插件资源身份保留目录。
+ * @author Smars
+ * @date 2026/09/13
+ */
 public final class ReservedPluginResourceCatalog {
 
     private final Set<ReservedResource> resources;

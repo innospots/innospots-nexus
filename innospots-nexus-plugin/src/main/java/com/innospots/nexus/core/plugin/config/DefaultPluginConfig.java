@@ -15,6 +15,8 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
  *
  * <p>{@code values} 保存强类型运行时值；{@code displayValues} 保存日志与诊断用的遮罩文本，
  * 避免 SECRET 明文泄漏到 {@link #toString()}。</p>
+ * @author Smars
+ * @date 2026/09/13
  */
 final class DefaultPluginConfig implements PluginConfig {
 

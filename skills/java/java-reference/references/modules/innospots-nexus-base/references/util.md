@@ -1,57 +1,42 @@
 # 包 `util`
 
-## BeanUtils
+## AsymmetricKeyPair
 
-**Type:** class
+**类型：** record
 
-Bean 属性拷贝与转换工具，封装 Hutool 的 `BeanUtil`。
+RSA 不对称密钥对，公钥与私钥均为 Base64 编码字符串。
 
-## Checks
+### 组件（record）
 
-**Type:** class
-
-前置条件检查，失败时抛出 `NexusException` 及 `NexusStatusCode#INVALID_PARAMETER`。
-
-## CryptoUtils
-
-**Type:** class
-
-加密工具：密码哈希（BCrypt）、对称加密（AES-GCM）及非对称加密（RSA/OAEP）。
-
-## DateTimeUtils
-
-**Type:** class
-
-日期与时间格式化及解析工具。
-
-## EnvUtils
-
-**Type:** class
-
-支持覆盖的环境属性解析器。
-
-## IdGenerator
-
-**Type:** class
-
-ID 生成工具：基于 Snowflake 的分布式 ID、**`ulid(prefix)` /
-`monotonicUlid(prefix)`**（主要持久化键生成）、可配置字符集的随机 ID、
-带时间戳前缀的 ID 及批量生成。
+| 名称 | 类型 | 说明 |
+|------|------|------|
+| `publicKey` | `String` | Base64 编码的公钥 |
+| `privateKey` | `String` | Base64 编码的私钥 |
 
 ## MetricsSnapshot
 
-**Type:** record
+**类型：** record
 
-指标计数器/计时器的时点快照。
+指标计数器/计时器的时点快照，记录指标名称、标签、总次数及累计耗时（纳秒）。
 
-## MetricsUtils
+### 组件（record）
 
-**Type:** class
+| 名称 | 类型 | 说明 |
+|------|------|------|
+| `name` | `String` | — |
+| `tags` | `Map<String, String>` | — |
+| `count` | `long` | — |
+| `totalNanos` | `long` | — |
 
-基于 Micrometer 的指标门面。
+### 方法
 
-## StringUtils
+#### `totalMillis() → double`
 
-**Type:** class
+- **说明：** 返回累计耗时的毫秒表示。
+- **返回：** 总耗时（毫秒）
 
-字符串工具：空白检查、占位符替换（`${key`} 与 `{{key`}}）、camelCase/下划线转换及随机键生成。
+## Type
+
+**类型：** enum
+
+随机 ID 字符集类型。

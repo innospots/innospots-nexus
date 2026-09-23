@@ -1,0 +1,57 @@
+package com.innospots.nexus.spring.core.bootstrap;
+
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.autoconfigure.MybatisPlusAutoConfiguration;
+import com.baomidou.mybatisplus.autoconfigure.MybatisPlusProperties;
+import com.baomidou.mybatisplus.autoconfigure.MybatisPlusPropertiesCustomizer;
+import com.baomidou.mybatisplus.core.config.GlobalConfig;
+import com.innospots.nexus.core.persistence.handler.AuditMetaObjectHandler;
+
+/**
+ * MyBatis-Plus 公共运行态装配。
+ *
+ * <p>归属 {@code innospots-nexus-spring-core}；各模块 DAO 扫描见对应
+ * {@code *DaoConfiguration}。数据源与 DDL 由宿主 {@code application.yaml} 提供。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
+ */
+@Configuration
+@AutoConfigureAfter({DataSourceAutoConfiguration.class, MybatisPlusAutoConfiguration.class})
+public class NexusPersistenceConfiguration {
+
+    /**
+     * MyBatis-Plus 审计字段自动填充处理器。
+     */
+    @Bean
+    AuditMetaObjectHandler auditMetaObjectHandler() {
+        return new AuditMetaObjectHandler();
+    }
+
+    /**
+     * MyBatis-Plus 默认 ORM 行为（可被 {@code application.yaml} 覆盖）。
+     */
+    @Bean
+    MybatisPlusPropertiesCustomizer mybatisPlusPropertiesCustomizer(AuditMetaObjectHandler auditMetaObjectHandler) {
+        return properties -> {
+            if (properties.getConfiguration() == null) {
+                properties.setConfiguration(new MybatisPlusProperties.CoreConfiguration());
+            }
+            properties.getConfiguration().setMapUnderscoreToCamelCase(true);
+            if (properties.getGlobalConfig() == null) {
+                properties.setGlobalConfig(new GlobalConfig());
+            }
+            if (properties.getGlobalConfig().getDbConfig() == null) {
+                properties.getGlobalConfig().setDbConfig(new GlobalConfig.DbConfig());
+            }
+            properties.getGlobalConfig().getDbConfig().setIdType(IdType.ASSIGN_UUID);
+            properties.getGlobalConfig().setMetaObjectHandler(auditMetaObjectHandler);
+        };
+    }
+}
+

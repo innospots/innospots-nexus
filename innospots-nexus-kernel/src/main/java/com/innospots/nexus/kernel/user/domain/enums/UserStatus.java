@@ -1,27 +1,30 @@
 package com.innospots.nexus.kernel.user.domain.enums;
 
 /**
- * User lifecycle status.
+ * 用户生命周期状态。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public enum UserStatus {
 
     /**
-     * Normal operational state.
+     * 正常运营状态。
      */
     ACTIVE,
 
     /**
-     * Disabled by an administrator.
+     * 被管理员禁用。
      */
     DISABLED,
 
     /**
-     * Temporarily locked due to policy or repeated failures.
+     * 因策略或多次失败被临时锁定。
      */
     LOCKED,
 
     /**
-     * Awaiting activation or verification.
+     * 等待激活或验证。
      */
     PENDING
 }

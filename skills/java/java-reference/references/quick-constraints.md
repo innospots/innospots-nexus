@@ -3,6 +3,7 @@
 `java:reference` 的跨技能复用速查表。按**工作场景**组织最常违反、代价最高的约束。
 完整规则回源 [`../standards/`](../standards/) 对应文件（通过 [standards-index.md](standards-index.md) 定位）。
 其他 `java:*` 技能链接本文件，不在各自正文中重复。
+结构简化、冗余与防过度设计见 [code-quality-constraints.md](code-quality-constraints.md)。
 
 ---
 

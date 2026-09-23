@@ -10,6 +10,8 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
 /**
  * 实例本地同步事件总线，隔离观察者失败。
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class DefaultPluginEventBus implements PluginEventBus {
 

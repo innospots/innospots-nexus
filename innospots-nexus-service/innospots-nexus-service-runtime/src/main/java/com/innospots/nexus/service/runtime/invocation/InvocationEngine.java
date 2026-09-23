@@ -32,7 +32,7 @@ import com.innospots.nexus.service.runtime.context.ContextSnapshot;
 import com.innospots.nexus.service.runtime.context.ThreadBoundServiceContext;
 
 /**
- * Runs interceptors then business for sync, async, and stream invocations.
+ * 对同步、异步与流式调用先运行拦截器再执行业务。
  *
  * @author Smars
  * @date 2026/09/13
@@ -42,7 +42,7 @@ import com.innospots.nexus.service.runtime.context.ThreadBoundServiceContext;
 public final class InvocationEngine {
 
     /**
-     * Optional attribute marking {@link ExecutionMode#NON_BLOCKING} invocations.
+     * 标记 {@link ExecutionMode#NON_BLOCKING} 调用的可选属性。
      */
     public static final AttributeKey<ExecutionMode> EXECUTION_MODE =
             new AttributeKey<>("runtime.executionMode", ExecutionMode.class);
@@ -53,10 +53,10 @@ public final class InvocationEngine {
     private final ThreadBoundServiceContext contexts;
 
     /**
-     * Creates an engine with interceptors sorted by order then id.
+     * 创建按顺序再按标识排序拦截器的引擎。
      *
-     * @param interceptors interceptors to run
-     * @param contexts     thread-bound context accessor
+     * @param interceptors 待运行拦截器
+     * @param contexts     线程绑定上下文访问器
      */
     public InvocationEngine(List<ServiceInterceptor> interceptors, ThreadBoundServiceContext contexts) {
         Checks.notNull(interceptors, "interceptors");
@@ -76,12 +76,12 @@ public final class InvocationEngine {
     }
 
     /**
-     * Invokes a blocking supplier on a worker. {@link ExecutionMode#NON_BLOCKING} is rejected.
+     * 在工作线程调用阻塞供应方。拒绝 {@link ExecutionMode#NON_BLOCKING}。
      *
-     * @param context  invocation
-     * @param business business supplier
-     * @param <T>      result type
-     * @return business result
+     * @param context  调用上下文
+     * @param business 业务供应方
+     * @param <T>      结果类型
+     * @return 业务结果
      */
     public <T> T invokeSync(InvocationContext context, Supplier<T> business) {
         Checks.notNull(context, "context");
@@ -111,12 +111,12 @@ public final class InvocationEngine {
     }
 
     /**
-     * Invokes an async supplier. The supplier is called after interceptors enter.
+     * 调用异步供应方。拦截器进入后调用供应方。
      *
-     * @param context  invocation
-     * @param business stage supplier
-     * @param <T>      result type
-     * @return business stage
+     * @param context  调用上下文
+     * @param business 阶段供应方
+     * @param <T>      结果类型
+     * @return 业务阶段
      */
     public <T> CompletionStage<T> invokeAsync(InvocationContext context, Supplier<CompletionStage<T>> business) {
         Checks.notNull(context, "context");
@@ -152,12 +152,12 @@ public final class InvocationEngine {
     }
 
     /**
-     * Invokes a stream supplier lazily on first subscribe. A second subscribe is rejected.
+     * 首次订阅时惰性调用流供应方。第二次订阅将被拒绝。
      *
-     * @param context  invocation
-     * @param business publisher supplier
-     * @param <T>      item type
-     * @return publisher
+     * @param context  调用上下文
+     * @param business 发布者供应方
+     * @param <T>      元素类型
+     * @return 发布者
      */
     public <T> Flow.Publisher<T> invokeStream(InvocationContext context, Supplier<Flow.Publisher<T>> business) {
         Checks.notNull(context, "context");

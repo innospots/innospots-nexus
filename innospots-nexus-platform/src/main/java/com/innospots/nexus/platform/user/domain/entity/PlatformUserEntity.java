@@ -17,9 +17,11 @@ import com.innospots.nexus.core.persistence.entity.BaseEntity;
 import com.innospots.nexus.platform.user.domain.enums.PlatformUserStatus;
 
 /**
- * Ops-domain login identity. Platform users are created by administrators,
- * not by public self-registration.
+ * 运维域登录身份。平台用户由管理员创建，
+ * 而非公开自助注册。
  *
+ * @author Smars
+ * @date 2026/09/13
  * @see PlatformUserStatus
  */
 @Getter
@@ -35,62 +37,67 @@ public class PlatformUserEntity extends BaseEntity {
     public static final String TABLE_NAME = "nx_platform_user";
 
     /**
-     * Platform-realm user identifier.
+     * 平台域 user 标识符。
      */
     @TableId(type = IdType.ASSIGN_UUID)
     @Id
     @Column(length = 32, nullable = false)
     private String platformUserId;
+    /**
+     * 返回主键前缀。
+     * @return 操作结果
+     */
 
+    
     @Override
     public String idPrefix() {
         return "pus";
     }
 
     /**
-     * Unique login name in the platform realm.
+     * 平台域唯一登录名。
      */
     @Column(length = 64, nullable = false)
     private String loginName;
 
     /**
-     * Display name shown in the ops console.
+     * 运维控制台展示的显示名称。
      */
     @Column(length = 128)
     private String displayName;
 
     /**
-     * Email address.
+     * 邮箱地址。
      */
     @Column(length = 128)
     private String email;
 
     /**
-     * Mobile number.
+     * 手机号。
      */
     @Column(length = 32)
     private String mobile;
 
     /**
-     * Internal employee number.
+     * 内部员工编号。
      */
     @Column(length = 64)
     private String employeeNo;
 
     /**
-     * Lifecycle status persisted as {@link PlatformUserStatus} name.
+     * 以 {@link PlatformUserStatus} 名称持久化的生命周期状态。
      */
     @Column(length = 32, nullable = false)
     private String status;
 
     /**
-     * Last successful login time.
+     * 上次成功登录时间。
      */
     @Column
     private LocalDateTime lastLoginTime;
 
     /**
-     * Last successful login IP address.
+     * 上次成功登录 IP 地址。
      */
     @Column(length = 64)
     private String lastLoginIp;

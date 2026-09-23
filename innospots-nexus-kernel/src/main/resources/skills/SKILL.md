@@ -46,7 +46,7 @@ Quarkus, Servlet, or a concrete web runtime.
 | `audit` | `LoginLog`, `LoginResult`, `LoginLogOperator` |
 | `user` | `KernelUser`, `UserStatus` |
 | `user.api` | `UserPasswordDecryptor`, `RsaUserPasswordDecryptor` |
-| `user.dao` | `UserDao`, `UserPasswordCredentialDao`, `UserOauthIdentityDao` |
+| `user.dao` | `UserDao`, `UserOauthIdentityDao` |
 | `user.operator` | `UserOperator`, `UserOauthOperator` |
 | `group` | `UserGroup`, `GroupType`, `GroupOperator` |
 | `role` | `Role`, `RoleScope`, `RoleOperator` |
@@ -62,7 +62,6 @@ Quarkus, Servlet, or a concrete web runtime.
 | Class | Type | Description |
 |-------|------|-------------|
 | `UserEntity` | `class` | User registration profile and lifecycle persistence shape. |
-| `UserPasswordCredentialEntity` | `class` | Local password credential storage kept separate from user profile data. |
 | `UserOauthIdentityEntity` | `class` | OAuth provider identity binding for externally registered users. |
 
 ### Package `user.api`
@@ -98,7 +97,6 @@ Quarkus, Servlet, or a concrete web runtime.
 | Class | Type | Description |
 |-------|------|-------------|
 | `UserDao` | `interface` | MyBatis-Plus mapper for user profile records. |
-| `UserPasswordCredentialDao` | `interface` | MyBatis-Plus mapper for local password credential records. |
 | `UserOauthIdentityDao` | `interface` | MyBatis-Plus mapper for OAuth identity binding records. |
 
 ### Package `user.enums`

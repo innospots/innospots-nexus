@@ -14,7 +14,10 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Protocol-reserved computed data source. Runtime semantics are implementation-defined.
+ * 协议预留的计算数据源；运行时语义由实现定义。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @Getter
 @Setter
@@ -26,11 +29,22 @@ public final class ComputedDataSource implements DataSourceConfig {
     private List<String> dependsOn = new ArrayList<>();
     private final Map<String, Object> extensions = new LinkedHashMap<>();
 
+    /**
+     * 返回扩展属性的 Jackson 序列化视图。
+     *
+     * @return 扩展属性映射
+     */
     @JsonAnyGetter
     public Map<String, Object> extensions() {
         return extensions;
     }
 
+    /**
+     * 设置一个扩展属性。
+     *
+     * @param key 扩展属性键
+     * @param value 扩展属性值
+     */
     @JsonAnySetter
     public void extension(String key, Object value) {
         extensions.put(key, value);

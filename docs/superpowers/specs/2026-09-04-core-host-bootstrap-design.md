@@ -1,4 +1,4 @@
-# Core Host Bootstrap and Startup Initialization Design
+# Core 宿主 Bootstrap 与启动初始化设计
 
 ## 1. 文档定位
 

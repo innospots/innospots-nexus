@@ -14,12 +14,17 @@
     <artifactId>innospots-nexus-service-websocket</artifactId>
 
     <name>innospots-nexus-service-websocket</name>
-    <description>WebSocket connection and message lifecycle policies.</description>
+    <description>WebSocket 连接与消息生命周期策略。</description>
 
     <dependencies>
         <dependency>
             <groupId>com.innospots</groupId>
             <artifactId>innospots-nexus-service-runtime</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.innospots</groupId>
+            <artifactId>innospots-nexus-service-governance</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

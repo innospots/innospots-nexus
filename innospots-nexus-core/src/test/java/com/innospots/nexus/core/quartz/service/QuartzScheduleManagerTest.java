@@ -84,7 +84,7 @@ class QuartzScheduleManagerTest {
 
         @Override
         public void execute(JobExecutionContext context) {
-            // Test job marker.
+            // 测试作业标记。
         }
     }
 }

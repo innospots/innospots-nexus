@@ -31,6 +31,9 @@ import com.innospots.nexus.console.catalog.domain.model.CatalogSyncResult;
  * 将已激活 Console Contribution 和 PageDsl 同步为宿主级目录索引。
  *
  * <p>Console Contribution 和 PageDsl 是唯一事实源；同步不会自动授权。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class ConsoleCatalogSyncService {
 
@@ -38,7 +41,9 @@ public final class ConsoleCatalogSyncService {
     private final ConsoleContributionCatalog contributionCatalog;
     private final PageDslLoader pageDslLoader;
 
-    /** 创建 Console 目录同步服务。 */
+    /**
+     * 创建 Console 目录同步服务。
+     */
     public ConsoleCatalogSyncService(
             ConsoleCatalogResourceDao resourceDao,
             ConsoleContributionCatalog contributionCatalog,

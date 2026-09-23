@@ -1,16 +1,16 @@
-# Nexus Plugin Minimal V1 Implementation Plan
+# Nexus Plugin 最小 V1 实施计划
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or
+> **面向 agent 工作者：** 必需子技能：使用 superpowers:subagent-driven-development（推荐）或
 > superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 实现一个可编译、可安装、可管理的最小插件体系，只支持 Java SPI 和 YAML 显式 Java Class，
+**目标：** 实现一个可编译、可安装、可管理的最小插件体系，只支持 Java SPI 和 YAML 显式 Java Class，
 并彻底移除 Extension 双轨。
 
-**Architecture:** Core 使用 `PluginInstallationManager` 管理持久化安装事实，使用纯 `PluginManager` 管理
+**架构：** Core 使用 `PluginInstallationManager` 管理持久化安装事实，使用纯 `PluginManager` 管理
 当前 JVM 生命周期。Java 和 YAML 都编译为运行时定义；Console 页面与菜单通过 `console@1` Contribution
 进入同一插件事务。远程 bind 和 capability exposures 不进入本轮实现。
 
-**Tech Stack:** Java 25、ServiceLoader、Jackson YAML、MyBatis-Plus、Jakarta Persistence、Jakarta REST、
+**技术栈：** Java 25、ServiceLoader、Jackson YAML、MyBatis-Plus、Jakarta Persistence、Jakarta REST、
 JUnit 5、AssertJ、Maven。
 
 ---
@@ -157,7 +157,7 @@ git diff --check
 
 ### Task 1：统一 Plugin 和 Provider 身份
 
-**Files:**
+**文件：**
 
 - Modify: `innospots-nexus-plugin/src/main/java/com/innospots/nexus/core/plugin/declaration/PluginDefinition.java`
 - Modify: `innospots-nexus-plugin/src/main/java/com/innospots/nexus/core/plugin/declaration/CapabilityContribution.java`
@@ -200,7 +200,7 @@ Plugin tags、Plugin config、capabilities、requirements 和 contributions；�
 
 ### Task 2：补齐 Provider 配置与 Tags 路由
 
-**Files:**
+**文件：**
 
 - Modify: `innospots-nexus-plugin/src/main/java/com/innospots/nexus/core/plugin/config/ConfigurationManager.java`
 - Modify: `innospots-nexus-plugin/src/main/java/com/innospots/nexus/core/plugin/contract/CapabilityProviderContext.java`
@@ -223,7 +223,7 @@ Plugin tags、Plugin config、capabilities、requirements 和 contributions；�
 
 ### Task 3：建立 Manifest、来源和定义编译边界
 
-**Files:**
+**文件：**
 
 - Create: `innospots-nexus-plugin/src/main/java/com/innospots/nexus/core/plugin/declaration/PluginManifest.java`
 - Create: `innospots-nexus-plugin/src/main/java/com/innospots/nexus/core/plugin/declaration/PluginSource.java`
@@ -277,7 +277,7 @@ spec:
 
 ### Task 4：统一 Java SPI 与 YAML 发现
 
-**Files:**
+**文件：**
 
 - Modify: `innospots-nexus-plugin/src/main/java/com/innospots/nexus/core/plugin/discovery/ClasspathPluginDiscovery.java`
 - Modify: `innospots-nexus-plugin/src/main/java/com/innospots/nexus/core/plugin/discovery/DiscoveredPlugin.java`
@@ -298,7 +298,7 @@ spec:
 
 ### Task 5：引入通用 Contribution 契约
 
-**Files:**
+**文件：**
 
 - Create: `innospots-nexus-plugin/src/main/java/com/innospots/nexus/core/plugin/contribution/PluginContribution.java`
 - Create: `innospots-nexus-plugin/src/main/java/com/innospots/nexus/core/plugin/contribution/PluginContributionType.java`
@@ -326,7 +326,7 @@ spec:
 
 ### Task 6：实现统一可用性和插件事务
 
-**Files:**
+**文件：**
 
 - Create: `innospots-nexus-plugin/src/main/java/com/innospots/nexus/core/plugin/lifecycle/PluginAvailability.java`
 - Modify: `innospots-nexus-plugin/src/main/java/com/innospots/nexus/core/plugin/lifecycle/ManagedPlugin.java`
@@ -350,7 +350,7 @@ spec:
 
 ### Task 7：将插件安装持久化迁入 Core
 
-**Files:**
+**文件：**
 
 - Create: `innospots-nexus-plugin/src/main/java/com/innospots/nexus/core/plugin/installation/config/PluginInstallationConfig.java`
 - Create: `innospots-nexus-plugin/src/main/java/com/innospots/nexus/core/plugin/installation/dao/PluginInstallationDao.java`
@@ -379,7 +379,7 @@ spec:
 
 ### Task 8：实现 PluginInstallationManager
 
-**Files:**
+**文件：**
 
 - Create: `innospots-nexus-plugin/src/main/java/com/innospots/nexus/core/plugin/installation/service/PluginRuntimeFactory.java`
 - Create: `innospots-nexus-plugin/src/main/java/com/innospots/nexus/core/plugin/installation/service/PluginInstallationManager.java`
@@ -403,7 +403,7 @@ spec:
 
 ### Task 9：提供管理端插件操作 API
 
-**Files:**
+**文件：**
 
 - Create: `innospots-nexus-console/src/main/java/com/innospots/nexus/console/plugin/endpoint/PluginManagementEndpoint.java`
 - Create: `innospots-nexus-console/src/main/java/com/innospots/nexus/console/plugin/domain/vo/PluginManagementVo.java`
@@ -423,7 +423,7 @@ spec:
 
 ### Task 10：补齐宿主装配与启动顺序
 
-**Files:**
+**文件：**
 
 - Modify: `innospots-nexus-plugin/src/main/java/com/innospots/nexus/core/plugin/installation/service/PluginRuntimeFactory.java`
 - Modify: `innospots-nexus-plugin/src/main/java/com/innospots/nexus/core/plugin/installation/config/PluginInstallationConfig.java`
@@ -443,7 +443,7 @@ spec:
 
 ### Task 11：迁移 Console Contribution
 
-**Files:**
+**文件：**
 
 - Create: `innospots-nexus-console/src/main/java/com/innospots/nexus/console/plugin/contribution/ConsolePluginContribution.java`
 - Create: `innospots-nexus-console/src/main/java/com/innospots/nexus/console/plugin/contribution/ConsoleModuleDeclaration.java`
@@ -470,7 +470,7 @@ spec:
 
 ### Task 12：迁移权限资源归属
 
-**Files:**
+**文件：**
 
 - Modify: `innospots-nexus-kernel/src/main/java/com/innospots/nexus/kernel/permission/service/PermissionResourceSyncService.java`
 - Modify: `innospots-nexus-console/src/main/java/com/innospots/nexus/console/permission/domain/entity/PermissionResourceEntity.java`
@@ -493,7 +493,7 @@ spec:
 
 ### Task 13：删除 Extension 双轨
 
-**Files:**
+**文件：**
 
 - Delete: `innospots-nexus-core/src/main/java/com/innospots/nexus/core/extension/**`
 - Delete: `innospots-nexus-console/src/main/java/com/innospots/nexus/console/extension/**`
@@ -513,10 +513,10 @@ spec:
 
 ### Task 14：完整验证和文档一致性
 
-**Files:**
+**文件：**
 
-- Verify: `innospots-nexus-plugin/docs/plugin/manual/*.md`
-- Verify: `innospots-nexus-plugin/docs/plugin/design/plugin-dsl-v1.schema.json`
+- 验证： `innospots-nexus-plugin/docs/plugin/manual/*.md`
+- 验证： `innospots-nexus-plugin/docs/plugin/design/plugin-dsl-v1.schema.json`
 - Modify: `innospots-nexus-plugin/docs/plugin/design/plugin-runtime-design.md`
 - Modify: `innospots-nexus-plugin/docs/plugin/design/plugin-installation-design.md`
 

@@ -7,7 +7,10 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * HTTP-backed dynamic DSL source.
+ * HTTP 支持的动态 DSL 源。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @Getter
 @Setter

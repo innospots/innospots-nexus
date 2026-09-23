@@ -1,17 +1,17 @@
-# Console Catalog and Navigation Implementation Plan
+# Console Catalog 与 Navigation 实施计划
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
+> **面向 agent 工作者：** 必需子技能：使用 superpowers:executing-plans 按任务逐步实施本计划。
 
-**Goal:** console 提供 catalog/navigation API；sync 迁入 console；启动与启停后保持 DB 索引一致。
+**目标：** console 提供 catalog/navigation API；sync 迁入 console；启动与启停后保持 DB 索引一致。
 
-**Architecture:** 单层 `nx_permission_resource`；sync 全量对账；启动 Task + PluginManagementEndpoint 触发 sync。
+**架构：** 单层 `nx_permission_resource`；sync 全量对账；启动 Task + PluginManagementEndpoint 触发 sync。
 
-**Spec:**
+**规格：**
 
 - [2026-09-04-console-catalog-and-navigation-design.md](../specs/2026-09-04-console-catalog-and-navigation-design.md)
 - [2026-09-04-core-host-bootstrap-design.md](../specs/2026-09-04-core-host-bootstrap-design.md)
 
-## Global Constraints
+## 全局约束
 
 - core：`NexusStartupTask` + `NexusStartup`（内含编排）+ `PluginHostStartupTask` only。
 - sync：全量对账；仅 ACTIVE 输入；**无** PluginEventBus 监听器（V1）。
@@ -20,9 +20,9 @@
 
 ---
 
-### Task 0: core NexusStartup（可与 Task 2 并行）
+### Task 0：core NexusStartup（可与 Task 2 并行）
 
-**Files:**
+**文件：**
 - Create: `innospots-nexus-core/.../bootstrap/NexusStartupTask.java`
 - Create: `innospots-nexus-core/.../bootstrap/NexusStartupContext.java`
 - Create: `innospots-nexus-core/.../bootstrap/NexusStartup.java`（Builder + `run()`）
@@ -36,9 +36,9 @@
 
 ---
 
-### Task 1: CatalogNodeVo + ConsoleCatalogService
+### Task 1：CatalogNodeVo + ConsoleCatalogService
 
-**Files:**
+**文件：**
 - Create: `console/catalog/domain/vo/CatalogNodeVo.java`
 - Create: `console/catalog/service/ConsoleCatalogService.java`
 - Test: `ConsoleCatalogServiceTest.java`
@@ -47,17 +47,17 @@
 
 ---
 
-### Task 2: 迁移 PermissionResourceSyncService
+### Task 2：迁移 PermissionResourceSyncService
 
-**Files:**
+**文件：**
 - Move to `console/catalog/service/PermissionResourceSyncService.java`
 - Move test; update `KernelModuleBoundaryTest`
 
 ---
 
-### Task 3: ConsoleCatalogSyncStartupTask + ConsoleCatalogEndpoint
+### Task 3：ConsoleCatalogSyncStartupTask + ConsoleCatalogEndpoint
 
-**Files:**
+**文件：**
 - Create: `console/catalog/bootstrap/ConsoleCatalogSyncStartupTask.java`（`NexusStartupTask` order=200）
 - Create: `console/catalog/endpoint/ConsoleCatalogEndpoint.java`
 - Delete: `permission/endpoint/PermissionCatalogEndpoint.java`
@@ -65,9 +65,9 @@
 
 ---
 
-### Task 4: AuthorizationSubjectResolver + Navigation
+### Task 4：AuthorizationSubjectResolver + Navigation
 
-**Files:**
+**文件：**
 - Create: `permission/authorization/AuthorizationSubjectResolver.java`
 - Extend: `NavigationMenuVo`
 - Create: `navigation/service/NavigationMenuAssembler.java`
@@ -76,7 +76,7 @@
 
 ---
 
-### Task 5: Spring/Quarkus 装配 + 验证
+### Task 5：Spring/Quarkus 装配 + 验证
 
 - [ ] 各模块注册 Task Bean；`NexusStartupConfiguration` 组装 `NexusStartup`
 - [ ] 适配层 `ApplicationRunner` / `StartupEvent` 仅调用 `nexusStartup.run()`

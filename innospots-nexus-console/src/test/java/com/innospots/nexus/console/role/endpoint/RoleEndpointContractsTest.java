@@ -25,7 +25,6 @@ import com.innospots.nexus.console.role.domain.vo.RoleOptionVo;
 import com.innospots.nexus.console.role.domain.vo.RoleVo;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class RoleEndpointContractsTest {
 
@@ -45,6 +44,7 @@ class RoleEndpointContractsTest {
     @Test
     void roleBindingEndpointRemainsASeparateBoundary() throws NoSuchMethodException {
         assertThat(RoleBindingEndpoint.class.isInterface()).isFalse();
+        assertThat(RoleEndpoint.class.isInterface()).isFalse();
         assertThat(RoleBindingEndpoint.class.getAnnotation(Path.class).value())
                 .isEqualTo("/console/roles/{roleId}/bindings");
         assertHttpMethod(RoleBindingEndpoint.class, "pageRoleBindings",
@@ -53,20 +53,6 @@ class RoleEndpointContractsTest {
                 POST.class, String.class, RoleBindingAddRequest.class);
         assertHttpMethod(RoleBindingEndpoint.class, "removeRoleBinding",
                 DELETE.class, String.class, String.class);
-    }
-
-    @Test
-    void roleBindingEndpointMethodsRemainExplicitlyUnimplemented() {
-        RoleBindingEndpoint endpoint = new RoleBindingEndpoint();
-
-        assertThatThrownBy(() -> endpoint.pageRoleBindings("role-1", new RoleBindingPageRequest()))
-                .isInstanceOf(UnsupportedOperationException.class);
-        assertThatThrownBy(() -> endpoint.addRoleBindings(
-                "role-1",
-                new RoleBindingAddRequest(RoleBindingSubjectType.USER, List.of("user-1"))))
-                .isInstanceOf(UnsupportedOperationException.class);
-        assertThatThrownBy(() -> endpoint.removeRoleBinding("role-1", "rbn-1"))
-                .isInstanceOf(UnsupportedOperationException.class);
     }
 
     @Test

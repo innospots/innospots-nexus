@@ -1,115 +1,38 @@
 package com.innospots.nexus.console.scope.service;
 
-import lombok.RequiredArgsConstructor;
-
-import com.innospots.nexus.base.thread.SessionContext;
-import com.innospots.nexus.base.thread.TLC;
-import com.innospots.nexus.base.util.Checks;
-import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
 import com.innospots.nexus.console.auth.domain.model.AuthUser;
 import com.innospots.nexus.console.auth.domain.model.TokenClaims;
 import com.innospots.nexus.console.auth.service.AuthSessionScope;
-import com.innospots.nexus.console.scope.api.ProjectScopeDirectory;
-import com.innospots.nexus.console.scope.api.TenantScopeDirectory;
-import com.innospots.nexus.console.scope.api.WorkspaceScopeDirectory;
-import com.innospots.nexus.console.scope.domain.model.TenantScope;
 
 /**
- * Binds auth identity and scope snapshots into {@link SessionContext}.
+ * 将认证身份与作用域快照绑定到会话上下文；由 kernel / platform 装配提供具体实现。
  */
-@RequiredArgsConstructor
-public class SessionScopeBinder {
-
-    private final TenantScopeDirectory tenantScopeDirectory;
-    private final WorkspaceScopeDirectory workspaceScopeDirectory;
-    private final ProjectScopeDirectory projectScopeDirectory;
+public interface SessionScopeBinder {
 
     /**
-     * Binds identity and scope snapshots after a successful auth flow.
+     * 认证流程成功后绑定身份与作用域快照。
      *
-     * @param user  authenticated user
-     * @param scope issued session scope
+     * @param user  已认证用户
+     * @param scope 签发的会话作用域
      */
-    public void bindAfterAuth(AuthUser user, AuthSessionScope scope) {
-        Checks.notNull(user, "user");
-        Checks.notNull(scope, "scope");
-        bindAuthUser(user);
-        bindScope(scope);
-    }
+    void bindAfterAuth(AuthUser user, AuthSessionScope scope);
 
     /**
-     * Binds tenant, workspace, and project snapshots for the given session scope.
+     * 为给定会话作用域绑定租户、工作区与项目快照。
      *
-     * @param scope issued session scope
+     * @param scope 签发的会话作用域
      */
-    public void bindScope(AuthSessionScope scope) {
-        Checks.notNull(scope, "scope");
-        bindSessionScope(scope);
-    }
+    void bindScope(AuthSessionScope scope);
 
     /**
-     * Rebuilds session snapshots from compact token claims.
+     * 从紧凑令牌声明重建会话快照。
      *
-     * @param claims parsed token claims
+     * @param claims 解析后的令牌声明
      */
-    public void bindFromClaims(TokenClaims claims) {
-        Checks.notNull(claims, "claims");
-        TLC.securityRealm(claims.realm().name());
-        TLC.put(TLC.USER_ID, claims.userId());
-        if (claims.realm() == SecurityRealm.PLATFORM) {
-            TLC.platformUserId(claims.userId());
-        }
-        bindSessionScope(new AuthSessionScope(
-                claims.tokenType(),
-                claims.tenantId(),
-                claims.tenantMemberId(),
-                claims.workspaceId(),
-                claims.projectId()));
-    }
+    void bindFromClaims(TokenClaims claims);
 
     /**
-     * Clears all bound session snapshots and TLC scope keys.
+     * 清除所有绑定的会话快照与 TLC 作用域键。
      */
-    public void clear() {
-        SessionContext.clearUser();
-        SessionContext.clearTenant();
-        SessionContext.clearWorkspace();
-        SessionContext.clearProject();
-        TLC.securityRealm(null);
-        TLC.remove(TLC.USER_ID);
-        TLC.platformUserId(null);
-    }
-
-    private void bindAuthUser(AuthUser user) {
-        TLC.securityRealm(user.realm().name());
-        TLC.userName(user.loginName());
-        TLC.put(TLC.USER_ID, user.userId());
-        if (user.realm() == SecurityRealm.PLATFORM) {
-            TLC.platformUserId(user.userId());
-        }
-    }
-
-    private void bindSessionScope(AuthSessionScope scope) {
-        SessionContext.clearTenant();
-        SessionContext.clearWorkspace();
-        SessionContext.clearProject();
-        if (scope.tenantId() != null && !scope.tenantId().isBlank()) {
-            TLC.tenantId(scope.tenantId());
-            TLC.tenantMemberId(scope.tenantMemberId());
-            tenantScopeDirectory.findByTenantId(scope.tenantId())
-                    .ifPresent(this::bindTenantScope);
-        }
-        if (scope.workspaceId() != null && !scope.workspaceId().isBlank()) {
-            workspaceScopeDirectory.findWorkspace(scope.tenantId(), scope.workspaceId())
-                    .ifPresent(SessionContext::bindWorkspace);
-        }
-        if (scope.projectId() != null && !scope.projectId().isBlank()) {
-            projectScopeDirectory.findProject(scope.tenantId(), scope.workspaceId(), scope.projectId())
-                    .ifPresent(SessionContext::bindProject);
-        }
-    }
-
-    private void bindTenantScope(TenantScope tenantScope) {
-        SessionContext.bindTenant(tenantScope.tenant(), tenantScope.organization());
-    }
+    void clear();
 }

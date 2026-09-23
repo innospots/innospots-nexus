@@ -1,17 +1,20 @@
 package com.innospots.nexus.console.menu.domain.enums;
 
 /**
- * Browser target used when opening a menu destination.
+ * 打开菜单目标时使用的浏览器目标。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public enum MenuOpenMode {
 
     /**
-     * Opens inside the application frame.
+     * 在应用框架内打开。
      */
     INTERNAL,
 
     /**
-     * Opens in a new browser window or tab.
+     * 在新浏览器窗口或标签页中打开。
      */
     NEW_WINDOW
 }

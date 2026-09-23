@@ -15,7 +15,7 @@
     <packaging>jar</packaging>
 
     <name>innospots-nexus-platform</name>
-    <description>Ops-domain platform for tenant lifecycle and platform IAM.</description>
+    <description>租户生命周期与平台 IAM 的运营域平台。</description>
 
     <dependencies>
         <dependency>

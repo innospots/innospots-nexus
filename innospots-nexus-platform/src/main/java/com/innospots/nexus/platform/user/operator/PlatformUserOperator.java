@@ -8,37 +8,35 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.status.NexusStatusCode;
-import com.innospots.nexus.base.util.CryptoUtils;
-import com.innospots.nexus.console.credential.api.PasswordDecryptor;
+import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
+import com.innospots.nexus.console.credential.password.PasswordDecryptor;
+import com.innospots.nexus.console.credential.password.service.CredentialService;
 import com.innospots.nexus.platform.user.dao.PlatformUserDao;
-import com.innospots.nexus.platform.user.dao.PlatformUserPasswordDao;
 import com.innospots.nexus.platform.user.domain.entity.PlatformUserEntity;
-import com.innospots.nexus.platform.user.domain.entity.PlatformUserPasswordEntity;
 import com.innospots.nexus.platform.user.domain.enums.PlatformUserStatus;
 import com.innospots.nexus.platform.user.domain.request.PlatformUserCreateRequest;
 import com.innospots.nexus.platform.user.domain.vo.PlatformUserVo;
 
 /**
- * Persists platform users and their local password credentials.
- * <p>There is no public self-registration path. Administrators create
- * accounts through this operator.</p>
+ * 持久化平台用户及其本地密码凭证。
+ * <p>无公开自助注册路径。管理员通过本 Operator 创建账号。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @Slf4j
 @RequiredArgsConstructor
 public class PlatformUserOperator {
 
-    private static final String DEFAULT_PASSWORD_ALGORITHM = "BCRYPT";
-    private static final int DEFAULT_PASSWORD_VERSION = 1;
-
     private final PlatformUserDao platformUserDao;
-    private final PlatformUserPasswordDao passwordDao;
+    private final CredentialService credentialService;
     private final PasswordDecryptor passwordDecryptor;
 
     /**
-     * Finds a platform user by identifier.
+     * 按标识符查找平台用户。
      *
-     * @param platformUserId platform-realm user identifier
-     * @return user summary when found
+     * @param platformUserId platform-realm user 标识符
+     * @return 找到时返回用户概要
      */
     public Optional<PlatformUserVo> findById(String platformUserId) {
         if (platformUserId == null) {
@@ -48,10 +46,10 @@ public class PlatformUserOperator {
     }
 
     /**
-     * Creates a platform user with a local password. Does not issue tokens.
+     * 使用本地密码创建平台用户。不签发令牌。
      *
-     * @param request admin create request
-     * @return created user summary
+     * @param request admin create 请求
+     * @return created user 概要
      */
     @Transactional
     public PlatformUserVo createWithPassword(PlatformUserCreateRequest request) {
@@ -68,16 +66,7 @@ public class PlatformUserOperator {
         platformUserDao.insert(user);
 
         String rawPassword = passwordDecryptor.decrypt(request.encryptedPassword());
-        String passwordSalt = CryptoUtils.generatePasswordSalt();
-        PlatformUserPasswordEntity credential = new PlatformUserPasswordEntity();
-        credential.setPlatformUserId(user.getPlatformUserId());
-        credential.setPasswordHash(CryptoUtils.encryptPassword(rawPassword, passwordSalt));
-        credential.setPasswordSalt(passwordSalt);
-        credential.setPasswordAlgorithm(DEFAULT_PASSWORD_ALGORITHM);
-        credential.setPasswordVersion(DEFAULT_PASSWORD_VERSION);
-        credential.setForceReset(false);
-        credential.setFailedAttempts(0);
-        passwordDao.insert(credential);
+        credentialService.enrollPassword(SecurityRealm.PLATFORM, user.getPlatformUserId(), rawPassword);
 
         log.info("Created platform user {}", user.getPlatformUserId());
         return toVo(user);

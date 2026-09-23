@@ -31,11 +31,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Wrapper around a Quartz {@link Scheduler} that manages jobs and triggers
- * within a single group, using in-memory (RAM) job storage.
- * <p>Supports four schedule modes: {@link ScheduleMode#ONCE},
- * {@link ScheduleMode#CRON}, {@link ScheduleMode#SCHEDULED}, and
- * {@link ScheduleMode#MANUAL} (rejected).</p>
+ * 围绕 Quartz {@link Scheduler} 的封装，在单一分组内管理作业与触发器，使用内存（RAM）作业存储。
+ * <p>支持四种调度模式：{@link ScheduleMode#ONCE}、{@link ScheduleMode#CRON}、
+ * {@link ScheduleMode#SCHEDULED} 与 {@link ScheduleMode#MANUAL}（拒绝调度）。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @see ScheduleMode
  */
 public class QuartzScheduleManager {
 
@@ -47,20 +49,20 @@ public class QuartzScheduleManager {
     private volatile Scheduler scheduler;
     private volatile LocalDateTime updateTime;
 
-    /** Creates a manager with default name ({@code nexus-quartz-scheduler}), 8 threads, and default group. */
+    /** 使用默认名称（{@code nexus-quartz-scheduler}）、8 线程与默认分组创建管理器。 */
     public QuartzScheduleManager() {
         this("nexus-quartz-scheduler", 8, DEFAULT_GROUP);
     }
 
-    /** Creates a manager with the given scheduler name and thread count, using the default group. */
+    /** 使用给定调度器名称与线程数创建管理器，分组使用默认值。 */
     public QuartzScheduleManager(String schedulerName, int threadCount) {
         this(schedulerName, threadCount, DEFAULT_GROUP);
     }
 
     /**
-     * @param schedulerName Quartz instance name (defaults to {@code nexus-quartz-scheduler} if blank)
-     * @param threadCount   thread pool size (minimum 1)
-     * @param groupName     job/trigger group (defaults to {@code NEXUS_QUARTZ} if blank)
+     * @param schedulerName Quartz 实例名称（空白时默认为 {@code nexus-quartz-scheduler}）
+     * @param threadCount   线程池大小（最小为 1）
+     * @param groupName     作业/触发器分组（空白时默认为 {@code NEXUS_QUARTZ}）
      */
     public QuartzScheduleManager(String schedulerName, int threadCount, String groupName) {
         this.schedulerName = schedulerName == null || schedulerName.isBlank() ? "nexus-quartz-scheduler" : schedulerName;
@@ -69,8 +71,8 @@ public class QuartzScheduleManager {
     }
 
     /**
-     * Lazily initialises and starts the Quartz scheduler (double-checked locking).
-     * Idempotent — safe to call multiple times.
+     * 延迟初始化并启动 Quartz 调度器（双重检查锁定）。
+     * 幂等，可安全多次调用。
      */
     public void startup() {
         try {
@@ -93,11 +95,10 @@ public class QuartzScheduleManager {
     }
 
     /**
-     * Schedules or updates a job. If the job already exists, it is
-     * replaced and its trigger is rescheduled (idempotent).
+     * 调度或更新作业。作业已存在时替换并重新调度触发器（幂等）。
      *
-     * @return true if the job was accepted, false if the schedule mode
-     *         is MANUAL or the cron expression is invalid
+     * @param request 作业请求
+     * @return 接受作业时返回 {@code true}；模式为 MANUAL 或 Cron 无效时返回 {@code false}
      */
     public boolean refreshJob(QuartzJobRequest request) {
         validateStarted();
@@ -123,7 +124,12 @@ public class QuartzScheduleManager {
         }
     }
 
-    /** Deletes a job and its associated trigger. Returns false if the job does not exist. */
+    /**
+     * 删除作业及其关联触发器。
+     *
+     * @param jobName 作业名称
+     * @return 作业不存在时返回 {@code false}
+     */
     public boolean deleteJob(String jobName) {
         validateStarted();
         try {
@@ -137,7 +143,12 @@ public class QuartzScheduleManager {
         }
     }
 
-    /** Pauses a job. Returns false if the job does not exist. */
+    /**
+     * 暂停作业。
+     *
+     * @param jobName 作业名称
+     * @return 作业不存在时返回 {@code false}
+     */
     public boolean pauseJob(String jobName) {
         validateStarted();
         try {
@@ -153,7 +164,12 @@ public class QuartzScheduleManager {
         }
     }
 
-    /** Resumes a paused job. Returns false if the job does not exist. */
+    /**
+     * 恢复已暂停的作业。
+     *
+     * @param jobName 作业名称
+     * @return 作业不存在时返回 {@code false}
+     */
     public boolean resumeJob(String jobName) {
         validateStarted();
         try {
@@ -169,7 +185,12 @@ public class QuartzScheduleManager {
         }
     }
 
-    /** Checks if a job exists. */
+    /**
+     * 检查作业是否存在。
+     *
+     * @param jobName 作业名称
+     * @return 存在时返回 {@code true}
+     */
     public boolean hasJob(String jobName) {
         validateStarted();
         try {
@@ -179,7 +200,11 @@ public class QuartzScheduleManager {
         }
     }
 
-    /** Returns the set of all job names in the configured group. */
+    /**
+     * 返回配置分组内全部作业名称。
+     *
+     * @return 作业名称集合
+     */
     public Set<String> scheduleJobs() {
         validateStarted();
         try {
@@ -191,7 +216,11 @@ public class QuartzScheduleManager {
         }
     }
 
-    /** Returns detailed info for all jobs in the configured group. */
+    /**
+     * 返回配置分组内全部作业的详细信息。
+     *
+     * @return 作业信息列表
+     */
     public List<QuartzJobInfo> schedulerInfo() {
         validateStarted();
         try {
@@ -217,14 +246,18 @@ public class QuartzScheduleManager {
         }
     }
 
-    /** Returns the timestamp of the last job schedule change. */
+    /**
+     * 返回最后一次作业调度变更的时间戳。
+     *
+     * @return 最近更新时间
+     */
     public LocalDateTime latestUpdateTime() {
         return updateTime;
     }
 
     /**
-     * Stops the scheduler, clears all jobs, and releases resources.
-     * Safe to call multiple times.
+     * 停止调度器、清空全部作业并释放资源。
+     * 可安全多次调用。
      */
     public void shutdown() {
         Scheduler current = scheduler;
@@ -298,7 +331,7 @@ public class QuartzScheduleManager {
         );
     }
 
-    /** Returns false for MANUAL mode or invalid cron expressions. */
+    /** MANUAL 模式或 Cron 无效时返回 {@code false}。 */
     private boolean isScheduleAllowed(QuartzJobRequest request) {
         if (ScheduleMode.MANUAL.equals(request.scheduleMode())) {
             return false;

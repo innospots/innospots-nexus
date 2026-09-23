@@ -6,7 +6,11 @@ import java.util.Map;
 
 import com.innospots.nexus.core.plugin.contribution.PluginContributionSnapshotter;
 
-/** 仅保存 Console 模块、页面、菜单稳定身份的安全快照器。 */
+/**
+ * 仅保存 Console 模块、页面、菜单稳定身份的安全快照器。
+ * @author Smars
+ * @date 2026/09/13
+ */
 public final class ConsolePluginContributionSnapshotter
         implements PluginContributionSnapshotter<ConsolePluginContribution> {
 

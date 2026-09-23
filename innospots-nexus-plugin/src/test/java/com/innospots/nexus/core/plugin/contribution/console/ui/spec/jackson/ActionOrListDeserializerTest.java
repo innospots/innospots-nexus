@@ -8,7 +8,9 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests {@link ActionOrListDeserializer} for single-object and array union forms.
+ * 测试 {@link ActionOrListDeserializer} 对单对象与数组联合形式的反序列化。
+ * @author Smars
+ * @date 2026/09/13
  */
 class ActionOrListDeserializerTest {
 

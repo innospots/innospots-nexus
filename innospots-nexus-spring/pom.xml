@@ -15,7 +15,7 @@
     <packaging>pom</packaging>
 
     <name>innospots-nexus-spring</name>
-    <description>Spring Boot runtime assembly aggregator for innospots-nexus.</description>
+    <description>innospots-nexus 的 Spring Boot 运行时组装 aggregator。</description>
 
     <properties>
         <spring-boot.version>4.1.1</spring-boot.version>
@@ -34,6 +34,7 @@
     </build>
 
     <modules>
+        <module>innospots-nexus-spring-core</module>
         <module>innospots-nexus-spring-service</module>
         <module>innospots-nexus-spring-app</module>
         <module>innospots-nexus-spring-console</module>

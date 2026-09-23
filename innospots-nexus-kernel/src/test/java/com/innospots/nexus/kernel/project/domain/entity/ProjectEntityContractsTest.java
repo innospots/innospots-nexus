@@ -12,7 +12,7 @@ import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import org.junit.jupiter.api.Test;
 
-import com.innospots.nexus.core.persistence.entity.WorkspaceBaseEntity;
+import com.innospots.nexus.kernel.persistence.entity.TenantWorkspaceBaseEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -21,7 +21,7 @@ class ProjectEntityContractsTest {
     @Test
     void projectEntityExposesWorkspaceScopedPersistenceTable() {
         assertPersistenceTable(ProjectEntity.class, "nx_project");
-        assertThat(ProjectEntity.class.getSuperclass()).isEqualTo(WorkspaceBaseEntity.class);
+        assertThat(ProjectEntity.class.getSuperclass()).isEqualTo(TenantWorkspaceBaseEntity.class);
         assertThat(new ProjectEntity().idPrefix()).isEqualTo("prj");
     }
 

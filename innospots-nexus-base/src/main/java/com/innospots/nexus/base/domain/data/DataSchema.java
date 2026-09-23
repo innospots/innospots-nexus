@@ -9,9 +9,11 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Describes the structure of a data payload: a list of {@link DomainField}s
- * plus free-form configuration entries. Used to convey field metadata
- * alongside data responses.
+ * 描述数据载荷结构：{@link com.innospots.nexus.base.domain.field.DomainField} 列表加自由格式配置项。用于在数据响应中传递字段元数据。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @see DomainField
  */
 public class DataSchema {
 
@@ -26,7 +28,7 @@ public class DataSchema {
     }
 
     /**
-     * Creates a schema with a programmatic code and display name.
+     * 使用程序化编码与显示名称创建模式。
      */
     public static DataSchema named(String code, String name) {
         return new DataSchema(code, name);
@@ -45,7 +47,7 @@ public class DataSchema {
     }
 
     /**
-     * Adds a field to the schema definition.
+     * 向模式定义添加字段。
      */
     public DataSchema field(DomainField field) {
         if (field != null) {
@@ -68,7 +70,7 @@ public class DataSchema {
     }
 
     /**
-     * Sets a configuration property on this schema.
+     * 在此模式上设置配置属性。
      */
     public DataSchema config(String key, Object value) {
         configs.put(key, value);
@@ -76,7 +78,7 @@ public class DataSchema {
     }
 
     /**
-     * Gets a configuration property by key.
+     * 按键获取配置属性。
      */
     public Object config(String key) {
         return configs.get(key);

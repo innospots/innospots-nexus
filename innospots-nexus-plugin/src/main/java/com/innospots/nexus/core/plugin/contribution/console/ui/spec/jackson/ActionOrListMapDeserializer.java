@@ -12,7 +12,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Deserializes a map of named actions.
+ * 反序列化命名动作映射。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class ActionOrListMapDeserializer extends JsonDeserializer<Map<String, ActionOrList>> {
 

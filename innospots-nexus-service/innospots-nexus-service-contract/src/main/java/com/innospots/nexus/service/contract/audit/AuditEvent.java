@@ -8,21 +8,21 @@ import com.innospots.nexus.service.contract.security.ServicePrincipal;
 import com.innospots.nexus.service.contract.security.ServiceScope;
 
 /**
- * Technical audit event emitted by the service runtime.
+ * 服务运行时发出的技术审计事件。
  *
- * @param eventId      unique event identifier used for deduplication
- * @param timestamp    event time
- * @param principal    actor
- * @param scope        resource scope
- * @param action       audit action
- * @param resourceType resource type
- * @param resourceId   resource identifier, nullable before create
- * @param requestId    request identifier
- * @param traceId      trace identifier
- * @param result       outcome name
- * @param before       previous snapshot
- * @param after        next snapshot
- * @param details      extra safe fields
+ * @param eventId      用于去重的唯一事件标识
+ * @param timestamp    事件时间
+ * @param principal    操作主体
+ * @param scope        资源作用域
+ * @param action       审计动作
+ * @param resourceType 资源类型
+ * @param resourceId   资源标识，创建前可为空
+ * @param requestId    请求标识
+ * @param traceId      追踪标识
+ * @param result       结果名称
+ * @param before       变更前快照
+ * @param after        变更后快照
+ * @param details      额外安全字段
  * @author Smars
  * @date 2026/09/13
  * @see AuditStorage

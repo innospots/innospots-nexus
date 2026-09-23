@@ -1,23 +1,23 @@
 package com.innospots.nexus.console.logger.domain.context;
 
 /**
- * Framework-independent description of a single intercepted invocation.
- * <p>Assembled by an interceptor adapter around an {@code @AuditLog}-annotated
- * method and handed to an {@link com.innospots.nexus.console.logger.InvocationLogHandler}
- * for persistence. Contains no framework type so any Java runtime can produce
- * and consume it. This record is the canonical domain context carried from the
- * interceptor boundary into the audit log operator.</p>
+ * 单次被拦截调用的框架无关描述。
+ * <p>由拦截器适配器在 {@code @AuditLog} 标注方法周围组装，并交给
+ * {@link com.innospots.nexus.console.logger.InvocationLogHandler} 用于持久化。
+ * 不含框架类型，任意 Java 运行时均可产生并消费。本记录是从拦截器边界传入
+ * 审计日志操作器的标准领域上下文。</p>
  *
- * @param className  declaring class name of the intercepted method
- * @param methodName intercepted method name
- * @param action     business action code declared by the
- *                   {@link com.innospots.nexus.console.logger.AuditLog} annotation
- * @param arguments  captured method arguments, or an empty array when not recorded
- * @param result     captured return value, or null when not recorded or on failure
- * @param exception  thrown exception, or null on success
- * @param startTime  invocation start time in epoch milliseconds
- * @param endTime    invocation end time in epoch milliseconds
- * @param actor      identity of the acting user, or an empty string when unknown
+ * @author Smars
+ * @date 2026/09/13
+ * @param className  被拦截方法的声明类名
+ * @param methodName 被拦截的方法名
+ * @param action     由 {@link com.innospots.nexus.console.logger.AuditLog} 注解声明的业务动作编码
+ * @param arguments  捕获的方法参数；未记录时为空数组
+ * @param result     捕获的返回值；未记录或失败时为 null
+ * @param exception  抛出的异常；成功时为 null
+ * @param startTime  调用开始时间（epoch 毫秒）
+ * @param endTime    调用结束时间（epoch 毫秒）
+ * @param actor      操作用户身份；未知时为空字符串
  */
 public record InvocationLogContext(
         String className,
@@ -40,18 +40,18 @@ public record InvocationLogContext(
     }
 
     /**
-     * Elapsed execution time in milliseconds.
+     * 执行耗时（毫秒）。
      *
-     * @return endTime minus startTime
+     * @return endTime endTime 减 startTime
      */
     public long elapsedMillis() {
         return endTime - startTime;
     }
 
     /**
-     * Whether the invocation completed without throwing.
+     * 调用是否未抛异常完成。
      *
-     * @return true when no exception was captured
+     * @return true 未捕获异常时为 true
      */
     public boolean success() {
         return exception == null;

@@ -7,7 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Declares required permission keys for a resource or method. Place on Controller/Resource types.
+ * 为资源或方法声明所需权限键。应标注于 Controller/Resource 类型。
  *
  * @author Smars
  * @date 2026/09/13
@@ -19,16 +19,16 @@ import java.lang.annotation.Target;
 public @interface RequiresPermission {
 
     /**
-     * Required permission keys. Combined with type-level keys using AND.
+     * 所需权限键。与类型级键以 AND 组合。
      *
-     * @return permission keys
+     * @return 权限键
      */
     String[] value();
 
     /**
-     * Resource resolver key. Empty means the default resolver for the operation.
+     * 资源解析器键。为空表示使用该操作的默认解析器。
      *
-     * @return resolver key
+     * @return 解析器键
      */
     String resource() default "";
 }

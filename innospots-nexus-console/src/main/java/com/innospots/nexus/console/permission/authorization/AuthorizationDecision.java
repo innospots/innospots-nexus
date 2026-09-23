@@ -1,12 +1,23 @@
 package com.innospots.nexus.console.permission.authorization;
 
-/** 与框架无关的请求鉴权结果。 */
+/**
+ * 与框架无关的请求鉴权结果。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ */
 public record AuthorizationDecision(
-        /** 是否允许请求继续执行。 */
+        /**
+         * 是否允许请求继续执行。
+         */
         boolean allowed,
-        /** 拒绝原因；允许时为空。 */
+        /**
+         * 拒绝原因；允许时为空。
+         */
         String denyReason,
-        /** 允许时交给后续适配器使用的鉴权上下文；拒绝时为空。 */
+        /**
+         * 允许时交给后续适配器使用的鉴权上下文；拒绝时为空。
+         */
         AuthorizationContext context
 ) {
 

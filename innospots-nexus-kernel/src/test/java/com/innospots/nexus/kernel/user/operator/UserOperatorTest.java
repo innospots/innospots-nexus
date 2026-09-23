@@ -12,12 +12,12 @@ import org.slf4j.Logger;
 
 import com.innospots.nexus.base.domain.data.DataPage;
 import com.innospots.nexus.base.util.CryptoUtils;
-import com.innospots.nexus.console.credential.api.PasswordDecryptor;
+import com.innospots.nexus.console.credential.password.PasswordDecryptor;
 import com.innospots.nexus.core.persistence.id.DbPrimaryGenerator;
 import com.innospots.nexus.kernel.user.dao.UserDao;
-import com.innospots.nexus.kernel.user.dao.UserPasswordCredentialDao;
+import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
+import com.innospots.nexus.console.credential.password.service.CredentialService;
 import com.innospots.nexus.kernel.user.domain.entity.UserEntity;
-import com.innospots.nexus.kernel.user.domain.entity.UserPasswordCredentialEntity;
 import com.innospots.nexus.kernel.user.domain.enums.UserRegisterSource;
 import com.innospots.nexus.kernel.user.domain.enums.UserStatus;
 import com.innospots.nexus.kernel.user.domain.request.UserPageRequest;
@@ -39,7 +39,7 @@ class UserOperatorTest {
     void userOperatorExposesLombokGeneratedConstructorAndLogger() throws Exception {
         assertThat(UserOperator.class.getDeclaredConstructor(
                 UserDao.class,
-                UserPasswordCredentialDao.class,
+                CredentialService.class,
                 PasswordDecryptor.class)).isNotNull();
         assertThat(UserOperator.class.getDeclaredField("log").getType()).isEqualTo(Logger.class);
         assertThat(UserOperator.class.getDeclaredConstructors()[0].getParameterCount()).isEqualTo(3);
@@ -85,7 +85,7 @@ class UserOperatorTest {
         when(userDao.selectPage(any(IPage.class), any(Wrapper.class))).thenReturn(selectedPage);
         UserOperator operator = new UserOperator(
                 userDao,
-                mock(UserPasswordCredentialDao.class),
+                mock(CredentialService.class),
                 mock(PasswordDecryptor.class));
         UserPageRequest request = new UserPageRequest(
                 null, 2L, 5L, "dav", "Lee", "example.com", "139");
@@ -111,7 +111,7 @@ class UserOperatorTest {
         when(userDao.deleteById("tus01HZY8J6Y3D6S4V7N9X2M5Q9")).thenReturn(1);
         UserOperator operator = new UserOperator(
                 userDao,
-                mock(UserPasswordCredentialDao.class),
+                mock(CredentialService.class),
                 mock(PasswordDecryptor.class));
 
         assertThat(operator.deleteUser("tus01HZY8J6Y3D6S4V7N9X2M5Q9")).isTrue();
@@ -125,7 +125,7 @@ class UserOperatorTest {
         when(userDao.updateById(any(UserEntity.class))).thenReturn(1);
         UserOperator operator = new UserOperator(
                 userDao,
-                mock(UserPasswordCredentialDao.class),
+                mock(CredentialService.class),
                 mock(PasswordDecryptor.class));
 
         assertThat(operator.freezeUser("tus01HZY8J6Y3D6S4V7N9X2M5QA")).isTrue();
@@ -142,7 +142,7 @@ class UserOperatorTest {
         when(userDao.updateById(any(UserEntity.class))).thenReturn(1);
         UserOperator operator = new UserOperator(
                 userDao,
-                mock(UserPasswordCredentialDao.class),
+                mock(CredentialService.class),
                 mock(PasswordDecryptor.class));
 
         assertThat(operator.unfreezeUser("tus01HZY8J6Y3D6S4V7N9X2M5QA")).isTrue();
@@ -167,7 +167,7 @@ class UserOperatorTest {
 
         UserOperator operator = new UserOperator(
                 userDao,
-                mock(UserPasswordCredentialDao.class),
+                mock(CredentialService.class),
                 mock(PasswordDecryptor.class));
 
         Optional<UserProfileVo> profile = operator.findById("tus01HZY8J6Y3D6S4V7N9X2M5QB");
@@ -183,20 +183,15 @@ class UserOperatorTest {
     @Test
     void registersPasswordUserWithSeparatePasswordCredential() {
         UserDao userDao = mock(UserDao.class);
-        UserPasswordCredentialDao credentialDao = mock(UserPasswordCredentialDao.class);
+        CredentialService credentialService = mock(CredentialService.class);
         PasswordDecryptor passwordDecryptor = mock(PasswordDecryptor.class);
-        UserOperator operator = new UserOperator(userDao, credentialDao, passwordDecryptor);
+        UserOperator operator = new UserOperator(userDao, credentialService, passwordDecryptor);
         DbPrimaryGenerator generator = new DbPrimaryGenerator();
         doAnswer(invocation -> {
             UserEntity entity = invocation.getArgument(0);
             entity.setTenantUserId(generator.nextUUID(entity));
             return 1;
         }).when(userDao).insert(any(UserEntity.class));
-        doAnswer(invocation -> {
-            UserPasswordCredentialEntity entity = invocation.getArgument(0);
-            entity.setCredentialId(generator.nextUUID(entity));
-            return 1;
-        }).when(credentialDao).insert(any(UserPasswordCredentialEntity.class));
         when(passwordDecryptor.decrypt(eq("front-encrypted-password"))).thenReturn("raw-secret");
 
         UserProfileVo profile = operator.registerWithPassword(new UserPasswordRegisterRequest(
@@ -217,20 +212,10 @@ class UserOperatorTest {
         verify(userDao).insert(userCaptor.capture());
         assertThat(userCaptor.getValue().getTenantUserId()).isEqualTo(profile.userId());
         verify(passwordDecryptor).decrypt("front-encrypted-password");
-
-        ArgumentCaptor<UserPasswordCredentialEntity> credentialCaptor = forClass(UserPasswordCredentialEntity.class);
-        verify(credentialDao).insert(credentialCaptor.capture());
-        UserPasswordCredentialEntity credential = credentialCaptor.getValue();
-        assertThat(credential.getCredentialId()).startsWith("tpc");
-        assertThat(credential.getCredentialId()).hasSize(29);
-        assertThat(credential.getTenantUserId()).isEqualTo(profile.userId());
-        assertThat(credential.getPasswordHash()).isNotEqualTo("raw-secret");
-        assertThat(CryptoUtils.matchesPassword("raw-secret", credential.getPasswordHash())).isTrue();
-        assertThat(credential.getPasswordSalt()).isNotBlank();
-        assertThat(credential.getPasswordHash())
-                .isEqualTo(CryptoUtils.encryptPassword("raw-secret", credential.getPasswordSalt()));
-        assertThat(credential.getPasswordAlgorithm()).isEqualTo("BCRYPT");
-        assertThat(credential.getPasswordVersion()).isEqualTo(1);
+        verify(credentialService).enrollPassword(
+                eq(SecurityRealm.TENANT),
+                eq(profile.userId()),
+                eq("raw-secret"));
     }
 
 }

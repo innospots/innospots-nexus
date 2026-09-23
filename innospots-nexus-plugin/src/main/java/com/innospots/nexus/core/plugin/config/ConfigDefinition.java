@@ -12,6 +12,8 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
 /**
  * 一个插件允许使用的配置键不可变 schema。
+ * @author Smars
+ * @date 2026/09/13
  */
 public interface ConfigDefinition {
 

@@ -10,10 +10,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Ordered chain of {@link PageDslFilter} instances.
+ * 有序的 {@link PageDslFilter} 实例链。
  *
- * <p>Filters run sequentially. Each step receives the output of the previous filter as the
- * working document through {@link PageDslRenderContext#withDocument(PageDsl)}.</p>
+ * <p>过滤器按序执行。每一步通过 {@link PageDslRenderContext#withDocument(PageDsl)}
+ * 接收上一过滤器的输出作为工作文档。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class PageDslFilterChain {
 
@@ -23,16 +26,20 @@ public final class PageDslFilterChain {
         this.filters = List.copyOf(filters);
     }
 
-    /** Creates an empty filter chain. */
+    /**
+     * 创建空过滤器链。
+     *
+     * @return 空过滤器链
+     */
     public static PageDslFilterChain create() {
         return new PageDslFilterChain(List.of());
     }
 
     /**
-     * Creates a filter chain from the supplied filters.
+     * 根据提供的过滤器创建过滤器链。
      *
-     * @param filters ordered filters
-     * @return filter chain
+     * @param filters 有序过滤器
+     * @return 过滤器链
      */
     public static PageDslFilterChain of(PageDslFilter... filters) {
         if (filters == null || filters.length == 0) {
@@ -48,10 +55,10 @@ public final class PageDslFilterChain {
     }
 
     /**
-     * Returns a new chain with one additional filter appended.
+     * 返回追加了新过滤器的新链。
      *
-     * @param filter filter to append
-     * @return new filter chain
+     * @param filter 待追加的过滤器
+     * @return 新过滤器链
      */
     public PageDslFilterChain add(PageDslFilter filter) {
         if (filter == null) {
@@ -64,10 +71,11 @@ public final class PageDslFilterChain {
     }
 
     /**
-     * Runs the configured filters against the supplied context.
+     * 对提供的上下文执行已配置的过滤器。
      *
-     * @param context render context
-     * @return processed page DSL
+     * @param context 渲染上下文
+     * @return 处理后的页面 DSL
+     * @throws com.innospots.nexus.base.exception.NexusException 上下文无效或过滤器返回 null 时
      */
     public PageDsl process(PageDslRenderContext context) {
         if (context == null) {
@@ -93,7 +101,11 @@ public final class PageDslFilterChain {
         return current;
     }
 
-    /** Returns an immutable view of configured filters. */
+    /**
+     * 返回已配置过滤器的不可变视图。
+     *
+     * @return 过滤器列表
+     */
     public List<PageDslFilter> filters() {
         return filters;
     }

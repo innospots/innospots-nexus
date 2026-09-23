@@ -20,6 +20,8 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
  * 一个插件运行时使用的不可变发现快照。
  *
  * <p>目录创建后只包含静态元数据，但其中的插件实例属于消费它的运行时，不能由多个管理器共享。</p>
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class PluginCatalog {
 

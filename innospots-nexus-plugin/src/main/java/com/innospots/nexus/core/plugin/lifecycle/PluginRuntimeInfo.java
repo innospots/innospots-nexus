@@ -11,6 +11,8 @@ import com.innospots.nexus.core.plugin.dependency.DependencyResolution;
 
 /**
  * 不可变且已脱敏的运行快照，不保留运行时对象或配置值。
+ * @author Smars
+ * @date 2026/09/13
  */
 public record PluginRuntimeInfo(
         String id,

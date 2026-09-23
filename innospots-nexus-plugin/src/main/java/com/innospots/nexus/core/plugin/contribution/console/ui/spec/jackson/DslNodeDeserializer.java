@@ -11,7 +11,10 @@ import com.innospots.nexus.core.plugin.contribution.console.ui.spec.node.DslRend
 import java.io.IOException;
 
 /**
- * Deserializes {@link DslNode} instances.
+ * 反序列化 {@link DslNode} 实例。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class DslNodeDeserializer extends JsonDeserializer<DslNode> {
 

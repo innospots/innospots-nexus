@@ -14,8 +14,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Deserializes {@link com.innospots.nexus.core.plugin.contribution.console.ui.spec.node.Children} from either a YAML
- * array or a single {@link com.innospots.nexus.core.plugin.contribution.console.ui.spec.node.DslSourceRef} object.
+ * 从 YAML 数组或单个
+ * {@link com.innospots.nexus.core.plugin.contribution.console.ui.spec.node.DslSourceRef}
+ * 对象反序列化
+ * {@link com.innospots.nexus.core.plugin.contribution.console.ui.spec.node.Children}。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class ChildrenDeserializer extends JsonDeserializer<Children> {
 
@@ -41,9 +46,14 @@ public final class ChildrenDeserializer extends JsonDeserializer<Children> {
     }
 
     /**
-     * Resolves one renderable node using structural heuristics from the Pactor schema.
+     * 使用 Pactor schema 的结构启发式解析一个可渲染节点。
      *
-     * <p>Detection order: {@code source} → {@code component} → {@code type}.</p>
+     * <p>检测顺序：{@code source} → {@code component} → {@code type}。</p>
+     *
+     * @param mapper Jackson 对象映射器
+     * @param node JSON 节点
+     * @return 可渲染 DSL 片段
+     * @throws IOException JSON 解析失败时
      */
     static DslRenderable readRenderable(ObjectMapper mapper, JsonNode node) throws IOException {
         if (node.has("source")) {

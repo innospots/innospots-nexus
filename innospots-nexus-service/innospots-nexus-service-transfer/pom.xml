@@ -14,7 +14,7 @@
     <artifactId>innospots-nexus-service-transfer</artifactId>
 
     <name>innospots-nexus-service-transfer</name>
-    <description>Streaming file upload and download through shared resource storage contracts.</description>
+    <description>通过共享资源存储契约进行流式文件上传与下载。</description>
 
     <dependencies>
         <dependency>

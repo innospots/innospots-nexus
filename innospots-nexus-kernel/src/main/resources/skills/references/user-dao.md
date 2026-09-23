@@ -10,16 +10,6 @@ MyBatis-Plus mapper for `UserEntity`.
 - **Signature:** `UserDao extends BaseMapper<UserEntity>`
 - **Description:** Inherits standard CRUD operations for `nx_user`.
 
-## UserPasswordCredentialDao
-
-**Type:** interface
-
-MyBatis-Plus mapper for `UserPasswordCredentialEntity`.
-
-### BaseMapper
-- **Signature:** `UserPasswordCredentialDao extends BaseMapper<UserPasswordCredentialEntity>`
-- **Description:** Inherits standard CRUD operations for `nx_user_password`.
-
 ## UserOauthIdentityDao
 
 **Type:** interface

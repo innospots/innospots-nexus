@@ -77,6 +77,8 @@ grill-me（新设计必经，琐碎 L0 可跳过）
 - [ ] 分层：`endpoint → service → operator → dao`；无 endpoint→dao、operator→service
 - [ ] 未规划空 `service` / `event` / `model` 包
 - [ ] 跨表读：分批单表 + 内存组装（无 join 设计）
+- [ ] 已对照 [code-quality-constraints.md](../../java-reference/references/code-quality-constraints.md)：无投机接口/事件/Utils 层
+- [ ] 同一概念只有一个 owning 边界（operator/service/endpoint 不重复承担）
 
 ---
 
@@ -103,6 +105,8 @@ grill-me（新设计必经，琐碎 L0 可跳过）
 - [ ] 测试范围表：契约类名 + 行为单测边界 + 不测范围
 - [ ] 兼容面 / 迁移（若有）已写
 - [ ] 已选定 L0 / L1 / L2 / L3 产出形态与文档路径
+- [ ] L1+ 文档含 **「不建什么」** 小节（接口/事件/模块/依赖/双轨 API）
+- [ ] 无默认「先加 adapter 以后再删」；若必须兼容，兼容面与删除里程碑已写
 
 **禁止进入 develop 若：** 契约骨架不足以让 develop 测试先行（无测试类清单、无状态码表）。
 

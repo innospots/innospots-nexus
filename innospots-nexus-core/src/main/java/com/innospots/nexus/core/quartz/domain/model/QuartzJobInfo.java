@@ -4,13 +4,15 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Immutable snapshot of a scheduled Quartz job and its triggers.
+ * 已调度 Quartz 作业及其触发器的不可变快照。
  *
- * @param jobName   the job name
- * @param jobGroup  the job group
- * @param jobClass  fully qualified class name of the job implementation
- * @param dataMap   job data map (defensively copied)
- * @param triggers  associated trigger info (defensively copied)
+ * @author Smars
+ * @date 2026/09/13
+ * @param jobName  作业名称
+ * @param jobGroup 作业分组
+ * @param jobClass 作业实现类的全限定名
+ * @param dataMap  作业数据映射（防御性复制）
+ * @param triggers 关联触发器信息（防御性复制）
  */
 public record QuartzJobInfo(
         String jobName,

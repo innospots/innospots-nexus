@@ -12,7 +12,7 @@ import com.innospots.nexus.service.contract.invocation.ServiceInterceptor;
 import com.innospots.nexus.service.contract.status.ServiceStatusCode;
 
 /**
- * Rejects an already expired deadline before business execution.
+ * 在业务执行前拒绝已过期的截止时间。
  *
  * @author Smars
  * @date 2026/09/13

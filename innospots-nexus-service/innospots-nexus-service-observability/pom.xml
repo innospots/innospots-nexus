@@ -14,12 +14,24 @@
     <artifactId>innospots-nexus-service-observability</artifactId>
 
     <name>innospots-nexus-service-observability</name>
-    <description>Tracing, metrics, access logging and audit output integration.</description>
+    <description>跟踪、指标、访问日志与审计输出集成。</description>
 
     <dependencies>
         <dependency>
             <groupId>com.innospots</groupId>
             <artifactId>innospots-nexus-service-contract</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
         </dependency>
     </dependencies>
 </project>

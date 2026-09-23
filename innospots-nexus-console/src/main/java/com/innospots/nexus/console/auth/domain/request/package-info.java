@@ -1,4 +1,6 @@
 /**
- * Authentication endpoint request records.
+ * 认证端点请求记录。
+ * @author Smars
+ * @date 2026/09/13
  */
 package com.innospots.nexus.console.auth.domain.request;

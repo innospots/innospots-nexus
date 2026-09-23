@@ -2,20 +2,29 @@ package com.innospots.nexus.console.auth.api;
 
 import java.util.Optional;
 
-import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
 import com.innospots.nexus.console.auth.domain.model.AuthUser;
 
 /**
- * Looks up login identities. Implemented by platform and kernel; console does not persist users.
+ * 查找登录身份。由 platform 与 kernel 各实现一份（构造时即绑定安全域）；console 不持久化用户。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public interface UserDirectory {
 
     /**
-     * Finds a user in the given realm by user_name, email, or mobile.
+     * 按 user_name、email 或 mobile 查找仍可用于认证的用户。
      *
-     * @param realm    security realm
-     * @param identity login identifier
-     * @return matching user when found
+     * @param identity login 标识符
+     * @return 匹配的活跃用户
      */
-    Optional<AuthUser> findByLogin(SecurityRealm realm, String identity);
+    Optional<AuthUser> findByLogin(String identity);
+
+    /**
+     * 按域用户主键加载仍可用于认证的用户（通常为 {@code ACTIVE}）。
+     *
+     * @param userId platform_user_id 或 tenant_user_id
+     * @return 找到且仍有效时返回
+     */
+    Optional<AuthUser> findById(String userId);
 }

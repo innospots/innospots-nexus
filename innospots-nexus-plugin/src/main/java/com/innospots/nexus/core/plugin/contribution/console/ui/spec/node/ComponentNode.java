@@ -14,10 +14,13 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Inline component node declared with a registry {@code type}.
+ * 以注册表 {@code type} 声明的内联组件节点。
  *
- * <p>{@code type} and {@code component} are mutually exclusive node shapes. Component-specific
- * {@link #props} are intentionally open and validated by the component registry.</p>
+ * <p>{@code type} 与 {@code component} 为互斥节点形态。组件特定的 {@link #props}
+ * 有意保持开放，由组件注册表校验。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @Getter
 @Setter

@@ -13,7 +13,10 @@ import com.innospots.nexus.platform.support.domain.request.SupportAccessGrantCre
 import com.innospots.nexus.platform.support.domain.vo.SupportAccessGrantVo;
 
 /**
- * Ops-domain contract for time-bounded tenant support access.
+ * 时间限定租户支持访问的运维域契约。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @Path("/platform/support-access")
 @Produces(MediaType.APPLICATION_JSON)
@@ -21,19 +24,19 @@ import com.innospots.nexus.platform.support.domain.vo.SupportAccessGrantVo;
 public interface SupportAccessGrantEndpoint {
 
     /**
-     * Creates a pending support-access grant.
+     * 创建待审批的支持访问授权。
      *
-     * @param request grant creation data
-     * @return created grant summary
+     * @param request 授权创建数据
+     * @return created grant 概要
      */
     @POST
     R<SupportAccessGrantVo> createGrant(SupportAccessGrantCreateRequest request);
 
     /**
-     * Returns one support-access grant.
+     * 返回单个支持访问授权。
      *
-     * @param grantId grant identifier
-     * @return grant summary
+     * @param grantId grant 标识符
+     * @return grant 概要
      */
     @GET
     @Path("/{grantId}")

@@ -10,6 +10,8 @@ import com.innospots.nexus.core.plugin.declaration.PluginSource;
  * @param source 被拒绝定义的来源元数据
  * @param claimedPluginId 声明的插件标识；未知时可为空
  * @param diagnostics 脱敏后的拒绝原因列表；{@code null} 视为空列表
+ * @author Smars
+ * @date 2026/09/13
  */
 public record RejectedPluginDefinition(
         PluginSource source,

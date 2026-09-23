@@ -5,7 +5,12 @@ import java.util.Optional;
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.status.NexusStatusCode;
 
-/** 通过线程上下文向数据访问适配器传递鉴权结果。 */
+/**
+ * 通过线程上下文向数据访问适配器传递鉴权结果。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ */
 public final class AuthorizationScope implements AutoCloseable {
 
     private static final ThreadLocal<AuthorizationContext> CURRENT = new ThreadLocal<>();

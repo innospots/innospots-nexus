@@ -7,7 +7,7 @@ import com.innospots.nexus.service.contract.context.ServiceContext;
 import com.innospots.nexus.service.contract.context.ServiceContextAccessor;
 
 /**
- * Thread-local {@link ServiceContext} accessor. Restore never clears an outer nested context.
+ * 线程本地 {@link ServiceContext} 访问器。恢复时不会清除外层嵌套上下文。
  *
  * @author Smars
  * @date 2026/09/13
@@ -24,10 +24,10 @@ public final class ThreadBoundServiceContext implements ServiceContextAccessor {
     }
 
     /**
-     * Installs {@code context} on the current thread and returns the previous snapshot.
+     * 在当前线程安装 {@code context} 并返回先前快照。
      *
-     * @param context context to install
-     * @return snapshot of the previous binding
+     * @param context 待安装上下文
+     * @return 先前绑定的快照
      */
     public ContextSnapshot install(ServiceContext context) {
         Checks.notNull(context, "context");
@@ -37,9 +37,9 @@ public final class ThreadBoundServiceContext implements ServiceContextAccessor {
     }
 
     /**
-     * Restores the previous binding. {@code null} previous removes the thread local.
+     * 恢复先前绑定。{@code null} 先前值将移除线程本地变量。
      *
-     * @param snapshot snapshot from {@link #install(ServiceContext)}
+     * @param snapshot 来自 {@link #install(ServiceContext)} 的快照
      */
     public void restore(ContextSnapshot snapshot) {
         Checks.notNull(snapshot, "snapshot");

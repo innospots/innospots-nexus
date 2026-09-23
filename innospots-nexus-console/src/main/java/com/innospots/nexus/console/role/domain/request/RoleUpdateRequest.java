@@ -1,11 +1,13 @@
 package com.innospots.nexus.console.role.domain.request;
 
 /**
- * Request for updating mutable role profile fields.
+ * 更新可变角色档案字段的请求。
  *
- * @param roleName    display name
- * @param description optional role description
- * @param sortOrder   display order
+ * @author Smars
+ * @date 2026/09/13
+ * @param roleName    显示名称
+ * @param description 可选 role 描述
+ * @param sortOrder   显示顺序
  */
 public record RoleUpdateRequest(
         String roleName,

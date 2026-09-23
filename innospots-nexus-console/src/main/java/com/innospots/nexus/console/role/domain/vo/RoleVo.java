@@ -7,22 +7,24 @@ import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
 import com.innospots.nexus.console.role.domain.enums.RoleOwnerType;
 
 /**
- * Management-console role view.
+ * 管理控制台角色视图。
  *
- * @param roleId         role identifier
- * @param roleName       display name
- * @param roleCode       stable code unique within the owner
- * @param ownerType      ownership layer
- * @param ownerId        owner identifier; empty for PLATFORM
- * @param securityRealm  PLATFORM or TENANT
- * @param description    optional description
- * @param status         lifecycle status
- * @param sortOrder      display order
- * @param builtIn        whether the role is system-managed
- * @param administrator  whether the role bypasses ordinary resource checks
- * @param memberCount    assigned user count
- * @param createdAt      creation time
- * @param updatedAt      last update time
+ * @author Smars
+ * @date 2026/09/13
+ * @param roleId         角色标识符
+ * @param roleName       显示名称
+ * @param roleCode       归属范围内唯一的稳定编码
+ * @param ownerType      归属层级
+ * @param ownerId        owner 标识符; empty for PLATFORM
+ * @param securityRealm  PLATFORM 或 TENANT
+ * @param description    可选 描述
+ * @param status         生命周期状态
+ * @param sortOrder      显示顺序
+ * @param builtIn        角色是否由系统管理
+ * @param administrator  角色是否绕过普通资源检查
+ * @param memberCount    已分配用户数量
+ * @param createdAt      创建时间
+ * @param updatedAt      最后更新时间
  */
 public record RoleVo(
         String roleId,

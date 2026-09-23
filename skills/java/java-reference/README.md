@@ -12,7 +12,7 @@
 
 1. **查规范** — 从 [standards-index.md](references/standards-index.md) 或下方「权威原文」定位章节，再打开 `standards/` 原文。
 2. **不确定走哪个技能** — 看 [SKILL.md](./SKILL.md) 中的技能路由表，或顶层 [skills/java/README.md](../README.md)。
-3. **动手前压力测试** — 重大方案走 [grill-me.md](references/grill-me.md)（跨技能，不产出代码）；实践见 [grill-me-best-practices.md](../../../docs/grill-me-best-practices.md)。
+3. **动手前压力测试** — 重大方案走 [grill-me.md](references/grill-me.md)（跨技能，不产出代码）。
 4. **查模块公共 API** — 见 `references/modules/<artifact-id>/README.md`（仅索引，非技能）。
 
 代理或 IDE 中引用本技能时，通常附带具体问题（如「命名 record 怎么写」「异常该放哪一层」）。

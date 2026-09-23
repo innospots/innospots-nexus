@@ -8,13 +8,15 @@ import com.innospots.nexus.console.logger.InvocationLogHandler;
 import com.innospots.nexus.console.logger.operator.InvocationLogOperator;
 
 /**
- * Persistence-backed implementation of {@link InvocationLogHandler}.
- * <p>Adapts a completed {@link InvocationLogContext} to the audit log operator,
- * which stores it in the audit-log domain. A persistence failure is logged but
- * never propagated, because audit logging must not disturb the audited
- * operation — this handler is invoked from an interceptor's {@code finally}
- * block.</p>
+ * {@link InvocationLogHandler} 的持久化实现。
+ * <p>将已完成的 {@link InvocationLogContext} 适配到审计日志操作器，
+ * 后者将其存入审计日志领域。持久化失败会记录日志但
+ * 永不传播，因为审计日志不得干扰被审计
+ * 操作——本处理器从拦截器的 {@code finally}
+ * 块中调用。</p>
  *
+ * @author Smars
+ * @date 2026/09/13
  * @see InvocationLogHandler
  * @see InvocationLogOperator
  */
@@ -23,7 +25,12 @@ import com.innospots.nexus.console.logger.operator.InvocationLogOperator;
 public class PersistenceInvocationLogHandler implements InvocationLogHandler {
 
     private final InvocationLogOperator operator;
+    /**
+     * 处理。
+     * @param context 调用上下文
+     */
 
+    
     @Override
     public void handle(InvocationLogContext context) {
         try {

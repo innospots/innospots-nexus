@@ -3,15 +3,17 @@ package com.innospots.nexus.kernel.user.domain.request;
 import com.innospots.nexus.base.domain.request.SimpleQueryRequest;
 
 /**
- * Paginated tenant-user query request.
+ * 分页租户用户查询请求。
  *
- * @param input       common fuzzy search keyword
- * @param pageNo      1-indexed page number, default 1
- * @param pageSize    page size, default 20
- * @param userName    user name filter
- * @param displayName display name filter
- * @param email       email filter
- * @param mobile      mobile number filter
+ * @author Smars
+ * @date 2026/09/13
+ * @param input       通用模糊搜索关键字
+ * @param pageNo      从 1 开始的页码，默认 1
+ * @param pageSize    分页大小，默认 20
+ * @param userName    用户名过滤条件
+ * @param displayName 显示名称 filter
+ * @param email       邮箱过滤条件
+ * @param mobile      手机号过滤条件
  */
 public record UserPageRequest(
         String input,

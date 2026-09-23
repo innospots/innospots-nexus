@@ -18,45 +18,108 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Convenience methods for HTTP GET and POST (JSON) requests.
- * Uses {@link HttpClientBuilder} to create short-lived clients for
- * each call.
+ * HTTP GET 与 POST（JSON）请求的便捷方法。
+ * 使用 {@link HttpClientBuilder} 为每次调用创建短生命周期客户端。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @see HttpResult
+ * @see HttpClientBuilder
  */
 public final class HttpUtils {
 
     private HttpUtils() {
     }
 
+    /**
+     * 发送 GET 请求（无自定义请求头）。
+     *
+     * @param url 请求 URL
+     * @return HTTP 结果
+     * @throws IOException 请求失败时
+     */
     public static HttpResult get(String url) throws IOException {
         return get(url, Map.of());
     }
 
+    /**
+     * 发送带自定义请求头的 GET 请求。
+     *
+     * @param url     请求 URL
+     * @param headers 请求头
+     * @return HTTP 结果
+     * @throws IOException 请求失败时
+     */
     public static HttpResult get(String url, Map<String, String> headers) throws IOException {
         try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
             return get(client, url, headers);
         }
     }
 
+    /**
+     * 使用已有客户端发送 GET 请求（无自定义请求头）。
+     *
+     * @param client HTTP 客户端
+     * @param url    请求 URL
+     * @return HTTP 结果
+     * @throws IOException 请求失败时
+     */
     public static HttpResult get(CloseableHttpClient client, String url) throws IOException {
         return get(client, url, Map.of());
     }
 
+    /**
+     * 使用已有客户端发送带自定义请求头的 GET 请求。
+     *
+     * @param client  HTTP 客户端
+     * @param url     请求 URL
+     * @param headers 请求头
+     * @return HTTP 结果
+     * @throws IOException 请求失败时
+     */
     public static HttpResult get(CloseableHttpClient client, String url, Map<String, String> headers) throws IOException {
         HttpGet request = new HttpGet(url);
         applyHeaders(request, headers);
         return execute(client, request);
     }
 
+    /**
+     * 发送 JSON POST 请求（无自定义请求头）。
+     *
+     * @param url      请求 URL
+     * @param jsonBody JSON 请求体
+     * @return HTTP 结果
+     * @throws IOException 请求失败时
+     */
     public static HttpResult postJson(String url, String jsonBody) throws IOException {
         return postJson(url, jsonBody, Map.of());
     }
 
+    /**
+     * 发送带自定义请求头的 JSON POST 请求。
+     *
+     * @param url      请求 URL
+     * @param jsonBody JSON 请求体
+     * @param headers  请求头
+     * @return HTTP 结果
+     * @throws IOException 请求失败时
+     */
     public static HttpResult postJson(String url, String jsonBody, Map<String, String> headers) throws IOException {
         try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
             return postJson(client, url, jsonBody, headers);
         }
     }
 
+    /**
+     * 使用已有客户端发送 JSON POST 请求。
+     *
+     * @param client   HTTP 客户端
+     * @param url      请求 URL
+     * @param jsonBody JSON 请求体
+     * @param headers  请求头
+     * @return HTTP 结果
+     * @throws IOException 请求失败时
+     */
     public static HttpResult postJson(
             CloseableHttpClient client,
             String url,
@@ -69,6 +132,14 @@ public final class HttpUtils {
         return execute(client, request);
     }
 
+    /**
+     * 使用已有客户端执行 HTTP 请求。
+     *
+     * @param client  HTTP 客户端
+     * @param request HTTP 请求
+     * @return HTTP 结果
+     * @throws IOException 请求失败时
+     */
     public static HttpResult execute(CloseableHttpClient client, org.apache.hc.core5.http.ClassicHttpRequest request)
             throws IOException {
         return client.execute(request, HttpUtils::toResult);

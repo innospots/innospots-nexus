@@ -14,10 +14,14 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Reference to a named component declared in {@link com.innospots.nexus.core.plugin.contribution.console.ui.spec.PageDsl#components}.
+ * 对
+ * {@link com.innospots.nexus.core.plugin.contribution.console.ui.spec.PageDsl#components}
+ * 中声明的命名组件的引用。
  *
- * <p>May optionally override {@link #props}, {@link #events}, or {@link #children} for the
- * referenced component instance.</p>
+ * <p>可为被引用组件实例选择性覆盖 {@link #props}、{@link #events} 或 {@link #children}。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @Getter
 @Setter

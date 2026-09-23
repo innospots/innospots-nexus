@@ -6,7 +6,7 @@ import com.innospots.nexus.base.status.StatusCode;
 import com.innospots.nexus.base.status.StatusCodeRules;
 
 /**
- * Service-framework status codes. Local codes are unique across the SRV module.
+ * 服务框架状态码。本地码在 SRV 模块内唯一。
  *
  * @author Smars
  * @date 2026/09/13
@@ -131,9 +131,9 @@ public enum ServiceStatusCode implements StatusCode {
     }
 
     /**
-     * Returns whether a caller may retry after this failure when other conditions allow it.
+     * 在其他条件允许时，返回调用方是否可在此失败后重试。
      *
-     * @return {@code true} when retry is potentially safe
+     * @return 可能安全重试时为 {@code true}
      */
     public boolean retryable() {
         return retryable;

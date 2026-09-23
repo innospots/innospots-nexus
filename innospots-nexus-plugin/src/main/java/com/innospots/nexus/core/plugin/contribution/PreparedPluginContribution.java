@@ -5,6 +5,8 @@ package com.innospots.nexus.core.plugin.contribution;
  *
  * <p>实现必须支持幂等的 {@link #stage()}、{@link #commit()}、{@link #rollback()}
  * 和 {@link #close()}；调用方按 stage → commit → close 顺序驱动，失败时回滚。</p>
+ * @author Smars
+ * @date 2026/09/13
  */
 public interface PreparedPluginContribution extends AutoCloseable {
 

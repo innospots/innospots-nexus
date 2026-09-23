@@ -4,22 +4,24 @@ import com.innospots.nexus.console.menu.domain.enums.MenuOpenMode;
 import com.innospots.nexus.console.menu.domain.enums.MenuType;
 
 /**
- * Mutable profile data for an existing menu node.
+ * 现有菜单节点的可变档案数据。
  * <p>
- * The stable menu key is deliberately excluded from updates.
+ * 稳定的菜单键刻意排除在更新之外。
  * </p>
  *
- * @param parentId     optional parent menu identifier
- * @param menuName     display name
- * @param menuType     menu node type
- * @param routePath    internal navigation path
- * @param componentKey logical frontend component identifier
- * @param redirectPath optional redirect path
- * @param externalUrl  external destination for link menus
- * @param icon         optional icon identifier
- * @param openMode     browser target mode
- * @param visible      whether the node appears in navigation
- * @param sortOrder    sibling display order
+ * @author Smars
+ * @date 2026/09/13
+ * @param parentId     可选 parent 菜单标识符
+ * @param menuName     显示名称
+ * @param menuType     菜单节点类型
+ * @param routePath    内部导航路径
+ * @param componentKey 逻辑前端组件标识符
+ * @param redirectPath 可选 redirect path
+ * @param externalUrl  外部目标地址 for link menus
+ * @param icon         可选 icon 标识符
+ * @param openMode     浏览器打开模式
+ * @param visible      节点是否在导航中可见
+ * @param sortOrder    sibling 显示顺序
  */
 public record MenuUpdateRequest(
         String parentId,

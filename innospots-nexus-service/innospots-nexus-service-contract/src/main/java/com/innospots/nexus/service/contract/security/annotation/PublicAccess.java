@@ -7,8 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marks an explicit unauthenticated entry. Conflicts with non-empty permissions on the same method
- * fail startup.
+ * 标记显式未认证入口。与同方法非空权限冲突将导致启动失败。
  *
  * @author Smars
  * @date 2026/09/13

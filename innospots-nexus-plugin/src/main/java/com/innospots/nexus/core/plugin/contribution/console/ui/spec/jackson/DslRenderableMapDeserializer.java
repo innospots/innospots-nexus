@@ -12,7 +12,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Deserializes a map of named renderable components.
+ * 反序列化命名可渲染组件映射。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class DslRenderableMapDeserializer extends JsonDeserializer<Map<String, DslRenderable>> {
 

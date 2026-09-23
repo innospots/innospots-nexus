@@ -3,35 +3,68 @@ package com.innospots.nexus.console.permission.domain.vo;
 import com.innospots.nexus.console.catalog.domain.entity.ConsoleCatalogResourceEntity;
 import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
 
-/** 面向管理端和前端的权限资源目录视图。 */
+/**
+ * 面向管理端和前端的权限资源目录视图。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ */
 public record PermissionResourceVo(
-        /** 资源记录主键。 */
+        /**
+         * 资源记录主键。
+         */
         String resourceId,
-        /** 来源插件稳定身份。 */
+        /**
+         * 来源插件稳定身份。
+         */
         String ownerPluginId,
-        /** 所属模块 key。 */
+        /**
+         * 所属模块 key。
+         */
         String moduleKey,
-        /** 资源类型。 */
+        /**
+         * 资源类型。
+         */
         CatalogResourceType resourceType,
-        /** 稳定资源 key。 */
+        /**
+         * 稳定资源 key。
+         */
         String resourceKey,
-        /** 资源父节点主键。 */
+        /**
+         * 资源父节点主键。
+         */
         String parentResourceId,
-        /** 资源所属或引用的页面 key。 */
+        /**
+         * 资源所属或引用的页面 key。
+         */
         String pageKey,
-        /** datasource 在页面内的 key。 */
+        /**
+         * datasource 在页面内的 key。
+         */
         String datasourceKey,
-        /** 页面路由。 */
+        /**
+         * 页面路由。
+         */
         String routePath,
-        /** datasource 的 HTTP 方法。 */
+        /**
+         * datasource 的 HTTP 方法。
+         */
         String requestMethod,
-        /** datasource 的 HTTP 路径模板。 */
+        /**
+         * datasource 的 HTTP 路径模板。
+         */
         String requestUrl,
-        /** 目录展示名称。 */
+        /**
+         * 目录展示名称。
+         */
         String displayName,
-        /** 同级排序值。 */
+        /**
+         * 同级排序值。
+         */
         Integer sortOrder,
-        /** 资源状态。 */
+        /**
+         * 资源状态。
+         */
         String status
 ) {
 

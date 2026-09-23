@@ -1,16 +1,25 @@
 package com.innospots.nexus.console.role.domain.enums;
 
 /**
- * Layer that owns a role definition.
+ * 拥有角色定义的层级。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public enum RoleOwnerType {
 
-    /** Ops-domain platform role. */
+    /**
+     * 运维域平台角色。
+     */
     PLATFORM,
 
-    /** Tenant-wide role. */
+    /**
+     * 租户级 role。
+     */
     TENANT,
 
-    /** Workspace-scoped role. */
+    /**
+     * 工作区作用域内的 role。
+     */
     WORKSPACE
 }

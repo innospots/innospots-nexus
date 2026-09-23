@@ -31,3 +31,8 @@ replay_pid*
 *.iml
 logs
 .vscode
+.claude/
+.cursor/
+.agents/
+.workbuddy/
+scripts/

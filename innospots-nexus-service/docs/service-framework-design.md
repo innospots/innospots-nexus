@@ -2,29 +2,25 @@
 
 ## 1. 文档定位
 
-- 状态：可实施规格 v1.2（评审中）。模块拓扑已由开发者确认；D1–D15 作为本规格的实施默认锁定。覆盖本规格即可进入 `java:project`（仅 D7/D8）和 `java:develop`，不代表功能已经实现。
-- 日期：2026-09-13。
-- 级别：L2 完整方案 + 实施附录。
-- 归属：`innospots-nexus-service` 的八个中立库，以及 `innospots-nexus-spring-service`、`innospots-nexus-quarkus-service`；M0 另增 `innospots-nexus-quarkus-service-deployment` 与 `innospots-nexus-service-adapter-test`。
-- 功能输入：[Java 统一服务接入与运行框架需求说明书](/Users/mac/Downloads/Java%20统一服务接入与运行框架需求说明书.md)（§1–48）；开发实践与开发者体验规范（对话内文，§1–51）。
-- 工程事实：[已建骨架说明](../README.md)、[仓库边界](../../AGENTS.md)、[BOM](../../innospots-nexus-bom/pom.xml)。上述相对链接以本文件位置解析。
-- 本次只交付设计文件，不修改 Java、POM、全局规范或模块 API 参考索引。
+- **角色**：架构总览——说明「做什么、不做什么、模块如何划分、哪些决策已锁定」。
+- **状态**：与当前代码对齐的设计基线（2026-09 起稿，随实现演进）。**交付缺口**见 [service-future-work.md](service-future-work.md)，不在本文按阶段复述。
+- **范围**：八个中立库、`innospots-nexus-spring-service`、`innospots-nexus-quarkus-service`、`innospots-nexus-quarkus-service-deployment`、`innospots-nexus-service-adapter-test`。
+- **约束**：[仓库边界](../../AGENTS.md)、[模块 README](../README.md)、[BOM](../../innospots-nexus-bom/pom.xml)。
 
-本文与以下附录构成**同一份**实施规格；附录对签名、状态机、配置键、测试类名具有约束力。`java:develop` 不得另选异常体系、模块拓扑或异步模型。
+专题文档分工：
 
-| 文档 | 实现用途 |
+| 文档 | 内容 |
 |---|---|
-| [开发体验](service-developer-experience-design.md) | 四级用法、注解落点、业务依赖、禁止项、DX 验收 |
-| [契约与类型](service-contract-design.md) | 包、类型、接口签名、空值与所有权、状态码 |
-| [运行时与协议](service-runtime-design.md) | 调用链、上下文、并发、SSE/WS/文件、安全、审计与治理算法 |
-| [框架适配与配置](service-adapter-design.md) | MVC/WebFlux/Quarkus 集成、自动装配、依赖与配置 |
-| [实施与验收](service-implementation-design.md) | 工程增量、源文件清单、测试类、里程碑、需求追踪与验收 |
+| [开发体验](service-developer-experience-design.md) | 四级用法、注解落点、禁止项 |
+| [契约与类型](service-contract-design.md) | 包、类型签名、状态码 |
+| [运行时与协议](service-runtime-design.md) | 调用链、流/WS/文件、治理与审计语义 |
+| [框架适配与配置](service-adapter-design.md) | Spring / Quarkus 装配与 `service.*` 配置 |
+| [模块清单与验收](service-implementation-design.md) | 源文件索引、测试体系、需求验收对照 |
+| [待完善能力](service-future-work.md) | 未完成项与明确排除项 |
 
-本稿区分三种信息：需求书中的功能目标、已检查的仓库事实、本文锁定的实现决策。需求书中的模块示例及技术建议不自动覆盖仓库规则。
+实现须遵守下文 **D1–D15** 与专题文档中的签名、状态机；不得另选异常体系、模块拓扑或公共异步模型。
 
-### 1.1 设计树（grill 结论）
-
-交互式外部 grilling CLI 未执行。下列决策树依据已确认模块拓扑、`AGENTS.md`、需求书与仓库源码闭合；开发者评审可覆盖，未覆盖前按本表实施。
+### 1.1 关键决策摘要
 
 | 节点 | 锁定结论 |
 |---|---|
@@ -33,7 +29,7 @@
 | 流输出口 | StreamSink 为 Level 2；Channel 为 SPI；按 id emit 必须鉴权 |
 | 注解 | 默认无 Enable*；差异用 RequiresPermission/Audited/治理注解；TimeoutProtected 为策略键 |
 | 异常 | 只使用 `NexusException` + 类型化 `StatusCode`；不建 `ServiceException` |
-| 状态码 module | 平台复用 `NEX`；服务专属失败使用 `SRV`，实施 M1 登记白名单 |
+| 状态码 module | 平台复用 `AIO`；服务专属失败使用 `SRV`（`ServiceStatusCode` + 契约测试） |
 | 主体 ID | `ServicePrincipal.id` 为 String；不把 ULID 强转 `UserSnapshot.userId()` 的 Long |
 | 安全 | 默认对接宿主 IAM Provider；不把 Spring Security 打进默认依赖 |
 | 路由 | 适配器跟随宿主原生路由；既有 console/kernel 继续 Jakarta REST |
@@ -55,11 +51,11 @@
 4. 每个队列、注册表、线程池和活跃会话均有上限；权限默认拒绝、取消传播、清理可观测。
 5. 实现者可按本规格中的文件归属、接口、状态转移、配置和测试逐项构建，不再自行决定基本行为。
 
-### 2.1 已查证的能力与缺口
+### 2.1 与仓库的衔接
 
-| 仓库事实 | 对本设计的影响 |
+| 事实 | 设计约束 |
 |---|---|
-| 新模块当前只有 POM 和包根 | 没有可复用的服务运行时；本规格全部新接口均属计划 |
+| 中立库与双适配器、adapter-test 已落地 | 行为以代码与测试为准；本文描述语义与边界 |
 | base 已有 `NexusException`、`StatusCode`、`R<T>` | 不再新建并行的 `ServiceException` 异常体系 |
 | `NexusException` 只保存 code/display/message，不保存 StatusCode 对象 | 新建有限的 `ServiceErrorCatalog` 解析允许的完整码，不能假设存在 `exception.statusCode()` |
 | `SessionContext` 使用 TLC；TLC 是线程本地可变 Map | 作为旧同步代码的桥接视图，不能直接当跨线程事实源 |
@@ -80,7 +76,7 @@
 
 ## 3. 不在本方案中的能力
 
-不重建路由、DI、Web Server、JSON 引擎、IAM 用户/角色表、审计查询管理台。第一、二阶段均不包含分布式 Session、跨节点推送、分布式限流、持久化 SSE 重放、STOMP/SockJS、断点续传上传、多段 Range 响应或通用重试引擎。
+不重建路由、DI、Web Server、JSON 引擎、IAM 用户/角色表、审计查询管理台。分布式 Session、跨节点推送、集群限流、SSE 持久重放、STOMP/SockJS、断点续传、多段 Range、通用重试引擎等见 [待完善与排除](service-future-work.md)。
 
 “可扩展”必须有已列出的 SPI 和失败语义，但不等于内置所有认证/病毒扫描/存储厂商。生产启用某 Provider 前需其实现通过契约测试；缺失 Provider 不能用放行实现填补。
 
@@ -151,7 +147,7 @@ flowchart TD
 | 上传 | UploadResource 或其列表 | 解析 multipart、限制、临时资源管理 |
 | 下载 | DownloadResource | 条件请求、Range、按需读取与关闭 |
 
-兼容性选择见 §9，接口骨架、泛型信息保留和资源所有权见[契约附录](service-contract-design.md)。所有类均为计划，没有在本次生成实现。
+兼容性选择见 §9；类型与所有权见[契约设计](service-contract-design.md)。
 
 ### 6.2 生命周期原则
 
@@ -171,7 +167,7 @@ SecurityProvider、PermissionProvider、AuditStorage、RateLimitProvider、Circu
 
 ## 7. 失败与状态码
 
-保留 `NexusException + StatusCode`。`ServiceError` 是中立错误描述，`ProblemDetailVo` 是可选 HTTP 表示，不是新异常。已有语义复用 NEX，服务专属语义提议 SRV 三字母段并在实施门禁注册，详见契约附录状态码表。
+保留 `NexusException + StatusCode`。`ServiceError` 是中立错误描述，`ProblemDetailVo` 是可选 HTTP 表示，不是新异常。已有语义复用 AIO，服务专属语义提议 SRV 三字母段并在实施门禁注册，详见契约附录状态码表。
 
 HTTP 未提交时可映射真实状态与错误体；已提交时不得重写状态。SSE/NDJSON 尽力发送有限的 error 事件后终止，WS 发 error envelope 或关闭，二进制响应直接中止并记录传输失败。取消有独立结果，不默认计为服务端 500 或熔断失败。
 
@@ -180,7 +176,7 @@ HTTP 未提交时可映射真实状态与错误体；已提交时不得重写状
 - 不在跨整个 SSE/WS 生命周期的事务中执行。业务事务保持短小，所属模块使用 Jakarta Transactional。
 - 全局只有有界共享执行器/定时器；不为每请求分配无界线程，不在 event loop 执行存储、密码校验、病毒扫描或阻塞等待。
 - CompletionStage/Publisher 由框架托管边界传播上下文；任意业务自建线程、commonPool、未包装回调不能自动保证，使用注入的 ContextExecutor 或 ContextPropagation 包装。
-- 第二阶段幂等只承诺单 JVM、有限 TTL、限定普通 JSON 操作；不自动重试非幂等调用。超时后的在途任务不能被简单删除而允许重入。
+- 幂等（启用时）只承诺单 JVM、有限 TTL、限定普通 JSON 写操作；不自动重试非幂等调用。超时后的在途任务不能被简单删除而允许重入。
 - 审计成功取决于提交事实；响应写失败不会把已提交业务写入改成“回滚”。
 
 ## 9. 兼容与迁移
@@ -197,8 +193,8 @@ HTTP 未提交时可映射真实状态与错误体；已提交时不得重写状
 | D4 | 需求 ServiceException | 只使用 `NexusException` + `ServiceErrorCatalog` | 不另建异常类，不修改既有 `NexusException` API |
 | D5 | 需求示例独立 security/audit/file/BOM 模块 | 映射到已确认八模块与根 BOM | 安全/审计是功能包，不是新 Maven 模块 |
 | D6 | 大文件下载与 `ResourceStore.read` 返回 `byte[]` | transfer 定义 `ResourceContentReader`；宿主提供真实流读 | 不扩展 base 公共 API |
-| D7 | 需求 Quarkus 零侵入注解 vs 仅 CDI runtime | M0 用 `java:project` 新增 `innospots-nexus-quarkus-service-deployment`。无该模块则不得宣称验收项 4/18 在 Quarkus 上完全满足 | runtime POM 不依赖 deployment JAR |
-| D8 | 双适配器同一套契约测试 | M0 新增 `innospots-nexus-service-adapter-test`（测试夹具库，非生产）。Spring/Quarkus 测试依赖它跑同一黑盒场景 | 禁止两套分叉断言 |
+| D7 | 需求 Quarkus 零侵入注解 vs 仅 CDI runtime | 独立 `innospots-nexus-quarkus-service-deployment`；**完整**构建期处理见 [待完善](service-future-work.md) | runtime POM 不依赖 deployment JAR |
+| D8 | 双适配器同一套契约测试 | `innospots-nexus-service-adapter-test` 共享黑盒场景 | 禁止两套分叉断言 |
 | D9 | 实践文 StreamSink vs 原“不提供 Sink” | `StreamSession<T> extends StreamSink<T>`；业务默认只用 Sink；`StreamChannel` 仅 SPI | 示例代码使用 StreamSink |
 | D10 | 实践文按 streamId emit vs 类型安全 | `StreamManager.emit/fail(sessionId, …)` 允许，但必须当前上下文 owner/scope 匹配且类型可赋给 open 时的 Type | 禁止未鉴权 Object emit |
 | D11 | 实践文治理注解名 | `@BulkheadProtected`、`@TimeoutProtected`（策略键）；废弃草稿名 `@Bulkheaded`、`@Timed` | 时长只来自配置 |
@@ -217,15 +213,15 @@ HTTP 未提交时可映射真实状态与错误体；已提交时不得重写状
 
 ## 10. 测试范围
 
-完整范围见[实施与验收](service-implementation-design.md)。重点验证真实异步完成和真实连接断开、背压、拒绝路径、权限隔离、流式字节数、Audit 提交与丢失语义。测试不只断言类型形状，不复制实现算法作为期望值。
+测试范围与验收对照见 [模块清单与验收](service-implementation-design.md)。重点：真实异步完成、连接断开、背压、拒绝路径、权限隔离、流式字节数、审计提交语义。
 
-所有适配跑相同 HTTP/WS 黑盒场景；MVC/WebFlux 使用分离的宿主配置，Quarkus JVM 为一期必测，native 为正式扩展交付门禁。性能验收采用同机未启用框架的对照，不把未经测量的数字写成已经达到的能力。
+Spring MVC / WebFlux 与 Quarkus JVM 共用 `adapter-test` 场景；Quarkus native 见 [待完善](service-future-work.md)。性能数字为测量目标，不作为已达成 SLA。
 
 ## 11. 架构约束自检
 
 ### 11.1 四步法门禁
 
-- [x] ① 定归属：八中立库 + 两适配；D7/D8 为 M0 新模块；无 kernel↔platform 互依；安全/审计不混入 console catalog 或 IAM 表
+- [x] ① 定归属：八中立库 + 两适配 + deployment + adapter-test；无 kernel↔platform 互依；安全/审计不混入 console catalog 或 IAM 表
 - [x] ② 建词汇：主概念中英文已对齐；技术 ID 与稳定键已区分；`state`/`status`/`mode`/`type` 已定义；SRV 三字母已选定
 - [x] ③ 划边界：功能包而非 `endpoint/role`；单包规划 ≤15 文件；无 Session 实体基类；无空 service/event 包；分层为 Adapter → InvocationEngine → 业务
 - [x] ④ 定契约：无业务 REST 端点；request/vo 为 record；失败均有 StatusCode；无表/DAO；配置键已给出；事务/幂等/并发已定义；无领域事件；测试范围见实施附录
@@ -238,16 +234,9 @@ HTTP 未提交时可映射真实状态与错误体；已提交时不得重写状
 - [x] 所有业务可见失败列入已有或提议状态码；取消/致命错误区别处理。
 - [x] 资源关闭、背压、审计提交、框架差异和测试场景已定义。
 - [x] 不创建 API 索引、业务表、全局规范或占位实现。
-- [x] D1–D15 已作为本规格实施默认锁定；SRV 在 M1 登记并写契约测试。
+- [x] D1–D15 已锁定；SRV 由 `ServiceStatusCode` 与契约测试登记。
 - [x] 开发体验四级、注解落点、禁止项与实践规范 §49 对齐。
 
-## 12. 开放问题与决策截止
+## 12. 环境与演进
 
-| 问题 | 本规格默认 | 截止点 | 未配置时的安全边界 |
-|---|---|---|---|
-| 生产认证来源及 issuer/audience/key rotation | 宿主配置可信 Provider；旧 compact token 独立模式 | 各环境上线前 | 未配置则受保护操作启动失败 |
-| 审计业务事实与事务落盘归属 | kernel/platform 各自实现，REQUIRED 模式用同库事务 | 二期审计上线前 | 不宣称内存队列可提供可靠审计 |
-| 性能数字 | 实施附录的对照测量预算 | M0 夹具可用后实测 | 数字是目标，不是已达到的能力 |
-| D1–D15 是否由开发者改判 | 按 §9.1 实施 | 评审接受本规格时 | 改判必须先改文档 |
-
-未决项不阻塞 M1 中立契约与运行时。它们不允许实现者自行采用另一套异常、身份或模块结构。先按 M0 登记依赖与测试夹具，再按 M1–M8 完成代码。
+上线前须由宿主配置认证、审计落库与网络信任策略；默认值与安全边界见 [service-future-work.md §7](service-future-work.md)。若要变更 D1–D15，须先修订本文件及受影响的专题文档，再改代码。

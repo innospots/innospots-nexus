@@ -184,10 +184,33 @@ class ConsoleCatalogSyncServiceTest {
     private static PluginConfig emptyConfig() {
         return new PluginConfig() {
             @Override public java.util.Optional<String> get(String key) { return java.util.Optional.empty(); }
-            @Override public String require(String key) { throw new IllegalArgumentException(key); }
-            @Override public int getInt(String key, int defaultValue) { return defaultValue; }
-            @Override public long getLong(String key, long defaultValue) { return defaultValue; }
-            @Override public boolean getBoolean(String key, boolean defaultValue) { return defaultValue; }
+                        /**
+                         * 执行require。
+                         * @param key 键
+                         * @return 操作结果
+                         */
+                        @Override public String require(String key) { throw new IllegalArgumentException(key); }
+                        /**
+                         * 获取Int。
+                         * @param key 键
+                         * @param defaultValue 默认值
+                         * @return 操作结果
+                         */
+                        @Override public int getInt(String key, int defaultValue) { return defaultValue; }
+                        /**
+                         * 获取Long。
+                         * @param key 键
+                         * @param defaultValue 默认值
+                         * @return 操作结果
+                         */
+                        @Override public long getLong(String key, long defaultValue) { return defaultValue; }
+                        /**
+                         * 获取Boolean。
+                         * @param key 键
+                         * @param defaultValue 默认值
+                         * @return 操作结果
+                         */
+                        @Override public boolean getBoolean(String key, boolean defaultValue) { return defaultValue; }
             @Override public java.time.Duration getDuration(String key, java.time.Duration defaultValue) { return defaultValue; }
             @Override public com.innospots.nexus.core.plugin.config.SecretValue requireSecret(String key) { throw new IllegalArgumentException(key); }
         };

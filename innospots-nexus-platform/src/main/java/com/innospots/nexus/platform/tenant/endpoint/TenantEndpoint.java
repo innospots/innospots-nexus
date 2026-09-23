@@ -13,7 +13,10 @@ import com.innospots.nexus.platform.tenant.domain.request.TenantCreateRequest;
 import com.innospots.nexus.platform.tenant.domain.vo.TenantVo;
 
 /**
- * Ops-domain contract for tenant lifecycle.
+ * 租户生命周期的运维域契约。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @Path("/platform/tenants")
 @Produces(MediaType.APPLICATION_JSON)
@@ -21,19 +24,19 @@ import com.innospots.nexus.platform.tenant.domain.vo.TenantVo;
 public interface TenantEndpoint {
 
     /**
-     * Opens a tenant and its enterprise profile.
+     * 开通租户及其企业档案。
      *
-     * @param request tenant and enterprise creation data
-     * @return created tenant summary
+     * @param request 租户与企业创建数据
+     * @return created tenant 概要
      */
     @POST
     R<TenantVo> createTenant(TenantCreateRequest request);
 
     /**
-     * Returns one tenant.
+     * 返回单个租户。
      *
-     * @param tenantId tenant identifier
-     * @return tenant summary
+     * @param tenantId tenant 标识符
+     * @return tenant 概要
      */
     @GET
     @Path("/{tenantId}")

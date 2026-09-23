@@ -10,6 +10,8 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
  *
  * @param name 标签名称
  * @param value 标签值
+ * @author Smars
+ * @date 2026/09/13
  */
 public record Tag(String name, String value) {
 

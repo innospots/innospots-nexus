@@ -1,16 +1,18 @@
 package com.innospots.nexus.console.auth.domain.request;
 
 /**
- * Tenant-realm identity registration. Does not create a TenantMember.
+ * 租户域身份注册。不创建 TenantMember。
  *
- * @param userName           unique login name
- * @param displayName        optional display name
- * @param email              optional email
- * @param mobile             optional mobile
- * @param region             optional region such as CN
- * @param timeZone           optional IANA time zone
- * @param language           optional UI language such as zh-CN
- * @param encryptedPassword  frontend encrypted password
+ * @author Smars
+ * @date 2026/09/13
+ * @param userName           唯一登录名
+ * @param displayName        可选 显示名称
+ * @param email              可选 email
+ * @param mobile             可选 mobile
+ * @param region             可选 region such as CN
+ * @param timeZone           可选 IANA 时区
+ * @param language           可选 界面语言，例如 zh-CN
+ * @param encryptedPassword  前端加密密码
  */
 public record TenantRegisterRequest(
         String userName,

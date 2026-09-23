@@ -5,7 +5,7 @@ import java.util.concurrent.CompletionStage;
 import com.innospots.nexus.service.contract.context.ServiceContext;
 
 /**
- * Host IAM adapter that authenticates a pre-auth {@link ServiceContext}.
+ * 认证预认证 {@link ServiceContext} 的宿主 IAM 适配器。
  *
  * @author Smars
  * @date 2026/09/13
@@ -15,17 +15,17 @@ import com.innospots.nexus.service.contract.context.ServiceContext;
 public interface SecurityProvider {
 
     /**
-     * Returns the provider identifier.
+     * 返回提供者标识。
      *
-     * @return stable id
+     * @return 稳定标识
      */
     String id();
 
     /**
-     * Authenticates the current request. Credentials stay in the native request scope.
+     * 认证当前请求。凭证保留在原生请求作用域。
      *
-     * @param context pre-auth context
-     * @return authentication result
+     * @param context 预认证上下文
+     * @return 认证结果
      */
     CompletionStage<AuthenticationResult> authenticate(ServiceContext context);
 }

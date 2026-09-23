@@ -7,12 +7,15 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
 /**
- * Root management-console endpoint contract.
+ * 根管理控制台端点契约。
  * <p>
- * This module only defines Jakarta JAX-RS API boundaries. Runtime binding,
- * authentication, filters, and concrete implementations belong in later
- * adapter/application modules.
+ * 本模块仅定义 Jakarta JAX-RS API 边界。运行时绑定、
+ * 认证、过滤器与具体实现属于后续
+ * 适配器/应用模块。
  * </p>
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @Path("/console")
 @Produces(MediaType.APPLICATION_JSON)
@@ -20,8 +23,8 @@ import jakarta.ws.rs.core.MediaType;
 public interface ConsoleEndpoint {
 
     /**
-     * Lightweight status endpoint used by console implementations to expose
-     * platform availability without binding this module to a web runtime.
+     * 供 console 实现暴露的轻量状态端点
+     * 平台可用性且不将本模块绑定到 Web 运行时。
      */
     @GET
     @Path("/status")

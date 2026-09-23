@@ -13,11 +13,15 @@ import com.innospots.nexus.core.plugin.contribution.console.ui.spec.config.PageD
 import com.innospots.nexus.core.plugin.contribution.console.ui.spec.validation.PageDslValidator;
 
 /**
- * Jackson-based strict YAML parser for Pactor page DSL documents.
+ * 基于 Jackson 的 Pactor 页面 DSL 严格 YAML 解析器。
  *
- * <p>Parsing honors {@link com.innospots.nexus.core.plugin.contribution.console.ui.spec.config.PageDslConfig#failOnUnknownProperties()}
- * and always runs {@link com.innospots.nexus.core.plugin.contribution.console.ui.spec.validation.PageDslValidator} before
- * returning a document.</p>
+ * <p>解析遵循
+ * {@link com.innospots.nexus.core.plugin.contribution.console.ui.spec.config.PageDslConfig#failOnUnknownProperties()}，
+ * 并在返回文档前始终运行
+ * {@link com.innospots.nexus.core.plugin.contribution.console.ui.spec.validation.PageDslValidator}。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class JacksonPageDslParser implements PageDslParser {
 
@@ -25,9 +29,10 @@ public final class JacksonPageDslParser implements PageDslParser {
     private final PageDslValidator validator;
 
     /**
-     * Creates a parser using the supplied loading and strictness configuration.
+     * 使用提供的加载与严格性配置创建解析器。
      *
-     * @param config parser configuration
+     * @param config 解析器配置
+     * @throws com.innospots.nexus.base.exception.NexusException 配置为 null 时
      */
     public JacksonPageDslParser(PageDslConfig config) {
         if (config == null) {

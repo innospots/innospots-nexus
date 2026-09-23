@@ -12,6 +12,8 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
  *
  * @param installation 持久化的安装事实
  * @param runtime 当前 JVM 中的运行快照；未加载运行时时为空
+ * @author Smars
+ * @date 2026/09/13
  */
 public record PluginManagementView(
         PluginInstallation installation,

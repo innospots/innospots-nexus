@@ -1,215 +1,268 @@
-# Agent Operating Guide
+# Agent 操作指南
 
-This repository is a greenfield reconstruction. The previous Innospots project
-is a reference, not a source template.
+本仓库为 greenfield 重建工程。旧 Innospots 项目仅作参考，不是源码模板。
 
-## Core Constraints
+## 核心约束
 
-- Never copy legacy source code into this repository.
-- Never move legacy files into this repository.
-- Never reproduce legacy POM or package structure mechanically.
-- Ask for or infer the current developer intent before creating new behavior.
-- Keep the foundation lightweight and dependency-minimal.
+- 不得将 legacy 源码复制到本仓库。
+- 不得将 legacy 文件移动到本仓库。
+- 不得机械复刻 legacy POM 或包结构。
+- 创建新行为前，应询问或推断当前开发者意图。
+- 保持 foundation 轻量、依赖最小。
 - **代码生成完成后必须编译验证** — 每次修改完 Java 源文件后，立即运行 `mvn clean compile` 确保没有不可编译的代码。禁止生成不能编译的通代码。
-- Do not create, update, or synchronize module API reference docs under
-  `skills/java/java-reference/references/modules/` as part of ordinary code
-  development.
-- Module API reference documentation may be generated or refreshed only when a
-  developer explicitly requests a module or project directory scan. That
-  operation must update the selected documentation set together, rather than
-  incrementally following individual code changes.
+- 普通代码开发过程中，不得创建、更新或同步
+  `skills/java/java-reference/references/modules/` 下的模块 API 参考文档。
+- 模块 API 参考文档仅在开发者明确要求模块或项目目录扫描时生成或刷新。
+  该操作必须整体更新所选文档集，而不是随单个代码变更增量更新。
 
-## Module Responsibilities
+## Agent 工作流
+
+### grill-me（方案压力测试，优先）
+
+在编写代码、修改 POM、定架构或注册新模块**之前**，若出现以下任一情况，**必须先**
+使用 **`grill-me`** 做方案压力测试（完整说明见
+[`skills/java/java-reference/references/grill-me.md`](skills/java/java-reference/references/grill-me.md)）：
+
+| 情形 | 说明 |
+|------|------|
+| **通用、宽泛、不具体** | 需求边界、归属模块、术语、兼容面尚未清晰；存在多种理解 |
+| **新需求** | 首次提出的业务能力、产品行为或平台能力 |
+| **新设计** | 新业务域、跨模块协作、重大契约或存储变更 |
+| **新建工程 / Maven 模块** | 调整 reactor 拓扑、改变依赖方向、拆分/合并模块 |
+
+未安装 `grill-me` 时**不得**代行上述决策，须先执行：
+
+```bash
+npx skills use "https://github.com/mattpocock/skills" --skill "grill-me"
+```
+
+按生成技能的完整说明执行；会话结束且开发者确认一致后，方可进入对应的 `java:*` 技能。
+
+**可跳过 grill-me 的典型场景**（须规范与契约已清晰）：单字段增补、已确认契约的局部修补、
+纯 `${revision}` 对齐、单模块插件微调。详见 grill-me.md「何时不调用」。
+
+### Java 技能（按需优先选用）
+
+涉及本仓库 Java 工作时，**不要凭印象即兴发挥**。先判断场景，**优先读取并遵循**
+`.cursor/skills/` 下对应的 **`java:*` 技能**（读其 `SKILL.md` 全文后再动手）：
+
+| 场景 | 技能 | 何时用 |
+|------|------|--------|
+| 查规范、问约定、不确定走哪条路 | `java:reference` | 只读、不产出代码；规范路由中枢 |
+| 新建/调整 Maven 模块、POM、构建 | `java:project` | 动**工程骨架**；须对照下文模块职责与依赖规则 |
+| 架构/模块/接口/契约/技术方案设计 | `java:design` | 动**设计决策**；须对照下文模块边界 |
+| 写功能、改功能、修 Bug、重构、单测 | `java:develop` | 动**实现与配套测试** |
+| 编译、跑测试、规范/质量/依赖/安全检查 | `java:check` | **验证**动作 |
+| Spring Boot 组装、配置与迁移 | `java:spring` | 涉及 **Spring 生态** |
+| 工程 `${revision}` 升版、发版 | `java:project-upgrade` | 改变**自身产物版本号** |
+| JDK、第三方依赖、框架升级 | `java:dependency-upgrade` | 改变**外部技术栈** |
+
+**典型链路**（按需省略中间环节）：
+
+```text
+grill-me  →  java:project（需新建/改模块时）  →  java:design  →  java:develop  →  java:check
+```
+
+- 新建 Maven 模块、新设计：**grill-me 为必经**（见上表）。
+- 规范条文以 `skills/java/java-reference/standards/` 为准；各技能不得重复复述规范。
+- 与本文件冲突时，以**本文件为上位约束**（裁决顺序见 `java:reference`）。
+- 新建工程/模块或修订 Agent 指南时，按
+  [`skills/java/java-reference/references/agents-template.md`](skills/java/java-reference/references/agents-template.md)
+  生成或增补；合入前由 `java:check` 对照本文件做 AGENTS 合规检查。
+
+## 模块职责
 
 ### `innospots-nexus-base`
 
-- Pure Java foundation for shared dependencies, contracts, primitives, and
-  utility packages.
-- Provides reusable capabilities such as exceptions, status codes, response
-  wrappers, domain-event contracts, MapStruct support, JSON helpers, ID
-  generation, cryptography, HTTP utilities, condition DSL, execution SPI,
-  in-process events, and other dependency-light tools.
-- Owns **transport/session snapshots** (`UserSnapshot`, `TenantSnapshot`,
-  `OrganizationSnapshot`, `WorkspaceSnapshot`, `ProjectSnapshot`, etc.)
-  as shared serializable shapes; kernel owns business entities and workflows.
-- Scope hierarchy: **Tenant → Workspace (shared resources) → Project (business
-  isolation)**. `OrganizationSnapshot` is the tenant business profile, not
-  kernel `OrganizationUnit`.
-- Must not contain business-domain logic or persistence bindings.
-- Must remain middleware-free and must not depend on database, messaging,
-  scheduling, Servlet, Spring, Quarkus, or other runtime infrastructure.
-- Module API reference lives under
+- 共享依赖、契约、原语与 utility 包的纯 Java foundation。
+- 提供可复用能力：异常、状态码、响应包装、领域事件契约、MapStruct 支持、
+  JSON 工具、ID 生成、密码学、HTTP 工具、condition DSL、execution SPI、
+  进程内事件及其他轻依赖工具。
+- 拥有 **transport/session snapshots**（`UserSnapshot`、`TenantSnapshot`、
+  `OrganizationSnapshot`、`WorkspaceSnapshot`、`ProjectSnapshot` 等）
+  作为共享可序列化形状；kernel 拥有业务实体与工作流。
+- 作用域层级：**Tenant → Workspace（共享资源）→ Project（业务隔离）**。
+  `OrganizationSnapshot` 是租户业务 profile，不是 kernel 的 `OrganizationUnit`。
+- 不得包含业务域逻辑或持久化绑定。
+- 必须保持 middleware-free，不得依赖 database、messaging、
+  scheduling、Servlet、Spring、Quarkus 或其他 runtime 基础设施。
+- 模块 API 参考位于
   `skills/java/java-reference/references/modules/<artifact-id>/README.md`
-  (index only — not a `SKILL.md`; not under `src/main/resources/skills/`).
-  Current indexes: `innospots-nexus-base`, `innospots-nexus-core`.
-- **Reserved without current consumers:** `domain.condition` (filter DSL),
-  `execution` (executor SPI). Do not remove without an explicit boundary
-  decision; wire a real consumer or document as experimental before expanding.
-- **New public APIs** in base require at least two upper-module consumers,
-  unless explicitly marked experimental or reserved.
-- **Forbidden in base** (belong in core, adapters, or business modules):
-  - Cache (local or distributed)
+  （仅索引 — 不是 `SKILL.md`；不在 `src/main/resources/skills/` 下）。
+  当前索引：`innospots-nexus-base`、`innospots-nexus-core`。
+- **保留但尚无消费者：** `domain.condition`（filter DSL）、
+  `execution`（executor SPI）。未经明确边界决策不得删除；
+  扩展前需接入真实消费者或标记为 experimental。
+- **base 中的新 public API** 至少需要两个上层模块消费者，
+  除非明确标记为 experimental 或 reserved。
+- **禁止出现在 base**（归属 core、adapter 或业务模块）：
+  - Cache（本地或分布式）
   - Retry / circuit breaker
   - Jakarta Bean Validation
-  - Scheduling runtime (Quartz/cron logic; scheduling enums may live in core)
-  - Messaging middleware (Kafka and similar)
+  - Scheduling runtime（Quartz/cron 逻辑；scheduling enum 可放在 core）
+  - Messaging middleware（Kafka 等）
   - ORM / JDBC / connection pools
   - Spring / Servlet bindings
-  - Business domain entities and service workflows
+  - 业务域实体与服务工作流
 
 ### `innospots-nexus-service`
 
-- Aggregates eight framework-neutral libraries: contract, runtime, http,
-  websocket, stream, transfer, observability, and governance.
-- Contract depends on base; runtime depends on contract; protocol/transfer
-  modules depend on runtime; observability and governance depend on contract.
-- Runtime consumes extension contracts without depending on observability or
-  governance implementations. Protocol modules must not require each other.
-- Must not depend on Spring, Quarkus, Servlet, Reactor, Mutiny, persistence,
-  or console/kernel/platform business modules.
-- Reuses base snapshots, status/exception contracts, and ResourceStore.
-  Core file metadata integration belongs at an assembly boundary.
-- Owns technical audit events/output integration, not business audit storage
-  or queries, which remain in kernel/platform.
-- Spring and Quarkus bindings belong in innospots-nexus-spring-service and
-  innospots-nexus-quarkus-service under their respective framework aggregators.
-- Neutral libraries inherit innospots-nexus-parent directly; the service POM
-  is an aggregator, not their build parent.
+- 聚合八个 framework-neutral 库：contract、runtime、http、
+  websocket、stream、transfer、observability、governance。
+- contract 依赖 base；runtime 依赖 contract；protocol/transfer
+  模块依赖 runtime；observability 与 governance 依赖 contract。
+- runtime 消费扩展契约，但不依赖 observability 或
+  governance 实现。protocol 模块之间不得相互依赖。
+- 不得依赖 Spring、Quarkus、Servlet、Reactor、Mutiny、persistence、
+  或 console/kernel/platform 业务模块。
+- 复用 base snapshots、status/exception 契约与 ResourceStore。
+  core 文件元数据集成属于 assembly 边界。
+- 拥有技术 audit events/output 集成，而非业务 audit 存储
+  或查询（仍归 kernel/platform）。
+- Spring 与 Quarkus bindings 归属各自 framework aggregator 下的
+  innospots-nexus-spring-service、innospots-nexus-spring-core 与 innospots-nexus-quarkus-service。
+- 中立库直接继承 innospots-nexus-parent；service POM
+  是 aggregator，不是它们的 build parent。
+
+### `innospots-nexus-spring-core`
+
+- Spring Boot 侧 core 基础设施组装（当前含 i18n 桥接）。
+- 通过 Spring `MessageSource` / ResourceBundle 实现 base 的 `I18nMessageResolver`，
+  并在启动时注册到 `I18nConverter`；由 `@EnableNexusI18n` 或 bootstrap 注解显式 `@Import` 引入。
+- 依赖 `innospots-nexus-base`；可装配 Web locale 同步 Filter。
+- 不得引入 kernel/console/platform 业务模块。
 
 ### `innospots-nexus-core`
 
-- Extends `innospots-nexus-base` with business-neutral middleware, database,
-  and platform infrastructure support.
-- Owns shared persistence base entities (`BaseEntity` → `TenantBaseEntity` →
-  `WorkspaceBaseEntity` → `ProjectBaseEntity`), audit fill, ID generation,
-  Quartz scheduling, service-node registry, watcher runtime, startup SPI, and
-  workspace-scoped file metadata (`nx_meta_resource` + `MetaResourceService`).
-- Must remain business-domain neutral. User, role, permission, menu, catalog
-  index, and other management-console concerns do not belong in this module.
-- May depend on middleware APIs and implementations needed for reusable
-  platform support, but must not bind itself to Spring Boot auto-configuration.
-- **Forbidden in core** (belong in plugin, console, kernel, platform, or
-  adapters):
-  - Classpath plugin runtime, contribution decoders, Page DSL, plugin
+- 在 `innospots-nexus-base` 之上扩展业务中立中间件、database
+  与平台基础设施支持。
+- 拥有共享持久化基类 `BaseEntity`、audit fill、ID 生成、
+  Quartz scheduling、service-node registry、watcher runtime、startup SPI、
+  以及按 {@code OwnershipEntity} 隔离的文件元数据（`nx_meta_resource` + `MetaResourceService`）。
+- 必须保持业务域中立。User、role、permission、menu、catalog
+  index 等 management-console 关注点不属于本模块。
+- 可依赖可复用平台支持所需的 middleware API 与实现，
+  但不得绑定 Spring Boot auto-configuration。
+- **禁止出现在 core**（归属 plugin、console、kernel、platform 或
+  adapter）：
+  - Classpath plugin runtime、contribution decoders、Page DSL、plugin
     installation tables
-  - Jakarta REST endpoints and console VOs
-  - User/role/permission/menu/dictionary business entities and workflows
-  - Auth/session conversation or chat product domains
+  - Jakarta REST endpoints 与 console VO
+  - User/role/permission/menu/dictionary 业务实体与工作流
+  - Auth/session conversation 或 chat 产品域
   - Spring / Quarkus / Servlet bindings
-- **New public APIs** in core require at least two upper-module consumers,
-  unless explicitly marked experimental.
-- Binary storage SPI stays in `base.resources.ResourceStore`; core binds stores
-  to persisted metadata via `core.resource.storage.ResourceStorageRegistry`.
+- **core 中的新 public API** 至少需要两个上层模块消费者，
+  除非明确标记为 experimental。
+- 二进制存储 SPI 位于 `base.resources.ResourceStore`；core 通过
+  `core.resource.storage.ResourceStorageRegistry` 将 store 绑定到持久化元数据。
 
 ### `innospots-nexus-plugin`
 
-- Extends `innospots-nexus-core` with classpath plugin runtime and contribution
-  processing.
-- Owns plugin discovery, declaration, lifecycle, installation, capability
-  routing, contribution decode/validate/snapshot, and **Pactor Page DSL 1.0**
-  under `core.plugin.contribution.console.ui.spec`.
-- Owns `console@1` contribution contracts and runtime handlers; it does **not**
-  own the persisted console catalog index (`nx_console_catalog_resource` — that
-  belongs in `innospots-nexus-console`).
-- Must remain business-domain neutral and middleware-binding-free (no Spring
-  Boot auto-configuration).
-- Package names remain under `com.innospots.nexus.core.plugin` for compatibility;
-  the Maven artifact is `innospots-nexus-plugin`.
+- 在 `innospots-nexus-core` 之上扩展 classpath plugin runtime 与 contribution
+  处理。
+- 拥有 plugin discovery、declaration、lifecycle、installation、capability
+  routing、contribution decode/validate/snapshot，以及
+  `core.plugin.contribution.console.ui.spec` 下的 **Pactor Page DSL 1.0**。
+- 拥有 `console@1` contribution 契约与 runtime handler；**不**拥有
+  持久化 console catalog 索引（`nx_console_catalog_resource` — 归属
+  `innospots-nexus-console`）。
+- 必须保持业务域中立且 middleware-binding-free（无 Spring
+  Boot auto-configuration）。
+- 包名仍为 `com.innospots.nexus.core.plugin`（兼容既有 import）；
+  Maven artifact 为 `innospots-nexus-plugin`。
 
 ### `innospots-nexus-console`
 
-- Management-console **API surface** module built on Core and Plugin.
-- Provides Jakarta REST management endpoints, request/response VOs, converters,
-  and the persisted **console catalog index** (`console.catalog.*`).
-- Must **not** own plugin specification or contribution constraint definitions;
-  those belong in `innospots-nexus-plugin`.
-- Must not implement concrete management business functions. User, role,
-  permission, registration, and other management features belong in business
-  modules such as `innospots-nexus-kernel`.
-- Module API reference lives under
+- 基于 Core 与 Plugin 构建的 management-console **API surface** 模块。
+- 提供 Jakarta REST management endpoints、request/response VO、converter，
+  以及持久化 **console catalog index**（`console.catalog.*`）。
+- **不得**拥有 plugin specification 或 contribution constraint 定义；
+  这些归属 `innospots-nexus-plugin`。
+- 不得实现具体 management 业务功能。User、role、
+  permission、registration 等 management 功能归属
+  `innospots-nexus-kernel` 等业务模块。
+- 模块 API 参考位于
   `skills/java/java-reference/references/modules/innospots-nexus-console/`
-  (not under `src/main/resources/skills/`).
+  （不在 `src/main/resources/skills/` 下）。
 
 ### `innospots-nexus-kernel`
 
-- Core Nexus business-function module built on the console and core
-  foundations.
-- Owns foundational management capabilities such as authentication,
-  registration, users, roles, permissions, menus, dictionaries, audit support,
-  and other baseline platform functions.
-- Organizes business code by domain first, then by responsibility packages
-  such as `endpoint`, `dao`, `domain`, `converter`, `operator`, `service`,
-  `handler`, `interceptor`, and `listener` (`kernel.role.endpoint`, not
-  `kernel.endpoint.role`). Large domains use functional subpackages
-  (`permission.authorization`, `grant.service`); no module-level `service`
-  dumping ground; at most 15 `.java` files per package directory. See
-  `skills/java/java-reference/references/package-structure.md`.
-- Must use the shared infrastructure and contracts from `base`, `core`, and
-  `console` rather than reimplementing them.
+- 拥有租户域持久化基类（`TenantBaseEntity` → `TenantWorkspaceBaseEntity` →
+  `TenantProjectBaseEntity`）及 workspace/project 作用域端口与实现；platform 不包含 workspace/project 域。
+- 基于 console 与 core foundation 构建的核心 Nexus 业务功能模块。
+- 拥有 foundational management 能力：authentication、
+  registration、users、roles、permissions、menus、dictionaries、audit support
+  及其他 baseline 平台功能。
+- 业务代码先按 domain 组织，再按职责分包，例如
+  `endpoint`、`dao`、`domain`、`converter`、`operator`、`service`、
+  `handler`、`interceptor`、`listener`（`kernel.role.endpoint`，而非
+  `kernel.endpoint.role`）。大 domain 使用功能子包
+  （`permission.authorization`、`grant.service`）；禁止 module 级 `service`
+  堆放区；每个包目录最多 15 个 `.java` 文件。见
+  `skills/java/java-reference/references/package-structure.md`。
+- 必须使用 `base`、`core`、`console` 的共享基础设施与契约，
+  而不是重新实现。
 
 ### `innospots-nexus-platform`
 
-- Ops-domain platform built on the console foundation, parallel to kernel.
-- Owns tenant lifecycle (`nx_tenant`), enterprise legal profile
-  (`nx_enterprise`), and later platform users, support access, and platform
-  audit.
-- Exposes `/platform/**` contracts. Must not provide public self-registration.
-- Must depend on `console` (and transitive `core` / `base`). Must not depend
-  on `innospots-nexus-kernel`.
+- 基于 console foundation 构建的 ops-domain 平台，与 kernel 并行。
+- 拥有 tenant lifecycle（`nx_tenant`）、enterprise legal profile
+  （`nx_enterprise`），以及后续的 platform users、support access、platform
+  audit。
+- 暴露 `/platform/**` 契约。不得提供公开 self-registration。
+- 必须依赖 `console`（及传递的 `core` / `base`）。不得依赖
+  `innospots-nexus-kernel`。
 
-## Dependency Rules
+## 依赖规则
 
-- `innospots-nexus-base` must remain middleware-free.
-- Internal Java modules should inherit `innospots-nexus-parent`.
-- Dependency versions belong in `innospots-nexus-bom`.
-- Shared Java module dependencies belong in `innospots-nexus-parent`, not in the
-  root aggregator or BOM.
-- `innospots-nexus-core` may depend on `innospots-nexus-base`.
-- `innospots-nexus-plugin` may depend on `innospots-nexus-core` and the
-  transitive base foundation.
-- `innospots-nexus-console` may depend on `innospots-nexus-core`,
-  `innospots-nexus-plugin`, and the transitive base foundation.
-- `innospots-nexus-kernel` may depend on `innospots-nexus-console`,
-  `innospots-nexus-core`, and their transitive base foundation.
-- `innospots-nexus-platform` may depend on `innospots-nexus-console`,
-  `innospots-nexus-core`, and their transitive base foundation.
-- The primary dependency direction is
+- `innospots-nexus-base` 必须保持 middleware-free。
+- 内部 Java 模块应继承 `innospots-nexus-parent`。
+- 依赖版本归属 `innospots-nexus-bom`。
+- 共享 Java 模块依赖归属 `innospots-nexus-parent`，不在根 aggregator 或 BOM 中定义。
+- `innospots-nexus-core` 可依赖 `innospots-nexus-base`。
+- `innospots-nexus-plugin` 可依赖 `innospots-nexus-core` 及
+  传递的 base foundation。
+- `innospots-nexus-console` 可依赖 `innospots-nexus-core`、
+  `innospots-nexus-plugin` 及传递的 base foundation。
+- `innospots-nexus-kernel` 可依赖 `innospots-nexus-console`、
+  `innospots-nexus-core` 及它们的传递 base foundation。
+- `innospots-nexus-platform` 可依赖 `innospots-nexus-console`、
+  `innospots-nexus-core` 及它们的传递 base foundation。
+- 主依赖方向为
   `innospots-nexus-base -> innospots-nexus-core -> innospots-nexus-plugin ->
-  innospots-nexus-console`, then `console -> innospots-nexus-kernel` and
-  `console -> innospots-nexus-platform` in parallel. Kernel and platform must
-  not depend on each other. Dependencies must not point back toward a higher
-  layer.
-- `innospots-nexus-core` may provide concrete business-neutral middleware and
-  database support, but must not bind itself to Spring Boot
-  auto-configuration.
-- Business-specific infrastructure belongs with its owning business module or
-  in a dedicated adapter, plugin, extension, or application module.
+  innospots-nexus-console`，然后 `console -> innospots-nexus-kernel` 与
+  `console -> innospots-nexus-platform` 并行。Kernel 与 platform 不得
+  相互依赖。依赖不得指回更高层。
+- `innospots-nexus-core` 可提供具体业务中立 middleware 与
+  database 支持，但不得绑定 Spring Boot
+  auto-configuration。
+- 业务特定基础设施归属其所属业务模块，或
+  专用 adapter、plugin、extension、application 模块。
 
-## DDD Rules
+## DDD 规则
 
-- Name packages and modules by responsibility and boundary.
-- Keep domain concepts independent from infrastructure implementations.
-- Prefer ports and adapters for middleware integration.
-- Add new modules only when the boundary is clear enough to test independently.
+- 按职责与边界命名包与模块。
+- 保持领域概念独立于基础设施实现。
+- 中间件集成优先采用 ports and adapters。
+- 仅在边界足够清晰、可独立测试时再新增模块。
 
-## Coding Standards
+## 编码规范
 
-Read the following files under `skills/java/java-reference/standards/` for complete rules. AI
-agents must load these files before generating code or documentation.
+生成代码或文档前，AI agent 必须加载
+`skills/java/java-reference/standards/` 下的完整规则。
 
-| File | Content |
-|------|---------|
-| [`skills/java/java-reference/standards/code-style.md`](skills/java/java-reference/standards/code-style.md) | Braces, indentation, line width, import order |
-| [`skills/java/java-reference/standards/code-comments.md`](skills/java/java-reference/standards/code-comments.md) | Javadoc tiers (class, method, inline) |
-| [`skills/java/java-reference/standards/naming.md`](skills/java/java-reference/standards/naming.md) | Naming conventions for Java, packages, files |
-| [`skills/java/java-reference/standards/api-design.md`](skills/java/java-reference/standards/api-design.md) | Method signatures, immutability, null handling, exceptions |
-| [`skills/java/java-reference/standards/domain-module-initialization.md`](skills/java/java-reference/standards/domain-module-initialization.md) | Stage-gated workflow for initializing a business domain |
-| [`skills/java/java-reference/standards/module-skills.md`](skills/java/java-reference/standards/module-skills.md) | Module API index (`README.md`) and references/ directory format |
+| 文件 | 内容 |
+|------|------|
+| [`skills/java/java-reference/standards/code-style.md`](skills/java/java-reference/standards/code-style.md) | 花括号、缩进、行宽、import 顺序 |
+| [`skills/java/java-reference/standards/code-comments.md`](skills/java/java-reference/standards/code-comments.md) | Javadoc 层级（class、method、inline） |
+| [`skills/java/java-reference/standards/naming.md`](skills/java/java-reference/standards/naming.md) | Java、包、文件命名约定 |
+| [`skills/java/java-reference/standards/api-design.md`](skills/java/java-reference/standards/api-design.md) | 方法签名、不可变性、null 处理、异常 |
+| [`skills/java/java-reference/standards/domain-module-initialization.md`](skills/java/java-reference/standards/domain-module-initialization.md) | 业务域初始化的分阶段工作流 |
+| [`skills/java/java-reference/standards/module-skills.md`](skills/java/java-reference/standards/module-skills.md) | 模块 API 索引（`README.md`）与 references/ 目录格式 |
 
-## Verification
+## 验证
 
-Run these commands after structural changes when the local JDK supports the
-configured release:
+当本地 JDK 支持配置的 release 时，结构变更后运行：
 
 ```bash
 mvn validate
@@ -217,5 +270,4 @@ mvn test
 mvn -q help:effective-pom
 ```
 
-If the local JDK is older than 25, report the environment mismatch instead of
-lowering the project baseline.
+若本地 JDK 低于 25，应报告环境不匹配，而不是降低项目基线。

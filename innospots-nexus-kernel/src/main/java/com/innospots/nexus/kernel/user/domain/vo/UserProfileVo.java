@@ -4,19 +4,21 @@ import com.innospots.nexus.kernel.user.domain.enums.UserRegisterSource;
 import com.innospots.nexus.kernel.user.domain.enums.UserStatus;
 
 /**
- * Read model for tenant-realm user profile data.
+ * 租户域用户档案数据的读模型。
  *
- * @param userId         tenant-realm user identifier
- * @param userName       unique login user name
- * @param displayName    display name shown in UI
- * @param email          email address
- * @param mobile         mobile phone number
- * @param region         region preference
- * @param timeZone       IANA time zone
- * @param language       UI language
- * @param avatarKey      avatar storage key
- * @param registerSource original registration source
- * @param status         user lifecycle status
+ * @author Smars
+ * @date 2026/09/13
+ * @param userId         tenant-realm user 标识符
+ * @param userName       唯一登录用户名
+ * @param displayName    界面展示的显示名称
+ * @param email          邮箱地址
+ * @param mobile         手机号
+ * @param region         地区偏好
+ * @param timeZone       IANA 时区
+ * @param language       界面语言
+ * @param avatarKey      头像存储键
+ * @param registerSource 原始注册来源
+ * @param status         user 生命周期状态
  */
 public record UserProfileVo(
         String userId,

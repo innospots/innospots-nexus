@@ -14,9 +14,13 @@
     <artifactId>innospots-nexus-quarkus-service</artifactId>
 
     <name>innospots-nexus-quarkus-service</name>
-    <description>Quarkus adapter boundary for standardized Nexus services.</description>
+    <description>标准化 Nexus 服务的 Quarkus adapter 边界。</description>
 
     <dependencies>
+        <dependency>
+            <groupId>com.innospots</groupId>
+            <artifactId>innospots-nexus-service-runtime</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.innospots</groupId>
             <artifactId>innospots-nexus-service-http</artifactId>
@@ -41,5 +45,32 @@
             <groupId>com.innospots</groupId>
             <artifactId>innospots-nexus-service-governance</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-arc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-rest</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-rest-jackson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-websockets-next</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.innospots</groupId>
+            <artifactId>innospots-nexus-service-adapter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-junit</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
+
 </project>

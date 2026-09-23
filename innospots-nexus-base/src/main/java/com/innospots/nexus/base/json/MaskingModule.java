@@ -11,12 +11,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Jackson {@link Module} that activates field-level value conversion and masking.
+ * 激活字段级值转换与脱敏的 Jackson {@link Module}。
  * <p>
- * Register this module on your {@code ObjectMapper} to enable automatic
- * conversion of fields annotated with {@code @ValueConverter} and masking of
- * fields annotated with {@code @MaskValue} during serialization.
- * Without this module, these annotations are ignored.
+ * 将此模块注册到 {@code ObjectMapper} 以在序列化时自动转换标注了
+ * {@code @ValueConverter} 的字段并脱敏标注了 {@code @MaskValue} 的字段。
+ * 未注册此模块时，这些注解被忽略。
  *
  * <pre>{@code
  * ObjectMapper mapper = JsonMapper.builder()
@@ -24,6 +23,8 @@ import java.util.List;
  *     .build();
  * }</pre>
  *
+ * @author Smars
+ * @date 2026/09/13
  * @see ValueConverter
  * @see MaskValue
  * @see MaskStrategy
@@ -46,8 +47,8 @@ public final class MaskingModule extends Module {
     }
 
     /**
-     * BeanSerializerModifier that rewires properties annotated with
-     * {@code @ValueConverter} or {@code @MaskValue} to use dedicated serializers.
+     * 将标注了 {@code @ValueConverter} 或 {@code @MaskValue} 的属性
+     * 重定向到专用序列化器的 BeanSerializerModifier。
      */
     private static final class MaskingBeanSerializerModifier extends BeanSerializerModifier {
 

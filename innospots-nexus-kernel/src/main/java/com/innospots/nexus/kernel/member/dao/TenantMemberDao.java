@@ -5,7 +5,10 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.innospots.nexus.kernel.member.domain.entity.TenantMemberEntity;
 
 /**
- * MyBatis-Plus mapper for tenant membership records.
+ * 租户成员关系记录的 MyBatis-Plus Mapper。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public interface TenantMemberDao extends BaseMapper<TenantMemberEntity> {
 }

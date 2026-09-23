@@ -1,16 +1,25 @@
 package com.innospots.nexus.kernel.member.domain.enums;
 
 /**
- * Lifecycle status of a tenant membership.
+ * 租户成员关系的生命周期状态。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public enum TenantMemberStatus {
 
-    /** Member can access the tenant. */
+    /**
+     * 成员可访问租户。
+     */
     ACTIVE,
 
-    /** Member is blocked from tenant access. */
+    /**
+     * 成员被阻断访问租户。
+     */
     DISABLED,
 
-    /** Invitation or join is not yet completed. */
+    /**
+     * 邀请或加入尚未完成。
+     */
     PENDING
 }

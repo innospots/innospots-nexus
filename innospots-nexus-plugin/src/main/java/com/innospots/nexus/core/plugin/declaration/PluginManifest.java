@@ -14,6 +14,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @param kind       文档类型，例如 {@code Plugin}
  * @param metadata   插件稳定身份与发布版本
  * @param spec       插件协议、名称、配置和扩展声明
+ * @author Smars
+ * @date 2026/09/13
  */
 public record PluginManifest(
         String apiVersion,

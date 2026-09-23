@@ -3,15 +3,17 @@ package com.innospots.nexus.platform.support.domain.vo;
 import java.time.LocalDateTime;
 
 /**
- * Support-access grant summary.
+ * 支持访问授权概要。
  *
- * @param grantId        grant identifier
- * @param tenantId       tenant being accessed
- * @param platformUserId platform user receiving access
- * @param reason         business reason
- * @param approvedBy     tenant-admin approver, if any
- * @param expireAt       absolute expiry
- * @param status         lifecycle status name
+ * @author Smars
+ * @date 2026/09/13
+ * @param grantId        grant 标识符
+ * @param tenantId       被访问的租户
+ * @param platformUserId 获得访问权限的平台用户
+ * @param reason         业务原因
+ * @param approvedBy     租户管理员审批人（如有）
+ * @param expireAt       绝对过期时间
+ * @param status         生命周期状态 name
  */
 public record SupportAccessGrantVo(
         String grantId,

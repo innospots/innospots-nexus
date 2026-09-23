@@ -7,7 +7,9 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests YAML deserialization for {@link ActionOrList} in lifecycle and page contexts.
+ * 测试生命周期与页面上下文中 {@link ActionOrList} 的 YAML 反序列化。
+ * @author Smars
+ * @date 2026/09/13
  */
 class ActionOrListDeserializationTest {
 

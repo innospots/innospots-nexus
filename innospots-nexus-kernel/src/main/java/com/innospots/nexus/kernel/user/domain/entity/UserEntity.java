@@ -16,8 +16,11 @@ import lombok.Setter;
 import com.innospots.nexus.core.persistence.entity.BaseEntity;
 
 /**
- * Tenant-realm login identity. Membership in a tenant is {@code nx_tenant_member},
- * not this table.
+ * 租户域登录身份。租户成员关系在 {@code nx_tenant_member}，
+ * 而非本表。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @Getter
 @Setter
@@ -34,98 +37,103 @@ public class UserEntity extends BaseEntity {
     public static final String TABLE_NAME = "nx_tenant_user";
 
     /**
-     * Tenant-realm user identifier.
+     * 租户域用户标识符。
      */
     @TableId(type = IdType.ASSIGN_UUID)
     @Id
     @Column(length = 32, nullable = false)
     private String tenantUserId;
+    /**
+     * 返回主键前缀。
+     * @return 操作结果
+     */
 
+    
     @Override
     public String idPrefix() {
         return "tus";
     }
 
     /**
-     * Unique login user name in the tenant realm.
+     * 租户域唯一登录用户名。
      */
     @Column(length = 64, nullable = false)
     private String userName;
 
     /**
-     * Display name; empty values fall back to {@code userName} in UI.
+     * 显示名称; empty values fall back to {@code userName} in UI。
      */
     @Column(length = 128)
     private String displayName;
 
     /**
-     * Email address; unique when present.
+     * 邮箱地址；存在时唯一。
      */
     @Column(length = 128)
     private String email;
 
     /**
-     * Mobile number; unique when present.
+     * 手机号；存在时唯一。
      */
     @Column(length = 32)
     private String mobile;
 
     /**
-     * Region preference such as CN or US.
+     * 地区偏好，例如 CN 或 US。
      */
     @Column(length = 32)
     private String region;
 
     /**
-     * IANA time zone such as Asia/Shanghai.
+     * IANA 时区，例如 Asia/Shanghai。
      */
     @Column(length = 64)
     private String timeZone;
 
     /**
-     * UI language such as zh-CN.
+     * 界面语言，例如 zh-CN。
      */
     @Column(length = 32)
     private String language;
 
     /**
-     * Avatar storage key.
+     * 头像存储键。
      */
     @Column(length = 256)
     private String avatarKey;
 
     /**
-     * Original registration source.
+     * 原始注册来源。
      */
     @Column(length = 32, nullable = false)
     private String registerSource;
 
     /**
-     * Lifecycle status.
+     * 生命周期状态。
      */
     @Column(length = 32, nullable = false)
     private String status;
 
     /**
-     * Whether the email address is verified.
+     * 邮箱是否已验证。
      */
     @Column(nullable = false)
     private Boolean emailVerified;
 
     /**
-     * Whether the mobile number is verified.
+     * 手机号是否已验证。
      */
     @Column(nullable = false)
     private Boolean mobileVerified;
 
     /**
-     * Last successful login time.
+     * 上次成功登录时间。
      */
     @Column
     private LocalDateTime lastLoginTime;
 
     /**
-     * Last successful login IP address.
+     * 上次成功登录 IP 地址。
      */
     @Column(length = 64)
     private String lastLoginIp;

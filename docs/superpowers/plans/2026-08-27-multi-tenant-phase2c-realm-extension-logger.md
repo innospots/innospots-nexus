@@ -1,51 +1,51 @@
-# Multi-Tenant Governance Phase 2c Implementation Plan
+# 多租户治理 Phase 2c 实施计划
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **面向 agent 工作者：** 必需子技能：使用 superpowers:executing-plans 按任务逐步实施本计划。步骤使用 checkbox（`- [ ]`）语法跟踪进度。
 
-**Goal:** Finish remaining Phase 2 console isolation: TLC realm identity keys, `security_realm` on console IAM tables, and move extension runtime plus logger out of kernel.
+**目标：** 完成 Phase 2 剩余 console 隔离：TLC realm 身份键、console IAM 表的 `security_realm`，以及将 extension runtime 与 logger 迁出 kernel。
 
-**Architecture:** Console owns reusable control-plane persistence and runtime (role/menu/permission/extension/logger). Core keeps extension *declaration* contracts. Kernel keeps tenant domain plus permission *sync* that calls console `ExtensionRegistry`. Platform stays ops-only.
+**架构：** Console 拥有可复用 control-plane 持久化与 runtime（role/menu/permission/extension/logger）。Core 保留 extension *declaration* 契约。Kernel 保留 tenant domain 及调用 console `ExtensionRegistry` 的 permission *sync*。Platform 保持 ops-only。
 
-**Tech Stack:** Java 25, Maven, Jakarta Persistence + MyBatis-Plus, JUnit 5 + AssertJ, Lombok.
+**技术栈：** Java 25、Maven、Jakarta Persistence + MyBatis-Plus、JUnit 5 + AssertJ、Lombok。
 
-**Spec:** [docs/design/multi-tenant-governance-design.md](../../design/multi-tenant-governance-design.md) §8.3, §9.3, §10.5–10.7, §12 Phase 2.
+**规格：** [docs/design/multi-tenant-governance-design.md](../../design/multi-tenant-governance-design.md) §8.3、§9.3、§10.5–10.7、§12 Phase 2。
 
-## Global Constraints
+## 全局约束
 
-- Domain then responsibility packages; requests/VOs under `domain.request` / `domain.vo`.
-- Console does not persist users. Kernel/platform do not issue tokens.
-- Reuse `console.auth.domain.enums.SecurityRealm`. Persist as String 32, not null.
-- Do not update module `SKILL.md`. Do not commit unless asked.
-- After Java changes: `mvn clean compile`. After the slice: `mvn test`.
+- 先 domain 后职责分包；request/VO 位于 `domain.request` / `domain.vo`。
+- Console 不持久化 users。Kernel/platform 不签发 token。
+- 复用 `console.auth.domain.enums.SecurityRealm`。持久化为 String 32，not null。
+- 不更新模块 `SKILL.md`。除非明确要求，否则不 commit。
+- Java 变更后：`mvn clean compile`。本 slice 完成后：`mvn test`。
 
 ---
 
-### Task 1: TLC realm identity keys
+### Task 1：TLC realm 身份键
 
-Add `securityRealm`, `tenantMemberId`, `platformUserId` to `TLC` with typed accessors. Extend `TLCTest`. Keep existing `userId` as Long.
+为 `TLC` 添加 `securityRealm`、`tenantMemberId`、`platformUserId` 及 typed accessor。扩展 `TLCTest`。保留现有 Long 型 `userId`。
 
-- [x] Completed
+- [x] 已完成
 
-### Task 2: `security_realm` + CAPABILITY
+### Task 2：`security_realm` + CAPABILITY
 
-Add `securityRealm` to `RoleEntity`, `MenuEntity`, `PermissionResourceEntity`, `PermissionGrantEntity`. Add `PermissionResourceType.CAPABILITY`. Expose realm on `RoleCreateRequest` / `RoleVo`.
+为 `RoleEntity`、`MenuEntity`、`PermissionResourceEntity`、`PermissionGrantEntity` 添加 `securityRealm`。添加 `PermissionResourceType.CAPABILITY`。在 `RoleCreateRequest` / `RoleVo` 上暴露 realm。
 
-- [x] Completed
+- [x] 已完成
 
-### Task 3: Move extension runtime to console
+### Task 3：将 extension runtime 迁至 console
 
-Relocate `kernel.extension` (entity/dao/repository/service/discovery + tests) to `console.extension` with the same inner layout. Update `PermissionResourceSyncService` to use console `ExtensionRegistry`. Leave kernel extension empty.
+将 `kernel.extension`（entity/dao/repository/service/discovery + tests）迁至 `console.extension`，保持相同内部布局。更新 `PermissionResourceSyncService` 使用 console `ExtensionRegistry`。kernel extension 留空。
 
-- [x] Completed
+- [x] 已完成
 
-### Task 4: Move logger to console
+### Task 4：将 logger 迁至 console
 
-Relocate `kernel.logger` to `console.logger` (`dao`, `domain.entity`, `domain.context`, `operator`, `handler`). Keep `@AuditLog` / `LogExecutor` at the logger domain root.
+将 `kernel.logger` 迁至 `console.logger`（`dao`、`domain.entity`、`domain.context`、`operator`、`handler`）。`@AuditLog` / `LogExecutor` 保留在 logger domain 根。
 
-- [x] Completed
+- [x] 已完成
 
-### Task 5: Verify
+### Task 5：验证
 
-`mvn clean compile` && `mvn test`. No kernel production `extension`/`logger` packages.
+`mvn clean compile` && `mvn test`。kernel 生产代码中无 `extension`/`logger` 包。
 
-- [x] Completed
+- [x] 已完成

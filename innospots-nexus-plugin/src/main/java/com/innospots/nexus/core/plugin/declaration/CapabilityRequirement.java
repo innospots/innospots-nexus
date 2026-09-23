@@ -11,6 +11,8 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
  * @param key Capability 逻辑身份
  * @param requiredTags Provider 必须包含的标签子集
  * @param required 缺少匹配 Provider 时是否阻止启动
+ * @author Smars
+ * @date 2026/09/13
  */
 public record CapabilityRequirement(CapabilityKey key, Tags requiredTags, boolean required) {
 

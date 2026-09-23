@@ -1,10 +1,12 @@
 package com.innospots.nexus.console.auth.domain.request;
 
 /**
- * Activates a workspace within the current tenant business scope.
+ * 在当前租户业务作用域内激活工作区。
  *
- * @param tenantId    tenant to validate membership against
- * @param workspaceId workspace to activate
+ * @author Smars
+ * @date 2026/09/13
+ * @param tenantId    用于校验成员关系的租户
+ * @param workspaceId 待激活的工作区
  */
 public record SelectWorkspaceRequest(String tenantId, String workspaceId) {
 }

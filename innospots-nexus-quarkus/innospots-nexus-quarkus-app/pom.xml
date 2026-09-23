@@ -15,7 +15,7 @@
     <packaging>jar</packaging>
 
     <name>innospots-nexus-quarkus-app</name>
-    <description>Quarkus application service assembly for innospots-nexus.</description>
+    <description>innospots-nexus 的 Quarkus 应用服务组装。</description>
 
     <dependencies>
         <dependency>

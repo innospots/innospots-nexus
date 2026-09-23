@@ -11,13 +11,29 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Custom {@link ThreadPoolExecutor} that captures and propagates
- * {@link TLC} context from the submitting thread to the worker thread.
+ * 自定义 {@link ThreadPoolExecutor}，在提交线程与工作线程之间捕获并传播 {@link TLC} 上下文。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @see TLC
+ * @see ThreadPoolExecutor
  */
 public class NexusThreadPoolExecutor extends ThreadPoolExecutor {
 
     private final String poolName;
 
+    /**
+     * 创建线程池执行器。
+     *
+     * @param poolName        线程池名称
+     * @param corePoolSize    核心线程数
+     * @param maximumPoolSize 最大线程数
+     * @param keepAliveTime   空闲线程存活时间
+     * @param unit            存活时间单位
+     * @param workQueue       工作队列
+     * @param threadFactory   线程工厂
+     * @param handler         拒绝处理策略
+     */
     public NexusThreadPoolExecutor(
             String poolName,
             int corePoolSize,
@@ -32,17 +48,29 @@ public class NexusThreadPoolExecutor extends ThreadPoolExecutor {
         this.poolName = poolName;
     }
 
-    /** Returns the human-readable pool name. */
+    /**
+     * 返回可读性良好的线程池名称。
+     *
+     * @return 线程池名称
+     */
     public String poolName() {
         return poolName;
     }
 
-    /** Returns true if at least one thread is available for immediate work. */
+    /**
+     * 判断是否至少有一个线程可立即处理任务。
+     *
+     * @return 有可用线程时返回 {@code true}
+     */
     public boolean hasAvailableThread() {
         return availableThreadCount() > 0;
     }
 
-    /** Returns the number of threads not currently executing tasks. */
+    /**
+     * 返回当前未在执行任务的线程数。
+     *
+     * @return 可用线程数
+     */
     public int availableThreadCount() {
         return Math.max(0, getMaximumPoolSize() - getActiveCount());
     }
@@ -67,9 +95,11 @@ public class NexusThreadPoolExecutor extends ThreadPoolExecutor {
     }
 
     /**
-     * Wraps a Runnable to capture the submitting thread's TLC context
-     * and restore it in the worker thread. The worker's original context
-     * is restored in the finally block.
+     * 包装 {@link Runnable}：捕获提交线程的 TLC 上下文并在工作线程中恢复，
+     * 工作线程的原始上下文在 finally 块中还原。
+     *
+     * @param command 原始任务
+     * @return 包装后的任务
      */
     private Runnable wrap(Runnable command) {
         Map<String, Object> captured = TLC.snapshot();
@@ -85,7 +115,11 @@ public class NexusThreadPoolExecutor extends ThreadPoolExecutor {
     }
 
     /**
-     * Wraps a Callable to capture and propagate TLC context across threads.
+     * 包装 {@link Callable}：跨线程捕获并传播 TLC 上下文。
+     *
+     * @param command 原始任务
+     * @param <T>     返回值类型
+     * @return 包装后的任务
      */
     private <T> Callable<T> wrap(Callable<T> command) {
         Map<String, Object> captured = TLC.snapshot();

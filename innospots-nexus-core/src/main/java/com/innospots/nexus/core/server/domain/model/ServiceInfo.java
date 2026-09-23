@@ -8,11 +8,14 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Fluent domain model for a registered service node.
- * <p>Carries identity (service name + instance ID), network address,
- * role/status, group membership, free-form tags, and runtime metrics.
- * The {@link #serverKey()} is derived as {@code host:port} for
- * cluster-wide uniqueness.</p>
+ * 已注册服务节点的流式领域模型。
+ * <p>承载身份（服务名 + 实例 ID）、网络地址、角色/状态、分组、自由标签与运行时指标。
+ * {@link #serverKey()} 派生为 {@code host:port}，保证集群内唯一。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @see ServiceRole
+ * @see ServiceStatus
  */
 public class ServiceInfo {
 
@@ -34,115 +37,119 @@ public class ServiceInfo {
     }
 
     /**
-     * Creates a service with the given name and instance identifier.
+     * 按服务名与实例标识创建服务。
      *
-     * @param serviceName the logical service type name
-     * @param instanceId  unique instance identifier (e.g. UUID or hostname)
+     * @param serviceName 逻辑服务类型名称
+     * @param instanceId  唯一实例标识（如 UUID 或主机名）
+     * @return 新服务信息
      */
     public static ServiceInfo named(String serviceName, String instanceId) {
         return new ServiceInfo(serviceName, instanceId);
     }
 
-    /** Returns the database-assigned server identifier. */
+    /** 返回数据库分配的服务标识。 */
     public Long serverId() {
         return serverId;
     }
 
-    /** Sets the database-assigned server identifier and returns this for chaining. */
+    /** 设置数据库分配的服务标识并返回自身以支持链式调用。 */
     public ServiceInfo serverId(Long serverId) {
         this.serverId = serverId;
         return this;
     }
 
-    /** Returns the logical service type name. */
+    /** 返回逻辑服务类型名称。 */
     public String serviceName() {
         return serviceName;
     }
 
-    /** Returns the unique instance identifier. */
+    /** 返回唯一实例标识。 */
     public String instanceId() {
         return instanceId;
     }
 
-    /** Returns the host address. */
+    /** 返回主机地址。 */
     public String host() {
         return host;
     }
 
-    /** Sets the host address and returns this for chaining. */
+    /** 设置主机地址并返回自身以支持链式调用。 */
     public ServiceInfo host(String host) {
         this.host = host;
         return this;
     }
 
-    /** Returns the port number. */
+    /** 返回端口号。 */
     public int port() {
         return port;
     }
 
-    /** Sets the port number and returns this for chaining. */
+    /** 设置端口号并返回自身以支持链式调用。 */
     public ServiceInfo port(int port) {
         this.port = port;
         return this;
     }
 
-    /** Returns the service status. */
+    /** 返回服务状态。 */
     public ServiceStatus status() {
         return status;
     }
 
-    /** Sets the service status (defaults to ONLINE if null) and returns this for chaining. */
+    /** 设置服务状态（{@code null} 时默认为 ONLINE）并返回自身以支持链式调用。 */
     public ServiceInfo status(ServiceStatus status) {
         this.status = status == null ? ServiceStatus.ONLINE : status;
         return this;
     }
 
-    /** Returns the service role. */
+    /** 返回服务角色。 */
     public ServiceRole role() {
         return role;
     }
 
-    /** Sets the service role (defaults to FOLLOWER if null) and returns this for chaining. */
+    /** 设置服务角色（{@code null} 时默认为 FOLLOWER）并返回自身以支持链式调用。 */
     public ServiceInfo role(ServiceRole role) {
         this.role = role == null ? ServiceRole.FOLLOWER : role;
         return this;
     }
 
-    /** Returns the group name. */
+    /** 返回分组名称。 */
     public String group() {
         return group;
     }
 
-    /** Sets the group name (defaults to "default" if null) and returns this for chaining. */
+    /** 设置分组名称（{@code null} 时默认为 "default"）并返回自身以支持链式调用。 */
     public ServiceInfo group(String group) {
         this.group = group == null ? "default" : group;
         return this;
     }
 
-    /** Returns the last heartbeat update time. */
+    /** 返回最后心跳更新时间。 */
     public LocalDateTime updatedAt() {
         return updatedAt;
     }
 
-    /** Sets the last heartbeat update time and returns this for chaining. */
+    /** 设置最后心跳更新时间并返回自身以支持链式调用。 */
     public ServiceInfo updatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
         return this;
     }
 
-    /** Unique cluster-wide key: {@code host:port}. */
+    /** 集群范围唯一键：{@code host:port}。 */
     public String serverKey() {
         return host + ":" + port;
     }
 
-    /** Returns an immutable copy of the tags map. */
+    /** 返回标签映射的不可变副本。 */
     public Map<String, String> tags() {
         return Map.copyOf(tags);
     }
 
     /**
-     * Parses and sets tags from a comma-separated string of {@code key=value} pairs.
-     * Example: {@code "env=prod,region=us-east-1"}.
+     * 从逗号分隔的 {@code key=value} 对解析并设置标签。
+     * 示例：{@code "env=prod,region=us-east-1"}。
+     *
+     * @param tags 标签字符串
+     * @return 自身以支持链式调用
      */
     public ServiceInfo tags(String tags) {
         if (tags != null) {
@@ -156,12 +163,12 @@ public class ServiceInfo {
         return this;
     }
 
-    /** Returns an immutable copy of the metrics map. */
+    /** 返回指标映射的不可变副本。 */
     public Map<String, String> metrics() {
         return Map.copyOf(metrics);
     }
 
-    /** Merges the given map into the runtime metrics. */
+    /** 将给定映射合并到运行时指标中。 */
     public ServiceInfo metrics(Map<String, String> metrics) {
         if (metrics != null) {
             this.metrics.putAll(metrics);
@@ -169,7 +176,7 @@ public class ServiceInfo {
         return this;
     }
 
-    /** Seconds since the last heartbeat update. Used for expiry detection. */
+    /** 自最后心跳更新起的秒数，用于过期检测。 */
     public long elapsedSecondsSinceUpdate() {
         return updatedAt == null
                 ? 0

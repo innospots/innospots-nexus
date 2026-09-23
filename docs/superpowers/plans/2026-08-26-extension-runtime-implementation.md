@@ -1,18 +1,18 @@
-# Extension Runtime Implementation Plan
+# Extension Runtime 实施计划
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
+> **面向 agent 工作者：** 必需子技能：使用 superpowers:executing-plans 按任务逐步实施本计划。
 
-**Goal:** Move extension contracts into `innospots-nexus-core`, remove the old console extension package, and implement page-URL role interception in `innospots-nexus-console`.
+**目标：** 将 extension 契约迁入 `innospots-nexus-core`，删除旧 console extension 包，并在 `innospots-nexus-console` 中实现 page-URL role 拦截。
 
-**Architecture:** Core owns framework-neutral extension descriptors, page/menu declarations, provider discovery, and lifecycle state. Console owns the active page-URL registry and a Jakarta REST request filter contract that validates the page-source header, URL template, and current user roles. Existing unrelated permission-domain work remains untouched.
+**架构：** Core 拥有 framework-neutral extension descriptor、page/menu declaration、provider discovery 与 lifecycle state。Console 拥有 active page-URL registry 及 Jakarta REST request filter 契约，用于校验 page-source header、URL template 与当前 user role。现有无关 permission-domain 工作保持不变。
 
-**Tech Stack:** Java 25, Java records, Jakarta REST, Java SPI, JUnit 5, AssertJ, Maven.
+**技术栈：** Java 25、Java record、Jakarta REST、Java SPI、JUnit 5、AssertJ、Maven。
 
 ---
 
-### Task 1: Add core extension declaration contracts
+### Task 1：添加 core extension declaration 契约
 
-**Files:**
+**文件：**
 - Create: `innospots-nexus-core/src/main/java/com/innospots/nexus/core/extension/contract/ConsoleExtensionProvider.java`
 - Create: `innospots-nexus-core/src/main/java/com/innospots/nexus/core/extension/contract/ConsoleExtensionEntry.java`
 - Create: `innospots-nexus-core/src/main/java/com/innospots/nexus/core/extension/declaration/ExtensionDescriptor.java`
@@ -21,29 +21,29 @@
 - Create: `innospots-nexus-core/src/main/java/com/innospots/nexus/core/extension/declaration/MenuDeclaration.java`
 - Test: `innospots-nexus-core/src/test/java/com/innospots/nexus/core/extension/ExtensionDeclarationTest.java`
 
-- [x] Write tests for immutable collections, qualified page identity, menu node validation, and module/page key validation.
-- [x] Run the focused contract test before implementation; it failed because the contracts did not exist.
-- [x] Implement the records and provider annotation with defensive copies and validation through `NexusException`.
-- [x] Run the focused test again and verify it passes.
+- [x] 编写 immutable collection、qualified page identity、menu node validation、module/page key validation 的测试。
+- [x] 实现前运行聚焦契约测试；因契约不存在而失败。
+- [x] 实现 record 与 provider annotation，通过 defensive copy 与 `NexusException` 校验。
+- [x] 再次运行聚焦测试并确认通过。
 
-### Task 2: Add core provider discovery and lifecycle registry
+### Task 2：添加 core provider discovery 与 lifecycle registry
 
-**Files:**
+**文件：**
 - Create: `innospots-nexus-core/src/main/java/com/innospots/nexus/core/extension/lifecycle/ExtensionState.java`
 - Create: `innospots-nexus-core/src/main/java/com/innospots/nexus/core/extension/lifecycle/ExtensionRegistration.java`
 - Create: `innospots-nexus-core/src/main/java/com/innospots/nexus/core/extension/discovery/ExtensionProviderDiscovery.java`
 - Create: `innospots-nexus-core/src/main/java/com/innospots/nexus/core/extension/lifecycle/ExtensionRegistry.java`
 - Test: `innospots-nexus-core/src/test/java/com/innospots/nexus/core/extension/ExtensionRegistryTest.java`
 
-- [x] Write tests for direct provider registration, Java SPI discovery, duplicate extension rejection, default enabled state, disable/activate transitions, and failed activation on unknown menu pages or conflicting paths.
-- [x] Run the focused registry test before implementation; it failed for missing types.
-- [x] Implement discovery without unrestricted classpath scanning: direct instances, `ServiceLoader`, and explicitly supplied annotated classes only.
-- [x] Implement atomic registration, activation, disable, state lookup, and active descriptor snapshots.
-- [x] Run the focused registry test and verify it passes.
+- [x] 编写 direct provider registration、Java SPI discovery、duplicate extension rejection、default enabled state、disable/activate transitions、unknown menu page 或 conflicting path 导致 activation 失败的测试。
+- [x] 实现前运行聚焦 registry 测试；因类型缺失而失败。
+- [x] 实现 discovery，不做 unrestricted classpath scanning：仅 direct instance、`ServiceLoader` 与显式提供的 annotated class。
+- [x] 实现 atomic registration、activation、disable、state lookup 与 active descriptor snapshot。
+- [x] 运行聚焦 registry 测试并确认通过。
 
-### Task 3: Add console page-URL permission contracts
+### Task 3：添加 console page-URL permission 契约
 
-**Files:**
+**文件：**
 - Create: `innospots-nexus-console/src/main/java/com/innospots/nexus/console/permission/PageUrlPermissionKey.java`
 - Create: `innospots-nexus-console/src/main/java/com/innospots/nexus/console/permission/PageUrlPermissionRegistry.java`
 - Create: `innospots-nexus-console/src/main/java/com/innospots/nexus/console/permission/CurrentUserRoleProvider.java`
@@ -52,34 +52,34 @@
 - Test: `innospots-nexus-console/src/test/java/com/innospots/nexus/console/permission/PageUrlPermissionRegistryTest.java`
 - Test: `innospots-nexus-console/src/test/java/com/innospots/nexus/console/permission/PageUrlPermissionInterceptorTest.java`
 
-- [x] Write tests for URL normalization, named path-variable matching, duplicate URL deduplication within one page, independent permissions for the same URL on different pages, missing/invalid page header denial, and role-based allow/deny.
-- [x] Run the focused tests before implementation; they failed for missing types.
-- [x] Implement the immutable composite permission key `(moduleKey, pageKey, urlPattern)` and registry.
-- [x] Implement the interceptor using `X-Nexus-Page-Key`, current roles from an injected provider, and an injected checker; query strings and HTTP methods do not affect the key.
-- [x] Run focused tests and verify they pass.
+- [x] 编写 URL normalization、named path-variable matching、单 page 内 duplicate URL deduplication、不同 page 上同一 URL 的独立 permission、missing/invalid page header denial、role-based allow/deny 的测试。
+- [x] 实现前运行聚焦测试；因类型缺失而失败。
+- [x] 实现 immutable composite permission key `(moduleKey, pageKey, urlPattern)` 与 registry。
+- [x] 实现 interceptor，使用 `X-Nexus-Page-Key`、注入 provider 的 current role 与注入 checker；query string 与 HTTP method 不影响 key。
+- [x] 运行聚焦测试并确认通过。
 
-### Task 4: Remove old console extension package and detach legacy references
+### Task 4：删除旧 console extension 包并解除 legacy 引用
 
-**Files:**
+**文件：**
 - Delete: `innospots-nexus-console/src/main/java/com/innospots/nexus/console/extension/ConsoleExtension.java`
 - Delete: `innospots-nexus-console/src/main/java/com/innospots/nexus/console/extension/ConsoleContribution.java`
 - Delete: `innospots-nexus-console/src/main/java/com/innospots/nexus/console/extension/ConsoleMenuDeclaration.java`
 - Delete: `innospots-nexus-console/src/main/java/com/innospots/nexus/console/extension/ConsoleRouteDeclaration.java`
 - Delete: `innospots-nexus-console/src/test/java/com/innospots/nexus/console/extension/ConsoleExtensionTest.java`
-- Modify: legacy `console/permission` references that import the deleted package.
+- Modify: 导入已删除包的 legacy `console/permission` 引用。
 
-- [x] Replace only imports and tests that directly depend on the deleted package; unrelated user changes remain untouched.
-- [x] Run the console compile; no Java reference to the deleted package remains.
-- [x] Run the console test suite and fix migration errors caused by the package removal.
+- [x] 仅替换直接依赖已删除包的 import 与测试；无关 user 变更保持不变。
+- [x] 运行 console compile；无对已删除包的 Java 引用。
+- [x] 运行 console 测试套件并修复包删除导致的 migration 错误。
 
-### Task 5: Verify module boundaries and documentation
+### Task 5：验证模块边界与文档
 
-**Files:**
-- Reference: `innospots-nexus-core/docs/archive/extension-design.md` as the historical baseline.
-- Modify: `innospots-nexus-core/docs/plugin-extension-design.md` only if implementation names or boundaries differ from the current design.
+**文件：**
+- Reference: `innospots-nexus-core/docs/archive/extension-design.md` 作为历史基线。
+- Modify: 仅当实现名称或边界与当前设计不同时修改 `innospots-nexus-core/docs/plugin-extension-design.md`。
 
-- [x] Run `mvn -pl innospots-nexus-core,innospots-nexus-console -am test`.
-- [x] Run `mvn clean compile` after all Java changes.
-- [x] Run `mvn validate`, `mvn test`, and `git diff --check`; effective-POM generation is blocked by the sandbox's read-only Maven resolver status path.
-- [x] Confirm core has no Jakarta REST dependency and console owns the permission interceptor.
-- [x] Confirm the old `console/extension` Java package and all direct Java references are gone.
+- [x] 运行 `mvn -pl innospots-nexus-core,innospots-nexus-console -am test`。
+- [x] 所有 Java 变更后运行 `mvn clean compile`。
+- [x] 运行 `mvn validate`、`mvn test`、`git diff --check`；sandbox 只读 Maven resolver status path 阻止 effective-POM 生成。
+- [x] 确认 core 无 Jakarta REST 依赖，console 拥有 permission interceptor。
+- [x] 确认旧 `console/extension` Java 包及所有直接 Java 引用已删除。

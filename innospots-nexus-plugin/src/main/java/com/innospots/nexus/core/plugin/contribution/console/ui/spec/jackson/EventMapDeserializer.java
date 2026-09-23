@@ -12,7 +12,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Deserializes component event maps.
+ * 反序列化组件事件映射。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class EventMapDeserializer extends JsonDeserializer<Map<String, ActionOrList>> {
 

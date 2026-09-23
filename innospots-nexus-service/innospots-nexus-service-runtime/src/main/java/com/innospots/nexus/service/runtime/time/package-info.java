@@ -1,5 +1,5 @@
 /**
- * Deadline interceptor and scheduler. Finite deadlines are {@link com.innospots.nexus.service.contract.time.Deadline#of}.
+ * 截止时间拦截器与调度器。有限截止时间使用 {@link com.innospots.nexus.service.contract.time.Deadline#of}。
  *
  * @author Smars
  * @date 2026/09/13

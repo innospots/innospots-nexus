@@ -1,26 +1,29 @@
 package com.innospots.nexus.console.menu.domain.enums;
 
 /**
- * Structural and navigational menu node types.
+ * 结构与导航菜单节点类型。
  * <p>
- * Authorization actions and API resources intentionally belong to the
- * permission domain rather than this enumeration.
+ * 授权动作与 API 资源有意归属
+ * 权限领域而非本枚举。
  * </p>
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public enum MenuType {
 
     /**
-     * Groups child menu nodes without a navigable destination.
+     * 分组子菜单节点且无导航目标。
      */
     DIRECTORY,
 
     /**
-     * Renders an internal application page.
+     * 渲染内部应用页面。
      */
     PAGE,
 
     /**
-     * Opens an external URL.
+     * 打开外部 URL。
      */
     EXTERNAL_LINK
 }

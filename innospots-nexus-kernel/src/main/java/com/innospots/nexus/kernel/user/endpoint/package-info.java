@@ -1,6 +1,7 @@
 /**
+ * 租户域用户管理的 Jakarta REST 端点契约。
+ *
  * @author Smars
- * @version 2.0
- * @date 2026/6/11
+ * @date 2026/09/13
  */
 package com.innospots.nexus.kernel.user.endpoint;

@@ -1,56 +1,56 @@
-# Multi-Tenant Governance Phase 1 Implementation Plan
+# 多租户治理 Phase 1 实施计划
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **面向 agent 工作者：** 必需子技能：使用 superpowers:subagent-driven-development（推荐）或 superpowers:executing-plans 按任务逐步实施本计划。步骤使用 checkbox（`- [ ]`）语法跟踪进度。
 
-**Status:** Phase 1 Tasks 1–10 implemented and verified (`mvn clean compile`, `mvn test` BUILD SUCCESS, 2026-08-27).
+**状态：** Phase 1 Task 1–10 已实现并验证（`mvn clean compile`、`mvn test` BUILD SUCCESS，2026-08-27）。
 
-**Goal:** Land the Phase 1 skeleton from the governance spec: `innospots-nexus-platform` module, console package boundaries, and the first tenant-domain / ops-domain persistence contracts (Tenant, Enterprise, Workspace, TenantMember, Organization Unit).
+**目标：** 落地治理规格中的 Phase 1 骨架：`innospots-nexus-platform` module、console package boundary，以及首批 tenant-domain / ops-domain 持久化契约（Tenant、Enterprise、Workspace、TenantMember、Organization Unit）。
 
-**Architecture:** `platform` and `kernel` both depend on `console`; they do not depend on each other. Platform owns `nx_tenant` + `nx_enterprise` (global `BaseEntity`). Kernel owns `nx_workspace`, `nx_tenant_member`, `nx_organization_unit`, `nx_organization_member` (`TenantBaseEntity`). Isolation keys are `tenantId` / `workspaceId`; `ProjectBaseEntity` is gone.
+**架构：** `platform` 与 `kernel` 均依赖 `console`；彼此不依赖。Platform 拥有 `nx_tenant` + `nx_enterprise`（global `BaseEntity`）。Kernel 拥有 `nx_workspace`、`nx_tenant_member`、`nx_organization_unit`、`nx_organization_member`（`TenantBaseEntity`）。隔离键为 `tenantId` / `workspaceId`；`ProjectBaseEntity` 已移除。
 
-**Tech Stack:** Java 25, Maven multi-module, Jakarta Persistence + MyBatis-Plus, Jakarta REST contracts, JUnit 5 + AssertJ, Lombok.
+**技术栈：** Java 25、Maven multi-module、Jakarta Persistence + MyBatis-Plus、Jakarta REST 契约、JUnit 5 + AssertJ、Lombok。
 
-**Spec:** [docs/design/multi-tenant-governance-design.md](../../design/multi-tenant-governance-design.md) §9–§10, §12 Phase 1.
+**规格：** [docs/design/multi-tenant-governance-design.md](../../design/multi-tenant-governance-design.md) §9–§10、§12 Phase 1。
 
-## Global Constraints
+## 全局约束
 
-- `innospots-nexus-base` stays middleware-free; `core` has no Spring Boot auto-configuration.
-- Dependency direction: `base -> core -> console -> {kernel | platform}`; kernel and platform never depend on each other.
-- Persistence entities inherit `BaseEntity`, `TenantBaseEntity`, or `WorkspaceBaseEntity`. Never reintroduce `ProjectBaseEntity` or `projectId`.
-- Concrete PK fields are `String`, `@TableId(type = IdType.ASSIGN_UUID)`, `@Id`, `@Column(length = 32, nullable = false)`.
-- String `@Column` lengths are powers of two. Index names are explicit and table-prefixed.
-- Domain `request` / `vo` types are records. Entities use Lombok `@Getter` `@Setter`.
-- Import order: `java.*`, third-party (incl. Lombok), `com.innospots.*`. Braces on every `if`/`else`/`for`/`while`.
-- Do not copy legacy Innospots source. Do not move role/menu/permission/user off kernel in this plan (Phase 2).
-- Do not create empty architectural layers. Do not update module `SKILL.md` unless the user asks for a skill scan.
-- Do not git-commit unless the user explicitly asks.
-- After Java changes: `mvn clean compile`. After structural POM changes: `mvn validate` and `mvn test`.
+- `innospots-nexus-base` 保持 middleware-free；`core` 无 Spring Boot auto-configuration。
+- 依赖方向：`base -> core -> console -> {kernel | platform}`；kernel 与 platform 永不相互依赖。
+- 持久化 entity 继承 `BaseEntity`、`TenantBaseEntity` 或 `WorkspaceBaseEntity`。不得重新引入 `ProjectBaseEntity` 或 `projectId`。
+- 具体 PK field 为 `String`，`@TableId(type = IdType.ASSIGN_UUID)`、`@Id`、`@Column(length = 32, nullable = false)`。
+- String `@Column` 长度为 2 的幂。Index 名称显式且 table-prefixed。
+- Domain `request` / `vo` 类型为 record。Entity 使用 Lombok `@Getter` `@Setter`。
+- Import 顺序：`java.*`、third-party（含 Lombok）、`com.innospots.*`。每个 `if`/`else`/`for`/`while` 使用花括号。
+- 不得复制 legacy Innospots 源码。本计划不将 role/menu/permission/user 迁出 kernel（Phase 2）。
+- 不得创建空 architectural layer。除非用户要求 skill scan，否则不更新 module `SKILL.md`。
+- 除非用户明确要求，否则不 git-commit。
+- Java 变更后：`mvn clean compile`。结构 POM 变更后：`mvn validate` 与 `mvn test`。
 
-## Already Done (do not redo)
+## 已完成（勿重做）
 
-- `TenantBaseEntity` / `WorkspaceBaseEntity` in `innospots-nexus-core`
+- `innospots-nexus-core` 中的 `TenantBaseEntity` / `WorkspaceBaseEntity`
 - `TLC.tenantId(String)` / `TLC.workspaceId(String)`
-- `AuditMetaObjectHandler` fills `tenantId` + `workspaceId`
-- Kernel/core workspace-scoped entities no longer extend `ProjectBaseEntity`
+- `AuditMetaObjectHandler` 填充 `tenantId` + `workspaceId`
+- Kernel/core workspace-scoped entity 不再继承 `ProjectBaseEntity`
 
-## Out of Scope (later plans)
+## 不在范围（后续计划）
 
-- Phase 2: split `nx_user` into platform/tenant users; move auth/menu/role/permission to console; delete Group
-- Phase 3: `security_realm` on permission/menu
-- Phase 4: drop Group tables
-- Platform user tables, support-access, audit logs
-- Kernel provisioning listener that consumes `TenantCreatedEvent` (event type only in this plan)
+- Phase 2：拆分 `nx_user` 为 platform/tenant user；将 auth/menu/role/permission 迁至 console；删除 Group
+- Phase 3：permission/menu 上的 `security_realm`
+- Phase 4：删除 Group 表
+- Platform user 表、support-access、audit log
+- 消费 `TenantCreatedEvent` 的 Kernel provisioning listener（本计划仅 event type）
 
-## File Map
+## 文件映射
 
-| File | Responsibility |
+| 文件 | 职责 |
 |------|----------------|
-| `innospots-nexus-platform/pom.xml` | New ops-domain module, depends on console |
-| `pom.xml`, `innospots-nexus-bom/pom.xml`, `AGENTS.md` | Aggregator, version, module contract |
-| `console/{auth,credential,role,menu,permission,extension,logger,dictionary}/package-info.java` | Intended Phase 2 homes; no business types yet |
+| `innospots-nexus-platform/pom.xml` | 新 ops-domain 模块，依赖 console |
+| `pom.xml`, `innospots-nexus-bom/pom.xml`, `AGENTS.md` | Aggregator、版本、模块契约 |
+| `console/{auth,credential,role,menu,permission,extension,logger,dictionary}/package-info.java` | Phase 2 目标归属；尚无业务类型 |
 | `platform/tenant/domain/entity/TenantEntity.java` | `nx_tenant` |
-| `platform/enterprise/domain/entity/EnterpriseEntity.java` | `nx_enterprise` 1:1 with tenant |
-| `platform/tenant/domain/event/TenantCreatedEvent.java` | Cross-module collaboration contract |
+| `platform/enterprise/domain/entity/EnterpriseEntity.java` | `nx_enterprise` 与 tenant 1:1 |
+| `platform/tenant/domain/event/TenantCreatedEvent.java` | 跨模块协作契约 |
 | `platform/tenant/endpoint/TenantEndpoint.java` | `/platform/tenants` JAX-RS contract |
 | `kernel/workspace/domain/entity/WorkspaceEntity.java` | `nx_workspace` |
 | `kernel/member/domain/entity/TenantMemberEntity.java` | `nx_tenant_member` |
@@ -59,9 +59,9 @@
 
 ---
 
-### Task 1: Platform Maven module
+### Task 1：Platform Maven module
 
-**Files:**
+**文件：**
 - Create: `innospots-nexus-platform/pom.xml`
 - Create: `innospots-nexus-platform/src/main/java/com/innospots/nexus/platform/PlatformModule.java`
 - Create: `innospots-nexus-platform/src/test/java/com/innospots/nexus/platform/PlatformModuleTest.java`
@@ -69,14 +69,14 @@
 - Modify: `innospots-nexus-bom/pom.xml` (add `innospots-nexus-platform` dependencyManagement entry after kernel)
 - Modify: `AGENTS.md` (add platform module section; extend dependency rules so kernel and platform both depend on console and not on each other)
 
-**Interfaces:**
-- Consumes: existing `innospots-nexus-parent`, `innospots-nexus-console`
-- Produces: artifact `com.innospots:innospots-nexus-platform`
+**接口：**
+- 消费： existing `innospots-nexus-parent`, `innospots-nexus-console`
+- 产出： artifact `com.innospots:innospots-nexus-platform`
 
-- [x] **Step 1: Write the failing module marker test**
-- [x] **Step 2: Run test to verify it fails**
-- [x] **Step 3: Add aggregator, BOM, POM, marker class, and AGENTS.md**
-- [x] **Step 4: Verify compile and the marker test**
+- [x] **Step 1：编写失败的 module marker 测试**
+- [x] **Step 2：运行测试确认失败**
+- [x] **Step 3：添加 aggregator、BOM、POM、marker class 与 AGENTS.md**
+- [x] **Step 4：验证编译与 marker 测试**
 
 ```java
 package com.innospots.nexus.platform;
@@ -95,43 +95,43 @@ class PlatformModuleTest {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [ ] **Step 2：运行测试确认失败**
 
-Run: `mvn -pl innospots-nexus-platform test -Dtest=PlatformModuleTest`
-Expected: FAIL because the module / class does not exist.
+运行： `mvn -pl innospots-nexus-platform test -Dtest=PlatformModuleTest`
+预期： FAIL，因 module / class 不存在。
 
-- [ ] **Step 3: Add aggregator, BOM, POM, marker class, and AGENTS.md**
+- [ ] **Step 3：添加 aggregator、BOM、POM、marker class 与 AGENTS.md**
 
-`innospots-nexus-platform/pom.xml` must inherit `innospots-nexus-parent`, depend on `innospots-nexus-console`, and include the same persistence APIs kernel uses (`jakarta.persistence-api`, `jakarta.transaction-api`, `mybatis-plus-core`, `mybatis-plus-extension`) plus `jakarta.ws.rs-api` (via console or explicit) for endpoints.
+`innospots-nexus-platform/pom.xml` 必须继承 `innospots-nexus-parent`、依赖 `innospots-nexus-console`，并包含 kernel 使用的相同 persistence API (`jakarta.persistence-api`, `jakarta.transaction-api`, `mybatis-plus-core`, `mybatis-plus-extension`) plus `jakarta.ws.rs-api` (via console or explicit) for endpoints.
 
-`PlatformModule` is an empty public marker with Javadoc: ops-domain platform; depends on console; must not depend on kernel.
+`PlatformModule` 为空 public marker，Javadoc：ops-domain platform；依赖 console；不得依赖 kernel。
 
-AGENTS.md additions:
-- New `innospots-nexus-platform` section: owns `nx_tenant`, `nx_enterprise`, later platform users / support access / platform audit; `/platform/**`; no public self-register.
-- Dependency: platform may depend on console + transitive core/base; must not depend on kernel.
-- Direction: `console -> kernel` and `console -> platform` in parallel.
+AGENTS.md 新增：
+- 新 `innospots-nexus-platform` 章节： owns `nx_tenant`, `nx_enterprise`, later platform users / support access / platform audit; `/platform/**`; no public self-register.
+- 依赖： platform may depend on console + transitive core/base; must not depend on kernel.
+- 方向： `console -> kernel` and `console -> platform` in parallel.
 
-- [ ] **Step 4: Verify compile and the marker test**
+- [ ] **Step 4：验证编译与 marker 测试**
 
-Run: `mvn -pl innospots-nexus-platform -am test -Dtest=PlatformModuleTest`
-Expected: PASS.
+运行： `mvn -pl innospots-nexus-platform -am test -Dtest=PlatformModuleTest`
+预期： PASS.
 
-Run: `mvn validate`
-Expected: BUILD SUCCESS.
+运行： `mvn validate`
+预期： BUILD SUCCESS.
 
 ---
 
-### Task 2: Console package skeleton
+### Task 2：Console package skeleton
 
-**Files:**
+**文件：**
 - Create: `innospots-nexus-console/src/main/java/com/innospots/nexus/console/{auth,credential,role,menu,permission,extension,logger,dictionary}/package-info.java`
 - Create: `innospots-nexus-console/src/test/java/com/innospots/nexus/console/ConsolePackageSkeletonTest.java`
 
-**Interfaces:**
-- Consumes: existing `com.innospots.nexus.console.endpoint`
-- Produces: documented package roots for Phase 2 moves; no entity/endpoint types yet
+**接口：**
+- 消费： existing `com.innospots.nexus.console.endpoint`
+- 产出： documented package roots for Phase 2 moves; no entity/endpoint types yet
 
-- [ ] **Step 1: Write the failing package test**
+- [ ] **Step 1：编写失败的 package 测试**
 
 ```java
 package com.innospots.nexus.console;
@@ -149,7 +149,7 @@ class ConsolePackageSkeletonTest {
 }
 ```
 
-Do not use `package-info.class` in source (invalid). Assert by loading packages:
+源码中勿用 `package-info.class`（无效）。通过加载 package 断言：
 
 ```java
 @Test
@@ -173,14 +173,14 @@ void consoleDeclaresPhaseTwoPackageRoots() {
 
 Use `Class.forName(name + ".package-info")` only — `package-info` compiles to `package-info`.
 
-- [ ] **Step 2: Run test to verify it fails**
+- [ ] **Step 2：运行测试确认失败**
 
-Run: `mvn -pl innospots-nexus-console test -Dtest=ConsolePackageSkeletonTest`
-Expected: `ClassNotFoundException` for `com.innospots.nexus.console.auth.package-info`.
+运行： `mvn -pl innospots-nexus-console test -Dtest=ConsolePackageSkeletonTest`
+预期： `ClassNotFoundException` for `com.innospots.nexus.console.auth.package-info`.
 
-- [ ] **Step 3: Add package-info files**
+- [ ] **Step 3：添加 package-info 文件**
 
-Each file states the Phase 2 responsibility and that concrete types still live in kernel until the move. Example:
+每个文件说明 Phase 2 职责及 concrete type 在迁移前仍在 kernel。示例：
 
 ```java
 /**
@@ -190,27 +190,27 @@ Each file states the Phase 2 responsibility and that concrete types still live i
 package com.innospots.nexus.console.auth;
 ```
 
-- [ ] **Step 4: Run the test**
+- [ ] **Step 4：运行测试**
 
-Run: `mvn -pl innospots-nexus-console test -Dtest=ConsolePackageSkeletonTest`
-Expected: PASS.
+运行： `mvn -pl innospots-nexus-console test -Dtest=ConsolePackageSkeletonTest`
+预期： PASS.
 
 ---
 
-### Task 3: TenantEntity
+### Task 3：TenantEntity
 
-**Files:**
+**文件：**
 - Test: `innospots-nexus-platform/src/test/java/com/innospots/nexus/platform/tenant/domain/entity/TenantEntityContractsTest.java`
 - Create: `innospots-nexus-platform/src/main/java/com/innospots/nexus/platform/tenant/domain/enums/TenantStatus.java`
 - Create: `innospots-nexus-platform/src/main/java/com/innospots/nexus/platform/tenant/domain/entity/TenantEntity.java`
 
-**Interfaces:**
-- Consumes: `BaseEntity`, table `nx_tenant`
-- Produces: `TenantEntity` with `idPrefix() == "tnt"`, fields below
+**接口：**
+- 消费： `BaseEntity`, table `nx_tenant`
+- 产出： `TenantEntity` with `idPrefix() == "tnt"`, fields below
 
-Fields (do not redeclare audit columns):
+字段（勿重复声明 audit 列）：
 
-| field | type | column | notes |
+| 字段 | 类型 | 列 | 说明 |
 |-------|------|--------|-------|
 | tenantId | String | PK 32 | prefix `tnt` |
 | tenantName | String | 128, not null | |
@@ -221,22 +221,22 @@ Fields (do not redeclare audit columns):
 
 `TenantStatus`: `ACTIVE`, `SUSPENDED`, `ARCHIVED`.
 
-- [ ] **Step 1: Write the failing contract test** (table name, superclass `BaseEntity`, PK, fields, unique index on `tenant_code`, `idPrefix()` via a new instance).
-- [ ] **Step 2: Run** `mvn -pl innospots-nexus-platform test -Dtest=TenantEntityContractsTest` — Expected: compile failure / missing class.
-- [ ] **Step 3: Implement `TenantStatus` + `TenantEntity`.**
-- [ ] **Step 4: Re-run the test — Expected: PASS.** `mvn -pl innospots-nexus-platform -am clean compile`.
+- [ ] **Step 1：编写失败的契约测试** (table name, superclass `BaseEntity`, PK, fields, unique index on `tenant_code`, `idPrefix()` via a new instance).
+- [ ] **Step 2：运行** `mvn -pl innospots-nexus-platform test -Dtest=TenantEntityContractsTest` — 预期： compile failure / missing class.
+- [ ] **Step 3：实现 `TenantStatus` + `TenantEntity`.**
+- [ ] **Step 4：重跑测试 — 预期：PASS。** `mvn -pl innospots-nexus-platform -am clean compile`.
 
 ---
 
-### Task 4: EnterpriseEntity
+### Task 4：EnterpriseEntity
 
-**Files:**
+**文件：**
 - Test: `innospots-nexus-platform/src/test/java/com/innospots/nexus/platform/enterprise/domain/entity/EnterpriseEntityContractsTest.java`
 - Create: `innospots-nexus-platform/src/main/java/com/innospots/nexus/platform/enterprise/domain/entity/EnterpriseEntity.java`
 
-**Interfaces:**
-- Consumes: `BaseEntity`, `TenantEntity.tenantId`
-- Produces: `nx_enterprise`, `idPrefix() == "ent"`, unique `tenant_id`
+**接口：**
+- 消费： `BaseEntity`, `TenantEntity.tenantId`
+- 产出： `nx_enterprise`, `idPrefix() == "ent"`, unique `tenant_id`
 
 | field | type | length | nullable |
 |-------|------|--------|----------|
@@ -253,16 +253,16 @@ Fields (do not redeclare audit columns):
 
 Indexes: `uk_nx_enterprise_tenant` unique `tenant_id`.
 
-- [ ] **Step 1: Failing contract test.**
-- [ ] **Step 2: Run test — missing class.**
-- [ ] **Step 3: Implement entity.**
-- [ ] **Step 4: Test PASS + `mvn -pl innospots-nexus-platform -am clean compile`.**
+- [ ] **Step 1：失败的契约测试。**
+- [ ] **Step 2：运行测试 — 类型缺失。**
+- [ ] **Step 3：实现 entity.**
+- [ ] **Step 4：测试 PASS + `mvn -pl innospots-nexus-platform -am clean compile`.**
 
 ---
 
-### Task 5: TenantCreatedEvent + Tenant DAO/operator create
+### Task 5：TenantCreatedEvent + Tenant DAO/operator create
 
-**Files:**
+**文件：**
 - Create: `innospots-nexus-platform/src/main/java/com/innospots/nexus/platform/tenant/domain/event/TenantCreatedEvent.java`
 - Create: `innospots-nexus-platform/src/main/java/com/innospots/nexus/platform/tenant/dao/TenantDao.java`
 - Create: `innospots-nexus-platform/src/main/java/com/innospots/nexus/platform/enterprise/dao/EnterpriseDao.java`
@@ -270,9 +270,9 @@ Indexes: `uk_nx_enterprise_tenant` unique `tenant_id`.
 - Test: `innospots-nexus-platform/src/test/java/com/innospots/nexus/platform/tenant/operator/TenantOperatorTest.java`
 - Test: `innospots-nexus-platform/src/test/java/com/innospots/nexus/platform/tenant/dao/TenantDaoContractsTest.java`
 
-**Interfaces:**
-- Consumes: `TenantEntity`, `EnterpriseEntity`, `DomainEvent`
-- Produces:
+**接口：**
+- 消费： `TenantEntity`, `EnterpriseEntity`, `DomainEvent`
+- 产出：
 
 ```java
 public record TenantCreatedEvent(String tenantId, String tenantCode, String ownerTenantUserId)
@@ -297,22 +297,22 @@ public TenantEntity create(TenantEntity tenant, EnterpriseEntity enterprise);
 - insert tenant then enterprise
 - do not call kernel
 
-- [ ] **Step 1: Write `TenantOperatorTest` with Mockito DAOs proving create inserts both rows and copies tenantId onto enterprise.**
-- [ ] **Step 2: Run — missing operator.**
-- [ ] **Step 3: Implement DAOs + operator (minimal validation).**
-- [ ] **Step 4: Tests PASS.**
+- [ ] **Step 1：编写 `TenantOperatorTest`，用 Mockito DAO 证明 create 插入两行并将 tenantId 复制到 enterprise。**
+- [ ] **Step 2：运行 — operator 缺失。**
+- [ ] **Step 3：实现 DAOs + operator (minimal validation).**
+- [ ] **Step 4：测试 PASS。**
 
 ---
 
-### Task 6: Platform TenantEndpoint contract
+### Task 6：Platform TenantEndpoint contract
 
-**Files:**
+**文件：**
 - Create: `innospots-nexus-platform/src/main/java/com/innospots/nexus/platform/tenant/domain/request/TenantCreateRequest.java`
 - Create: `innospots-nexus-platform/src/main/java/com/innospots/nexus/platform/tenant/domain/vo/TenantVo.java`
 - Create: `innospots-nexus-platform/src/main/java/com/innospots/nexus/platform/tenant/endpoint/TenantEndpoint.java`
 - Test: `innospots-nexus-platform/src/test/java/com/innospots/nexus/platform/tenant/endpoint/TenantEndpointContractsTest.java`
 
-**Interfaces:**
+**接口：**
 - Produces JAX-RS interface `@Path("/platform/tenants")`:
 
 ```java
@@ -326,45 +326,45 @@ public TenantEntity create(TenantEntity tenant, EnterpriseEntity enterprise);
 
 No runtime implementation class in this task (contract only, same as `RoleEndpoint`).
 
-- [ ] **Step 1: Failing endpoint contract test** (`Path` = `/platform/tenants`, POST create, GET by id, request/vo are records).
-- [ ] **Step 2: Run — missing types.**
-- [ ] **Step 3: Add request, vo, endpoint interface.**
-- [ ] **Step 4: Test PASS + `mvn -pl innospots-nexus-platform -am clean compile`.**
+- [ ] **Step 1：失败的 endpoint 契约测试** (`Path` = `/platform/tenants`, POST create, GET by id, request/vo are records).
+- [ ] **Step 2：运行 — 类型缺失。**
+- [ ] **Step 3：添加 request、vo、endpoint interface。**
+- [ ] **Step 4：测试 PASS + `mvn -pl innospots-nexus-platform -am clean compile`.**
 
 ---
 
-### Task 7: WorkspaceEntity
+### Task 7：WorkspaceEntity
 
-**Files:**
+**文件：**
 - Test: `innospots-nexus-kernel/src/test/java/com/innospots/nexus/kernel/workspace/domain/entity/WorkspaceEntityContractsTest.java`
 - Create: `innospots-nexus-kernel/src/main/java/com/innospots/nexus/kernel/workspace/domain/entity/WorkspaceEntity.java`
 - Create: `innospots-nexus-kernel/src/main/java/com/innospots/nexus/kernel/workspace/dao/WorkspaceDao.java`
 - Test: `innospots-nexus-kernel/src/test/java/com/innospots/nexus/kernel/workspace/dao/WorkspaceDaoContractsTest.java`
 
-**Interfaces:**
+**接口：**
 - Superclass: `TenantBaseEntity` (inherits `tenantId`; do not redeclare)
 - Table: `nx_workspace`
 - Prefix: `wks`
 - Fields: `workspaceId` PK, `workspaceName` 128 not null, `workspaceCode` 64 not null, `description` 512 nullable, `status` 32 not null
 - Unique: `uk_nx_workspace_tenant_code` on `tenant_id,workspace_code`
 
-- [ ] **Step 1: Failing contract test.**
-- [ ] **Step 2: Run — missing class.**
-- [ ] **Step 3: Entity + DAO.**
-- [ ] **Step 4: Tests PASS + `mvn -pl innospots-nexus-kernel -am clean compile`.**
+- [ ] **Step 1：失败的契约测试。**
+- [ ] **Step 2： Run — missing class.**
+- [ ] **Step 3： Entity + DAO.**
+- [ ] **Step 4： Tests PASS + `mvn -pl innospots-nexus-kernel -am clean compile`.**
 
 ---
 
-### Task 8: TenantMemberEntity
+### Task 8：TenantMemberEntity
 
-**Files:**
+**文件：**
 - Test: `innospots-nexus-kernel/src/test/java/com/innospots/nexus/kernel/member/domain/entity/TenantMemberEntityContractsTest.java`
 - Create: `innospots-nexus-kernel/src/main/java/com/innospots/nexus/kernel/member/domain/enums/TenantMemberStatus.java`
 - Create: `innospots-nexus-kernel/src/main/java/com/innospots/nexus/kernel/member/domain/entity/TenantMemberEntity.java`
 - Create: `innospots-nexus-kernel/src/main/java/com/innospots/nexus/kernel/member/dao/TenantMemberDao.java`
 - Test: `innospots-nexus-kernel/src/test/java/com/innospots/nexus/kernel/member/dao/TenantMemberDaoContractsTest.java`
 
-**Interfaces:**
+**接口：**
 - Superclass: `TenantBaseEntity`
 - Table: `nx_tenant_member`
 - Prefix: `tmb`
@@ -372,20 +372,20 @@ No runtime implementation class in this task (contract only, same as `RoleEndpoi
 - Unique: `uk_nx_tenant_member_user` on `tenant_id,tenant_user_id`
 - `TenantMemberStatus`: `ACTIVE`, `DISABLED`, `PENDING`
 
-- [ ] **Step 1–4:** TDD contract + entity + DAO.
+- [ ] **Step 1–4：** TDD contract + entity + DAO.
 
 ---
 
-### Task 9: Organization Unit and Member
+### Task 9：Organization Unit and Member
 
-**Files:**
+**文件：**
 - Tests under `innospots-nexus-kernel/src/test/java/com/innospots/nexus/kernel/organization/`
 - Create: `.../organization/domain/enums/OrganizationUnitType.java` (`COMPANY`, `BRANCH`, `DEPARTMENT`, `TEAM`)
 - Create: `.../organization/domain/entity/OrganizationUnitEntity.java`
 - Create: `.../organization/domain/entity/OrganizationMemberEntity.java`
 - Create: matching DAOs
 
-**Interfaces:**
+**接口：**
 
 `nx_organization_unit` extends `TenantBaseEntity`, prefix `org`:
 - `unitId` PK, `parentId` 32 nullable, `unitCode` 64 not null, `unitName` 128 not null, `unitType` 32 not null, `sortOrder` Integer not null, `status` 32 not null
@@ -396,15 +396,15 @@ No runtime implementation class in this task (contract only, same as `RoleEndpoi
 - `organizationMemberId` PK, `unitId` 32 not null, `tenantMemberId` 32 not null
 - Unique `uk_nx_organization_member` on `tenant_id,unit_id,tenant_member_id`
 
-- [ ] **Step 1–4:** TDD both entities and DAOs.
+- [ ] **Step 1–4：** TDD both entities and DAOs.
 
 ---
 
-### Task 10: Phase 1 verification
+### Task 10：Phase 1 verification
 
-- [ ] **Step 1:** `mvn clean compile`
-- [ ] **Step 2:** `mvn test`
-- [ ] **Step 3:** Confirm no `ProjectBaseEntity` / `TLC.projectId` in production Java.
+- [ ] **Step 1：** `mvn clean compile`
+- [ ] **Step 2：** `mvn test`
+- [ ] **Step 3：** Confirm no `ProjectBaseEntity` / `TLC.projectId` in production Java.
 
 ## Self-Review
 

@@ -11,6 +11,29 @@
 
     <name>innospots-nexus</name>
     <description>Lightweight AI enterprise platform foundation.</description>
+    <url>https://github.com/innospots/innospots-nexus</url>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Innospots Team</name>
+            <organization>Innospots</organization>
+            <organizationUrl>https://github.com/innospots</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:https://github.com/innospots/innospots-nexus.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:innospots/innospots-nexus.git</developerConnection>
+        <url>https://github.com/innospots/innospots-nexus</url>
+    </scm>
 
     <modules>
         <module>innospots-nexus-bom</module>
@@ -24,12 +47,16 @@
         <module>innospots-nexus-platform</module>
         <module>innospots-nexus-spring</module>
         <module>innospots-nexus-quarkus</module>
+        <module>innospots-nexus-sample</module>
     </modules>
 
     <properties>
         <revision>0.1.0-SNAPSHOT</revision>
         <innospots.version>${revision}</innospots.version>
         <flatten-maven-plugin.version>1.7.3</flatten-maven-plugin.version>
+        <central-publishing-maven-plugin.version>0.11.0</central-publishing-maven-plugin.version>
+        <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
+        <innospots.maven.central.serverId>innospots-maven</innospots.maven.central.serverId>
     </properties>
 
     <build>
@@ -70,4 +97,38 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>central-publish</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>${maven-gpg-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>${central-publishing-maven-plugin.version}</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>${innospots.maven.central.serverId}</publishingServerId>
+                            <autoPublish>false</autoPublish>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

@@ -8,7 +8,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Render-time context passed through a {@link PageDslFilterChain}.
+ * 在 {@link PageDslFilterChain} 中传递的渲染时上下文。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class PageDslRenderContext {
 
@@ -33,13 +36,14 @@ public final class PageDslRenderContext {
     }
 
     /**
-     * Creates a render context for one module page.
+     * 为一个模块页面创建渲染上下文。
      *
-     * @param moduleKey owning module key
-     * @param pageKey page key matching {@code page.id}
-     * @param document source page DSL loaded from storage
-     * @param parameters runtime request parameters
-     * @return render context
+     * @param moduleKey 所属模块键
+     * @param pageKey 与 {@code page.id} 匹配的页面键
+     * @param document 从存储加载的源页面 DSL
+     * @param parameters 运行时请求参数
+     * @return 渲染上下文
+     * @throws com.innospots.nexus.base.exception.NexusException 文档为 null 时
      */
     public static PageDslRenderContext of(
             String moduleKey,
@@ -55,26 +59,39 @@ public final class PageDslRenderContext {
         return new PageDslRenderContext(moduleKey, pageKey, document, parameters, new LinkedHashMap<>());
     }
 
-    /** Returns the owning module key. */
+    /**
+     * 返回所属模块键。
+     *
+     * @return 模块键
+     */
     public String moduleKey() {
         return moduleKey;
     }
 
-    /** Returns the page key. */
+    /**
+     * 返回页面键。
+     *
+     * @return 页面键
+     */
     public String pageKey() {
         return pageKey;
     }
 
-    /** Returns the current working page DSL document. */
+    /**
+     * 返回当前工作页面 DSL 文档。
+     *
+     * @return 页面 DSL 文档
+     */
     public PageDsl document() {
         return document;
     }
 
     /**
-     * Returns a context view with a replaced working document.
+     * 返回替换了工作文档的上下文视图。
      *
-     * @param document next working document
-     * @return context for the next filter step
+     * @param document 下一工作文档
+     * @return 供下一过滤器步骤使用的上下文
+     * @throws com.innospots.nexus.base.exception.NexusException 文档为 null 时
      */
     public PageDslRenderContext withDocument(PageDsl document) {
         if (document == null) {
@@ -85,17 +102,21 @@ public final class PageDslRenderContext {
         return new PageDslRenderContext(moduleKey, pageKey, document, parameters, attributes);
     }
 
-    /** Returns an immutable view of request parameters. */
+    /**
+     * 返回请求参数的不可变视图。
+     *
+     * @return 请求参数
+     */
     public Map<String, Object> parameters() {
         return parameters;
     }
 
     /**
-     * Stores one attribute for downstream filters in the same chain execution.
+     * 为同一链执行中的下游过滤器存储一个属性。
      *
-     * @param key attribute key
-     * @param value attribute value
-     * @return this context for fluent chaining
+     * @param key 属性键
+     * @param value 属性值
+     * @return 本上下文，支持链式调用
      */
     public PageDslRenderContext attribute(String key, Object value) {
         if (key != null) {
@@ -104,12 +125,21 @@ public final class PageDslRenderContext {
         return this;
     }
 
-    /** Returns the attribute value, or {@code null} when absent. */
+    /**
+     * 返回属性值；不存在时返回 {@code null}。
+     *
+     * @param key 属性键
+     * @return 属性值
+     */
     public Object attribute(String key) {
         return attributes.get(key);
     }
 
-    /** Returns an immutable view of chain attributes. */
+    /**
+     * 返回链属性的不可变视图。
+     *
+     * @return 链属性
+     */
     public Map<String, Object> attributes() {
         return Map.copyOf(attributes);
     }

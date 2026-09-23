@@ -1,4 +1,4 @@
-# Console Plugin Catalog and Navigation Design
+# Console 插件 Catalog 与 Navigation 设计
 
 ## 1. 文档定位
 

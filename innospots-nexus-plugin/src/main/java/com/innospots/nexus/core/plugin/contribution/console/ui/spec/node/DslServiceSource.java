@@ -9,7 +9,10 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Service-backed dynamic DSL source.
+ * 服务支持的动态 DSL 源。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @Getter
 @Setter

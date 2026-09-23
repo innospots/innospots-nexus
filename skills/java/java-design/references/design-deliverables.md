@@ -142,11 +142,23 @@ public record XxxCreateRequest(...) {}
 
 引用或内嵌 test-scope 清单（契约测试 + 行为单测 + 不测范围）。
 
-## 11. 架构约束自检
+## 11. AGENTS 对齐
+
+按 [`agents-template.md`](../../java-reference/references/agents-template.md)「设计文档中的 AGENTS 对齐节」填写；
+若持久改变模块边界，须同步规划根 `AGENTS.md` 增补（由 `java:project` 或单独 PR 执行）。
+
+## 12. 不建什么（防过度设计）
+
+对照 [code-quality-constraints.md](../../java-reference/references/code-quality-constraints.md)：
+
+- 明确**不引入**的接口、事件、Maven 模块、第三方依赖、双轨 API、Utils/adapter 层及理由
+- 若存在临时兼容，写删除里程碑与调用方迁移范围
+
+## 13. 架构约束自检
 
 对照 quick-constraints 与 AGENTS.md 模块职责的勾选清单。
 
-## 12. 开放问题
+## 14. 开放问题
 
 未决项与决策截止；已闭合项移到「已确认决策」。
 ```
@@ -250,7 +262,6 @@ develop 不得因章节标题不同而遗漏契约。
   `npx skills use "https://github.com/mattpocock/skills" --skill "grill-me"`）。
 - **L2 / L3** 或架构触发项：在文档草案阶段完成 grill-me，结论写入 §12 或 ADR。
 - grill-me 产出的是**双方确认的设计树**，应沉淀到上述文档或 L0 块，而不是只留在聊天记录。
-- 会话技巧与落盘格式见 [`docs/grill-me-best-practices.md`](../../../../docs/grill-me-best-practices.md)。
 
 ---
 

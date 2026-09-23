@@ -138,8 +138,8 @@ mvn dependency:analyze
 - [ ] 未在中立库模块引入 Spring/Quarkus starter
 - [ ] kernel ↔ platform 无互依
 - [ ] 仅创建包根，未预建领域 `service`/`event` 空树
-- [ ] 若模块职责变化，已评估是否更新 `AGENTS.md`（须单独说明）
-- [ ] 下一步已明确：`java:design`（非直接 develop）
+- [ ] 若模块职责变化，已按 [agents-template.md](../../java-reference/references/agents-template.md) 增补根 `AGENTS.md`（或 PR 说明为何不修订）
+- [ ] 下一步已明确：`java:design`（非直接 develop）；design 完成后 `java:check` 含 AGENTS 合规
 
 全量 L0–L5 由 `java:check` 在 develop 完成后执行。
 
@@ -164,6 +164,7 @@ mvn dependency:analyze
 | 依赖引用与可运行应用 | [dependency-conventions.md](dependency-conventions.md) |
 | parent/BOM/插件/POM 模板 | [build-config.md](build-config.md) |
 | 模块职责与包结构 | [module-layout.md](module-layout.md) |
+| AGENTS 增补 | [agents-template.md](../../java-reference/references/agents-template.md) |
 | 领域包（非 Maven 模块） | [package-structure.md](../../java-reference/references/package-structure.md) |
 | 实现交付物 | [develop-deliverables.md](../../java-develop/references/develop-deliverables.md) |
 | Spring 依赖边界 | [spring-dependencies.md](../../java-spring/references/spring-dependencies.md) |

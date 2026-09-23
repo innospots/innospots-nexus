@@ -10,8 +10,10 @@ import com.innospots.nexus.core.plugin.contribution.console.ui.spec.loader.PageD
 import java.util.Map;
 
 /**
- * Default {@link PageDslEndpoint} that loads a classpath page DSL document and
- * runs it through a configured filter chain.
+ * 默认 {@link PageDslEndpoint} 实现：从 classpath 加载页面 DSL 文档，并通过已配置的过滤器链处理。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class DefaultPageDslEndpoint implements PageDslEndpoint {
 
@@ -19,10 +21,10 @@ public final class DefaultPageDslEndpoint implements PageDslEndpoint {
     private final PageDslFilterChain filterChain;
 
     /**
-     * Creates an endpoint with the supplied loader and filter chain.
+     * 使用提供的加载器与过滤器链创建端点。
      *
-     * @param loader page DSL loader
-     * @param filterChain ordered render-time filters
+     * @param loader 页面 DSL 加载器
+     * @param filterChain 有序渲染时过滤器
      */
     public DefaultPageDslEndpoint(PageDslLoader loader, PageDslFilterChain filterChain) {
         if (loader == null) {

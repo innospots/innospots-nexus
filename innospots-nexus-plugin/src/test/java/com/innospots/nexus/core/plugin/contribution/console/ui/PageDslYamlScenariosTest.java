@@ -28,10 +28,11 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * End-to-end verification of the canonical {@code customer-list.yaml} fixture.
+ * 对规范 {@code customer-list.yaml} 夹具的端到端验证。
  *
- * <p>Covers parser, validator, loader, filter chain, and endpoint integration for a
- * representative full Pactor page document.</p>
+ * <p>覆盖代表性完整 Pactor 页面文档的解析器、校验器、加载器、过滤器链与端点集成。</p>
+ * @author Smars
+ * @date 2026/09/13
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class PageDslYamlScenariosTest {

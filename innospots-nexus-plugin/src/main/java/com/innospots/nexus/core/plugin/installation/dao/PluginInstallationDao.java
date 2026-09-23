@@ -7,7 +7,11 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.innospots.nexus.core.plugin.installation.domain.entity.PluginInstallationEntity;
 import org.apache.ibatis.annotations.Mapper;
 
-/** 只访问 nx_plugin_installation 单表的 DAO。 */
+/**
+ * 只访问 nx_plugin_installation 单表的 DAO。
+ * @author Smars
+ * @date 2026/09/13
+ */
 @Mapper
 public interface PluginInstallationDao extends BaseMapper<PluginInstallationEntity> {
 

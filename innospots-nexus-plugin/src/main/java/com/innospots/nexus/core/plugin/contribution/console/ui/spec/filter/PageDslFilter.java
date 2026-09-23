@@ -3,29 +3,30 @@ package com.innospots.nexus.core.plugin.contribution.console.ui.spec.filter;
 import com.innospots.nexus.core.plugin.contribution.console.ui.spec.PageDsl;
 
 /**
- * Transforms a page DSL document during render-time preparation.
+ * 在渲染时准备阶段转换页面 DSL 文档。
  *
- * <p>Implementations must return a non-null document. Filters may mutate the working document
- * in place when the transformation is scoped to the current request.</p>
+ * <p>实现必须返回非 null 文档。当转换限定于当前请求时，过滤器可就地修改工作文档。</p>
  *
  * @see PageDslFilterChain
  * @see PageDslRenderContext
+ * @author Smars
+ * @date 2026/09/13
  */
 @FunctionalInterface
 public interface PageDslFilter {
 
     /**
-     * Applies one transformation step and returns the document for the next filter.
+     * 应用一步转换，并返回供下一过滤器使用的文档。
      *
-     * @param context current render context
-     * @return transformed document; must not be {@code null}
+     * @param context 当前渲染上下文
+     * @return 转换后的文档；不得为 {@code null}
      */
     PageDsl filter(PageDslRenderContext context);
 
     /**
-     * Returns a stable identifier for logging and diagnostics.
+     * 返回用于日志与诊断的稳定标识符。
      *
-     * @return filter identifier
+     * @return 过滤器标识符
      */
     default String filterId() {
         return getClass().getSimpleName();

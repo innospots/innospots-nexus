@@ -17,6 +17,9 @@ import com.innospots.nexus.quarkus.plugin.config.PluginInstallationManagerHolder
 
 /**
  * 控制台 catalog / navigation / plugin REST 资源生产者。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @ApplicationScoped
 public class ConsoleResourceProducers {
@@ -28,6 +31,8 @@ public class ConsoleResourceProducers {
     private final AuthorizationSubjectResolver subjectResolver;
 
     /**
+     * 构造控制台 REST 资源生产者。
+     *
      * @param managerHolder           安装管理器持有器
      * @param catalogService          目录树服务
      * @param syncService             目录同步服务
@@ -48,18 +53,27 @@ public class ConsoleResourceProducers {
         this.subjectResolver = subjectResolver;
     }
 
+    /**
+     * 权限设置目录 REST 端点 Bean。
+     */
     @Produces
     @Dependent
     ConsoleCatalogEndpoint consoleCatalogEndpoint() {
         return new ConsoleCatalogEndpoint(catalogService, syncService);
     }
 
+    /**
+     * 导航菜单 REST 端点 Bean。
+     */
     @Produces
     @Dependent
     NavigationMenuEndpoint navigationMenuEndpoint() {
         return new NavigationMenuEndpoint(navigationMenuAssembler, subjectResolver);
     }
 
+    /**
+     * 插件管理 REST 端点 Bean（含启停后目录同步）。
+     */
     @Produces
     @Dependent
     PluginManagementEndpoint pluginManagementEndpoint() {
@@ -69,3 +83,4 @@ public class ConsoleResourceProducers {
                 syncService);
     }
 }
+

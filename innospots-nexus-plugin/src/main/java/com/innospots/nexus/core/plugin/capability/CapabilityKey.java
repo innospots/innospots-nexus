@@ -10,6 +10,8 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
  *
  * @param name 小写点分 Capability 名称
  * @param majorVersion 正整数形式的 API 主版本
+ * @author Smars
+ * @date 2026/09/13
  */
 public record CapabilityKey(String name, int majorVersion) {
 

@@ -1,6 +1,10 @@
 package com.innospots.nexus.core.plugin.installation.domain.enums;
 
-/** 插件定义在当前有效目录中的存在性。 */
+/**
+ * 插件定义在当前有效目录中的存在性。
+ * @author Smars
+ * @date 2026/09/13
+ */
 public enum PluginPresence {
 
     /** 定义在当前有效目录中可发现。 */

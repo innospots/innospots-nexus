@@ -170,7 +170,7 @@
 | 无版本冲突 | 依赖树中出现非 BOM 路径的版本覆盖 |
 | `base` 零中间件 | `base` 的 POM 出现数据库/框架依赖 |
 | `core` 不绑 Spring Boot 自动配置 | `core` 出现自动配置类 |
-| 模块职责符合 `AGENTS.md` | 业务能力错放 |
+| 模块职责符合 `AGENTS.md` | 业务能力错放；新建模块未在根 AGENTS 增补职责 |
 | 新增依赖已选型评估 | 直接引入未评估的第三方库 |
 
 ---
@@ -215,6 +215,27 @@
 
 ---
 
+## O. 结构、冗余与过度设计
+
+对照 `java:reference` → [code-quality-constraints.md](../../java-reference/references/code-quality-constraints.md)。
+
+| 检查项 | 不合格信号 |
+|--------|-----------|
+| diff 规模合理 | 行为变化小却新增/改动大量文件或行数，且无结构说明 |
+| 一概念一 owner | 同义校验/查询/映射散落在 endpoint、service、operator 多处 |
+| 无多余转发层 | 仅 `return delegate.foo()` 的 service；endpoint 内大段业务 |
+| 接口有真实边界 | 单实现 `XxxImpl`；接口仅为 Mockito |
+| 无 wrapper 堆叠 | 对 base/core/框架 API 再包一层无语义 `Adapter`/`Facade` |
+| 无长期双轨 | 旧 endpoint/方法/状态码与新实现并存且无迁移与删除计划 |
+| 无投机分层 | 空 `event`/`model`/`service` 包；未消费的事件类型与配置键 |
+| 无 Utils 垃圾桶 | 新 `*Util`/`*Common`/`*Helper` 承担本属 operator/service 的职责 |
+| 无无效/死代码 | 注释掉的大段实现；明显无引用的 public 类型未经过引用确认就删/留 |
+| 注释与噪声 | 复述代码的 Javadoc/行内注释；AI 生成的废话块 |
+| 重构守行为 | 重构 diff 中夹带新功能；为通过检查削弱断言 |
+| 命名不掩盖设计 | `process`/`handle`/`execute`/`Manager` 当万能名 |
+
+---
+
 ## 判定与输出
 
 | 判定 | 标准 |
@@ -223,6 +244,7 @@
 | 有条件通过 | 存在警告项但无阻塞项，且遗留项已明确责任与时限 |
 | 不通过 | 存在任一阻塞项，或 L0–L4 任一命令失败 |
 
-阻塞项包括：红线违反、编译/测试失败、安全泄露、依赖方向错误、兼容面无方案改动。
+阻塞项包括：红线违反、编译/测试失败、安全泄露、依赖方向错误、兼容面无方案改动、
+**AGENTS 结构缺失或与 POM/代码边界冲突**（见 [agents-compliance-checklist.md](agents-compliance-checklist.md)）。
 
 每个问题输出必须包含：级别、`path:line`、问题描述、修正建议。

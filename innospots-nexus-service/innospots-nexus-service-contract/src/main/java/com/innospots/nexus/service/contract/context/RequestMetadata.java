@@ -10,14 +10,14 @@ import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.base.util.Checks;
 
 /**
- * Transport request metadata. Header names are lower-cased and values are copied.
+ * 传输层请求元数据。请求头名称小写化，值被复制。
  *
- * @param method        HTTP or protocol method
- * @param path          request path
- * @param routeTemplate matched route template, empty before matching
- * @param headers       allowed headers with lowercase names
- * @param remoteAddress caller address
- * @param clientId      optional client identifier
+ * @param method        HTTP 或协议方法
+ * @param path          请求路径
+ * @param routeTemplate 匹配的路由模板，匹配前为空
+ * @param headers       允许的小写名称请求头
+ * @param remoteAddress 调用方地址
+ * @param clientId      可选客户端标识
  * @author Smars
  * @date 2026/09/13
  * @see ServiceContext

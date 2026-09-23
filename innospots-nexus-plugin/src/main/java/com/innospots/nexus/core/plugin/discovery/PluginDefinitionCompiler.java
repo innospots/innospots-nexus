@@ -29,7 +29,11 @@ import com.innospots.nexus.core.plugin.declaration.PluginManifest;
 import com.innospots.nexus.core.plugin.declaration.PluginSource;
 import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
-/** 将 YAML 纯数据模型编译为无副作用的运行时 PluginDefinition。 */
+/**
+ * 将 YAML 纯数据模型编译为无副作用的运行时 PluginDefinition。
+ * @author Smars
+ * @date 2026/09/13
+ */
 public final class PluginDefinitionCompiler {
 
     private final CapabilityTypeRegistry.Builder capabilityTypes;

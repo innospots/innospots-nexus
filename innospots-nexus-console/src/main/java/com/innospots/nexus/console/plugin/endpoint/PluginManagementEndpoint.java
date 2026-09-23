@@ -19,7 +19,12 @@ import com.innospots.nexus.core.plugin.installation.domain.model.PluginManagemen
 import com.innospots.nexus.core.plugin.installation.service.PluginInstallationManager;
 import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
-/** 管理端插件查询、安装、启停和失败重试接口；不提供 JAR 删除或卸载操作。 */
+/**
+ * 管理端插件查询、安装、启停和失败重试接口；不提供 JAR 删除或卸载操作。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ */
 @Path("/console/plugins")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -29,12 +34,16 @@ public final class PluginManagementEndpoint {
     private final PluginManagementConverter converter;
     private final ConsoleCatalogSyncService syncService;
 
-    /** 创建只依赖 Core 安装管理器的插件管理接口。 */
+    /**
+     * 创建只依赖 Core 安装管理器的插件管理接口。
+     */
     public PluginManagementEndpoint(PluginInstallationManager manager) {
         this(manager, PluginManagementConverter.INSTANCE, null);
     }
 
-    /** 创建可注入转换器的插件管理接口，便于无数据库测试。 */
+    /**
+     * 创建可注入转换器的插件管理接口，便于无数据库测试。
+     */
     public PluginManagementEndpoint(
             PluginInstallationManager manager,
             PluginManagementConverter converter
@@ -42,7 +51,9 @@ public final class PluginManagementEndpoint {
         this(manager, converter, null);
     }
 
-    /** 创建含目录同步能力的插件管理接口。 */
+    /**
+     * 创建含目录同步能力的插件管理接口。
+     */
     public PluginManagementEndpoint(
             PluginInstallationManager manager,
             PluginManagementConverter converter,
@@ -57,13 +68,17 @@ public final class PluginManagementEndpoint {
         this.syncService = syncService;
     }
 
-    /** 查询全部插件聚合视图。 */
+    /**
+     * 查询全部插件聚合视图。
+     */
     @GET
     public R<List<PluginManagementVo>> list() {
         return R.ok(manager.plugins().stream().map(converter::toVo).toList());
     }
 
-    /** 查询单个插件聚合视图。 */
+    /**
+     * 查询单个插件聚合视图。
+     */
     @GET
     @Path("/{pluginId}")
     public R<PluginManagementVo> get(@PathParam("pluginId") String pluginId) {
@@ -72,14 +87,18 @@ public final class PluginManagementEndpoint {
                         "plugin was not found: " + pluginId)));
     }
 
-    /** 安装并启动插件。 */
+    /**
+     * 安装并启动插件。
+     */
     @POST
     @Path("/{pluginId}/install")
     public R<PluginManagementVo> install(@PathParam("pluginId") String pluginId) {
         return R.ok(converter.toVo(manager.installAndStart(pluginId)));
     }
 
-    /** 启用已安装插件。 */
+    /**
+     * 启用已安装插件。
+     */
     @POST
     @Path("/{pluginId}/enable")
     public R<PluginManagementVo> enable(@PathParam("pluginId") String pluginId) {
@@ -88,7 +107,9 @@ public final class PluginManagementEndpoint {
         return R.ok(result);
     }
 
-    /** 停用插件但保留安装事实。 */
+    /**
+     * 停用插件但保留安装事实。
+     */
     @POST
     @Path("/{pluginId}/disable")
     public R<PluginManagementVo> disable(@PathParam("pluginId") String pluginId) {
@@ -97,7 +118,9 @@ public final class PluginManagementEndpoint {
         return R.ok(result);
     }
 
-    /** 重试处于 FAILED 的插件。 */
+    /**
+     * 重试处于 FAILED 的插件。
+     */
     @POST
     @Path("/{pluginId}/retry")
     public R<PluginManagementVo> retry(@PathParam("pluginId") String pluginId) {

@@ -14,8 +14,11 @@ import lombok.Setter;
 import com.innospots.nexus.core.persistence.entity.BaseEntity;
 
 /**
- * Persistence entity for a registered service instance.
- * Platform-wide infrastructure data, not tenant-scoped.
+ * 已注册服务实例的持久化实体；平台级基础设施数据，不按租户隔离。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @see BaseEntity
  */
 @Getter
 @Setter
@@ -29,9 +32,7 @@ public class ServiceRegistryEntity extends BaseEntity {
 
     public static final String TABLE_NAME = "nx_service_registry";
 
-    /**
-     * Service registry identifier.
-     */
+    /** 服务注册标识。 */
     @TableId(type = IdType.ASSIGN_UUID)
     @Id
     @Column(length = 32, nullable = false)
@@ -42,58 +43,43 @@ public class ServiceRegistryEntity extends BaseEntity {
         return "srv";
     }
 
-    /**
-     * Logical service type name.
-     */
+    /** 逻辑服务类型名称。 */
     @Column(length = 128)
     private String serviceName;
 
-    /**
-     * Unique instance identifier.
-     */
+    /** 唯一实例标识。 */
     @Column(length = 128)
     private String instanceId;
 
-    /**
-     * Host address.
-     */
+    /** 主机地址。 */
     @Column(length = 256)
     private String host;
 
-    /**
-     * Listen port.
-     */
+    /** 监听端口。 */
     @Column
     private Integer port;
 
-    /**
-     * Service lifecycle status.
-     */
+    /** 服务生命周期状态。 */
     @Column(length = 32)
     private String serviceStatus;
 
     /**
-     * Cluster role of this service instance. Not named {@code role} because it
-     * is a SQL reserved word in some dialects.
+     * 该服务实例的集群角色。未命名为 {@code role}，因部分 SQL 方言中为保留字。
      */
     @Column(length = 32)
     private String serviceRole;
 
     /**
-     * Service group name. Not named {@code group} because it is a SQL reserved word.
+     * 服务分组名称。未命名为 {@code group}，因 SQL 保留字。
      */
     @Column(length = 64)
     private String groupName;
 
-    /**
-     * Serialized tags.
-     */
+    /** 序列化后的标签。 */
     @Column(length = 512)
     private String tags;
 
-    /**
-     * Serialized runtime metrics.
-     */
+    /** 序列化后的运行时指标。 */
     @Column(length = 1024)
     private String metrics;
 }

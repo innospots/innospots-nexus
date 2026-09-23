@@ -13,6 +13,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
+import lombok.RequiredArgsConstructor;
 
 import com.innospots.nexus.base.domain.enums.BasicStatus;
 import com.innospots.nexus.base.domain.response.PageResult;
@@ -23,88 +24,62 @@ import com.innospots.nexus.console.role.domain.request.RoleStatusUpdateRequest;
 import com.innospots.nexus.console.role.domain.request.RoleUpdateRequest;
 import com.innospots.nexus.console.role.domain.vo.RoleOptionVo;
 import com.innospots.nexus.console.role.domain.vo.RoleVo;
+import com.innospots.nexus.console.role.service.RoleService;
 
 /**
- * Management-console contract for role lifecycle and role lookup operations.
+ * 角色生命周期与查询 REST 资源，可直接继承以扩展路由或响应包装。
  */
 @Path("/console/roles")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public interface RoleEndpoint {
+@RequiredArgsConstructor
+public class RoleEndpoint {
 
-    /**
-     * Pages project roles using management filters.
-     *
-     * @param request role page query
-     * @return matching role page
-     */
+    private final RoleService roleService;
+
     @GET
-    R<PageResult<RoleVo>> pageRoles(@BeanParam RolePageRequest request);
+    public R<PageResult<RoleVo>> pageRoles(@BeanParam RolePageRequest request) {
+        return R.ok(roleService.pageRoles(request));
+    }
 
-    /**
-     * Returns one role.
-     *
-     * @param roleId role identifier
-     * @return role details
-     */
     @GET
     @Path("/{roleId}")
-    R<RoleVo> getRole(@PathParam("roleId") String roleId);
+    public R<RoleVo> getRole(@PathParam("roleId") String roleId) {
+        return R.ok(roleService.getRole(roleId));
+    }
 
-    /**
-     * Creates a project role.
-     *
-     * @param request role creation data
-     * @return created role
-     */
     @POST
-    R<RoleVo> createRole(RoleCreateRequest request);
+    public R<RoleVo> createRole(RoleCreateRequest request) {
+        return R.ok(roleService.createRole(request));
+    }
 
-    /**
-     * Updates mutable role profile fields.
-     *
-     * @param roleId  role identifier
-     * @param request role update data
-     * @return updated role
-     */
     @PUT
     @Path("/{roleId}")
-    R<RoleVo> updateRole(
+    public R<RoleVo> updateRole(
             @PathParam("roleId") String roleId,
-            RoleUpdateRequest request
-    );
+            RoleUpdateRequest request) {
+        return R.ok(roleService.updateRole(roleId, request));
+    }
 
-    /**
-     * Enables or disables a role.
-     *
-     * @param roleId  role identifier
-     * @param request target status
-     * @return empty success response
-     */
     @PUT
     @Path("/{roleId}/status")
-    R<Void> updateRoleStatus(
+    public R<Void> updateRoleStatus(
             @PathParam("roleId") String roleId,
-            RoleStatusUpdateRequest request
-    );
+            RoleStatusUpdateRequest request) {
+        roleService.updateRoleStatus(roleId, request);
+        return R.ok();
+    }
 
-    /**
-     * Deletes a non-protected role.
-     *
-     * @param roleId role identifier
-     * @return empty success response
-     */
     @DELETE
     @Path("/{roleId}")
-    R<Void> deleteRole(@PathParam("roleId") String roleId);
+    public R<Void> deleteRole(@PathParam("roleId") String roleId) {
+        roleService.deleteRole(roleId);
+        return R.ok();
+    }
 
-    /**
-     * Lists compact role options for assignment controls.
-     *
-     * @param status optional status filter
-     * @return role options
-     */
     @GET
     @Path("/options")
-    R<List<RoleOptionVo>> listRoleOptions(@QueryParam("status") BasicStatus status);
+    public R<List<RoleOptionVo>> listRoleOptions(@QueryParam("status") BasicStatus status) {
+        return R.ok(roleService.listRoleOptions(status));
+    }
 }

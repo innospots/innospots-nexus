@@ -9,6 +9,8 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
  *
  * @param owner 声明该 Contribution 的插件 Provider 身份
  * @param contribution 已解码的 Contribution 值
+ * @author Smars
+ * @date 2026/09/13
  */
 public record PluginContributionEntry<T extends PluginContribution>(ProviderRef owner, T contribution) {
 

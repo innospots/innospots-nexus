@@ -11,6 +11,8 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
  * @param name 小写点分类型名称
  * @param majorVersion 正整数形式的类型主版本
  * @param <T> 该类型对应的 Contribution 接口
+ * @author Smars
+ * @date 2026/09/13
  */
 public record PluginContributionType<T extends PluginContribution>(
         String name,

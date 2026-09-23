@@ -24,7 +24,11 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** 通过 Java SPI 和全部 plugin.yaml 资源发现插件，并统一编译为 Plugin。 */
+/**
+ * 通过 Java SPI 和全部 plugin.yaml 资源发现插件，并统一编译为 Plugin。
+ * @author Smars
+ * @date 2026/09/13
+ */
 public final class ClasspathPluginDiscovery {
 
     private static final Logger logger = LoggerFactory.getLogger(ClasspathPluginDiscovery.class);

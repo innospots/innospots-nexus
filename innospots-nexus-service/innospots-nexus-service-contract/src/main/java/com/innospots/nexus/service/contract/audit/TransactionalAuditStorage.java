@@ -1,7 +1,7 @@
 package com.innospots.nexus.service.contract.audit;
 
 /**
- * Audit storage that participates in the host's current transaction.
+ * 参与主机当前事务的审计存储。
  *
  * @author Smars
  * @date 2026/09/13
@@ -11,9 +11,9 @@ package com.innospots.nexus.service.contract.audit;
 public interface TransactionalAuditStorage {
 
     /**
-     * Appends {@code event} in the current transaction before business commit.
+     * 在业务提交前于当前事务中追加 {@code event}。
      *
-     * @param event audit event
+     * @param event 审计事件
      */
     void appendInCurrentTransaction(AuditEvent event);
 }

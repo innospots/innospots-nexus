@@ -25,10 +25,8 @@ class UserEntityContractsTest {
     @Test
     void userEntitiesExposeTenantRealmPersistenceTables() {
         assertPersistenceTable(UserEntity.class, "nx_tenant_user");
-        assertPersistenceTable(UserPasswordCredentialEntity.class, "nx_tenant_user_password");
         assertPersistenceTable(UserOauthIdentityEntity.class, "nx_tenant_user_oauth");
         assertThat(new UserEntity().idPrefix()).isEqualTo("tus");
-        assertThat(new UserPasswordCredentialEntity().idPrefix()).isEqualTo("tpc");
         assertThat(new UserOauthIdentityEntity().idPrefix()).isEqualTo("toi");
     }
 
@@ -39,8 +37,6 @@ class UserEntityContractsTest {
         assertIndex(UserEntity.class, "uk_nx_tenant_user_mobile", "mobile", true);
         assertIndex(UserEntity.class, "idx_nx_tenant_user_status", "status", false);
 
-        assertIndex(UserPasswordCredentialEntity.class, "uk_nx_tenant_user_password_user", "tenant_user_id", true);
-
         assertIndex(UserOauthIdentityEntity.class, "idx_nx_tenant_user_oauth_user", "tenant_user_id", false);
         assertIndex(UserOauthIdentityEntity.class, "uk_nx_tenant_user_oauth_provider_subject",
                 "provider, provider_subject", true);
@@ -49,7 +45,6 @@ class UserEntityContractsTest {
     @Test
     void userEntitiesInheritCoreBaseEntityForAuditFields() {
         assertThat(UserEntity.class.getSuperclass()).isEqualTo(BaseEntity.class);
-        assertThat(UserPasswordCredentialEntity.class.getSuperclass()).isEqualTo(BaseEntity.class);
         assertThat(UserOauthIdentityEntity.class.getSuperclass()).isEqualTo(BaseEntity.class);
     }
 
@@ -79,19 +74,6 @@ class UserEntityContractsTest {
     }
 
     @Test
-    void passwordCredentialEntityStoresLocalPasswordMaterialSeparately() throws NoSuchFieldException {
-        assertPersistenceId(UserPasswordCredentialEntity.class.getDeclaredField("credentialId"), IdType.ASSIGN_UUID);
-
-        assertField(UserPasswordCredentialEntity.class, "credentialId", String.class, 32, false);
-        assertField(UserPasswordCredentialEntity.class, "tenantUserId", String.class, 32, false);
-        assertField(UserPasswordCredentialEntity.class, "passwordHash", String.class, 256, false);
-        assertField(UserPasswordCredentialEntity.class, "passwordSalt", String.class, 128, false);
-        assertField(UserPasswordCredentialEntity.class, "passwordAlgorithm", String.class, 64, false);
-        assertField(UserPasswordCredentialEntity.class, "passwordVersion", Integer.class, 255, false);
-        assertField(UserPasswordCredentialEntity.class, "expiredAt", LocalDateTime.class, 255, true);
-    }
-
-    @Test
     void oauthIdentityEntityAllowsExternalRegistrationWithoutLocalPassword() throws NoSuchFieldException {
         assertPersistenceId(UserOauthIdentityEntity.class.getDeclaredField("identityId"), IdType.ASSIGN_UUID);
 
@@ -113,20 +95,12 @@ class UserEntityContractsTest {
         user.setRegisterSource(UserRegisterSource.PASSWORD.name());
         user.setStatus(UserStatus.ACTIVE.name());
 
-        UserPasswordCredentialEntity password = new UserPasswordCredentialEntity();
-        password.setTenantUserId(user.getTenantUserId());
-        password.setPasswordHash("hash");
-        password.setPasswordSalt("salt");
-        password.setPasswordAlgorithm("argon2id");
-        password.setPasswordVersion(1);
-
         UserOauthIdentityEntity oauth = new UserOauthIdentityEntity();
         oauth.setTenantUserId(user.getTenantUserId());
         oauth.setProvider("github");
         oauth.setProviderSubject("gh-1001");
 
         assertThat(user.getUserName()).isEqualTo("alice");
-        assertThat(password.getPasswordAlgorithm()).isEqualTo("argon2id");
         assertThat(oauth.getProviderSubject()).isEqualTo("gh-1001");
     }
 

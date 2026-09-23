@@ -19,7 +19,11 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Core 运行时工厂，集中组装唯一的 PluginManager，不访问数据库或 Console。 */
+/**
+ * Core 运行时工厂，集中组装唯一的 PluginManager，不访问数据库或 Console。
+ * @author Smars
+ * @date 2026/09/13
+ */
 public final class PluginRuntimeFactory {
 
     private static final Logger logger = LoggerFactory.getLogger(PluginRuntimeFactory.class);

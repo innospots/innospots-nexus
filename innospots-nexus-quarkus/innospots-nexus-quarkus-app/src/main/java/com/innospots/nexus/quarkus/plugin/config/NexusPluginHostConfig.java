@@ -12,6 +12,9 @@ import io.smallrye.config.WithName;
  *
  * <p>绑定 {@code nexus.plugin.*} 与 {@code nexus.plugins.*}。
  * 插件实例键 {@code plugins.*} 由 {@link PluginHostConfigBinder} 单独汇总。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @ConfigMapping(prefix = "nexus")
 public interface NexusPluginHostConfig {
@@ -48,3 +51,4 @@ public interface NexusPluginHostConfig {
         Optional<List<String>> disabled();
     }
 }
+

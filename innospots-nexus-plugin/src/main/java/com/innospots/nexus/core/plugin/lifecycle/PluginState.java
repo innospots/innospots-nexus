@@ -4,6 +4,8 @@ package com.innospots.nexus.core.plugin.lifecycle;
  * 对外暴露的插件粗粒度生命周期状态。
  *
  * @see PluginRuntimeInfo
+ * @author Smars
+ * @date 2026/09/13
  */
 public enum PluginState {
 

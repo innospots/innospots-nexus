@@ -16,7 +16,12 @@ import com.innospots.nexus.console.catalog.domain.model.CatalogSyncResult;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogSyncService;
 import com.innospots.nexus.console.permission.domain.vo.PermissionResourceSyncVo;
 
-/** 权限设置页目录树与显式同步接口。 */
+/**
+ * 权限设置页目录树与显式同步接口。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ */
 @Path("/console/catalog")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -25,7 +30,9 @@ public final class ConsoleCatalogEndpoint {
     private final ConsoleCatalogService catalogService;
     private final ConsoleCatalogSyncService syncService;
 
-    /** 创建目录接口。 */
+    /**
+     * 创建目录接口。
+     */
     public ConsoleCatalogEndpoint(
             ConsoleCatalogService catalogService,
             ConsoleCatalogSyncService syncService
@@ -34,14 +41,18 @@ public final class ConsoleCatalogEndpoint {
         this.syncService = syncService;
     }
 
-    /** 返回已启用的插件目录资源树。 */
+    /**
+     * 返回已启用的插件目录资源树。
+     */
     @GET
     @Path("/tree")
     public R<List<CatalogNodeVo>> tree() {
         return R.ok(catalogService.tree());
     }
 
-    /** 将 ACTIVE 插件贡献同步到权限目录。 */
+    /**
+     * 将 ACTIVE 插件贡献同步到权限目录。
+     */
     @POST
     @Path("/sync")
     public R<PermissionResourceSyncVo> sync() {

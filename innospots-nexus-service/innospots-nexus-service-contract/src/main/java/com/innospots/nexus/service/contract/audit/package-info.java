@@ -1,5 +1,5 @@
 /**
- * Technical audit event and storage SPI. Business audit query remains in kernel/platform.
+ * 技术审计事件与存储 SPI。业务审计查询仍归属 kernel/platform。
  *
  * @author Smars
  * @date 2026/09/13

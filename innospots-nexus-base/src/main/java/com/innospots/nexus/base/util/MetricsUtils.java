@@ -16,9 +16,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 /**
- * Micrometer-based metrics facade. Provides counters, timers, and
- * gauges with automatic name normalization (lowercase, underscore-separated).
- * Supports success/failure/retry counting and duration recording.
+ * 基于 Micrometer 的指标门面，提供计数器、计时器与仪表盘，
+ * 并自动规范化指标名称（小写、下划线分隔）。支持成功/失败/重试计数与耗时记录。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @see MetricsSnapshot
  */
 public final class MetricsUtils {
 
@@ -31,22 +34,50 @@ public final class MetricsUtils {
     private MetricsUtils() {
     }
 
+    /**
+     * 初始化全局指标注册表。
+     *
+     * @param registry Micrometer 注册表
+     */
     public static void initialize(MeterRegistry registry) {
         meterRegistry = Objects.requireNonNull(registry, "MeterRegistry must not be null");
     }
 
+    /**
+     * 返回当前全局指标注册表。
+     *
+     * @return 指标注册表
+     */
     public static MeterRegistry registry() {
         return meterRegistry;
     }
 
+    /**
+     * 将指定指标计数加一。
+     *
+     * @param name 指标名称
+     */
     public static void increment(String name) {
         increment(name, Map.of(), 1);
     }
 
+    /**
+     * 将带标签的指定指标计数加一。
+     *
+     * @param name 指标名称
+     * @param tags 标签映射
+     */
     public static void increment(String name, Map<String, String> tags) {
         increment(name, tags, 1);
     }
 
+    /**
+     * 将带标签的指定指标计数增加指定量。
+     *
+     * @param name   指标名称
+     * @param tags   标签映射
+     * @param amount 增量（负值按零处理）
+     */
     public static void increment(String name, Map<String, String> tags, long amount) {
         Counter.builder(normalizeName(name))
                 .tags(tags(tags))
@@ -54,10 +85,27 @@ public final class MetricsUtils {
                 .increment(Math.max(0, amount));
     }
 
+    /**
+     * 执行可调用任务并记录耗时。
+     *
+     * @param name 指标名称
+     * @param task 待执行任务
+     * @param <T>  返回值类型
+     * @return 任务返回值
+     */
     public static <T> T record(String name, Callable<T> task) {
         return record(name, Map.of(), task);
     }
 
+    /**
+     * 执行带标签的可调用任务并记录耗时。
+     *
+     * @param name 指标名称
+     * @param tags 标签映射
+     * @param task 待执行任务
+     * @param <T>  返回值类型
+     * @return 任务返回值
+     */
     public static <T> T record(String name, Map<String, String> tags, Callable<T> task) {
         Timer timer = timer(name, tags);
         try {
@@ -69,18 +117,48 @@ public final class MetricsUtils {
         }
     }
 
+    /**
+     * 执行 Runnable 任务并记录耗时。
+     *
+     * @param name 指标名称
+     * @param task 待执行任务
+     */
     public static void record(String name, Runnable task) {
         record(name, Map.of(), task);
     }
 
+    /**
+     * 执行带标签的 Runnable 任务并记录耗时。
+     *
+     * @param name 指标名称
+     * @param tags 标签映射
+     * @param task 待执行任务
+     */
     public static void record(String name, Map<String, String> tags, Runnable task) {
         timer(name, tags).record(task);
     }
 
+    /**
+     * 执行任务并同时记录耗时与成功/失败状态。
+     *
+     * @param name 指标名称
+     * @param task 待执行任务
+     * @param <T>  返回值类型
+     * @return 任务返回值
+     */
     public static <T> T recordWithStatus(String name, Callable<T> task) {
         return recordWithStatus(name, Map.of(), task);
     }
 
+    /**
+     * 执行带标签的任务并同时记录耗时与成功/失败状态。
+     *
+     * @param name 指标名称
+     * @param tags 标签映射
+     * @param task 待执行任务
+     * @param <T>  返回值类型
+     * @return 任务返回值
+     */
     public static <T> T recordWithStatus(String name, Map<String, String> tags, Callable<T> task) {
         try {
             T result = record(name, tags, task);
@@ -92,10 +170,23 @@ public final class MetricsUtils {
         }
     }
 
+    /**
+     * 执行 Runnable 任务并同时记录耗时与成功/失败状态。
+     *
+     * @param name 指标名称
+     * @param task 待执行任务
+     */
     public static void recordWithStatus(String name, Runnable task) {
         recordWithStatus(name, Map.of(), task);
     }
 
+    /**
+     * 执行带标签的 Runnable 任务并同时记录耗时与成功/失败状态。
+     *
+     * @param name 指标名称
+     * @param tags 标签映射
+     * @param task 待执行任务
+     */
     public static void recordWithStatus(String name, Map<String, String> tags, Runnable task) {
         recordWithStatus(name, tags, () -> {
             task.run();
@@ -103,36 +194,88 @@ public final class MetricsUtils {
         });
     }
 
+    /**
+     * 直接记录纳秒级耗时。
+     *
+     * @param name  指标名称
+     * @param tags  标签映射
+     * @param nanos 耗时（纳秒）
+     */
     public static void recordDuration(String name, Map<String, String> tags, long nanos) {
         timer(name, tags).record(Math.max(0, nanos), TimeUnit.NANOSECONDS);
     }
 
+    /**
+     * 直接记录 Duration 耗时。
+     *
+     * @param name     指标名称
+     * @param tags     标签映射
+     * @param duration 耗时，null 时按零处理
+     */
     public static void recordDuration(String name, Map<String, String> tags, Duration duration) {
         timer(name, tags).record(duration == null ? Duration.ZERO : duration);
     }
 
+    /**
+     * 记录成功次数。
+     *
+     * @param name 指标名称
+     * @param tags 标签映射
+     */
     public static void countSuccess(String name, Map<String, String> tags) {
         increment(normalizeName(name) + SUCCESS_SUFFIX, tags);
     }
 
+    /**
+     * 记录失败次数。
+     *
+     * @param name 指标名称
+     * @param tags 标签映射
+     */
     public static void countFailure(String name, Map<String, String> tags) {
         increment(normalizeName(name) + FAILURE_SUFFIX, tags);
     }
 
+    /**
+     * 记录重试次数。
+     *
+     * @param name 指标名称
+     * @param tags 标签映射
+     */
     public static void countRetry(String name, Map<String, String> tags) {
         increment(normalizeName(name) + RETRY_SUFFIX, tags);
     }
 
+    /**
+     * 注册仪表盘指标。
+     *
+     * @param name     指标名称
+     * @param tags     标签映射
+     * @param supplier 数值供应器
+     */
     public static void gauge(String name, Map<String, String> tags, Supplier<Number> supplier) {
         io.micrometer.core.instrument.Gauge.builder(normalizeName(name), supplier, MetricsUtils::gaugeValue)
                 .tags(tags(tags))
                 .register(meterRegistry);
     }
 
+    /**
+     * 获取指定指标的时点快照。
+     *
+     * @param name 指标名称
+     * @return 指标快照
+     */
     public static MetricsSnapshot snapshot(String name) {
         return snapshot(name, Map.of());
     }
 
+    /**
+     * 获取带标签指标的时点快照。
+     *
+     * @param name 指标名称
+     * @param tags 标签映射
+     * @return 指标快照
+     */
     public static MetricsSnapshot snapshot(String name, Map<String, String> tags) {
         String normalizedName = normalizeName(name);
         Map<String, String> normalizedTags = normalizeTags(tags);
@@ -144,10 +287,20 @@ public final class MetricsUtils {
         return new MetricsSnapshot(normalizedName, normalizedTags, counterCount + timerCount, totalNanos);
     }
 
+    /**
+     * 清空注册表中的所有指标。
+     */
     public static void clear() {
         meterRegistry.clear();
     }
 
+    /**
+     * 将指标名称规范化为小写下划线格式。
+     *
+     * @param name 原始名称
+     * @return 规范化后的名称
+     * @throws IllegalArgumentException 名称空白或无法规范化时
+     */
     public static String normalizeName(String name) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Metric name cannot be blank");

@@ -11,6 +11,9 @@ import com.innospots.nexus.core.plugin.bootstrap.PluginHostStartupTask;
 
 /**
  * Quarkus 启动编排 Bean 生产器。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @ApplicationScoped
 public class NexusStartupProducer {
@@ -45,3 +48,4 @@ public class NexusStartupProducer {
         return builder.build();
     }
 }
+

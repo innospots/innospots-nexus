@@ -42,6 +42,8 @@ import org.slf4j.LoggerFactory;
  *
  * <p>消费宿主已完成的全局校验目录；不在本类内执行 classpath 发现。管理操作通过短暂令牌串行化；
  * 插件生命周期代码不在该锁内执行。每个实例独立，关闭后不可复用。</p>
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class DefaultPluginManager implements PluginManager {
 

@@ -9,11 +9,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 /**
- * Template-method base class for background watchers.
- * <p>Runs a loop: {@link #check()} → {@link #execute()} → sleep, until
- * {@link #stop()} is called or the {@code runningCondition} supplier
- * returns false. The actual work is defined by subclasses via
- * {@link #execute()}.</p>
+ * 后台 Watcher 的模板方法基类。
+ * <p>循环执行 {@link #check()} → {@link #execute()} → 休眠，直至调用 {@link #stop()}
+ * 或 {@code runningCondition} 返回 {@code false}。具体工作由子类通过 {@link #execute()} 定义。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @see IWatcher
  */
 public abstract class AbstractWatcher implements IWatcher {
 
@@ -26,9 +28,9 @@ public abstract class AbstractWatcher implements IWatcher {
     private long startTimeMillis;
 
     /**
-     * @param name                watcher name for logging
-     * @param checkIntervalMillis sleep interval between cycles
-     * @param runningCondition    checked each cycle; loop exits when false
+     * @param name                Watcher 名称，用于日志
+     * @param checkIntervalMillis 周期间隔休眠时间（毫秒）
+     * @param runningCondition    每轮检查的运行条件；为 {@code false} 时退出循环
      */
     protected AbstractWatcher(String name, int checkIntervalMillis, Supplier<Boolean> runningCondition) {
         this.name = name;
@@ -47,8 +49,7 @@ public abstract class AbstractWatcher implements IWatcher {
     }
 
     /**
-     * Main execution loop: check → execute → sleep, repeating until
-     * stopped or the running condition returns false.
+     * 主执行循环：检查 → 执行 → 休眠，重复直至停止或运行条件为 {@code false}。
      */
     @Override
     public void run() {
@@ -62,7 +63,7 @@ public abstract class AbstractWatcher implements IWatcher {
                 if (check()) {
                     interval = execute();
                 }
-                // Fall back to default interval if execute() returns none
+                // execute() 未返回有效间隔时回退到默认值
                 if (interval <= 0) {
                     interval = checkIntervalMillis;
                 }
@@ -77,7 +78,7 @@ public abstract class AbstractWatcher implements IWatcher {
                     running = false;
                 }
             }
-            // Re-check condition after sleep in case it changed
+            // 休眠后重新检查条件，防止状态已变更
             running = runningCondition.get();
         }
 
@@ -85,7 +86,7 @@ public abstract class AbstractWatcher implements IWatcher {
         logger.info("Watcher {} stopped, uptime: {}", name, DateTimeUtils.consume(startTimeMillis));
     }
 
-    /** Sets the running flag to false; the loop will exit after the current cycle. */
+    /** 将运行标志设为 {@code false}；循环将在当前轮结束后退出。 */
     @Override
     public void stop() {
         running = false;

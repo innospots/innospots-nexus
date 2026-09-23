@@ -9,6 +9,9 @@ import org.eclipse.microprofile.config.Config;
  * 将 MicroProfile 配置中的插件键扁平化为 Core 宿主配置映射。
  *
  * @see com.innospots.nexus.core.plugin.runtime.PluginRuntimeConfig#hostConfig()
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class PluginHostConfigBinder {
 
@@ -37,3 +40,4 @@ public final class PluginHostConfigBinder {
         return Map.copyOf(hostConfig);
     }
 }
+

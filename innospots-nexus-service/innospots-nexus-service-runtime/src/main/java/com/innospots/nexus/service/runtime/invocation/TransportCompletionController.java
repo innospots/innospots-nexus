@@ -8,7 +8,7 @@ import com.innospots.nexus.service.contract.invocation.InvocationOutcome;
 import com.innospots.nexus.service.contract.invocation.TransportCompletion;
 
 /**
- * Completes transport-level outcome exactly once.
+ * 精确一次完成传输层结果。
  *
  * @author Smars
  * @date 2026/09/13
@@ -25,10 +25,10 @@ public final class TransportCompletionController implements TransportCompletion 
     }
 
     /**
-     * Completes the transport outcome when it has not already completed.
+     * 在尚未完成时完成传输结果。
      *
-     * @param outcome transport outcome
-     * @return {@code true} when this call completed the stage
+     * @param outcome 传输结果
+     * @return 本次调用完成阶段时为 {@code true}
      */
     public boolean complete(InvocationOutcome outcome) {
         Checks.notNull(outcome, "outcome");

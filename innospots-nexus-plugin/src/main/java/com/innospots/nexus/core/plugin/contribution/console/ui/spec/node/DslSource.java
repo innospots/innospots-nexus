@@ -8,7 +8,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Dynamic DSL source definition for {@link DslSourceRef}.
+ * {@link DslSourceRef} 的动态 DSL 源定义。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", visible = true)
 @JsonSubTypes({
@@ -18,9 +21,9 @@ import java.util.Map;
 public sealed interface DslSource permits DslServiceSource, DslHttpSource {
 
     /**
-     * Returns the source type discriminator.
+     * 返回源类型鉴别器。
      *
-     * @return source type
+     * @return 源类型
      */
     String getType();
 }

@@ -11,6 +11,8 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
  * 宿主显式注册的通用 Contribution Decoder 表。
  *
  * <p>构建后不可变，可在多个编译器或运行时实例间安全共享。</p>
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class PluginContributionDecoderRegistry {
 

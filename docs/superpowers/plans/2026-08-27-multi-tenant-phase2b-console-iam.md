@@ -1,25 +1,25 @@
-# Multi-Tenant Governance Phase 2b Implementation Plan
+# 多租户治理 Phase 2b 实施计划
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **面向 agent 工作者：** 必需子技能：使用 superpowers:executing-plans 按任务逐步实施本 plan。步骤使用 checkbox（`- [ ]`）语法跟踪进度。
 
-**Goal:** Move console-owned IAM (role/menu/permission) out of kernel, fix domain package layout, stop Group, and land AuthFacade plus platform SupportAccessGrant.
+**目标：** 将 console 拥有的 IAM（role/menu/permission）迁出 kernel，修正 domain 包布局，停用 Group，并落地 AuthFacade 与 platform SupportAccessGrant。
 
-**Architecture:** Console owns the role engine, menu catalog, permission catalog/grants, credential SPI, and token issuance. Kernel keeps tenant-user storage, membership, org, workspace, and extension-driven permission *sync* (uses console DAOs). Platform keeps ops users, tenant lifecycle, and support access. Kernel and platform never depend on each other.
+**架构：** Console 拥有 role engine、menu catalog、permission catalog/grants、credential SPI 与 token 签发。Kernel 保留 tenant-user 存储、membership、org、workspace，以及 extension 驱动的 permission *sync*（使用 console DAO）。Platform 保留 ops users、tenant lifecycle 与 support access。Kernel 与 platform 永不相互依赖。
 
-**Tech Stack:** Java 25, Maven, Jakarta Persistence + MyBatis-Plus, Jakarta REST, JUnit 5 + AssertJ, Lombok.
+**技术栈：** Java 25、Maven、Jakarta Persistence + MyBatis-Plus、Jakarta REST、JUnit 5 + AssertJ、Lombok。
 
-**Spec:** [docs/design/multi-tenant-governance-design.md](../../design/multi-tenant-governance-design.md) §6.8, §7, §11.3–11.4, §12 Phase 2.
+**规格：** [docs/design/multi-tenant-governance-design.md](../../design/multi-tenant-governance-design.md) §6.8、§7、§11.3–11.4、§12 Phase 2。
 
-## Global Constraints
+## 全局约束
 
-- Package by domain then responsibility: `endpoint`, `dao`, `operator`, `service`, `api`, `domain/{entity,request,vo,model,enums,event}`.
-- Requests/VOs live under `domain.request` / `domain.vo`, never directly under the domain root or a sibling `request`/`vo` package.
-- Console does not persist users. Kernel/platform do not issue tokens.
-- No `ProjectBaseEntity` / `projectId`. Permission subjects: `ROLE | ORG_UNIT` only.
-- Do not update module `SKILL.md`. Do not commit unless asked.
-- After Java changes: `mvn clean compile`. After the slice: `mvn test`.
+- 先 domain 后职责分包：`endpoint`、`dao`、`operator`、`service`、`api`、`domain/{entity,request,vo,model,enums,event}`。
+- Request/VO 位于 `domain.request` / `domain.vo`，不得直接放在 domain 根或并列 `request`/`vo` 包。
+- Console 不持久化 users。Kernel/platform 不签发 token。
+- 禁止 `ProjectBaseEntity` / `projectId`。Permission subject 仅 `ROLE | ORG_UNIT`。
+- 不更新模块 `SKILL.md`。除非明确要求，否则不 commit。
+- Java 变更后：`mvn clean compile`。本 slice 完成后：`mvn test`。
 
-## Target console layout (auth example)
+## 目标 console 布局（auth 示例）
 
 ```text
 console.auth
@@ -33,7 +33,7 @@ console.auth
       └── vo/              AuthTokenVo
 ```
 
-Kernel leftover after the move:
+迁移后 kernel 遗留：
 
 ```text
 kernel.permission.service.PermissionResourceSyncService  (uses console DAOs + kernel ExtensionRegistry)
@@ -41,30 +41,30 @@ kernel.permission.service.PermissionResourceSyncService  (uses console DAOs + ke
 
 ---
 
-### Task 1: Fix auth/credential package layout
+### Task 1：修正 auth/credential 包布局
 
-Move Phase 2a types into `api` / `endpoint` / `domain.*`. Move `VerificationType` to `credential.domain.enums`. Rename `UserProfileVO` → `UserProfileVo`.
+将 Phase 2a 类型移入 `api` / `endpoint` / `domain.*`。将 `VerificationType` 移至 `credential.domain.enums`。重命名 `UserProfileVO` → `UserProfileVo`。
 
-### Task 2: Console persistence + move role/menu/permission
+### Task 2：Console 持久化 + 迁移 role/menu/permission
 
-Add JPA / MyBatis-Plus / transaction APIs to console. Relocate kernel `role`, `menu`, `permission` (except sync service) and matching tests to `com.innospots.nexus.console.*`.
+为 console 添加 JPA / MyBatis-Plus / transaction API。将 kernel `role`、`menu`、`permission`（sync service 除外）及对应测试迁至 `com.innospots.nexus.console.*`。
 
-### Task 3: Role owner + role binding
+### Task 3：Role owner + role binding
 
-Add `RoleOwnerType` (`PLATFORM|TENANT|WORKSPACE`) and `ownerType`/`ownerId` on `RoleEntity`. Replace `nx_user_role` / `UserRoleEntity` with `nx_role_binding` / `RoleBindingEntity` (`subjectType` USER|ORG_UNIT).
+添加 `RoleOwnerType`（`PLATFORM|TENANT|WORKSPACE`）及 `RoleEntity` 上的 `ownerType`/`ownerId`。用 `nx_role_binding` / `RoleBindingEntity`（`subjectType` USER|ORG_UNIT）替换 `nx_user_role` / `UserRoleEntity`。
 
-### Task 4: Delete Group; grant subject ORG_UNIT
+### Task 4：删除 Group；grant subject 改为 ORG_UNIT
 
-Delete kernel `group` domain. `PermissionSubjectType` = `ROLE | ORG_UNIT`. `AuthorizationSubject.groupIds` → `orgUnitIds`.
+删除 kernel `group` domain。`PermissionSubjectType` = `ROLE | ORG_UNIT`。`AuthorizationSubject.groupIds` → `orgUnitIds`。
 
-### Task 5: AuthFacade token issuance
+### Task 5：AuthFacade token 签发
 
-`AuthFacade` login/select-tenant/refresh/logout using directory ports + AES-GCM compact tokens (`CryptoUtils.encryptAesGcm`). No user persistence in console.
+`AuthFacade` login/select-tenant/refresh/logout 使用 directory port + AES-GCM compact token（`CryptoUtils.encryptAesGcm`）。console 中不持久化 user。
 
-### Task 6: Platform SupportAccessGrant
+### Task 6：Platform SupportAccessGrant
 
-`nx_support_access_grant` in platform (`support` domain, proper `domain.entity` / `dao` / `endpoint`).
+platform 中 `nx_support_access_grant`（`support` domain，正确的 `domain.entity` / `dao` / `endpoint`）。
 
-### Task 7: Verify
+### Task 7：验证
 
-`mvn clean compile` && `mvn test`. No kernel `role`/`menu`/`group` production packages. Console has no user entities.
+`mvn clean compile` && `mvn test`。kernel 生产代码中无 `role`/`menu`/`group` 包。Console 无 user entity。

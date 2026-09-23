@@ -14,6 +14,8 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
  * Capability 逻辑身份到 Java API 的映射表，不注册 Provider 实现类。
  *
  * <p>发现阶段由插件声明自动填充；构建后不可变，可在多个运行时实例间安全共享。</p>
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class CapabilityTypeRegistry {
 

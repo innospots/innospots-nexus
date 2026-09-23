@@ -18,7 +18,9 @@ import lombok.Setter;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests {@link DslRenderableMapDeserializer} for named reusable components.
+ * 测试 {@link DslRenderableMapDeserializer} 对命名可复用组件的反序列化。
+ * @author Smars
+ * @date 2026/09/13
  */
 class DslRenderableMapDeserializerTest {
 

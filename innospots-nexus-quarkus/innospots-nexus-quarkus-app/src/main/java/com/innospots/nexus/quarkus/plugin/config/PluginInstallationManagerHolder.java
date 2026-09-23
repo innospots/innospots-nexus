@@ -10,6 +10,9 @@ import jakarta.enterprise.context.ApplicationScoped;
  * <p>在 {@link PluginHostLifecycle} 启动后写入，供 REST 与业务代码在
  * {@link io.quarkus.runtime.StartupEvent} 完成之后访问。使用 {@code volatile}
  * 保证启动线程与请求线程之间的可见性。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @ApplicationScoped
 public class PluginInstallationManagerHolder {
@@ -53,3 +56,4 @@ public class PluginInstallationManagerHolder {
         return current;
     }
 }
+

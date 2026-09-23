@@ -15,7 +15,7 @@
     <packaging>jar</packaging>
 
     <name>innospots-nexus-core</name>
-    <description>Business-neutral platform infrastructure: persistence, scheduling, server lifecycle, and shared resource metadata.</description>
+    <description>业务中立的平台基础设施：持久化、调度、服务生命周期与共享资源元数据。</description>
 
     <dependencies>
         <dependency>

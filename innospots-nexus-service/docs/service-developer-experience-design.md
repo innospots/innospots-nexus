@@ -1,6 +1,6 @@
 # 服务框架开发实践与开发者体验设计
 
-状态：可实施规格 v1.2，2026-09-13。本文件把《统一服务框架开发实践与开发者体验规范》落到本仓库真实类型与模块名。实现与测试以本文件 + [契约](service-contract-design.md) 为准；实践文中的示例名不自动覆盖仓库坐标。
+面向**业务开发者**：四级能力、注解落点、分层与禁止项。类型细节见 [契约](service-contract-design.md)；运行时行为见 [运行时](service-runtime-design.md)。
 
 ## 1. 文档定位
 
@@ -30,8 +30,8 @@
 
 | 实践文名称 | 仓库 artifact |
 |---|---|
-| innospots-service-spring-boot-starter | `innospots-nexus-spring-service`（AutoConfiguration） |
-| innospots-service-quarkus | `innospots-nexus-quarkus-service` + deployment（D7） |
+| innospots-service-spring-boot-starter | `innospots-nexus-spring-service`（`@EnableNexusService`） |
+| innospots-service-quarkus | `innospots-nexus-quarkus-service` + deployment |
 
 ## 3. 默认自动接入（禁止逐方法开启）
 
@@ -120,7 +120,7 @@ streamManager.emit(sessionId, "progress", event);
 streamManager.fail(sessionId, NexusException.build(status));
 ```
 
-当前 `ServiceContext` 的 principal/scope 必须与会话创建时的 owner/scope 一致，事件类型必须可赋给 open 时捕获的 `Type`。否则 `NEX040006` 或 `NEX010001`。禁止未鉴权的 `Object` emit。
+当前 `ServiceContext` 的 principal/scope 必须与会话创建时的 owner/scope 一致，事件类型必须可赋给 open 时捕获的 `Type`。否则 `AIO040006` 或 `AIO010001`。禁止未鉴权的 `Object` emit。
 
 `fail` 只接受 `NexusException`。业务领域失败先在归属边界翻译。
 
@@ -149,9 +149,9 @@ webSocketService.sendToSession(sessionId, message);
 throw NexusException.build(ModelStatusCode.MODEL_NOT_FOUND);
 ```
 
-领域自定义异常若使用，必须是 `base.exception` 下批准的 `NexusException` 子类型。到达适配器的其它 JDK/框架异常映射 `NEX030017`，不把 `exception.getMessage()` 或路径放入响应。禁止在 Controller 里手写 `ResponseEntity.status(...)` 处理业务失败。
+领域自定义异常若使用，必须是 `base.exception` 下批准的 `NexusException` 子类型。到达适配器的其它 JDK/框架异常映射 `AIO030017`，不把 `exception.getMessage()` 或路径放入响应。禁止在 Controller 里手写 `ResponseEntity.status(...)` 处理业务失败。
 
-Jakarta `@Valid` 失败由宿主校验转为 `NEX010001`。
+Jakarta `@Valid` 失败由宿主校验转为 `AIO010001`。
 
 ## 8. 观测与治理使用面
 
@@ -163,7 +163,7 @@ Jakarta `@Valid` 失败由宿主校验转为 `NEX010001`。
 | `@RateLimited("model-invoke")` 等策略键 | `rateLimiter.acquire()`、直接操作 CircuitBreaker/Semaphore |
 | 配置全局默认策略 | 对非幂等写默认 Retry |
 
-Retry **不在本框架一期实现**（D15）。若后续引入，只允许幂等下游 Client，禁止对全部业务方法默认重试。
+Retry **不在本框架实现**（D15）。若业务自建，只允许幂等下游 Client，禁止对写操作默认重试。
 
 ## 9. 生命周期
 
@@ -177,7 +177,7 @@ Retry **不在本框架一期实现**（D15）。若后续引入，只允许幂�
 |---|---|
 | 业务单元测试 | Service 可纯 Java 构造；不强制启动 Web 容器；无活动上下文时不要调用 `requireCurrent()` |
 | 框架能力 | 用适配夹具测权限/审计/限流/流/WS/追踪/上下文/文件/错误 |
-| 双适配器 | `adapter-test` 同源场景，见实施附录 |
+| 双适配器 | `adapter-test` 同源场景，见 [模块清单 §3.3](service-implementation-design.md) |
 
 ## 11. 禁止实践（实现与评审红线）
 

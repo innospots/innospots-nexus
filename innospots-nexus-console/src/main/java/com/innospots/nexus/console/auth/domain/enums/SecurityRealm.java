@@ -1,13 +1,20 @@
 package com.innospots.nexus.console.auth.domain.enums;
 
 /**
- * Security realm for tokens and user directories.
+ * 令牌与用户目录的安全域。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public enum SecurityRealm {
 
-    /** Ops-domain platform. */
+    /**
+     * 运维域平台。
+     */
     PLATFORM,
 
-    /** Tenant-domain identity and business access. */
+    /**
+     * 租户域身份与业务访问。
+     */
     TENANT
 }

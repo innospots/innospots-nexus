@@ -30,7 +30,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * Verifies key Pactor DSL 1.0 modules and component bindings through YAML scenarios.
+ * 通过 YAML 场景验证 Pactor DSL 1.0 关键模块与组件绑定。
+ * @author Smars
+ * @date 2026/09/13
  */
 class PageDslSpecificationContractsTest {
 

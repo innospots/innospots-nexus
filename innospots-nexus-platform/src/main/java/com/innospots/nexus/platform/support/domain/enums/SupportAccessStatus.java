@@ -1,19 +1,30 @@
 package com.innospots.nexus.platform.support.domain.enums;
 
 /**
- * Lifecycle of a platform support-access grant into a tenant.
+ * 平台支持访问授权进入租户的生命周期。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public enum SupportAccessStatus {
 
-    /** Waiting for tenant-admin approval. */
+    /**
+     * 等待租户管理员审批。
+     */
     PENDING,
 
-    /** Currently usable until {@code expireAt}. */
+    /**
+     * 当前可用至 {@code expireAt}。
+     */
     ACTIVE,
 
-    /** Past expiry. */
+    /**
+     * 已过期。
+     */
     EXPIRED,
 
-    /** Explicitly revoked. */
+    /**
+     * 已显式撤销。
+     */
     REVOKED
 }

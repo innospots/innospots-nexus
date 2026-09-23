@@ -5,12 +5,13 @@ description: |
   Java 工程创建与调整的使用约定与标准（非当前仓库依赖关系说明）。当用户要新建
   Maven 模块、调整已有工程结构、配置 POM（parent/BOM/最小依赖引用）、选择应引用
   console/kernel/platform/spring/quarkus 等模块、设置 JDK 与编译基线、处理多模块
-  reactor 构建或排查构建结构问题时使用。所有 JAR 版本统一由 innospots-nexus-bom
-  管理，parent 默认 innospots-nexus-parent，禁止模块内单独写依赖版本。
+  reactor 构建或排查构建结构问题时使用。新建工程前必经 grill-me，并须对照
+  AGENTS.md 模块职责与依赖规则。所有 JAR 版本统一由 innospots-nexus-bom 管理，
+  parent 默认 innospots-nexus-parent，禁止模块内单独写依赖版本。
   触发词：新建模块、工程结构、模块划分、POM 配置、Maven、BOM、parent、依赖引用、
   最小依赖、console、kernel、platform、spring、quarkus、构建配置、编译基线。
 category: java
-version: 1.2.0
+version: 1.4.0
 ---
 
 # 工程创建、结构、构建与项目配置
@@ -24,6 +25,7 @@ version: 1.2.0
 
 **本技能不是**「当前 innospots-nexus 仓库依赖关系说明书」。仓库现状以各模块
 `pom.xml` 与 `mvn dependency:tree` 为准；本技能给出**应遵循的规范**与选型表。
+**上位边界**以 [`AGENTS.md`](../../../AGENTS.md) 的模块职责、依赖规则与核心约束为准。
 
 **规范与存量：** 新模块按规范写最小依赖；存量 POM 若有多余声明，收敛须单独 PR，
 不得以存量为由在新代码中复制冗余模式（见 `dependency-conventions.md` →「规范与存量 POM」）。
@@ -32,6 +34,23 @@ version: 1.2.0
 **默认不新建 Maven 模块**——新业务域优先在 kernel/platform 内加领域包（见 project-deliverables）。
 
 权威依赖约定见 [dependency-conventions.md](references/dependency-conventions.md)。
+
+## AGENTS.md 前置（动工程前必读）
+
+注册新模块、改 reactor 或调整依赖方向**之前**，必须先阅读并对照
+[`AGENTS.md`](../../../AGENTS.md)：
+
+| 核对项 | 用途 |
+|--------|------|
+| **核心约束** | 不复制 legacy、不机械复刻 POM、保持 foundation 轻量 |
+| **模块职责** | 确认新 Maven 模块是否必要（默认在 kernel/platform 内加领域包） |
+| **依赖规则** | parent/BOM 约定、传递依赖、禁止 kernel↔platform、单向依赖链 |
+| **Agent 工作流** | 新建工程/模块须先 grill-me；按 AGENTS.md 技能路由表选用对应 `java:*` 技能 |
+
+POM 变更与 `<modules>` 注册须与 AGENTS.md 一致；grill-me 结论中应引用相关模块职责条目。
+新建 Maven 模块时，按 [`agents-template.md`](../java-reference/references/agents-template.md)
+在根 `AGENTS.md` **增补**模块职责与依赖规则；交付后交 `java:check` 做 AGENTS 合规检查。
+若 grill-me 结论与 AGENTS.md 冲突，须开发者显式确认例外后再改 POM。
 
 ## grill-me（结构变更前，必经）
 
@@ -49,7 +68,9 @@ npx skills use "https://github.com/mattpocock/skills" --skill "grill-me"
 ```
 
 按生成技能的**完整说明**执行（输出过长则重定向到临时文件再读）；相对路径从
-**supporting-files** 目录解析。开发者确认 grill-me 结论后，方可改 POM / 注册模块。
+**supporting-files** 目录解析。审查范围须包含 **`AGENTS.md`**（模块职责、依赖规则）
+与目标 `pom.xml` / `module-layout.md`。开发者确认 grill-me 结论后，再核对 AGENTS.md，
+方可改 POM / 注册模块。
 
 纯 POM 版本对齐、插件版本升级、单模块内配置微调无需 grill。
 
@@ -109,14 +130,16 @@ innospots-nexus-spring / innospots-nexus-quarkus
 完整步骤与交付清单见 [project-deliverables.md](references/project-deliverables.md)。
 
 1. **grill-me** — 结构变更类必经；结论写入 PR 或 ADR。
-2. **确认边界与模块类型** — 三者都清楚才建新 Maven 模块；否则在现有模块内加领域包。
-3. 在根 `pom.xml`（或所属聚合器）的 `<modules>` 中注册。
-4. 配置 `<parent>`（见下表）；POM 模板见 [build-config.md](references/build-config.md)。
-5. 按 [dependency-conventions.md](references/dependency-conventions.md) 只声明**最小**直接依赖，不写 `<version>`。
-6. 若新模块要被其他模块依赖，在 **`innospots-nexus-bom`** 的 `dependencyManagement` 中登记。
-7. 建 `src/main/java`、`src/test/java` 与**包根 only** `com.innospots.nexus.<module>`（不预建领域子包）。
-8. `mvn validate` → `mvn -pl <module> -am clean compile` → `mvn -q help:effective-pom` → `dependency:tree`。
-9. 交 **`java:design`**（领域包与契约），再 `java:develop`。
+2. **核对 AGENTS.md** — 模块职责、依赖方向、核心约束与 grill-me 结论一致。
+3. **确认边界与模块类型** — 三者都清楚才建新 Maven 模块；否则在现有模块内加领域包。
+4. 在根 `pom.xml`（或所属聚合器）的 `<modules>` 中注册。
+5. 配置 `<parent>`（见下表）；POM 模板见 [build-config.md](references/build-config.md)。
+6. 按 [dependency-conventions.md](references/dependency-conventions.md) 只声明**最小**直接依赖，不写 `<version>`。
+7. 若新模块要被其他模块依赖，在 **`innospots-nexus-bom`** 的 `dependencyManagement` 中登记。
+8. 建 `src/main/java`、`src/test/java` 与**包根 only** `com.innospots.nexus.<module>`（不预建领域子包）。
+9. `mvn validate` → `mvn -pl <module> -am clean compile` → `mvn -q help:effective-pom` → `dependency:tree`。
+10. 按 [agents-template.md](../java-reference/references/agents-template.md) **增补根 `AGENTS.md`**（模块职责 + 依赖规则）。
+11. 交 **`java:design`**（领域包与契约），再 `java:develop` → **`java:check`**（含 AGENTS 合规）。
 
 ### parent 与 relativePath
 
@@ -156,3 +179,4 @@ mvn versions:display-dependency-updates   # 依赖升级候选（需人工评估
 - [dependency-conventions.md](references/dependency-conventions.md) — 依赖引用、可运行应用组装
 - [build-config.md](references/build-config.md) — parent/BOM/插件、POM 模板、排错
 - [module-layout.md](references/module-layout.md) — 模块职责与包结构
+- [agents-template.md](../java-reference/references/agents-template.md) — 新建模块时根 AGENTS.md 增补片段

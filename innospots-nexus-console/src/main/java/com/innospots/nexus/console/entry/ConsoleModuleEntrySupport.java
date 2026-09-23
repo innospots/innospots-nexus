@@ -11,7 +11,10 @@ import com.innospots.nexus.core.plugin.contribution.console.UiSpecPageDeclaratio
 import com.innospots.nexus.core.plugin.declaration.PluginDefinition;
 
 /**
- * Shared assembly helpers for built-in console module entry plugins.
+ * 内置控制台模块 entry 插件的共享组装辅助工具。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class ConsoleModuleEntrySupport {
 
@@ -19,10 +22,10 @@ public final class ConsoleModuleEntrySupport {
     }
 
     /**
-     * Builds a contribution-only plugin definition for one console main page.
+     * 为单个控制台主页面构建仅贡献型插件定义。
      *
-     * @param descriptor built-in module metadata
-     * @return immutable plugin definition
+     * @param descriptor 内置模块元数据
+     * @return immutable 插件定义
      */
     public static PluginDefinition definition(ConsoleModuleDescriptor descriptor) {
         return PluginDefinition.builder(descriptor.pluginId())

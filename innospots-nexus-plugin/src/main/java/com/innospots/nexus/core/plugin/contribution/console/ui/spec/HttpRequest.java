@@ -9,31 +9,34 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * HTTP request definition used by HTTP data sources and dynamic DSL sources.
+ * HTTP 数据源与动态 DSL 源使用的 HTTP 请求定义。
  *
- * <p>URLs and parameter values may contain Pactor expressions such as
- * {@code /api/customers/${state.selectedId}}.</p>
+ * <p>URL 与参数值可包含 Pactor 表达式，例如
+ * {@code /api/customers/${state.selectedId}}。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @Getter
 @Setter
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class HttpRequest {
 
-    /** HTTP method. Defaults to {@code GET} in the schema when omitted. */
+    /** HTTP 方法；省略时 schema 默认为 {@code GET}。 */
     private String method = "GET";
 
-    /** Request URL or path. */
+    /** 请求 URL 或路径。 */
     private String url;
 
-    /** Query parameters. */
+    /** 查询参数。 */
     private Map<String, Object> params = new LinkedHashMap<>();
 
-    /** Request headers. */
+    /** 请求头。 */
     private Map<String, Object> headers = new LinkedHashMap<>();
 
-    /** Optional request body for POST, PUT, and PATCH requests. */
+    /** POST、PUT、PATCH 请求的可选请求体。 */
     private Object body;
 
-    /** Optional request timeout in milliseconds. */
+    /** 可选请求超时时间（毫秒）。 */
     private Integer timeout;
 }

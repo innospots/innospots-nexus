@@ -6,12 +6,15 @@ import com.innospots.nexus.base.status.StatusCode;
 import java.util.Objects;
 
 /**
- * Base runtime exception for the platform. Carries a machine-readable
- * error code (see {@link com.innospots.nexus.base.status.StatusCode}),
- * a human-readable message, and an optional internationalized display
- * for frontend rendering.
- * <p>Use static factory methods ({@link #build(StatusCode)} and
- * {@link #build(String, String)}) instead of constructors.</p>
+ * 平台基础运行时异常。携带机器可读的错误码（见 {@link StatusCode}）、
+ * 人类可读的消息以及可选的国际化展示信息供前端渲染。
+ * <p>请使用静态工厂方法（{@link #build(StatusCode)} 和
+ * {@link #build(String, String)}）而非直接调用构造函数。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @see StatusCode
+ * @see com.innospots.nexus.base.status.NexusStatusCode
  */
 public class NexusException extends RuntimeException {
 
@@ -42,30 +45,48 @@ public class NexusException extends RuntimeException {
         this.display = display;
     }
 
-    /** Builds from a {@link StatusCode}, using its full code and summary message. */
+    /**
+     * 基于 {@link StatusCode} 构建异常，使用其完整码与摘要消息。
+     *
+     * @param statusCode 状态码
+     * @return 异常实例
+     */
     public static NexusException build(StatusCode statusCode) {
         StatusCode code = Objects.requireNonNull(statusCode, "statusCode must not be null");
         return new NexusException(code.fullCode(), code.summary());
     }
 
-    /** Builds from a {@link StatusCode} with an internationalized display message. */
+    /**
+     * 基于 {@link StatusCode} 构建异常，附带国际化展示消息。
+     *
+     * @param statusCode 状态码
+     * @param display    国际化展示信息
+     * @return 异常实例
+     */
     public static NexusException build(StatusCode statusCode, I18nObject display) {
         StatusCode code = Objects.requireNonNull(statusCode, "statusCode must not be null");
         return new NexusException(code.fullCode(), code.summary(), display);
     }
 
-    /** Builds from a {@link StatusCode} with a display message and originating cause. */
+    /**
+     * 基于 {@link StatusCode} 构建异常，附带展示消息与原始原因。
+     *
+     * @param statusCode 状态码
+     * @param display    国际化展示信息
+     * @param cause      原始异常
+     * @return 异常实例
+     */
     public static NexusException build(StatusCode statusCode, I18nObject display, Throwable cause) {
         StatusCode code = Objects.requireNonNull(statusCode, "statusCode must not be null");
         return new NexusException(code.fullCode(), code.summary(), display, cause);
     }
 
     /**
-     * Builds from a {@link StatusCode} with an override message.
+     * 基于 {@link StatusCode} 构建异常，使用覆盖消息。
      *
-     * @param statusCode status code providing the machine-readable code
-     * @param message    human-readable message; blank values fall back to the status summary
-     * @return exception carrying the status full code
+     * @param statusCode 状态码，提供机器可读错误码
+     * @param message    人类可读消息；空白时回退到状态码摘要
+     * @return 携带状态码完整码的异常
      */
     public static NexusException build(StatusCode statusCode, String message) {
         StatusCode code = Objects.requireNonNull(statusCode, "statusCode must not be null");
@@ -74,33 +95,54 @@ public class NexusException extends RuntimeException {
     }
 
     /**
-     * Builds from a {@link StatusCode} with an originating cause.
+     * 基于 {@link StatusCode} 构建异常，附带原始原因。
      *
-     * @param statusCode status code providing the machine-readable code and summary
-     * @param cause      originating failure
-     * @return exception carrying the status full code
+     * @param statusCode 状态码，提供机器可读错误码与摘要
+     * @param cause      原始失败原因
+     * @return 携带状态码完整码的异常
      */
     public static NexusException build(StatusCode statusCode, Throwable cause) {
         StatusCode code = Objects.requireNonNull(statusCode, "statusCode must not be null");
         return new NexusException(code.fullCode(), code.summary(), cause);
     }
 
-    /** Builds with a machine-readable code and a human-readable message. */
+    /**
+     * 使用机器可读错误码与人类可读消息构建异常。
+     *
+     * @param code    错误码
+     * @param message 消息
+     * @return 异常实例
+     */
     public static NexusException build(String code, String message) {
         return new NexusException(code, message);
     }
 
-    /** Builds with a code, message, and originating cause. */
+    /**
+     * 使用错误码、消息与原始原因构建异常。
+     *
+     * @param code    错误码
+     * @param message 消息
+     * @param cause   原始异常
+     * @return 异常实例
+     */
     public static NexusException build(String code, String message, Throwable cause) {
         return new NexusException(code, message, cause);
     }
 
-    /** Returns the machine-readable error code. */
+    /**
+     * 返回机器可读错误码。
+     *
+     * @return 错误码
+     */
     public String code() {
         return code;
     }
 
-    /** Returns the internationalized display message, may be {@code null}. */
+    /**
+     * 返回国际化展示消息，可能为 {@code null}。
+     *
+     * @return 展示信息
+     */
     public I18nObject display() {
         return display;
     }

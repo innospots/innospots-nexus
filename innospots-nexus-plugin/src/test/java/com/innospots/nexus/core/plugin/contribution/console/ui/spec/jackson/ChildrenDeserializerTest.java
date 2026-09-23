@@ -11,7 +11,9 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests {@link ChildrenDeserializer} for array, single-node, and dynamic source forms.
+ * 测试 {@link ChildrenDeserializer} 对数组、单节点与动态来源形式的反序列化。
+ * @author Smars
+ * @date 2026/09/13
  */
 class ChildrenDeserializerTest {
 

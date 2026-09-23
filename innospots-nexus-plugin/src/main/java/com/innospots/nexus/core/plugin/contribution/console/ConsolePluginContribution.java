@@ -7,7 +7,11 @@ import com.innospots.nexus.core.plugin.contribution.PluginContribution;
 import com.innospots.nexus.core.plugin.contribution.PluginContributionType;
 import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
-/** console@1 管理模块、页面和菜单的静态资源贡献。 */
+/**
+ * console@1 管理模块、页面和菜单的静态资源贡献。
+ * @author Smars
+ * @date 2026/09/13
+ */
 public record ConsolePluginContribution(List<ConsoleModuleDeclaration> modules)
         implements PluginContribution {
 

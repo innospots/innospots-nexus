@@ -15,7 +15,7 @@
     <packaging>jar</packaging>
 
     <name>innospots-nexus-base</name>
-    <description>Pure Java base module for shared code-level contracts and utilities.</description>
+    <description>共享代码级契约与工具的纯 Java 基础模块。</description>
 
     <dependencies>
         <dependency>

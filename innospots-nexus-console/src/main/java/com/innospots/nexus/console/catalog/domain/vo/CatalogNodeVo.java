@@ -7,6 +7,8 @@ import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
 /**
  * 权限设置页的插件功能树节点。
  *
+ * @author Smars
+ * @date 2026/09/13
  * @param resourceId    资源主键
  * @param ownerPluginId 来源插件
  * @param moduleKey     模块 key

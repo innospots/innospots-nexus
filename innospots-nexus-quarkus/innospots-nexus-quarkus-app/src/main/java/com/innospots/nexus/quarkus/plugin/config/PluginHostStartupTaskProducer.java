@@ -22,6 +22,9 @@ import io.quarkus.arc.All;
 
 /**
  * 插件宿主启动任务 Bean 生产器。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @ApplicationScoped
 public class PluginHostStartupTaskProducer {
@@ -89,3 +92,4 @@ public class PluginHostStartupTaskProducer {
                 Thread.currentThread().getContextClassLoader());
     }
 }
+

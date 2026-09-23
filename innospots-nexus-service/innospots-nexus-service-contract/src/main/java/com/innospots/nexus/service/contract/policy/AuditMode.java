@@ -1,7 +1,7 @@
 package com.innospots.nexus.service.contract.policy;
 
 /**
- * Audit persistence mode. {@link #REQUIRED} fails the invocation when audit cannot be written.
+ * 审计持久化模式。{@link #REQUIRED} 在无法写入审计时使调用失败。
  *
  * @author Smars
  * @date 2026/09/13

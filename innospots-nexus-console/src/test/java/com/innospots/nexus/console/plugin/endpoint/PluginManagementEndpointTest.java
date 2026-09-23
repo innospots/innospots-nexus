@@ -14,7 +14,9 @@ import com.innospots.nexus.base.domain.response.R;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/** 插件管理接口的路径、HTTP 方法和卸载边界测试。 */
+/**
+ * 插件管理接口的路径、HTTP 方法和卸载边界测试。
+ */
 class PluginManagementEndpointTest {
 
     @Test

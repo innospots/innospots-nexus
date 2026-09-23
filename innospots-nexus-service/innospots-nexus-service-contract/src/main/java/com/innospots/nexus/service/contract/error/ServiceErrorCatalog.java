@@ -10,7 +10,7 @@ import com.innospots.nexus.base.util.Checks;
 import com.innospots.nexus.service.contract.status.ServiceStatusCode;
 
 /**
- * Resolves registered status catalogs into {@link ServiceError} values.
+ * 将已注册状态目录解析为 {@link ServiceError} 值。
  *
  * @author Smars
  * @date 2026/09/13
@@ -26,19 +26,19 @@ public final class ServiceErrorCatalog {
     }
 
     /**
-     * Builds the default catalog from platform and service status enums.
+     * 从平台与服务状态枚举构建默认目录。
      *
-     * @return catalog covering NEX and SRV codes
+     * @return 覆盖 AIO 与 SRV 码的目录
      */
     public static ServiceErrorCatalog standard() {
         return of(concat(NexusStatusCode.values(), ServiceStatusCode.values()));
     }
 
     /**
-     * Builds a catalog from the given status codes.
+     * 从给定状态码构建目录。
      *
-     * @param statuses codes to register
-     * @return catalog
+     * @param statuses 待注册的状态码
+     * @return 目录
      */
     public static ServiceErrorCatalog of(StatusCode... statuses) {
         Checks.notNull(statuses, "statuses");
@@ -54,10 +54,10 @@ public final class ServiceErrorCatalog {
     }
 
     /**
-     * Resolves a full code to a safe error. Unknown codes map to {@link NexusStatusCode#SYSTEM_ERROR}.
+     * 将完整码解析为安全错误。未知码映射为 {@link NexusStatusCode#SYSTEM_ERROR}。
      *
-     * @param fullCode machine-readable code
-     * @return error description
+     * @param fullCode 机器可读码
+     * @return 错误描述
      */
     public ServiceError resolve(String fullCode) {
         StatusCode status = codes.get(fullCode);

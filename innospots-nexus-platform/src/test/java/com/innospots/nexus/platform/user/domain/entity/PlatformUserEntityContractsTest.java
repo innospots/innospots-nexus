@@ -23,11 +23,9 @@ class PlatformUserEntityContractsTest {
     @Test
     void platformUserEntitiesExposeOpsRealmPersistenceTables() {
         assertPersistenceTable(PlatformUserEntity.class, "nx_platform_user");
-        assertPersistenceTable(PlatformUserPasswordEntity.class, "nx_platform_user_password");
         assertPersistenceTable(PlatformUserOauthEntity.class, "nx_platform_user_oauth");
         assertThat(PlatformUserEntity.class.getSuperclass()).isEqualTo(BaseEntity.class);
         assertThat(new PlatformUserEntity().idPrefix()).isEqualTo("pus");
-        assertThat(new PlatformUserPasswordEntity().idPrefix()).isEqualTo("ppc");
         assertThat(new PlatformUserOauthEntity().idPrefix()).isEqualTo("poi");
     }
 
@@ -46,11 +44,8 @@ class PlatformUserEntityContractsTest {
     }
 
     @Test
-    void platformUserPasswordAndOauthBindPlatformUserId() throws NoSuchFieldException {
-        assertField(PlatformUserPasswordEntity.class, "platformUserId", String.class, 32, false);
+    void platformUserOauthBindsPlatformUserId() throws NoSuchFieldException {
         assertField(PlatformUserOauthEntity.class, "platformUserId", String.class, 32, false);
-        assertIndex(PlatformUserPasswordEntity.class, "uk_nx_platform_user_password_user",
-                "platform_user_id", true);
         assertIndex(PlatformUserOauthEntity.class, "idx_nx_platform_user_oauth_user",
                 "platform_user_id", false);
     }

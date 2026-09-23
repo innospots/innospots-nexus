@@ -1,10 +1,12 @@
 package com.innospots.nexus.console.auth.domain.request;
 
 /**
- * Authenticated password change.
+ * 已认证用户的密码修改。
  *
- * @param oldEncryptedPassword current frontend encrypted password
- * @param newEncryptedPassword desired frontend encrypted password
+ * @author Smars
+ * @date 2026/09/13
+ * @param oldEncryptedPassword 当前前端加密密码
+ * @param newEncryptedPassword 期望的前端加密密码
  */
 public record PasswordChangeRequest(String oldEncryptedPassword, String newEncryptedPassword) {
 }

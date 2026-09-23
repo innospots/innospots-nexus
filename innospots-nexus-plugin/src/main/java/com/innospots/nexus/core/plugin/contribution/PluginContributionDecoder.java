@@ -8,6 +8,8 @@ import com.innospots.nexus.base.exception.NexusException;
  * 将已完成结构校验的通用 YAML 字段解码为具体 Contribution。
  *
  * @param <T> 解码目标类型
+ * @author Smars
+ * @date 2026/09/13
  */
 public interface PluginContributionDecoder<T extends PluginContribution> {
 

@@ -3,8 +3,16 @@ package com.innospots.nexus.base.domain.data;
 import java.util.List;
 
 /**
- * Immutable paginated data container. Validates page bounds at construction
- * and provides convenience methods for pagination navigation.
+ * 不可变的分页数据容器。在构造时校验分页边界，并提供分页导航便捷方法。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @param records  分页记录列表
+ * @param pageNo   页码（从 1 开始）
+ * @param pageSize 每页记录数
+ * @param total    全部记录总数
+ * @param pages    总页数（自动计算）
+ * @see PageResult
  */
 public record DataPage<T>(
         List<T> records,
@@ -15,8 +23,7 @@ public record DataPage<T>(
 ) {
 
     /**
-     * Compact constructor validates pagination parameters and ensures
-     * the records list is never null.
+     * 紧凑构造器校验分页参数，并确保记录列表永不为 null。
      */
     public DataPage {
         if (pageNo < 1) {
@@ -32,19 +39,19 @@ public record DataPage<T>(
     }
 
     /**
-     * Creates a page with auto-calculated total pages.
+     * 创建自动计算总页数的分页结果。
      *
-     * @param records  the page records (null-safe)
-     * @param pageNo   1-indexed page number
-     * @param pageSize number of records per page
-     * @param total    total record count across all pages
+     * @param records  分页记录（null 安全）
+     * @param pageNo   页码（从 1 开始）
+     * @param pageSize 每页记录数
+     * @param total    全部记录总数
      */
     public static <T> DataPage<T> of(List<T> records, long pageNo, long pageSize, long total) {
         return new DataPage<>(records, pageNo, pageSize, total, calculatePages(total, pageSize));
     }
 
     /**
-     * Returns an empty page for the given page number and size.
+     * 返回指定页码与大小的空分页结果。
      */
     public static <T> DataPage<T> empty(long pageNo, long pageSize) {
         return of(List.of(), pageNo, pageSize, 0);
@@ -59,7 +66,7 @@ public record DataPage<T>(
     }
 
     /**
-     * Calculates the total number of pages using ceiling division.
+     * 使用向上取整除法计算总页数。
      */
     private static long calculatePages(long total, long pageSize) {
         if (total <= 0) {

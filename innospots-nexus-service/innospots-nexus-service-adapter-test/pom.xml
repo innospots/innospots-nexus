@@ -14,7 +14,7 @@
     <artifactId>innospots-nexus-service-adapter-test</artifactId>
 
     <name>innospots-nexus-service-adapter-test</name>
-    <description>Shared black-box adapter scenarios for Spring and Quarkus service hosts.</description>
+    <description>Spring 与 Quarkus 服务宿主共享的黑盒 adapter 场景。</description>
 
     <dependencies>
         <dependency>
@@ -32,6 +32,10 @@
         <dependency>
             <groupId>com.innospots</groupId>
             <artifactId>innospots-nexus-service-websocket</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.innospots</groupId>
+            <artifactId>innospots-nexus-service-transfer</artifactId>
         </dependency>
     </dependencies>
 </project>

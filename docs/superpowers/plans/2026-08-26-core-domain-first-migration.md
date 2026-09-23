@@ -1,22 +1,22 @@
-# Core Domain-First Package Migration Implementation Plan
+# Core Domain-First 包迁移实施计划
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **面向 agent 工作者：** 必需子技能：使用 superpowers:executing-plans 按任务逐步实施本计划。步骤使用 checkbox（`- [ ]`）语法跟踪进度。
 
-**Goal:** Reorganize existing `innospots-nexus-core` types by domain and responsibility, moving concrete entities into their owning module subpackages while changing only the kernel references required for compilation.
+**目标：** 按 domain 与 responsibility 重组既有 `innospots-nexus-core` 类型，将 concrete entity 移入 owning module 子包，仅变更编译所需的 kernel reference。
 
-**Architecture:** Keep shared persistence parents under `core.domain.entity`, move MyBatis support into `core.persistence`, and organize existing session, resource, server, quartz, watcher, and extension types without introducing an `api` layer or new abstractions. Preserve fields, tables, ID prefixes, event names, and behavior.
+**架构：** shared persistence parent 保留在 `core.domain.entity`，MyBatis support 移入 `core.persistence`，组织既有 session、resource、server、quartz、watcher、extension 类型，不引入 `api` 层或新 abstraction。保留 field、table、ID prefix、event name 与 behavior。
 
-**Tech Stack:** Java 25, Maven, Jakarta Persistence, MyBatis-Plus, Quartz, Lombok, JUnit 5, AssertJ.
+**技术栈：** Java 25、Maven、Jakarta Persistence、MyBatis-Plus、Quartz、Lombok、JUnit 5、AssertJ。
 
 ---
 
-## Files and Package Map
+## 文件与包映射
 
-Production files are moved and package declarations/imports are updated as follows:
+生产文件迁移并更新 package declaration/import 如下：
 
-| Current path/package | Target path/package |
+| 当前 path/package | 目标 path/package |
 |---|---|
-| `core/domain/entity/BaseEntity.java` | unchanged: `core.domain.entity` |
+| `core/domain/entity/BaseEntity.java` | 不变：`core.domain.entity` |
 | `core/entity/ProjectBaseEntity.java` | `core/domain/entity/ProjectBaseEntity.java` |
 | `core/entity/AuditMetaObjectHandler.java` | `core/persistence/handler/AuditMetaObjectHandler.java` |
 | `core/entity/DbPrimaryGenerator.java` | `core/persistence/id/DbPrimaryGenerator.java` |
@@ -43,13 +43,13 @@ Production files are moved and package declarations/imports are updated as follo
 | `core/watcher/IWatcher.java` | `core/watcher/contract/IWatcher.java` |
 | `core/watcher/AbstractWatcher.java`, `WatcherSupervisor.java` | `core/watcher/runtime/` |
 
-Existing `core.extension.contract` and `core.extension.declaration` packages
-remain unchanged. No empty `model`, `entity`, `api`, or other placeholder
-packages are created for modules with no existing types.
+既有 `core.extension.contract` 与 `core.extension.declaration` package
+保持不变。不为尚无类型的 module 创建空 `model`、`entity`、`api` 或其他 placeholder
+package。
 
-## Task 1: Move Shared Persistence Support
+## Task 1：迁移 Shared Persistence Support
 
-**Files:**
+**文件：**
 
 - Move: `innospots-nexus-core/src/main/java/com/innospots/nexus/core/entity/ProjectBaseEntity.java` to `innospots-nexus-core/src/main/java/com/innospots/nexus/core/domain/entity/ProjectBaseEntity.java`
 - Move: `innospots-nexus-core/src/main/java/com/innospots/nexus/core/entity/AuditMetaObjectHandler.java` to `innospots-nexus-core/src/main/java/com/innospots/nexus/core/persistence/handler/AuditMetaObjectHandler.java`
@@ -58,7 +58,7 @@ packages are created for modules with no existing types.
 - Modify: `innospots-nexus-core/src/test/java/com/innospots/nexus/core/entity/CoreEntityContractsTest.java`
 - Modify: kernel production and test files importing `ProjectBaseEntity` or `DbPrimaryGenerator`
 
-- [x] **Step 1: Move files and update package declarations/imports.**
+- [x] **Step 1：迁移文件并更新 package declaration/import。**
 
   `ProjectBaseEntity` becomes `com.innospots.nexus.core.domain.entity` and
   imports `BaseEntity` from its sibling package. `AuditMetaObjectHandler`
@@ -67,9 +67,9 @@ packages are created for modules with no existing types.
   `BaseEntity` points its Javadoc links to the sibling `ProjectBaseEntity` and
   the new `core.persistence.handler.AuditMetaObjectHandler` package.
 
-- [x] **Step 2: Update all kernel references without changing kernel logic.**
+- [x] **Step 2：更新全部 kernel 引用，不改变 kernel 逻辑。**
 
-  Replace only these import targets:
+  仅替换以下 import 目标：
 
   ```text
   com.innospots.nexus.core.entity.ProjectBaseEntity
@@ -78,35 +78,35 @@ packages are created for modules with no existing types.
       -> com.innospots.nexus.core.persistence.id.DbPrimaryGenerator
   ```
 
-- [x] **Step 3: Update the core entity contract test package/imports.**
+- [x] **Step 3：更新 core entity 契约测试的 package/import。**
 
-  Keep the assertions and test behavior unchanged; point imports to the new
-  persistence support package and keep the test in the shared entity contract
-  area only if its package-local references require it.
+  保持断言与测试行为不变；将 import 指向新
+  persistence support 包，仅在 package-local reference 需要时保留测试于 shared entity 契约
+  区域。
 
-- [x] **Step 4: Compile immediately after the Java changes.**
+- [x] **Step 4：Java 变更后立即编译。**
 
-  Run:
+  运行：
 
   ```bash
   mvn clean compile
   ```
 
-  Expected: `BUILD SUCCESS`; shared persistence support and kernel references
-  compile from their new packages. Concrete core entities remain to be moved
-  in Tasks 2 and 3.
+  预期： `BUILD SUCCESS`; shared persistence support and kernel references
+  从新 package 编译。concrete core entity 待在 Task 2、3 迁移
+  。
 
-## Task 2: Move Session and Resource Types
+## Task 2：Move Session and Resource Types
 
-**Files:**
+**文件：**
 
-- Move the four session persistence/domain contract groups listed in the map
+- 迁移 map 中列出的四组 session persistence/domain contract
 - Move `MetaResourceEntity.java` to `core/resource/domain/entity`
 - Modify: `CoreEntityContractsTest.java`, `SessionContractsTest.java`, and any Javadoc/imports that refer to moved session/resource types
 
-- [x] **Step 1: Move session entities, models, enum, events, repositories, and service.**
+- [x] **Step 1：迁移 session entity、model、enum、event、repository 与 service。**
 
-  Use these exact package declarations:
+  使用以下精确 package declaration：
 
   ```text
   com.innospots.nexus.core.session.domain.entity
@@ -117,36 +117,36 @@ packages are created for modules with no existing types.
   com.innospots.nexus.core.session.service
   ```
 
-  Add imports between those packages explicitly. The repository interfaces
-  remain the same interfaces and method signatures. `SessionService` keeps its
-  existing constructor, save operations, and event type strings.
+  在 package 间显式添加 import。repository interface
+  保持相同 interface 与方法签名。`SessionService` 保留
+  既有 constructor、save 操作与 event type string。
 
-- [x] **Step 2: Move the resource entity.**
+- [x] **Step 2：迁移 resource entity。**
 
-  Set its package to `com.innospots.nexus.core.resource.domain.entity` and
-  import `ProjectBaseEntity` from `core.domain.entity`. Preserve
+  设置 package 为 `com.innospots.nexus.core.resource.domain.entity` 并
+  从 `core.domain.entity` import `ProjectBaseEntity`。保留
   `nexus_meta_resource`, `resourceId`, and the `res` ID prefix.
 
-- [x] **Step 3: Update session/resource tests and core entity references.**
+- [x] **Step 3：更新 session/resource 测试与 core entity 引用。**
 
-  Update imports and package declarations only. Keep the existing assertions for
-  immutable collections, event publication, message classification, table
-  names, and ID generation.
+  仅更新 import 与 package declaration。保留既有断言：
+  immutable collection、event publication、message classification、table
+  name 与 ID generation。
 
-- [x] **Step 4: Compile immediately after the Java changes.**
+- [x] **Step 4：Java 变更后立即编译。**
 
-  Run:
+  运行：
 
   ```bash
   mvn clean compile
   ```
 
-  Expected: `BUILD SUCCESS`; the old flat `core.session` package is absent and
-  all moved types are resolved from their new packages.
+  预期： `BUILD SUCCESS`; the old flat `core.session` package is absent and
+  所有 moved type 从新 package 解析。
 
-## Task 3: Move Server Types
+## Task 3：Move Server Types
 
-**Files:**
+**文件：**
 
 - Move: `ServiceRegistryEntity.java` to `core/server/domain/entity`
 - Move: `ServiceInfo.java`, `ServiceLifecycle.java` to `core/server/domain/model`
@@ -155,32 +155,32 @@ packages are created for modules with no existing types.
 - Move: `ServiceNodeHolder.java` to `core/server/runtime`
 - Modify: `ServerContractsTest.java`, `ServiceNodeHolderTest.java`, and `CoreEntityContractsTest.java`
 
-- [x] **Step 1: Move server types and update package declarations.**
+- [x] **Step 1：迁移 server 类型并更新 package declaration。**
 
-  Add only the imports needed for the new subpackages. Keep `ServiceInfo`
-  fluent setters, immutable map accessors, server-key calculation, and elapsed
-  heartbeat behavior unchanged. Keep `ServiceNodeHolder` lifecycle and shard
-  calculations unchanged.
+  仅添加新 subpackage 所需 import。保留 `ServiceInfo`
+  fluent setter、immutable map accessor、server-key 计算与 elapsed
+  heartbeat 行为不变。保留 `ServiceNodeHolder` lifecycle 与 shard
+  计算不变。
 
-- [x] **Step 2: Update server tests and entity contract references.**
+- [x] **Step 2：更新 server 测试与 entity 契约引用。**
 
-  Update package declarations/imports while preserving existing behavior
-  assertions and the service registry table/ID contract.
+  更新 package declaration/import，保留既有 behavior
+  断言与 service registry table/ID 契约。
 
-- [x] **Step 3: Compile immediately after the Java changes.**
+- [x] **Step 3：Java 变更后立即编译。**
 
-  Run:
+  运行：
 
   ```bash
   mvn clean compile
   ```
 
-  Expected: `BUILD SUCCESS` with server models, enums, entity, registry, and
-  runtime coordination resolved from their target packages.
+  预期： `BUILD SUCCESS` with server models, enums, entity, registry, and
+  runtime coordination 从目标 package 解析。
 
-## Task 4: Move Quartz and Watcher Types
+## Task 4：Move Quartz and Watcher Types
 
-**Files:**
+**文件：**
 
 - Move `CronConverter.java` to `core/quartz/converter`
 - Move `QuartzJobInfo.java`, `QuartzTriggerInfo.java` to `core/quartz/domain/model`
@@ -191,62 +191,62 @@ packages are created for modules with no existing types.
 - Move `AbstractWatcher.java`, `WatcherSupervisor.java` to `core/watcher/runtime`
 - Modify corresponding Quartz and watcher tests
 
-- [x] **Step 1: Move Quartz types and update imports.**
+- [x] **Step 1：迁移 Quartz 类型并更新 import。**
 
-  Preserve the request factories, schedule enum values, cron conversion
-  behavior, scheduler group constants, and manager lifecycle. Update imports
-  for `ScheduleMode`, `QuartzJobRequest`, `QuartzJobInfo`, and
-  `QuartzTriggerInfo` rather than creating forwarding types.
+  保留 request factory、schedule enum value、cron conversion
+  behavior、scheduler group constant 与 manager lifecycle。更新 import
+  ：`ScheduleMode`、`QuartzJobRequest`、`QuartzJobInfo`、
+  `QuartzTriggerInfo`，不创建 forwarding type。
 
-- [x] **Step 2: Move watcher types and update imports.**
+- [x] **Step 2：迁移 watcher 类型并更新 import。**
 
-  Keep `IWatcher` as the existing interface. Update `AbstractWatcher` and
-  `WatcherSupervisor` imports to the new contract/runtime packages without
-  changing watcher callbacks, scheduling, or shutdown behavior.
+  保留 `IWatcher` 为既有 interface。更新 `AbstractWatcher` 与
+  `WatcherSupervisor` import 到新 contract/runtime package，不
+  改变 watcher callback、scheduling 或 shutdown behavior。
 
-- [x] **Step 3: Compile immediately after the Java changes.**
+- [x] **Step 3：Java 变更后立即编译。**
 
-  Run:
+  运行：
 
   ```bash
   mvn clean compile
   ```
 
-  Expected: `BUILD SUCCESS` with no old flat Quartz/watcher type references.
+  预期： `BUILD SUCCESS` with no old flat Quartz/watcher type references.
 
-## Task 5: Remove Stale References and Verify Structure
+## Task 5：Remove Stale References and Verify Structure
 
-**Files:**
+**文件：**
 
-- Modify only remaining core/kernel Java references discovered by search
-- Do not modify unrelated base, console, or kernel business implementations
+- 仅修改 search 发现的剩余 core/kernel Java 引用
+- 不修改无关 base、console 或 kernel 业务实现
 
-- [x] **Step 1: Search for old package references.**
+- [x] **Step 1：搜索旧 package 引用。**
 
-  Run:
+  运行：
 
   ```bash
   rg -n "com\\.innospots\\.nexus\\.core\\.(entity|session|server|quartz|watcher)" --glob '*.java' --glob '*.md' .
   ```
 
-  Expected: no old Java package imports or declarations; documentation may be
-  updated only when it names a moved core class and is part of the requested
-  reference synchronization.
+  预期： no old Java package imports or declarations; documentation may be
+  命名 moved core class 时可更新，
+  作为 reference synchronization 一部分。
 
-- [x] **Step 2: Search for misplaced entity classes.**
+- [x] **Step 2：搜索错位的 entity class。**
 
-  Run:
+  运行：
 
   ```bash
   find innospots-nexus-core/src/main/java/com/innospots/nexus/core -type f -name '*Entity.java' | sort
   ```
 
-  Expected: only `core.domain.entity` shared parents plus entities under
-  `session/domain/entity`, `resource/domain/entity`, and `server/domain/entity`.
+  预期： only `core.domain.entity` shared parents plus entities under
+  `session/domain/entity`、`resource/domain/entity`、`server/domain/entity` 下的 entity。
 
-- [x] **Step 3: Run full verification.**
+- [x] **Step 3：运行完整验证。**
 
-  Run:
+  运行：
 
   ```bash
   mvn validate
@@ -254,27 +254,27 @@ packages are created for modules with no existing types.
   mvn -q help:effective-pom
   ```
 
-  Expected: all commands succeed on the configured Java 25 environment.
+  预期： all commands succeed on the configured Java 25 environment.
 
-- [x] **Step 4: Inspect the final diff.**
+- [x] **Step 4：检查最终 diff。**
 
-  Run:
+  运行：
 
   ```bash
   git diff --check
   git status --short
   ```
 
-  Confirm the diff contains only the planned core moves, necessary kernel
-  reference changes, tests, and the design/plan documents; preserve all
-  unrelated pre-existing working-tree changes.
+  确认 diff 仅含 planned core 迁移、必要 kernel
+  reference 变更、测试与设计/计划文档；保留全部
+  无关既有 working-tree 变更。
 
-## Verification Record
+## 验证记录
 
-- `mvn clean compile`: passed after each Java migration batch; the first batch
-  required three explicit `ProjectBaseEntity` imports after the shared parent
-  moved, then passed.
-- `mvn test`: passed — base 175, core 40, console 1, kernel 74 tests.
-- `mvn validate`: passed.
-- `mvn -q help:effective-pom`: passed.
-- Old Java package reference search: no matches.
+- `mvn clean compile`: 每组 Java 迁移后通过; 第一批
+  shared parent 迁移后需要三个显式 `ProjectBaseEntity` import，
+  moved, then 通过。
+- `mvn test`: 通过 — base 175, core 40, console 1, kernel 74 tests.
+- `mvn validate`: 通过。
+- `mvn -q help:effective-pom`: 通过。
+- 旧 Java package 引用搜索： 无匹配。

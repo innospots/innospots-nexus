@@ -1,176 +1,171 @@
-# Exception and Status Code Standards Implementation Plan
+# 异常与状态码规范实施计划
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **面向 agent 工作者：** 必需子技能：使用 superpowers:subagent-driven-development（推荐）或 superpowers:executing-plans 按任务逐步实施本计划。步骤使用 checkbox（`- [ ]`）语法跟踪进度。
 
-**Goal:** Add a coherent, code-informed standard for exceptions, platform and
-domain status codes, and safe status-code extension.
+**目标：** 新增连贯、基于代码的 exception、platform 与
+domain status code 及安全 status-code extension 规范。
 
-**Architecture:** Create one authoritative `exception-status-code.md` document,
-then keep API and domain-initialization documents concise by linking to it and
-adding their local gates. Preserve current module boundaries and existing Java
-behavior; this is a documentation-only change.
+**架构：** 创建单一权威 `exception-status-code.md` 文档，
+然后 API 与 domain-initialization 文档通过链接保持简洁并
+添加本地 gate。保留当前 module boundary 与既有 Java
+behavior；本变更仅涉及文档。
 
-**Tech Stack:** Markdown, Java 25 project conventions, `NexusException`,
-`StatusCode`, `NexusStatusCode`, `PluginStatusCode`, `StatusCodeRules`, and
-`R<T>`.
+**技术栈：** Markdown、Java 25 项目约定、`NexusException`、
+`StatusCode`、`NexusStatusCode`、`PluginStatusCode`、`StatusCodeRules`、
+`R<T>`。
 
-**Spec:** `docs/superpowers/specs/2026-08-28-exception-status-code-design.md`
+**规格：** `docs/superpowers/specs/2026-08-28-exception-status-code-design.md`
 
-## Global Constraints
+## 全局约束
 
-- Use `NexusException` for expected application, domain, and translated
-  infrastructure failures.
-- Prefer typed `StatusCode` overloads; raw code strings are interop boundaries.
-- Preserve original causes when translating lower-level failures.
-- Full status codes use `MODULE(3) + CATEGORY(2) + LOCAL(4)` and are nine
-  characters, for example `NEX080002`.
-- Platform-wide codes belong to `NexusStatusCode`.
-- Domain-specific codes belong to the owning domain's `domain.enums` package;
-  technical module codes stay with their technical boundary.
-- Do not create one exception subclass per status code.
-- Do not modify Java source or `standards/module-skills.md`.
+- 预期 application、domain 与 translated
+  infrastructure failure 使用 `NexusException`。
+- 优先 typed `StatusCode` overload；raw code string 为 interop boundary。
+- 翻译 lower-level failure 时保留 original cause。
+- full status code 使用 `MODULE(3) + CATEGORY(2) + LOCAL(4)`，共九
+  字符，例如 `AIO080002`。
+- 平台级 code 归属 `NexusStatusCode`。
+- domain-specific code 归属 owning domain 的 `domain.enums` package；
+  technical module code 留在 technical boundary。
+- 不为每个 status code 创建 exception 子类。
+- 不修改 Java 源码或 `standards/module-skills.md`。
 
 ---
 
-### Task 1: Write the authoritative exception and status-code standard
+### Task 1：编写权威 exception 与 status-code 规范
 
-**Files:**
+**文件：**
 - Create: `standards/exception-status-code.md`
 
-**Interfaces:**
-- Consumes: current behavior of `NexusException`, `StatusCode`,
-  `StatusCategory`, `StatusCodeRules`, `NexusStatusCode`, `PluginStatusCode`,
-  and `R<T>`.
-- Produces: the canonical rules linked by API and domain initialization docs.
+**接口：**
+- 消费：`NexusException`、`StatusCode`、
+  `StatusCategory`、`StatusCodeRules`、`NexusStatusCode`、`PluginStatusCode`、
+  `R<T>` 的当前 behavior。
+- 产出：API 与 domain initialization 文档链接的 canonical 规则。
 
-- [x] **Step 1: Add exception taxonomy and construction rules**
+- [x] **Step 1：添加 exception taxonomy 与 construction 规则**
 
-Document expected business failures, translated infrastructure failures, pure
-utility programmer misuse, interruption/cancellation, and fatal errors. Cover
-`NexusException.build(StatusCode, ...)`, typed versus raw-code overloads,
-message/display separation, cause preservation, and sensitive-data handling.
+文档化 expected business failure、translated infrastructure failure、pure
+utility programmer misuse、interruption/cancellation 与 fatal error。覆盖
+`NexusException.build(StatusCode, ...)`、typed 与 raw-code overload、
+message/display 分离、cause preservation 与 sensitive-data 处理。
 
-- [x] **Step 2: Add catch, translation, and response rules**
+- [x] **Step 2：添加 catch、translation 与 response 规则**
 
-Define when to rethrow unchanged, when to wrap with a more specific status, how
-to preserve the cause, where unknown failures become a generic system status,
-how to avoid duplicate logging, and how endpoint infrastructure maps
-`NexusException` to `R.fail(...)` without leaking stack traces.
+定义何时 unchanged rethrow、何时 wrap 为更 specific status、如何
+preserve cause、unknown failure 在何处变为 generic system status、
+如何避免 duplicate logging、endpoint infrastructure 如何将
+`NexusException` 映射为 `R.fail(...)` 而不泄漏 stack trace。
 
-- [x] **Step 3: Add status-code structure and semantic rules**
+- [x] **Step 3：添加 status-code 结构与 semantic 规则**
 
-Document module allocation, category selection, four-digit local codes,
-English/Chinese message and advice, HTTP mapping, enum constant naming,
-uniqueness, and compatibility of full codes. Explicitly distinguish business
-status from transport HTTP status.
+文档化 module allocation、category selection、四位 local code、
+英文/中文 message 与 advice、HTTP mapping、enum constant naming、
+uniqueness 与 full code 兼容性。显式区分 business
+status 与 transport HTTP status。
 
-- [x] **Step 4: Add extension procedure and tests**
+- [x] **Step 4：添加 extension 流程与测试**
 
-Describe reuse search, ownership decision, module/local allocation, metadata,
-registration/allowlist concerns for raw strings, and required contract tests for
-format, uniqueness, messages, categories, HTTP status, and behavior.
+描述 reuse search、ownership 决策、module/local allocation、metadata、
+raw string 的 registration/allowlist concern，以及 format、uniqueness、message、category、HTTP status、behavior 的 required contract test。
 
-- [x] **Step 5: Add review checklist and validate the document**
+- [x] **Step 5：添加 review checklist 并验证文档**
 
-Run:
+运行：
 
 ```bash
 rg -n '^## ' standards/exception-status-code.md
 git diff --check -- standards/exception-status-code.md
 ```
 
-Expected: all exception, status, extension, compatibility, and checklist
-sections are present with no whitespace errors.
+预期：exception、status、extension、compatibility、checklist
+章节齐全且无 whitespace 错误。
 
-### Task 2: Align API design with the authoritative error standard
+### Task 2：使 API design 与权威 error 规范对齐
 
-**Files:**
+**文件：**
 - Modify: `standards/api-design.md`
 
-**Interfaces:**
-- Consumes: `standards/exception-status-code.md`.
-- Produces: concise API-specific links and boundary rules.
+**接口：**
+- 消费：`standards/exception-status-code.md`。
+- 产出：简洁 API-specific 链接与 boundary 规则。
 
-- [x] **Step 1: Replace duplicated exception guidance with a cross-reference**
+- [x] **Step 1：用交叉引用替换重复的 exception 指导**
 
-Retain the API-layer rule that business failures use `NexusException`, then
-link to the authoritative document for taxonomy, wrapping, and response
-mapping.
+保留 API 层 rule：business failure 使用 `NexusException`，然后
+链接权威文档的 taxonomy、wrapping 与 response
+mapping。
 
-- [x] **Step 2: Clarify pure utility preconditions and status selection**
+- [x] **Step 2：澄清 pure utility precondition 与 status selection**
 
-State that JDK/framework precondition exceptions are allowed only for pure
-programmer misuse that does not represent caller or business input. Require a
-typed reusable status code for application-visible failures and prohibit raw
-string codes in ordinary in-repo calls.
+说明 JDK/framework precondition exception 仅允许用于不表示 caller 或 business input 的 pure
+programmer misuse。application-visible failure 需要 typed reusable status code，禁止 ordinary in-repo call 使用 raw
+string code。
 
-- [x] **Step 3: Validate the API document**
+- [x] **Step 3：验证 API 文档**
 
-Run:
+运行：
 
 ```bash
 rg -n 'exception-status-code.md|NexusException|StatusCode' standards/api-design.md
 git diff --check -- standards/api-design.md
 ```
 
-Expected: the API document points to the authoritative standard and has no
-contradictory exception rule.
+预期：API 文档指向权威规范且无矛盾 exception rule。
 
-### Task 3: Add status-code gates to domain initialization
+### Task 3：为 domain initialization 添加 status-code gate
 
-**Files:**
+**文件：**
 - Modify: `standards/domain-module-initialization.md`
 
-**Interfaces:**
-- Consumes: `standards/exception-status-code.md` and existing stage gates.
-- Produces: pre-creation and verification checks for domain failures.
+**接口：**
+- 消费：`standards/exception-status-code.md` 与既有 stage gate。
+- 产出：domain failure 的 pre-creation 与 verification 检查。
 
-- [x] **Step 1: Add status ownership to the domain vocabulary gate**
+- [x] **Step 1：在 domain vocabulary gate 添加 status ownership**
 
-Require deciding whether a failure is platform-wide, domain-specific, or
-technical before adding a status enum, and require names to follow the domain
-and status-code conventions.
+添加 status enum 前决定 failure 是 platform-wide、domain-specific 还是
+technical，并要求 name 遵循 domain
+与 status-code 约定。
 
-- [x] **Step 2: Add status-code checks to the domain contract gate**
+- [x] **Step 2：在 domain contract gate 添加 status-code 检查**
 
-Require reuse search, unique module/local allocation, category and HTTP mapping,
-bilingual message/advice, no runtime secrets in text, and no per-error exception
-subclasses.
+要求 reuse search、唯一 module/local allocation、category 与 HTTP mapping、
+双语 message/advice、text 中无 runtime secret、无 per-error exception
+subclass。
 
-- [x] **Step 3: Add extension tests to the verification gate**
+- [x] **Step 3：在 verification gate 添加 extension 测试**
 
-Require contract tests for full-code shape, uniqueness, metadata, and exception
-translation behavior; preserve the existing compile and full-test commands.
+要求 full-code shape、uniqueness、metadata、exception
+translation behavior 的 contract test；保留既有 compile 与 full-test 命令。
 
-- [x] **Step 4: Validate the workflow document**
+- [x] **Step 4：验证 workflow 文档**
 
-Run:
+运行：
 
 ```bash
 rg -n 'exception-status-code.md|status code|StatusCode|NexusException' standards/domain-module-initialization.md
 git diff --check -- standards/domain-module-initialization.md
 ```
 
-Expected: status ownership and extension checks are visible in the relevant
-stages and the diff check is clean.
+预期：相关 stage 可见 status ownership 与 extension 检查，diff check 干净。
 
-### Task 4: Cross-file review and verification
+### Task 4：跨文件 review 与验证
 
-**Files:**
+**文件：**
 - Verify: `standards/exception-status-code.md`
 - Verify: `standards/api-design.md`
 - Verify: `standards/domain-module-initialization.md`
 - Verify unchanged: `standards/module-skills.md`
 
-- [x] **Step 1: Check consistency and implementation alignment**
+- [x] **Step 1：检查一致性与实现对齐**
 
-Search for conflicting code formats, `VO`/`Vo`-style status naming, raw-code
-recommendations, uncaught-cause wording, and module placement that would
-violate `AGENTS.md`.
+搜索 conflicting code format、`VO`/`Vo` 风格 status naming、raw-code
+recommendation、uncaught-cause 措辞、违反 `AGENTS.md` 的 module placement。
 
-- [x] **Step 2: Run repository verification**
+- [x] **Step 2：运行仓库验证**
 
-Run:
+运行：
 
 ```bash
 git diff --check
@@ -180,17 +175,15 @@ mvn -q help:effective-pom
 git status --short
 ```
 
-Expected: Maven commands succeed on Java 25, tests report zero failures, the
-working tree is clean after commit, and only the intended documentation files
-are changed.
+预期：Java 25 上 Maven 成功、测试零失败、
+commit 后 working tree 干净，且仅 intended 文档变更。
 
-- [x] **Step 3: Confirm source scope**
+- [x] **Step 3：确认源码范围**
 
-Run:
+运行：
 
 ```bash
 git diff --name-only HEAD~4..HEAD
 ```
 
-Expected: no Java source and no `standards/module-skills.md` appear in the
-task's final change set.
+预期：task 最终变更集中无 Java 源码与 `standards/module-skills.md`。

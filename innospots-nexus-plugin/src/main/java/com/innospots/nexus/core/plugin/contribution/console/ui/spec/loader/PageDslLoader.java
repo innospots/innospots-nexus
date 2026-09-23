@@ -2,15 +2,20 @@ package com.innospots.nexus.core.plugin.contribution.console.ui.spec.loader;
 
 import com.innospots.nexus.core.plugin.contribution.console.ui.spec.PageDsl;
 
-/** Loads page DSL documents from a backing store. */
+/**
+ * 从后端存储加载页面 DSL 文档。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ */
 public interface PageDslLoader {
 
     /**
-     * Loads one page DSL document.
+     * 加载一个页面 DSL 文档。
      *
-     * @param moduleKey owning module key
-     * @param pageKey page key matching {@code page.id}
-     * @return page DSL document
+     * @param moduleKey 所属模块键
+     * @param pageKey 与 {@code page.id} 匹配的页面键
+     * @return 页面 DSL 文档
      */
     PageDsl load(String moduleKey, String pageKey);
 }

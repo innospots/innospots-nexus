@@ -6,24 +6,27 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Pagination binding for data sources that return paged results.
+ * 返回分页结果的数据源的分页绑定配置。
  *
- * <p>Field values may be literals or expressions bound to page state.</p>
+ * <p>字段值可为字面量，或绑定到页面状态的表达式。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @Getter
 @Setter
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class PaginationConfig {
 
-    /** Current page index or expression. */
+    /** 当前页码或表达式。 */
     private Object page;
 
-    /** Page size or expression. */
+    /** 每页大小或表达式。 */
     private Object pageSize;
 
-    /** Backend field that contains the total count. */
+    /** 后端响应中包含总数的字段名。 */
     private String totalField;
 
-    /** Backend field that contains the page records. */
+    /** 后端响应中包含分页记录的字段名。 */
     private String dataField;
 }

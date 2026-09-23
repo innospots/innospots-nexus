@@ -6,47 +6,49 @@ import com.innospots.nexus.core.plugin.contribution.console.ui.spec.jackson.Chil
 import java.util.List;
 
 /**
- * Child renderables declared as an array or a single dynamic source reference.
+ * 以数组或单个动态源引用声明的子可渲染节点。
  *
- * @param items inline child nodes when {@link #isArray()} is {@code true}
- * @param sourceRef dynamic DSL source when the YAML value is a single {@code source} object
+ * @param items 当 {@link #isArray()} 为 {@code true} 时的内联子节点
+ * @param sourceRef YAML 值为单个 {@code source} 对象时的动态 DSL 源
+ * @author Smars
+ * @date 2026/09/13
  */
 @JsonDeserialize(using = ChildrenDeserializer.class)
 public record Children(List<DslRenderable> items, DslSourceRef sourceRef) {
 
     /**
-     * Creates children from an inline renderable list.
+     * 从内联可渲染列表创建子节点。
      *
-     * @param items child renderables
-     * @return children wrapper
+     * @param items 子可渲染节点
+     * @return 子节点包装器
      */
     public static Children ofItems(List<DslRenderable> items) {
         return new Children(items, null);
     }
 
     /**
-     * Creates children from one dynamic source reference.
+     * 从单个动态源引用创建子节点。
      *
-     * @param sourceRef dynamic source reference
-     * @return children wrapper
+     * @param sourceRef 动态源引用
+     * @return 子节点包装器
      */
     public static Children ofSourceRef(DslSourceRef sourceRef) {
         return new Children(List.of(), sourceRef);
     }
 
     /**
-     * Returns whether children are declared as an array.
+     * 返回子节点是否以数组形式声明。
      *
-     * @return true for array children
+     * @return 数组子节点时返回 {@code true}
      */
     public boolean isArray() {
         return sourceRef == null;
     }
 
     /**
-     * Returns the inline child list, which may be empty.
+     * 返回内联子节点列表，可能为空。
      *
-     * @return child items
+     * @return 子节点列表
      */
     public List<DslRenderable> items() {
         return items == null ? List.of() : List.copyOf(items);

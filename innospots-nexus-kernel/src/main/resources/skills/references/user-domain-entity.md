@@ -22,23 +22,6 @@ operators assign a prefixed ULID before insertion.
 - `idx_nx_user_mobile` index on `mobile`
 - `idx_nx_user_status` index on `status`
 
-## UserPasswordCredentialEntity
-
-**Type:** class
-
-Persistence entity for the `nx_user_password` table. It stores
-local password hash material, password algorithm metadata, password versioning,
-failure/lock state, and expiry. It inherits audit fields from `BaseEntity`.
-Primary key `credentialId` and foreign key `userId` are 32-character string
-columns. Operators assign a prefixed ULID before insertion.
-
-### TABLE_NAME
-- **Signature:** `TABLE_NAME -> String`
-- **Description:** MyBatis-Plus and JPA table name, `nx_user_password`.
-
-### Indexes
-- `uk_nx_user_password_user_id` unique index on `user_id`
-
 ## UserOauthIdentityEntity
 
 **Type:** class

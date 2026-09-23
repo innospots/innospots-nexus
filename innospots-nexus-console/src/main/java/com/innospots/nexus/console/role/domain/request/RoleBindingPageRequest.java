@@ -7,12 +7,14 @@ import com.innospots.nexus.base.domain.request.SimpleQueryRequest;
 import com.innospots.nexus.console.role.domain.enums.RoleBindingSubjectType;
 
 /**
- * Paginated query for subjects bound to a role.
+ * 绑定到角色的主体的分页查询。
  *
- * @param input        fuzzy subject identifier
- * @param subjectType  optional USER or ORG_UNIT filter
- * @param pageNo       1-indexed page number
- * @param pageSize     page size
+ * @author Smars
+ * @date 2026/09/13
+ * @param input        fuzzy subject 标识符
+ * @param subjectType  可选 USER 或 ORG_UNIT filter
+ * @param pageNo       从 1 开始的页码
+ * @param pageSize     分页大小
  */
 public record RoleBindingPageRequest(
         @QueryParam("input") String input,

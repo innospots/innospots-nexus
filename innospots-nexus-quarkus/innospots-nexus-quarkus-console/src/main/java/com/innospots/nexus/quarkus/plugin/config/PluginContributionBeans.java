@@ -19,6 +19,9 @@ import com.innospots.nexus.core.plugin.contribution.PluginContributionSnapshotte
  * Console 插件 Contribution 三连 CDI 生产者。
  *
  * <p>为 app 模块的 {@link PluginHostLifecycle} 提供 Decoder、Handler 与 Snapshotter Bean。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @ApplicationScoped
 public class PluginContributionBeans {
@@ -88,3 +91,4 @@ public class PluginContributionBeans {
                 reservedPluginResourceCatalog));
     }
 }
+

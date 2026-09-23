@@ -15,7 +15,7 @@
     <packaging>jar</packaging>
 
     <name>innospots-nexus-console</name>
-    <description>Management console API module using Jakarta JAX-RS contracts.</description>
+    <description>使用 Jakarta JAX-RS 契约的管理控制台 API 模块。</description>
 
     <dependencies>
         <dependency>
@@ -33,6 +33,10 @@
         <dependency>
             <groupId>jakarta.transaction</groupId>
             <artifactId>jakarta.transaction-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-extension</artifactId>
         </dependency>
     </dependencies>
 </project>

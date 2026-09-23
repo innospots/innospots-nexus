@@ -3,5 +3,9 @@
  *
  * <p>未来菜单业务能力装配入口，仅属于管理控制台模块；
  * 与插件 Console Contribution 发布的动态菜单无关。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 package com.innospots.nexus.quarkus.menu.config;
+

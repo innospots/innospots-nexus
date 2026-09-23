@@ -15,6 +15,9 @@ import io.quarkus.runtime.StartupEvent;
  * 插件子系统 Quarkus 生命周期监听器。
  *
  * <p>在基础设施就绪后的 {@link StartupEvent} 中调用 {@link NexusStartup#run()}。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @ApplicationScoped
 public class PluginHostLifecycle {
@@ -64,3 +67,4 @@ public class PluginHostLifecycle {
         return managerHolder.requireManager();
     }
 }
+

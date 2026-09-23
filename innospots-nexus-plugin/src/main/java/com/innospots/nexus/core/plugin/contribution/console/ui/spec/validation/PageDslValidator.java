@@ -21,10 +21,13 @@ import com.innospots.nexus.core.plugin.contribution.console.ui.spec.node.DslRend
 import com.innospots.nexus.core.plugin.contribution.console.ui.spec.node.DslSourceRef;
 
 /**
- * Validates structural and cross-reference rules in a page DSL document.
+ * 校验页面 DSL 文档中的结构与交叉引用规则。
  *
- * <p>This validator implements the core schema boundary only. It does not prove that
- * components, actions, services, expressions, or permissions exist in the host runtime.</p>
+ * <p>本校验器仅实现核心 schema 边界，不证明组件、动作、服务、表达式或权限在宿主运行时
+ * 中存在。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class PageDslValidator {
 
@@ -32,10 +35,10 @@ public final class PageDslValidator {
             "GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS");
 
     /**
-     * Validates one complete page DSL document.
+     * 校验一个完整的页面 DSL 文档。
      *
-     * @param document page DSL to validate
-     * @throws com.innospots.nexus.base.exception.NexusException when a structural rule fails
+     * @param document 待校验的页面 DSL
+     * @throws com.innospots.nexus.base.exception.NexusException 结构规则不满足时
      */
     public void validate(PageDsl document) {
         if (document == null) {

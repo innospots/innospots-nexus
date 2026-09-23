@@ -14,7 +14,7 @@
     <artifactId>innospots-nexus-quarkus-service-deployment</artifactId>
 
     <name>innospots-nexus-quarkus-service-deployment</name>
-    <description>Quarkus build-time processors for standardized Nexus services.</description>
+    <description>标准化 Nexus 服务的 Quarkus 构建期 processor。</description>
 
     <dependencies>
         <dependency>

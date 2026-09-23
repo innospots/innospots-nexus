@@ -12,19 +12,26 @@ import com.innospots.nexus.console.permission.domain.entity.PermissionGrantEntit
 import com.innospots.nexus.console.catalog.domain.entity.ConsoleCatalogResourceEntity;
 import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
 import com.innospots.nexus.console.permission.domain.enums.PermissionSubjectType;
+import com.innospots.nexus.console.scope.ConsoleOwnership;
+import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
 
 /**
  * 基于标准化请求信息执行页面和 datasource 鉴权的核心组件。
  *
  * <p>本类只负责读取权限目录和授权记录并返回鉴权结果，不读取原始请求，也不生成 HTTP 响应。具体
  * Servlet Filter、Jakarta REST Filter 或其他运行时拦截器由应用适配层负责调用本类。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class RequestAuthorizer {
 
     private final ConsoleCatalogResourceDao resourceDao;
     private final PermissionGrantDao grantDao;
 
-    /** 使用权限目录和授权记录存储创建请求鉴权器。 */
+    /**
+     * 使用权限目录和授权记录存储创建请求鉴权器。
+     */
     public RequestAuthorizer(
             ConsoleCatalogResourceDao resourceDao,
             PermissionGrantDao grantDao
@@ -115,19 +122,22 @@ public final class RequestAuthorizer {
             AuthorizationSubject subject
     ) {
         List<PermissionGrantEntity> result = new ArrayList<>();
+        ConsoleOwnership ownership = ConsoleOwnershipScope.workspaceOwnership(workspaceId, null);
         if (!subject.roleIds().isEmpty()) {
-            result.addAll(grantDao.selectList(Wrappers.<PermissionGrantEntity>lambdaQuery()
-                    .eq(PermissionGrantEntity::getWorkspaceId, workspaceId)
-                    .eq(PermissionGrantEntity::getSubjectType, PermissionSubjectType.ROLE.name())
-                    .in(PermissionGrantEntity::getSubjectId, subject.roleIds())
-                    .eq(PermissionGrantEntity::getResourceId, resourceId)));
+            result.addAll(grantDao.selectList(ConsoleOwnershipScope.apply(
+                    Wrappers.<PermissionGrantEntity>lambdaQuery()
+                            .eq(PermissionGrantEntity::getSubjectType, PermissionSubjectType.ROLE.name())
+                            .in(PermissionGrantEntity::getSubjectId, subject.roleIds())
+                            .eq(PermissionGrantEntity::getResourceId, resourceId),
+                    ownership)));
         }
         if (!subject.orgUnitIds().isEmpty()) {
-            result.addAll(grantDao.selectList(Wrappers.<PermissionGrantEntity>lambdaQuery()
-                    .eq(PermissionGrantEntity::getWorkspaceId, workspaceId)
-                    .eq(PermissionGrantEntity::getSubjectType, PermissionSubjectType.ORG_UNIT.name())
-                    .in(PermissionGrantEntity::getSubjectId, subject.orgUnitIds())
-                    .eq(PermissionGrantEntity::getResourceId, resourceId)));
+            result.addAll(grantDao.selectList(ConsoleOwnershipScope.apply(
+                    Wrappers.<PermissionGrantEntity>lambdaQuery()
+                            .eq(PermissionGrantEntity::getSubjectType, PermissionSubjectType.ORG_UNIT.name())
+                            .in(PermissionGrantEntity::getSubjectId, subject.orgUnitIds())
+                            .eq(PermissionGrantEntity::getResourceId, resourceId),
+                    ownership)));
         }
         return result;
     }

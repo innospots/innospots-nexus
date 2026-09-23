@@ -7,7 +7,10 @@ import org.apache.ibatis.annotations.Mapper;
 import com.innospots.nexus.console.role.domain.entity.RoleBindingEntity;
 
 /**
- * MyBatis-Plus mapper for role-binding records.
+ * 角色绑定记录的 MyBatis-Plus Mapper。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @Mapper
 public interface RoleBindingDao extends BaseMapper<RoleBindingEntity> {

@@ -15,7 +15,7 @@
     <packaging>pom</packaging>
 
     <name>innospots-nexus-service</name>
-    <description>Framework-neutral service access and governance aggregator.</description>
+    <description>framework-neutral 服务接入与治理 aggregator。</description>
 
     <modules>
         <module>innospots-nexus-service-contract</module>
@@ -26,6 +26,7 @@
         <module>innospots-nexus-service-transfer</module>
         <module>innospots-nexus-service-observability</module>
         <module>innospots-nexus-service-governance</module>
+        <module>innospots-nexus-service-governance-redis</module>
         <module>innospots-nexus-service-adapter-test</module>
     </modules>
 </project>

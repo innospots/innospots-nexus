@@ -11,10 +11,13 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-import com.innospots.nexus.core.persistence.entity.TenantBaseEntity;
+import com.innospots.nexus.kernel.persistence.entity.TenantBaseEntity;
 
 /**
- * Association between an organization unit and a tenant member.
+ * 组织单元与租户成员之间的关联。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @Getter
 @Setter
@@ -29,26 +32,31 @@ public class OrganizationMemberEntity extends TenantBaseEntity {
     public static final String TABLE_NAME = "nx_organization_member";
 
     /**
-     * Association identifier.
+     * 关联标识符。
      */
     @TableId(type = IdType.ASSIGN_UUID)
     @Id
     @Column(length = 32, nullable = false)
     private String organizationMemberId;
+    /**
+     * 返回主键前缀。
+     * @return 操作结果
+     */
 
+    
     @Override
     public String idPrefix() {
         return "ogm";
     }
 
     /**
-     * Organization unit identifier.
+     * 组织单元标识符。
      */
     @Column(length = 32, nullable = false)
     private String unitId;
 
     /**
-     * Tenant membership identifier.
+     * 租户成员关系标识符。
      */
     @Column(length = 32, nullable = false)
     private String tenantMemberId;

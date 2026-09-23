@@ -11,6 +11,9 @@ import org.junit.jupiter.api.Test;
 import com.innospots.nexus.base.resources.FileResource;
 import com.innospots.nexus.base.resources.MetaResource;
 import com.innospots.nexus.base.resources.ResourceStore;
+import com.innospots.nexus.core.persistence.scope.OwnerType;
+import com.innospots.nexus.core.persistence.scope.OwnershipScope;
+import com.innospots.nexus.core.persistence.scope.PersistenceOwnership;
 import com.innospots.nexus.core.resource.dao.MetaResourceDao;
 import com.innospots.nexus.core.resource.domain.entity.MetaResourceEntity;
 import com.innospots.nexus.core.resource.storage.ResourceStorageRegistry;
@@ -52,6 +55,7 @@ class MetaResourceServiceTest {
         MetaResourceEntity entity = new MetaResourceEntity();
         entity.setResourceId("res-1");
         entity.setStoreMode("memory");
+        OwnershipScope.stamp(entity, new PersistenceOwnership(OwnerType.PLATFORM, null, "TENANT"));
         when(dao.selectById("res-1")).thenReturn(entity);
         MetaResourceService service = new MetaResourceService(
                 dao, new ResourceStorageRegistry().register(store));

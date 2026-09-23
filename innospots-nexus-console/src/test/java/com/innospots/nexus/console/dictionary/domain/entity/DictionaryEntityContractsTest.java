@@ -12,7 +12,7 @@ import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import org.junit.jupiter.api.Test;
 
-import com.innospots.nexus.core.persistence.entity.WorkspaceBaseEntity;
+import com.innospots.nexus.core.persistence.entity.OwnershipEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -23,8 +23,8 @@ class DictionaryEntityContractsTest {
         assertPersistenceTable(DictionaryTypeEntity.class, "nx_dictionary_type");
         assertPersistenceTable(DictionaryItemEntity.class, "nx_dictionary_item");
 
-        assertThat(DictionaryTypeEntity.class.getSuperclass()).isEqualTo(WorkspaceBaseEntity.class);
-        assertThat(DictionaryItemEntity.class.getSuperclass()).isEqualTo(WorkspaceBaseEntity.class);
+        assertThat(DictionaryTypeEntity.class.getSuperclass()).isEqualTo(OwnershipEntity.class);
+        assertThat(DictionaryItemEntity.class.getSuperclass()).isEqualTo(OwnershipEntity.class);
         assertThat(new DictionaryTypeEntity().idPrefix()).isEqualTo("dct");
         assertThat(new DictionaryItemEntity().idPrefix()).isEqualTo("dci");
     }
@@ -35,7 +35,6 @@ class DictionaryEntityContractsTest {
         assertField(DictionaryTypeEntity.class, "dictionaryTypeId", String.class, 32, false);
         assertField(DictionaryTypeEntity.class, "typeCode", String.class, 64, false);
         assertField(DictionaryTypeEntity.class, "typeName", String.class, 128, false);
-        assertField(DictionaryTypeEntity.class, "securityRealm", String.class, 32, false);
         assertField(DictionaryTypeEntity.class, "status", String.class, 32, false);
         assertField(DictionaryTypeEntity.class, "sortOrder", Integer.class, 255, false);
         assertField(DictionaryTypeEntity.class, "builtIn", Boolean.class, 255, false);
@@ -48,7 +47,6 @@ class DictionaryEntityContractsTest {
         assertField(DictionaryItemEntity.class, "typeCode", String.class, 64, false);
         assertField(DictionaryItemEntity.class, "itemValue", String.class, 64, false);
         assertField(DictionaryItemEntity.class, "itemName", String.class, 128, false);
-        assertField(DictionaryItemEntity.class, "securityRealm", String.class, 32, false);
         assertField(DictionaryItemEntity.class, "status", String.class, 32, false);
         assertField(DictionaryItemEntity.class, "sortOrder", Integer.class, 255, false);
         assertField(DictionaryItemEntity.class, "builtIn", Boolean.class, 255, false);
@@ -57,17 +55,13 @@ class DictionaryEntityContractsTest {
     @Test
     void dictionaryEntitiesDeclareRealmAwareIndexes() {
         assertIndex(DictionaryTypeEntity.class, "uk_nx_dictionary_type_code",
-                "workspace_id,security_realm,type_code", true);
+                "owner_type,owner_id,security_realm,type_code", true);
         assertIndex(DictionaryTypeEntity.class, "idx_nx_dictionary_type_status",
-                "workspace_id,status", false);
-        assertIndex(DictionaryTypeEntity.class, "idx_nx_dictionary_type_realm",
-                "security_realm", false);
+                "owner_type,owner_id,status", false);
         assertIndex(DictionaryItemEntity.class, "uk_nx_dictionary_item_value",
-                "workspace_id,security_realm,type_code,item_value", true);
+                "owner_type,owner_id,security_realm,type_code,item_value", true);
         assertIndex(DictionaryItemEntity.class, "idx_nx_dictionary_item_type",
-                "workspace_id,type_code,sort_order", false);
-        assertIndex(DictionaryItemEntity.class, "idx_nx_dictionary_item_realm",
-                "security_realm", false);
+                "owner_type,owner_id,type_code,sort_order", false);
     }
 
     private static void assertPersistenceTable(Class<?> entityType, String tableName) {

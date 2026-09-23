@@ -1,6 +1,6 @@
-# Base 基础类补齐 Implementation Plan
+# Base 基础类补齐实施计划
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **面向 agent 工作者：** 必需子技能：使用 superpowers:subagent-driven-development（推荐）或 superpowers:executing-plans 按任务逐步实施本计划。步骤使用 checkbox（`- [ ]`）语法跟踪进度。
 
 **Goal:** 分三阶段补齐 `innospots-nexus-base` 日常开发助手，去掉上层重复样板，对齐 ID/分页类型。
 
@@ -10,7 +10,7 @@
 
 **Spec:** 对照当前 base 源码与 kernel/console/platform 调用点，不复制旧 Innospots。
 
-## Global Constraints
+## 全局约束
 
 - `innospots-nexus-base` 保持 middleware-free（无 Spring / Servlet / DB）
 - 不含业务域逻辑
@@ -85,7 +85,7 @@
 |---|---|---|
 | 新增 | `base/.../util/Tree.java` | `of(list, idFn, parentIdFn, childrenSetter)`，根节点 parentId 为 null/blank |
 | 新增 | `base/.../util/TreeTest.java` | 两层树、孤儿节点、空列表 |
-| 修改 | `base/.../status/NexusStatusCode.java` | javadoc：fullCode 是 9 位（`NEX`+2+4），不是 6/7 位 |
+| 修改 | `base/.../status/NexusStatusCode.java` | javadoc：fullCode 是 9 位（`AIO`+2+4），不是 6/7 位 |
 | 可选 | console 菜单 VO 组装、权限 catalog | 改用 `Tree.of`，仅在有现成列表→树逻辑时替换，不借机重构 |
 
 本阶段明确不做：

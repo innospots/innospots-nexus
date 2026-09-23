@@ -1,4 +1,4 @@
-# Core Plugin Installation and Extension Removal Design
+# Core 插件安装与 Extension 移除设计
 
 > 本文保留为改造决策记录。现行规范已经拆分到
 > `innospots-nexus-plugin/docs/plugin/design/plugin-installation-design.md`、

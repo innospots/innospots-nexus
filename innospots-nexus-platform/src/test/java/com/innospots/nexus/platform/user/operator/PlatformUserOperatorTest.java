@@ -6,13 +6,12 @@ import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
 
 import com.innospots.nexus.base.exception.NexusException;
-import com.innospots.nexus.base.util.CryptoUtils;
-import com.innospots.nexus.console.credential.api.PasswordDecryptor;
+import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
+import com.innospots.nexus.console.credential.password.PasswordDecryptor;
+import com.innospots.nexus.console.credential.password.service.CredentialService;
 import com.innospots.nexus.core.persistence.id.DbPrimaryGenerator;
 import com.innospots.nexus.platform.user.dao.PlatformUserDao;
-import com.innospots.nexus.platform.user.dao.PlatformUserPasswordDao;
 import com.innospots.nexus.platform.user.domain.entity.PlatformUserEntity;
-import com.innospots.nexus.platform.user.domain.entity.PlatformUserPasswordEntity;
 import com.innospots.nexus.platform.user.domain.enums.PlatformUserStatus;
 import com.innospots.nexus.platform.user.domain.request.PlatformUserCreateRequest;
 import com.innospots.nexus.platform.user.domain.vo.PlatformUserVo;
@@ -32,7 +31,7 @@ class PlatformUserOperatorTest {
     @Test
     void createWithPasswordPersistsUserThenCredential() {
         PlatformUserDao userDao = mock(PlatformUserDao.class);
-        PlatformUserPasswordDao passwordDao = mock(PlatformUserPasswordDao.class);
+        CredentialService credentialService = mock(CredentialService.class);
         PasswordDecryptor decryptor = mock(PasswordDecryptor.class);
         DbPrimaryGenerator generator = new DbPrimaryGenerator();
         doAnswer(invocation -> {
@@ -40,14 +39,9 @@ class PlatformUserOperatorTest {
             entity.setPlatformUserId(generator.nextUUID(entity));
             return 1;
         }).when(userDao).insert(any(PlatformUserEntity.class));
-        doAnswer(invocation -> {
-            PlatformUserPasswordEntity entity = invocation.getArgument(0);
-            entity.setCredentialId(generator.nextUUID(entity));
-            return 1;
-        }).when(passwordDao).insert(any(PlatformUserPasswordEntity.class));
         when(decryptor.decrypt(eq("front-encrypted-password"))).thenReturn("raw-secret");
 
-        PlatformUserVo created = new PlatformUserOperator(userDao, passwordDao, decryptor)
+        PlatformUserVo created = new PlatformUserOperator(userDao, credentialService, decryptor)
                 .createWithPassword(new PlatformUserCreateRequest(
                         "ops.alice",
                         "Alice",
@@ -61,20 +55,17 @@ class PlatformUserOperatorTest {
         assertThat(created.loginName()).isEqualTo("ops.alice");
         assertThat(created.status()).isEqualTo(PlatformUserStatus.ACTIVE.name());
         verify(decryptor).decrypt("front-encrypted-password");
-
-        ArgumentCaptor<PlatformUserPasswordEntity> credentialCaptor = forClass(PlatformUserPasswordEntity.class);
-        verify(passwordDao).insert(credentialCaptor.capture());
-        PlatformUserPasswordEntity credential = credentialCaptor.getValue();
-        assertThat(credential.getCredentialId()).startsWith("ppc");
-        assertThat(credential.getPlatformUserId()).isEqualTo(created.platformUserId());
-        assertThat(CryptoUtils.matchesPassword("raw-secret", credential.getPasswordHash())).isTrue();
+        verify(credentialService).enrollPassword(
+                eq(SecurityRealm.PLATFORM),
+                eq(created.platformUserId()),
+                eq("raw-secret"));
     }
 
     @Test
     void createWithPasswordRejectsMissingLoginName() {
         PlatformUserOperator operator = new PlatformUserOperator(
                 mock(PlatformUserDao.class),
-                mock(PlatformUserPasswordDao.class),
+                mock(CredentialService.class),
                 mock(PasswordDecryptor.class));
 
         assertThatThrownBy(() -> operator.createWithPassword(new PlatformUserCreateRequest(

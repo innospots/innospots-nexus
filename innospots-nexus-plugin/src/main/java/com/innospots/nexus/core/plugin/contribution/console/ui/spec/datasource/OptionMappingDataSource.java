@@ -6,7 +6,7 @@ import com.innospots.nexus.core.plugin.contribution.console.ui.spec.PaginationCo
 import lombok.Getter;
 import lombok.Setter;
 
-/** Shared option-mapping and auto-load fields for concrete data source types. */
+/** 具体数据源类型共享的选项映射与自动加载字段。 */
 @Getter
 @Setter
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)

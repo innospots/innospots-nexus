@@ -5,12 +5,17 @@ import cn.hutool.core.text.CharSequenceUtil;
 import java.util.regex.Pattern;
 
 /**
- * Validation rules for status code formatting.
+ * 状态码格式校验规则。
  * <ul>
- *   <li>Module: exactly 3 uppercase letters (e.g. {@code NEX})</li>
- *   <li>Category: non-null {@link StatusCategory}</li>
- *   <li>Local code: exactly 4 digits (e.g. {@code 0001})</li>
+ *   <li>模块码：恰好 3 个大写字母（如 {@code AIO}）</li>
+ *   <li>分类：非 null 的 {@link StatusCategory}</li>
+ *   <li>本地码：恰好 4 位数字（如 {@code 0001}）</li>
  * </ul>
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @see StatusCode
+ * @see StatusCategory
  */
 public final class StatusCodeRules {
 
@@ -20,6 +25,14 @@ public final class StatusCodeRules {
     private StatusCodeRules() {
     }
 
+    /**
+     * 校验状态码各组成部分的格式合法性。
+     *
+     * @param module    模块码
+     * @param category  状态分类
+     * @param localCode 本地码
+     * @throws IllegalArgumentException 格式不合法时
+     */
     public static void requireValid(String module, StatusCategory category, String localCode) {
         if (!MODULE_PATTERN.matcher(CharSequenceUtil.nullToEmpty(module)).matches()) {
             throw new IllegalArgumentException("Status module code must be three uppercase letters");

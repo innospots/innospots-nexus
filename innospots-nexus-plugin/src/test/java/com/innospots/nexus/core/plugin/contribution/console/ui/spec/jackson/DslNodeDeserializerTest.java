@@ -15,7 +15,9 @@ import lombok.Setter;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests {@link DslNodeDeserializer} for body and placeholder node binding.
+ * 测试 {@link DslNodeDeserializer} 对 body 与占位节点的绑定。
+ * @author Smars
+ * @date 2026/09/13
  */
 class DslNodeDeserializerTest {
 

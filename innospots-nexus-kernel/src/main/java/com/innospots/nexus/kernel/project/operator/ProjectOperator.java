@@ -10,7 +10,10 @@ import com.innospots.nexus.kernel.project.dao.ProjectDao;
 import com.innospots.nexus.kernel.project.domain.entity.ProjectEntity;
 
 /**
- * Workspace project data operator backed by MyBatis-Plus DAO objects.
+ * 基于 MyBatis-Plus DAO 的工作区项目数据操作器。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @RequiredArgsConstructor
 public class ProjectOperator {
@@ -18,12 +21,12 @@ public class ProjectOperator {
     private final ProjectDao projectDao;
 
     /**
-     * Finds a project snapshot scoped to the given tenant and workspace.
+     * 查找给定租户与工作区作用域内的项目快照。
      *
-     * @param tenantId    owning tenant identifier
-     * @param workspaceId owning workspace identifier
-     * @param projectId   project identifier
-     * @return project snapshot when found and scope matches
+     * @param tenantId    owning tenant 标识符
+     * @param workspaceId owning workspace 标识符
+     * @param projectId   project 标识符
+     * @return project 找到且作用域匹配时返回的快照
      */
     public Optional<ProjectSnapshot> findSnapshot(String tenantId, String workspaceId, String projectId) {
         if (tenantId == null || workspaceId == null || projectId == null) {

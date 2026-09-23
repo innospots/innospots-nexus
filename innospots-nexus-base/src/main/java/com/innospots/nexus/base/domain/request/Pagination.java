@@ -1,7 +1,11 @@
 package com.innospots.nexus.base.domain.request;
 
 /**
- * Shared pagination defaults and normalization for query requests.
+ * 查询请求共享的分页默认值与规范化逻辑。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @see SimpleQueryRequest
  */
 public final class Pagination {
 
@@ -12,10 +16,10 @@ public final class Pagination {
     }
 
     /**
-     * Returns {@code pageNo} when it is at least 1, otherwise {@link #DEFAULT_PAGE_NO}.
+     * 当 {@code pageNo} 至少为 1 时返回该值，否则返回 {@link #DEFAULT_PAGE_NO}。
      *
-     * @param pageNo requested page number
-     * @return a 1-indexed page number
+     * @param pageNo 请求的页码
+     * @return 从 1 开始的页码
      */
     public static long normalizePageNo(long pageNo) {
         if (pageNo < 1) {
@@ -25,10 +29,10 @@ public final class Pagination {
     }
 
     /**
-     * Returns {@code pageSize} when it is at least 1, otherwise {@link #DEFAULT_PAGE_SIZE}.
+     * 当 {@code pageSize} 至少为 1 时返回该值，否则返回 {@link #DEFAULT_PAGE_SIZE}。
      *
-     * @param pageSize requested page size
-     * @return a positive page size
+     * @param pageSize 请求的每页记录数
+     * @return 正数的每页记录数
      */
     public static long normalizePageSize(long pageSize) {
         if (pageSize < 1) {

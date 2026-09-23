@@ -2,6 +2,10 @@ package com.innospots.nexus.core.bootstrap;
 
 /**
  * 框架无关的启动后初始化步骤。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @see NexusStartup
  */
 public interface NexusStartupTask {
 

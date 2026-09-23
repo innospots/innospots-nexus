@@ -1,84 +1,69 @@
 # innospots-nexus
 
-`innospots-nexus` is the lightweight foundation for a new AI enterprise platform.
-The project is built incrementally from simple platform capabilities toward
-plugins, extensions, and applications.
+`innospots-nexus` 是新一代 AI 企业平台的轻量级基础工程。
+项目从简单的平台能力起步，逐步演进为插件、扩展与应用体系。
 
-## Coordinates
+## 坐标
 
 - Group: `com.innospots`
 - Artifact: `innospots-nexus`
 - Version property: `revision`
-- Current version: `0.1.0-SNAPSHOT`
+- Current version: `1.0.0-SNAPSHOT`
 - JDK: 25
 - Build: Maven
 
-## Version Management
+## 版本管理
 
-The project uses Maven CI-friendly versions. Keep the single source of truth in
-the root `pom.xml`:
+项目采用 Maven CI-friendly 版本管理。在根 `pom.xml` 中保持单一事实来源：
 
 ```xml
-<revision>0.1.0-SNAPSHOT</revision>
+<revision>1.0.0-SNAPSHOT</revision>
 ```
 
-Module parent versions and internal dependency versions should reference
-`${revision}`. The `flatten-maven-plugin` is bound to the build to generate
-resolved consumer POMs. Generated `.flattened-pom.xml` files are ignored by git.
+模块 parent 版本与内部依赖版本应引用 `${revision}`。`flatten-maven-plugin`
+绑定到构建流程以生成解析后的 consumer POM。生成的 `.flattened-pom.xml` 文件由 git 忽略。
 
-## Design Principles
+## 设计原则
 
-- Domain-driven design first: modules should express domain, application,
-  port, extension, and infrastructure boundaries clearly.
-- Minimal dependencies: the base framework should only provide foundational
-  platform capability.
-- No Spring hard dependency in the foundation: Spring can be introduced by
-  adapters or application modules when a concrete runtime needs it.
-- Developer-driven code creation: old project code may be read for context, but
-  must not be copied, moved, or mechanically rewritten into this repository.
-- Incremental growth: add modules only after their domain boundary, dependency
-  direction, and test strategy are explicit.
+- 领域驱动设计优先：模块应清晰表达领域、应用、端口、扩展与基础设施边界。
+- 最小依赖：基础框架只提供 foundational 平台能力。
+- 基础层不硬依赖 Spring：当具体运行时需要时，由 adapter 或 application 模块引入 Spring。
+- 开发者驱动代码创建：可阅读旧项目代码以理解上下文，但不得复制、迁移或机械改写到本仓库。
+- 增量演进：仅在领域边界、依赖方向与测试策略明确后再新增模块。
 
-## Modules
+## 模块
 
 ### `innospots-nexus-parent`
 
-Build parent for internal Java modules. It imports the project BOM, centralizes
-plugin configuration, enforces the JDK/Maven baseline, and provides shared
-module dependencies such as SLF4J API, Lombok, and test libraries.
+内部 Java 模块的构建 parent。它导入项目 BOM、集中管理插件配置、
+强制 JDK/Maven 基线，并提供 SLF4J API、Lombok、测试库等共享模块依赖。
 
 ### `innospots-nexus-bom`
 
-Dependency management for internal modules and extension candidates. The BOM
-keeps versions centralized without forcing downstream modules to inherit a
-Spring Boot parent or runtime. It should remain dependency-management only and
-must not define inherited module dependencies.
+内部模块与扩展候选的依赖管理。BOM 集中管理版本，不要求下游模块继承
+Spring Boot parent 或 runtime。它应仅做 dependency-management，
+不得定义继承的模块依赖。
 
 ### `innospots-nexus-base`
 
-Pure Java base module. This module is reserved for code-level contracts and
-small utilities only. It must not depend on databases, caches, message brokers,
-HTTP runtimes, Spring, or other middleware.
+纯 Java 基础模块。此模块仅用于代码级契约与小型工具。
+不得依赖数据库、缓存、消息 broker、HTTP runtime、Spring 或其他中间件。
 
-The first initialization only creates the module and source directories. No Java
-implementation is generated in this stage.
+首次初始化只创建模块与源码目录。此阶段不生成 Java 实现。
 
 ### `innospots-nexus-core`
 
-Core platform module for domain, application, port, and extension boundaries. It
-may depend on `innospots-nexus-base` and may define interface-level middleware
-ports later, but it should not provide Spring Boot starters, database
-auto-configuration, or concrete infrastructure implementations in the foundation
-stage.
+Core 平台模块，承载领域、应用、端口与扩展边界。可依赖 `innospots-nexus-base`，
+后续可定义 interface 级中间件 port，但在 foundation 阶段不应提供
+Spring Boot starter、数据库 auto-configuration 或具体基础设施实现。
 
-## Reference Project Policy
+## 参考项目策略
 
-The previous project at `/Users/yxy/works/innospots_ent/innospots_premium` is a
-reference only. Use it to understand product history, naming pressure, and broad
-module responsibilities. Do not copy source files, POM fragments, package
-layouts, or implementation details directly.
+旧项目位于 `/Users/yxy/works/innospots_ent/innospots_premium`，仅作参考。
+可用于理解产品历史、命名压力与大致模块职责。不得直接复制源文件、
+POM 片段、包布局或实现细节。
 
-## Build
+## 构建
 
 ```bash
 mvn validate
@@ -86,5 +71,4 @@ mvn test
 mvn -q help:effective-pom
 ```
 
-The build enforces JDK 25. If Maven runs with an older local JDK, validation is
-expected to fail until the local toolchain is switched to JDK 25.
+构建强制 JDK 25。若 Maven 使用较旧的本地 JDK，在切换到 JDK 25 之前验证失败是预期行为。

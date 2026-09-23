@@ -6,36 +6,36 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 /**
- * Renders a {@link Factor} into a script/expression language (e.g. MVEL, SpEL)
- * string. Numeric values are left unquoted; strings are single-quoted.
- * {@code IN} and {@code NOT_IN} operators use {@code include(...)} /
- * {@code notInclude(...)} helper functions; {@code LIKE} uses
- * {@code regexMatch(...)}.
+ * 将 {@link Factor} 渲染为脚本/表达式语言（如 MVEL、SpEL）字符串。数值不加引号；字符串使用单引号。
+ * {@code IN}/{@code NOT_IN} 使用 {@code include(...)}/{@code notInclude(...)}；{@code LIKE} 使用 {@code regexMatch(...)}。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @see IFactorStatement
  */
 public class ScriptFactorStatement implements IFactorStatement {
 
     /**
-     * Normalizes a value for script/expression language output.
-     * The {@code M} suffix denotes BigDecimal literals in some expression
-     * languages (e.g. MVEL); values with this suffix are passed through raw.
+     * 将值规范化为脚本/表达式语言输出。
+     * {@code M} 后缀表示某些表达式语言（如 MVEL）中的 BigDecimal 字面量；带此后缀的值原样传递。
      *
-     * @param value     the raw value to normalize
-     * @param valueType the expected value type, may be null
-     * @param operator  the operator, used to detect range operators
-     * @return the normalized value (String for quoted, Number for unquoted)
+     * @param value     待规范化的原始值
+     * @param valueType 期望的值类型，可为 null
+     * @param operator  运算符，用于识别范围运算符
+     * @return 规范化后的值（字符串加引号，数值不加引号）
      */
     @Override
     public Object normalizeValue(Object value, FieldValueType valueType, Operator operator) {
         if (valueType == null) {
-            // Without a declared type, treat Number and BigDecimal literals as-is
+            // 未声明类型时，Number 与 BigDecimal 字面量原样传递
             if (value instanceof Number) {
                 return value;
             }
-            // BigDecimal MVEL literal (e.g. 10.5M)
+            // BigDecimal MVEL 字面量（如 10.5M）
             if (value != null && value.toString().endsWith("M")) {
                 return value;
             }
-            // Range operator values are left unquoted for arithmetic comparison
+            // 范围运算符的值不加引号以便算术比较
             if (operator != null && operator.isRange()) {
                 return value;
             }
@@ -51,7 +51,7 @@ public class ScriptFactorStatement implements IFactorStatement {
             }
             return valueType.convert(value);
         }
-        // Pass through BigDecimal literals and range values for non-numeric types
+        // 非数值类型也原样传递 BigDecimal 字面量与范围值
         if (value != null && (value.toString().endsWith("M") || (operator != null && operator.isRange()))) {
             return value;
         }
@@ -64,7 +64,7 @@ public class ScriptFactorStatement implements IFactorStatement {
     }
 
     /**
-     * Renders a single factor as a script expression.
+     * 将单个因子渲染为脚本表达式。
      * <ul>
      *   <li>Comparison operators: {@code field == value}</li>
      *   <li>IN/NOT_IN: {@code include(seq.set(v1,v2), field)}</li>
@@ -79,16 +79,16 @@ public class ScriptFactorStatement implements IFactorStatement {
         }
         StringBuilder stmt = new StringBuilder();
         switch (factor.operator()) {
-            // Null/unary checks: field == null / field != null (bare keyword, not quoted)
+            // 空值/一元检查：field == null / field != null（裸关键字，不加引号）
             case IS_NULL ->
                     stmt.append(factor.code()).append(" == null");
             case IS_NOT_NULL, HAS_VALUE ->
                     stmt.append(factor.code()).append(" != null");
-            // Simple binary operators: code op normalizedValue
+            // 简单二元运算符：code op normalizedValue
             case EQUAL, LESS, NOT_EQUAL, GREATER, LESS_EQUAL, GREATER_EQUAL ->
                     stmt.append(factor.code()).append(factor.operator().scriptSymbol())
                             .append(normalizeValue(factor));
-            // IN -> include(seq.set(vals), field)
+            // IN 映射为 include(seq.set(vals), field)
             case IN -> {
                 if (factor.value() instanceof Collection<?> col) {
                     String vs = col.stream()
@@ -99,7 +99,7 @@ public class ScriptFactorStatement implements IFactorStatement {
                     stmt.append("include(seq.set(").append(normalizeValue(factor)).append("),").append(factor.code()).append(")");
                 }
             }
-            // NOT_IN -> notInclude(seq.set(vals), field)
+            // NOT_IN 映射为 notInclude(seq.set(vals), field)
             case NOT_IN -> {
                 if (factor.value() instanceof Collection<?> col) {
                     String vs = col.stream()
@@ -110,10 +110,10 @@ public class ScriptFactorStatement implements IFactorStatement {
                     stmt.append("notInclude(seq.set(").append(normalizeValue(factor)).append("),").append(factor.code()).append(")");
                 }
             }
-            // LIKE -> regexMatch(pattern, field)
+            // LIKE 映射为 regexMatch(pattern, field)
             case LIKE -> stmt.append("regexMatch(").append(normalizeValue(factor))
                     .append(",").append(factor.code()).append(")");
-            // BETWEEN -> field >= start && field <= end
+            // BETWEEN 展开为 field >= start && field <= end
             case BETWEEN -> {
                 if (factor.value() instanceof Collection<?> col) {
                     int i = 0;

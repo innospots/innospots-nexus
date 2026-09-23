@@ -7,7 +7,9 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests YAML deserialization for {@link ComputedDataSource}.
+ * 测试 {@link ComputedDataSource} 的 YAML 反序列化。
+ * @author Smars
+ * @date 2026/09/13
  */
 class ComputedDataSourceDeserializationTest {
 

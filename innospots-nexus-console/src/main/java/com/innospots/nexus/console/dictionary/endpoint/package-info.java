@@ -1,4 +1,6 @@
 /**
- * Dictionary type and item HTTP endpoints.
+ * 字典类型与字典项 HTTP 端点。
+ * @author Smars
+ * @date 2026/09/13
  */
 package com.innospots.nexus.console.dictionary.endpoint;

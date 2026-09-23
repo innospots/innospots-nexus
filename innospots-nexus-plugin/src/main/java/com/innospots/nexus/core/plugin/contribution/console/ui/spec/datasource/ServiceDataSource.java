@@ -9,8 +9,10 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Service-registry-backed data source. Preferred for business pages because DSL does not
- * bind directly to HTTP endpoints.
+ * 服务注册表支持的数据源；业务页面首选，因 DSL 不直接绑定 HTTP 端点。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @Getter
 @Setter
