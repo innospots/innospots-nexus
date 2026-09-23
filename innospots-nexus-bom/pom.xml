@@ -126,6 +126,16 @@
             </dependency>
             <dependency>
                 <groupId>com.innospots</groupId>
+                <artifactId>innospots-nexus-spring-kernel</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.innospots</groupId>
+                <artifactId>innospots-nexus-spring-platform</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.innospots</groupId>
                 <artifactId>innospots-nexus-quarkus-app</artifactId>
                 <version>${revision}</version>
             </dependency>

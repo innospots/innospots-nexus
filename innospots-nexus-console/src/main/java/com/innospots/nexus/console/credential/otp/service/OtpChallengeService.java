@@ -39,7 +39,7 @@ import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
  * @see com.innospots.nexus.console.credential.otp.domain.entity.OtpChallengeEntity
  * @see com.innospots.nexus.console.credential.otp.policy.OtpPolicy
  */
-public final class OtpChallengeService {
+public class OtpChallengeService {
 
     private static final SecureRandom RANDOM = new SecureRandom();
 

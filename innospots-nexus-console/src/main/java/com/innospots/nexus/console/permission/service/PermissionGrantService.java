@@ -33,7 +33,7 @@ import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
  * @author Smars
  * @date 2026/09/13
  */
-public final class PermissionGrantService {
+public class PermissionGrantService {
 
     private final PermissionGrantDao grantDao;
     private final ConsoleCatalogResourceDao resourceDao;

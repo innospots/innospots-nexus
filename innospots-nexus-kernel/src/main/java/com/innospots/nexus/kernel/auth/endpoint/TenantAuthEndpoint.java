@@ -7,6 +7,9 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import lombok.RequiredArgsConstructor;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+
 import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.status.NexusStatusCode;
@@ -33,6 +36,7 @@ import com.innospots.nexus.kernel.user.operator.UserOperator;
 @Path("/tenant/auth")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Tag(name = "TenantAuth", description = "租户域认证与注册")
 @RequiredArgsConstructor
 public class TenantAuthEndpoint {
 
@@ -71,6 +75,7 @@ public class TenantAuthEndpoint {
 
     @POST
     @Path("/login")
+    @Operation(operationId = "tenantAuthLogin", summary = "租户域登录")
     public R<AuthTokenVo> login(AuthLoginRequest request) {
         return R.ok(tenantAuthFacade.login(request));
     }

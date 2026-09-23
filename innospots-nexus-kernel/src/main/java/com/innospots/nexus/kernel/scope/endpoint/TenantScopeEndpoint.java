@@ -6,7 +6,11 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+
 import com.innospots.nexus.base.domain.response.R;
+import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 import com.innospots.nexus.kernel.scope.domain.request.SelectProjectRequest;
 import com.innospots.nexus.kernel.scope.domain.request.SelectWorkspaceRequest;
 import com.innospots.nexus.console.auth.domain.vo.AuthTokenVo;
@@ -17,6 +21,8 @@ import com.innospots.nexus.console.auth.domain.vo.AuthTokenVo;
 @Path("/tenant/scope")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Tag(name = "TenantScope", description = "工作区与项目作用域选择")
+@NexusAuthenticatedApi
 public interface TenantScopeEndpoint {
 
     /**
@@ -27,6 +33,7 @@ public interface TenantScopeEndpoint {
      */
     @POST
     @Path("/select-workspace")
+    @Operation(operationId = "tenantScopeSelectWorkspace", summary = "选择工作区")
     R<AuthTokenVo> selectWorkspace(SelectWorkspaceRequest request);
 
     /**

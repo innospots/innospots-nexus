@@ -1,9 +1,8 @@
-package com.innospots.nexus.sample.spring.platform.config;
+package com.innospots.nexus.spring.platform.config;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,17 +17,20 @@ import com.innospots.nexus.console.config.AuthConfig;
 import com.innospots.nexus.console.credential.otp.service.CaptchaChallengeService;
 import com.innospots.nexus.console.credential.password.PasswordDecryptor;
 import com.innospots.nexus.console.credential.password.PasswordVerificationOperator;
-import com.innospots.nexus.console.credential.password.RsaPasswordDecryptor;
 import com.innospots.nexus.console.credential.password.service.CredentialService;
 import com.innospots.nexus.console.scope.service.SessionScopeBinder;
-import com.innospots.nexus.platform.scope.PlatformSessionScopeBinder;
 import com.innospots.nexus.platform.auth.adapter.PlatformUserDirectory;
 import com.innospots.nexus.platform.auth.endpoint.PlatformAuthEndpoint;
 import com.innospots.nexus.platform.auth.operator.PlatformPasswordOperator;
+import com.innospots.nexus.platform.scope.PlatformSessionScopeBinder;
 import com.innospots.nexus.platform.user.dao.PlatformUserDao;
 
 /**
- * 运营平台示例：{@code console.auth} 与 platform 认证端点装配（不依赖 kernel）。
+ * platform 运维域认证与用户相关 Spring 装配。
+ *
+ * @author Smars
+ * @date 2026/09/23
+ * @see PlatformAuthEndpoint
  */
 @Configuration
 @MapperScan(
@@ -38,31 +40,7 @@ import com.innospots.nexus.platform.user.dao.PlatformUserDao;
         annotationClass = Mapper.class,
         sqlSessionFactoryRef = "sqlSessionFactory")
 @ConditionalOnProperty(prefix = "nexus.console.auth.rsa", name = "private-key")
-public class PlatformSampleConsoleAuthConfiguration {
-
-    @Bean
-    AuthConfig authConfig(
-            @Value("${nexus.console.auth.token-secret:}") String tokenSecret,
-            @Value("${nexus.console.auth.access-token-ttl-seconds:7200}") long accessTtl,
-            @Value("${nexus.console.auth.refresh-token-ttl-seconds:604800}") long refreshTtl,
-            @Value("${nexus.console.auth.tenant-login-captcha-enabled:true}") boolean tenantLoginCaptchaEnabled,
-            @Value("${nexus.console.auth.platform-login-captcha-enabled:true}") boolean platformLoginCaptchaEnabled) {
-        AuthConfig config = new AuthConfig();
-        if (tokenSecret != null && !tokenSecret.isBlank()) {
-            config.setTokenSecret(tokenSecret);
-        }
-        config.setAccessTokenTtlSeconds(accessTtl);
-        config.setRefreshTokenTtlSeconds(refreshTtl);
-        config.setTenantLoginCaptchaEnabled(tenantLoginCaptchaEnabled);
-        config.setPlatformLoginCaptchaEnabled(platformLoginCaptchaEnabled);
-        return config;
-    }
-
-    @Bean
-    PasswordDecryptor passwordDecryptor(
-            @Value("${nexus.console.auth.rsa.private-key}") String privateKey) {
-        return new RsaPasswordDecryptor(privateKey);
-    }
+public class PlatformAuthConfiguration {
 
     @Bean
     PlatformUserDirectory platformUserDirectory(PlatformUserDao platformUserDao) {

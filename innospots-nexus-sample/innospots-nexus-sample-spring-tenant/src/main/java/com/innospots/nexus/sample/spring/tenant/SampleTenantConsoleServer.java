@@ -2,17 +2,14 @@ package com.innospots.nexus.sample.spring.tenant;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Import;
 
-import com.innospots.nexus.sample.spring.tenant.config.TenantSampleConsoleAuthConfiguration;
-import com.innospots.nexus.spring.console.EnableNexusConsole;
+import com.innospots.nexus.spring.kernel.EnableNexusKernel;
 
 /**
  * 示例：租户管理控制台可执行入口。
  */
 @SpringBootApplication
-@EnableNexusConsole
-@Import(TenantSampleConsoleAuthConfiguration.class)
+@EnableNexusKernel
 public class SampleTenantConsoleServer {
 
     /**

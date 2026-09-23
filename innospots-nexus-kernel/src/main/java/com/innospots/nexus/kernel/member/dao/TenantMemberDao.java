@@ -1,5 +1,7 @@
 package com.innospots.nexus.kernel.member.dao;
 
+import org.apache.ibatis.annotations.Mapper;
+
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 import com.innospots.nexus.kernel.member.domain.entity.TenantMemberEntity;
@@ -10,5 +12,6 @@ import com.innospots.nexus.kernel.member.domain.entity.TenantMemberEntity;
  * @author Smars
  * @date 2026/09/13
  */
+@Mapper
 public interface TenantMemberDao extends BaseMapper<TenantMemberEntity> {
 }

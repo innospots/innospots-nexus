@@ -11,7 +11,7 @@ class OpenApiBuildContractsTest {
 
     @Test
     void buildGeneratesConsoleOpenApiSpec() throws Exception {
-        Path spec = Path.of("target/generated/openapi/openapi.yaml");
+        Path spec = Path.of("target/generated/openapi/innospots-nexus-console.yaml");
         assertThat(spec).exists();
         String yaml = Files.readString(spec);
         assertThat(yaml).contains("Innospots Nexus Console API");

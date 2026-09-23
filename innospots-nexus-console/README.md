@@ -70,7 +70,7 @@ Maven 依赖：`innospots-nexus-core`、`innospots-nexus-plugin`、`jakarta.ws.r
 
 安全域通过 `SecurityRealm` 分离 **PLATFORM** 与 **TENANT**。完整方法表与 record 索引见下方「进一步阅读」。
 
-OpenAPI 在 **`mvn package`** 时由 `smallrye-open-api-maven-plugin` 扫描各 `*.endpoint` 实现类（JAX-RS + `@Operation`）生成，产物打包为 `META-INF/openapi.yaml`；运行时 Spring/Quarkus 只暴露该文件，不再动态扫描。
+OpenAPI 在 **`mvn package`** 时由 `smallrye-open-api-maven-plugin` 扫描各 `*.endpoint` 实现类（JAX-RS + `@Operation`）生成，产物打包为 `META-INF/nexus-openapi/innospots-nexus-console.yaml`（`schemaFilename` 与模块 `artifactId` 一致）；运行时 Spring/Quarkus 按模块暴露对应文件，不再动态扫描。Kernel、Platform 模块同理，文件名分别为 `innospots-nexus-kernel.yaml`、`innospots-nexus-platform.yaml`。
 
 ## 边界速查
 

@@ -27,7 +27,7 @@ import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
  * @see com.innospots.nexus.console.credential.password.domain.entity.UserCredentialEntity
  * @see com.innospots.nexus.console.credential.password.algorithm.CredentialAlgorithmRegistry
  */
-public final class UserCredentialOperator {
+public class UserCredentialOperator {
 
     private final UserCredentialDao credentialDao;
     private final CredentialAlgorithmRegistry algorithmRegistry;

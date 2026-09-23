@@ -2,9 +2,9 @@ package com.innospots.nexus.spring.console.config;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -30,6 +30,7 @@ import com.innospots.nexus.console.credential.totp.service.TotpEnrollmentService
  * {@code console.credential} 域装配。
  */
 @Configuration
+@EnableConfigurationProperties(ConsoleCredentialTotpProperties.class)
 @MapperScan(
         basePackages = {
             "com.innospots.nexus.console.credential.password.dao",
@@ -60,9 +61,10 @@ public class ConsoleCredentialConfiguration {
     CredentialService credentialService(
             UserCredentialOperator userCredentialOperator,
             PasswordValidator passwordValidator,
-            @Value("${nexus.console.auth.login-max-failed-attempts:5}") int loginMaxFailedAttempts,
-            @Value("${nexus.console.auth.login-lock-minutes:15}") int loginLockMinutes) {
-        LoginLockPolicy lockPolicy = new LoginLockPolicy(loginMaxFailedAttempts, loginLockMinutes);
+            ConsoleAuthProperties authProperties) {
+        LoginLockPolicy lockPolicy = new LoginLockPolicy(
+                authProperties.getLoginMaxFailedAttempts(),
+                authProperties.getLoginLockMinutes());
         return new CredentialService(userCredentialOperator, passwordValidator, lockPolicy);
     }
 
@@ -83,9 +85,8 @@ public class ConsoleCredentialConfiguration {
 
     @Bean
     @ConditionalOnProperty(prefix = "nexus.console.credential.totp", name = "master-key")
-    TotpMasterKeyProvider totpMasterKeyProvider(
-            @Value("${nexus.console.credential.totp.master-key}") String masterKey) {
-        return TotpMasterKeyProvider.fixed(masterKey);
+    TotpMasterKeyProvider totpMasterKeyProvider(ConsoleCredentialTotpProperties totpProperties) {
+        return TotpMasterKeyProvider.fixed(totpProperties.getMasterKey());
     }
 
     @Bean

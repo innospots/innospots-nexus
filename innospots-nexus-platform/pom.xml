@@ -22,5 +22,70 @@
             <groupId>com.innospots</groupId>
             <artifactId>innospots-nexus-console</artifactId>
         </dependency>
+        <dependency>
+            <groupId>jakarta.ws.rs</groupId>
+            <artifactId>jakarta.ws.rs-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.microprofile.openapi</groupId>
+            <artifactId>microprofile-openapi-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>io.smallrye</groupId>
+                <artifactId>smallrye-open-api-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>generate-openapi</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>generate-schema</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/generated/openapi</outputDirectory>
+                            <schemaFilename>${project.artifactId}</schemaFilename>
+                            <outputFileTypeFilter>YAML</outputFileTypeFilter>
+                            <encoding>UTF-8</encoding>
+                            <scanners>
+                                <scanner>JAX-RS</scanner>
+                            </scanners>
+                            <scanPackages>com.innospots.nexus.platform</scanPackages>
+                            <scanDependenciesDisable>false</scanDependenciesDisable>
+                            <openApiVersion>3.1.0</openApiVersion>
+                            <operationIdStrategy>CLASS_METHOD</operationIdStrategy>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>package-openapi</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.outputDirectory}/META-INF/nexus-openapi</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.build.directory}/generated/openapi</directory>
+                                    <includes>
+                                        <include>${project.artifactId}.yaml</include>
+                                    </includes>
+                                    <filtering>false</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

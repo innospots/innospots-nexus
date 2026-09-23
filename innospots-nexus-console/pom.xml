@@ -59,15 +59,13 @@
                         </goals>
                         <configuration>
                             <outputDirectory>${project.build.directory}/generated/openapi</outputDirectory>
-                            <schemaFilename>openapi</schemaFilename>
+                            <schemaFilename>${project.artifactId}</schemaFilename>
                             <outputFileTypeFilter>YAML</outputFileTypeFilter>
                             <encoding>UTF-8</encoding>
                             <scanners>
                                 <scanner>JAX-RS</scanner>
                             </scanners>
-                            <scanPackages>
-                                com.innospots.nexus.console.openapi,com.innospots.nexus.console.endpoint,com.innospots.nexus.console.role.endpoint,com.innospots.nexus.console.dictionary.endpoint,com.innospots.nexus.console.permission.endpoint,com.innospots.nexus.console.catalog.endpoint,com.innospots.nexus.console.navigation.endpoint,com.innospots.nexus.console.plugin.endpoint
-                            </scanPackages>
+                            <scanPackages>com.innospots.nexus.console</scanPackages>
                             <scanDependenciesDisable>false</scanDependenciesDisable>
                             <openApiVersion>3.1.0</openApiVersion>
                             <operationIdStrategy>CLASS_METHOD</operationIdStrategy>
@@ -86,12 +84,12 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.outputDirectory}/META-INF</outputDirectory>
+                            <outputDirectory>${project.build.outputDirectory}/META-INF/nexus-openapi</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>${project.build.directory}/generated/openapi</directory>
                                     <includes>
-                                        <include>openapi.yaml</include>
+                                        <include>${project.artifactId}.yaml</include>
                                     </includes>
                                     <filtering>false</filtering>
                                 </resource>
