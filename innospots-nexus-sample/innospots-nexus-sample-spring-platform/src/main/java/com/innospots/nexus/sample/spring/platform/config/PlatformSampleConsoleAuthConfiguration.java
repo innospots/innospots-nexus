@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
-import com.innospots.nexus.console.auth.api.MembershipDirectory;
 import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
 import com.innospots.nexus.console.auth.service.AuthFacade;
 import com.innospots.nexus.console.auth.service.AuthTokenPairIssuer;
@@ -27,7 +26,6 @@ import com.innospots.nexus.platform.auth.adapter.PlatformUserDirectory;
 import com.innospots.nexus.platform.auth.endpoint.PlatformAuthEndpoint;
 import com.innospots.nexus.platform.auth.operator.PlatformPasswordOperator;
 import com.innospots.nexus.platform.user.dao.PlatformUserDao;
-import com.innospots.nexus.sample.spring.platform.scope.SamplePlatformScopeSupport;
 
 /**
  * 运营平台示例：{@code console.auth} 与 platform 认证端点装配（不依赖 kernel）。
@@ -77,11 +75,6 @@ public class PlatformSampleConsoleAuthConfiguration {
     }
 
     @Bean
-    MembershipDirectory membershipDirectory() {
-        return SamplePlatformScopeSupport.emptyMembershipDirectory();
-    }
-
-    @Bean
     SessionScopeBinder sessionScopeBinder() {
         return new PlatformSessionScopeBinder();
     }
@@ -101,7 +94,6 @@ public class PlatformSampleConsoleAuthConfiguration {
             PlatformUserDirectory platformUserDirectory,
             CredentialService credentialService,
             LoginCaptchaGate loginCaptchaGate,
-            MembershipDirectory membershipDirectory,
             PasswordDecryptor passwordDecryptor,
             TokenIssuer tokenIssuer,
             AuthTokenPairIssuer authTokenPairIssuer,
@@ -111,7 +103,6 @@ public class PlatformSampleConsoleAuthConfiguration {
                 platformUserDirectory,
                 credentialService,
                 loginCaptchaGate,
-                membershipDirectory,
                 passwordDecryptor,
                 tokenIssuer,
                 authTokenPairIssuer,

@@ -34,8 +34,8 @@ Maven 依赖：`innospots-nexus-core`、`innospots-nexus-plugin`、`jakarta.ws.r
 
 | 包 / 域 | 用途 | 说明 |
 |--------|------|------|
-| **auth** | 认证与会话编排 | `AuthFacade`、`LoginCaptchaGate` 与 `auth.api` 目录端口；REST 由 kernel/platform 暴露，Spring 装配在 `innospots-nexus-spring-console`。 |
-| **scope** | 作用域选择 | `ScopeFacade` 与 `/tenant/scope` 契约。 |
+| **auth** | 跨域认证契约 | 共享 `UserDirectory`、令牌工具与 **平台域** `AuthFacade`；租户域 `TenantAuthFacade`、成员关系与 `/tenant/auth` 请求形状归属 **kernel**。 |
+| **scope** | 控制台归属解析 | `ConsoleOwnership*` 与 `SessionScopeBinder` 端口；租户 `/tenant/scope` 与 `ScopeFacade` 归属 **kernel**。 |
 | **credential** | 归属化鉴权凭据 | 统一表 `nx_user_credential`；`CredentialService`（登录 `authenticate` + 生命周期）与 OTP/TOTP 子包。 |
 | **catalog** | 控制台目录索引 | 将插件 `console@1` 贡献与 Page DSL 同步到表 `nx_console_catalog_resource`（`ConsoleCatalogSyncService`）；为权限 UI 提供目录树读取（`ConsoleCatalogService`）。启动钩子：`ConsoleCatalogSyncStartupTask`。 |
 | **permission** | 授权运行时 | 持久化 `nx_permission_grant`；`PermissionGrantService` 管理角色/组织单元的授权替换；`PermissionVisibilityService` 计算当前用户可见资源；`RequestAuthorizer` 基于目录与授权做 PAGE/DATASOURCE 判定（框架中立，由 adapter 过滤器调用）。REST：授权管理、当前用户权限等。 |
@@ -69,6 +69,8 @@ Maven 依赖：`innospots-nexus-core`、`innospots-nexus-plugin`、`jakarta.ws.r
 | `/platform/auth` | 运维平台域登录（无公开自注册） |
 
 安全域通过 `SecurityRealm` 分离 **PLATFORM** 与 **TENANT**。完整方法表与 record 索引见下方「进一步阅读」。
+
+OpenAPI 在 **`mvn package`** 时由 `smallrye-open-api-maven-plugin` 扫描各 `*.endpoint` 实现类（JAX-RS + `@Operation`）生成，产物打包为 `META-INF/openapi.yaml`；运行时 Spring/Quarkus 只暴露该文件，不再动态扫描。
 
 ## 边界速查
 

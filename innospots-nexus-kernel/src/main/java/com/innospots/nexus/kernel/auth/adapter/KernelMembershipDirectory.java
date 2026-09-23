@@ -5,8 +5,8 @@ import java.util.List;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 
-import com.innospots.nexus.console.auth.api.MembershipDirectory;
-import com.innospots.nexus.console.auth.domain.model.TenantMembership;
+import com.innospots.nexus.kernel.auth.api.MembershipDirectory;
+import com.innospots.nexus.kernel.auth.domain.model.TenantMembership;
 import com.innospots.nexus.kernel.member.dao.TenantMemberDao;
 import com.innospots.nexus.kernel.member.domain.entity.TenantMemberEntity;
 import com.innospots.nexus.kernel.member.domain.enums.TenantMemberStatus;

@@ -2,17 +2,15 @@ package com.innospots.nexus.sample.spring.tenant.config;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
-import com.innospots.nexus.console.auth.api.MembershipDirectory;
-import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
-import com.innospots.nexus.console.auth.service.AuthFacade;
 import com.innospots.nexus.console.auth.service.AuthTokenPairIssuer;
+import com.innospots.nexus.kernel.auth.api.MembershipDirectory;
+import com.innospots.nexus.kernel.auth.service.TenantAuthFacade;
 import com.innospots.nexus.console.auth.service.LoginCaptchaGate;
 import com.innospots.nexus.console.auth.service.TokenIssuer;
 import com.innospots.nexus.console.config.AuthConfig;
@@ -143,8 +141,8 @@ public class TenantSampleConsoleAuthConfiguration {
         return new AuthTokenPairIssuer(tokenIssuer);
     }
 
-    @Bean(name = "tenantAuthFacade")
-    AuthFacade tenantAuthFacade(
+    @Bean
+    TenantAuthFacade tenantAuthFacade(
             KernelUserDirectory kernelUserDirectory,
             CredentialService credentialService,
             LoginCaptchaGate loginCaptchaGate,
@@ -153,8 +151,7 @@ public class TenantSampleConsoleAuthConfiguration {
             TokenIssuer tokenIssuer,
             AuthTokenPairIssuer authTokenPairIssuer,
             SessionScopeBinder sessionScopeBinder) {
-        return new AuthFacade(
-                SecurityRealm.TENANT,
+        return new TenantAuthFacade(
                 kernelUserDirectory,
                 credentialService,
                 loginCaptchaGate,
@@ -184,10 +181,10 @@ public class TenantSampleConsoleAuthConfiguration {
     @Bean
     @Lazy
     TenantAuthEndpoint tenantAuthEndpoint(
-            @Qualifier("tenantAuthFacade") AuthFacade authFacade,
+            TenantAuthFacade tenantAuthFacade,
             UserOperator userOperator,
             PasswordOperator passwordOperator,
             PasswordDecryptor passwordDecryptor) {
-        return new TenantAuthEndpoint(authFacade, userOperator, passwordOperator, passwordDecryptor);
+        return new TenantAuthEndpoint(tenantAuthFacade, userOperator, passwordOperator, passwordDecryptor);
     }
 }

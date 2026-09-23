@@ -1,14 +1,11 @@
-package com.innospots.nexus.console.auth.api;
+package com.innospots.nexus.kernel.auth.api;
 
 import java.util.List;
 
-import com.innospots.nexus.console.auth.domain.model.TenantMembership;
+import com.innospots.nexus.kernel.auth.domain.model.TenantMembership;
 
 /**
  * 租户域身份认证后用于查询租户成员关系。
- *
- * @author Smars
- * @date 2026/09/13
  */
 public interface MembershipDirectory {
 
@@ -24,7 +21,7 @@ public interface MembershipDirectory {
      * 列出租户用户拥有 ACTIVE 成员关系的租户 ID。
      *
      * @param tenantUserId 租户域用户 ID
-     * @return active tenant 标识符s, never null
+     * @return active tenant 标识符，永不为 null
      */
     default List<String> listActiveTenantIds(String tenantUserId) {
         return listActiveMemberships(tenantUserId).stream()

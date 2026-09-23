@@ -11,7 +11,6 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 
 import com.innospots.nexus.base.domain.response.R;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**

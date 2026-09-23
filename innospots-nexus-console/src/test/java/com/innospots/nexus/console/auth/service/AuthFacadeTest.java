@@ -1,31 +1,22 @@
 package com.innospots.nexus.console.auth.service;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import com.innospots.nexus.base.domain.enums.BasicStatus;
-import com.innospots.nexus.base.domain.organization.OrganizationSnapshot;
-import com.innospots.nexus.base.domain.tenant.TenantSnapshot;
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.status.NexusStatusCode;
-import com.innospots.nexus.base.thread.SessionContext;
 import com.innospots.nexus.base.thread.TLC;
 import com.innospots.nexus.base.util.CryptoUtils;
-import com.innospots.nexus.console.auth.api.MembershipDirectory;
 import com.innospots.nexus.console.auth.api.UserDirectory;
 import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
 import com.innospots.nexus.console.auth.domain.model.AuthUser;
 import com.innospots.nexus.console.auth.domain.model.CredentialRecord;
-import com.innospots.nexus.console.auth.domain.model.TenantMembership;
 import com.innospots.nexus.console.auth.domain.model.TokenClaims;
 import com.innospots.nexus.console.auth.domain.request.AuthLoginRequest;
-import com.innospots.nexus.console.auth.domain.request.SelectTenantRequest;
 import com.innospots.nexus.console.auth.domain.request.TokenRefreshRequest;
 import com.innospots.nexus.console.auth.domain.vo.AuthTokenVo;
 import com.innospots.nexus.console.config.AuthConfig;
@@ -33,9 +24,7 @@ import com.innospots.nexus.console.credential.otp.service.CaptchaChallengeServic
 import com.innospots.nexus.console.credential.password.CredentialKind;
 import com.innospots.nexus.console.credential.password.algorithm.CredentialAlgorithms;
 import com.innospots.nexus.console.credential.password.service.CredentialService;
-import com.innospots.nexus.base.domain.scope.TenantScope;
 import com.innospots.nexus.console.scope.service.SessionScopeBinder;
-import com.innospots.nexus.console.scope.service.SessionScopeTlc;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -89,35 +78,6 @@ class AuthFacadeTest {
     }
 
     @Test
-    void tenantLoginIssuesIdentityTokenWhenMultipleMembershipsExist() {
-        AuthHarness harness = AuthHarness.tenantUser(
-                "alice",
-                "Secret123",
-                List.of(new TenantMembership("tnt-a", "tmb-a"), new TenantMembership("tnt-b", "tmb-b")));
-
-        AuthTokenVo token = harness.facade().login(loginRequest("alice", "Secret123"));
-
-        assertThat(token.tokenType()).isEqualTo("IDENTITY");
-        AuthTokenVo business = harness.facade().selectTenant("tus-alice", new SelectTenantRequest("tnt-b"));
-        assertThat(business.tokenType()).isEqualTo("BUSINESS");
-        assertThat(business.tenantId()).isEqualTo("tnt-b");
-        assertThat(SessionContext.tenant()).isPresent();
-    }
-
-    @Test
-    void tenantLoginIssuesBusinessTokenWhenExactlyOneMembershipExists() {
-        AuthHarness harness = AuthHarness.tenantUser(
-                "bob",
-                "Secret123",
-                List.of(new TenantMembership("tnt-a", "tmb-a")));
-
-        AuthTokenVo token = harness.facade().login(loginRequest("bob", "Secret123"));
-
-        assertThat(token.tokenType()).isEqualTo("BUSINESS");
-        assertThat(token.tenantId()).isEqualTo("tnt-a");
-    }
-
-    @Test
     void refreshIssuesNewPairFromRefreshToken() {
         AuthHarness harness = AuthHarness.platformUser("ops", "Secret123");
         AuthTokenVo original = harness.facade().login(loginRequest("ops", "Secret123"));
@@ -130,15 +90,12 @@ class AuthFacadeTest {
 
     @Test
     void logoutClearsSessionScope() {
-        AuthHarness harness = AuthHarness.tenantUser(
-                "bob",
-                "Secret123",
-                List.of(new TenantMembership("tnt-a", "tmb-a")));
-        harness.facade().login(loginRequest("bob", "Secret123"));
+        AuthHarness harness = AuthHarness.platformUser("ops", "Secret123");
+        harness.facade().login(loginRequest("ops", "Secret123"));
 
         harness.facade().logout();
 
-        assertThat(SessionContext.tenant()).isEmpty();
+        assertThat(TLC.userName()).isNull();
     }
 
     private static AuthLoginRequest loginRequest(String login, String password) {
@@ -151,38 +108,24 @@ class AuthFacadeTest {
             InMemoryDirectory directory = new InMemoryDirectory();
             directory.addUser(new AuthUser("pus-" + login, login, "ACTIVE", SecurityRealm.PLATFORM));
             directory.addPassword("pus-" + login, password);
-            return harness(SecurityRealm.PLATFORM, directory);
+            return harness(directory);
         }
 
-        private static AuthHarness tenantUser(
-                String login,
-                String password,
-                List<TenantMembership> memberships
-        ) {
-            InMemoryDirectory directory = new InMemoryDirectory();
-            directory.addUser(new AuthUser("tus-" + login, login, "ACTIVE", SecurityRealm.TENANT));
-            directory.addPassword("tus-" + login, password);
-            directory.addMemberships("tus-" + login, memberships);
-            return harness(SecurityRealm.TENANT, directory);
-        }
-
-        private static AuthHarness harness(SecurityRealm realm, InMemoryDirectory directory) {
+        private static AuthHarness harness(InMemoryDirectory directory) {
             AuthConfig authConfig = new AuthConfig();
             authConfig.setPlatformLoginCaptchaEnabled(false);
-            authConfig.setTenantLoginCaptchaEnabled(false);
             LoginCaptchaGate captchaGate = new LoginCaptchaGate(authConfig, mock(CaptchaChallengeService.class));
             CredentialService credentialService = mock(CredentialService.class);
-            stubAuthenticate(credentialService, directory, realm);
+            stubAuthenticate(credentialService, directory);
             AuthConfig config = new AuthConfig();
             TokenIssuer issuer = new TokenIssuer(config);
             AuthTokenPairIssuer tokenPairIssuer = new AuthTokenPairIssuer(issuer);
-            SessionScopeBinder sessionScopeBinder = new TestSessionScopeBinder(directory);
+            SessionScopeBinder sessionScopeBinder = new TestSessionScopeBinder();
             AuthFacade facade = new AuthFacade(
-                    realm,
+                    SecurityRealm.PLATFORM,
                     directory,
                     credentialService,
                     captchaGate,
-                    directory,
                     encrypted -> encrypted,
                     issuer,
                     tokenPairIssuer,
@@ -190,11 +133,7 @@ class AuthFacadeTest {
             return new AuthHarness(facade, issuer);
         }
 
-        private static void stubAuthenticate(
-                CredentialService credentialService,
-                InMemoryDirectory directory,
-                SecurityRealm realm
-        ) {
+        private static void stubAuthenticate(CredentialService credentialService, InMemoryDirectory directory) {
             doAnswer(invocation -> {
                 String subjectId = invocation.getArgument(1);
                 String rawPassword = invocation.getArgument(2);
@@ -203,57 +142,37 @@ class AuthFacadeTest {
                     throw NexusException.build(NexusStatusCode.AUTHENTICATION_FAILED);
                 }
                 return null;
-            }).when(credentialService).authenticate(eq(realm), anyString(), anyString());
+            }).when(credentialService).authenticate(eq(SecurityRealm.PLATFORM), anyString(), anyString());
         }
     }
 
     private static final class TestSessionScopeBinder implements SessionScopeBinder {
 
-        private final InMemoryDirectory directory;
-
-        private TestSessionScopeBinder(InMemoryDirectory directory) {
-            this.directory = directory;
-        }
-
         @Override
         public void bindAfterAuth(AuthUser user, AuthSessionScope scope) {
-            SessionScopeTlc.bindAuthUser(user);
-            bindScope(scope);
+            TLC.put(TLC.USER_ID, user.userId());
+            TLC.put(TLC.USER_NAME, user.loginName());
         }
 
         @Override
         public void bindScope(AuthSessionScope scope) {
-            SessionScopeTlc.applyScopeIds(scope);
-            if (scope.tenantId() != null && !scope.tenantId().isBlank()) {
-                directory.findByTenantId(scope.tenantId())
-                        .ifPresent(tenantScope -> SessionContext.bindTenant(
-                                tenantScope.tenant(), tenantScope.organization()));
-            }
         }
 
         @Override
         public void bindFromClaims(TokenClaims claims) {
-            SessionScopeTlc.applyClaimsIdentity(claims);
-            bindScope(new AuthSessionScope(
-                    claims.tokenType(),
-                    claims.tenantId(),
-                    claims.tenantMemberId(),
-                    claims.workspaceId(),
-                    claims.projectId()));
         }
 
         @Override
         public void clear() {
-            SessionScopeTlc.clear();
+            TLC.clear();
         }
     }
 
-    private static final class InMemoryDirectory implements UserDirectory, MembershipDirectory {
+    private static final class InMemoryDirectory implements UserDirectory {
 
         private final Map<String, AuthUser> usersByLogin = new HashMap<>();
         private final Map<String, AuthUser> usersById = new HashMap<>();
         private final Map<String, CredentialRecord> passwords = new HashMap<>();
-        private final Map<String, List<TenantMembership>> memberships = new HashMap<>();
 
         private void addUser(AuthUser user) {
             usersByLogin.put(user.realm() + ":" + user.loginName(), user);
@@ -274,10 +193,6 @@ class AuthFacadeTest {
                     null));
         }
 
-        private void addMemberships(String tenantUserId, List<TenantMembership> values) {
-            memberships.put(tenantUserId, List.copyOf(values));
-        }
-
         @Override
         public Optional<AuthUser> findByLogin(String identity) {
             return usersByLogin.values().stream()
@@ -288,36 +203,6 @@ class AuthFacadeTest {
         @Override
         public Optional<AuthUser> findById(String userId) {
             return Optional.ofNullable(usersById.get(userId));
-        }
-
-        @Override
-        public List<TenantMembership> listActiveMemberships(String tenantUserId) {
-            return new ArrayList<>(memberships.getOrDefault(tenantUserId, List.of()));
-        }
-
-        public Optional<TenantScope> findByTenantId(String tenantId) {
-            if (tenantId == null) {
-                return Optional.empty();
-            }
-            TenantSnapshot tenant = new TenantSnapshot(tenantId, tenantId, tenantId, BasicStatus.ENABLED);
-            OrganizationSnapshot organization = new OrganizationSnapshot(
-                    tenantId, tenantId, tenantId, null, null, null, BasicStatus.ENABLED);
-            return Optional.of(new TenantScope(tenant, organization));
-        }
-
-        public Optional<com.innospots.nexus.base.domain.workspace.WorkspaceSnapshot> findWorkspace(
-                String tenantId,
-                String workspaceId
-        ) {
-            return Optional.empty();
-        }
-
-        public Optional<com.innospots.nexus.base.domain.project.ProjectSnapshot> findProject(
-                String tenantId,
-                String workspaceId,
-                String projectId
-        ) {
-            return Optional.empty();
         }
     }
 }

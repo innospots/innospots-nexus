@@ -21,7 +21,6 @@ import com.innospots.nexus.console.menu.domain.vo.MenuOptionVo;
 import com.innospots.nexus.console.menu.domain.vo.MenuVo;
 import com.innospots.nexus.console.menu.domain.vo.NavigationMenuVo;
 import com.innospots.nexus.console.navigation.endpoint.NavigationMenuEndpoint;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 class NavigationMenuEndpointContractsTest {

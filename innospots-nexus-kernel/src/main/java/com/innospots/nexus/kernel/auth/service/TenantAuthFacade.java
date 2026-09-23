@@ -1,6 +1,7 @@
-package com.innospots.nexus.console.auth.service;
+package com.innospots.nexus.kernel.auth.service;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Objects;
 
 import lombok.extern.slf4j.Slf4j;
@@ -16,102 +17,111 @@ import com.innospots.nexus.console.auth.domain.request.AuthLoginRequest;
 import com.innospots.nexus.console.auth.domain.request.TokenRefreshRequest;
 import com.innospots.nexus.console.auth.domain.vo.AuthCaptchaVo;
 import com.innospots.nexus.console.auth.domain.vo.AuthTokenVo;
+import com.innospots.nexus.console.auth.service.AuthFacade;
+import com.innospots.nexus.console.auth.service.AuthSessionScope;
+import com.innospots.nexus.console.auth.service.AuthTokenPairIssuer;
+import com.innospots.nexus.console.auth.service.LoginCaptchaGate;
+import com.innospots.nexus.console.auth.service.TokenIssuer;
 import com.innospots.nexus.console.credential.password.PasswordDecryptor;
 import com.innospots.nexus.console.credential.password.service.CredentialService;
 import com.innospots.nexus.console.scope.service.SessionScopeBinder;
+import com.innospots.nexus.kernel.auth.api.MembershipDirectory;
+import com.innospots.nexus.kernel.auth.domain.model.TenantMembership;
+import com.innospots.nexus.kernel.auth.domain.request.SelectTenantRequest;
 
 /**
- * 运维平台域登录与令牌刷新编排。租户域认证见 {@code kernel.auth.service.TenantAuthFacade}。
+ * 租户域登录、租户选择与令牌刷新编排。
  */
 @Slf4j
-public class AuthFacade {
+public class TenantAuthFacade {
 
-    public static final String TOKEN_TYPE_IDENTITY = "IDENTITY";
-    public static final String TOKEN_TYPE_BUSINESS = "BUSINESS";
+    private static final SecurityRealm REALM = SecurityRealm.TENANT;
 
-    private final SecurityRealm realm;
     private final UserDirectory userDirectory;
     private final CredentialService credentialService;
     private final LoginCaptchaGate loginCaptchaGate;
+    private final MembershipDirectory membershipDirectory;
     private final PasswordDecryptor passwordDecryptor;
     private final TokenIssuer tokenIssuer;
     private final AuthTokenPairIssuer tokenPairIssuer;
     private final SessionScopeBinder sessionScopeBinder;
 
-    public AuthFacade(
-            SecurityRealm realm,
+    public TenantAuthFacade(
             UserDirectory userDirectory,
             CredentialService credentialService,
             LoginCaptchaGate loginCaptchaGate,
+            MembershipDirectory membershipDirectory,
             PasswordDecryptor passwordDecryptor,
             TokenIssuer tokenIssuer,
             AuthTokenPairIssuer tokenPairIssuer,
             SessionScopeBinder sessionScopeBinder
     ) {
-        this.realm = Objects.requireNonNull(realm, "realm");
         this.userDirectory = Objects.requireNonNull(userDirectory, "userDirectory");
         this.credentialService = Objects.requireNonNull(credentialService, "credentialService");
         this.loginCaptchaGate = Objects.requireNonNull(loginCaptchaGate, "loginCaptchaGate");
+        this.membershipDirectory = Objects.requireNonNull(membershipDirectory, "membershipDirectory");
         this.passwordDecryptor = Objects.requireNonNull(passwordDecryptor, "passwordDecryptor");
         this.tokenIssuer = Objects.requireNonNull(tokenIssuer, "tokenIssuer");
         this.tokenPairIssuer = Objects.requireNonNull(tokenPairIssuer, "tokenPairIssuer");
         this.sessionScopeBinder = Objects.requireNonNull(sessionScopeBinder, "sessionScopeBinder");
-        if (realm != SecurityRealm.PLATFORM) {
-            throw new IllegalArgumentException("AuthFacade supports PLATFORM realm only");
-        }
-    }
-
-    /**
-     * 所属安全域（构造时绑定）。
-     */
-    public SecurityRealm realm() {
-        return realm;
     }
 
     /**
      * 发放登录用图形验证码。
-     *
-     * @param clientKey 客户端事务键；空白时由服务端生成
      */
     public AuthCaptchaVo issueLoginCaptcha(String clientKey) {
-        return loginCaptchaGate.issueForLogin(realm, clientKey);
+        return loginCaptchaGate.issueForLogin(REALM, clientKey);
     }
 
     /**
-     * 认证域用户并签发令牌对。
-     *
-     * @param request 登录身份与加密密码
-     * @return issued 令牌对
+     * 认证租户域用户并签发令牌对。
      */
     public AuthTokenVo login(AuthLoginRequest request) {
         Checks.notNull(request, "request");
         Checks.notBlank(request.login(), "login");
         Checks.notBlank(request.encryptedPassword(), "encryptedPassword");
-        loginCaptchaGate.verifyIfRequired(realm, request);
+        loginCaptchaGate.verifyIfRequired(REALM, request);
         String rawPassword = passwordDecryptor.decrypt(request.encryptedPassword());
         AuthUser user = userDirectory.findByLogin(request.login()).orElse(null);
         if (user == null) {
-            log.debug("Login rejected: unknown identity in realm {}", realm);
+            log.debug("Login rejected: unknown identity in realm {}", REALM);
             throw NexusException.build(NexusStatusCode.AUTHENTICATION_FAILED);
         }
-        credentialService.authenticate(realm, user.userId(), rawPassword);
-        AuthSessionScope scope = new AuthSessionScope(TOKEN_TYPE_BUSINESS, null, null, null, null);
-        AuthTokenVo token = tokenPairIssuer.issue(realm, user.userId(), scope);
+        credentialService.authenticate(REALM, user.userId(), rawPassword);
+        AuthSessionScope scope = resolveLoginScope(user.userId());
+        AuthTokenVo token = tokenPairIssuer.issue(REALM, user.userId(), scope);
         sessionScopeBinder.bindAfterAuth(user, scope);
         return token;
     }
 
     /**
-     * 从同域刷新令牌签发新令牌对。
-     *
-     * @param request 刷新令牌
-     * @return new 令牌对
+     * 将租户身份交换为绑定单一成员关系的业务令牌。
+     */
+    public AuthTokenVo selectTenant(String tenantUserId, SelectTenantRequest request) {
+        Checks.notBlank(tenantUserId, "tenantUserId");
+        Checks.notNull(request, "request");
+        Checks.notBlank(request.tenantId(), "tenantId");
+        AuthUser user = userDirectory.findById(tenantUserId)
+                .orElseThrow(() -> NexusException.build(NexusStatusCode.AUTHENTICATION_FAILED));
+        TenantMembership membership = membershipDirectory.listActiveMemberships(tenantUserId).stream()
+                .filter(item -> request.tenantId().equals(item.tenantId()))
+                .findFirst()
+                .orElseThrow(() -> NexusException.build(NexusStatusCode.NO_PERMISSION));
+        AuthSessionScope scope = new AuthSessionScope(
+                AuthFacade.TOKEN_TYPE_BUSINESS, membership.tenantId(), membership.tenantMemberId(), null, null);
+        AuthTokenVo token = tokenPairIssuer.issue(REALM, tenantUserId, scope);
+        sessionScopeBinder.bindAfterAuth(user, scope);
+        return token;
+    }
+
+    /**
+     * 从租户域刷新令牌签发新令牌对。
      */
     public AuthTokenVo refresh(TokenRefreshRequest request) {
         Checks.notNull(request, "request");
         Checks.notBlank(request.refreshToken(), "refreshToken");
         TokenClaims claims = tokenIssuer.parse(request.refreshToken());
-        if (claims.realm() != realm
+        if (claims.realm() != REALM
                 || !TokenIssuer.PURPOSE_REFRESH.equals(claims.purpose())
                 || claims.expiresAt() <= Instant.now().getEpochSecond()) {
             throw NexusException.build(NexusStatusCode.AUTHENTICATION_FAILED);
@@ -124,7 +134,7 @@ public class AuthFacade {
                 claims.tenantMemberId(),
                 claims.workspaceId(),
                 claims.projectId());
-        AuthTokenVo token = tokenPairIssuer.issue(realm, claims.userId(), scope);
+        AuthTokenVo token = tokenPairIssuer.issue(REALM, claims.userId(), scope);
         sessionScopeBinder.bindAfterAuth(user, scope);
         return token;
     }
@@ -135,5 +145,19 @@ public class AuthFacade {
     public void logout() {
         sessionScopeBinder.clear();
         log.debug("Logout requested for a compact token session");
+    }
+
+    private AuthSessionScope resolveLoginScope(String userId) {
+        List<TenantMembership> memberships = membershipDirectory.listActiveMemberships(userId);
+        if (memberships.size() == 1) {
+            TenantMembership membership = memberships.getFirst();
+            return new AuthSessionScope(
+                    AuthFacade.TOKEN_TYPE_BUSINESS,
+                    membership.tenantId(),
+                    membership.tenantMemberId(),
+                    null,
+                    null);
+        }
+        return new AuthSessionScope(AuthFacade.TOKEN_TYPE_IDENTITY, null, null, null, null);
     }
 }

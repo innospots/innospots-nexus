@@ -15,6 +15,10 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import lombok.RequiredArgsConstructor;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+
 import com.innospots.nexus.base.domain.enums.BasicStatus;
 import com.innospots.nexus.base.domain.response.PageResult;
 import com.innospots.nexus.base.domain.response.R;
@@ -25,6 +29,7 @@ import com.innospots.nexus.console.role.domain.request.RoleUpdateRequest;
 import com.innospots.nexus.console.role.domain.vo.RoleOptionVo;
 import com.innospots.nexus.console.role.domain.vo.RoleVo;
 import com.innospots.nexus.console.role.service.RoleService;
+import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 
 /**
  * 角色生命周期与查询 REST 资源，可直接继承以扩展路由或响应包装。
@@ -32,29 +37,36 @@ import com.innospots.nexus.console.role.service.RoleService;
 @Path("/console/roles")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Tag(name = "Role", description = "角色与绑定")
+@NexusAuthenticatedApi
 @RequiredArgsConstructor
 public class RoleEndpoint {
 
     private final RoleService roleService;
 
     @GET
+    @Operation(operationId = "rolePage", summary = "分页查询角色")
     public R<PageResult<RoleVo>> pageRoles(@BeanParam RolePageRequest request) {
         return R.ok(roleService.pageRoles(request));
     }
 
     @GET
     @Path("/{roleId}")
-    public R<RoleVo> getRole(@PathParam("roleId") String roleId) {
+    @Operation(operationId = "roleGet", summary = "查询角色详情")
+    public R<RoleVo> getRole(
+            @Parameter(description = "角色 ID", required = true) @PathParam("roleId") String roleId) {
         return R.ok(roleService.getRole(roleId));
     }
 
     @POST
+    @Operation(operationId = "roleCreate", summary = "创建角色")
     public R<RoleVo> createRole(RoleCreateRequest request) {
         return R.ok(roleService.createRole(request));
     }
 
     @PUT
     @Path("/{roleId}")
+    @Operation(operationId = "roleUpdate", summary = "更新角色")
     public R<RoleVo> updateRole(
             @PathParam("roleId") String roleId,
             RoleUpdateRequest request) {
@@ -63,6 +75,7 @@ public class RoleEndpoint {
 
     @PUT
     @Path("/{roleId}/status")
+    @Operation(operationId = "roleUpdateStatus", summary = "更新角色状态")
     public R<Void> updateRoleStatus(
             @PathParam("roleId") String roleId,
             RoleStatusUpdateRequest request) {
@@ -72,6 +85,7 @@ public class RoleEndpoint {
 
     @DELETE
     @Path("/{roleId}")
+    @Operation(operationId = "roleDelete", summary = "删除角色")
     public R<Void> deleteRole(@PathParam("roleId") String roleId) {
         roleService.deleteRole(roleId);
         return R.ok();
@@ -79,6 +93,7 @@ public class RoleEndpoint {
 
     @GET
     @Path("/options")
+    @Operation(operationId = "roleListOptions", summary = "角色下拉选项")
     public R<List<RoleOptionVo>> listRoleOptions(@QueryParam("status") BasicStatus status) {
         return R.ok(roleService.listRoleOptions(status));
     }

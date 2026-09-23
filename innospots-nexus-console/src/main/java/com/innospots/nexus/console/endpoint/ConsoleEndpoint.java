@@ -6,6 +6,9 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+
 /**
  * 根管理控制台端点契约。
  * <p>
@@ -20,6 +23,7 @@ import jakarta.ws.rs.core.MediaType;
 @Path("/console")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Tag(name = "Console", description = "控制台状态与健康")
 public interface ConsoleEndpoint {
 
     /**
@@ -28,5 +32,6 @@ public interface ConsoleEndpoint {
      */
     @GET
     @Path("/status")
+    @Operation(operationId = "consoleStatus", summary = "控制台可用性探测")
     String status();
 }

@@ -7,8 +7,8 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
 import com.innospots.nexus.base.domain.response.R;
-import com.innospots.nexus.console.auth.domain.request.SelectProjectRequest;
-import com.innospots.nexus.console.auth.domain.request.SelectWorkspaceRequest;
+import com.innospots.nexus.kernel.scope.domain.request.SelectProjectRequest;
+import com.innospots.nexus.kernel.scope.domain.request.SelectWorkspaceRequest;
 import com.innospots.nexus.console.auth.domain.vo.AuthTokenVo;
 
 /**

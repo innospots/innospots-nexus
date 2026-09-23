@@ -17,11 +17,11 @@ import com.innospots.nexus.console.auth.domain.request.AuthLoginRequest;
 import com.innospots.nexus.console.auth.domain.vo.AuthCaptchaVo;
 import com.innospots.nexus.console.auth.domain.request.PasswordChangeRequest;
 import com.innospots.nexus.console.auth.domain.request.PasswordResetRequest;
-import com.innospots.nexus.console.auth.domain.request.SelectTenantRequest;
-import com.innospots.nexus.console.auth.domain.request.TenantRegisterRequest;
 import com.innospots.nexus.console.auth.domain.request.TokenRefreshRequest;
 import com.innospots.nexus.console.auth.domain.vo.AuthTokenVo;
-import com.innospots.nexus.console.auth.service.AuthFacade;
+import com.innospots.nexus.kernel.auth.domain.request.SelectTenantRequest;
+import com.innospots.nexus.kernel.auth.domain.request.TenantRegisterRequest;
+import com.innospots.nexus.kernel.auth.service.TenantAuthFacade;
 import com.innospots.nexus.console.credential.password.PasswordDecryptor;
 import com.innospots.nexus.kernel.user.domain.request.UserPasswordRegisterRequest;
 import com.innospots.nexus.kernel.user.operator.PasswordOperator;
@@ -36,7 +36,7 @@ import com.innospots.nexus.kernel.user.operator.UserOperator;
 @RequiredArgsConstructor
 public class TenantAuthEndpoint {
 
-    private final AuthFacade authFacade;
+    private final TenantAuthFacade tenantAuthFacade;
     private final UserOperator userOperator;
     private final PasswordOperator passwordOperator;
     private final PasswordDecryptor passwordDecryptor;
@@ -59,39 +59,39 @@ public class TenantAuthEndpoint {
                 request.encryptedPassword(),
                 null,
                 null);
-        return R.ok(authFacade.login(loginRequest));
+        return R.ok(tenantAuthFacade.login(loginRequest));
     }
 
     @POST
     @Path("/captcha/issue")
     public R<AuthCaptchaVo> issueLoginCaptcha(AuthCaptchaIssueRequest request) {
         String clientKey = request == null ? null : request.clientKey();
-        return R.ok(authFacade.issueLoginCaptcha(clientKey));
+        return R.ok(tenantAuthFacade.issueLoginCaptcha(clientKey));
     }
 
     @POST
     @Path("/login")
     public R<AuthTokenVo> login(AuthLoginRequest request) {
-        return R.ok(authFacade.login(request));
+        return R.ok(tenantAuthFacade.login(request));
     }
 
     @POST
     @Path("/select-tenant")
     public R<AuthTokenVo> selectTenant(SelectTenantRequest request) {
         String tenantUserId = requireAuthenticatedUserId();
-        return R.ok(authFacade.selectTenant(tenantUserId, request));
+        return R.ok(tenantAuthFacade.selectTenant(tenantUserId, request));
     }
 
     @POST
     @Path("/refresh")
     public R<AuthTokenVo> refresh(TokenRefreshRequest request) {
-        return R.ok(authFacade.refresh(request));
+        return R.ok(tenantAuthFacade.refresh(request));
     }
 
     @POST
     @Path("/logout")
     public R<Void> logout() {
-        authFacade.logout();
+        tenantAuthFacade.logout();
         return R.ok();
     }
 

@@ -10,40 +10,36 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+
 import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogSyncService;
 import com.innospots.nexus.console.plugin.converter.PluginManagementConverter;
 import com.innospots.nexus.console.plugin.domain.vo.PluginManagementVo;
-import com.innospots.nexus.core.plugin.installation.domain.model.PluginManagementView;
+import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 import com.innospots.nexus.core.plugin.installation.service.PluginInstallationManager;
 import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
 /**
  * 管理端插件查询、安装、启停和失败重试接口；不提供 JAR 删除或卸载操作。
- *
- * @author Smars
- * @date 2026/09/13
  */
 @Path("/console/plugins")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Tag(name = "Plugin", description = "插件生命周期")
+@NexusAuthenticatedApi
 public final class PluginManagementEndpoint {
 
     private final PluginInstallationManager manager;
     private final PluginManagementConverter converter;
     private final ConsoleCatalogSyncService syncService;
 
-    /**
-     * 创建只依赖 Core 安装管理器的插件管理接口。
-     */
     public PluginManagementEndpoint(PluginInstallationManager manager) {
         this(manager, PluginManagementConverter.INSTANCE, null);
     }
 
-    /**
-     * 创建可注入转换器的插件管理接口，便于无数据库测试。
-     */
     public PluginManagementEndpoint(
             PluginInstallationManager manager,
             PluginManagementConverter converter
@@ -51,9 +47,6 @@ public final class PluginManagementEndpoint {
         this(manager, converter, null);
     }
 
-    /**
-     * 创建含目录同步能力的插件管理接口。
-     */
     public PluginManagementEndpoint(
             PluginInstallationManager manager,
             PluginManagementConverter converter,
@@ -68,61 +61,49 @@ public final class PluginManagementEndpoint {
         this.syncService = syncService;
     }
 
-    /**
-     * 查询全部插件聚合视图。
-     */
     @GET
+    @Operation(operationId = "pluginList", summary = "查询全部插件")
     public R<List<PluginManagementVo>> list() {
         return R.ok(manager.plugins().stream().map(converter::toVo).toList());
     }
 
-    /**
-     * 查询单个插件聚合视图。
-     */
     @GET
     @Path("/{pluginId}")
+    @Operation(operationId = "pluginGet", summary = "查询单个插件")
     public R<PluginManagementVo> get(@PathParam("pluginId") String pluginId) {
         return R.ok(manager.plugin(pluginId).map(converter::toVo).orElseThrow(
                 () -> NexusException.build(PluginStatusCode.PLUGIN_NOT_INSTALLED,
                         "plugin was not found: " + pluginId)));
     }
 
-    /**
-     * 安装并启动插件。
-     */
     @POST
     @Path("/{pluginId}/install")
+    @Operation(operationId = "pluginInstall", summary = "安装并启动插件")
     public R<PluginManagementVo> install(@PathParam("pluginId") String pluginId) {
         return R.ok(converter.toVo(manager.installAndStart(pluginId)));
     }
 
-    /**
-     * 启用已安装插件。
-     */
     @POST
     @Path("/{pluginId}/enable")
+    @Operation(operationId = "pluginEnable", summary = "启用插件")
     public R<PluginManagementVo> enable(@PathParam("pluginId") String pluginId) {
         PluginManagementVo result = converter.toVo(manager.enable(pluginId));
         syncCatalog();
         return R.ok(result);
     }
 
-    /**
-     * 停用插件但保留安装事实。
-     */
     @POST
     @Path("/{pluginId}/disable")
+    @Operation(operationId = "pluginDisable", summary = "停用插件")
     public R<PluginManagementVo> disable(@PathParam("pluginId") String pluginId) {
         PluginManagementVo result = converter.toVo(manager.disable(pluginId));
         syncCatalog();
         return R.ok(result);
     }
 
-    /**
-     * 重试处于 FAILED 的插件。
-     */
     @POST
     @Path("/{pluginId}/retry")
+    @Operation(operationId = "pluginRetry", summary = "重试失败插件")
     public R<PluginManagementVo> retry(@PathParam("pluginId") String pluginId) {
         return R.ok(converter.toVo(manager.retryStart(pluginId)));
     }

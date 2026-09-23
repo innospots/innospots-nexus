@@ -10,8 +10,8 @@ import org.junit.jupiter.api.Test;
 import com.innospots.nexus.console.auth.domain.request.AuthLoginRequest;
 import com.innospots.nexus.console.auth.domain.request.PasswordChangeRequest;
 import com.innospots.nexus.console.auth.domain.request.PasswordResetRequest;
-import com.innospots.nexus.console.auth.domain.request.SelectTenantRequest;
-import com.innospots.nexus.console.auth.domain.request.TenantRegisterRequest;
+import com.innospots.nexus.kernel.auth.domain.request.SelectTenantRequest;
+import com.innospots.nexus.kernel.auth.domain.request.TenantRegisterRequest;
 import com.innospots.nexus.console.auth.domain.request.TokenRefreshRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;

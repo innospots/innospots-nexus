@@ -6,8 +6,8 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import org.junit.jupiter.api.Test;
 
-import com.innospots.nexus.console.auth.domain.request.SelectProjectRequest;
-import com.innospots.nexus.console.auth.domain.request.SelectWorkspaceRequest;
+import com.innospots.nexus.kernel.scope.domain.request.SelectProjectRequest;
+import com.innospots.nexus.kernel.scope.domain.request.SelectWorkspaceRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

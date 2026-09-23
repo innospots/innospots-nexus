@@ -41,6 +41,7 @@
         <versions-maven-plugin.version>2.21.0</versions-maven-plugin.version>
         <lombok.version>1.18.46</lombok.version>
         <mapstruct.version>1.6.3</mapstruct.version>
+        <smallrye-open-api-maven-plugin.version>4.3.5</smallrye-open-api-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -168,6 +169,11 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
                     <version>${maven-dependency-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>io.smallrye</groupId>
+                    <artifactId>smallrye-open-api-maven-plugin</artifactId>
+                    <version>${smallrye-open-api-maven-plugin.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

@@ -12,10 +12,8 @@ class UserDirectoryContractsTest {
     @Test
     void authPortsAreInterfaces() throws Exception {
         assertThat(UserDirectory.class).isInterface();
-        assertThat(MembershipDirectory.class).isInterface();
         assertThat(UserDirectory.class.getMethod("findById", String.class)).isNotNull();
         assertThat(AuthUser.class.isRecord()).isTrue();
         assertThat(CredentialRecord.class.isRecord()).isTrue();
-        assertThat(MembershipDirectory.class.getMethod("listActiveMemberships", String.class)).isNotNull();
     }
 }

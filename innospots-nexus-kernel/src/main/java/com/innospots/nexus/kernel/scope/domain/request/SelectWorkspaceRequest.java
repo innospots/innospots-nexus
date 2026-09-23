@@ -1,10 +1,8 @@
-package com.innospots.nexus.console.auth.domain.request;
+package com.innospots.nexus.kernel.scope.domain.request;
 
 /**
  * 在当前租户业务作用域内激活工作区。
  *
- * @author Smars
- * @date 2026/09/13
  * @param tenantId    用于校验成员关系的租户
  * @param workspaceId 待激活的工作区
  */
