@@ -14,7 +14,7 @@
 
 1. **`grill-me`（新建模块 / 结构变更前必经）** — 未安装则
    `npx skills use "https://github.com/mattpocock/skills" --skill "grill-me"`（见 [grill-me.md](../java-reference/references/grill-me.md)）。
-2. **判断是否需要新 Maven 模块** — 默认**否**；新业务域多数只需 kernel/platform 内新领域包（见 project-deliverables）。
+2. **判断是否需要新 Maven 模块** — 默认**否**；新业务域多数只需 portal/platform 内新领域包（见 project-deliverables）。
 3. **新建模块** — 按 [project-deliverables.md](references/project-deliverables.md) 标准流程。
 4. **选型依赖** — [dependency-conventions.md](references/dependency-conventions.md)。
 5. **插件 / enforcer** — [build-config.md](references/build-config.md)。
@@ -25,8 +25,8 @@
 | 类型 | 示例 |
 |------|------|
 | grill-me 结论 | 模块类型、依赖方向、是否 application/adapter |
-| 工程意图 | 「加 adapter」「spring 统一进程 kernel+platform」 |
-| 模块边界 | 职责一句话、可独立测试、与 kernel/platform 关系 |
+| 工程意图 | 「加 adapter」「spring 统一进程 portal+platform」 |
+| 模块边界 | 职责一句话、可独立测试、与 portal/platform 关系 |
 | 目标运行时 | 纯库 / Spring Boot / Quarkus |
 | 报错 | enforcer、传递依赖冲突、flatten |
 
@@ -50,7 +50,7 @@
 |------|------|
 | 领域包（无新 Maven 模块） | 新业务域、多数功能扩展 |
 | adapter | 外部系统、客户专属集成 |
-| application | 同进程 kernel + platform |
+| application | 同进程 portal + platform |
 | spring/quarkus 子模块 | 可运行服务 |
 
 **不产出**：业务 Java 源码、设计文档、revision/BOM 大版本升级（交对应技能）。
@@ -73,7 +73,7 @@
 | 升 JDK/第三方 | `java:dependency-upgrade` |
 | Spring starter 细则 | `java:spring` |
 
-**硬约束**：禁止 POM 内联 JAR `<version>`；禁止 kernel↔platform 互依；禁止中立库绑 Spring/Quarkus。
+**硬约束**：禁止 POM 内联 JAR `<version>`；禁止 portal↔platform 互依；禁止中立库绑 Spring/Quarkus。
 
 ## 与上下游技能
 

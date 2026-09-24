@@ -192,7 +192,7 @@ PluginContributionDecoderRegistry contributionDecoders =
 ConsoleContributionCatalog catalog = new ConsoleContributionCatalog();
 ConsolePluginContributionHandler handler = new ConsolePluginContributionHandler(
         catalog,
-        new ReservedPluginResourceCatalog(List.of("platform", "kernel"))); // 保留前缀
+        new ReservedPluginResourceCatalog(List.of("platform", "portal"))); // 保留前缀
 
 List<PluginContributionHandler<?>> handlers = List.of(handler);
 ```

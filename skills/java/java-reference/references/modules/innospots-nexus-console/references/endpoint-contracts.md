@@ -163,6 +163,6 @@ PUT 为授权 + 数据源条件的**完整替换**。
 
 1. 请求体：`domain.request` **records**；查询/分页参数：使用处为 `@BeanParam` records。
 2. 错误：`NexusException` + 类型化 `StatusCode` — 绝不向客户端暴露原始运行时异常。
-3. 接口端点在 **kernel**（租户）或 **platform**（运维）中实现。
-4. 带逻辑的类端点在 **console** 中交付；stub 在 kernel 装配服务前抛出异常。
+3. 接口端点在 **portal**（租户）或 **platform**（运维）中实现。
+4. 带逻辑的类端点在 **console** 中交付；stub 在 portal 装配服务前抛出异常。
 5. ID 路径参数使用稳定的业务 ID（`roleId`、`typeCode`、`pluginId`），而非代理名称。

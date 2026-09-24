@@ -49,14 +49,14 @@ permission-design.md
 |---------|------|------|
 | **平台级 / 跨多模块** | `docs/design/` | `docs/design/multi-tenant-governance-design.md` |
 | **带日期的规格迭代**（superpowers 流程） | `docs/superpowers/specs/` | `docs/superpowers/specs/2026-09-04-console-catalog-and-navigation-design.md` |
-| **单项架构决策（ADR）** | `docs/design/adr/` | `docs/design/adr/0002-kernel-platform-isolation.md` |
-| **单 Maven 模块、单域或子系统** | `<artifact-id>/docs/` | `innospots-nexus-kernel/docs/permission-design.md` |
+| **单项架构决策（ADR）** | `docs/design/adr/` | `docs/design/adr/0002-portal-platform-isolation.md` |
+| **单 Maven 模块、单域或子系统** | `<artifact-id>/docs/` | `innospots-nexus-portal/docs/permission-design.md` |
 | **模块内子系统（较深）** | `<artifact-id>/docs/<area>/design/` | `innospots-nexus-plugin/docs/plugin/design/plugin-runtime-design.md` |
 
 **选择规则：**
 
 1. 只影响一个 `innospots-nexus-*` 模块 → 放该模块 `docs/`。
-2. 影响 kernel **与** platform/console 等多模块协作 → 放 `docs/design/`。
+2. 影响 portal **与** platform/console 等多模块协作 → 放 `docs/design/`。
 3. 已存在同域设计文档 → **追加章节或修订同一文件**，不要平行写第二份冲突文档。
 4. ADR 记录「一件事一个决策」；完整域方案用 L1/L2 设计文档，ADR 可链接过去。
 

@@ -39,7 +39,7 @@ public enum OtpChannel {
     CAPTCHA;
 
     /**
-     * 从 kernel 使用的 {@link VerificationType} 转为 OTP 通道。
+     * 从 portal 使用的 {@link VerificationType} 转为 OTP 通道。
      * <p>调用场景：忘记密码流程仅支持邮箱与手机。</p>
      *
      * @param type 验证类型

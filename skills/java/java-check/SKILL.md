@@ -75,7 +75,7 @@ L5  静态巡检     规范 / 依赖 / 安全 / 性能 / 结构冗余（人工 +
 | 持久化 | 单表无 join、无 Mapper XML、索引与访问模式匹配、未重复继承字段 |
 | 异常 | `NexusException` + 类型化 `StatusCode`；cause 保留；响应无敏感值与堆栈 |
 | 事务 | 只用 `jakarta.transaction.Transactional`；方法级最小写操作 |
-| 事件 | 成功后发布；订阅有清理；kernel/platform 不互引 |
+| 事件 | 成功后发布；订阅有清理；portal/platform 不互引 |
 
 详见 [review-checklist.md](references/review-checklist.md)。
 
@@ -91,7 +91,7 @@ L5  静态巡检     规范 / 依赖 / 安全 / 性能 / 结构冗余（人工 +
 | 文档结构 | 核心约束、Agent 工作流、模块职责、依赖规则、DDD、编码规范、验证 |
 | Agent 工作流 | grill-me 触发条件、Java 技能路由表、典型链路 |
 | 模块 vs 工程 | 新模块在 AGENTS 有职责节；代码/POM 不违反「不得拥有」 |
-| 依赖 vs POM | 单向链、BOM、kernel/platform 隔离、新 artifact 已登记 |
+| 依赖 vs POM | 单向链、BOM、portal/platform 隔离、新 artifact 已登记 |
 | 设计对齐 | L2「AGENTS 对齐」表与四步法、grill-me 结论一致 |
 | 模板 | 按 [`agents-template.md`](../java-reference/references/agents-template.md) 生成，无残留占位符 |
 
@@ -118,7 +118,7 @@ mvn versions:display-property-updates        # 属性升级候选
 - [ ] 无版本冲突或意外的版本覆盖
 - [ ] `base` 未引入任何中间件或运行时框架依赖
 - [ ] `core` 未绑定 Spring Boot 自动配置
-- [ ] `kernel` 与 `platform` 无互相依赖
+- [ ] `portal` 与 `platform` 无互相依赖
 - [ ] 新增第三方依赖已完成 `java:design` 的选型评估并登记到 BOM
 
 `versions:*` 只列候选：**依赖/JDK/框架**升级交给 `java:dependency-upgrade`；**工程 revision**

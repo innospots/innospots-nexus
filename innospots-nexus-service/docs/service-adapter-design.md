@@ -4,7 +4,7 @@
 
 ## 1. 装配边界
 
-两个 adapter 组合 contract/runtime 与 http、stream、websocket、transfer、observability、governance，**不**依赖 console/kernel/platform。宿主保留 Web starter、JSON、认证；adapter 不得隐式引入 JDBC 或全套 IAM。
+两个 adapter 组合 contract/runtime 与 http、stream、websocket、transfer、observability、governance，**不**依赖 console/portal/platform。宿主保留 Web starter、JSON、认证；adapter 不得隐式引入 JDBC 或全套 IAM。
 
 | 适配器 | 引入方式 |
 |--------|----------|
@@ -121,7 +121,7 @@ WebSockets Next callback 的线程模式与返回类型/原生注解有关，ada
 | 宿主 service.resource | CoreResourceContentBridge | 组合 core registry 与真实流读 provider；缺少能力拒绝 |
 | 宿主 service.audit | 审计存储/提交观察桥接 | 写入其拥有的业务表或outbox，通用库不依赖JDBC |
 
-这些桥接是宿主应用配置，不产生 service→console 的反向依赖。kernel/platform 各自提供业务能力，应用可以装配，但不互相 import。
+这些桥接是宿主应用配置，不产生 service→console 的反向依赖。portal/platform 各自提供业务能力，应用可以装配，但不互相 import。
 
 既有 JavaScript/管理端客户端保持 R 和 compact token；新 JWT/OIDC 服务可并存但明确配置 realm/providerId 和受众，不用“尝试解密失败就换另一种认证”的模糊链来放行。
 
@@ -300,4 +300,4 @@ service:
 - WS 路由薄壳留在宿主；Handler 在中立业务模块；注入 `WebSocketService` 而非原生 Session。
 - 业务抛出的非 `NexusException` 在边界映射 `SYSTEM_ERROR`，不把 JDK 消息写入响应体。
 
-本框架不提供登录、权限授予、审计查询 REST API。相关 URL 仍由既有 console/kernel/platform 所有；不得为了演示把模型、聊天、文件业务实体写入中立模块。
+本框架不提供登录、权限授予、审计查询 REST API。相关 URL 仍由既有 console/portal/platform 所有；不得为了演示把模型、聊天、文件业务实体写入中立模块。

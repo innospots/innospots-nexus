@@ -31,7 +31,7 @@
 | A2 | **Agent 工作流** | 缺少 grill-me 说明或 Java 技能路由表 |
 | A3 | **grill-me 触发条件** | 未覆盖「通用宽泛」「新需求」「新设计」「新建工程/模块」 |
 | A4 | **模块职责** | 缺少本变更涉及的 `innospots-nexus-*` 模块说明 |
-| A5 | **依赖规则** | 缺少 BOM/parent、单向依赖链、kernel/platform 隔离 |
+| A5 | **依赖规则** | 缺少 BOM/parent、单向依赖链、portal/platform 隔离 |
 | A6 | **DDD 规则** | 完全缺失 |
 | A7 | **编码规范** | 未指向 `skills/java/java-reference/standards/` |
 | A8 | **验证** | 缺少 `mvn validate` / `mvn test` / `help:effective-pom` |
@@ -67,9 +67,9 @@
 | 职责与代码一致 | AGENTS 写「不得拥有 REST 端点」但模块内有 `*Endpoint` |
 | base middleware-free | AGENTS 与 POM 均允许 base 引数据库/Spring |
 | core 不绑 Spring Boot auto-config | AGENTS 或代码出现 `@AutoConfiguration` 在 core |
-| kernel ↔ platform | AGENTS 或 POM 允许互依；或设计对齐表声称无互依但 tree 有 |
+| portal ↔ platform | AGENTS 或 POM 允许互依；或设计对齐表声称无互依但 tree 有 |
 | plugin / console 边界 | catalog 索引归 console；Page DSL 归 plugin — 写反或代码反 |
-| service 模块中立 | service 子模块依赖 kernel/platform/console |
+| service 模块中立 | service 子模块依赖 portal/platform/console |
 | 禁止清单 | AGENTS「不得拥有」项出现在该模块 diff 中 |
 
 新建模块时对照 [`module-ownership.md`](../../java-reference/references/module-ownership.md)。
@@ -85,7 +85,7 @@
 | parent 正确 | 库模块 parent 非 `innospots-nexus-parent`（spring/quarkus 子模块除外） |
 | 最小依赖 | AGENTS 登记的直接依赖与 POM 重复声明可传递模块 |
 | 新增模块依赖条目 | 根 AGENTS「依赖规则」未追加新 artifact 的上下游 |
-| kernel/platform 隔离 | 任一方 POM 或 AGENTS 增补允许依赖对方 |
+| portal/platform 隔离 | 任一方 POM 或 AGENTS 增补允许依赖对方 |
 
 ---
 
@@ -120,7 +120,7 @@ L2 设计文档中的「AGENTS 对齐」表：
 
 | 级别 | AGENTS 相关问题示例 |
 |------|---------------------|
-| **阻塞** | 新模块无 AGENTS 职责条目；kernel↔platform 互依；base 引中间件；模块 AGENTS 与根冲突；缺少 Agent 工作流/grill-me |
+| **阻塞** | 新模块无 AGENTS 职责条目；portal↔platform 互依；base 引中间件；模块 AGENTS 与根冲突；缺少 Agent 工作流/grill-me |
 | **警告** | 依赖规则未登记新 artifact 但 POM 已合并；设计对齐节缺失 grill-me 引用；模块补充缺少对齐声明表 |
 | **提示** | 章节标题措辞与模板略有不同但语义完整；可跳过 grill-me 场景未写但本次变更不适用 |
 

@@ -35,9 +35,9 @@ grill-me（新设计必经，琐碎 L0 可跳过）
 
 ### 出口门禁
 
-- [ ] 能力归属的 **Maven 模块**已确定（base / core / plugin / console / kernel / platform / adapter / application）
-- [ ] 与 plugin、console catalog、kernel 业务边界无混同
-- [ ] `kernel` ↔ `platform` **无** Maven 互依方案
+- [ ] 能力归属的 **Maven 模块**已确定（base / core / plugin / console / portal / platform / adapter / application）
+- [ ] 与 plugin、console catalog、portal 业务边界无混同
+- [ ] `portal` ↔ `platform` **无** Maven 互依方案
 - [ ] 已判定：**仅新领域包** vs **需新建 Maven 模块**（后者须 `java:project`）
 - [ ] 相邻域交互方式已列出（直接调用 / 事件 / 禁止依赖）
 - [ ] 有意延后的能力已记录

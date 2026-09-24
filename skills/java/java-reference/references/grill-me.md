@@ -108,7 +108,7 @@ java:check        验证出口
 ## 推荐审查范围（示例）
 
 ```text
-/grill-me innospots-nexus-kernel/src/.../permission
+/grill-me innospots-nexus-portal/src/.../permission
 /grill-me skills/java
 /grill-me docs/design/multi-tenant-governance-design.md
 /grill-me JDK 25 + Spring Boot 4 升级方案

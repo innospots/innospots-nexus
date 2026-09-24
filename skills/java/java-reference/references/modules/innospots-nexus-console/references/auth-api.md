@@ -16,4 +16,4 @@
 
 **类型：** interface
 
-查找登录身份。由 platform 与 kernel 实现；console 不持久化用户。
+查找登录身份。由 platform 与 portal 实现；console 不持久化用户。

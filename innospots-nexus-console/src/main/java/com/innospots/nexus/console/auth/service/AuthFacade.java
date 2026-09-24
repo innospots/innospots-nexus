@@ -21,7 +21,7 @@ import com.innospots.nexus.console.credential.password.service.CredentialService
 import com.innospots.nexus.console.scope.service.SessionScopeBinder;
 
 /**
- * 运维平台域登录与令牌刷新编排。租户域认证见 {@code kernel.auth.service.TenantAuthFacade}。
+ * 运维平台域登录与令牌刷新编排。租户域认证见 {@code portal.auth.service.TenantAuthFacade}。
  */
 @Slf4j
 public class AuthFacade {

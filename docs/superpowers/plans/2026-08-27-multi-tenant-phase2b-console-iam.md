@@ -2,9 +2,9 @@
 
 > **面向 agent 工作者：** 必需子技能：使用 superpowers:executing-plans 按任务逐步实施本 plan。步骤使用 checkbox（`- [ ]`）语法跟踪进度。
 
-**目标：** 将 console 拥有的 IAM（role/menu/permission）迁出 kernel，修正 domain 包布局，停用 Group，并落地 AuthFacade 与 platform SupportAccessGrant。
+**目标：** 将 console 拥有的 IAM（role/menu/permission）迁出 portal，修正 domain 包布局，停用 Group，并落地 AuthFacade 与 platform SupportAccessGrant。
 
-**架构：** Console 拥有 role engine、menu catalog、permission catalog/grants、credential SPI 与 token 签发。Kernel 保留 tenant-user 存储、membership、org、workspace，以及 extension 驱动的 permission *sync*（使用 console DAO）。Platform 保留 ops users、tenant lifecycle 与 support access。Kernel 与 platform 永不相互依赖。
+**架构：** Console 拥有 role engine、menu catalog、permission catalog/grants、credential SPI 与 token 签发。Portal 保留 tenant-user 存储、membership、org、workspace，以及 extension 驱动的 permission *sync*（使用 console DAO）。Platform 保留 ops users、tenant lifecycle 与 support access。Portal 与 platform 永不相互依赖。
 
 **技术栈：** Java 25、Maven、Jakarta Persistence + MyBatis-Plus、Jakarta REST、JUnit 5 + AssertJ、Lombok。
 
@@ -14,7 +14,7 @@
 
 - 先 domain 后职责分包：`endpoint`、`dao`、`operator`、`service`、`api`、`domain/{entity,request,vo,model,enums,event}`。
 - Request/VO 位于 `domain.request` / `domain.vo`，不得直接放在 domain 根或并列 `request`/`vo` 包。
-- Console 不持久化 users。Kernel/platform 不签发 token。
+- Console 不持久化 users。Portal/platform 不签发 token。
 - 禁止 `ProjectBaseEntity` / `projectId`。Permission subject 仅 `ROLE | ORG_UNIT`。
 - 不更新模块 `SKILL.md`。除非明确要求，否则不 commit。
 - Java 变更后：`mvn clean compile`。本 slice 完成后：`mvn test`。
@@ -33,10 +33,10 @@ console.auth
       └── vo/              AuthTokenVo
 ```
 
-迁移后 kernel 遗留：
+迁移后 portal 遗留：
 
 ```text
-kernel.permission.service.PermissionResourceSyncService  (uses console DAOs + kernel ExtensionRegistry)
+portal.permission.service.PermissionResourceSyncService  (uses console DAOs + portal ExtensionRegistry)
 ```
 
 ---
@@ -47,7 +47,7 @@ kernel.permission.service.PermissionResourceSyncService  (uses console DAOs + ke
 
 ### Task 2：Console 持久化 + 迁移 role/menu/permission
 
-为 console 添加 JPA / MyBatis-Plus / transaction API。将 kernel `role`、`menu`、`permission`（sync service 除外）及对应测试迁至 `com.innospots.nexus.console.*`。
+为 console 添加 JPA / MyBatis-Plus / transaction API。将 portal `role`、`menu`、`permission`（sync service 除外）及对应测试迁至 `com.innospots.nexus.console.*`。
 
 ### Task 3：Role owner + role binding
 
@@ -55,7 +55,7 @@ kernel.permission.service.PermissionResourceSyncService  (uses console DAOs + ke
 
 ### Task 4：删除 Group；grant subject 改为 ORG_UNIT
 
-删除 kernel `group` domain。`PermissionSubjectType` = `ROLE | ORG_UNIT`。`AuthorizationSubject.groupIds` → `orgUnitIds`。
+删除 portal `group` domain。`PermissionSubjectType` = `ROLE | ORG_UNIT`。`AuthorizationSubject.groupIds` → `orgUnitIds`。
 
 ### Task 5：AuthFacade token 签发
 
@@ -67,4 +67,4 @@ platform 中 `nx_support_access_grant`（`support` domain，正确的 `domain.en
 
 ### Task 7：验证
 
-`mvn clean compile` && `mvn test`。kernel 生产代码中无 `role`/`menu`/`group` 包。Console 无 user entity。
+`mvn clean compile` && `mvn test`。portal 生产代码中无 `role`/`menu`/`group` 包。Console 无 user entity。

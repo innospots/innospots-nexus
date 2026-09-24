@@ -33,8 +33,8 @@ version: 1.8.0
 
 | 核对项 | 用途 |
 |--------|------|
-| **模块职责** | 能力归属哪个 `innospots-nexus-*` 模块；禁止越界写入 base/core/console/kernel/platform |
-| **依赖规则** | 依赖方向单向、最小依赖；kernel 与 platform 不得互依 |
+| **模块职责** | 能力归属哪个 `innospots-nexus-*` 模块；禁止越界写入 base/core/console/portal/platform |
+| **依赖规则** | 依赖方向单向、最小依赖；portal 与 platform 不得互依 |
 | **DDD 规则** | 领域概念与基础设施分离；ports and adapters |
 | **编码规范入口** | 契约细节回查 `skills/java/java-reference/standards/` |
 | **Agent 工作流** | 新需求/新设计须先 grill-me；Java 任务按 AGENTS.md 技能路由表选用对应 `java:*` 技能 |

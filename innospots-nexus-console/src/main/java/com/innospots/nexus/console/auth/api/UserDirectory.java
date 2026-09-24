@@ -5,7 +5,7 @@ import java.util.Optional;
 import com.innospots.nexus.console.auth.domain.model.AuthUser;
 
 /**
- * 查找登录身份。由 platform 与 kernel 各实现一份（构造时即绑定安全域）；console 不持久化用户。
+ * 查找登录身份。由 platform 与 portal 各实现一份（构造时即绑定安全域）；console 不持久化用户。
  *
  * @author Smars
  * @date 2026/09/13

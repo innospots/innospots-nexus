@@ -3,7 +3,7 @@
 **日期：** 2026-08-26
 
 **范围：** `innospots-nexus-core`，以及 core 包迁移所需的
-`innospots-nexus-kernel` import/package-reference 更新。
+`innospots-nexus-portal` import/package-reference 更新。
 
 ## 目标
 
@@ -16,9 +16,9 @@ flat package 不再混放 model、event 与 service。这是 package-organizatio
 ## 约束
 
 - 仅 redesign core production 与 core test 结构。
-- Kernel 变更限于 import、package declaration 与
+- Portal 变更限于 import、package declaration 与
   编译新 core package 所需的 test reference。
-- 不 redesign kernel business behavior、persistence shape 或 domain package。
+- 不 redesign portal business behavior、persistence shape 或 domain package。
 - 不在旧 core package 下保留 compatibility class。
 - working tree 中既有 user 变更保持不变，除非直接引用 moved core type。
 - 不新增或删除 core Maven module、dependency direction、table name 或 event type。
@@ -188,7 +188,7 @@ repository behavior、event publication 不变。
    name、ID length/type/prefix、audit fill behavior。
 3. 保留 session、server、quartz、watcher、extension contract test
    的行为导向；仅更新 package/import reference。
-4. 仅更新 kernel import 与 test reference（`ProjectBaseEntity`、
+4. 仅更新 portal import 与 test reference（`ProjectBaseEntity`、
    `DbPrimaryGenerator`）。确认无旧 core package reference。
 5. 每组 Java 源码编辑后立即 `mvn clean compile`，
    package migration 全部完成后运行 `mvn validate`、`mvn test`、`mvn -q help:effective-pom`。
@@ -200,7 +200,7 @@ repository behavior、event publication 不变。
 - migrated module 不引入 standalone `api` package。
 - 不引入新 interface 或复杂 business logic。
 - 每个 moved type 的 package declaration、import、Javadoc link、test 一致。
-- Kernel 使用新 core package name 编译，无无关 behavior
+- Portal 使用新 core package name 编译，无无关 behavior
   变更。
 - 既有 table、ID prefix、event type string、public contract 保持稳定。
 - 在 configured JDK 上 core 与全仓库 verification command 通过；

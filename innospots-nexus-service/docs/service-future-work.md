@@ -47,7 +47,7 @@
 | **分布式**限流 | Spring 可选 `service.governance.rate-limit.store=redis`（`innospots-nexus-service-governance-redis`）；Quarkus 仍默认本地 |
 | **分布式**会话 / 推送 | 仍仅单 JVM；见 core 会话设计 |
 | 幂等 | `InMemoryIdempotencyStore` 单 JVM、有限 TTL；不承诺跨重启 exactly-once；SSE/WS/大结果不重放 |
-| 审计 **REQUIRED + 真实事务** | 运行时语义与 `TransactionalAuditStorage` 已有；业务表 / outbox 在 kernel/platform，宿主集成测试需真实 DB（中立库不测 JDBC） |
+| 审计 **REQUIRED + 真实事务** | 运行时语义与 `TransactionalAuditStorage` 已有；业务表 / outbox 在 portal/platform，宿主集成测试需真实 DB（中立库不测 JDBC） |
 | 性能 **SLA 数字** | [实施文档 §5](service-implementation-design.md) 为测量目标，非已达成 SLA；须在夹具上对照实测后写入 PR |
 
 ## 6. 协议与产品形态（明确不做）

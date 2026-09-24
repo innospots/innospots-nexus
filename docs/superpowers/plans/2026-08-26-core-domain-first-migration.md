@@ -2,7 +2,7 @@
 
 > **面向 agent 工作者：** 必需子技能：使用 superpowers:executing-plans 按任务逐步实施本计划。步骤使用 checkbox（`- [ ]`）语法跟踪进度。
 
-**目标：** 按 domain 与 responsibility 重组既有 `innospots-nexus-core` 类型，将 concrete entity 移入 owning module 子包，仅变更编译所需的 kernel reference。
+**目标：** 按 domain 与 responsibility 重组既有 `innospots-nexus-core` 类型，将 concrete entity 移入 owning module 子包，仅变更编译所需的 portal reference。
 
 **架构：** shared persistence parent 保留在 `core.domain.entity`，MyBatis support 移入 `core.persistence`，组织既有 session、resource、server、quartz、watcher、extension 类型，不引入 `api` 层或新 abstraction。保留 field、table、ID prefix、event name 与 behavior。
 
@@ -56,7 +56,7 @@ package。
 - Move: `innospots-nexus-core/src/main/java/com/innospots/nexus/core/entity/DbPrimaryGenerator.java` to `innospots-nexus-core/src/main/java/com/innospots/nexus/core/persistence/id/DbPrimaryGenerator.java`
 - Modify: `innospots-nexus-core/src/main/java/com/innospots/nexus/core/domain/entity/BaseEntity.java`
 - Modify: `innospots-nexus-core/src/test/java/com/innospots/nexus/core/entity/CoreEntityContractsTest.java`
-- Modify: kernel production and test files importing `ProjectBaseEntity` or `DbPrimaryGenerator`
+- Modify: portal production and test files importing `ProjectBaseEntity` or `DbPrimaryGenerator`
 
 - [x] **Step 1：迁移文件并更新 package declaration/import。**
 
@@ -67,7 +67,7 @@ package。
   `BaseEntity` points its Javadoc links to the sibling `ProjectBaseEntity` and
   the new `core.persistence.handler.AuditMetaObjectHandler` package.
 
-- [x] **Step 2：更新全部 kernel 引用，不改变 kernel 逻辑。**
+- [x] **Step 2：更新全部 portal 引用，不改变 portal 逻辑。**
 
   仅替换以下 import 目标：
 
@@ -92,7 +92,7 @@ package。
   mvn clean compile
   ```
 
-  预期： `BUILD SUCCESS`; shared persistence support and kernel references
+  预期： `BUILD SUCCESS`; shared persistence support and portal references
   从新 package 编译。concrete core entity 待在 Task 2、3 迁移
   。
 
@@ -218,8 +218,8 @@ package。
 
 **文件：**
 
-- 仅修改 search 发现的剩余 core/kernel Java 引用
-- 不修改无关 base、console 或 kernel 业务实现
+- 仅修改 search 发现的剩余 core/portal Java 引用
+- 不修改无关 base、console 或 portal 业务实现
 
 - [x] **Step 1：搜索旧 package 引用。**
 
@@ -265,7 +265,7 @@ package。
   git status --short
   ```
 
-  确认 diff 仅含 planned core 迁移、必要 kernel
+  确认 diff 仅含 planned core 迁移、必要 portal
   reference 变更、测试与设计/计划文档；保留全部
   无关既有 working-tree 变更。
 
@@ -274,7 +274,7 @@ package。
 - `mvn clean compile`: 每组 Java 迁移后通过; 第一批
   shared parent 迁移后需要三个显式 `ProjectBaseEntity` import，
   moved, then 通过。
-- `mvn test`: 通过 — base 175, core 40, console 1, kernel 74 tests.
+- `mvn test`: 通过 — base 175, core 40, console 1, portal 74 tests.
 - `mvn validate`: 通过。
 - `mvn -q help:effective-pom`: 通过。
 - 旧 Java package 引用搜索： 无匹配。

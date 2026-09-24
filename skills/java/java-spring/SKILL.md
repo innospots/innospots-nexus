@@ -5,7 +5,7 @@ description: |
   Spring 与 Spring Boot 专项能力。当用户处理本仓库 Spring 运行时组装、依赖版本、
   配置与迁移评估时使用。强调：Spring 版本跟随 innospots-nexus-bom，禁止模块内联
   版本；禁止 Spring Data 与 Spring Security（持久化用 MyBatis-Plus，鉴权用
-  kernel/console）。端点仍用 Jakarta REST，不用 Spring MVC。
+  portal/console）。端点仍用 Jakarta REST，不用 Spring MVC。
   触发词：Spring、Spring Boot、starter、自动配置、BOM、spring-boot 版本、
   依赖注入、@Configuration、迁移评估。
 category: java
@@ -44,7 +44,7 @@ Spring 集成边界未定时（如 filter 与 `SessionContext` 绑定、Boot 自
 | Spring / Boot 及 starter **版本只来自 `innospots-nexus-bom`** | 在 `innospots-nexus-spring` 子模块 POM 写 `<version>` |
 | 升 Boot 只改 BOM 的 `spring-boot.version` + `dependency:tree` 验证 | 在 spring 聚合 POM 维护第二套 `spring-boot.version` |
 | 持久化用 **MyBatis-Plus**（`mybatis-plus-spring-boot4-starter`） | **Spring Data**（`spring-boot-starter-data-*`、`spring-data-*`） |
-| 认证/授权用 **kernel / console** 领域与 Jakarta 边界 | **Spring Security**（`spring-boot-starter-security`、`spring-security-*`） |
+| 认证/授权用 **portal / console** 领域与 Jakarta 边界 | **Spring Security**（`spring-boot-starter-security`、`spring-security-*`） |
 | 新增 starter 先 `java:design` + BOM 登记 | 绕过 BOM 直接引第三方坐标 |
 
 细则与自检 → [spring-dependencies.md](references/spring-dependencies.md)、

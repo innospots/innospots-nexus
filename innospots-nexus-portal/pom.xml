@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.innospots</groupId>
+        <artifactId>innospots-nexus-parent</artifactId>
+        <version>${revision}</version>
+        <relativePath>../innospots-nexus-parent/pom.xml</relativePath>
+    </parent>
+
+    <artifactId>innospots-nexus-portal</artifactId>
+    <packaging>jar</packaging>
+
+    <name>innospots-nexus-portal</name>
+    <description>基于管理控制台边界构建的功能 portal 模块。</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.innospots</groupId>
+            <artifactId>innospots-nexus-console</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>io.smallrye</groupId>
+                <artifactId>smallrye-open-api-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>generate-openapi</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>generate-schema</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/generated/openapi</outputDirectory>
+                            <schemaFilename>${project.artifactId}</schemaFilename>
+                            <outputFileTypeFilter>YAML</outputFileTypeFilter>
+                            <encoding>UTF-8</encoding>
+                            <scanners>
+                                <scanner>JAX-RS</scanner>
+                            </scanners>
+                            <scanPackages>com.innospots.nexus.portal</scanPackages>
+                            <scanDependenciesDisable>false</scanDependenciesDisable>
+                            <openApiVersion>3.1.0</openApiVersion>
+                            <operationIdStrategy>CLASS_METHOD</operationIdStrategy>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>package-openapi</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.outputDirectory}/META-INF/nexus-openapi</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.build.directory}/generated/openapi</directory>
+                                    <includes>
+                                        <include>${project.artifactId}.yaml</include>
+                                    </includes>
+                                    <filtering>false</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

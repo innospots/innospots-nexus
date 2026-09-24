@@ -51,7 +51,7 @@
 
 **文件：**
 - Move to `console/catalog/service/PermissionResourceSyncService.java`
-- Move test; update `KernelModuleBoundaryTest`
+- Move test; update `PortalModuleBoundaryTest`
 
 ---
 

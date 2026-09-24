@@ -40,7 +40,7 @@
 |--------|------|
 | AES-GCM 报文 / Body 加密 | 传输机密性由 HTTPS 承担 |
 | 请求签名、Canonical Request、时间戳防重放 | 不在 Core 范围 |
-| Filter / Interceptor / 权限模型 | 归属 service 适配层或 console/kernel |
+| Filter / Interceptor / 权限模型 | 归属 service 适配层或 console/portal |
 | JWT 签发与校验 | 上层可绑定 `principalId`，Core 不校验身份合法性 |
 | Vault / KMS / 长期客户端密钥 | 仅临时 X25519 密钥对 |
 | 密钥刷新、keyVersion、grace period | 过期后 **重新执行完整 ECDHE** |
@@ -108,7 +108,7 @@ com.innospots.nexus.core.security.status
 
 - `jakarta.ws.rs`、`spring-web`、Servlet Filter
 - Redis / JDBC 实现类（仅接口在 core，实现放 `innospots-nexus-spring-*` / Quarkus adapter 等）
-- 与 console/kernel 用户表耦合
+- 与 console/portal 用户表耦合
 
 ### 5.2 与相邻域交互
 
@@ -119,7 +119,7 @@ com.innospots.nexus.core.security.status
          │  JSON（transport）                │
          ▼                                   ▼
 ┌─────────────────────────────────────────────────────┐
-│ service-http / spring-console / kernel endpoint      │
+│ service-http / spring-console / portal endpoint      │
 │  - 映射 /security/session*                           │
 │  - 从 JWT/AppKey 解析 principalId（可选）            │
 └────────────────────────┬────────────────────────────┘
@@ -443,7 +443,7 @@ Client                                      Server
 | 不绑定 Spring Boot auto-configuration | 仅 Java 构造注入 / 工厂；Spring 配置类放 `innospots-nexus-spring-core` 或 application |
 | 禁止 console 管理功能 | 无 CRUD 管理端点 |
 | base middleware-free | 密码学在 core，不新增 base 依赖 |
-| 新 public API 两消费者 | 预期 consumer：service-http 安全过滤器、kernel/console 登录后增强（implement 时登记） |
+| 新 public API 两消费者 | 预期 consumer：service-http 安全过滤器、portal/console 登录后增强（implement 时登记） |
 
 **无需修改根 `AGENTS.md` 模块表**；若后续将「安全会话」列为 core 一等公民，可在 `java:project` 或文档 PR 中增补一句模块职责说明。
 

@@ -17,7 +17,7 @@ import com.innospots.nexus.console.scope.ConsoleOwnership;
 
 /**
  * 租户/平台用户密码生命周期：注册、修改、重置；校验强度后委托 {@link UserCredentialOperator}。
- * 供 kernel / platform 调用，不绑定 HTTP。
+ * 供 portal / platform 调用，不绑定 HTTP。
  *
  * @author Smars
  * @date 2026/09/13
@@ -78,7 +78,7 @@ public final class CredentialService {
 
     /**
      * 首次为用户设置密码。
-     * <p>调用场景：kernel/platform 用户创建或邀请激活后写入初始密码。</p>
+     * <p>调用场景：portal/platform 用户创建或邀请激活后写入初始密码。</p>
      *
      * @param realm       平台或租户域
      * @param subjectId   用户 ID
@@ -91,7 +91,7 @@ public final class CredentialService {
 
     /**
      * 已登录用户修改密码（需校验旧密码）。
-     * <p>调用场景：控制台或 kernel 改密 API，在 OTP/会话已建立的前提下调用。</p>
+     * <p>调用场景：控制台或 portal 改密 API，在 OTP/会话已建立的前提下调用。</p>
      *
      * @param realm       安全域
      * @param subjectId   用户 ID
@@ -116,8 +116,8 @@ public final class CredentialService {
 
     /**
      * 在身份已验证（如 OTP）后强制设置新密码。
-     * <p>调用场景：{@link com.innospots.nexus.kernel.user.operator.PasswordOperator} 忘记密码流程，
-     * 验证码通过后由 kernel 调用。</p>
+     * <p>调用场景：{@link com.innospots.nexus.portal.user.operator.PasswordOperator} 忘记密码流程，
+     * 验证码通过后由 portal 调用。</p>
      *
      * @param realm       安全域
      * @param subjectId   用户 ID

@@ -5,7 +5,7 @@ import com.innospots.nexus.console.auth.domain.model.TokenClaims;
 import com.innospots.nexus.console.auth.service.AuthSessionScope;
 
 /**
- * 将认证身份与作用域快照绑定到会话上下文；由 kernel / platform 装配提供具体实现。
+ * 将认证身份与作用域快照绑定到会话上下文；由 portal / platform 装配提供具体实现。
  */
 public interface SessionScopeBinder {
 

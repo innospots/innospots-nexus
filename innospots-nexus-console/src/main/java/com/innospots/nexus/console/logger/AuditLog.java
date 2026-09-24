@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
  * 标记方法为审计日志操作。
  * <p>框架无关标记：本包自身不执行拦截。
  * 拦截器适配器（AspectJ、Byte Buddy、CDI 等）位于包外；
- * kernel 读取本注解以驱动共享
+ * portal 读取本注解以驱动共享
  * {@link LogExecutor} 例程。</p>
  *
  * @author Smars

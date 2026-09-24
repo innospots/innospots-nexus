@@ -16,7 +16,7 @@
 | 领域事件 | [domain-events.md](domain-events.md) |
 | 集成测试 `*IT` | [integration-tests.md](integration-tests.md) |
 | MyBatis-Plus / yaml / 禁 XML | [persistence-mybatis.md](persistence-mybatis.md) |
-| 插件 vs kernel 归属 | `java:reference` → [module-ownership.md](../../java-reference/references/module-ownership.md) |
+| 插件 vs portal 归属 | `java:reference` → [module-ownership.md](../../java-reference/references/module-ownership.md) |
 
 ---
 

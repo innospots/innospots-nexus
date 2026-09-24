@@ -41,5 +41,5 @@ nexus:
 
 ## 依赖边界
 
-- 依赖 `innospots-nexus-base`；**不**引入 kernel、console 等业务模块。
+- 依赖 `innospots-nexus-base`；**不**引入 portal、console 等业务模块。
 - 在 **application / assembly** 模块引用本 artifact，版本由 `innospots-nexus-bom` 管理。

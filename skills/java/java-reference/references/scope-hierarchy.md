@@ -17,7 +17,7 @@ User → Tenant + Organization → Workspace → Project（可选）
 |------|-----------------|------|
 | 用户 | `UserSnapshot` | 当前认证主体 |
 | 租户 | `TenantSnapshot` | 租户标识与展示属性 |
-| 组织档案 | `OrganizationSnapshot` | 租户业务档案（**不是** kernel `OrganizationUnit`） |
+| 组织档案 | `OrganizationSnapshot` | 租户业务档案（**不是** portal `OrganizationUnit`） |
 | 工作区 | `WorkspaceSnapshot` | 工作区共享资源边界 |
 | 项目 | `ProjectSnapshot` | 可选；工作区内的业务隔离上下文 |
 
@@ -31,11 +31,11 @@ bindUser → bindTenant → bindWorkspace → bindProject（可选）
 
 - `requireWorkspaceId()`：工作区级操作必须已有工作区
 - `projectId()` / `project()`：项目为**可选**上下文，未选项目时为空
-- Snapshot 类型归 **base**，业务实体与工作流归 **kernel / platform**
+- Snapshot 类型归 **base**，业务实体与工作流归 **portal / platform**
 
 ### Snapshot 与 Entity
 
-| 维度 | Snapshot（base） | Entity（kernel/platform/core） |
+| 维度 | Snapshot（base） | Entity（portal/platform/core） |
 |------|------------------|-------------------------------|
 | 用途 | 传输、会话、JWT 声明 | 持久化、业务规则 |
 | 形态 | record / 轻量 class | JPA/MyBatis-Plus 实体 |
@@ -77,9 +77,9 @@ BaseEntity → TenantBaseEntity → WorkspaceBaseEntity → ProjectBaseEntity
 | 误判 | 正确做法 |
 |------|---------|
 | 有 `projectId` 会话就必须用 `ProjectBaseEntity` | 会话项目上下文 ≠ 持久化隔离；默认仍用 `WorkspaceBaseEntity` |
-| `OrganizationSnapshot` 就是组织单元实体 | Snapshot 是传输档案；kernel 自有 `OrganizationUnit` 实体 |
+| `OrganizationSnapshot` 就是组织单元实体 | Snapshot 是传输档案；portal 自有 `OrganizationUnit` 实体 |
 | 在 base 放业务实体 | base 只放 Snapshot 与无中间件工具 |
-| kernel 与 platform 互引对方的 Snapshot 扩展 | 各自域内建模；共享契约下沉 base/console |
+| portal 与 platform 互引对方的 Snapshot 扩展 | 各自域内建模；共享契约下沉 base/console |
 
 ---
 

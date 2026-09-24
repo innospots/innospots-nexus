@@ -14,7 +14,7 @@
 | **工程版本** | `1.0.0-SNAPSHOT`（根 POM `${revision}`，由 `innospots-nexus-bom` 对齐） |
 | **本模块阶段** | **M1 契约层**：公共类型、注解与 SPI 已随服务框架 M1–M9 交付；**行为**由 `service-runtime` + adapter 实现，非本 JAR 自带 |
 | **文档状态快照** | 2026-09-16；实现细节以仓库源码与 [service-future-work.md](../docs/service-future-work.md) 为准 |
-| **适配器** | Spring / Quarkus adapter 已具备 HTTP 黑盒场景；**kernel 尚未提供**默认 `PermissionProvider` / `AuditStorage` 生产实现 |
+| **适配器** | Spring / Quarkus adapter 已具备 HTTP 黑盒场景；**portal 尚未提供**默认 `PermissionProvider` / `AuditStorage` 生产实现 |
 
 ### 实现状态图例（下文通用）
 
@@ -32,7 +32,7 @@
 | **契约** | `innospots-nexus-service-contract` 类型/注解是否齐全 |
 | **Runtime** | `innospots-nexus-service-runtime`（及 governance/observability 库）是否执行 |
 | **Spring 默认** | `innospots-nexus-spring-service` 的 `ServiceCoreConfiguration` 等是否**开箱注册** |
-| **生产集成** | kernel/platform/运维侧是否已有默认可用实现（非 test fixture） |
+| **生产集成** | portal/platform/运维侧是否已有默认可用实现（非 test fixture） |
 
 ### 能力总表（实现状态）
 
@@ -42,14 +42,14 @@
 | 调用链 `invocation` | ✅ | ✅ | ✅ `InvocationEngine` | ✅ |
 | 策略解析 `policy` | ✅ | 🔶 | ✅ `AnnotationPolicyResolver` | 🔶 见各注解子项 |
 | `@ServiceOperation` | ✅ | 🔶 | ✅ 解析进 `OperationPolicy` | ✅ |
-| `@RequiresPermission` / `@PublicAccess` | ✅ | ✅ | 🔶 须 `ServiceInvocationBridge` | ❌ kernel 未注册 `PermissionProvider` |
+| `@RequiresPermission` / `@PublicAccess` | ✅ | ✅ | 🔶 须 `ServiceInvocationBridge` | ❌ portal 未注册 `PermissionProvider` |
 | `@RateLimited` | ✅ | ✅ | 🔶 须 Bridge + 默认仅本地令牌桶 | 🔶 单 JVM，无分布式限流 |
 | `@TimeoutProtected` | ✅ | 📋 | 🔶 超时靠 `GovernanceConfig.timeouts` 的 **operationId 键**，**未**从注解解析 | 🔶 |
 | `@BulkheadProtected` / `@CircuitProtected` | ✅ | ✅ 拦截器在 governance | ❌ Spring 默认**未**注册舱壁/熔断拦截器 | 🔶 需自行 `addInterceptor` |
 | `@Traced` / `@Execution` | ✅ | 📋 | 📋 | 📋 |
 | 审计 `@Audited` | ✅ | ✅ `AuditInterceptor` | 🔶 默认 `auditEnabled=false`，noop 存储 | ❌ 无持久化 `AuditStorage` |
 | 审计快照 `AuditSnapshotProvider` | ✅ | 📋 | 📋 | ❌ |
-| 事务审计 `TransactionalAuditStorage` | ✅ | 🔶 运行时语义 | ❌ | ❌ 业务 outbox 在 kernel/platform |
+| 事务审计 `TransactionalAuditStorage` | ✅ | 🔶 运行时语义 | ❌ | ❌ 业务 outbox 在 portal/platform |
 | 治理 SPI `governance` | ✅ | ✅ 本地 + 可选 Redis 模块 | 🔶 仅限流+超时 | 🔶 Redis 需 `store=redis`（Spring） |
 | 指标 `observation` | ✅ | ✅ | 🔶 访问日志+MDC；指标 Bean 需另配 | 🔶 |
 | 追踪 `trace` | ✅ | ✅ | 🔶 默认 `NoOpTraceProvider` | 🔶 OTel 实现已有，非默认 |
@@ -203,13 +203,13 @@
 | `@RequiresPermission("order.read")` | 类型级与方法级可叠加（AND）；可指定 `resource` 解析器键 |
 | `@PublicAccess` | 显式跳过权限检查（仍可有认证） |
 
-**实现状态**：契约 ✅ · Runtime ✅（`AuthenticationCoordinator`、`AuthorizationInterceptor`）· Spring 默认 🔶（`ObjectProvider` 可选注册 Provider）· 生产集成 ❌（**无** kernel 默认 Bean；仅 adapter-test 的 `HostSecurityProvider` / `HostPermissionProvider`）。
+**实现状态**：契约 ✅ · Runtime ✅（`AuthenticationCoordinator`、`AuthorizationInterceptor`）· Spring 默认 🔶（`ObjectProvider` 可选注册 Provider）· 生产集成 ❌（**无** portal 默认 Bean；仅 adapter-test 的 `HostSecurityProvider` / `HostPermissionProvider`）。
 
 **用法要点**：
 
 - 权限注解应标在 **被 Bridge 调用的 Service / 应用服务方法**（与 Controller 解耦）；Controller 只负责 `bridge.invoke(service, method, operationId, () -> ...)`。
 - 类型级与方法级 `@RequiresPermission` **AND** 组合；`@PublicAccess` 与 `@RequiresPermission` 不可共存（解析期 `CONFIG_ERROR`）。
-- `SecurityProvider` 负责把凭据变为 `ServicePrincipal`；`PermissionProvider` 只做授权判定，**不**替代 kernel 的权限模型实现。
+- `SecurityProvider` 负责把凭据变为 `ServicePrincipal`；`PermissionProvider` 只做授权判定，**不**替代 portal 的权限模型实现。
 - `resource` 解析器键预留扩展；默认使用操作级 `ResourceRef`（Bridge 当前使用 adapter 占位资源）。
 - Domain / Repository **禁止**依赖本包注解或类型。
 
@@ -217,7 +217,7 @@
 
 ### 5. `audit` — 技术审计
 
-**作用**：记录「谁在何时对什么资源做了什么」的技术审计事件契约。**不**承担业务审计查询与报表（归属 kernel/platform）。
+**作用**：记录「谁在何时对什么资源做了什么」的技术审计事件契约。**不**承担业务审计查询与报表（归属 portal/platform）。
 
 | 类型 | 说明 |
 |------|------|
@@ -233,7 +233,7 @@
 |------|------|
 | `@Audited(action = "order.create", mode = AuditMode.REQUIRED)` | 标在 **Application Service** 方法/类；可配 `resourceType`、`snapshot` 键 |
 
-**实现状态**：契约 ✅ · Runtime ✅（`AuditInterceptor`、`AuditDispatcher`、队列）· Spring 默认 🔶（`ServiceRuntime` 默认 `auditEnabled=false` + noop 存储）· 生产集成 ❌（持久化 `AuditStorage`、kernel 审计表未接）。
+**实现状态**：契约 ✅ · Runtime ✅（`AuditInterceptor`、`AuditDispatcher`、队列）· Spring 默认 🔶（`ServiceRuntime` 默认 `auditEnabled=false` + noop 存储）· 生产集成 ❌（持久化 `AuditStorage`、portal 审计表未接）。
 
 **用法要点**：
 
@@ -241,7 +241,7 @@
 - `AuditMode.REQUIRED`：无可用 `AuditStorage` 或分发失败时**拒绝**操作（runtime 单测已覆盖）；`BEST_EFFORT` 尽力写入。
 - 开启审计须在构建 `ServiceRuntime` 时 `auditEnabled(true)` 并注入真实 `AuditStorage`（Spring 应用当前需扩展 `ServiceRuntime` Bean，见 runtime README）。
 - `auditSnapshot` / `AuditSnapshotProvider`：契约已有，**运行时未**按快照键自动调用 Provider（📋）。
-- `TransactionalAuditStorage` + `CommitObserver`：用于与 DB 事务对齐；**业务 outbox 与落库**归属 kernel/platform（见 [service-future-work.md](../docs/service-future-work.md)）。
+- `TransactionalAuditStorage` + `CommitObserver`：用于与 DB 事务对齐；**业务 outbox 与落库**归属 portal/platform（见 [service-future-work.md](../docs/service-future-work.md)）。
 
 ---
 
@@ -372,7 +372,7 @@
 
 **用法要点**：
 
-- 与 kernel/console **业务**状态码分离；SRV 段表示框架、传输、治理类失败。
+- 与 portal/console **业务**状态码分离；SRV 段表示框架、传输、治理类失败。
 - adapter 将 `ServiceStatusCode` 映射为 HTTP 状态与 `R` / Problem Detail 外形（由 `ResponseProfile` 决定）。
 - 契约测试锁定双语消息形状与模块前缀（`ServiceStatusCodeContractsTest`）。
 
@@ -425,7 +425,7 @@ com.innospots.nexus.service.contract
 |------|--------|------|
 | 仅类型/注解 | `innospots-nexus-service-contract` | Domain 以外的 API 模块引用注解；**无**运行时行为 |
 | 完整 HTTP 能力 | `innospots-nexus-spring-service` + `spring-boot-starter-web`（或 webflux） | Filter、`ServiceContext`、`InvocationEngine`、错误映射 |
-| 平台身份与权限 | 上者 + 自研 `SecurityProvider` / `PermissionProvider` Bean | 授权拦截生效（kernel 默认实现尚未提供） |
+| 平台身份与权限 | 上者 + 自研 `SecurityProvider` / `PermissionProvider` Bean | 授权拦截生效（portal 默认实现尚未提供） |
 
 Spring 应用须在启动类 **显式**启用（无 `spring.factories` 自动开关）：
 
@@ -511,7 +511,7 @@ public class OrderService {
 }
 ```
 
-**配置与 SPI**（示例：本地开发用测试夹具同等逻辑，生产替换为 kernel 实现）：
+**配置与 SPI**（示例：本地开发用测试夹具同等逻辑，生产替换为 portal 实现）：
 
 ```java
 @Configuration
@@ -538,7 +538,7 @@ public class SecurityBeans {
 
 ### 场景 2：应用服务审计（`@Audited`）
 
-**用途**：对关键业务操作（创建订单、改权限、删数据）产生**技术审计事件**，写入 `AuditStorage`，供合规与排障；与 kernel 侧「审计查询 UI」分离（查询不在 contract 层）。
+**用途**：对关键业务操作（创建订单、改权限、删数据）产生**技术审计事件**，写入 `AuditStorage`，供合规与排障；与 portal 侧「审计查询 UI」分离（查询不在 contract 层）。
 
 **生效条件**：
 
@@ -728,8 +728,8 @@ public class OrderQueryService {
 | 扩展点 | 接口 | 典型实现方 |
 |--------|------|------------|
 | 调用拦截 | `ServiceInterceptor` | 平台 / adapter 注册 |
-| 认证 | `SecurityProvider` | kernel / gateway |
-| 授权 | `PermissionProvider` | kernel / console |
+| 认证 | `SecurityProvider` | portal / gateway |
+| 授权 | `PermissionProvider` | portal / console |
 | 审计存储 | `AuditStorage` | platform / adapter |
 | 审计快照 | `AuditSnapshotProvider` | 业务模块按资源注册 |
 | 限流 | `RateLimitProvider` | governance 模块 |

@@ -11,8 +11,8 @@
 Jakarta REST 契约、请求/响应 record、转换器、框架中立的认证/作用域端口、
 目录索引持久化、权限运行时，以及内置控制台入口插件。
 
-**不包含：** Spring Boot 自动配置、Servlet 绑定、具体用户持久化（kernel/platform 实现端口）、
-插件规范 / Page DSL 定义，或菜单/角色/字典 CRUD 的完整业务工作流（契约已存在；kernel 负责实现）。
+**不包含：** Spring Boot 自动配置、Servlet 绑定、具体用户持久化（portal/platform 实现端口）、
+插件规范 / Page DSL 定义，或菜单/角色/字典 CRUD 的完整业务工作流（契约已存在；portal 负责实现）。
 
 **能力一览：**
 
@@ -25,21 +25,21 @@ Jakarta REST 契约、请求/响应 record、转换器、框架中立的认证/�
 | **导航** | 基于目录 + 授权的权限过滤侧边栏组装 |
 | **插件管理** | 通过 `PluginInstallationManager` 安装/启用/禁用/重试 |
 | **内置入口** | 六个控制台模块的 `Plugin` 入口描述符 |
-| **管理 CRUD 契约** | 角色、菜单、字典端点形态（实现在 kernel 中） |
+| **管理 CRUD 契约** | 角色、菜单、字典端点形态（实现在 portal 中） |
 | **审计日志** | `nx_audit_log` 实体 + 调用日志管道 |
 
 ## 边界契约
 
-### 控制台 vs 插件 vs kernel/platform
+### 控制台 vs 插件 vs portal/platform
 
 | 关注点 | 归属 | 控制台提供 |
 |---------|-------|------------------|
 | 插件发现、贡献解码、Page DSL | **plugin** | 仅消费 `ConsoleContributionCatalog`、`PageDslLoader` 用于同步 |
 | 目录持久化索引（`nx_console_catalog_resource`） | **console** | `ConsoleCatalogSyncService`、`ConsoleCatalogService` |
 | 权限授权（`nx_permission_grant`） | **console** | 实体、DAO、授权替换契约、`RequestAuthorizer` |
-| 用户 / 成员持久化 | **kernel** / **platform** | `UserDirectory`、`MembershipDirectory`、`CredentialStore` 端口 |
-| 租户 / 工作空间 / 项目快照 | **kernel** / **platform** | `TenantScopeDirectory`、`WorkspaceScopeDirectory`、`ProjectScopeDirectory` |
-| 角色/菜单/字典业务工作流 | **kernel** | 实现控制台端点契约 + operator |
+| 用户 / 成员持久化 | **portal** / **platform** | `UserDirectory`、`MembershipDirectory`、`CredentialStore` 端口 |
+| 租户 / 工作空间 / 项目快照 | **portal** / **platform** | `TenantScopeDirectory`、`WorkspaceScopeDirectory`、`ProjectScopeDirectory` |
+| 角色/菜单/字典业务工作流 | **portal** | 实现控制台端点契约 + operator |
 | HTTP 运行时绑定 | **adapter/application** | 装配端点、过滤器、`AuthorizationSubjectResolver` |
 
 ### 分层（强制）
@@ -51,7 +51,7 @@ endpoint → service → operator → dao
 - 端点：仅使用 `jakarta.ws.rs`；返回 `R<T>`（或 `R` 内的 `PageResult<T>`）。
 - `domain.request` / `domain.vo`：**records**。
 - 事务：仅在 service/operator 上使用 `jakarta.transaction.Transactional`。
-- 控制台端点可以是**接口**（kernel 实现）或**类**（console 自带逻辑）。
+- 控制台端点可以是**接口**（portal 实现）或**类**（console 自带逻辑）。
 
 ### 安全域
 
@@ -80,14 +80,14 @@ endpoint → service → operator → dao
 
 | 需求 | 使用控制台中的 | 实现在 |
 |------|------------------|--------------|
-| 租户/平台登录 | `AuthFacade`、`AuthTokenPairIssuer`、认证端点 | kernel / platform + adapter |
-| 作用域目录查询 | `*ScopeDirectory` 端口 | kernel（租户数据）/ platform |
-| 用户查询 | `UserDirectory`、`CredentialStore` | kernel / platform |
-| 登录时密码验证 | `PasswordVerificationOperator`、`PasswordDecryptor` | adapter 或 kernel |
+| 租户/平台登录 | `AuthFacade`、`AuthTokenPairIssuer`、认证端点 | portal / platform + adapter |
+| 作用域目录查询 | `*ScopeDirectory` 端口 | portal（租户数据）/ platform |
+| 用户查询 | `UserDirectory`、`CredentialStore` | portal / platform |
+| 登录时密码验证 | `PasswordVerificationOperator`、`PasswordDecryptor` | adapter 或 portal |
 | HTTP 请求授权 | `RequestAuthorizer` + `AuthorizationRequest` | adapter 过滤器调用 authorizer |
 | 当前用户主体 | `AuthorizationSubjectResolver` | adapter（从令牌/会话） |
 | 插件启用时目录同步 | `ConsoleCatalogSyncService`、启动任务 | 宿主注册 `NexusStartupTask` |
-| 新管理 REST 区域 | 在 console 中添加端点接口 + request/vo records | kernel service/operator/dao |
+| 新管理 REST 区域 | 在 console 中添加端点接口 + request/vo records | portal service/operator/dao |
 | 新内置控制台模块页面 | `ConsoleModuleDescriptor` + `*EntryPlugin` | console entry 包 |
 
 **不要**在 console 中放置插件规范、贡献约束或 Spring 绑定。
@@ -116,7 +116,7 @@ endpoint → service → operator → dao
 
 ## 类参考
 
-### 包 `auth.api`（端口 — kernel/platform 实现）
+### 包 `auth.api`（端口 — portal/platform 实现）
 
 | 类 | 类型 | 说明 |
 |-------|------|-------------|
@@ -210,8 +210,8 @@ endpoint → service → operator → dao
 
 本目录**不是** `java:console` 或任何可安装技能。在以下场景通过 **`java:reference`** 消费：
 
-- 扩展 kernel/platform 以实现控制台端口或端点接口
-- 在 kernel 实现之前在 console 中添加 REST 契约或 VO
+- 扩展 portal/platform 以实现控制台端口或端点接口
+- 在 portal 实现之前在 console 中添加 REST 契约或 VO
 - 判断目录、权限或插件逻辑应归属 console 还是 plugin
 - 审查 `/tenant` 与 `/platform` 路径及 `SecurityRealm` 分离
 
@@ -220,7 +220,7 @@ endpoint → service → operator → dao
 ```text
 java:reference  → module-ownership.md + this README
 java:design     → boundary + endpoint contracts before code
-java:develop    → implement in kernel/platform/adapter; console stays contract-neutral
+java:develop    → implement in portal/platform/adapter; console stays contract-neutral
 java:check      → mvn clean compile / test per module
 ```
 

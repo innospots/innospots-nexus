@@ -39,7 +39,7 @@ innospots-nexus-parent   ← 构建 parent（插件、编译基线、公共 test
 
 ### parent 引用方式
 
-所有 **innospots-nexus 体系内的 Java 模块**（`base`、`core`、`console`、`kernel` 等）默认：
+所有 **innospots-nexus 体系内的 Java 模块**（`base`、`core`、`console`、`portal` 等）默认：
 
 ```xml
 <parent>
@@ -91,8 +91,8 @@ innospots-nexus-parent   ← 构建 parent（插件、编译基线、公共 test
 | 场景 | 应引用的模块 | 说明 |
 |------|-------------|------|
 | 仅需管理台契约、catalog、权限运行时等**控制台地基** | `innospots-nexus-console` | 传递带来 `plugin`、`core`、`base` |
-| **租户侧管理业务**（用户、角色、权限、菜单、字典、认证实现等） | `innospots-nexus-kernel` | 业务类管理端；传递带来 `console` 及更下层 |
-| **运营侧平台**（租户生命周期、企业主体、平台 IAM、`/platform/**`） | `innospots-nexus-platform` | 系统运营类平台；传递带来 `console`；**不得**依赖 `kernel` |
+| **租户侧管理业务**（用户、角色、权限、菜单、字典、认证实现等） | `innospots-nexus-portal` | 业务类管理端；传递带来 `console` 及更下层 |
+| **运营侧平台**（租户生命周期、企业主体、平台 IAM、`/platform/**`） | `innospots-nexus-platform` | 系统运营类平台；传递带来 `console`；**不得**依赖 `portal` |
 | 仅需业务中立平台基础设施（持久化基类、Quartz、watcher 等） | `innospots-nexus-core` | 不含控制台与管理业务 |
 | 仅需纯 Java 基础契约与工具 | `innospots-nexus-base` | 零中间件 |
 | 插件运行时与 Page DSL（不经管理台） | `innospots-nexus-plugin` | 见下文「直接引用 plugin」 |
@@ -105,7 +105,7 @@ innospots-nexus-parent   ← 构建 parent（插件、编译基线、公共 test
 
 | 场景 | 引用 | 不引 |
 |------|------|------|
-| 独立 classpath 插件 JAR、贡献解码/安装宿主 | `plugin`（传递 `core`/`base`） | `console`、`kernel` |
+| 独立 classpath 插件 JAR、贡献解码/安装宿主 | `plugin`（传递 `core`/`base`） | `console`、`portal` |
 | 仅需 Page DSL / contribution 运行时，无管理台 REST | `plugin` | `console` |
 | 管理台 UI + catalog + 权限 + REST 契约 | `console`（已传递 `plugin`） | 单独再写 `plugin` |
 
@@ -116,13 +116,13 @@ innospots-nexus-parent   ← 构建 parent（插件、编译基线、公共 test
 
 ```text
 innospots-nexus-console   → 管理台 API 契约与扩展地基（域无关）
-innospots-nexus-kernel    → 租户域管理业务实现（业务类管理端）
+innospots-nexus-portal    → 租户域管理业务实现（业务类管理端）
 innospots-nexus-platform  → 运营域平台能力（系统运营类）
 ```
 
 - 做**管理台特性、扩展、REST 契约**时引用 **`console`**。
-- 做**租户侧管理功能实现**时引用 **`kernel`**（通常已足够，无需再写 `console`）。
-- 做**运营/平台侧能力**时引用 **`platform`**（与 `kernel` 平行，互不依赖）。
+- 做**租户侧管理功能实现**时引用 **`portal`**（通常已足够，无需再写 `console`）。
+- 做**运营/平台侧能力**时引用 **`platform`**（与 `portal` 平行，互不依赖）。
 
 ---
 
@@ -142,7 +142,7 @@ innospots-nexus-platform  → 运营域平台能力（系统运营类）
 ```xml
 <!-- 仅需租户管理业务，却重复声明整条链 -->
 <dependency>
-    <artifactId>innospots-nexus-kernel</artifactId>
+    <artifactId>innospots-nexus-portal</artifactId>
 </dependency>
 <dependency>
     <artifactId>innospots-nexus-console</artifactId>
@@ -158,18 +158,18 @@ innospots-nexus-platform  → 运营域平台能力（系统运营类）
 **正例 — 最小引用：**
 
 ```xml
-<!-- 租户管理业务：kernel 已传递 console / plugin / core / base -->
+<!-- 租户管理业务：portal 已传递 console / plugin / core / base -->
 <dependency>
     <groupId>com.innospots</groupId>
-    <artifactId>innospots-nexus-kernel</artifactId>
+    <artifactId>innospots-nexus-portal</artifactId>
 </dependency>
 ```
 
-**反例 — 运营平台误引 kernel：**
+**反例 — 运营平台误引 portal：**
 
 ```xml
 <dependency>
-    <artifactId>innospots-nexus-kernel</artifactId>
+    <artifactId>innospots-nexus-portal</artifactId>
 </dependency>
 <dependency>
     <artifactId>innospots-nexus-platform</artifactId>
@@ -214,7 +214,7 @@ innospots-nexus-platform  → 运营域平台能力（系统运营类）
 
 | 模块 | 显式声明 | 原因 |
 |------|---------|------|
-| `innospots-nexus-kernel` | `console` + `core` | 契约层与持久化基类 API 同时使用；`core` 虽可由 `console` 传递，显式声明表达直接依赖 |
+| `innospots-nexus-portal` | `console` + `core` | 契约层与持久化基类 API 同时使用；`core` 虽可由 `console` 传递，显式声明表达直接依赖 |
 
 新模块默认先选**一个最上层**依赖；若需上表模式，在 PR 说明中写明直接 import 的下层 API。
 
@@ -225,30 +225,30 @@ innospots-nexus-platform  → 运营域平台能力（系统运营类）
 ## 运行时组装（Spring / Quarkus）
 
 框架绑定放在 **`innospots-nexus-spring`** 或 **`innospots-nexus-quarkus`** 聚合下，
-不要在中立库模块（`base`/`core`/`console`/`kernel`/`platform`）中引入 Spring/Quarkus starter。
+不要在中立库模块（`base`/`core`/`console`/`portal`/`platform`）中引入 Spring/Quarkus starter。
 
 ### 可运行应用组装决策表
 
-库模块 `kernel` 与 `platform` **互不依赖**。可运行应用按部署域选型：
+库模块 `portal` 与 `platform` **互不依赖**。可运行应用按部署域选型：
 
 | 部署目标 | 库依赖（选一侧） | 运行时模块（Spring 示例） | 说明 |
 |----------|-----------------|---------------------------|------|
-| 租户管理端 | `innospots-nexus-kernel` | `innospots-nexus-spring-app` | 用户/角色/权限/菜单等 |
+| 租户管理端 | `innospots-nexus-portal` | `innospots-nexus-spring-app` | 用户/角色/权限/菜单等 |
 | 运营平台 | `innospots-nexus-platform` | `innospots-nexus-spring-app` | 租户生命周期、企业主体、`/platform/**` |
-| 仅控制台契约/扩展（无 kernel 业务） | `innospots-nexus-console` | `innospots-nexus-spring-app` | 少见；通常仍有 `*-app` 提供 JDBC 等 |
-| **同一进程同时要 kernel + platform** | **新建 `application` 模块** 同时依赖两者 | `innospots-nexus-spring-app` | 见下节；**禁止**让 `kernel` 与 `platform` 库模块互依 |
+| 仅控制台契约/扩展（无 portal 业务） | `innospots-nexus-console` | `innospots-nexus-spring-app` | 少见；通常仍有 `*-app` 提供 JDBC 等 |
+| **同一进程同时要 portal + platform** | **新建 `application` 模块** 同时依赖两者 | `innospots-nexus-spring-app` | 见下节；**禁止**让 `portal` 与 `platform` 库模块互依 |
 
 Quarkus 将上表 `spring-app` 替换为 `innospots-nexus-quarkus-app`，原则相同。
 
-### 同一进程包含 kernel 与 platform
+### 同一进程包含 portal 与 platform
 
-`kernel` 与 `platform` 是平级库模块，**不得**在二者之间加 Maven 依赖。
+`portal` 与 `platform` 是平级库模块，**不得**在二者之间加 Maven 依赖。
 若产品要求**一个可执行 JAR** 同时暴露租户管理与运营能力：
 
 1. 新建 **`application` / `adapter` 组装模块**（可放在 `innospots-nexus-spring` 或
    `innospots-nexus-quarkus` 聚合下，例如 `innospots-nexus-spring-unified`）。
-2. 在该模块 POM 中**同时**声明 `kernel` 与 `platform`（以及 `*-app`）。
-3. 运行时绑定、路由、安全配置在组装模块完成；**不**修改 `kernel`/`platform` 的依赖方向。
+2. 在该模块 POM 中**同时**声明 `portal` 与 `platform`（以及 `*-app`）。
+3. 运行时绑定、路由、安全配置在组装模块完成；**不**修改 `portal`/`platform` 的依赖方向。
 
 ```xml
 <!-- 示例：统一可运行应用（新建模块，非现有 artifact） -->
@@ -259,7 +259,7 @@ Quarkus 将上表 `spring-app` 替换为 `innospots-nexus-quarkus-app`，原则�
     </dependency>
     <dependency>
         <groupId>com.innospots</groupId>
-        <artifactId>innospots-nexus-kernel</artifactId>
+        <artifactId>innospots-nexus-portal</artifactId>
     </dependency>
     <dependency>
         <groupId>com.innospots</groupId>
@@ -276,12 +276,12 @@ Quarkus 将上表 `spring-app` 替换为 `innospots-nexus-quarkus-app`，原则�
 |------|------|
 | `innospots-nexus-spring` | Spring 运行时聚合 parent（含 `spring-boot-maven-plugin` 管理） |
 | `innospots-nexus-spring-app` | Spring 基础设施组装（Web、JDBC、MyBatis-Plus 等） |
-| `innospots-nexus-spring-console` | **可运行的管理端** Spring Boot 应用（组装 `kernel` + 运行时） |
+| `innospots-nexus-spring-console` | **可运行的管理端** Spring Boot 应用（组装 `portal` + 运行时） |
 
 Spring 版本与 starter 约束见 `java:spring` → `spring-dependencies.md`：
 
 - **版本跟随 BOM**（`spring-boot.version` 只在 `innospots-nexus-bom`）；spring 子模块禁止内联 `<version>`
-- **禁止 Spring Data、Spring Security**；持久化用 MyBatis-Plus，鉴权用 kernel/console
+- **禁止 Spring Data、Spring Security**；持久化用 MyBatis-Plus，鉴权用 portal/console
 
 典型可运行管理端依赖（遵循最小原则）：
 
@@ -293,13 +293,13 @@ Spring 版本与 starter 约束见 `java:spring` → `spring-dependencies.md`：
     </dependency>
     <dependency>
         <groupId>com.innospots</groupId>
-        <artifactId>innospots-nexus-kernel</artifactId>
+        <artifactId>innospots-nexus-portal</artifactId>
     </dependency>
 </dependencies>
 ```
 
-`kernel` 传递引入 `console`；**无需**再写 `innospots-nexus-console`，除非该组装模块
-不引 `kernel` 却需要控制台契约（少见）。
+`portal` 传递引入 `console`；**无需**再写 `innospots-nexus-console`，除非该组装模块
+不引 `portal` 却需要控制台契约（少见）。
 
 **租户管理端（规范写法）：**
 
@@ -311,7 +311,7 @@ Spring 版本与 starter 约束见 `java:spring` → `spring-dependencies.md`：
     </dependency>
     <dependency>
         <groupId>com.innospots</groupId>
-        <artifactId>innospots-nexus-kernel</artifactId>
+        <artifactId>innospots-nexus-portal</artifactId>
     </dependency>
 </dependencies>
 ```
@@ -331,7 +331,7 @@ Spring 版本与 starter 约束见 `java:spring` → `spring-dependencies.md`：
 </dependencies>
 ```
 
-`kernel` / `platform` 传递引入 `console`；组装模块**无需**再写 `innospots-nexus-console`。
+`portal` / `platform` 传递引入 `console`；组装模块**无需**再写 `innospots-nexus-console`。
 
 > 存量 `innospots-nexus-spring-console` 可能仍显式声明 `console`，属历史冗余；
 > 新组装模块按上表即可。
@@ -348,9 +348,9 @@ Spring 版本与 starter 约束见 `java:spring` → `spring-dependencies.md`：
 
 | 部署 | 依赖 |
 |------|------|
-| 租户管理端 | `innospots-nexus-quarkus-app` + `innospots-nexus-kernel` |
+| 租户管理端 | `innospots-nexus-quarkus-app` + `innospots-nexus-portal` |
 | 运营平台 | `innospots-nexus-quarkus-app` + `innospots-nexus-platform` |
-| 统一进程（kernel + platform） | `quarkus-app` + `kernel` + `platform`（新建 application 模块） |
+| 统一进程（portal + platform） | `quarkus-app` + `portal` + `platform`（新建 application 模块） |
 
 ---
 

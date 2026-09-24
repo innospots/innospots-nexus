@@ -15,12 +15,12 @@
     <packaging>jar</packaging>
 
     <name>innospots-nexus-sample-spring-tenant</name>
-    <description>示例：租户管理控制台（spring-kernel）。</description>
+    <description>示例：租户管理控制台（spring-portal）。</description>
 
     <dependencies>
         <dependency>
             <groupId>com.innospots</groupId>
-            <artifactId>innospots-nexus-spring-kernel</artifactId>
+            <artifactId>innospots-nexus-spring-portal</artifactId>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>

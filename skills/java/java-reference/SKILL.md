@@ -127,10 +127,10 @@ version: 1.8.0
 | `innospots-nexus-core` | [README.md](references/modules/innospots-nexus-core/README.md) |
 | `innospots-nexus-console` | [README.md](references/modules/innospots-nexus-console/README.md) |
 | `innospots-nexus-plugin` | 暂无 API 索引；归属见 [module-ownership.md](references/module-ownership.md)；设计见 `innospots-nexus-plugin/docs/plugin/design/` |
-| `innospots-nexus-kernel` | 暂无 API 索引；归属见 [module-ownership.md](references/module-ownership.md)；包结构见 [package-structure.md](references/package-structure.md) |
+| `innospots-nexus-portal` | 暂无 API 索引；归属见 [module-ownership.md](references/module-ownership.md)；包结构见 [package-structure.md](references/package-structure.md) |
 | `innospots-nexus-platform` | 暂无 API 索引；归属见 [module-ownership.md](references/module-ownership.md) |
 
-显式扫描请求时可生成 plugin/kernel/platform 索引（见 [`standards/module-skills.md`](standards/module-skills.md)）。
+显式扫描请求时可生成 plugin/portal/platform 索引（见 [`standards/module-skills.md`](standards/module-skills.md)）。
 
 ## 详细参考
 

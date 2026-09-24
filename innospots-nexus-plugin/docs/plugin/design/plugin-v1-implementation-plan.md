@@ -34,7 +34,7 @@ JUnit 5、AssertJ、Maven。
 - Plugin availability 门控；
 - Core 插件安装表和 PluginInstallationManager；
 - autoInstall、REGISTERED、DISABLED、MISSING 派生管理状态；
-- Kernel 权限资源 ownerPluginId；
+- Portal 权限资源 ownerPluginId；
 - 删除 Extension 生产代码和测试入口。
 
 ### 1.2 明确不实现
@@ -127,7 +127,7 @@ mvn clean compile
 
 ```bash
 mvn -pl innospots-nexus-plugin -am test
-mvn -pl innospots-nexus-console,innospots-nexus-kernel -am test
+mvn -pl innospots-nexus-console,innospots-nexus-portal -am test
 ```
 
 完整验收：
@@ -472,14 +472,14 @@ spec:
 
 **文件：**
 
-- Modify: `innospots-nexus-kernel/src/main/java/com/innospots/nexus/kernel/permission/service/PermissionResourceSyncService.java`
+- Modify: `innospots-nexus-portal/src/main/java/com/innospots/nexus/portal/permission/service/PermissionResourceSyncService.java`
 - Modify: `innospots-nexus-console/src/main/java/com/innospots/nexus/console/permission/domain/entity/PermissionResourceEntity.java`
 - Modify: `innospots-nexus-console/src/main/java/com/innospots/nexus/console/permission/domain/vo/PermissionResourceVo.java`
 - Create: `innospots-nexus-console/docs/plugin-permission-owner-schema.sql`
 - Test: `innospots-nexus-console/src/test/java/com/innospots/nexus/console/permission/domain/entity/PermissionEntityContractsTest.java`
 - Test: `innospots-nexus-console/src/test/java/com/innospots/nexus/console/permission/authorization/RequestAuthorizerTest.java`
 - Test: `innospots-nexus-console/src/test/java/com/innospots/nexus/console/permission/service/PermissionVisibilityServiceTest.java`
-- Test: `innospots-nexus-kernel/src/test/java/com/innospots/nexus/kernel/permission/service/PermissionResourceSyncServiceTest.java`
+- Test: `innospots-nexus-portal/src/test/java/com/innospots/nexus/portal/permission/service/PermissionResourceSyncServiceTest.java`
 
 - [ ] PermissionResourceSyncService 改读 ConsoleContributionCatalog。
 - [ ] 权限资源 extensionKey 改为 ownerPluginId。
@@ -489,7 +489,7 @@ spec:
 - [ ] 停用和 MISSING 不删除历史授权，只使资源不可用。
 - [ ] 相同 pluginId 和资源身份恢复时复用关联。
 - [ ] 不机械修改 Session/Conversation 中可能具有独立业务语义的 extensionKey；先单独确认其领域含义。
-- [ ] 运行编译和 Console/Kernel 权限测试。
+- [ ] 运行编译和 Console/Portal 权限测试。
 
 ### Task 13：删除 Extension 双轨
 
@@ -502,14 +502,14 @@ spec:
 - Delete: `innospots-nexus-console/src/test/java/com/innospots/nexus/console/extension/repository/ExtensionInstallationRepositoryTest.java`
 - Delete: `innospots-nexus-console/src/test/java/com/innospots/nexus/console/extension/service/ExtensionRegistryTest.java`
 - Delete: `innospots-nexus-console/src/test/resources/META-INF/services/com.innospots.nexus.core.extension.contract.ConsoleExtensionProvider`
-- Modify: `innospots-nexus-kernel/src/test/java/com/innospots/nexus/kernel/KernelModuleBoundaryTest.java`
+- Modify: `innospots-nexus-portal/src/test/java/com/innospots/nexus/portal/PortalModuleBoundaryTest.java`
 
 - [ ] 确认 PluginManager 已完整承接所有活动插件。
 - [ ] 删除旧 SPI、Discovery、Registry、Entity、DAO、Repository 和状态。
 - [ ] 删除 `nexus_extension_installation` 的代码映射；物理表删除按 Task 7 选择的数据路径执行。
 - [ ] 全仓检索旧类型，区分插件身份与其它业务中的同名 extensionKey。
 - [ ] 确认不存在 deprecated 双轨入口。
-- [ ] 运行 `mvn clean compile` 和 Core/Console/Kernel 测试。
+- [ ] 运行 `mvn clean compile` 和 Core/Console/Portal 测试。
 
 ### Task 14：完整验证和文档一致性
 
@@ -530,7 +530,7 @@ spec:
 - [ ] 检索 `extensionKey` 残留并逐项分类：权限/插件归属必须清零；Session/Conversation 等独立领域字段保留时，
   在审计记录中说明其含义与插件系统无关。
 - [ ] 检索静态 Capability Locator、第二个 PluginManager、Console 安装 DAO/Entity、独立 ClassLoader，结果必须为空。
-- [ ] 运行模块边界测试，确认 Core 不依赖 Console，Console 不拥有插件安装持久化，Kernel 不依赖旧 Extension。
+- [ ] 运行模块边界测试，确认 Core 不依赖 Console，Console 不拥有插件安装持久化，Portal 不依赖旧 Extension。
 - [ ] 执行 `mvn validate`、`mvn test` 和 effective-pom 检查。
 - [ ] 执行 `git diff --check` 并确认未修改模块 SKILL.md/references。
 
@@ -564,7 +564,7 @@ spec:
 - Console 没有安装持久化和第二套状态机；
 - Console Contribution 与 Capability 共享 availability；
 - MISSING 插件的 Console 资源身份由安全快照保留，不能被其它插件抢占；
-- Kernel 权限资源使用 ownerPluginId；
+- Portal 权限资源使用 ownerPluginId；
 - 新表和字段具有显式参考 DDL；历史数据迁移不依赖自动猜测身份；
 - 生产代码不再依赖 Extension SPI、Registry 和旧安装表；
 - 完整 DSL 保持公开稳定，Minimal V1 对未实现能力显式拒绝；

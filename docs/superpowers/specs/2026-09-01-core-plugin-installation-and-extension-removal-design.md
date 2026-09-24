@@ -47,7 +47,7 @@ Application ClassLoader / YAML packages
           │
           └── Contribution Handlers
                     └── ConsoleContributionCatalog
-                                  └── Kernel permission sync
+                                  └── Portal permission sync
 ```
 
 模块职责：
@@ -56,7 +56,7 @@ Application ClassLoader / YAML packages
 |------|------|
 | Core | Plugin 发现、安装记录、安装策略、依赖、启停、运行状态和通用 Contribution 生命周期 |
 | Console | 插件管理 Endpoint/VO、Console Contribution 声明、校验和活动资源目录 |
-| Kernel | 基于活动 Console Contribution 和 UiSpec 同步权限资源，不管理插件生命周期 |
+| Portal | 基于活动 Console Contribution 和 UiSpec 同步权限资源，不管理插件生命周期 |
 | 应用装配 | 绑定系统配置、DAO 实现、ContributionHandler 和最终启动顺序 |
 
 ## 4. 安装事实与运行事实分离
@@ -323,7 +323,7 @@ com.innospots.nexus.core.plugin.contribution.console
 `ConsoleContributionCatalog` 是活动资源的不可变内存快照，不是第二个 PluginManager，不存启停状态，也不
 写插件安装表。Handler 在 Plugin 启动事务中 prepare，PluginManager 提交成功后原子发布；停止时先撤出。
 
-### 9.3 Kernel 权限同步
+### 9.3 Portal 权限同步
 
 `PermissionResourceSyncService` 改为读取 `ConsoleContributionCatalog.activeContributions()`，每条活动贡献
 携带 ownerPluginId 和 ConsolePluginContribution。同步逻辑继续加载 UiSpec、校验页面和菜单，并把来源插件
@@ -440,7 +440,7 @@ Core 插件技术状态码需要覆盖：
 - PluginDefinition 支持 contributions；
 - PluginManager 将 Capability 与 Contribution 放入同一启动/停止事务。
 
-### 阶段四：Kernel 权限同步迁移
+### 阶段四：Portal 权限同步迁移
 
 - PermissionResourceSyncService 改读 ConsoleContributionCatalog；
 - `extensionKey` 来源字段改为 `ownerPluginId`；
@@ -456,7 +456,7 @@ Core 插件技术状态码需要覆盖：
 ### 阶段六：完整验证
 
 - 每批 Java 修改后执行 `mvn clean compile`；
-- 执行 Core、Console、Kernel 聚焦测试；
+- 执行 Core、Console、Portal 聚焦测试；
 - 执行 `mvn validate`、`mvn test`、`mvn -q help:effective-pom`；
 - 执行 `git diff --check`；
 - 确认没有生成或修改模块 SKILL.md 和 references。
@@ -493,7 +493,7 @@ Core 插件技术状态码需要覆盖：
 - 一个 pluginId 只有一条安装记录；
 - MISSING、installed、desiredEnabled 和 runtimeState 含义无重叠；
 - Console 页面/菜单通过 Plugin Contribution 发布；
-- Kernel 权限同步不再依赖 ExtensionRegistry；
+- Portal 权限同步不再依赖 ExtensionRegistry；
 - `core.extension`、`console.extension` 和旧 Extension SPI 已删除；
 - 旧表和 extensionKey 安装身份不再被新代码读写；
-- Core、Console、Kernel 编译和测试全部通过。
+- Core、Console、Portal 编译和测试全部通过。

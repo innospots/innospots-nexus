@@ -40,7 +40,7 @@
 | Persistence entity | UpperCamelCase，带 `Entity` 后缀 | `RoleEntity`, `UserRoleEntity` |
 | Request record | 资源 + 操作/目的 + `Request` | `RoleCreateRequest`, `UserPageRequest` |
 | View record | 资源 + 视图目的 + `Vo` | `RoleOptionVo`, `UserProfileVo` |
-| Internal domain model | 业务概念，无强制后缀 | `Conversation`, `KernelUser` |
+| Internal domain model | 业务概念，无强制后缀 | `Conversation`, `PortalUser` |
 | Configuration object | UpperCamelCase，带 `Config` 后缀 | `SecurityConfig`, `PluginRuntimeConfig` |
 | Bean converter | UpperCamelCase，带 `Converter` 后缀 | `RoleConverter`, `CronConverter` |
 | Business status code | UpperCamelCase，带 `StatusCode` 后缀 | `PluginStatusCode`, `UserStatusCode` |
@@ -98,7 +98,7 @@
 
 - 实体以持久化业务记录命名并加 `Entity`：`RoleEntity`、`PermissionGrantEntity`、`PlatformUserPasswordEntity`。
 - 关联实体从双方或关联概念命名：`RoleBindingEntity`、`OrganizationMemberEntity`。
-- 内部模型以业务概念命名，不用 `Dto`、`Pojo`、`Bean`、`Data` 或强制 `Model` 后缀：`Conversation`、`SessionMessage`、`KernelUser`。
+- 内部模型以业务概念命名，不用 `Dto`、`Pojo`、`Bean`、`Data` 或强制 `Model` 后缀：`Conversation`、`SessionMessage`、`PortalUser`。
 - 仅对具有定义范围的有意继承抽象使用 `Base`，如 `BaseEntity`、`TenantBaseEntity` 和 `WorkspaceBaseEntity`。
 
 ### 请求
@@ -226,7 +226,7 @@
   - `discovery` 用于从外部位置发现实现/声明。
 
 ```text
-com.innospots.nexus.kernel
+com.innospots.nexus.portal
   └── role
       ├── endpoint
       ├── dao
@@ -294,7 +294,7 @@ com.innospots.nexus.core.plugin
 | `dao.role.RoleDao` | `role.dao.RoleDao` | 技术层优先，领域被撕裂 |
 | `endpoint.menu.MenuEndpoint` | `menu.endpoint.MenuEndpoint` | 技术层优先 |
 | `domain.role.entity.RoleEntity` | `role.domain.entity.RoleEntity` | 全局 domain 包下按领域再分 |
-| `kernel.service.RoleService` 等数十个 Service | `kernel.role…`、`kernel.menu…` 各领域子树 | 模块级 service 垃圾桶 |
+| `portal.service.RoleService` 等数十个 Service | `portal.role…`、`portal.menu…` 各领域子树 | 模块级 service 垃圾桶 |
 | `permission.service` 内 20+ 编排类 | `permission.grant.service`、`permission.authorization` 等 | 未按功能子模块拆分 |
 
 ## 命名清单

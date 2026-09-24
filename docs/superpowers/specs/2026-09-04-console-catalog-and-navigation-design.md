@@ -12,7 +12,7 @@
 ## 2. 已确认决策
 
 1. 事实源：运行时 `ConsoleContributionCatalog` + `UiSpecLoader`；**不是** `nx_menu`。
-2. `PermissionResourceSyncService` 归属 **console**（从 kernel 迁入）。
+2. `PermissionResourceSyncService` 归属 **console**（从 portal 迁入）。
 3. sync 输入：**仅 ACTIVE 插件贡献**；workspace **全量对账**（非 per-plugin 增量）。
 4. API：`GET /console/catalog/tree`、`POST /console/catalog/sync`、`GET /console/navigation/menus`。
 5. 删除未实现的 `PermissionCatalogEndpoint`。
@@ -31,7 +31,7 @@
 | `console.entry` | 内置 entryPlugin 声明 | 业务 CRUD |
 | **core** | `ConsoleContributionCatalog`、插件运行时 | sync、菜单 API |
 
-kernel：**不**含 sync、菜单 API。
+portal：**不**含 sync、菜单 API。
 
 ## 4. 架构（一层索引，两个投影）
 
@@ -122,14 +122,14 @@ navigation 与 `/me/permissions` 共用。console 不解析 HTTP。
 | `GET /console/pages/...` UiSpec HTTP | 后续 |
 | `BuiltinConsolePluginInstallInitializer` | **删除**；用 `requiredPluginIds` |
 | `NavigationMenuEndpoint` 读内存 Catalog | **禁止** |
-| kernel `PermissionResourceSyncService` | **删除** |
+| portal `PermissionResourceSyncService` | **删除** |
 
 ## 9. 测试要点
 
 1. sync 全量对账：ACTIVE upsert；停用后 disableMissing。
 2. disable 后 navigation 不含该 MENU（endpoint 内 sync）。
 3. catalog tree / navigation 契约与组装逻辑。
-4. sync 不在 kernel。
+4. sync 不在 portal。
 
 ## 10. 验收标准
 

@@ -14,7 +14,7 @@
 ## 事实来源
 
 更新从当前 `base`、`core`、`console`、
-`kernel`、`platform` 源码树推导约定。代表性既有模式包括：
+`portal`、`platform` 源码树推导约定。代表性既有模式包括：
 
 - domain 角色如 `RoleEntity`、`RoleDao`、`RoleCreateRequest`、
   `RoleOptionVo`、`TenantCreatedEvent`；

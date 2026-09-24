@@ -86,6 +86,6 @@ mvn test -pl innospots-nexus-spring/innospots-nexus-spring-service,innospots-nex
 - runtime 通过 contract 扩展点接入观测和治理，不反向依赖其实现模块。
 - 四个协议/传输模块互不强制依赖，可独立演进与测试。
 - 文件内容复用 base 的 ResourceStore；core 的元数据与存储注册表由装配边界桥接。
-- 审计事件和输出扩展属于服务契约，业务审计持久化与查询仍归 kernel / platform。
+- 审计事件和输出扩展属于服务契约，业务审计持久化与查询仍归 portal / platform。
 - 普通 HTTP 响应、WebSocket、流和文件分别保留协议语义，不统一强制 JSON 包装。
 - 当前仅保留生产与测试包根，不预建领域层级或占位公共 API。

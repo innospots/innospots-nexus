@@ -2,7 +2,7 @@
 
 ## 概述
 
-在 kernel user 模块新增 `PasswordOperator`，支持密码修改（需旧密码）与
+在 portal user 模块新增 `PasswordOperator`，支持密码修改（需旧密码）与
 密码重置（通过验证码）。声明 `PasswordVerificationOperator` SPI；默认占位实现
 抛出 `UnsupportedOperationException`。
 
@@ -14,7 +14,7 @@
 ## 目录影响
 
 ```
-innospots-nexus-kernel/src/main/java/com/innospots/nexus/kernel/user/operator/
+innospots-nexus-portal/src/main/java/com/innospots/nexus/portal/user/operator/
 ├── PasswordOperator.java          (new)
 ├── PasswordVerificationOperator.java  (new)
 ├── PasswordValidator.java         (new)
@@ -25,7 +25,7 @@ innospots-nexus-kernel/src/main/java/com/innospots/nexus/kernel/user/operator/
 
 ### PasswordOperator
 
-`com.innospots.nexus.kernel.user.operator.PasswordOperator` 是拥有密码更新逻辑的
+`com.innospots.nexus.portal.user.operator.PasswordOperator` 是拥有密码更新逻辑的
 具体 service 类。它不继承或实现任何其他 interface——上层直接依赖它。
 
 **依赖**
@@ -102,7 +102,7 @@ public interface PasswordVerificationOperator {
 ```
 
 默认实现（同包 `NullPasswordVerificationOperator`）对所有方法抛出
-`UnsupportedOperationException`。未来实现位于 kernel 模块之外。
+`UnsupportedOperationException`。未来实现位于 portal 模块之外。
 
 ### VerificationType enum
 
@@ -164,7 +164,7 @@ public class PasswordValidator {
 
 ### 非功能决策
 
-- kernel 层不做 rate-limiting 或 brute-force 防护 — 由 authentication gateway 处理。
+- portal 层不做 rate-limiting 或 brute-force 防护 — 由 authentication gateway 处理。
 - 不做 password history check（禁止复用最近 N 个密码）— 延后到未来增强。
 - `PasswordValidator` 常量（`MIN_LENGTH`、字符类要求）
   为 public `static final` 字段，供上层测试读取。

@@ -32,10 +32,10 @@
 | 状态码 module | 平台复用 `AIO`；服务专属失败使用 `SRV`（`ServiceStatusCode` + 契约测试） |
 | 主体 ID | `ServicePrincipal.id` 为 String；不把 ULID 强转 `UserSnapshot.userId()` 的 Long |
 | 安全 | 默认对接宿主 IAM Provider；不把 Spring Security 打进默认依赖 |
-| 路由 | 适配器跟随宿主原生路由；既有 console/kernel 继续 Jakarta REST |
+| 路由 | 适配器跟随宿主原生路由；既有 console/portal 继续 Jakarta REST |
 | 响应 | 默认 `legacy`（`R<T>`）；`problem` 需 operation 显式选择 |
 | 文件读 | 不修改 `ResourceStore.read(byte[])`；大文件走 `ResourceContentReader` |
-| 审计 | 技术事件/输出在 service；业务审计表与查询仍在 kernel/platform |
+| 审计 | 技术事件/输出在 service；业务审计表与查询仍在 portal/platform |
 | 事件 | 不引入领域事件包；横切用拦截器与 SPI |
 | 持久化 | 本框架无表、无 DAO |
 
@@ -120,7 +120,7 @@ flowchart TD
   G --> C
   C --> B[base]
   APP[宿主应用装配] --> AD
-  APP --> IAM[console / kernel 或 platform]
+  APP --> IAM[console / portal 或 platform]
 ```
 
 - contract.security / contract.audit：只含中立认证、权限、审计契约和业务意图注解。
@@ -187,7 +187,7 @@ HTTP 未提交时可映射真实状态与错误体；已提交时不得重写状
 
 | 编号 | 冲突 | 锁定决策 | 实施影响 |
 |---|---|---|---|
-| D1 | 需求原生 MVC/WebFlux，规范 Jakarta REST | 已有管理端继续 Jakarta REST；`spring-service` / `quarkus-service` 及其测试夹具允许宿主原生路由注解。业务核心与中立库禁止 Spring MVC / Quarkus REST 类型 | 规范例外仅作用于适配模块与夹具，不改旧 console/kernel 端点 |
+| D1 | 需求原生 MVC/WebFlux，规范 Jakarta REST | 已有管理端继续 Jakarta REST；`spring-service` / `quarkus-service` 及其测试夹具允许宿主原生路由注解。业务核心与中立库禁止 Spring MVC / Quarkus REST 类型 | 规范例外仅作用于适配模块与夹具，不改旧 console/portal 端点 |
 | D2 | 需求 Spring Security，规范禁止 | 默认 `SecurityProvider` 对接宿主已认证身份（console compact token / Quarkus SecurityIdentity）。Spring Security 不进入默认 POM；若未来需要，单独条件配置且不得创建第二条 FilterChain | 需求 §15 JWT/OIDC 由宿主 Provider 满足，不在中立库实现密码学 |
 | D3 | 需求 Problem Details，规范 R\<T\> | 默认 `service.response-profile=legacy` 保持 `R<T>`；operation 显式 `problem` 才输出 RFC 9457。不按 Accept 暗中切换旧接口 | 旧错误码/字段保留；关联 ID 可同时放响应头 |
 | D4 | 需求 ServiceException | 只使用 `NexusException` + `ServiceErrorCatalog` | 不另建异常类，不修改既有 `NexusException` API |
@@ -221,7 +221,7 @@ Spring MVC / WebFlux 与 Quarkus JVM 共用 `adapter-test` 场景；Quarkus nati
 
 ### 11.1 四步法门禁
 
-- [x] ① 定归属：八中立库 + 两适配 + deployment + adapter-test；无 kernel↔platform 互依；安全/审计不混入 console catalog 或 IAM 表
+- [x] ① 定归属：八中立库 + 两适配 + deployment + adapter-test；无 portal↔platform 互依；安全/审计不混入 console catalog 或 IAM 表
 - [x] ② 建词汇：主概念中英文已对齐；技术 ID 与稳定键已区分；`state`/`status`/`mode`/`type` 已定义；SRV 三字母已选定
 - [x] ③ 划边界：功能包而非 `endpoint/role`；单包规划 ≤15 文件；无 Session 实体基类；无空 service/event 包；分层为 Adapter → InvocationEngine → 业务
 - [x] ④ 定契约：无业务 REST 端点；request/vo 为 record；失败均有 StatusCode；无表/DAO；配置键已给出；事务/幂等/并发已定义；无领域事件；测试范围见实施附录

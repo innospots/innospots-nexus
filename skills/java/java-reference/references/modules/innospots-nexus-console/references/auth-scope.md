@@ -1,6 +1,6 @@
 # 认证、凭证与作用域
 
-控制台定义**机制**和**契约**；kernel 和 platform 提供**身份数据**。
+控制台定义**机制**和**契约**；portal 和 platform 提供**身份数据**。
 
 ## 安全域
 
@@ -27,14 +27,14 @@ refresh / logout   → pair rotation / revocation
 
 | 端口 | 职责 | 典型归属 |
 |------|----------------|---------------|
-| `UserDirectory` | `findByLogin(realm, identity)` | kernel（TENANT）、platform（PLATFORM） |
-| `MembershipDirectory` | 多租户登录的租户成员关系 | kernel |
-| `CredentialStore` | 存储的凭证哈希/材料 | kernel / platform |
+| `UserDirectory` | `findByLogin(realm, identity)` | portal（TENANT）、platform（PLATFORM） |
+| `MembershipDirectory` | 多租户登录的租户成员关系 | portal |
+| `CredentialStore` | 存储的凭证哈希/材料 | portal / platform |
 | `PasswordDecryptor` | 解密客户端载荷 | adapter |
-| `PasswordVerificationOperator` | 验证解密后的密码 | kernel / platform |
-| `TenantScopeDirectory` | `TenantScope` 快照 | kernel |
-| `WorkspaceScopeDirectory` | `WorkspaceSnapshot` | kernel |
-| `ProjectScopeDirectory` | `ProjectSnapshot` | kernel |
+| `PasswordVerificationOperator` | 验证解密后的密码 | portal / platform |
+| `TenantScopeDirectory` | `TenantScope` 快照 | portal |
+| `WorkspaceScopeDirectory` | `WorkspaceSnapshot` | portal |
+| `ProjectScopeDirectory` | `ProjectSnapshot` | portal |
 
 控制台**不得**为这些端口持久化用户或租户业务实体。
 
@@ -75,4 +75,4 @@ AuthFacade / ScopeFacade
 - JWT/会话 Cookie 签发与验证
 - 从令牌填充 `AuthorizationSubjectResolver`
 - 在 servlet/JAX-RS 过滤器中调用 `RequestAuthorizer`（见 catalog-permission.md）
-- 将 `UserDirectory` 等连接到 kernel/platform Bean
+- 将 `UserDirectory` 等连接到 portal/platform Bean

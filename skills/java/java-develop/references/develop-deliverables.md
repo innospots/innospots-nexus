@@ -69,7 +69,7 @@ innospots-nexus-<module>/
 ### 三层划分（先想清楚再建目录）
 
 ```text
-Maven 模块（kernel / console / platform / adapter …）   ← 部署与依赖边界
+Maven 模块（portal / console / platform / adapter …）   ← 部署与依赖边界
   └── 业务领域（role / permission / catalog …）         ← 有界上下文
         └── 功能子模块（grant / authorization / sync …） ← 领域内独立曲面（按需）
               └── 职责包（endpoint / service / dao / domain/…） ← 技术职责
@@ -77,8 +77,8 @@ Maven 模块（kernel / console / platform / adapter …）   ← 部署与依�
 
 | 刀法 | 问什么 | 典型产物 |
 |------|--------|---------|
-| **第一刀：Maven 模块** | 能否独立测试？依赖方向是否干净？是否业务中立？ | 留在 `kernel` **或** 新建 `adapter` / `application` / 业务 extension |
-| **第二刀：领域包** | 词汇是否独立？与相邻域是否常改同一批文件？ | `kernel.role.*`、`console.catalog.*` |
+| **第一刀：Maven 模块** | 能否独立测试？依赖方向是否干净？是否业务中立？ | 留在 `portal` **或** 新建 `adapter` / `application` / 业务 extension |
+| **第二刀：领域包** | 词汇是否独立？与相邻域是否常改同一批文件？ | `portal.role.*`、`console.catalog.*` |
 | **第三刀：功能子模块** | 领域内是否有多种工作流（鉴权、同步、授予、入口）？ | `permission.grant.*`、`permission.authorization.*` |
 
 **小领域**（整个领域预计 < 15 个类型）：领域根下 `endpoint` + `dao` + `domain` 即可，
@@ -113,7 +113,7 @@ com.innospots.nexus.console.permission
   └── domain/
 ```
 
-`kernel` / `platform` 新领域应对齐同一模式：`com.innospots.nexus.kernel.<domain>.<responsibility>`。
+`portal` / `platform` 新领域应对齐同一模式：`com.innospots.nexus.portal.<domain>.<responsibility>`。
 
 ### 单包 ≤15 类（硬上限）
 
@@ -139,12 +139,12 @@ find innospots-nexus-<module>/src/main/java/<pkg/path> -maxdepth 1 -name '*.java
 
 | 禁止 | 应改为 |
 |------|--------|
-| `kernel.service.RoleService` + `kernel.service.MenuService` … | `kernel.role.service`、`kernel.menu.service` |
+| `portal.service.RoleService` + `portal.service.MenuService` … | `portal.role.service`、`portal.menu.service` |
 | `endpoint/role`、`dao/role`（技术层优先） | `role/endpoint`、`role/dao` |
 | 一个 `permission.service` 里 20+ 编排类 | `permission.grant.service`、`permission.visibility.service` … |
 | 为凑分层建空 `service`/`event` | 有任务再建 |
 | 把 A 领域类型放进 B 领域包「方便调用」 | 下沉 `base`/`console` 契约或 service 编排 |
-| 用事件让 `kernel` 与 `platform` 互引 | `application` 组装模块或下沉中立契约 |
+| 用事件让 `portal` 与 `platform` 互引 | `application` 组装模块或下沉中立契约 |
 
 ### 何时停 implement，回 design / project
 
@@ -152,11 +152,11 @@ develop **不得**在代码里硬扩边界；出现下列信号应**暂停提交
 
 | 信号 | 动作 |
 |------|------|
-| 新能力说不清归 `kernel` 还是 `platform` | `java:design` + 必要时 `grill-me` |
-| 需要 `kernel` 依赖 `platform`（或反向） | 契约下沉 `console`/`core`，或 `java:project` 新建 `application`/`adapter` |
+| 新能力说不清归 `portal` 还是 `platform` | `java:design` + 必要时 `grill-me` |
+| 需要 `portal` 依赖 `platform`（或反向） | 契约下沉 `console`/`core`，或 `java:project` 新建 `application`/`adapter` |
 | 单一领域包树预计 **> 40～50** 个生产类型且无功能子模块规划 | `java:design` 拆功能子模块或拆领域 |
-| 整个 `innospots-nexus-kernel` 持续新增**无关**业务域 | 评估是否应独立 Maven 模块（插件、adapter、extension） |
-| 业务逻辑塞进 `core`/`console` 只为少写一个模块 | 回到 module-ownership；业务归 kernel/platform |
+| 整个 `innospots-nexus-portal` 持续新增**无关**业务域 | 评估是否应独立 Maven 模块（插件、adapter、extension） |
+| 业务逻辑塞进 `core`/`console` 只为少写一个模块 | 回到 module-ownership；业务归 portal/platform |
 | 插件能力 vs 管理台契约混淆 | plugin 管运行时与 DSL；console 管 REST/catalog 索引 |
 | 任意包目录将超 15 类 | 先拆包再写新类 |
 
@@ -164,7 +164,7 @@ develop **不得**在代码里硬扩边界；出现下列信号应**暂停提交
 
 - 边界、依赖方向、**可独立测试**三者同时清晰；
 - 不是「目录好看」或「复制遗留多模块」；
-- 常见正当场景：`adapter`（外部系统）、`*-app`（可运行组装）、classpath 插件、与 kernel/platform 平行的业务 extension。
+- 常见正当场景：`adapter`（外部系统）、`*-app`（可运行组装）、classpath 插件、与 portal/platform 平行的业务 extension。
 
 模块类型与交付清单见 `java:project` →
 [project-deliverables.md](../../java-project/references/project-deliverables.md)。
@@ -181,7 +181,7 @@ develop **不得**在代码里硬扩边界；出现下列信号应**暂停提交
 - [ ] 每个包目录 `.java` **≤ 15**
 - [ ] 未创建 `impl`/`common`/`misc`/`util` 逃避归属
 - [ ] 共享类型在正确 **Maven 模块**（非邻近领域包塞入）
-- [ ] `kernel` ↔ `platform` 无 Maven 互依
+- [ ] `portal` ↔ `platform` 无 Maven 互依
 
 疑义回源 [package-structure.md](../../java-reference/references/package-structure.md) 全文。
 

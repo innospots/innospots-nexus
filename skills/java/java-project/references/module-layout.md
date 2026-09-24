@@ -15,7 +15,7 @@ innospots-nexus (root, packaging=pom)
 ├── innospots-nexus-core             业务中立的平台基础设施
 ├── innospots-nexus-plugin           插件运行时与 Page DSL
 ├── innospots-nexus-console          管理台契约与 catalog 索引（引用此模块 = 控制台地基）
-├── innospots-nexus-kernel           租户侧管理业务（业务类管理端）
+├── innospots-nexus-portal           租户侧管理业务（业务类管理端）
 ├── innospots-nexus-platform         运营域平台（系统运营类）
 ├── innospots-nexus-spring           Spring Boot 运行时聚合
 │   ├── innospots-nexus-spring-app
@@ -28,19 +28,19 @@ innospots-nexus (root, packaging=pom)
 库模块依赖方向严格单向：
 
 ```text
-base  →  core  →  plugin  →  console  →  kernel
+base  →  core  →  plugin  →  console  →  portal
                                     ↘ platform
 ```
 
-`kernel` 与 `platform` 是 `console` 下的两个平行业务模块，**互不依赖**。
+`portal` 与 `platform` 是 `console` 下的两个平行业务模块，**互不依赖**。
 `spring` / `quarkus` 为**运行时组装层**，依赖上层的库模块，不在中立库中反向被依赖。
 任何反向依赖或跨平级依赖都必须在设计阶段消解：
 
 | 需求 | 正确做法 | 错误做法 |
 |------|---------|---------|
-| kernel 需要 platform 的租户信息 | 把业务中立契约下沉到 `console` 或 `core` | 让 kernel 依赖 platform |
+| portal 需要 platform 的租户信息 | 把业务中立契约下沉到 `console` 或 `core` | 让 portal 依赖 platform |
 | 两个模块都要消费同一事件 | 事件契约放可共同依赖的低层，或由可同时依赖两者的 application/adapter 模块协调 | 把具体业务事件塞进 core 只为绕过依赖规则 |
-| platform 需要用户能力 | 抽象成 console 契约或独立 application 模块编排 | 让 platform 依赖 kernel |
+| platform 需要用户能力 | 抽象成 console 契约或独立 application 模块编排 | 让 platform 依赖 portal |
 
 ---
 
@@ -109,9 +109,9 @@ base  →  core  →  plugin  →  console  →  kernel
 **硬约束**：
 
 - 不拥有插件规范与 contribution 约束定义（属于 `innospots-nexus-plugin`）
-- 不实现具体管理业务功能；用户、角色、权限、注册等属于 `kernel` 之类的业务模块
+- 不实现具体管理业务功能；用户、角色、权限、注册等属于 `portal` 之类的业务模块
 
-### innospots-nexus-kernel
+### innospots-nexus-portal
 
 **定位**：**业务类管理端** — 建设在 console 之上的租户侧管理业务实现。
 
@@ -127,7 +127,7 @@ base  →  core  →  plugin  →  console  →  kernel
 
 ### innospots-nexus-platform
 
-**定位**：**系统运营类平台**，与 kernel 平行，建设在 console 地基之上。
+**定位**：**系统运营类平台**，与 portal 平行，建设在 console 地基之上。
 
 **Maven 引用场景**：租户生命周期、企业主体、平台 IAM、`/platform/**` 等运营侧能力。
 
@@ -138,7 +138,7 @@ base  →  core  →  plugin  →  console  →  kernel
 
 - 暴露 `/platform/**` 契约
 - 不提供对外自助注册
-- 依赖 `console` 及传递的 `core` / `base`；**不得依赖 `innospots-nexus-kernel`**
+- 依赖 `console` 及传递的 `core` / `base`；**不得依赖 `innospots-nexus-portal`**
 
 ### innospots-nexus-spring
 
@@ -175,7 +175,7 @@ base  →  core  →  plugin  →  console  →  kernel
 [java-reference → package-structure.md](../../java-reference/references/package-structure.md)。
 
 ```text
-com.innospots.nexus.kernel
+com.innospots.nexus.portal
   ├── permission                    # 较大领域：先划功能子模块
   │   ├── authorization             # 请求鉴权
   │   ├── grant                     # 授权授予（可含 service/operator/domain）
@@ -198,7 +198,7 @@ com.innospots.nexus.kernel
 
 | 必须 | 禁止 |
 |------|------|
-| 领域优先：`kernel.role.endpoint` | 技术层优先：`kernel.endpoint.role` |
+| 领域优先：`portal.role.endpoint` | 技术层优先：`portal.endpoint.role` |
 | 大领域按功能子模块：`permission.authorization`、`grant.service` | 模块根 `service` 或单包堆满 `*Service` |
 | 单包 ≤15 个 `.java` | 单包 16+ 类不分子包 |
 | 只用清单内的职责包名 | 自造层级 |
@@ -236,7 +236,7 @@ com.innospots.nexus.kernel
 - [ ] 边界是否清晰到可以独立测试？
 - [ ] 依赖方向是否单向、无环？
 - [ ] 是否确实无法并入现有模块？
-- [ ] 若属业务能力，是否应放在 `kernel` / `platform` 的某个域下而非新模块？
+- [ ] 若属业务能力，是否应放在 `portal` / `platform` 的某个域下而非新模块？
 - [ ] 若为基础设施，是业务中立（→ `core`）还是业务专属（→ 业务模块或 adapter）？
 - [ ] 是否需要被其他模块依赖？（是 → 需在 BOM 登记）
 - [ ] POM 是否只声明了最小直接依赖？（见 dependency-conventions.md）

@@ -32,7 +32,7 @@
 |------|------|
 | 边界结论 | 允许/禁止的注解、模块、依赖 |
 | POM 建议 | 符合 BOM 的 starter 声明（无内联 version） |
-| 迁移对照 | Repository→Dao、Security→kernel/console 等 |
+| 迁移对照 | Repository→Dao、Security→portal/console 等 |
 | 自检命令 | grep / dependency:tree 验证项 |
 | 语义解释 | DI、AOP、配置、测试切片（外部项目或集成层） |
 
@@ -43,7 +43,7 @@
 - `innospots-nexus-spring` 模块依赖与配置
 - Spring Boot 版本评估与断点查阅
 - 从 Spring Data / Security 迁移到本仓库栈
-- 调试 Spring 容器中的 kernel/console 组装
+- 调试 Spring 容器中的 portal/console 组装
 - 与 `java:dependency-upgrade` 配合的 Spring 大版本升级
 
 ## 不适用 / 边界
@@ -53,7 +53,7 @@
 | Spring MVC 写端点 | 用 `jakarta.ws.rs` |
 | `org.springframework.transaction.annotation.Transactional` | 用 Jakarta 事务注解 |
 | Spring Data（`starter-data-*`、`spring-data-*`） | 持久化用 MyBatis-Plus |
-| Spring Security | 鉴权用 kernel / console |
+| Spring Security | 鉴权用 portal / console |
 | 模块 POM 内联 Spring `<version>` | 只改 BOM `spring-boot.version` |
 | 在 `innospots-nexus-base` 引 Spring | 模块职责禁止 |
 

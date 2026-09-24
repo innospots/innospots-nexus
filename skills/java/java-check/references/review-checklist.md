@@ -12,7 +12,7 @@
 | Maven 模块归属正确 | 业务能力错放在 `base`/`core`；基础设施塞在业务模块 |
 | 业务域归属正确 | 相邻域概念混在一个域里 |
 | 遗留代码只作行为参考 | diff 中出现遗留源码、遗留 POM 结构、机械复刻的包名 |
-| 依赖方向单向 | `kernel` ↔ `platform` 互引；反向依赖高层 |
+| 依赖方向单向 | `portal` ↔ `platform` 互引；反向依赖高层 |
 | 未创建投机分层 | 空的 `model`/`service`/`event` 包 |
 | 功能子模块划分合理 | 模块根 `service` 挂多领域；领域内扁平 `service` 堆满编排类 |
 | 单包类型数量 | 任一包目录 >15 个 `.java` 仍不分子包 |
@@ -30,7 +30,7 @@
 | 字段语义明确 | `data`/`info`/`item`/`flag`；裸 `timeout`；无后缀的计数 |
 | 布尔命名 | `isEnabled` 字段；`notDisabled` 这类否定式 |
 | 缩写大小写一致 | `pluginID` 与 `pluginId` 混用；`DAO`/`Dao` 混用 |
-| 包名表达边界 | 技术层优先（`endpoint/role`）；`kernel.service.*` 垃圾桶；单包 >15 类；`impl`/`common`/`misc`/`util` 子包；复数包名 |
+| 包名表达边界 | 技术层优先（`endpoint/role`）；`portal.service.*` 垃圾桶；单包 >15 类；`impl`/`common`/`misc`/`util` 子包；复数包名 |
 | 一概念一词 | 同一个概念在端点/实体/DAO/库中用了不同的词 |
 
 ---
@@ -124,7 +124,7 @@
 | 捕获最窄异常 | `catch (Exception)` 后返回伪造成功 |
 | 中断处理 | 吞掉 `InterruptedException`；未恢复中断标志 |
 | 集中映射 | 端点里逐个方法做异常到响应的映射 |
-| 归属正确 | 领域状态放错模块；kernel/platform 互引状态枚举 |
+| 归属正确 | 领域状态放错模块；portal/platform 互引状态枚举 |
 | 新增前已搜索 | 造了与现有码同义的新码 |
 
 ---

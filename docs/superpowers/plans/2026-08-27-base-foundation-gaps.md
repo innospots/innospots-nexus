@@ -8,7 +8,7 @@
 
 **Tech Stack:** Java 25, Jackson 2.22, JUnit 5, 现有 `NexusException` / `NexusStatusCode` / `R` / `PageResult` / `TLC`
 
-**Spec:** 对照当前 base 源码与 kernel/console/platform 调用点，不复制旧 Innospots。
+**Spec:** 对照当前 base 源码与 portal/console/platform 调用点，不复制旧 Innospots。
 
 ## 全局约束
 
@@ -61,13 +61,13 @@
 | 修改 | `core/.../CoreEntityContractsTest.java` | `TLC.userId(1001L)` → 字符串 ID |
 | 修改 | `base/.../domain/response/PageResult.java` | 加 `from(DataPage)`；分页计算抽到 `Pagination` |
 | 修改 | `base/.../domain/data/DataPage.java` | 标 `@Deprecated`，内部改调 `Pagination`；新代码只用 `PageResult` |
-| 修改 | `kernel/.../user/operator/UserOperator.java`（及返回 `DataPage` 的调用点） | 返回值改为 `PageResult` |
+| 修改 | `portal/.../user/operator/UserOperator.java`（及返回 `DataPage` 的调用点） | 返回值改为 `PageResult` |
 | 修改 | 5 个 `*PageRequest` | compact constructor 改调 `Pagination.normalize*`，删除本地 `if (pageNo < 1)` |
 | | `console/.../DictionaryItemPageRequest.java` | 同上 |
 | | `console/.../DictionaryTypePageRequest.java` | 同上 |
 | | `console/.../RolePageRequest.java` | 同上 |
 | | `console/.../RoleBindingPageRequest.java` | 同上 |
-| | `kernel/.../UserPageRequest.java` | 同上 |
+| | `portal/.../UserPageRequest.java` | 同上 |
 | 修改 | `base/.../events/DomainEvent.java` | 去掉每次 new 的 default；改为要求实现提供稳定 `eventId` / `occurredAt`，或提供带缓存的抽象 |
 | 修改 | `ResourceEvent`、`TenantCreatedEvent`、`ConversationCreatedEvent`、`SessionMessageCreatedEvent`、相关测试 | 实现稳定 eventId/occurredAt（record 补字段，或构造时生成一次） |
 

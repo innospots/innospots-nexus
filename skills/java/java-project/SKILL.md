@@ -4,12 +4,12 @@ display_name: Java 工程与构建
 description: |
   Java 工程创建与调整的使用约定与标准（非当前仓库依赖关系说明）。当用户要新建
   Maven 模块、调整已有工程结构、配置 POM（parent/BOM/最小依赖引用）、选择应引用
-  console/kernel/platform/spring/quarkus 等模块、设置 JDK 与编译基线、处理多模块
+  console/portal/platform/spring/quarkus 等模块、设置 JDK 与编译基线、处理多模块
   reactor 构建或排查构建结构问题时使用。新建工程前必经 grill-me，并须对照
   AGENTS.md 模块职责与依赖规则。所有 JAR 版本统一由 innospots-nexus-bom 管理，
   parent 默认 innospots-nexus-parent，禁止模块内单独写依赖版本。
   触发词：新建模块、工程结构、模块划分、POM 配置、Maven、BOM、parent、依赖引用、
-  最小依赖、console、kernel、platform、spring、quarkus、构建配置、编译基线。
+  最小依赖、console、portal、platform、spring、quarkus、构建配置、编译基线。
 category: java
 version: 1.4.0
 ---
@@ -31,7 +31,7 @@ version: 1.4.0
 不得以存量为由在新代码中复制冗余模式（见 `dependency-conventions.md` →「规范与存量 POM」）。
 
 不负责类与接口的设计（`java:design`），也不负责实现代码（`java:develop`）。
-**默认不新建 Maven 模块**——新业务域优先在 kernel/platform 内加领域包（见 project-deliverables）。
+**默认不新建 Maven 模块**——新业务域优先在 portal/platform 内加领域包（见 project-deliverables）。
 
 权威依赖约定见 [dependency-conventions.md](references/dependency-conventions.md)。
 
@@ -43,8 +43,8 @@ version: 1.4.0
 | 核对项 | 用途 |
 |--------|------|
 | **核心约束** | 不复制 legacy、不机械复刻 POM、保持 foundation 轻量 |
-| **模块职责** | 确认新 Maven 模块是否必要（默认在 kernel/platform 内加领域包） |
-| **依赖规则** | parent/BOM 约定、传递依赖、禁止 kernel↔platform、单向依赖链 |
+| **模块职责** | 确认新 Maven 模块是否必要（默认在 portal/platform 内加领域包） |
+| **依赖规则** | parent/BOM 约定、传递依赖、禁止 portal↔platform、单向依赖链 |
 | **Agent 工作流** | 新建工程/模块须先 grill-me；按 AGENTS.md 技能路由表选用对应 `java:*` 技能 |
 
 POM 变更与 `<modules>` 注册须与 AGENTS.md 一致；grill-me 结论中应引用相关模块职责条目。
@@ -58,7 +58,7 @@ POM 变更与 `<modules>` 注册须与 AGENTS.md 一致；grill-me 结论中应�
 [grill-me.md](../java-reference/references/grill-me.md)）：
 
 - 新建 Maven 模块或调整 reactor 拓扑
-- 改变模块间依赖方向（含 kernel/platform 协作方式）
+- 改变模块间依赖方向（含 portal/platform 协作方式）
 - 拆分/合并模块、引入新的 application/adapter 层
 
 **未安装 `grill-me` 时不得开始上述操作。** 先执行：
@@ -92,14 +92,14 @@ npx skills use "https://github.com/mattpocock/skills" --skill "grill-me"
 | 需求 | 引用模块 | 勿重复声明 |
 |------|---------|-----------|
 | 管理台契约与扩展地基 | `innospots-nexus-console` | 其下的 `plugin`/`core`/`base` |
-| 租户侧管理业务（业务类管理端） | `innospots-nexus-kernel` | 已传递的 `console` 等 |
-| 运营侧平台（系统运营类） | `innospots-nexus-platform` | `kernel`（禁止互依） |
+| 租户侧管理业务（业务类管理端） | `innospots-nexus-portal` | 已传递的 `console` 等 |
+| 运营侧平台（系统运营类） | `innospots-nexus-platform` | `portal`（禁止互依） |
 | Spring Boot 可运行服务 | `innospots-nexus-spring` 子模块 | 在中立库模块中引 starter |
 | Quarkus 可运行服务 | `innospots-nexus-quarkus` 子模块 | 在中立库模块中引 Quarkus BOM |
-| classpath 插件（不经管理台） | `innospots-nexus-plugin` | `console` / `kernel` |
-| 同进程 kernel + platform | 新建 **application** 组装模块 | 让 `kernel` 与 `platform` 库模块互依 |
+| classpath 插件（不经管理台） | `innospots-nexus-plugin` | `console` / `portal` |
+| 同进程 portal + platform | 新建 **application** 组装模块 | 让 `portal` 与 `platform` 库模块互依 |
 
-**可运行应用（规范）：** `*-app` + `kernel`（租户）或 `*-app` + `platform`（运营）；
+**可运行应用（规范）：** `*-app` + `portal`（租户）或 `*-app` + `platform`（运营）；
 详见 [dependency-conventions.md](references/dependency-conventions.md) →「可运行应用组装决策表」。
 
 **硬性规则：**
@@ -117,7 +117,7 @@ npx skills use "https://github.com/mattpocock/skills" --skill "grill-me"
 ```text
 innospots-nexus-bom / innospots-nexus-parent
         ↓
-base → core → plugin → console → kernel
+base → core → plugin → console → portal
                               ↘ platform
         ↓（运行时绑定，独立聚合）
 innospots-nexus-spring / innospots-nexus-quarkus
@@ -157,8 +157,8 @@ innospots-nexus-spring / innospots-nexus-quarkus
 - 不得为了迁就本地旧 JDK 而下调 `maven.compiler.release` 或 enforcer 的 `requireJavaVersion`
 - 不得单独引用 JAR 版本；不得在模块 POM 内联写 `<version>`（绕过 BOM）
 - 不得为已传递引入的 innospots 模块重复声明依赖（违反最小引用原则）
-- 不得在 `base`/`core`/`console`/`kernel`/`platform` 中直接引入 Spring/Quarkus 运行时
-- 不得让 `kernel` 依赖 `platform` 或反向依赖
+- 不得在 `base`/`core`/`console`/`portal`/`platform` 中直接引入 Spring/Quarkus 运行时
+- 不得让 `portal` 依赖 `platform` 或反向依赖
 - 不得在 `base` 引入任何中间件或运行时框架依赖
 - 不得在 `core` 绑定 Spring Boot 自动配置
 - 不得复制遗留工程的 POM 结构

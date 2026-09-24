@@ -10,7 +10,7 @@
 
 | 读者 | 目标 |
 |------|------|
-| 业务功能开发者 | 在 kernel / platform 中扩展管理能力与租户侧业务 |
+| 业务功能开发者 | 在 portal / platform 中扩展管理能力与租户侧业务 |
 | 插件开发者 | 通过 Capability 与 `console@1` 贡献扩展控制台 |
 | 集成与宿主开发者 | 在 Spring / Quarkus 进程中装配框架与插件 |
 | 使用 Cursor / AI Agent 的开发者 | 按技能路由完成规范一致的设计与交付 |
@@ -36,7 +36,7 @@ innospots-nexus-plugin        插件运行时、Contribution、Page DSL
         ↓
 innospots-nexus-console       管理台 REST 契约、VO、Catalog 索引
         ↓
-innospots-nexus-kernel        租户侧管理业务（用户、权限、菜单…）
+innospots-nexus-portal        租户侧管理业务（用户、权限、菜单…）
 innospots-nexus-platform      平台运维域（租户生命周期、企业主体…）
         ↓（并行，互不依赖）
 innospots-nexus-spring / innospots-nexus-quarkus   可运行宿主与适配层
@@ -44,7 +44,7 @@ innospots-nexus-spring / innospots-nexus-quarkus   可运行宿主与适配层
 
 **硬性规则：**
 
-- `kernel` 与 `platform` **不得相互依赖**。
+- `portal` 与 `platform` **不得相互依赖**。
 - `base` 不得引入数据库、Spring、Servlet、消息中间件等运行时基础设施。
 - 业务 REST 端点使用 `jakarta.ws.rs`，返回 `R<T>`；事务使用 `jakarta.transaction.Transactional`。
 
@@ -61,7 +61,7 @@ Tenant → Workspace（共享资源）→ Project（业务隔离）
 业务代码 **先按领域分包，再按职责分包**：
 
 ```text
-com.innospots.nexus.kernel.<domain>/
+com.innospots.nexus.portal.<domain>/
   ├── endpoint / dao / domain / converter / operator / service（按需）
   └── <subcapability>/   # 单包超过约 15 类时再分子能力包
 ```
@@ -78,18 +78,18 @@ com.innospots.nexus.kernel.<domain>/
 
 | 你想做的事 | 推荐落点 | 是否新建 Maven 模块 |
 |-----------|---------|-------------------|
-| 用户、角色、权限、菜单、字典等租户管理功能 | `innospots-nexus-kernel` 新领域包 | 通常 **否** |
+| 用户、角色、权限、菜单、字典等租户管理功能 | `innospots-nexus-portal` 新领域包 | 通常 **否** |
 | 租户开通、企业主体、平台审计 | `innospots-nexus-platform` | 通常 **否** |
 | 管理台 REST 路径与 VO 契约 | `innospots-nexus-console`（interface + VO） | 否 |
-| 管理台业务实现与工作流 | `kernel` / `platform` | 否 |
+| 管理台业务实现与工作流 | `portal` / `platform` | 否 |
 | 插件能力、控制台页面贡献 | 独立插件 JAR + `innospots-nexus-plugin` 运行时 | 常为 **是**（插件 artifact） |
 | 客户专属集成、外部系统对接 | 新建 `adapter` 模块 | **是** |
-| 同进程组装 kernel + platform 的可运行服务 | `innospots-nexus-spring-*` / Quarkus 对应模块 | 按需 |
+| 同进程组装 portal + platform 的可运行服务 | `innospots-nexus-spring-*` / Quarkus 对应模块 | 按需 |
 | 统一 HTTP/流/WS 治理（权限、审计、追踪） | 业务模块依赖 `innospots-nexus-service` 中立库 | 否 |
 
 归属判定表见 [module-ownership.md](../skills/java/java-reference/references/module-ownership.md)。
 
-**默认原则：** 新业务域多数只需在 `kernel` 或 `platform` 内新增领域包，**不要**为每个功能新建 Maven 模块。
+**默认原则：** 新业务域多数只需在 `portal` 或 `platform` 内新增领域包，**不要**为每个功能新建 Maven 模块。
 
 ---
 
@@ -135,16 +135,16 @@ com.innospots.nexus.kernel.<domain>/
 
 ## 5. 典型二次开发场景
 
-### 5.1 新增租户侧业务领域（kernel）
+### 5.1 新增租户侧业务领域（portal）
 
 **步骤：**
 
-1. 用 [module-ownership.md](../skills/java/java-reference/references/module-ownership.md) 确认归属为 `kernel`（非 platform）。
+1. 用 [module-ownership.md](../skills/java/java-reference/references/module-ownership.md) 确认归属为 `portal`（非 platform）。
 2. 走 `java:design` 四步法，产出设计文档或 PR「设计结论」块。
-3. 在 `innospots-nexus-kernel/src/main/java/com/innospots/nexus/kernel/<domain>/` 下按领域优先建包。
+3. 在 `innospots-nexus-portal/src/main/java/com/innospots/nexus/portal/<domain>/` 下按领域优先建包。
 4. 若暴露管理台 API：
    - 在 `innospots-nexus-console` 定义 REST interface 与 `domain.request` / `domain.vo`（record）。
-   - 在 `kernel` 实现 endpoint → service → operator → dao 调用链。
+   - 在 `portal` 实现 endpoint → service → operator → dao 调用链。
 5. 在 `innospots-nexus-spring-console` 中注册 DAO / 端点装配（见既有 `*Configuration` 类模式）。
 6. `java:develop` 完成实现与测试，`java:check` 全量验证。
 
@@ -158,11 +158,11 @@ Operator 不得依赖 service 或其他 operator。DAO 单表、无 join、无 M
 
 ### 5.2 新增平台运维能力（platform）
 
-与 kernel 类似，但代码落在 `innospots-nexus-platform`，暴露 `/platform/**` 契约。平台域不提供公开自助注册；不得依赖 kernel。
+与 portal 类似，但代码落在 `innospots-nexus-platform`，暴露 `/platform/**` 契约。平台域不提供公开自助注册；不得依赖 portal。
 
 ### 5.3 插件二次开发
 
-插件开发独立于 kernel 业务包，遵循插件手册：
+插件开发独立于 portal 业务包，遵循插件手册：
 
 | 步骤 | 说明 | 文档 |
 |------|------|------|
@@ -274,7 +274,7 @@ npx skills use "https://github.com/mattpocock/skills" --skill "grill-me"
 
 **方式四：模块级领域技能（示例）**
 
-部分业务模块在 `src/main/resources/skills/` 下附带领域契约索引，供 AI 理解模块能力边界，例如 `innospots-nexus-kernel` 的 [SKILL.md](../innospots-nexus-kernel/src/main/resources/skills/SKILL.md)。扩展 kernel 时可 `@` 该文件，避免与相邻域混淆。
+部分业务模块在 `src/main/resources/skills/` 下附带领域契约索引，供 AI 理解模块能力边界，例如 `innospots-nexus-portal` 的 [SKILL.md](../innospots-nexus-portal/src/main/resources/skills/SKILL.md)。扩展 portal 时可 `@` 该文件，避免与相邻域混淆。
 
 ### 6.4 按任务选择技能
 
@@ -297,12 +297,12 @@ npx skills use "https://github.com/mattpocock/skills" --skill "grill-me"
 
 ```text
 # 示例 1：新领域
-在 innospots-nexus-kernel 新增「工作区邀请」领域。
+在 innospots-nexus-portal 新增「工作区邀请」领域。
 请先走 java:design 四步法，确认归属与契约后再 java:develop。
-设计文档放 innospots-nexus-kernel/docs/workspace-invite-design.md（L1）。
+设计文档放 innospots-nexus-portal/docs/workspace-invite-design.md（L1）。
 
 # 示例 2：小改动
-在 kernel.user 增加按邮箱查询接口，契约已存在于 PR 描述。
+在 portal.user 增加按邮箱查询接口，契约已存在于 PR 描述。
 直接 java:develop，先写端点契约测试。
 
 # 示例 3：插件
@@ -353,7 +353,7 @@ DAO 层能否用 @Transactional？请只查 java:reference 并引用 standards �
 | 编码规范原文 | [skills/java/java-reference/standards/](../skills/java/java-reference/standards/) |
 | 插件手册 | [innospots-nexus-plugin/docs/plugin/manual/](../innospots-nexus-plugin/docs/plugin/manual/) |
 | 服务框架 | [innospots-nexus-service/docs/](../innospots-nexus-service/docs/) |
-| 权限设计（kernel） | [innospots-nexus-kernel/docs/permission-design.md](../innospots-nexus-kernel/docs/permission-design.md) |
+| 权限设计（portal） | [innospots-nexus-portal/docs/permission-design.md](../innospots-nexus-portal/docs/permission-design.md) |
 | 架构决策（ADR） | [docs/design/adr/](design/adr/) |
 
 ---
@@ -368,7 +368,7 @@ DAO 层能否用 @Transactional？请只查 java:reference 并引用 standards �
     ├─ 要新建 Maven 模块？ ──→ grill-me → java:project → java:design → …
     │
     ├─ 新业务能力落在哪？
-    │       ├─ 租户管理（用户/权限/菜单） → kernel 新领域包
+    │       ├─ 租户管理（用户/权限/菜单） → portal 新领域包
     │       ├─ 平台运维（租户/企业）     → platform 新领域包
     │       ├─ 可插拔能力 + 控制台页     → plugin 手册流程
     │       └─ 外部系统 / 客户定制       → 新 adapter 模块

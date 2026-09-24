@@ -39,11 +39,11 @@ innospots-nexus-core
         ↓
 innospots-nexus-console
         ↓
-kernel / platform
+portal / platform
 ```
 
 插件内核属于业务中立的平台运行能力，必须放在 Core。它可以复用 Base 的异常、状态码和线程基础，
-但不能依赖 Console、Kernel、Platform、Spring Boot 自动配置或具体业务模块。
+但不能依赖 Console、Portal、Platform、Spring Boot 自动配置或具体业务模块。
 
 ### 2.2 已有能力
 
@@ -1841,7 +1841,7 @@ V1 实现期间：
 - 依赖链和依赖循环；
 - 两个同 Capability、不同 Tags 的 Plugin。
 
-fixture 不能引用 Console、Kernel 或 Platform。
+fixture 不能引用 Console、Portal 或 Platform。
 
 ## 23. 分阶段实现计划
 

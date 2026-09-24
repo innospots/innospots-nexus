@@ -24,7 +24,7 @@
 | 必须 | 禁止 |
 |------|------|
 | 业务包先领域后职责：`role/endpoint`、`role/dao`、`role/domain/entity` | 技术层优先：`endpoint/role`、`dao/menu`、`domain/permission/entity` |
-| 同一领域代码聚在一个领域根下（如 `kernel/role/**`） | 为「分层」把多领域塞进同一 `endpoint/`、`dao/` 顶层包 |
+| 同一领域代码聚在一个领域根下（如 `portal/role/**`） | 为「分层」把多领域塞进同一 `endpoint/`、`dao/` 顶层包 |
 | 大领域按功能子模块：`permission/authorization`、`grant/service` | 模块根 `service` 或单包堆满全部 `*Service` |
 | 单包 ≤15 个 `.java`（达 12 规划拆分） | 单包 16+ 类仍平铺 |
 | `domain` 子包仅用 `entity`/`request`/`vo`/`model`/`enums`/`event` | `role/entity` 缺 `domain` 层；或 `domain/<领域名>/` 套娃 |
@@ -126,7 +126,7 @@ service / operator **不得**构造 `R<T>`，只返回领域值或 `PageResult<T
 响应与状态文本中禁止出现：密码、令牌、凭据、密钥、授权头、含密钥的完整 SQL、
 堆栈、请求 ID、记录 ID、文件路径、供应商原文、用户输入。
 
-`kernel` 与 `platform` 不得互引对方的状态枚举、事件类型或业务包。
+`portal` 与 `platform` 不得互引对方的状态枚举、事件类型或业务包。
 
 ---
 
@@ -149,8 +149,8 @@ endpoint → service → operator → dao
 | 契约按能力命名（`ResourceStore`、`PasswordDecryptor`） | 给每个具体类机械配接口 |
 | `DefaultXxx` 仅在存在其他合法实现时使用 | 单实现也硬套 `Default` 前缀 |
 
-模块依赖方向：`base → core → plugin → console → {kernel, platform}`。
-`kernel` 与 `platform` 平行且互不依赖。反向依赖一律禁止。
+模块依赖方向：`base → core → plugin → console → {portal, platform}`。
+`portal` 与 `platform` 平行且互不依赖。反向依赖一律禁止。
 
 ---
 

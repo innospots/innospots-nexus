@@ -160,9 +160,9 @@ find . -name "*.xml" -path "*/mapper/*"
 # 模块 POM 中是否内联版本
 grep -rn "<version>" --include=pom.xml */pom.xml
 
-# kernel 与 platform 是否互引
-grep -rn "nexus.platform" --include=*.java innospots-nexus-kernel/src
-grep -rn "nexus.kernel" --include=*.java innospots-nexus-platform/src
+# portal 与 platform 是否互引
+grep -rn "nexus.platform" --include=*.java innospots-nexus-portal/src
+grep -rn "nexus.portal" --include=*.java innospots-nexus-platform/src
 
 # base 是否引入中间件/框架依赖
 grep -n "artifactId" innospots-nexus-base/pom.xml

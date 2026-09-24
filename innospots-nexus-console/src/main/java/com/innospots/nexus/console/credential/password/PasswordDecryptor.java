@@ -1,7 +1,7 @@
 package com.innospots.nexus.console.credential.password;
 
 /**
- * 解密前端客户端提交的密码密文；由 kernel/platform/auth 注入，实现见 {@link RsaPasswordDecryptor}。
+ * 解密前端客户端提交的密码密文；由 portal/platform/auth 注入，实现见 {@link RsaPasswordDecryptor}。
  *
  * @author Smars
  * @date 2026/09/13

@@ -4,7 +4,7 @@ import com.innospots.nexus.base.domain.enums.BasicStatus;
 
 /**
  * 租户面向业务的档案（语言环境、货币、品牌标识）。
- * 这不是 {@code nx_organization_unit}；内部组织树保留在 kernel 中。
+ * 这不是 {@code nx_organization_unit}；内部组织树保留在 portal 中。
  *
  * @author Smars
  * @date 2026/09/13

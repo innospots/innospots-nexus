@@ -8,7 +8,7 @@ import org.apache.ibatis.reflection.MetaObject;
 import java.time.LocalDateTime;
 
 /**
- * MyBatis-Plus 元对象处理器，为继承 {@link BaseEntity} 或 kernel 租户域基类的实体自动填充审计字段。
+ * MyBatis-Plus 元对象处理器，为继承 {@link BaseEntity} 或 portal 租户域基类的实体自动填充审计字段。
  * <p>从 {@link com.innospots.nexus.base.thread.TLC 线程本地上下文} 读取用户身份、租户 ID、
  * 工作区 ID 与项目 ID，仓储层无需显式赋值。</p>
  *

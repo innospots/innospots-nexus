@@ -236,7 +236,7 @@ public class OtpChallengeService {
 
     /**
      * 校验忘记密码场景下的验证码。
-     * <p>调用场景：kernel 写新密码前的 OTP 校验。</p>
+     * <p>调用场景：portal 写新密码前的 OTP 校验。</p>
      *
      * @param realm    安全域
      * @param identity 与发送时相同的邮箱或手机

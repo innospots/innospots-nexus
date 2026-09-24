@@ -17,7 +17,7 @@
 ### 正确 — 领域优先（Domain-first）
 
 ```text
-com.innospots.nexus.kernel
+com.innospots.nexus.portal
   ├── role
   │   ├── endpoint
   │   ├── dao
@@ -45,7 +45,7 @@ com.innospots.nexus.kernel
 ### 错误 — 技术层优先（Layer-first）
 
 ```text
-com.innospots.nexus.kernel
+com.innospots.nexus.portal
   ├── endpoint
   │   ├── role
   │   ├── menu
@@ -77,8 +77,8 @@ com.innospots.nexus.kernel
 
 | 层级 | 划分依据 | 示例 |
 |------|---------|------|
-| **Maven 模块** | 部署边界、依赖方向、可独立测试 | `innospots-nexus-kernel`、`innospots-nexus-console` |
-| **Java 包（业务模块内）** | 业务领域 → 职责 | `kernel.role.endpoint`、`kernel.role.dao` |
+| **Maven 模块** | 部署边界、依赖方向、可独立测试 | `innospots-nexus-portal`、`innospots-nexus-console` |
+| **Java 包（业务模块内）** | 业务领域 → 职责 | `portal.role.endpoint`、`portal.role.dao` |
 
 - 不要在未证明边界清晰时，为每个技术层再建一个 Maven 模块。
 - 在**同一个** Maven 模块内，仍必须**领域优先**，不得用「再拆一个 dao 模块」替代包结构。
@@ -130,7 +130,7 @@ com.innospots.nexus.kernel
 ### 三层结构
 
 ```text
-Maven 模块（kernel / console / platform）
+Maven 模块（portal / console / platform）
   └── 业务领域（role / permission / catalog）     ← 第一刀：有界上下文
         └── 功能子模块（grant / authorization / entry）  ← 第二刀：领域内功能曲面（按需）
               └── 职责包（endpoint / service / dao / domain/…）  ← 第三刀：技术职责
@@ -180,9 +180,9 @@ permission/
 
 ```text
 # ✗ 模块级：所有业务塞进一个 service 包
-kernel.service.RoleService
-kernel.service.MenuService
-kernel.service.PermissionGrantService
+portal.service.RoleService
+portal.service.MenuService
+portal.service.PermissionGrantService
 …（数十个 *Service）
 
 # ✗ 领域级：一个扁平 service 包堆满编排类
@@ -296,7 +296,7 @@ role/entity/RoleEntity.java             ✗  缺少 domain 层（request/vo 无�
 - 共享契约下沉：`innospots-nexus-base`（轻量）、`innospots-nexus-console`（管理台契约）、
   `innospots-nexus-core`（平台基础设施）。
 - 同一 Maven 模块内两领域协作：通过 **service** 编排或 **领域事件**，而不是合并包树。
-- `kernel` 与 `platform` **不得** Maven 互依；需要同时暴露时用 application 组装模块
+- `portal` 与 `platform` **不得** Maven 互依；需要同时暴露时用 application 组装模块
   （见 [dependency-conventions.md](../../java-project/references/dependency-conventions.md)）。
 
 ---
@@ -321,7 +321,7 @@ com.innospots.nexus.console
   └── entry                # 模块级装配（非业务 service 桶）
 ```
 
-新建 kernel/platform 领域时，**对齐同一模式**：`com.innospots.nexus.kernel.<domain>.<responsibility>`。
+新建 portal/platform 领域时，**对齐同一模式**：`com.innospots.nexus.portal.<domain>.<responsibility>`。
 
 ---
 

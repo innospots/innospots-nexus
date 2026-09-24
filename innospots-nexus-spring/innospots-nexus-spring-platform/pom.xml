@@ -15,7 +15,7 @@
     <packaging>jar</packaging>
 
     <name>innospots-nexus-spring-platform</name>
-    <description>innospots-nexus platform 运维域 Spring 装配库（依赖 spring-console，不含 kernel）。</description>
+    <description>innospots-nexus platform 运维域 Spring 装配库（依赖 spring-console，不含 portal）。</description>
 
     <dependencies>
         <dependency>

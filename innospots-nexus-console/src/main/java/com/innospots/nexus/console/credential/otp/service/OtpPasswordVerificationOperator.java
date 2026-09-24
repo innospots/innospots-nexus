@@ -8,7 +8,7 @@ import com.innospots.nexus.console.credential.password.VerificationType;
 /**
  * 将 {@link PasswordVerificationOperator} 映射到 OTP 子域，且用途固定为
  * {@link com.innospots.nexus.console.credential.otp.domain.enums.OtpPurpose#PASSWORD_RESET}。
- * <p>kernel 用户改密流程只依赖该端口，无需直接引用 {@link OtpChallengeService}。</p>
+ * <p>portal 用户改密流程只依赖该端口，无需直接引用 {@link OtpChallengeService}。</p>
  *
  * @author Smars
  * @date 2026/09/19

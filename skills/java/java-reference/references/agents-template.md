@@ -36,7 +36,7 @@ grill-me  →  核对根 AGENTS.md  →  java:project（动 POM）  →  java:de
 
 1. **核心约束** — greenfield、不复制 legacy、编译验证、模块 API 索引策略
 2. **Agent 工作流** — grill-me 优先触发条件、Java 技能路由表、典型链路
-3. **依赖规则** — 单向链、BOM/parent、kernel/platform 隔离
+3. **依赖规则** — 单向链、BOM/parent、portal/platform 隔离
 4. **DDD 规则**
 5. **编码规范** — 指向 `skills/java/java-reference/standards/`
 6. **验证** — `mvn validate` / `mvn test` / `help:effective-pom`
@@ -116,8 +116,8 @@ npx skills use "https://github.com/mattpocock/skills" --skill "grill-me"
 - 内部 Java 模块应继承 `{{PARENT_ARTIFACT}}`。
 - 依赖版本归属 `{{BOM_ARTIFACT}}`。
 - 主依赖方向为
-  `{{DEPENDENCY_CHAIN — 例：base → core → console → kernel ↘ platform}}`。
-- {{KERNEL_PLATFORM_RULE — 例：Kernel 与 platform 不得相互依赖。}}
+  `{{DEPENDENCY_CHAIN — 例：base → core → console → portal ↘ platform}}`。
+- {{PORTAL_PLATFORM_RULE — 例：Portal 与 platform 不得相互依赖。}}
 - 业务特定基础设施归属其业务模块或 adapter/application 模块。
 
 ## DDD 规则
@@ -223,7 +223,7 @@ mvn -q help:effective-pom
 | 检查项 | 结论 |
 |--------|------|
 | 归属模块 | `{{artifact-id}}` — 符合根 AGENTS.md §{{模块名}} |
-| 依赖方向 | {{单向链说明}}；无 kernel↔platform |
+| 依赖方向 | {{单向链说明}}；无 portal↔platform |
 | 是否需修订根 AGENTS.md | 是 / 否 — {{若「是」，列出增补条目}} |
 | grill-me 结论引用 | {{PR / ADR 链接}} |
 ```

@@ -35,7 +35,7 @@
 | `cronExpression` | `CRON` / `SCHEDULED` 时必填 |
 | `dataMap` | 防御性复制的作业数据 |
 
-作业实现类位于**上层模块**（kernel/platform/plugin）；core 仅提供调度基础设施。
+作业实现类位于**上层模块**（portal/platform/plugin）；core 仅提供调度基础设施。
 
 ## QuartzJobInfo / QuartzTriggerInfo
 

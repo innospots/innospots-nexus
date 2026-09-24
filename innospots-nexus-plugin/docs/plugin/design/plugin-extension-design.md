@@ -121,7 +121,7 @@ innospots-nexus-plugin
         ↓
 innospots-nexus-console
         ↓
-kernel / platform
+portal / platform
 ```
 
 ### 5.1 Base
@@ -162,9 +162,9 @@ Console 拥有管理平台扩展面：
 
 Console 不持有插件安装运行时状态机，不发现和实例化 Plugin；贡献声明约束定义在 plugin 模块。
 
-### 5.5 Kernel 和 Platform
+### 5.5 Portal 和 Platform
 
-Kernel、Platform 可以提供 Plugin 和 Console Contribution。Kernel 权限模块从活动的
+Portal、Platform 可以提供 Plugin 和 Console Contribution。Portal 权限模块从活动的
 `ConsoleContributionCatalog` 同步资源。两个模块保持平行，不互相依赖，也不实现插件内核。
 
 ## 6. 安装事实与运行事实
@@ -270,7 +270,7 @@ Core Minimal V1 只实现：
 1. 统一 Plugin 身份、ProviderRef 和三种定义模型；
 2. 将安装存储和协调迁移到 Core；
 3. 将 Console Extension 转换为 `console@1` Contribution；
-4. 迁移 Kernel 权限资源的 `extensionKey` 为 `ownerPluginId`；
+4. 迁移 Portal 权限资源的 `extensionKey` 为 `ownerPluginId`；
 5. 删除 `core.extension`、`console.extension` 和旧安装表；
 6. 实现 YAML `java` bind；
 7. 按真实需求逐种实现远程 Binding Adapter 和 exposures。

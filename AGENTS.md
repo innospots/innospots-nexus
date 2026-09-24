@@ -80,9 +80,9 @@ grill-me  →  java:project（需新建/改模块时）  →  java:design  →  
   进程内事件及其他轻依赖工具。
 - 拥有 **transport/session snapshots**（`UserSnapshot`、`TenantSnapshot`、
   `OrganizationSnapshot`、`WorkspaceSnapshot`、`ProjectSnapshot` 等）
-  作为共享可序列化形状；kernel 拥有业务实体与工作流。
+  作为共享可序列化形状；portal 拥有业务实体与工作流。
 - 作用域层级：**Tenant → Workspace（共享资源）→ Project（业务隔离）**。
-  `OrganizationSnapshot` 是租户业务 profile，不是 kernel 的 `OrganizationUnit`。
+  `OrganizationSnapshot` 是租户业务 profile，不是 portal 的 `OrganizationUnit`。
 - 不得包含业务域逻辑或持久化绑定。
 - 必须保持 middleware-free，不得依赖 database、messaging、
   scheduling、Servlet、Spring、Quarkus 或其他 runtime 基础设施。
@@ -114,11 +114,11 @@ grill-me  →  java:project（需新建/改模块时）  →  java:design  →  
 - runtime 消费扩展契约，但不依赖 observability 或
   governance 实现。protocol 模块之间不得相互依赖。
 - 不得依赖 Spring、Quarkus、Servlet、Reactor、Mutiny、persistence、
-  或 console/kernel/platform 业务模块。
+  或 console/portal/platform 业务模块。
 - 复用 base snapshots、status/exception 契约与 ResourceStore。
   core 文件元数据集成属于 assembly 边界。
 - 拥有技术 audit events/output 集成，而非业务 audit 存储
-  或查询（仍归 kernel/platform）。
+  或查询（仍归 portal/platform）。
 - Spring 与 Quarkus bindings 归属各自 framework aggregator 下的
   innospots-nexus-spring-service、innospots-nexus-spring-core 与 innospots-nexus-quarkus-service。
 - 中立库直接继承 innospots-nexus-parent；service POM
@@ -130,7 +130,7 @@ grill-me  →  java:project（需新建/改模块时）  →  java:design  →  
 - 通过 Spring `MessageSource` / ResourceBundle 实现 base 的 `I18nMessageResolver`，
   并在启动时注册到 `I18nConverter`；由 `@EnableNexusI18n` 或 bootstrap 注解显式 `@Import` 引入。
 - 依赖 `innospots-nexus-base`；可装配 Web locale 同步 Filter。
-- 不得引入 kernel/console/platform 业务模块。
+- 不得引入 portal/console/platform 业务模块。
 
 ### `innospots-nexus-core`
 
@@ -143,7 +143,7 @@ grill-me  →  java:project（需新建/改模块时）  →  java:design  →  
   index 等 management-console 关注点不属于本模块。
 - 可依赖可复用平台支持所需的 middleware API 与实现，
   但不得绑定 Spring Boot auto-configuration。
-- **禁止出现在 core**（归属 plugin、console、kernel、platform 或
+- **禁止出现在 core**（归属 plugin、console、portal、platform 或
   adapter）：
   - Classpath plugin runtime、contribution decoders、Page DSL、plugin
     installation tables
@@ -180,12 +180,12 @@ grill-me  →  java:project（需新建/改模块时）  →  java:design  →  
   这些归属 `innospots-nexus-plugin`。
 - 不得实现具体 management 业务功能。User、role、
   permission、registration 等 management 功能归属
-  `innospots-nexus-kernel` 等业务模块。
+  `innospots-nexus-portal` 等业务模块。
 - 模块 API 参考位于
   `skills/java/java-reference/references/modules/innospots-nexus-console/`
   （不在 `src/main/resources/skills/` 下）。
 
-### `innospots-nexus-kernel`
+### `innospots-nexus-portal`
 
 - 拥有租户域持久化基类（`TenantBaseEntity` → `TenantWorkspaceBaseEntity` →
   `TenantProjectBaseEntity`）及 workspace/project 作用域端口与实现；platform 不包含 workspace/project 域。
@@ -195,8 +195,8 @@ grill-me  →  java:project（需新建/改模块时）  →  java:design  →  
   及其他 baseline 平台功能。
 - 业务代码先按 domain 组织，再按职责分包，例如
   `endpoint`、`dao`、`domain`、`converter`、`operator`、`service`、
-  `handler`、`interceptor`、`listener`（`kernel.role.endpoint`，而非
-  `kernel.endpoint.role`）。大 domain 使用功能子包
+  `handler`、`interceptor`、`listener`（`portal.role.endpoint`，而非
+  `portal.endpoint.role`）。大 domain 使用功能子包
   （`permission.authorization`、`grant.service`）；禁止 module 级 `service`
   堆放区；每个包目录最多 15 个 `.java` 文件。见
   `skills/java/java-reference/references/package-structure.md`。
@@ -205,13 +205,13 @@ grill-me  →  java:project（需新建/改模块时）  →  java:design  →  
 
 ### `innospots-nexus-platform`
 
-- 基于 console foundation 构建的 ops-domain 平台，与 kernel 并行。
+- 基于 console foundation 构建的 ops-domain 平台，与 portal 并行。
 - 拥有 tenant lifecycle（`nx_tenant`）、enterprise legal profile
   （`nx_enterprise`），以及后续的 platform users、support access、platform
   audit。
 - 暴露 `/platform/**` 契约。不得提供公开 self-registration。
 - 必须依赖 `console`（及传递的 `core` / `base`）。不得依赖
-  `innospots-nexus-kernel`。
+  `innospots-nexus-portal`。
 
 ## 依赖规则
 
@@ -224,14 +224,14 @@ grill-me  →  java:project（需新建/改模块时）  →  java:design  →  
   传递的 base foundation。
 - `innospots-nexus-console` 可依赖 `innospots-nexus-core`、
   `innospots-nexus-plugin` 及传递的 base foundation。
-- `innospots-nexus-kernel` 可依赖 `innospots-nexus-console`、
+- `innospots-nexus-portal` 可依赖 `innospots-nexus-console`、
   `innospots-nexus-core` 及它们的传递 base foundation。
 - `innospots-nexus-platform` 可依赖 `innospots-nexus-console`、
   `innospots-nexus-core` 及它们的传递 base foundation。
 - 主依赖方向为
   `innospots-nexus-base -> innospots-nexus-core -> innospots-nexus-plugin ->
-  innospots-nexus-console`，然后 `console -> innospots-nexus-kernel` 与
-  `console -> innospots-nexus-platform` 并行。Kernel 与 platform 不得
+  innospots-nexus-console`，然后 `console -> innospots-nexus-portal` 与
+  `console -> innospots-nexus-platform` 并行。Portal 与 platform 不得
   相互依赖。依赖不得指回更高层。
 - `innospots-nexus-core` 可提供具体业务中立 middleware 与
   database 支持，但不得绑定 Spring Boot

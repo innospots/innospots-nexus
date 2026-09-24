@@ -8,7 +8,7 @@
 
 | 需要 | 不需要 |
 |------|--------|
-| 同进程解耦：A 域完成后通知 B 域（依赖方向仍合法） | 用事件让 `kernel` 与 `platform` 互引 |
+| 同进程解耦：A 域完成后通知 B 域（依赖方向仍合法） | 用事件让 `portal` 与 `platform` 互引 |
 | 明确「成功后」副作用（审计、索引刷新） | 替代 service 编排（本可同步调用） |
 | 载荷稳定、版本可演进 | 投机性「以后可能用」预建 event 包 |
 
@@ -30,7 +30,7 @@
 ## 设计评审门禁（事件）
 
 - [ ] 是否可用 service 直接调用代替？若可以，不设计事件
-- [ ] 订阅方是否违反 kernel/platform 互依？
+- [ ] 订阅方是否违反 portal/platform 互依？
 - [ ] 载荷是否纳入 test-scope（形状契约 + handler 行为单测）？
 - [ ] 与 [exception-contract.md](exception-contract.md) 区分：失败不走事件「补偿」
 

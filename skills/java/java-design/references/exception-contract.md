@@ -18,7 +18,7 @@
 | 推迟实现的端点/方法在设计中标注状态码策略 | 依赖 `UnsupportedOperationException` 作为公共契约 |
 
 `NexusException` 是 `base` 中唯一的平台业务运行时异常基类。除该类及其在
-`base.exception` 包下**显式批准**的子类型外，业务模块（`kernel`、`console`、`platform`、
+`base.exception` 包下**显式批准**的子类型外，业务模块（`portal`、`console`、`platform`、
 `plugin` 应用路径、`core` 对外服务）**不得**向调用方抛出其他运行时或受检异常。
 
 ---

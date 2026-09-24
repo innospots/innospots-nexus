@@ -20,7 +20,7 @@
 | 多行格式 | 流式链点号置于续行行首；record 多行头一个组件一行；禁止嵌套三元；可用菱形推断 |
 | Lombok | 构造器注入用 `@RequiredArgsConstructor` + `final`；日志用 `@Slf4j`（禁止 `@Sl4j` 拼写）；可变实体/配置绑定用 `@Getter`+`@Setter`；`domain.request`/`domain.vo` 是 record 不适用；**禁止 `@Data`**；敏感值禁止 Lombok `toString` |
 | 领域类型 | `domain.request`/`domain.vo` 必须是 record；领域类型可封装自身不变量与行为 |
-| REST 端点 | `endpoint` 包 + `*Endpoint`；默认具体类；**console 传输契约可为 interface**（kernel/platform 实现）；只用 `jakarta.ws.rs`；类级 `@Path`/`@Produces`/`@Consumes`，方法级 HTTP 注解；显式参数注解；推迟实现用 `TODO` + `NexusException`；返回 `R<T>` |
+| REST 端点 | `endpoint` 包 + `*Endpoint`；默认具体类；**console 传输契约可为 interface**（portal/platform 实现）；只用 `jakarta.ws.rs`；类级 `@Path`/`@Produces`/`@Consumes`，方法级 HTTP 注解；显式参数注解；推迟实现用 `TODO` + `NexusException`；返回 `R<T>` |
 | MapStruct 转换器 | 非平凡结构转换必须用 MapStruct；`converter` 包 + `*Converter`；`@Mapper(config = BaseMapperConfig.class)`；模型↔实体继承 `BaseBeanConverter` |
 | MyBatis-Plus DAO | `dao` 包 + `*Dao` + `BaseMapper<Entity>`；自定义操作用 `default` 方法 + lambda wrapper；**每方法仅单表、禁止 join、禁止 XML**；N+1 禁止 |
 | 配置与资源文件 | 业务配置 `*.yaml`/`*.yml`；**禁止**业务级 `*.properties`、`beans.xml`、XML 装配；配置类在模块 `config` 包 |
@@ -73,7 +73,7 @@
 | DAO 契约 | 同 `code-style.md`；一表一 Dao；yaml 禁 properties/XML；跨表读用分批查询+内存组装；跨表写交由事务 service；细则见 `persistence-config.md` |
 | Service 与 Operator 边界 | operator 简单数据操作，不得依赖 service 或另一 operator；service 复杂工作流；分页返回 `PageResult<T>` |
 | 查询与命令语义 | 查询不改状态；`create` 遇重复稳定键失败；`update` 不接受不可变稳定键；`replace` 需定义省略是否删除；`delete` 需定义缺失是成功还是未找到；生命周期操作需定义重复调用行为 |
-| 领域事件与 EventBus | 发布域拥有事件契约，放 `domain.event`，实现 `DomainEvent`；`kernel` 与 `platform` **不得互相引用事件类型**；事件是不可变 record；状态变更成功后才发布；`publish` 异步通知、`publishSync` 仅在真正需要立即结果时用；订阅者负责清理 |
+| 领域事件与 EventBus | 发布域拥有事件契约，放 `domain.event`，实现 `DomainEvent`；`portal` 与 `platform` **不得互相引用事件类型**；事件是不可变 record；状态变更成功后才发布；`publish` 异步通知、`publishSync` 仅在真正需要立即结果时用；订阅者负责清理 |
 | 领域转换 | 同 `code-style.md` 的 MapStruct 规则 |
 | 密码注册请求 | 请求携带前端加密载荷，不含 hash/salt/algorithm；通过公共模块接口解密 |
 | 分页请求 | 分页请求对象放 `domain.request`；可组合 `SimpleQueryRequest`；方法收请求对象而非散参数 |
@@ -109,7 +109,7 @@
 | 3. 构造 `NexusException` | 默认 `build(StatusCode, ...)` 类型化重载；**`Checks.*`** 用于参数/不变量前置条件（抛 `NexusException`，非 JDK 异常）；字符串重载**仅限**互操作边界，需全码解析器 + 显式白名单 + 结构化日志记录来源 + 尽量翻译为类型化状态；`build(StatusCode, String)` 的运行时消息同样是响应面，禁止密钥/ID/用户输入/SQL/路径/堆栈 |
 | 4. 抛出、捕获与翻译 | 在能选出正确业务语义的边界抛出；重抛已有 `NexusException` 不改写（除非有更准确状态）；捕获最窄异常；**禁止为返回伪造成功而 catch**；捕获 `InterruptedException` 需恢复中断标志；禁止 `catch (Throwable)`；端点基础设施集中映射 `R.fail(...)`，`R<T>` 不含 HTTP status 字段 |
 | 5. 状态码结构 | `MODULE(3 大写字母) + CATEGORY(2 位数字) + LOCAL(4 位数字)` = 9 字符；`bisCode()` 必须等于 `fullCode()`；类别按语义族选择而非 HTTP 便利；HTTP 映射表（400/401/403/404/409/429/500/502/503） |
-| 6. 状态码命名与归属 | `XxxStatusCode` 实现 `StatusCode`；平台级失败→base `NexusStatusCode`；领域失败→`<domain>.domain.enums`；技术状态→技术边界旁（如 `core.plugin.status.PluginStatusCode`）；`kernel` 与 `platform` 不得互引状态枚举 |
+| 6. 状态码命名与归属 | `XxxStatusCode` 实现 `StatusCode`；平台级失败→base `NexusStatusCode`；领域失败→`<domain>.domain.enums`；技术状态→技术边界旁（如 `core.plugin.status.PluginStatusCode`）；`portal` 与 `platform` 不得互引状态枚举 |
 | 7. 扩展状态码目录 | 九步流程：先搜索→定归属→保留模块段→选类别→分配本地码→定义稳定元数据（双语 message/advice）→类型化构造→**先加契约测试**→审查兼容性 |
 | 8. 契约测试要求 | 13 项必须被测试证明的性质（形状、类别、唯一性、命名、双语文本、HTTP 映射、cause 保留、原始码拒绝、端点映射不泄露堆栈等） |
 | 9. 评审检查清单 | 异常 6 条 / 状态码 6 条 / 扩展 5 条 |

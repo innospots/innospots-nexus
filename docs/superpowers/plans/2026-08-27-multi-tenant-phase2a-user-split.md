@@ -4,7 +4,7 @@
 
 **目标：** 将 user 拆分为 platform 与 tenant 表，将 password credential SPI 迁入 console，并声明双 realm auth/register JAX-RS 契约。Console 仍不持久化 users。
 
-**架构：** console 拥有 decrypt/hash/validation SPI、`UserDirectory` / `CredentialStore` port，以及 `/platform/auth/**` + `/tenant/auth/**` 契约。platform 存储 `nx_platform_user*`。kernel 存储 `nx_tenant_user*`（由 `nx_user` 演进）。Kernel/platform 稍后实现 port；本 slice 落地 entity、operator 与契约。
+**架构：** console 拥有 decrypt/hash/validation SPI、`UserDirectory` / `CredentialStore` port，以及 `/platform/auth/**` + `/tenant/auth/**` 契约。platform 存储 `nx_platform_user*`。portal 存储 `nx_tenant_user*`（由 `nx_user` 演进）。Portal/platform 稍后实现 port；本 slice 落地 entity、operator 与契约。
 
 **技术栈：** Java 25、Maven、Jakarta Persistence + MyBatis-Plus、Jakarta REST、JUnit 5 + AssertJ、Lombok。
 
@@ -12,7 +12,7 @@
 
 ## 全局约束
 
-- Console 不持久化 user 行。Kernel 与 platform 不签发 token。
+- Console 不持久化 user 行。Portal 与 platform 不签发 token。
 - 无公开 `/platform/auth/register`。Tenant `POST /tenant/auth/register` 仅创建 identity（无 TenantMember）。
 - 不得重新引入 `ProjectBaseEntity` / `projectId`。
 - 本计划不迁移 menu/role/permission/extension/logger。本计划不删除 Group。
@@ -23,7 +23,7 @@
 
 - AuthFacade token 签名 / refresh / logout 实现
 - Group 删除、OrgUnit grant subject 切换
-- 将 kernel menu/role/permission 迁入 console
+- 将 portal menu/role/permission 迁入 console
 - SupportAccessGrant
 
 ---
@@ -34,16 +34,16 @@
 - Create: `console/credential/PasswordDecryptor.java`, `RsaPasswordDecryptor.java`, `PasswordValidator.java`
 - Create: `console/credential/PasswordVerificationOperator.java`, `NullPasswordVerificationOperator.java`, `VerificationType.java`
 - Test: `console/.../PasswordDecryptorTest.java`, `PasswordValidatorTest.java`
-- Modify: kernel operator/test 改为 import console 类型
-- Delete: kernel `user/tools/{UserPasswordDecryptor,RsaUserPasswordDecryptor,PasswordValidator}.java` 及 kernel decryptor test
-- Delete: console 副本存在后删除 kernel `PasswordVerificationOperator`, `NullPasswordVerificationOperator`, `VerificationType`
-- Modify: `UserPackageContractsTest`（不再期望 decryptor 在 kernel.tools）
+- Modify: portal operator/test 改为 import console 类型
+- Delete: portal `user/tools/{UserPasswordDecryptor,RsaUserPasswordDecryptor,PasswordValidator}.java` 及 portal decryptor test
+- Delete: console 副本存在后删除 portal `PasswordVerificationOperator`, `NullPasswordVerificationOperator`, `VerificationType`
+- Modify: `UserPackageContractsTest`（不再期望 decryptor 在 portal.tools）
 
-保留方法名：`decrypt`、`isValid`、`MIN_LENGTH = 8`。RSA record 接受 Base64 PKCS#8 private key，与当前 kernel record 相同。
+保留方法名：`decrypt`、`isValid`、`MIN_LENGTH = 8`。RSA record 接受 Base64 PKCS#8 private key，与当前 portal record 相同。
 
 - [x] **Step 1：** 失败的 console `PasswordDecryptorTest`（通过 `CryptoUtils` 的 RSA round-trip）与 `PasswordValidatorTest`（过短 / 缺 class / 有效）。
 - [x] **Step 2：** 运行 `mvn -pl innospots-nexus-console test -Dtest=PasswordDecryptorTest,PasswordValidatorTest` — 类型缺失。
-- [x] **Step 3：** 实现 SPI；kernel `UserOperator` / `PasswordOperator` 指向 console 类型；删除 kernel 副本。
+- [x] **Step 3：** 实现 SPI；portal `UserOperator` / `PasswordOperator` 指向 console 类型；删除 portal 副本。
 - [x] **Step 4：** 测试 PASS。
 
 ---
@@ -69,9 +69,9 @@ Token vo: `realm`, `tokenType`（`IDENTITY` | `BUSINESS`）, `accessToken`, `ref
 
 ---
 
-### Task 3：Kernel tenant user 表
+### Task 3：Portal tenant user 表
 
-演进现有 kernel user 持久化：
+演进现有 portal user 持久化：
 
 | 旧 | 新 |
 |-----|-----|
@@ -86,7 +86,7 @@ Token vo: `realm`, `tokenType`（`IDENTITY` | `BUSINESS`）, `accessToken`, `ref
 - [x] **Step 1：** 重写 `UserEntityContractsTest` 以适配 tenant-user 表（将失败）。
 - [x] **Step 2：** 确认 RED。
 - [x] **Step 3：** 替换 entity/operator/test。
-- [x] **Step 4：** Kernel user 测试 PASS。
+- [x] **Step 4：** Portal user 测试 PASS。
 
 ---
 
@@ -111,4 +111,4 @@ OAuth: `nx_platform_user_oauth`, prefix `poi`。
 
 - [x] `mvn clean compile`
 - [x] `mvn test`
-- [x] 确认 kernel 无 `nx_user` 表名，console 无 user entity。
+- [x] 确认 portal 无 `nx_user` 表名，console 无 user entity。

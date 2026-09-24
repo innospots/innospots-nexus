@@ -81,7 +81,7 @@
 
 - **Model**：仅当既非实体也非传输 record 时需要；按业务概念命名，无 `Model` 后缀
 - **Enums**：封闭业务概念；`State`/`Status`/`Mode`/`Type` 语义区分
-- **Event**：不可变 record；发布域拥有；kernel 与 platform 不得互引对方事件类型
+- **Event**：不可变 record；发布域拥有；portal 与 platform 不得互引对方事件类型
 - **StatusCode**：先搜现有目录；九字符全码；见 [`standards/exception-status-code.md`](../standards/exception-status-code.md)
 
 ---

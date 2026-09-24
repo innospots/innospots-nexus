@@ -1,7 +1,7 @@
 # 管理域：菜单、角色、字典
 
 控制台拥有工作空间级管理数据的 **REST 契约**、**实体**和 **DAO**。
-**业务工作流**（service/operator 实现）归属 **innospots-nexus-kernel**，
+**业务工作流**（service/operator 实现）归属 **innospots-nexus-portal**，
 除非明确仅限 platform。
 
 ## Role（`console.role`）
@@ -15,7 +15,7 @@
 
 ### 端点
 
-- `RoleEndpoint` — CRUD + 状态 + 选项（**interface** → kernel 实现）
+- `RoleEndpoint` — CRUD + 状态 + 选项（**interface** → portal 实现）
 - `RoleBindingEndpoint` — 分页/添加/删除绑定（**class stub**）
 - `GrantManagementEndpoint` — 权限替换（见 catalog-permission.md）
 
@@ -76,13 +76,13 @@
 
 | 领域 | 契约 | console 中的 service/operator |
 |------|----------|----------------------------|
-| Role REST | 完整接口 | 无 — kernel |
-| Role binding | Stub 类 | Kernel TODO |
-| Menu management | Stub 类 | Kernel TODO |
+| Role REST | 完整接口 | 无 — portal |
+| Role binding | Stub 类 | Portal TODO |
+| Menu management | Stub 类 | Portal TODO |
 | Menu navigation | 已实现 | `NavigationMenuAssembler` |
-| Dictionary | Stub 类 | Kernel TODO |
+| Dictionary | Stub 类 | Portal TODO |
 
-在 kernel 中实现时：
+在 portal 中实现时：
 
 1. 将实现接口端点作为 JAX-RS Bean，委托给 `*Service`。
 2. 遵循 `endpoint → service → operator → dao`，使用 `WorkspaceBaseEntity` TLC 填充。

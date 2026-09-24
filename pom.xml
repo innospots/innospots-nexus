@@ -43,7 +43,7 @@
         <module>innospots-nexus-core</module>
         <module>innospots-nexus-plugin</module>
         <module>innospots-nexus-console</module>
-        <module>innospots-nexus-kernel</module>
+        <module>innospots-nexus-portal</module>
         <module>innospots-nexus-platform</module>
         <module>innospots-nexus-spring</module>
         <module>innospots-nexus-quarkus</module>

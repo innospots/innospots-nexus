@@ -1,7 +1,7 @@
 package com.innospots.nexus.console.permission.api;
 
 /**
- * 校验组织单元是否属于指定租户；由 kernel 或 adapter 提供实现。
+ * 校验组织单元是否属于指定租户；由 portal 或 adapter 提供实现。
  */
 public interface OrganizationUnitDirectory {
 

@@ -2,7 +2,7 @@
 #
 # 绑定: com.innospots.nexus.spring.console.config.ConsoleAuthProperties
 #       com.innospots.nexus.spring.console.config.ConsoleCredentialTotpProperties
-# 装配: ConsoleAuthConfiguration, ConsoleCredentialConfiguration, KernelAuthConfiguration
+# 装配: ConsoleAuthConfiguration, ConsoleCredentialConfiguration, PortalAuthConfiguration
 #
 nexus:
   console:

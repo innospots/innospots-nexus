@@ -182,7 +182,7 @@ MODULE (3 uppercase letters) + CATEGORY (2 digits) + LOCAL (4 digits)
 - 领域特定业务失败属于所属领域的 `<domain>.domain.enums` 包。所属领域是该码业务语义的唯一来源。
 - 技术状态放在发出它的技术边界旁，如插件基础设施的 `core.plugin.status.PluginStatusCode`。
 - `console` 仅当 console 边界拥有含义时，才可定义业务中立的 console 契约状态；具体的用户、角色、权限、菜单或租户状态属于其所属业务模块。
-- 同级 `kernel` 和 `platform` 模块不得相互导入对方的状态枚举、事件或业务包。若工作流跨越两者，使用中立的 console/core 契约或可同时翻译双方状态的应用适配器。
+- 同级 `portal` 和 `platform` 模块不得相互导入对方的状态枚举、事件或业务包。若工作流跨越两者，使用中立的 console/core 契约或可同时翻译双方状态的应用适配器。
 
 ## 7. 扩展状态码目录
 

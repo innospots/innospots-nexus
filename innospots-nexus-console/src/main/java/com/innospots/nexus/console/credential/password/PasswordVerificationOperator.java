@@ -5,7 +5,7 @@ package com.innospots.nexus.console.credential.password;
  *
  * @author Smars
  * @date 2026/09/13
- * @see com.innospots.nexus.kernel.user.operator.PasswordOperator
+ * @see com.innospots.nexus.portal.user.operator.PasswordOperator
  */
 public interface PasswordVerificationOperator {
 

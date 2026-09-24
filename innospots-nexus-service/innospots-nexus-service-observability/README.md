@@ -299,7 +299,7 @@ com.innospots.nexus.service.observability
 
 ## 注意事项
 
-- 观测与**业务 audit 查询**分离：本模块负责技术 access log / trace / metrics；`@Audited` 持久化走 `AuditStorage`（kernel/platform）。
+- 观测与**业务 audit 查询**分离：本模块负责技术 access log / trace / metrics；`@Audited` 持久化走 `AuditStorage`（portal/platform）。
 - 高基数 label（principalId、requestId、sessionId、path）**禁止**作为指标 tag。
 - WS 连接生命周期也会记 access/指标；不是「只有 REST 才有观测」。
 

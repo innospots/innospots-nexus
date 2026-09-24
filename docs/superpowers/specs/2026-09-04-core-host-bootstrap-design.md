@@ -25,7 +25,7 @@
 | **core.plugin** | `PluginHostBootstrap`、`PluginEventBus`（已有） | 调用 console sync |
 | **console** | 注册 `ConsoleCatalogSyncStartupTask`；`PluginManagementEndpoint` 启停后调 sync | 定义启动编排框架 |
 | **spring-app / quarkus-app** | 配置类组装 `NexusStartup` Bean；适配层只调 `run()` | 业务初始化逻辑 |
-| **kernel / platform** | 按需注册种子 Task（`order` 在 300+） | 插件、权限目录 |
+| **portal / platform** | 按需注册种子 Task（`order` 在 300+） | 插件、权限目录 |
 
 ## 4. 核心契约（仅 3 个类型）
 
@@ -89,11 +89,11 @@ public final class NexusStartup {
 | 0–99 | 预留（基础设施自检，V1 不用） | — |
 | **100** | 插件子系统 | `plugin-host`（core 内置） |
 | **200–299** | 依赖 ACTIVE 插件的派生索引 | `console-catalog-sync`（200） |
-| **300–499** | 系统/域默认数据种子 | console 300、kernel 310、platform 320 |
+| **300–499** | 系统/域默认数据种子 | console 300、portal 310、platform 320 |
 | **500+** | 应用扩展 | 客户自定义 Task |
 | 900+ | 就绪标记（可选） | 应用自定义 |
 
-console / kernel / platform 各自注册 Task，**不需要**在 core 定义 `SYSTEM_SEED` / `DOMAIN_SEED` 枚举。
+console / portal / platform 各自注册 Task，**不需要**在 core 定义 `SYSTEM_SEED` / `DOMAIN_SEED` 枚举。
 
 ## 6. 配置组装与框架适配
 

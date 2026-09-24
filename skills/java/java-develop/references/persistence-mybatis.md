@@ -37,7 +37,7 @@ src/main/resources/
 
 - Dao 接口：`org.apache.ibatis.annotations.Mapper`（或宿主统一 `@MapperScan` 扫描）。
 - **不要**创建 `mybatis-config.xml` 或 `mapper/**/*.xml`。
-- Spring 集成在 `innospots-nexus-spring-*`；**中立库模块**（kernel/console 等）不写 Spring 配置类。
+- Spring 集成在 `innospots-nexus-spring-*`；**中立库模块**（portal/console 等）不写 Spring 配置类。
 
 ---
 

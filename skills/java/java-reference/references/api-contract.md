@@ -100,15 +100,15 @@ Lombok 只消除访问器样板，**不替代**领域类的显式行为方法。
 ## Console 传输契约（interface 例外）
 
 `innospots-nexus-console` 可将管理台 REST 边界声明为 **`interface *Endpoint`**，
-由 `innospots-nexus-kernel` 或 `innospots-nexus-platform` 提供 **`class` 实现**。
+由 `innospots-nexus-portal` 或 `innospots-nexus-platform` 提供 **`class` 实现**。
 
 | 必须 | 禁止 |
 |------|------|
 | 路径、`R<T>`、request/vo record 在 **console** 锁定 | 在 console 写 role/menu 等业务工作流 |
-| 实现类在 kernel/platform，遵守领域优先包结构 | 为单测 mock 在业务域随意抽 endpoint 接口 |
-| 契约测试反射锁定 console 侧 interface | kernel 改路径而不更新 console 契约 |
+| 实现类在 portal/platform，遵守领域优先包结构 | 为单测 mock 在业务域随意抽 endpoint 接口 |
+| 契约测试反射锁定 console 侧 interface | portal 改路径而不更新 console 契约 |
 
-**新业务域**（kernel/platform 内）仍默认**具体 endpoint 类**；不要机械复制 console 的 interface 模式。
+**新业务域**（portal/platform 内）仍默认**具体 endpoint 类**；不要机械复制 console 的 interface 模式。
 
 模块分工见 [module-ownership.md](module-ownership.md)；端点索引见
 `references/modules/innospots-nexus-console/references/endpoint-contracts.md`。
@@ -128,7 +128,7 @@ endpoint → service → operator → dao
 | `Operator` | 面向 DAO 的直接数据操作；可跨多 DAO 但须简单内聚 | 依赖 service 或另一个 operator |
 | `Dao` | 单表操作 | join、XML、跨表编排 |
 
-模块依赖：`base → core → plugin → console → {kernel, platform}`。
+模块依赖：`base → core → plugin → console → {portal, platform}`。
 
 ---
 
