@@ -1,0 +1,19 @@
+spring:
+  jersey:
+    type: filter
+  datasource:
+    url: jdbc:h2:mem:nexus-platform-openapi-it;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  sql:
+    init:
+      mode: never
+
+scalar:
+  enabled: true
+  path: /openapi/ui
+  page-title: Nexus API Reference
+  with-default-fonts: false
+  agent:
+    disabled: true

@@ -13,6 +13,9 @@ import com.innospots.nexus.spring.console.config.ConsoleCatalogConfiguration;
 import com.innospots.nexus.spring.console.config.ConsoleCredentialConfiguration;
 import com.innospots.nexus.spring.console.config.ConsoleDictionaryConfiguration;
 import com.innospots.nexus.spring.console.config.ConsoleLoggerConfiguration;
+import com.innospots.nexus.spring.console.config.ConsoleOpenApiConfiguration;
+import com.innospots.nexus.spring.console.jaxrs.NexusJaxRsConfiguration;
+import com.innospots.nexus.spring.console.jaxrs.NexusScalarJerseyConfiguration;
 import com.innospots.nexus.spring.console.config.ConsoleMenuConfiguration;
 import com.innospots.nexus.spring.console.config.ConsoleNavigationConfiguration;
 import com.innospots.nexus.spring.console.config.ConsolePermissionConfiguration;
@@ -42,7 +45,10 @@ import com.innospots.nexus.spring.core.plugin.EnableNexusPluginHost;
         ConsoleMenuConfiguration.class,
         ConsoleRoleConfiguration.class,
         ConsoleDictionaryConfiguration.class,
-        ConsoleLoggerConfiguration.class
+        ConsoleLoggerConfiguration.class,
+        ConsoleOpenApiConfiguration.class,
+        NexusJaxRsConfiguration.class,
+        NexusScalarJerseyConfiguration.class
 })
 public @interface EnableNexusConsole {
 }

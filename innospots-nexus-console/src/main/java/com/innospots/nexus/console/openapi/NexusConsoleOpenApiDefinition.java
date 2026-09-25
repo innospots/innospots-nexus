@@ -26,7 +26,8 @@ import com.innospots.nexus.core.openapi.NexusOpenApiSecurityNames;
                 @Tag(name = "Catalog", description = "控制台目录索引"),
                 @Tag(name = "Navigation", description = "运行时导航"),
                 @Tag(name = "Dictionary", description = "租户级字典"),
-                @Tag(name = "Plugin", description = "插件生命周期")
+                @Tag(name = "Plugin", description = "插件生命周期"),
+                @Tag(name = "OpenApiCatalog", description = "OpenAPI 规范目录")
         }
 )
 @SecurityScheme(
