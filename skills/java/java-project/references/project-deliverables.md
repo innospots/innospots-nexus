@@ -22,7 +22,37 @@
 
 ---
 
-## 何时新建 Maven 模块 vs 何时只加 Java 包
+## 外部产品工程（仓库外）
+
+适用：`java:project` 的主场景。完整约定见 [external-project-layout.md](external-project-layout.md)。
+
+### A. 新建产品工程（greenfield）
+
+| 步骤 | 动作 |
+|------|------|
+| 1 | grill-me；**询问产品形态**：仅管理平台 / 仅对外接口 / 两者兼有 |
+| 2 | **询问运行框架**：Spring Boot 或 Quarkus（**二选一**，未答复不得建两套） |
+| 3 | 创建根聚合器 + `{product}-bom`（import `innospots-nexus-bom`）+ `{product}-core` |
+| 4 | 按形态创建库模块：**仅对外** → `service` only（**不要** console、ui）；**仅管理** → `console` + 按需 `ui`；**两者** → console + service + 按需 ui |
+| 5 | 仅创建 **`{product}-spring` 或 `{product}-quarkus`** 及与之匹配的可运行子模块（如仅 `*-service` 或 `*-console`） |
+| 6 | 各一级 Java 模块 `<parent>` = `innospots-nexus-parent`；产品 `AGENTS.md` 登记职责与选型 |
+| 7 | `mvn validate` → 全 reactor `clean compile` |
+
+**禁止：** 纯对外服务仍建 console/ui；同时建 spring 与 quarkus；`{product}-portal` 等产品侧 Nexus 同名模块。
+
+### B. 已有产品工程（结构已确认）
+
+| 步骤 | 动作 |
+|------|------|
+| 1 | 读取现有 `<modules>`，**不新增**模块类型 |
+| 2 | 在目标模块 POM 上收敛 parent、BOM、Nexus **库依赖** |
+| 3 | `mvn -pl <已有模块> -am clean compile` → `dependency:tree` |
+
+**不在此技能阶段编写**业务域包（交 `java:design` → `java:develop`）。
+
+---
+
+## 何时新建 Maven 模块 vs 何时只加 Java 包（innospots-nexus 本仓库）
 
 **默认：不新建 Maven 模块。** 先在现有 `portal` / `platform` / `console` 内按领域加包
 （见 [package-structure.md](../../java-reference/references/package-structure.md)、

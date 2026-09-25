@@ -35,9 +35,11 @@
     </build>
 
     <modules>
+        <module>innospots-nexus-quarkus-core</module>
         <module>innospots-nexus-quarkus-service</module>
-        <module>innospots-nexus-quarkus-service-deployment</module>
         <module>innospots-nexus-quarkus-app</module>
         <module>innospots-nexus-quarkus-console</module>
+        <module>innospots-nexus-quarkus-portal</module>
+        <module>innospots-nexus-quarkus-platform</module>
     </modules>
 </project>

@@ -1,7 +1,21 @@
 # Maven 依赖引用约定
 
-本文档定义**新建工程**或**调整已有工程**时的依赖与 parent 使用规范。
-它不是当前仓库依赖关系的快照说明；具体传递链以 `mvn dependency:tree` 为准。
+本文档定义依赖与 parent 使用规范（**外部产品工程**与 **innospots-nexus 平台库**共用原则）。
+具体传递链以 `mvn dependency:tree` 为准。
+
+## 外部产品 parent / BOM
+
+产品 **reactor 已确认**；本表只说明如何在**已有**模块 POM 上引用 Nexus，**不**要求新增
+`innospots-nexus-portal` 等产品侧 Maven 模块。
+
+| 项 | 约定 |
+|----|------|
+| 一级 Java 模块 parent | `innospots-nexus-parent` |
+| `{product}-bom`（若已有） | import `innospots-nexus-bom` |
+| 已有 `{product}-console` | 依赖 `innospots-nexus-console`；按需 `innospots-nexus-portal` 或 `innospots-nexus-platform` |
+| 已有 `{product}-service` | 依赖 `innospots-nexus-service-*`；**不**为管理台再引 `portal` |
+
+见 [external-project-layout.md](external-project-layout.md)。
 
 ## 规范与存量 POM
 
@@ -21,7 +35,7 @@
 
 | 原则 | 要求 |
 |------|------|
-| **版本统一由 BOM 管理** | 所有 JAR（含第三方与内部模块）的版本只在 `innospots-nexus-bom` 中定义 |
+| **版本统一由 BOM 管理** | Nexus 坐标版本在 `innospots-nexus-bom`；外部产品自有 artifact 在 `{product}-bom` 中定义 |
 | **禁止单独引用 JAR 版本** | 模块 POM 只写 `groupId` + `artifactId`，**不得**写 `<version>` |
 | **parent 统一** | 业务与库模块默认继承 `innospots-nexus-parent` |
 | **最小依赖** | 只声明**直接使用的最上层模块**；能由传递依赖带来的下层模块不要重复声明 |
@@ -238,7 +252,8 @@ innospots-nexus-platform  → 运营域平台能力（系统运营类）
 | 仅控制台契约/扩展（无 portal 业务） | `innospots-nexus-console` | `innospots-nexus-spring-app` | 少见；通常仍有 `*-app` 提供 JDBC 等 |
 | **同一进程同时要 portal + platform** | **新建 `application` 模块** 同时依赖两者 | `innospots-nexus-spring-app` | 见下节；**禁止**让 `portal` 与 `platform` 库模块互依 |
 
-Quarkus 将上表 `spring-app` 替换为 `innospots-nexus-quarkus-app`，原则相同。
+Quarkus 将上表运行时模块替换为 `innospots-nexus-quarkus-portal` /
+`innospots-nexus-quarkus-platform`（或 `quarkus-app` 用于纯 API 服务），原则相同。
 
 ### 同一进程包含 portal 与 platform
 
@@ -341,16 +356,21 @@ Spring 版本与 starter 约束见 `java:spring` → `spring-dependencies.md`：
 | 模块 | 用途 |
 |------|------|
 | `innospots-nexus-quarkus` | Quarkus 运行时聚合 parent |
-| `innospots-nexus-quarkus-app` | Quarkus 基础设施组装 |
-| `innospots-nexus-quarkus-console` | **可运行的管理端** Quarkus 应用 |
+| `innospots-nexus-quarkus-core` | 宿主引导、插件宿主 |
+| `innospots-nexus-quarkus-service` | service 框架 adapter |
+| `innospots-nexus-quarkus-app` | 应用服务装配库（core + service） |
+| `innospots-nexus-quarkus-console` | 管理控制台装配库 |
+| `innospots-nexus-quarkus-portal` | portal 域装配（console + portal） |
+| `innospots-nexus-quarkus-platform` | platform 域装配（console + platform） |
 
 依赖原则与 Spring 对称：
 
 | 部署 | 依赖 |
 |------|------|
-| 租户管理端 | `innospots-nexus-quarkus-app` + `innospots-nexus-portal` |
-| 运营平台 | `innospots-nexus-quarkus-app` + `innospots-nexus-platform` |
-| 统一进程（portal + platform） | `quarkus-app` + `portal` + `platform`（新建 application 模块） |
+| 标准 API 服务 | `innospots-nexus-quarkus-app` |
+| 租户管理端 | `innospots-nexus-quarkus-portal` |
+| 运营平台 | `innospots-nexus-quarkus-platform` |
+| 统一进程（portal + platform） | 新建 application 模块同时依赖 `quarkus-portal` 与 `quarkus-platform` |
 
 ---
 

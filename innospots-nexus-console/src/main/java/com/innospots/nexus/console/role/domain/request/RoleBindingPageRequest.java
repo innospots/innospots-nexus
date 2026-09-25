@@ -3,36 +3,46 @@ package com.innospots.nexus.console.role.domain.request;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.QueryParam;
 
-import com.innospots.nexus.base.domain.request.SimpleQueryRequest;
+import com.innospots.nexus.base.domain.request.Pagination;
 import com.innospots.nexus.console.role.domain.enums.RoleBindingSubjectType;
 
 /**
  * 绑定到角色的主体的分页查询。
  *
- * @author Smars
- * @date 2026/09/13
- * @param input        fuzzy subject 标识符
- * @param subjectType  可选 USER 或 ORG_UNIT filter
- * @param pageNo       从 1 开始的页码
- * @param pageSize     分页大小
+ * <p>使用 Bean 类而非 record，以兼容 Quarkus REST 对 {@code @BeanParam} 的注入代码生成。</p>
  */
-public record RoleBindingPageRequest(
-        @QueryParam("input") String input,
-        @QueryParam("subjectType") RoleBindingSubjectType subjectType,
-        @DefaultValue("1") @QueryParam("pageNo") long pageNo,
-        @DefaultValue("20") @QueryParam("pageSize") long pageSize
-) {
+public final class RoleBindingPageRequest {
 
-    public RoleBindingPageRequest {
-        if (pageNo < 1) {
-            pageNo = SimpleQueryRequest.DEFAULT_PAGE_NO;
-        }
-        if (pageSize < 1) {
-            pageSize = SimpleQueryRequest.DEFAULT_PAGE_SIZE;
-        }
-    }
+    @QueryParam("input")
+    private String input;
+
+    @QueryParam("subjectType")
+    private RoleBindingSubjectType subjectType;
+
+    @DefaultValue("1")
+    @QueryParam("pageNo")
+    private long pageNo;
+
+    @DefaultValue("20")
+    @QueryParam("pageSize")
+    private long pageSize;
 
     public RoleBindingPageRequest() {
-        this(null, null, SimpleQueryRequest.DEFAULT_PAGE_NO, SimpleQueryRequest.DEFAULT_PAGE_SIZE);
+    }
+
+    public String input() {
+        return input;
+    }
+
+    public RoleBindingSubjectType subjectType() {
+        return subjectType;
+    }
+
+    public long pageNo() {
+        return Pagination.normalizePageNo(pageNo);
+    }
+
+    public long pageSize() {
+        return Pagination.normalizePageSize(pageSize);
     }
 }

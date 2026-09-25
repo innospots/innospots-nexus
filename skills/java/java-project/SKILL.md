@@ -2,14 +2,15 @@
 name: java:project
 display_name: Java 工程与构建
 description: |
-  Java 工程创建与调整的使用约定与标准（非当前仓库依赖关系说明）。当用户要新建
-  Maven 模块、调整已有工程结构、配置 POM（parent/BOM/最小依赖引用）、选择应引用
-  console/portal/platform/spring/quarkus 等模块、设置 JDK 与编译基线、处理多模块
-  reactor 构建或排查构建结构问题时使用。新建工程前必经 grill-me，并须对照
-  AGENTS.md 模块职责与依赖规则。所有 JAR 版本统一由 innospots-nexus-bom 管理，
-  parent 默认 innospots-nexus-parent，禁止模块内单独写依赖版本。
-  触发词：新建模块、工程结构、模块划分、POM 配置、Maven、BOM、parent、依赖引用、
-  最小依赖、console、portal、platform、spring、quarkus、构建配置、编译基线。
+  **外部产品工程**的 Maven 创建与调整约定（非 innospots-nexus 本仓库说明书）。
+  当用户在仓库外、**模块结构已确认**的产品工程上配置 POM、挂接 innospots-nexus-parent/BOM、
+  引用 Nexus 平台库依赖、或排查外部 reactor 时使用。新建工程模块为 bom/core/console/service/ui
+  与 spring 或 quarkus（二选一）；须询问管理/对外形态与运行框架。不得照搬 Nexus 模块名为产品模块。
+  一级 Java 模块须继承 innospots-nexus-parent；产品 BOM 须 import innospots-nexus-bom。
+  修改 innospots-nexus 仓库内的平台库模块时，以根 AGENTS.md 与 module-layout.md 为准，
+  本技能仅作 parent/BOM/最小依赖引用补充。新建外部工程前必经 grill-me。
+  触发词：外部工程、产品工程、nexmux、新建仓库、*-console、*-service、客户项目、
+  Maven、BOM、parent、依赖引用、spring、quarkus、构建配置。
 category: java
 version: 1.4.0
 ---
@@ -18,39 +19,38 @@ version: 1.4.0
 
 ## 定位
 
-负责**新建工程或对已有工程进行调整**时的约定与标准：模块怎么划、POM 怎么写、
-依赖怎么引、版本谁管、构建怎么跑。
+负责在 **innospots-nexus 仓库之外** 新建或调整**产品工程**时的约定：reactor 怎么划、
+POM 怎么写、如何挂接 `innospots-nexus-parent` / `innospots-nexus-bom`、如何引用
+Nexus 平台库（`console`、`portal`、`service` 等）。
 
-交付物形态、模块类型决策与清单见 [project-deliverables.md](references/project-deliverables.md)。
+| 场景 | 以谁为准 |
+|------|---------|
+| **外部产品工程**（`{product}-console` / `{product}-service` / …） | 本文 + [external-project-layout.md](references/external-project-layout.md) |
+| **innospots-nexus 本仓库**（`innospots-nexus-*` 平台库） | 根 [`AGENTS.md`](../../../AGENTS.md) + [module-layout.md](references/module-layout.md) |
 
-**本技能不是**「当前 innospots-nexus 仓库依赖关系说明书」。仓库现状以各模块
-`pom.xml` 与 `mvn dependency:tree` 为准；本技能给出**应遵循的规范**与选型表。
-**上位边界**以 [`AGENTS.md`](../../../AGENTS.md) 的模块职责、依赖规则与核心约束为准。
+**本技能不是**「innospots-nexus 仓库依赖关系实时说明书」。本仓库现状以各模块 `pom.xml`
+与 `mvn dependency:tree` 为准。
 
-**规范与存量：** 新模块按规范写最小依赖；存量 POM 若有多余声明，收敛须单独 PR，
-不得以存量为由在新代码中复制冗余模式（见 `dependency-conventions.md` →「规范与存量 POM」）。
+交付物见 [project-deliverables.md](references/project-deliverables.md)。
+不负责类与接口设计（`java:design`）与业务实现（`java:develop`）。
 
-不负责类与接口的设计（`java:design`），也不负责实现代码（`java:develop`）。
-**默认不新建 Maven 模块**——新业务域优先在 portal/platform 内加领域包（见 project-deliverables）。
+**外部产品 — 新建：** 先问 **仅管理 / 仅对外 / 两者**；纯对外则 **不要** console、ui。
+模块类型含 bom、core、按需 console/service/ui；**spring 或 quarkus 二选一**（须问用户）。
+**外部产品 — 已有：** 以确认过的 `<modules>` 为准，不擅自加模块。
+Nexus `portal` / `platform` 等仅为 **Maven 依赖**，不是产品 Maven 模块名。
+
+**本仓库内：** 默认不新建 Maven 模块 — 新业务域优先在 `portal` / `platform` 内加领域包。
 
 权威依赖约定见 [dependency-conventions.md](references/dependency-conventions.md)。
 
 ## AGENTS.md 前置（动工程前必读）
 
-注册新模块、改 reactor 或调整依赖方向**之前**，必须先阅读并对照
-[`AGENTS.md`](../../../AGENTS.md)：
+| 工作对象 | 必读 |
+|----------|------|
+| **外部产品仓库** | grill-me 结论 + [external-project-layout.md](references/external-project-layout.md)；在产品根 **新建/修订** `AGENTS.md`（见 [agents-template.md](../java-reference/references/agents-template.md)） |
+| **innospots-nexus 本仓库** | 根 [`AGENTS.md`](../../../AGENTS.md) 模块职责与依赖规则；改 reactor 仍须 grill-me |
 
-| 核对项 | 用途 |
-|--------|------|
-| **核心约束** | 不复制 legacy、不机械复刻 POM、保持 foundation 轻量 |
-| **模块职责** | 确认新 Maven 模块是否必要（默认在 portal/platform 内加领域包） |
-| **依赖规则** | parent/BOM 约定、传递依赖、禁止 portal↔platform、单向依赖链 |
-| **Agent 工作流** | 新建工程/模块须先 grill-me；按 AGENTS.md 技能路由表选用对应 `java:*` 技能 |
-
-POM 变更与 `<modules>` 注册须与 AGENTS.md 一致；grill-me 结论中应引用相关模块职责条目。
-新建 Maven 模块时，按 [`agents-template.md`](../java-reference/references/agents-template.md)
-在根 `AGENTS.md` **增补**模块职责与依赖规则；交付后交 `java:check` 做 AGENTS 合规检查。
-若 grill-me 结论与 AGENTS.md 冲突，须开发者显式确认例外后再改 POM。
+POM 变更须与对应 AGENTS 一致；交付后交 `java:check` 做合规检查。
 
 ## grill-me（结构变更前，必经）
 
@@ -112,7 +112,13 @@ npx skills use "https://github.com/mattpocock/skills" --skill "grill-me"
 完整说明、正反例与 Spring/Quarkus 组装见
 [dependency-conventions.md](references/dependency-conventions.md)。
 
-## 库模块分层（职责边界，非 POM 复制清单）
+## 库模块分层（两套视图）
+
+**外部产品工程：** 以产品**已有** `<modules>` 为准；仅在各模块 POM 上挂
+`innospots-nexus-parent`、BOM 与 Nexus **库依赖**（不新增模块对齐 Nexus）。
+见 [external-project-layout.md](references/external-project-layout.md)。
+
+**Nexus 平台库**（本仓库 `innospots-nexus-*`）：
 
 ```text
 innospots-nexus-bom / innospots-nexus-parent
@@ -123,7 +129,7 @@ base → core → plugin → console → portal
 innospots-nexus-spring / innospots-nexus-quarkus
 ```
 
-模块职责边界见 `AGENTS.md` 与 [module-layout.md](references/module-layout.md)。
+见根 `AGENTS.md` 与 [module-layout.md](references/module-layout.md)。
 
 ## 新建模块流程
 
@@ -136,7 +142,7 @@ innospots-nexus-spring / innospots-nexus-quarkus
 5. 配置 `<parent>`（见下表）；POM 模板见 [build-config.md](references/build-config.md)。
 6. 按 [dependency-conventions.md](references/dependency-conventions.md) 只声明**最小**直接依赖，不写 `<version>`。
 7. 若新模块要被其他模块依赖，在 **`innospots-nexus-bom`** 的 `dependencyManagement` 中登记。
-8. 建 `src/main/java`、`src/test/java` 与**包根 only** `com.innospots.nexus.<module>`（不预建领域子包）。
+8. 建 `src/main/java`、`src/test/java` 与**包根 only**（外部产品：`com.<vendor>.<product>.<module>`；本仓库：`com.innospots.nexus.<module>`，不预建领域子包）。
 9. `mvn validate` → `mvn -pl <module> -am clean compile` → `mvn -q help:effective-pom` → `dependency:tree`。
 10. 按 [agents-template.md](../java-reference/references/agents-template.md) **增补根 `AGENTS.md`**（模块职责 + 依赖规则）。
 11. 交 **`java:design`**（领域包与契约），再 `java:develop` → **`java:check`**（含 AGENTS 合规）。
@@ -178,5 +184,6 @@ mvn versions:display-dependency-updates   # 依赖升级候选（需人工评估
 - [project-deliverables.md](references/project-deliverables.md) — 交付物、模块类型、流程、清单
 - [dependency-conventions.md](references/dependency-conventions.md) — 依赖引用、可运行应用组装
 - [build-config.md](references/build-config.md) — parent/BOM/插件、POM 模板、排错
-- [module-layout.md](references/module-layout.md) — 模块职责与包结构
+- [external-project-layout.md](references/external-project-layout.md) — **外部产品**模块职责与 reactor
+- [module-layout.md](references/module-layout.md) — **innospots-nexus 平台库**模块职责
 - [agents-template.md](../java-reference/references/agents-template.md) — 新建模块时根 AGENTS.md 增补片段

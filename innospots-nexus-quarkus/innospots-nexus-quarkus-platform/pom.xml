@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.innospots</groupId>
+        <artifactId>innospots-nexus-quarkus</artifactId>
+        <version>${revision}</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>innospots-nexus-quarkus-platform</artifactId>
+    <packaging>jar</packaging>
+
+    <name>innospots-nexus-quarkus-platform</name>
+    <description>innospots-nexus platform 运维域 Quarkus 装配库（依赖 quarkus-console，不含 portal）。</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.innospots</groupId>
+            <artifactId>innospots-nexus-quarkus-console</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.innospots</groupId>
+            <artifactId>innospots-nexus-platform</artifactId>
+        </dependency>
+    </dependencies>
+</project>

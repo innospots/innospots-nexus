@@ -67,13 +67,11 @@ class DictionaryEndpointContractsTest {
                 "typeCode", "typeName", "securityRealm", "sortOrder");
         assertRecordComponents(DictionaryTypeUpdateRequest.class, "typeName", "sortOrder");
         assertRecordComponents(DictionaryTypeStatusUpdateRequest.class, "status");
-        assertRecordComponents(DictionaryTypePageRequest.class,
-                "input", "status", "builtIn", "pageNo", "pageSize");
+        assertThat(DictionaryTypePageRequest.class.isRecord()).isFalse();
         assertRecordComponents(DictionaryItemCreateRequest.class, "itemValue", "itemName", "sortOrder");
         assertRecordComponents(DictionaryItemUpdateRequest.class, "itemName", "sortOrder");
         assertRecordComponents(DictionaryItemStatusUpdateRequest.class, "status");
-        assertRecordComponents(DictionaryItemPageRequest.class,
-                "input", "status", "pageNo", "pageSize");
+        assertThat(DictionaryItemPageRequest.class.isRecord()).isFalse();
         assertThat(DictionaryTypeVo.class.isRecord()).isTrue();
         assertThat(DictionaryTypeOptionVo.class.isRecord()).isTrue();
         assertThat(DictionaryItemVo.class.isRecord()).isTrue();

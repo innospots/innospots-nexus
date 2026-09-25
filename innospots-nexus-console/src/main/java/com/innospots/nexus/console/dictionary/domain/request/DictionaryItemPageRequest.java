@@ -4,37 +4,45 @@ import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.QueryParam;
 
 import com.innospots.nexus.base.domain.enums.BasicStatus;
-import com.innospots.nexus.base.domain.request.SimpleQueryRequest;
+import com.innospots.nexus.base.domain.request.Pagination;
 
 /**
  * 由管理控制台查询参数绑定的分页字典项查询。
  *
- * @author Smars
- * @date 2026/09/13
- * @param input    字典项名称或值的模糊匹配
- * @param status   可选 生命周期状态
- * @param pageNo   从 1 开始的页码
- * @param pageSize 分页大小
+ * <p>使用 Bean 类而非 record，以兼容 Quarkus REST 对 {@code @BeanParam} 的注入代码生成。</p>
  */
-public record DictionaryItemPageRequest(
-        @QueryParam("input") String input,
-        @QueryParam("status") BasicStatus status,
-        @DefaultValue("1") @QueryParam("pageNo") long pageNo,
-        @DefaultValue("20") @QueryParam("pageSize") long pageSize
-) {
+public final class DictionaryItemPageRequest {
 
-    public DictionaryItemPageRequest {
-        if (pageNo < 1) {
-            pageNo = SimpleQueryRequest.DEFAULT_PAGE_NO;
-        }
-        if (pageSize < 1) {
-            pageSize = SimpleQueryRequest.DEFAULT_PAGE_SIZE;
-        }
-    }
+    @QueryParam("input")
+    private String input;
+
+    @QueryParam("status")
+    private BasicStatus status;
+
+    @DefaultValue("1")
+    @QueryParam("pageNo")
+    private long pageNo;
+
+    @DefaultValue("20")
+    @QueryParam("pageSize")
+    private long pageSize;
 
     public DictionaryItemPageRequest() {
-        this(null, null,
-                SimpleQueryRequest.DEFAULT_PAGE_NO,
-                SimpleQueryRequest.DEFAULT_PAGE_SIZE);
+    }
+
+    public String input() {
+        return input;
+    }
+
+    public BasicStatus status() {
+        return status;
+    }
+
+    public long pageNo() {
+        return Pagination.normalizePageNo(pageNo);
+    }
+
+    public long pageSize() {
+        return Pagination.normalizePageSize(pageSize);
     }
 }

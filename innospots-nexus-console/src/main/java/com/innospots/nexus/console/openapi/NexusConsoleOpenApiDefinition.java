@@ -1,8 +1,5 @@
 package com.innospots.nexus.console.openapi;
 
-import jakarta.ws.rs.ApplicationPath;
-import jakarta.ws.rs.core.Application;
-
 import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition;
 import org.eclipse.microprofile.openapi.annotations.enums.SecuritySchemeType;
 import org.eclipse.microprofile.openapi.annotations.info.Contact;
@@ -13,9 +10,8 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import com.innospots.nexus.core.openapi.NexusOpenApiSecurityNames;
 
 /**
- * 控制台 OpenAPI 全局元数据与 JAX-RS 应用锚点（仅用于构建期扫描）。
+ * 控制台 OpenAPI 全局元数据（构建期扫描；非 JAX-RS {@code Application}，以便与 portal/platform 共宿主）。
  */
-@ApplicationPath("/")
 @OpenAPIDefinition(
         info = @Info(
                 title = "Innospots Nexus Console API",
@@ -40,5 +36,7 @@ import com.innospots.nexus.core.openapi.NexusOpenApiSecurityNames;
         bearerFormat = "JWT",
         description = "紧凑访问令牌（IDENTITY 或 BUSINESS）"
 )
-public class NexusConsoleOpenApiDefinition extends Application {
+public final class NexusConsoleOpenApiDefinition {
+    private NexusConsoleOpenApiDefinition() {
+    }
 }

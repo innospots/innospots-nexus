@@ -15,6 +15,17 @@
 - 模块 API 参考文档仅在开发者明确要求模块或项目目录扫描时生成或刷新。
   该操作必须整体更新所选文档集，而不是随单个代码变更增量更新。
 
+## 文档与技能范围
+
+| 对象 | 模块职责与工程结构以谁为准 |
+|------|---------------------------|
+| **本仓库** `innospots-nexus-*` 平台库 | 下文 **模块职责**、[module-layout.md](skills/java/java-project/references/module-layout.md) |
+| **仓库外产品工程**（模块结构**已由产品方确认**，如 `nexmux`） | [`java:project`](skills/java/java-project/SKILL.md) → [external-project-layout.md](skills/java/java-project/references/external-project-layout.md) |
+
+外部产品：**新建**前先问仅管理平台、仅对外接口或两者；**仅对外**时不要 console、ui。
+必有 bom、core；按需 console/service/ui；**spring 与 quarkus 二选一**（须问用户）。
+**已有** reactor 不得擅自加模块。Nexus portal/platform 等仅为**依赖**，非产品 Maven 模块名。
+
 ## Agent 工作流
 
 ### grill-me（方案压力测试，优先）
@@ -49,7 +60,8 @@ npx skills use "https://github.com/mattpocock/skills" --skill "grill-me"
 | 场景 | 技能 | 何时用 |
 |------|------|--------|
 | 查规范、问约定、不确定走哪条路 | `java:reference` | 只读、不产出代码；规范路由中枢 |
-| 新建/调整 Maven 模块、POM、构建 | `java:project` | 动**工程骨架**；须对照下文模块职责与依赖规则 |
+| 新建/调整**外部产品** Maven 工程、POM、构建 | `java:project` | 仓库外 `*-console`/`*-service` 等；见 external-project-layout |
+| 调整**本仓库** reactor / 平台库 POM | `java:project`（parent/BOM 约定）+ 下文模块职责 | 不套用外部 `{product}-*` 模块命名 |
 | 架构/模块/接口/契约/技术方案设计 | `java:design` | 动**设计决策**；须对照下文模块边界 |
 | 写功能、改功能、修 Bug、重构、单测 | `java:develop` | 动**实现与配套测试** |
 | 编译、跑测试、规范/质量/依赖/安全检查 | `java:check` | **验证**动作 |
@@ -119,8 +131,9 @@ grill-me  →  java:project（需新建/改模块时）  →  java:design  →  
   core 文件元数据集成属于 assembly 边界。
 - 拥有技术 audit events/output 集成，而非业务 audit 存储
   或查询（仍归 portal/platform）。
-- Spring 与 Quarkus bindings 归属各自 framework aggregator 下的
-  innospots-nexus-spring-service、innospots-nexus-spring-core 与 innospots-nexus-quarkus-service。
+- Spring 与 Quarkus bindings 归属各自 framework aggregator（`innospots-nexus-spring` /
+  `innospots-nexus-quarkus`）下的 core、service、app、console、portal、platform 子模块；
+  `portal` 与 `platform` 均依赖 console，且不得相互依赖。
 - 中立库直接继承 innospots-nexus-parent；service POM
   是 aggregator，不是它们的 build parent。
 

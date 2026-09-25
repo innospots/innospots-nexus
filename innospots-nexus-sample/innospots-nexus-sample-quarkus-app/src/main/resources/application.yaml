@@ -1,0 +1,78 @@
+quarkus:
+  application:
+    name: nexus-app
+  http:
+    port: 8080
+  log:
+    level: INFO
+    category:
+      "com.innospots.nexus":
+        level: INFO
+      "org.apache.ibatis":
+        level: INFO
+      "com.baomidou.mybatisplus":
+        level: INFO
+      "io.quarkus":
+        level: INFO
+    console:
+      enable: true
+      format: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5p [%c{2.}] (%t) %s%e%n"
+    file:
+      enable: true
+      path: logs/nexus-app.log
+      format: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5p [%c{2.}] (%t) %s%e%n"
+      rotation:
+        max-file-size: 100M
+        max-backup-index: 100
+  datasource:
+    db-kind: h2
+    username: sa
+    password: ""
+    jdbc:
+      url: jdbc:h2:mem:nexus;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
+    devservices:
+      enabled: false
+  index-dependency:
+    nexus-core:
+      group-id: com.innospots
+      artifact-id: innospots-nexus-core
+    nexus-plugin:
+      group-id: com.innospots
+      artifact-id: innospots-nexus-plugin
+  mybatis:
+    initial-sql: nexus/schema/plugin-installation-h2.sql,nexus/schema/console-catalog-h2.sql
+    map-underscore-to-camel-case: true
+  mybatis-plus:
+    global-config:
+      meta-object-handler: com.innospots.nexus.core.persistence.handler.AuditMetaObjectHandler
+      db-config:
+        id-type: ASSIGN_UUID
+
+# ---------------------------------------------------------------------------
+# Nexus 插件宿主策略（应用服务默认骨架，无控制台内置 required 列表）
+#
+# 绑定类: com.innospots.nexus.quarkus.plugin.config.NexusPluginHostConfig
+# 装配类:
+#   - PluginRuntimeConfigFactory     → PluginRuntimeConfig（启停策略）
+#   - PluginHostStartupTaskProducer  → PluginInstallationConfig（安装策略）
+# ---------------------------------------------------------------------------
+nexus:
+  plugin:
+    # nexus.plugin.auto-install
+    # 含义: classpath 首次发现插件时，是否自动写入 nx_plugin_installation 并期望启用。
+    # 默认: true（PluginHostProperties / NexusPluginHostConfig）
+    auto-install: true
+
+  plugins:
+    # nexus.plugins.required
+    # 含义: 启动后必须 ACTIVE 的插件 ID；未满足则宿主启动失败。
+    # required: []
+
+    # nexus.plugins.disabled
+    # 含义: 永不自动启动的插件 ID；与 required 不能重叠。
+    # disabled: []
+
+# plugins.<pluginId>.<key>
+# 含义: 单个插件实例的运行参数，由 PluginHostConfigBinder 汇总进 hostConfig。
+# 示例:
+# plugins.com.example.message-wecom.corp-id=ww-demo

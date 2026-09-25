@@ -1,9 +1,11 @@
-# 模块结构与职责边界
+# innospots-nexus 平台库模块结构与职责
 
-> 本文档说明**模块职责与包结构约定**，供新建/调整工程时选型。
-> **工程交付物、新建 Maven 模块流程与清单**见 [project-deliverables.md](project-deliverables.md)。
-> Maven 依赖应引哪个 artifact、如何最小声明，见
-> [dependency-conventions.md](dependency-conventions.md)。
+> **适用范围：** **本仓库**内的 `innospots-nexus-*` 平台库（base、core、console、portal 等）。
+> **外部产品工程**（`{product}-console` / `{product}-service` / …）见
+> [external-project-layout.md](external-project-layout.md)。
+>
+> 工程交付物与流程见 [project-deliverables.md](project-deliverables.md)。
+> Maven 依赖选型见 [dependency-conventions.md](dependency-conventions.md)。
 
 ## 分层全景
 
@@ -18,11 +20,9 @@ innospots-nexus (root, packaging=pom)
 ├── innospots-nexus-portal           租户侧管理业务（业务类管理端）
 ├── innospots-nexus-platform         运营域平台（系统运营类）
 ├── innospots-nexus-spring           Spring Boot 运行时聚合
-│   ├── innospots-nexus-spring-app
-│   └── innospots-nexus-spring-console
+│   ├── innospots-nexus-spring-core / -service / -app / -console / -portal / -platform
 └── innospots-nexus-quarkus          Quarkus 运行时聚合
-    ├── innospots-nexus-quarkus-app
-    └── innospots-nexus-quarkus-console
+    ├── innospots-nexus-quarkus-core / -service / -app / -console / -portal / -platform
 ```
 
 库模块依赖方向严格单向：
@@ -161,8 +161,12 @@ base  →  core  →  plugin  →  console  →  portal
 
 | 子模块 | 用途 |
 |--------|------|
-| `innospots-nexus-quarkus-app` | Quarkus 基础设施组装 |
-| `innospots-nexus-quarkus-console` | 可运行的管理端 Quarkus 应用 |
+| `innospots-nexus-quarkus-core` | 宿主引导、插件宿主（对齐 spring-core） |
+| `innospots-nexus-quarkus-service` | service 框架 Quarkus adapter |
+| `innospots-nexus-quarkus-app` | 应用服务装配库（core + service） |
+| `innospots-nexus-quarkus-console` | 管理控制台装配库（core + console） |
+| `innospots-nexus-quarkus-portal` | portal 域装配（console + portal） |
+| `innospots-nexus-quarkus-platform` | platform 域装配（console + platform） |
 
 新建 Quarkus 服务时引用此聚合下的子模块，不要在中立库模块中绑定 Quarkus 扩展。
 

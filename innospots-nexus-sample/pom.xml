@@ -15,7 +15,7 @@
     <packaging>pom</packaging>
 
     <name>innospots-nexus-sample</name>
-    <description>可运行的 Spring 示例服务（不参与制品发布）。</description>
+    <description>可运行的 Spring / Quarkus 示例服务（不参与制品发布）。</description>
 
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>
@@ -67,7 +67,10 @@
 
     <modules>
         <module>innospots-nexus-sample-spring-app</module>
-        <module>innospots-nexus-sample-spring-tenant</module>
+        <module>innospots-nexus-sample-spring-portal</module>
         <module>innospots-nexus-sample-spring-platform</module>
+        <module>innospots-nexus-sample-quarkus-app</module>
+        <module>innospots-nexus-sample-quarkus-portal</module>
+        <module>innospots-nexus-sample-quarkus-platform</module>
     </modules>
 </project>

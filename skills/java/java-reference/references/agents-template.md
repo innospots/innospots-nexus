@@ -46,10 +46,33 @@ grill-me  →  核对根 AGENTS.md  →  java:project（动 POM）  →  java:de
 
 ---
 
+## 外部产品工程模块职责（模板片段）
+
+在**仓库外**、**reactor 已确认**的产品根 `AGENTS.md` 中，只描述**已有**模块职责与 Nexus
+**依赖挂接**（勿按 Nexus 拓扑新增模块）。语义参考见
+[java:project → external-project-layout.md](../../java-project/references/external-project-layout.md)：
+
+| 模块（新建工程标准集） | 职责摘要 |
+|----------------------|---------|
+| `{{product}}-bom` | import `innospots-nexus-bom` |
+| `{{product}}-core` | 产品共享领域库 |
+| `{{product}}-console` | **有管理平台时**；依赖 `innospots-nexus-console` 等 |
+| `{{product}}-service` | **有对外接口时**；依赖 `innospots-nexus-service-*` 等 |
+| `{{product}}-ui` | **有管理台且要前端时**；纯对外服务 **不要** ui |
+| `{{product}}-spring` **或** `{{product}}-quarkus` | 运行时聚合，**二选一** |
+
+**新建前必问：** 仅管理 / 仅对外 / 两者；运行框架 Spring 或 Quarkus。  
+**禁止：** 纯对外仍建 console/ui；同时建 spring 与 quarkus；`{product}-portal` 等产品侧 Nexus 同名模块。
+
+**parent：** 一级 Java 模块继承 `innospots-nexus-parent`。
+
+---
+
 ## 仓库根模板（新建独立仓库时使用）
 
 将 `{{...}}` 替换为实际值。若仓库是 **innospots-nexus 子集或 fork**，优先**修订现有根
-`AGENTS.md` 而非另起文件。
+`AGENTS.md` 而非另起文件。若为**外部产品工程**，须包含上表模块职责并链接
+`external-project-layout.md`。
 
 ```markdown
 # Agent 操作指南

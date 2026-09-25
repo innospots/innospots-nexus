@@ -15,20 +15,16 @@
     <packaging>jar</packaging>
 
     <name>innospots-nexus-quarkus-console</name>
-    <description>innospots-nexus 的 Quarkus 管理控制台组装。</description>
+    <description>innospots-nexus 管理控制台 Quarkus 装配库（无独立 main，由外部应用引用）。</description>
 
     <dependencies>
         <dependency>
             <groupId>com.innospots</groupId>
-            <artifactId>innospots-nexus-quarkus-app</artifactId>
+            <artifactId>innospots-nexus-quarkus-core</artifactId>
         </dependency>
         <dependency>
             <groupId>com.innospots</groupId>
             <artifactId>innospots-nexus-console</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.innospots</groupId>
-            <artifactId>innospots-nexus-portal</artifactId>
         </dependency>
     </dependencies>
 </project>

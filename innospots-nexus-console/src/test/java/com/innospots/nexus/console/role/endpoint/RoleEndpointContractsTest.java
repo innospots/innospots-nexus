@@ -62,10 +62,8 @@ class RoleEndpointContractsTest {
         assertRecordComponents(RoleUpdateRequest.class,
                 "roleName", "description", "sortOrder");
         assertRecordComponents(RoleStatusUpdateRequest.class, "status");
-        assertRecordComponents(RolePageRequest.class,
-                "input", "status", "builtIn", "pageNo", "pageSize");
-        assertRecordComponents(RoleBindingPageRequest.class,
-                "input", "subjectType", "pageNo", "pageSize");
+        assertThat(RolePageRequest.class.isRecord()).isFalse();
+        assertThat(RoleBindingPageRequest.class.isRecord()).isFalse();
         assertRecordComponents(RoleBindingAddRequest.class, "subjectType", "subjectIds");
 
         assertThat(RoleVo.class.isRecord()).isTrue();

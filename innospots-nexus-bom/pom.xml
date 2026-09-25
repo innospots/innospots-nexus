@@ -136,12 +136,27 @@
             </dependency>
             <dependency>
                 <groupId>com.innospots</groupId>
+                <artifactId>innospots-nexus-quarkus-core</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.innospots</groupId>
                 <artifactId>innospots-nexus-quarkus-app</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.innospots</groupId>
                 <artifactId>innospots-nexus-quarkus-console</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.innospots</groupId>
+                <artifactId>innospots-nexus-quarkus-portal</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.innospots</groupId>
+                <artifactId>innospots-nexus-quarkus-platform</artifactId>
                 <version>${revision}</version>
             </dependency>
 
@@ -198,11 +213,6 @@
             <dependency>
                 <groupId>com.innospots</groupId>
                 <artifactId>innospots-nexus-quarkus-service</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.innospots</groupId>
-                <artifactId>innospots-nexus-quarkus-service-deployment</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
@@ -393,4 +403,13 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 </project>
