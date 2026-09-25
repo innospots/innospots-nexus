@@ -72,6 +72,10 @@
                             <scanDependenciesDisable>false</scanDependenciesDisable>
                             <openApiVersion>3.1.0</openApiVersion>
                             <operationIdStrategy>CLASS_METHOD</operationIdStrategy>
+                            <infoTitle>Innospots Nexus Console API</infoTitle>
+                            <infoVersion>1.0.0</infoVersion>
+                            <infoDescription>管理控制台 Jakarta REST 契约；运行时仅暴露构建期生成的 OpenAPI。</infoDescription>
+                            <infoContactName>Innospots Nexus</infoContactName>
                         </configuration>
                     </execution>
                 </executions>

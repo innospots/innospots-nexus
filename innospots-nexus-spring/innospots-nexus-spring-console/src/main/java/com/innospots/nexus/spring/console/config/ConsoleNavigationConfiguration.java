@@ -10,7 +10,11 @@ import com.innospots.nexus.console.permission.authorization.AuthorizationSubject
 import com.innospots.nexus.console.permission.service.PermissionVisibilityService;
 
 /**
- * {@code console.navigation} 域 Spring 装配。
+ * {@code console.navigation} 域 Spring 装配：按权限裁剪的导航菜单 REST。
+ *
+ * @author Smars
+ * @date 2026/09/23
+ * @see ConsolePermissionConfiguration
  */
 @Configuration
 public class ConsoleNavigationConfiguration {

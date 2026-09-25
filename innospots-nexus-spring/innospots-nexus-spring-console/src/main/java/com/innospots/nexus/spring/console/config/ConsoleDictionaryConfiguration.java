@@ -16,7 +16,10 @@ import com.innospots.nexus.console.dictionary.operator.DictionaryTypeOperator;
 import com.innospots.nexus.console.dictionary.service.DictionaryService;
 
 /**
- * {@code console.dictionary} 域 Spring 装配。
+ * {@code console.dictionary} 域 Spring 装配：字典类型与字典项 REST。
+ *
+ * @author Smars
+ * @date 2026/09/23
  */
 @Configuration
 @MapperScan(

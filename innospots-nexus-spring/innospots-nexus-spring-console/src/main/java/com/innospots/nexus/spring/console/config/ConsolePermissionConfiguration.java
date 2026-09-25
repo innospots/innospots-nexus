@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Lazy;
 
 import com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubjectResolver;
+import com.innospots.nexus.console.permission.authorization.RequestAuthorizer;
 import com.innospots.nexus.console.permission.authorization.SessionAuthorizationSubjectResolver;
 import com.innospots.nexus.console.permission.dao.PermissionGrantDao;
 import com.innospots.nexus.console.permission.endpoint.CurrentAuthorizationEndpoint;
@@ -19,7 +20,11 @@ import com.innospots.nexus.console.role.dao.RoleBindingDao;
 import com.innospots.nexus.console.role.dao.RoleDao;
 
 /**
- * {@code console.permission} 域 Spring 装配。
+ * {@code console.permission} 域 Spring 装配：授权主体解析、请求鉴权与授权管理 REST。
+ *
+ * @author Smars
+ * @date 2026/09/23
+ * @see RequestAuthorizer
  */
 @Configuration
 @MapperScan(
@@ -53,6 +58,13 @@ public class ConsolePermissionConfiguration {
             RoleBindingDao roleBindingDao,
             RoleDao roleDao) {
         return new SessionAuthorizationSubjectResolver(roleBindingDao, roleDao);
+    }
+
+    @Bean
+    RequestAuthorizer requestAuthorizer(
+            ConsoleCatalogResourceDao resourceDao,
+            PermissionGrantDao grantDao) {
+        return new RequestAuthorizer(resourceDao, grantDao);
     }
 
     @Bean

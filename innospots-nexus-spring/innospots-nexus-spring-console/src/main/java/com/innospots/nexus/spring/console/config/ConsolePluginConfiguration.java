@@ -20,7 +20,10 @@ import com.innospots.nexus.core.plugin.contribution.console.ReservedPluginResour
 import com.innospots.nexus.spring.core.plugin.PluginInstallationManagerHolder;
 
 /**
- * {@code console.plugin} 域 Spring 装配（Contribution 与插件管理 REST）。
+ * {@code console.plugin} 域 Spring 装配：Contribution 编解码与插件管理 REST。
+ *
+ * @author Smars
+ * @date 2026/09/23
  */
 @Configuration
 public class ConsolePluginConfiguration {
@@ -64,7 +67,7 @@ public class ConsolePluginConfiguration {
             PluginInstallationManagerHolder managerHolder,
             ConsoleCatalogSyncService syncService) {
         return new PluginManagementEndpoint(
-                managerHolder.requireManager(),
+                managerHolder::requireManager,
                 PluginManagementConverter.INSTANCE,
                 syncService);
     }

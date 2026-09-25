@@ -1,0 +1,38 @@
+# ---------------------------------------------------------------------------
+# 控制台 Jersey Web 横切（鉴权 Filter、CORS、异常映射、RequestId）
+#
+# 绑定: com.innospots.nexus.spring.console.config.ConsoleWebProperties
+# 装配: ConsoleJaxRsWebConfiguration
+#
+# 与 spring.jersey.type=filter 配合；关闭 enabled 时不注册过滤器与 ExceptionMapper。
+# ---------------------------------------------------------------------------
+nexus:
+  console:
+    web:
+      # 是否启用 Web 横切；默认 true（与 @ConditionalOnProperty matchIfMissing 一致）
+      enabled: true
+      security:
+        # 免 Bearer 鉴权路径（Ant 风格）；省略时使用 ConsoleWebProperties 内置默认列表
+        # permit-all-patterns:
+        #   - /openapi/**
+        #   - /auth/**
+        #   - /tenant/auth/**
+        #   - /platform/auth/**
+        #   - /health
+        #   - /actuator/health/**
+        # datasource 代理鉴权路径；默认 /console/datasource/**
+        # datasource-path-patterns:
+        #   - /console/datasource/**
+        # catalog 页面键请求头；默认 X-Nexus-Page-Key
+        page-key-header: X-Nexus-Page-Key
+      cors:
+        # 是否输出 CORS 响应头；默认 false
+        enabled: false
+        # allowed-origins:
+        #   - "*"
+        # allowed-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD
+        # allowed-headers:
+        #   - "*"
+        # exposed-headers: []
+        # allow-credentials: false
+        # max-age-seconds: 3600

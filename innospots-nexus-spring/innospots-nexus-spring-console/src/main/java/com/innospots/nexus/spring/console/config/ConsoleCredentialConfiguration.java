@@ -27,7 +27,11 @@ import com.innospots.nexus.console.credential.totp.service.DefaultTotpEnrollment
 import com.innospots.nexus.console.credential.totp.service.TotpEnrollmentService;
 
 /**
- * {@code console.credential} 域装配。
+ * {@code console.credential} 域装配：密码、OTP/TOTP 与登录锁定策略。
+ *
+ * @author Smars
+ * @date 2026/09/23
+ * @see ConsoleCredentialTotpProperties
  */
 @Configuration
 @EnableConfigurationProperties(ConsoleCredentialTotpProperties.class)

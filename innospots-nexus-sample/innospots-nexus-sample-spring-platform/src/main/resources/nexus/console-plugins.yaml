@@ -1,0 +1,31 @@
+# ---------------------------------------------------------------------------
+# Nexus 插件宿主与控制台必选插件（示例宿主）
+#
+# 绑定: com.innospots.nexus.spring.core.plugin.PluginHostProperties 等
+# 装配: PluginHostConfiguration、NexusStartupConfiguration
+#
+# workspace 隔离不由本文件配置；鉴权 Filter 写入 TLC.workspaceId() 后用于授权与导航裁剪。
+# 目录索引（nx_console_catalog_resource）为宿主全局，不按 workspace 分表。
+# ---------------------------------------------------------------------------
+nexus:
+  plugin:
+    # classpath 首次发现插件时是否自动写入 nx_plugin_installation；默认 true
+    auto-install: true
+
+  plugins:
+    # 启动后必须处于 ACTIVE 的插件 ID；与 disabled 不能重叠
+    required:
+      - com.innospots.nexus.console.menu
+      - com.innospots.nexus.console.dictionary
+      - com.innospots.nexus.console.logger
+      - com.innospots.nexus.console.permission
+      - com.innospots.nexus.console.role
+      - com.innospots.nexus.console.plugin-management
+
+    # 永不自动启动的插件 ID
+    # disabled: []
+
+# 单插件运行参数示例（由 PluginHostConfigBinder 汇总）:
+# plugins:
+#   com.example.message-wecom:
+#     corpId: ww-demo

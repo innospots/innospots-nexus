@@ -13,6 +13,7 @@ import com.innospots.nexus.spring.console.config.ConsoleCatalogConfiguration;
 import com.innospots.nexus.spring.console.config.ConsoleCredentialConfiguration;
 import com.innospots.nexus.spring.console.config.ConsoleDictionaryConfiguration;
 import com.innospots.nexus.spring.console.config.ConsoleLoggerConfiguration;
+import com.innospots.nexus.spring.console.config.ConsoleJaxRsWebConfiguration;
 import com.innospots.nexus.spring.console.config.ConsoleOpenApiConfiguration;
 import com.innospots.nexus.spring.console.jaxrs.NexusJaxRsConfiguration;
 import com.innospots.nexus.spring.console.jaxrs.NexusScalarJerseyConfiguration;
@@ -47,6 +48,7 @@ import com.innospots.nexus.spring.core.plugin.EnableNexusPluginHost;
         ConsoleDictionaryConfiguration.class,
         ConsoleLoggerConfiguration.class,
         ConsoleOpenApiConfiguration.class,
+        ConsoleJaxRsWebConfiguration.class,
         NexusJaxRsConfiguration.class,
         NexusScalarJerseyConfiguration.class
 })

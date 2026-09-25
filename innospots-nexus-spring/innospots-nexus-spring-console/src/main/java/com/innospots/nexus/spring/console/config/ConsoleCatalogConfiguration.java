@@ -19,7 +19,10 @@ import com.innospots.nexus.core.plugin.contribution.console.ui.spec.loader.PageD
 import com.innospots.nexus.core.plugin.contribution.console.ui.spec.parser.JacksonPageDslParser;
 
 /**
- * {@code console.catalog} 域 Spring 装配。
+ * {@code console.catalog} 域 Spring 装配：插件贡献目录索引与 Page DSL 加载。
+ *
+ * @author Smars
+ * @date 2026/09/23
  */
 @Configuration
 @MapperScan(

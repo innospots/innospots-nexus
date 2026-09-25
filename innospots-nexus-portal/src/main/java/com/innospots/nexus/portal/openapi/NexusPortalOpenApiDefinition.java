@@ -1,5 +1,7 @@
 package com.innospots.nexus.portal.openapi;
 
+import jakarta.ws.rs.Path;
+
 import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition;
 import org.eclipse.microprofile.openapi.annotations.enums.SecuritySchemeType;
 import org.eclipse.microprofile.openapi.annotations.info.Contact;
@@ -11,7 +13,9 @@ import com.innospots.nexus.core.openapi.NexusOpenApiSecurityNames;
 
 /**
  * Portal OpenAPI 全局元数据（构建期扫描；非 JAX-RS {@code Application}，以便与 console 共宿主）。
+ * <p>带 {@link Path} 以便 SmallRye JAX-RS 扫描器拾取 {@link OpenAPIDefinition}，运行时不暴露端点。</p>
  */
+@Path("/tenant")
 @OpenAPIDefinition(
         info = @Info(
                 title = "Innospots Nexus Portal API",

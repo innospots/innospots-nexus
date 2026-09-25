@@ -1,0 +1,26 @@
+# ---------------------------------------------------------------------------
+# 控制台认证（示例值；生产请更换密钥）
+#
+# 绑定: com.innospots.nexus.spring.console.config.ConsoleAuthProperties
+# 装配: ConsoleAuthConfiguration → com.innospots.nexus.console.config.AuthConfig
+# ---------------------------------------------------------------------------
+nexus:
+  console:
+    auth:
+      # 紧凑令牌 AES 密钥；未配置时使用 AuthConfig.DEFAULT_TOKEN_SECRET
+      token-secret: "0123456789abcdef"
+      # 访问令牌有效期（秒）；默认 7200
+      access-token-ttl-seconds: 7200
+      # 刷新令牌有效期（秒）；默认 604800
+      refresh-token-ttl-seconds: 604800
+      # 租户域登录是否要求图形验证码；默认 true
+      tenant-login-captcha-enabled: true
+      # 平台域登录是否要求图形验证码；默认 true
+      platform-login-captcha-enabled: false
+      # 连续登录失败锁定阈值；默认 5
+      login-max-failed-attempts: 5
+      # 登录锁定时长（分钟）；默认 15
+      login-lock-minutes: 15
+      rsa:
+        # PEM 或 Base64 RSA 私钥；配置后启用登录密码 RSA 解密（PasswordDecryptor）
+        private-key: MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCtwgwE8LlWbM8Cis4wr9HA6F/s7OYN/mjGIGGurviLTXzQEoJzPu3U+G6XeMwzWzRBX82Aizf5eQKg6I2ytP4VtpkMtcq6wjztks1pqBpBCwfdKrrjp08DpugTlV8bSjgNoyI7Dzu4cmavRotY3u6wHv2rUKmnOEoWisQ4H2y4FjKq3ZCHGHVv31SoUSI82vFmb3T+WOV/1nsmiS/QFA/PbWtXIQUxbmmfBoXOr/01MhCb5QmKcQFobjQ49H2a7S2yawdUICb3BRtuq3n+hErsoKfPeMqjlepBborfy0c2MaHw1tXrxMw1MvuTS/CWwiTffXn+bIRA+AhRJpm3O7PvAgMBAAECggEACbUQPCvBWaAKkKHLPdJqGCo4nGE/w621khwNA61SxWA224kChghl+8KaqxZckiHuRsNgv7sHYttCglV7qm2Mzw8Rzdv6JM+P3StDvpCy/B9ETomB7LtUIWgZtGkL6de4+fS7MiwlB1DyMP3ymwHEDqLXQ9Ll0inFjyzWztaH7wt23PO64MJNVFHQ/BhRLYqwDdQj+p7wvPAG0y5PHKL0Y4DexM9aUhK3rOxaHQ8yZt8bHl40iXU18yKr2KKbU+rRj6QVoMpMSpM1ZEP6vXC6rFPHqPFi/uxdS9cdWnMlgzx3VD1oc51HRxxuvTCZ2yqbunURncJs7I5IFAOIt9APgQKBgQDWNhkjReHWKaJsip4EGy391OLH8GzOBzKv8c7u22h+MqwEiUTw+Gd01848bd23p9EMl9chU6t0Ab0WEvMsChk49VU1J+lHj1WRZkWo6oYRaAaZHaCDbstor+PfXspXA8HaPA3jWretoEBcsK2f+z9AkddTxyeJ/X4TWuGjjRRohwKBgQDPp6ySmri2rWf6uI0V5A/wjJhL0ACNmQd4MlFOjByskcKMQcdBzdZbKoESFuT0ZNAwYb9kycLMBnBNpjTgHnmz3hDKj2mbAkpMKsuwiTdFeGdvsWYUeCUzPnK4cj0qTAdfnbTbAIW9IgULGdrK1/uarE+5ISv94J5dNxbDZuH7WQKBgFLQvW02ojYDCKl/+dFKlMBSoo579AS/IaiGCuOrbb2EZ56lV0L2NkElAbW5IAPV3GtK9MAMsfd6iJjVILBBAzlTF+siD/07e/BnorzIVqa6GfruSlUl63wArE96PS3g5PwzRYdFVkfI8bkkESwNnYmgGKhqEW4205w2AZAShfZXAoGAK1X1yN6rP8xuj79mCjR/MxdUTTYKd4KBMY9msnrBHS6KKFUt7Ui0vG/hYdIPVAWaAQ7VL4Z/ta5+T2YpUMBra6MjY/KL+oJ+2Ohxe9UXCNN42rFt+UWdldUpgd6tbx9Qxp6V+MJiJrdr0AZER+LNKlldhegrUx9GTXPKt1rIPHkCgYAYGGQohTYiH/++n5iqALeZ7Rbtq4wM7ikGiqGWuQnoqPj8yoeA6rPAZfNIceNj4zh5+r1NjrczE+A5U1XkF+RlKVaH3rKRvNplyRBaqW2K4rJOm/zIGpZs/4UoNYSMDA1qIhiG+Z8B55ygoQcztb2dvFBPicNrYkTwaPNCpWtONQ==

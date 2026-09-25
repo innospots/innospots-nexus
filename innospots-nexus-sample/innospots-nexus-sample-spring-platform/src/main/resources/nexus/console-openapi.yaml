@@ -1,0 +1,21 @@
+# ---------------------------------------------------------------------------
+# OpenAPI 文档页（Scalar）与规范目录 HTTP
+#
+# Scalar 绑定: com.scalar.maven.core.ScalarProperties（prefix scalar）
+# 装配: NexusScalarJerseyConfiguration、ConsoleOpenApiConfiguration
+#
+# 接口:
+#   GET /openapi/specs
+#   GET /openapi/specs/{specId}
+#   GET /openapi/ui（默认 path，可改 scalar.path）
+#   GET /openapi/ui/scalar.js
+# ---------------------------------------------------------------------------
+scalar:
+  # 是否启用 Scalar 文档页；默认 true
+  enabled: true
+  # 文档页路径；默认 /openapi/ui
+  path: /openapi/ui
+  page-title: Nexus API Reference
+  with-default-fonts: false
+  agent:
+    disabled: true

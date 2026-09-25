@@ -21,11 +21,13 @@ import com.innospots.nexus.console.credential.password.RsaPasswordDecryptor;
 @EnableConfigurationProperties(ConsoleAuthProperties.class)
 public class ConsoleAuthConfiguration {
 
+    /** 将 Spring 属性映射为 framework-neutral {@link AuthConfig}。 */
     @Bean
     AuthConfig authConfig(ConsoleAuthProperties authProperties) {
         return toAuthConfig(authProperties);
     }
 
+    /** 配置 RSA 私钥时启用登录密码解密。 */
     @Bean
     @ConditionalOnProperty(prefix = "nexus.console.auth.rsa", name = "private-key")
     PasswordDecryptor passwordDecryptor(ConsoleAuthProperties authProperties) {

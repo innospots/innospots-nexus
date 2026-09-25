@@ -9,8 +9,6 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.jersey.autoconfigure.ResourceConfigCustomizer;
 
-import com.innospots.nexus.console.openapi.endpoint.OpenApiCatalogEndpoint;
-
 import java.util.List;
 
 import org.springframework.context.ApplicationContext;
@@ -36,20 +34,20 @@ public class NexusJaxRsConfiguration {
     }
 
     /**
-     * 在 {@link ResourceConfig} 基础 Bean 创建之后注册带 {@link Path} 的 Spring Bean，
-     * 避免 {@code openApiCatalogEndpoint} 等尚未装配时漏注册。
+     * 在 {@link ResourceConfig} 基础 Bean 创建之后注册带 {@link Path} 的 Spring Bean 类型。
+     *
+     * <p>仅解析 Bean 定义并 {@code register(Class)}，不调用 {@code getBeansWithAnnotation}，
+     * 以免 Jersey 启动阶段提前实例化带 {@code @Lazy} 的端点（如插件管理 REST）。</p>
      */
     @Bean
-    ResourceConfigCustomizer nexusJaxRsEndpointCustomizer(
-            ApplicationContext applicationContext,
-            OpenApiCatalogEndpoint openApiCatalogEndpoint) {
+    ResourceConfigCustomizer nexusJaxRsEndpointCustomizer(ApplicationContext applicationContext) {
         return resourceConfig -> {
-            resourceConfig.register(openApiCatalogEndpoint);
             for (String beanName : applicationContext.getBeanNamesForAnnotation(Path.class)) {
-                if (applicationContext.getType(beanName) == OpenApiCatalogEndpoint.class) {
+                Class<?> beanType = applicationContext.getType(beanName);
+                if (beanType == null) {
                     continue;
                 }
-                Class<?> resourceClass = AopUtils.getTargetClass(applicationContext.getType(beanName));
+                Class<?> resourceClass = AopUtils.getTargetClass(beanType);
                 resourceConfig.register(resourceClass);
             }
         };

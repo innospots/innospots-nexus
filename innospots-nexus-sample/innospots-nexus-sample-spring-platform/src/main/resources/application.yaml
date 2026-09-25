@@ -2,9 +2,11 @@ spring:
   application:
     name: nexus-platform-console
   jersey:
+    # Jersey 以 Servlet Filter 接入，与 Spring MVC 共用同一端口
     type: filter
   config:
     import:
+      # 控制台分项配置见 classpath:nexus/console-*.yaml
       - optional:classpath:nexus/console-application.yaml
       - optional:file:./config/nexus/console-application.yaml
   datasource:
@@ -20,59 +22,3 @@ spring:
 
 server:
   port: 8082
-
-# OpenAPI（innospots-nexus-spring-console）：
-#   GET  http://localhost:8082/openapi/specs
-#   GET  http://localhost:8082/openapi/specs/{specId}
-#   文档页 http://localhost:8082/openapi/ui（scalar-core + Jersey，脚本来自 JAR）
-scalar:
-  enabled: true
-  path: /openapi/ui
-  page-title: Nexus API Reference
-  with-default-fonts: false
-  agent:
-    disabled: true
-
-# ---------------------------------------------------------------------------
-# Nexus 插件宿主与控制台策略
-#
-# 绑定类: com.innospots.nexus.spring.core.plugin.PluginHostProperties
-# 装配类:
-#   - PluginHostConfiguration      → PluginRuntimeConfig（启停策略）
-#   - NexusStartupConfiguration    → PluginInstallationConfig（安装策略）
-#
-# workspace 隔离不由本文件配置；请求进入后由鉴权 Filter 写入 TLC.workspaceId()，
-# 用于授权（nx_permission_grant）、导航裁剪等。目录索引（nx_console_catalog_resource）
-# 为宿主全局，不按 workspace 分表。
-# ---------------------------------------------------------------------------
-nexus:
-  plugin:
-    # nexus.plugin.auto-install
-    # 含义: classpath 首次发现插件时，是否自动写入 nx_plugin_installation 并期望启用。
-    # 默认: true（PluginHostProperties / NexusPluginHostConfig）
-    # 说明: 仅影响「发现 → 登记」；与 required 独立。
-    auto-install: true
-
-  plugins:
-    # nexus.plugins.required
-    # 含义: 宿主启动后这些插件必须处于 ACTIVE，否则启动失败并回滚。
-    # 装配: PluginRuntimeConfig.requiredPluginIds → DefaultPluginManager
-    # 常量: BuiltinConsoleEntryPlugins.REQUIRED_PLUGIN_IDS
-    required:
-      - com.innospots.nexus.console.menu
-      - com.innospots.nexus.console.dictionary
-      - com.innospots.nexus.console.logger
-      - com.innospots.nexus.console.permission
-      - com.innospots.nexus.console.role
-      - com.innospots.nexus.console.plugin-management
-
-    # nexus.plugins.disabled
-    # 含义: 永不自动启动的插件 ID；与 required 不能重叠。
-    # disabled: []
-
-# plugins.<pluginId>.<key>
-# 含义: 单个插件实例的运行参数，由 PluginHostConfigBinder 汇总进 PluginRuntimeConfig.hostConfig。
-# 示例:
-# plugins:
-#   com.example.message-wecom:
-#     corpId: ww-demo

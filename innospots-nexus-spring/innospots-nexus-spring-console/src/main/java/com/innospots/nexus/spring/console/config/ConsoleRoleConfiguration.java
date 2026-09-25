@@ -16,7 +16,10 @@ import com.innospots.nexus.console.role.operator.RoleOperator;
 import com.innospots.nexus.console.role.service.RoleService;
 
 /**
- * {@code console.role} 域 Spring 装配。
+ * {@code console.role} 域 Spring 装配：角色 CRUD 与绑定 REST。
+ *
+ * @author Smars
+ * @date 2026/09/23
  */
 @Configuration
 @MapperScan(

@@ -12,7 +12,10 @@ import com.innospots.nexus.console.logger.handler.PersistenceInvocationLogHandle
 import com.innospots.nexus.console.logger.operator.InvocationLogOperator;
 
 /**
- * {@code console.logger} 域 Spring 装配。
+ * {@code console.logger} 域 Spring 装配：调用审计日志持久化与异步执行器。
+ *
+ * @author Smars
+ * @date 2026/09/23
  */
 @Configuration
 @MapperScan(
