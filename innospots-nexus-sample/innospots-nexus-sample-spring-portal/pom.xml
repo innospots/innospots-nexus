@@ -30,6 +30,12 @@
     </dependencies>
 
     <build>
+        <!-- 覆盖 sample 父 POM 对 yaml/properties 的排除，Spring Boot / IDEA 需从 classpath 读取配置 -->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
