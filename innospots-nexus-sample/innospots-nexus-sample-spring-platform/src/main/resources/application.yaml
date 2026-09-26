@@ -6,9 +6,13 @@ spring:
     type: filter
   config:
     import:
-      # 控制台分项配置见 classpath:nexus/console-*.yaml
-      - optional:classpath:nexus/console-application.yaml
-      - optional:file:./config/nexus/console-application.yaml
+      # 控制台示例配置（完整分项见 classpath:nexus/console-*.yaml）
+      - optional:classpath:nexus/console-auth.yaml
+      - optional:classpath:nexus/console-credential.yaml
+      - optional:classpath:nexus/console-web.yaml
+      - optional:classpath:nexus/console-openapi.yaml
+      - optional:classpath:nexus/console-plugins.yaml
+      # 本地覆盖：可选放置同名文件，例如 optional:file:./config/nexus/console-web.yaml
   datasource:
     url: jdbc:h2:mem:nexus-platform-console;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
     driver-class-name: org.h2.Driver

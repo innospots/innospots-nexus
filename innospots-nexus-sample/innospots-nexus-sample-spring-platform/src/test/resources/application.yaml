@@ -3,7 +3,11 @@ spring:
     type: filter
   config:
     import:
-      - optional:classpath:nexus/console-application.yaml
+      - optional:classpath:nexus/console-auth.yaml
+      - optional:classpath:nexus/console-credential.yaml
+      - optional:classpath:nexus/console-web.yaml
+      - optional:classpath:nexus/console-openapi.yaml
+      - optional:classpath:nexus/console-plugins.yaml
   datasource:
     url: jdbc:h2:mem:nexus-platform-openapi-it;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
     driver-class-name: org.h2.Driver

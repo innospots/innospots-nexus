@@ -4,7 +4,8 @@
 # 绑定: com.innospots.nexus.spring.console.config.ConsoleWebProperties
 # 装配: ConsoleJaxRsWebConfiguration
 #
-# 与 spring.jersey.type=filter 配合；关闭 enabled 时不注册过滤器与 ExceptionMapper。
+# 由 application.yaml 的 spring.config.import 直接引入；与 spring.jersey.type=filter 配合。
+# 关闭 nexus.console.web.enabled 时不注册过滤器与 ExceptionMapper。
 # ---------------------------------------------------------------------------
 nexus:
   console:
