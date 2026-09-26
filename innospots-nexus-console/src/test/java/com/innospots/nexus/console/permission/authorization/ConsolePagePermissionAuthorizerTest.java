@@ -16,7 +16,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class RequestAuthorizerTest {
+class ConsolePagePermissionAuthorizerTest {
 
     @Test
     void checksPageThenDatasourceAndMergesRoleAndOrgUnitConstraints() {
@@ -43,7 +43,7 @@ class RequestAuthorizerTest {
                 List.of(roleGrant),
                 List.of(orgUnitGrant));
 
-        RequestAuthorizer authorizer = new RequestAuthorizer(resourceDao, grantDao);
+        ConsolePagePermissionAuthorizer authorizer = new ConsolePagePermissionAuthorizer(resourceDao, grantDao);
         AuthorizationDecision decision = authorizer.authorize(new AuthorizationRequest(
                 "1",
                 "post",
@@ -67,7 +67,7 @@ class RequestAuthorizerTest {
         PermissionGrantDao grantDao = mock(PermissionGrantDao.class);
         when(grantDao.selectList(any())).thenReturn(List.of());
 
-        AuthorizationDecision decision = new RequestAuthorizer(
+        AuthorizationDecision decision = new ConsolePagePermissionAuthorizer(
                 resourceDao, grantDao).authorize(new AuthorizationRequest(
                 "1",
                 "GET",

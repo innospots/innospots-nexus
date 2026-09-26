@@ -8,6 +8,7 @@ import jakarta.ws.rs.core.MediaType;
 import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.status.NexusStatusCode;
+import com.innospots.nexus.base.thread.SessionContext;
 
 @Path("/console/jaxrs-web-test")
 @Produces(MediaType.APPLICATION_JSON)
@@ -17,6 +18,15 @@ public class ConsoleJaxRsWebSecuredTestResource {
     @Path("/secured-echo")
     public R<String> securedEcho() {
         return R.ok("secured");
+    }
+
+    @GET
+    @Path("/session-user-id")
+    public R<String> sessionUserId() {
+        String userId = SessionContext.user()
+                .map(user -> String.valueOf(user.userId()))
+                .orElse("none");
+        return R.ok(userId);
     }
 
     @GET

@@ -11,13 +11,14 @@ import org.springframework.context.annotation.Configuration;
 import com.innospots.nexus.console.auth.service.TokenIssuer;
 import com.innospots.nexus.console.config.AuthConfig;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubjectResolver;
-import com.innospots.nexus.console.permission.authorization.RequestAuthorizer;
+import com.innospots.nexus.console.permission.authorization.ConsolePagePermissionAuthorizer;
 import com.innospots.nexus.spring.console.jaxrs.exception.ConsoleJaxRsExceptionSupport;
 import com.innospots.nexus.spring.console.jaxrs.exception.ConsoleNexusExceptionMapper;
 import com.innospots.nexus.spring.console.jaxrs.exception.ConsoleThrowableExceptionMapper;
 import com.innospots.nexus.spring.console.jaxrs.filter.ConsoleAuthenticationFilter;
 import com.innospots.nexus.spring.console.jaxrs.filter.ConsoleCorsFilter;
-import com.innospots.nexus.spring.console.jaxrs.filter.ConsoleDatasourceAuthorizationFilter;
+import com.innospots.nexus.spring.console.jaxrs.filter.ConsoleDevSessionFilter;
+import com.innospots.nexus.spring.console.jaxrs.filter.ConsolePagePermissionFilter;
 import com.innospots.nexus.spring.console.jaxrs.filter.ConsoleRequestContextFilter;
 
 /**
@@ -66,13 +67,19 @@ public class ConsoleJaxRsWebConfiguration {
         return new ConsoleAuthenticationFilter(webProperties, tokenIssuer);
     }
 
-    /** 对 catalog datasource 代理路径执行 {@link RequestAuthorizer} 鉴权。 */
+    /** 关闭请求侧安全时，按 {@link ConsoleWebProperties.Security#getDevSession()} 注入开发会话。 */
     @Bean
-    ConsoleDatasourceAuthorizationFilter consoleDatasourceAuthorizationFilter(
+    ConsoleDevSessionFilter consoleDevSessionFilter(ConsoleWebProperties webProperties) {
+        return new ConsoleDevSessionFilter(webProperties);
+    }
+
+    /** 对 {@link ConsoleWebProperties.Security#getConsolePathPatterns()} 命中路径执行页面权限校验。 */
+    @Bean
+    ConsolePagePermissionFilter consolePagePermissionFilter(
             ConsoleWebProperties webProperties,
-            RequestAuthorizer requestAuthorizer,
+            ConsolePagePermissionAuthorizer pagePermissionAuthorizer,
             AuthorizationSubjectResolver subjectResolver) {
-        return new ConsoleDatasourceAuthorizationFilter(webProperties, requestAuthorizer, subjectResolver);
+        return new ConsolePagePermissionFilter(webProperties, pagePermissionAuthorizer, subjectResolver);
     }
 
     /** 分配 {@code X-Request-Id}、写入 TLC，并在响应结束后清理线程上下文。 */
@@ -100,14 +107,16 @@ public class ConsoleJaxRsWebConfiguration {
     ResourceConfigCustomizer consoleJaxRsWebResourceConfigCustomizer(
             ConsoleCorsFilter corsFilter,
             ConsoleAuthenticationFilter authenticationFilter,
-            ConsoleDatasourceAuthorizationFilter datasourceAuthorizationFilter,
+            ConsoleDevSessionFilter devSessionFilter,
+            ConsolePagePermissionFilter pagePermissionFilter,
             ConsoleRequestContextFilter requestContextFilter,
             ConsoleNexusExceptionMapper nexusExceptionMapper,
             ConsoleThrowableExceptionMapper throwableExceptionMapper) {
         return resourceConfig -> {
             resourceConfig.register(corsFilter);
             resourceConfig.register(authenticationFilter);
-            resourceConfig.register(datasourceAuthorizationFilter);
+            resourceConfig.register(devSessionFilter);
+            resourceConfig.register(pagePermissionFilter);
             resourceConfig.register(requestContextFilter);
             resourceConfig.register(nexusExceptionMapper);
             resourceConfig.register(throwableExceptionMapper);

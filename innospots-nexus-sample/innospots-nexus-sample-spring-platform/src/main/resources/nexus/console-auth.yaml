@@ -3,6 +3,9 @@
 #
 # 绑定: com.innospots.nexus.spring.console.config.ConsoleAuthProperties
 # 装配: ConsoleAuthConfiguration → com.innospots.nexus.console.config.AuthConfig
+#
+# 说明：本文件管令牌 TTL、验证码、RSA 等「登录/签发」策略；Jersey 请求是否强制鉴权与页面权限
+# 见 console-web.yaml 的 nexus.console.web.security.enabled（勿在本文件加同类开关）。
 # ---------------------------------------------------------------------------
 nexus:
   console:

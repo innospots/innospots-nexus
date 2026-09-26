@@ -14,10 +14,10 @@ import com.innospots.nexus.console.openapi.endpoint.OpenApiCatalogEndpoint;
 import com.innospots.nexus.console.openapi.operator.OpenApiCatalogOperator;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubject;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubjectResolver;
-import com.innospots.nexus.console.permission.authorization.RequestAuthorizer;
+import com.innospots.nexus.console.permission.authorization.ConsolePagePermissionAuthorizer;
 
 /**
- * Web 过滤器测试用最小 Bean（不含真实 {@link com.innospots.nexus.console.permission.authorization.RequestAuthorizer}）。
+ * Web 过滤器测试用最小 Bean（不含真实 {@link ConsolePagePermissionAuthorizer}）。
  */
 @Configuration
 public class ConsoleJaxRsWebTestConfiguration {
@@ -48,8 +48,8 @@ public class ConsoleJaxRsWebTestConfiguration {
 
     @Bean
     @Primary
-    RequestAuthorizer consoleJaxRsWebTestRequestAuthorizer() {
-        return ConsoleJaxRsWebTestMocks.REQUEST_AUTHORIZER;
+    ConsolePagePermissionAuthorizer consoleJaxRsWebTestPagePermissionAuthorizer() {
+        return ConsoleJaxRsWebTestMocks.PAGE_PERMISSION_AUTHORIZER;
     }
 
     @Bean

@@ -12,7 +12,23 @@ nexus:
       # 是否启用 Web 横切；默认 true（与 @ConditionalOnProperty matchIfMissing 一致）
       enabled: true
       security:
-        # 免 Bearer 鉴权路径（Ant 风格）；省略时使用 ConsoleWebProperties 内置默认列表
+        # 请求侧安全总开关（Bearer 鉴权 + ConsolePagePermissionFilter）；默认 true。
+        # 关闭后不做鉴权与页面 permission 判定；登录/令牌仍由 console-auth.yaml 配置（仅建议本地调试）。
+        # enabled: false
+
+        # dev-session：仅当 security.enabled=false 时生效；注入固定 SessionContext（本地调试）。
+        # 生产务必保持 dev-session.enabled=false；建议配合 spring.profiles.active 含 dev。
+        # dev-session:
+        #   enabled: true
+        #   user-id: "1"
+        #   tenant-id: dev-tenant
+        #   workspace-id: dev-workspace
+        #   project-id: dev-project
+        #   realm: TENANT
+        #   tenant-member-id: member-1
+
+        # permit-all-patterns：ConsoleAuthenticationFilter 使用（security.enabled=true 时）。
+        # 命中则跳过 Bearer 令牌校验（OpenAPI、登录、健康检查等）；与下方 console 页面权限配置无关。
         # permit-all-patterns:
         #   - /openapi/**
         #   - /auth/**
@@ -20,10 +36,17 @@ nexus:
         #   - /platform/auth/**
         #   - /health
         #   - /actuator/health/**
-        # datasource 代理鉴权路径；默认 /console/datasource/**
-        # datasource-path-patterns:
+
+        # console-path-patterns：ConsolePagePermissionFilter 使用（非 ConsoleAuthenticationFilter）。
+        # 命中表示该 URL 须做「控制台页面级」授权：在已通过 Bearer 登录的前提下，
+        # 还须携带 page-key-header（默认 X-Nexus-Page-Key），值为当前 UI 页在 catalog 中的 page key，
+        # 由 ConsolePagePermissionAuthorizer 按 workspace + 方法 + 路径 + page key 判定页面/datasource 权限。
+        # 默认仅 /console/datasource/**；自定义代理前缀时可追加或整体替换本列表。
+        # 设为空列表 [] 则关闭控制台页面级授权（不推荐生产环境）。
+        # console-path-patterns:
         #   - /console/datasource/**
-        # catalog 页面键请求头；默认 X-Nexus-Page-Key
+
+        # 页面权限鉴权专用请求头名；仅匹配 console-path-patterns 时必填，缺省返回 403。
         page-key-header: X-Nexus-Page-Key
       cors:
         # 是否输出 CORS 响应头；默认 false

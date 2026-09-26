@@ -16,7 +16,7 @@ class PortalModuleBoundaryTest {
         assertTypeAbsent("com.innospots.nexus.portal.group.endpoint.GroupEndpoint");
         assertTypeAbsent("com.innospots.nexus.portal.group.domain.entity.GroupEntity");
         assertTypeAbsent("com.innospots.nexus.portal.permission.endpoint.GrantManagementEndpoint");
-        assertTypeAbsent("com.innospots.nexus.portal.permission.authorization.RequestAuthorizer");
+        assertTypeAbsent("com.innospots.nexus.portal.permission.authorization.ConsolePagePermissionAuthorizer");
         assertTypeAbsent("com.innospots.nexus.portal.permission.domain.entity.PermissionResourceEntity");
         assertTypeAbsent("com.innospots.nexus.portal.logger.AuditLog");
         assertTypeAbsent("com.innospots.nexus.portal.logger.LogExecutor");

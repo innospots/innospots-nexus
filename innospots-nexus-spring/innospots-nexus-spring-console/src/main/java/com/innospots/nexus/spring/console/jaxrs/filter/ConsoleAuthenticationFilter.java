@@ -31,6 +31,9 @@ public final class ConsoleAuthenticationFilter implements ContainerRequestFilter
 
     @Override
     public void filter(ContainerRequestContext requestContext) {
+        if (!security.isEnabled()) {
+            return;
+        }
         String path = normalizedPath(requestContext);
         if (ConsoleAntPathMatcher.matchesAny(security.getPermitAllPatterns(), path)) {
             return;

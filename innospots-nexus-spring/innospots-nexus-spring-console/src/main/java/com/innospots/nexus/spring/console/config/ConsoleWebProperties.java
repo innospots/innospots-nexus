@@ -25,14 +25,18 @@ public class ConsoleWebProperties {
     /** 是否启用控制台 Jersey 过滤器、CORS 与统一异常映射；默认 {@code true}。 */
     private boolean enabled = true;
 
-    /** 鉴权与数据源代理路径规则。 */
+    /** Jersey 请求侧安全（鉴权、页面权限路径规则）。 */
     private Security security = new Security();
 
     /** 浏览器跨域（CORS）响应头；默认关闭。 */
     private Cors cors = new Cors();
 
     /**
-     * {@code nexus.console.web.security.*}：访问控制与 catalog datasource 代理鉴权。
+     * {@code nexus.console.web.security.*}：Jersey 鉴权相关路径与请求头。
+     *
+     * <p>{@link #enabled} 为总开关：关闭时 {@link com.innospots.nexus.spring.console.jaxrs.filter.ConsoleAuthenticationFilter}
+     * 与 {@link com.innospots.nexus.spring.console.jaxrs.filter.ConsolePagePermissionFilter} 均不执行。
+     * {@link #permitAllPatterns}、{@link #consolePathPatterns} 仅在 {@link #enabled} 为 {@code true} 时生效。</p>
      *
      * @author Smars
      * @date 2026/09/25
@@ -41,18 +45,51 @@ public class ConsoleWebProperties {
     public static class Security {
 
         /**
+         * 是否启用 Jersey 请求侧安全（Bearer 鉴权 + 控制台页面权限 Filter）；默认 {@code true}。
+         *
+         * <p>绑定 {@code nexus.console.web.security.enabled}。为 {@code false} 时不校验令牌、不调用
+         * {@link com.innospots.nexus.console.permission.authorization.ConsolePagePermissionAuthorizer}；
+         * 登录签发、令牌 TTL 等仍由 {@code nexus.console.auth.*} 控制。仅建议本地或受控集成环境使用。</p>
+         */
+        @Setter
+        private boolean enabled = true;
+
+        /**
+         * 关闭 {@link #enabled} 时的开发用会话绑定；默认关闭。
+         *
+         * <p>仅当 {@link #enabled} 为 {@code false} 且 {@link DevSession#enabled} 为 {@code true} 时生效；
+         * 生产环境请保持 {@link DevSession#enabled} 为 {@code false}，并配合 {@code spring.profiles.active=dev} 使用。</p>
+         */
+        @Setter
+        private DevSession devSession = new DevSession();
+
+        /**
          * 无需 Bearer 令牌的路径 Ant 模式（如 OpenAPI、登录、健康检查）。
          * 配置 {@code nexus.console.web.security.permit-all-patterns} 时整体替换默认列表。
          */
         private final List<String> permitAllPatterns = defaultPermitAll();
 
         /**
-         * 需经 {@link com.innospots.nexus.console.permission.authorization.RequestAuthorizer}
-         * 鉴权的 datasource 代理路径 Ant 模式。
+         * 控制台页面权限 Filter 生效的 HTTP 路径 Ant 模式：命中后除 Bearer 登录态外，还须通过
+         * {@link com.innospots.nexus.console.permission.authorization.ConsolePagePermissionAuthorizer} 做页面级授权。
+         *
+         * <p>典型场景：管理端 UI 经 catalog 注册的代理路径（默认含 {@code /console/datasource/**}）
+         * 拉取列表/图表数据；Filter 读取 {@link #pageKeyHeader}（当前页面在 catalog 中的 page key），
+         * 结合 {@link com.innospots.nexus.base.thread.SessionContext} 中的 workspace、HTTP 方法与路径，
+         * 判定当前用户是否拥有该页面对应资源的访问权。未命中本列表的路径不执行该授权逻辑。</p>
+         *
+         * <p>配置 {@code nexus.console.web.security.console-path-patterns} 时整体替换默认列表；
+         * 置空列表表示不对任何路径启用页面权限 Filter。</p>
          */
-        private final List<String> datasourcePathPatterns = new ArrayList<>(List.of("/console/datasource/**"));
+        private final List<String> consolePathPatterns = new ArrayList<>(List.of("/console/datasource/**"));
 
-        /** 页面资源键请求头名，用于 datasource 鉴权时关联 catalog 权限。 */
+        /**
+         * 控制台页面权限鉴权用的页面键请求头名（默认 {@code X-Nexus-Page-Key}）。
+         *
+         * <p>仅当请求路径匹配 {@link #consolePathPatterns} 时必填；缺失或空白时返回 403。
+         * 值须与控制台 catalog 中当前页面的 page key 一致，供
+         * {@link com.innospots.nexus.console.permission.authorization.ConsolePagePermissionAuthorizer} 解析权限。</p>
+         */
         @Setter
         private String pageKeyHeader = "X-Nexus-Page-Key";
 
@@ -69,14 +106,14 @@ public class ConsoleWebProperties {
         }
 
         /**
-         * 设置 datasource 鉴权路径列表。
+         * 设置控制台页面权限 Filter 生效的路径列表（见 {@link #consolePathPatterns} 字段说明）。
          *
-         * @param datasourcePathPatterns 路径模式；{@code null} 时清空列表
+         * @param consolePathPatterns 路径 Ant 模式；{@code null} 时清空列表（不启用页面权限 Filter）
          */
-        public void setDatasourcePathPatterns(List<String> datasourcePathPatterns) {
-            this.datasourcePathPatterns.clear();
-            if (datasourcePathPatterns != null) {
-                this.datasourcePathPatterns.addAll(datasourcePathPatterns);
+        public void setConsolePathPatterns(List<String> consolePathPatterns) {
+            this.consolePathPatterns.clear();
+            if (consolePathPatterns != null) {
+                this.consolePathPatterns.addAll(consolePathPatterns);
             }
         }
 
@@ -89,6 +126,37 @@ public class ConsoleWebProperties {
             patterns.add("/health");
             patterns.add("/actuator/health/**");
             return patterns;
+        }
+
+        /**
+         * {@code nexus.console.web.security.dev-session.*}：关闭请求侧安全时的固定会话快照。
+         */
+        @Getter
+        @Setter
+        public static class DevSession {
+
+            /**
+             * 是否注入 dev 会话；绑定 {@code nexus.console.web.security.dev-session.enabled}，默认 {@code false}。
+             */
+            private boolean enabled = false;
+
+            /** 逻辑用户 ID（字符串，与令牌声明一致）。 */
+            private String userId = "1";
+
+            /** 租户 ID。 */
+            private String tenantId = "dev-tenant";
+
+            /** 工作区 ID。 */
+            private String workspaceId = "dev-workspace";
+
+            /** 可选项目 ID。 */
+            private String projectId;
+
+            /** 可选 {@link com.innospots.nexus.base.thread.TLC#SECURITY_REALM}。 */
+            private String realm;
+
+            /** 可选租户成员 ID（{@link com.innospots.nexus.base.thread.TLC#tenantMemberId}）。 */
+            private String tenantMemberId;
         }
     }
 

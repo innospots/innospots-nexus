@@ -25,7 +25,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-class ConsoleDatasourceAuthorizationFilterTest extends ConsoleJaxRsWebIntegrationTest {
+class ConsolePagePermissionFilterTest extends ConsoleJaxRsWebIntegrationTest {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
@@ -36,7 +36,7 @@ class ConsoleDatasourceAuthorizationFilterTest extends ConsoleJaxRsWebIntegratio
 
     @BeforeEach
     void resetAuthorizerMock() {
-        Mockito.reset(ConsoleJaxRsWebTestMocks.REQUEST_AUTHORIZER);
+        Mockito.reset(ConsoleJaxRsWebTestMocks.PAGE_PERMISSION_AUTHORIZER);
         accessToken = ConsoleJaxRsWebTestTokens.platformAccessToken(tokenIssuer);
     }
 
@@ -48,7 +48,7 @@ class ConsoleDatasourceAuthorizationFilterTest extends ConsoleJaxRsWebIntegratio
                 null,
                 accessToken);
         assertThat(response.statusCode()).isEqualTo(200);
-        verify(ConsoleJaxRsWebTestMocks.REQUEST_AUTHORIZER, never()).authorize(any());
+        verify(ConsoleJaxRsWebTestMocks.PAGE_PERMISSION_AUTHORIZER, never()).authorize(any());
     }
 
     @Test
@@ -59,12 +59,12 @@ class ConsoleDatasourceAuthorizationFilterTest extends ConsoleJaxRsWebIntegratio
                 null,
                 accessToken);
         assertThat(response.statusCode()).isEqualTo(403);
-        verify(ConsoleJaxRsWebTestMocks.REQUEST_AUTHORIZER, never()).authorize(any());
+        verify(ConsoleJaxRsWebTestMocks.PAGE_PERMISSION_AUTHORIZER, never()).authorize(any());
     }
 
     @Test
     void datasourcePathWithDeniedDecisionReturns403() throws Exception {
-        when(ConsoleJaxRsWebTestMocks.REQUEST_AUTHORIZER.authorize(any(AuthorizationRequest.class)))
+        when(ConsoleJaxRsWebTestMocks.PAGE_PERMISSION_AUTHORIZER.authorize(any(AuthorizationRequest.class)))
                 .thenReturn(AuthorizationDecision.deny("denied"));
         HttpResponse<String> response = http.exchange(
                 "GET",
@@ -78,7 +78,7 @@ class ConsoleDatasourceAuthorizationFilterTest extends ConsoleJaxRsWebIntegratio
 
     @Test
     void datasourcePathWithAllowedDecisionSucceeds() throws Exception {
-        when(ConsoleJaxRsWebTestMocks.REQUEST_AUTHORIZER.authorize(any(AuthorizationRequest.class)))
+        when(ConsoleJaxRsWebTestMocks.PAGE_PERMISSION_AUTHORIZER.authorize(any(AuthorizationRequest.class)))
                 .thenReturn(AuthorizationDecision.allow(new AuthorizationContext(
                         "wks-demo",
                         "demo.page",

@@ -16,15 +16,17 @@ import com.innospots.nexus.console.scope.ConsoleOwnership;
 import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
 
 /**
- * 基于标准化请求信息执行页面和 datasource 鉴权的核心组件。
+ * 控制台 catalog 页面与 datasource 代理的权限判定（框架中立）。
  *
- * <p>本类只负责读取权限目录和授权记录并返回鉴权结果，不读取原始请求，也不生成 HTTP 响应。具体
- * Servlet Filter、Jakarta REST Filter 或其他运行时拦截器由应用适配层负责调用本类。</p>
+ * <p>根据 {@link AuthorizationRequest} 中的 page key、HTTP 方法与路径，先校验 PAGE 再校验
+ * DATASOURCE 授权；与 Bearer 登录态、{@code ConsoleAuthenticationFilter} 等身份认证无关。
+ * 不读取原始 Servlet/JAX-RS 请求，由适配层（如 {@code ConsolePagePermissionFilter}）组装入参。</p>
  *
  * @author Smars
  * @date 2026/09/13
+ * @see AuthorizationRequest
  */
-public final class RequestAuthorizer {
+public final class ConsolePagePermissionAuthorizer {
 
     private final ConsoleCatalogResourceDao resourceDao;
     private final PermissionGrantDao grantDao;
@@ -32,7 +34,7 @@ public final class RequestAuthorizer {
     /**
      * 使用权限目录和授权记录存储创建请求鉴权器。
      */
-    public RequestAuthorizer(
+    public ConsolePagePermissionAuthorizer(
             ConsoleCatalogResourceDao resourceDao,
             PermissionGrantDao grantDao
     ) {

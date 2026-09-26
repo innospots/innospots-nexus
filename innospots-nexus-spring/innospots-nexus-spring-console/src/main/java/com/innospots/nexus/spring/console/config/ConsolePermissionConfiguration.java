@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Lazy;
 
 import com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubjectResolver;
-import com.innospots.nexus.console.permission.authorization.RequestAuthorizer;
+import com.innospots.nexus.console.permission.authorization.ConsolePagePermissionAuthorizer;
 import com.innospots.nexus.console.permission.authorization.SessionAuthorizationSubjectResolver;
 import com.innospots.nexus.console.permission.dao.PermissionGrantDao;
 import com.innospots.nexus.console.permission.endpoint.CurrentAuthorizationEndpoint;
@@ -24,7 +24,7 @@ import com.innospots.nexus.console.role.dao.RoleDao;
  *
  * @author Smars
  * @date 2026/09/23
- * @see RequestAuthorizer
+ * @see ConsolePagePermissionAuthorizer
  */
 @Configuration
 @MapperScan(
@@ -61,10 +61,10 @@ public class ConsolePermissionConfiguration {
     }
 
     @Bean
-    RequestAuthorizer requestAuthorizer(
+    ConsolePagePermissionAuthorizer consolePagePermissionAuthorizer(
             ConsoleCatalogResourceDao resourceDao,
             PermissionGrantDao grantDao) {
-        return new RequestAuthorizer(resourceDao, grantDao);
+        return new ConsolePagePermissionAuthorizer(resourceDao, grantDao);
     }
 
     @Bean
