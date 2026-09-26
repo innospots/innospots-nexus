@@ -325,6 +325,33 @@ com.innospots.nexus.console
 
 ---
 
+## 平台扩展库（交付面优先）
+
+适用：`innospots-nexus-sample-platform` 及同类 **在 platform 之上的无框架扩展 JAR**（非 `innospots-nexus-platform` 本体）。
+
+在扩展库内 **第一级为交付面、第二级为领域**，第三级仍为职责包（与上文「领域内」规则相同）：
+
+```text
+com.innospots.nexus.sample.platform
+  ├── core.<domain>/{dao,domain,operator,service,loader}
+  ├── console.<domain>/{endpoint,service}
+  └── inbound.<domain>/{endpoint,service,…}
+```
+
+| 交付面 | 禁止 |
+|--------|------|
+| `core` | Jakarta REST `endpoint`、Spring/Quarkus 类型 |
+| `console` / `inbound` | `dao`、`domain.entity`（应引用 `core` 类型） |
+| 任意 | `inbound` → `console` 包依赖；模块根多领域 `service` 桶 |
+
+**与平台库并存：** `com.innospots.nexus.platform.tenant.endpoint` 仍是领域优先；
+扩展库多一刀交付面是为路径与装配隔离，**领域内**仍禁止 `endpoint/<domain>` 式技术层优先。
+
+完整工程、路径前缀、Maven 模块树见
+[sample-extension-layout.md](sample-extension-layout.md)。
+
+---
+
 ## 自检清单
 
 新建或调整包结构前确认：
@@ -338,6 +365,7 @@ com.innospots.nexus.console
 - [ ] 没有 `impl`、`common`、`misc` 逃避归属？
 - [ ] 初始面是否最小（未投机性创建 `service`/`event`/空包）？
 - [ ] 共享类型是否已放到正确的 **Maven 模块** 而非塞进邻近领域包？
+- [ ] 若为 **sample 扩展库**：交付面（core/console/inbound）与领域二级包是否正确？`core` 是否未放 endpoint？
 
 疑义回源：[standards/naming.md](../standards/naming.md)「包命名」、
 [standards/domain-module-initialization.md](../standards/domain-module-initialization.md) 阶段零。

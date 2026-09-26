@@ -23,6 +23,10 @@ innospots-nexus (root, packaging=pom)
 │   ├── innospots-nexus-spring-core / -service / -app / -console / -portal / -platform
 └── innospots-nexus-quarkus          Quarkus 运行时聚合
     ├── innospots-nexus-quarkus-core / -service / -app / -console / -portal / -platform
+└── innospots-nexus-sample           可运行示例（不发布）；见下文
+    ├── innospots-nexus-sample-platform          无框架 platform 扩展库
+    ├── innospots-nexus-sample-spring-app / -spring-portal / -spring-platform
+    └── innospots-nexus-sample-quarkus-app / -quarkus-portal / -quarkus-platform
 ```
 
 库模块依赖方向严格单向：
@@ -245,3 +249,20 @@ com.innospots.nexus.portal
 - [ ] 是否需要被其他模块依赖？（是 → 需在 BOM 登记）
 - [ ] POM 是否只声明了最小直接依赖？（见 dependency-conventions.md）
 - [ ] `AGENTS.md` 中的模块职责是否需要同步更新？
+
+---
+
+## innospots-nexus-sample（示例聚合器）
+
+**不参与制品发布**（`maven.deploy.skip`）。reactor 内 **并列多种** 可运行子模块，用于演示 Spring/Quarkus 组装与 **platform 扩展库** 包结构；**新建工程时只按需选取其中一类或几类**，不得默认复制全套模块。选型见 [sample-extension-layout.md](../../java-reference/references/sample-extension-layout.md) §1.1、§2.2。
+
+| 模块 | 职责 |
+|------|------|
+| `innospots-nexus-sample-platform` | 依赖 `innospots-nexus-platform`；`core` / `console` / `inbound` 交付面 + 领域 DDD |
+| `innospots-nexus-sample-spring-platform` | 可运行运营平台示例 + assembly → `sample/dist` |
+| `innospots-nexus-sample-spring-portal` | 可运行租户管理端示例 |
+| `innospots-nexus-sample-spring-app` | 可运行 app/service 框架示例 |
+| `*-quarkus-*` | 与 spring 对称 |
+
+扩展库与路径、契约、自检清单：
+[sample-extension-layout.md](../../java-reference/references/sample-extension-layout.md)。

@@ -10,7 +10,7 @@ description: |
   触发词：Java 规范、编码规范、命名规范、代码风格、注释规范、API 设计、
   异常规范、状态码、java 标准、standards。
 category: java
-version: 1.8.0
+version: 1.9.0
 ---
 
 # Java 通用规范与标准
@@ -55,6 +55,7 @@ version: 1.8.0
 | 规范章节地图 | [standards-index.md](references/standards-index.md) | 定位规则在哪份 standards 文件的哪一节 |
 | 模块归属 | [module-ownership.md](references/module-ownership.md) | Maven 模块与业务域判定 |
 | 包结构（领域优先） | [package-structure.md](references/package-structure.md) | 领域 → 功能子模块 → 职责；禁止 service 堆积；单包 ≤15 类 |
+| sample 示例工程 | [sample-extension-layout.md](references/sample-extension-layout.md) | reactor、交付面×领域 DDD、HTTP 前缀、扩展与 platform 边界 |
 | 作用域层级 | [scope-hierarchy.md](references/scope-hierarchy.md) | Session/Snapshot 与 Entity 基类 |
 | 领域建模 | [domain-modeling.md](references/domain-modeling.md) | 实体/请求/VO/事件建模决策 |
 | API 契约 | [api-contract.md](references/api-contract.md) | 签名、分层、事务、兼容性；含 Console interface 例外 |
@@ -81,7 +82,7 @@ version: 1.8.0
 |------|---------|-----------|
 | 查规范、问约定、不确定走哪个技能 | `java:reference` | 只读、不产出代码 |
 | 建**外部产品**工程、配 Maven/POM（`*-console`/`*-service` 等） | `java:project` | 仓库外工程骨架；本仓库平台库见 `AGENTS.md` |
-| 做架构/模块/接口/类/技术方案设计 | `java:design` | 动的是**设计决策** |
+| 做架构/模块/实体/枚举/状态码/异常/接口/包结构/技术方案设计 | `java:design` | 动的是**设计决策**（见 design → structural-design-blueprint） |
 | 写功能、改功能、修 Bug、重构、单元/契约测试 | `java:develop` | 动的是**实现与配套测试代码** |
 | 编译、跑测试、规范/质量/依赖/安全检查 | `java:check` | 动的是**验证动作** |
 | Spring / Spring Boot 专项能力 | `java:spring` | 涉及 **Spring 生态** |
@@ -129,6 +130,7 @@ version: 1.8.0
 | `innospots-nexus-plugin` | 暂无 API 索引；归属见 [module-ownership.md](references/module-ownership.md)；设计见 `innospots-nexus-plugin/docs/plugin/design/` |
 | `innospots-nexus-portal` | 暂无 API 索引；归属见 [module-ownership.md](references/module-ownership.md)；包结构见 [package-structure.md](references/package-structure.md) |
 | `innospots-nexus-platform` | 暂无 API 索引；归属见 [module-ownership.md](references/module-ownership.md) |
+| `innospots-nexus-sample` | 结构/契约见 [sample-extension-layout.md](references/sample-extension-layout.md)（非模块 API 索引） |
 
 显式扫描请求时可生成 plugin/portal/platform 索引（见 [`standards/module-skills.md`](standards/module-skills.md)）。
 
@@ -147,3 +149,4 @@ version: 1.8.0
 - [domain-initialization-checklist.md](references/domain-initialization-checklist.md)
 - [grill-me.md](references/grill-me.md)
 - [agents-template.md](references/agents-template.md)
+- [sample-extension-layout.md](references/sample-extension-layout.md)

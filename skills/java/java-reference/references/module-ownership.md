@@ -93,6 +93,20 @@ Console 传输契约 interface 模式见 [api-contract.md](api-contract.md)「Co
 
 ---
 
+## innospots-nexus-sample 扩展（归属）
+
+| 判定 | 归属 |
+|------|------|
+| 在 platform 之上、无 Spring 的运营域增量（示例或 experimental） | `innospots-nexus-sample-platform` |
+| Spring/Quarkus 主类、配置、发行包、集成测试 | `innospots-nexus-sample-*-spring-*` / `*-quarkus-*` |
+| 已是 AGENTS.md 定义的 platform 产品能力（租户、企业、平台 IAM） | `innospots-nexus-platform`，**不得**长期留在 sample |
+| 租户侧管理业务 | `innospots-nexus-portal` 或外部产品；sample-portal **运行模块** 只演示装配 |
+
+扩展库依赖：**仅** `innospots-nexus-platform`（最小引用）；**禁止** `portal`。
+包树与 HTTP 前缀见 [sample-extension-layout.md](sample-extension-layout.md)。
+
+---
+
 ## 阶段零门禁（design → develop 硬边界）
 
 进入 `java:develop` 六阶段之前，必须已在 `java:design` 完成：

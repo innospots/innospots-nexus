@@ -10,7 +10,7 @@ description: |
   领域初始化、建实体、建端点、建 DAO、代码模板、单元测试、契约测试、JUnit、
   去冗余、结构简化、死代码清理。
 category: java
-version: 1.6.0
+version: 1.7.0
 ---
 
 # 功能开发、修改、Bug 修复、重构与单元测试
@@ -44,6 +44,7 @@ version: 1.6.0
 - 设计输入与实现输出 → [develop-deliverables.md](references/develop-deliverables.md)
 - 归属与模块边界 → [module-ownership.md](../java-reference/references/module-ownership.md)
 - 包结构（领域优先） → [package-structure.md](../java-reference/references/package-structure.md)
+- sample 扩展实施 → [sample-extension-development.md](references/sample-extension-development.md)
 - 作用域层级 → [scope-hierarchy.md](../java-reference/references/scope-hierarchy.md)
 - 建模与契约 → [domain-modeling.md](../java-reference/references/domain-modeling.md)、[api-contract.md](../java-reference/references/api-contract.md)
 - 注释 → [code-comments.md](../java-reference/standards/code-comments.md)
@@ -105,6 +106,7 @@ code-quality-constraints「增加代码前的门禁」。
 - [persistence-mybatis.md](references/persistence-mybatis.md) — MyBatis-Plus、LambdaWrapper、yaml 配置、禁 XML/properties
 - [exception-handling.md](references/exception-handling.md) — 异常实现
 - [change-workflow.md](references/change-workflow.md) — 加功能/改功能/修 Bug/重构
+- [sample-extension-development.md](references/sample-extension-development.md) — innospots-nexus-sample-platform 实施顺序与装配
 - [code-quality-constraints.md](../java-reference/references/code-quality-constraints.md) — 简化、去冗余、删无效代码
 
 ## 六阶段领域初始化

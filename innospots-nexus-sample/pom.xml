@@ -66,6 +66,7 @@
     </build>
 
     <modules>
+        <module>innospots-nexus-sample-platform</module>
         <module>innospots-nexus-sample-spring-app</module>
         <module>innospots-nexus-sample-spring-portal</module>
         <module>innospots-nexus-sample-spring-platform</module>

@@ -6,6 +6,9 @@
 
 以下将**六阶段**映射为 develop 的测试先行步骤（与 [test-conventions.md](test-conventions.md) 一致）。
 
+在 **`innospots-nexus-sample-platform`** 实施时，先读交付面顺序：
+[sample-extension-development.md](sample-extension-development.md)。
+
 ---
 
 ## 步骤对照表

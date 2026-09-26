@@ -4,6 +4,8 @@
 四步完成后再过 SKILL「设计评审门禁」，再交 `java:develop`。
 
 产出落盘见 [design-deliverables.md](design-deliverables.md)。
+八类设计面（实体、枚举、状态码、异常、接口、DDD、模块、包）见
+[structural-design-blueprint.md](structural-design-blueprint.md)。
 场景选型见 [design-scenarios.md](design-scenarios.md)。
 
 ---
@@ -17,7 +19,7 @@ grill-me（新设计必经，琐碎 L0 可跳过）
     ↓
 ② 建词汇  →  naming.md（经 standards-index.md）
     ↓
-③ 划边界  →  package-structure.md、domain-modeling.md、scope-hierarchy.md
+③ 划边界  →  package-structure.md（含 sample 交付面）、domain-modeling.md、scope-hierarchy.md
     ↓
 ④ 定契约  →  api-contract、exception-contract、persistence-contract、test-scope
     ↓
@@ -35,12 +37,14 @@ grill-me（新设计必经，琐碎 L0 可跳过）
 
 ### 出口门禁
 
-- [ ] 能力归属的 **Maven 模块**已确定（base / core / plugin / console / portal / platform / adapter / application）
+- [ ] 能力归属的 **Maven 模块**已确定（base / core / plugin / console / portal / platform / adapter / application / **sample-platform 扩展**）
+- [ ] 若走 sample 扩展：已对照 [sample-extension-design.md](sample-extension-design.md) 与 [sample-extension-layout.md](../../java-reference/references/sample-extension-layout.md) §6（非 platform 产品能力）
 - [ ] 与 plugin、console catalog、portal 业务边界无混同
 - [ ] `portal` ↔ `platform` **无** Maven 互依方案
 - [ ] 已判定：**仅新领域包** vs **需新建 Maven 模块**（后者须 `java:project`）
 - [ ] 相邻域交互方式已列出（直接调用 / 事件 / 禁止依赖）
 - [ ] 有意延后的能力已记录
+- [ ] 已填 **Maven 归属表**（见 structural-design-blueprint §1）
 
 **禁止进入 ② 若：** 说不清归属模块，或计划用新 Maven 模块「装多个无关领域」。
 
@@ -59,6 +63,8 @@ grill-me（新设计必经，琐碎 L0 可跳过）
 - [ ] 状态码 **module** 三字前缀与归属域一致（先搜现有目录）
 - [ ] 失败语义初分：平台 / 领域 / 技术（供 ④ exception-contract）
 - [ ] 未引入相邻域同义词
+- [ ] **枚举** 命名与 `state/status/mode/type` 区分已写入词汇表（§4）
+- [ ] **状态码** 复用/新增初判完成（先搜现有目录）（§5）
 
 ---
 
@@ -79,6 +85,8 @@ grill-me（新设计必经，琐碎 L0 可跳过）
 - [ ] 跨表读：分批单表 + 内存组装（无 join 设计）
 - [ ] 已对照 [code-quality-constraints.md](../../java-reference/references/code-quality-constraints.md)：无投机接口/事件/Utils 层
 - [ ] 同一概念只有一个 owning 边界（operator/service/endpoint 不重复承担）
+- [ ] **DDD 边界表**：有界上下文 → owning 模块 + 包根 + 对外暴露方式（§2）
+- [ ] **实体清单**：表名、基类、主键/稳定键、索引意图（§3）；与 Session 作用域一致
 
 ---
 
@@ -95,9 +103,11 @@ grill-me（新设计必经，琐碎 L0 可跳过）
 
 ### 出口门禁
 
-- [ ] 端点表：方法、路径、`R<T>`、委托层；端点 >7 个已规划复审
+- [ ] **HTTP 端点表** + **Java 接口表**（若有）：方法、路径、`R<T>`、委托层；interface 引入理由（§7）
 - [ ] request / vo 为 **record** 骨架；校验归属明确
-- [ ] 每应用可见失败有 **StatusCode** 行 + 抛出边界（仅 `NexusException`）
+- [ ] **实体字段级契约**（或与 §③ 实体表合并）可支撑 develop 写 `*EntityContractsTest`
+- [ ] **枚举常量表** 与 DB 列长度一致
+- [ ] 每应用可见失败有 **StatusCode** 行 + **NexusException 抛出边界**（§5–§6）
 - [ ] 持久化：一表一 Dao、无 join/XML/properties；Dao 自定义方法清单（见 persistence-contract）
 - [ ] 配置：yaml 键路径 + Java `@ConfigurationProperties` 归属（若有）
 - [ ] 事务 / 幂等 / 并发策略已写

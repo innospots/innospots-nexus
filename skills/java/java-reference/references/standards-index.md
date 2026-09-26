@@ -5,6 +5,7 @@
 
 跨技能专题（模块归属、**包结构**、作用域、建模、契约）见同目录下的专题参考文件，不在此重复。
 包结构权威专题：[package-structure.md](package-structure.md)。
+`innospots-nexus-sample` 工程与扩展 DDD 边界：[sample-extension-layout.md](sample-extension-layout.md)。
 
 ---
 

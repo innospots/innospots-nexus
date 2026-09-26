@@ -94,22 +94,39 @@ permission-design.md
 | 概念 | 英文名 | 归属模块/包 | 技术 ID | 稳定业务键 | 备注 |
 |------|--------|------------|---------|-----------|------|
 
-## 5. 边界与包结构（四步法 ③）
+## 5. 工程模块与 DDD 边界（四步法 ①③）
 
-- 领域包路径（领域优先，单包 ≤15 类）
-- 与相邻域交互方式（调用 / 事件 / 禁止直接依赖）
-- Session 作用域 vs Entity 基类选择
+### 5.1 Maven 模块归属
 
-## 6. API 与分层契约（四步法 ④）
+| 有界上下文 / 能力 | Owning artifact | 依赖（仅直接） | 新建模块？ |
+|------------------|-----------------|----------------|-----------|
 
-### 6.1 端点
+### 5.2 包结构
 
-| 方法 | 路径 | 请求 | 响应 | 委托 |
-|------|------|------|------|------|
+- 完整包路径（领域优先或 sample 交付面×领域）；功能子模块列表
+- 单包 ≤15 类；过大时的拆分计划
+- 与相邻域交互（调用 / 事件 / 禁止依赖）
 
-### 6.2 分层调用
+### 5.3 Session 与持久化作用域
 
-`endpoint → service → operator → dao` 职责说明；禁止项。
+- Snapshot / 请求作用域结论
+- Entity 基类选择（见 [structural-design-blueprint.md](structural-design-blueprint.md) §3）
+
+## 6. 领域模型（四步法 ③④）
+
+### 6.1 实体（Entity）
+
+| 实体 | 表名 | 基类 | 主键 | 稳定业务键 | 索引（uk_/idx_） | 备注 |
+|------|------|------|------|-----------|------------------|------|
+
+字段级说明可附子表或附录；须能回答 domain-modeling 字段评审八问。
+
+### 6.2 枚举（Enums）
+
+| 枚举 | 常量 | 语义 | 存储列 | 状态迁移 |
+|------|------|------|--------|----------|
+
+区分 **领域 enum** 与 **StatusCode**（勿混用）。
 
 ### 6.3 Request / VO（record 骨架）
 
@@ -118,47 +135,65 @@ permission-design.md
 public record XxxCreateRequest(...) {}
 ```
 
-### 6.4 持久化意图
+### 6.4 持久化与 Dao
 
 表名、主键、索引、单表约束（无 join）；每表 `*Dao`；自定义访问清单（default 方法级）。
 **禁止** mapper.xml / beans.xml；配置只用 yaml + Java config（见 [persistence-contract.md](persistence-contract.md)）。
 
-## 7. 失败与状态码
+## 7. 接口与 API（四步法 ④）
 
-| 场景 | StatusCode（module+category+local） | 抛出边界 | HTTP 映射意图 |
-|------|-------------------------------------|---------|--------------|
+### 7.1 HTTP 端点
 
-推迟实现的端点须标注未来状态码策略（见 exception-contract.md）。
+| 方法 | 路径 | 请求 | 响应 `R<T>` | 委托 service | interface/class |
+|------|------|------|-------------|--------------|-----------------|
 
-## 8. 事务、幂等与并发
+### 7.2 Java 接口（非 HTTP，若有）
+
+| 接口 | 包 | 实现方 | 引入理由（≥2 消费者或 SPI） |
+|------|-----|--------|---------------------------|
+
+### 7.3 分层调用
+
+`endpoint → service → operator → dao` 职责说明；禁止项。
+
+## 8. 失败、状态码与异常
+
+| 场景 | StatusCode（module+category+local） | 抛出边界（operator/service/…） | NexusException 构建方式 | HTTP 映射意图 |
+|------|-------------------------------------|-------------------------------|-------------------------|--------------|
+
+推迟实现的端点须标注未来状态码策略（见 [exception-contract.md](exception-contract.md)）。
+**禁止** JDK 通用异常作为应用可见失败。
+
+## 9. 事务、幂等与并发
 
 写操作事务边界；重复调用语义；锁或乐观策略。
 
-## 9. 兼容与迁移
+## 10. 兼容与迁移
 
 公共兼容面变化、数据迁移、双写/灰度（若有）。
 
-## 10. 测试范围
+## 11. 测试范围
 
 引用或内嵌 test-scope 清单（契约测试 + 行为单测 + 不测范围）。
+须列出：实体契约、枚举/状态码契约、端点契约、operator/service 行为单测类名（计划）。
 
-## 11. AGENTS 对齐
+## 12. AGENTS 对齐
 
 按 [`agents-template.md`](../../java-reference/references/agents-template.md)「设计文档中的 AGENTS 对齐节」填写；
 若持久改变模块边界，须同步规划根 `AGENTS.md` 增补（由 `java:project` 或单独 PR 执行）。
 
-## 12. 不建什么（防过度设计）
+## 13. 不建什么（防过度设计）
 
 对照 [code-quality-constraints.md](../../java-reference/references/code-quality-constraints.md)：
 
 - 明确**不引入**的接口、事件、Maven 模块、第三方依赖、双轨 API、Utils/adapter 层及理由
 - 若存在临时兼容，写删除里程碑与调用方迁移范围
 
-## 13. 架构约束自检
+## 14. 架构约束自检
 
-对照 quick-constraints 与 AGENTS.md 模块职责的勾选清单。
+对照 [structural-design-blueprint.md](structural-design-blueprint.md) §1–§7 门禁与 quick-constraints、AGENTS.md。
 
-## 14. 开放问题
+## 15. 开放问题
 
 未决项与决策截止；已闭合项移到「已确认决策」。
 ```
@@ -177,8 +212,13 @@ develop 不得因章节标题不同而遗漏契约。
 
 - **归属**：`<module>` / `<domain>` / `<subpackage>`
 - **Maven 模块**：无新建 / 需 `java:project`（说明 artifact 类型）
+- **包路径**：`<完整包前缀>`（领域优先或交付面×领域）
 - **词汇**：<关键术语对齐说明，一行>
-- **契约变更**：<端点/方法/record 字段 diff 摘要>
+- **实体/表**：无 / `<Entity>` + `nx_*` + 基类
+- **枚举**：无 / `<Enum>` 及常量摘要
+- **状态码**：无新增 / 复用 `NexusStatusCode.*` / 新增 `*StatusCode` 列表
+- **异常边界**：<哪一层抛 NexusException>
+- **契约变更**：<端点/接口/record 字段 diff 摘要>
 - **持久化**：无新表 / 新表+Dao 清单；禁止 join/XML/properties
 - **配置**：无 / 新增 yaml 键路径 + 配置类归属
 - **事件**：无 / <eventType + 发布域>

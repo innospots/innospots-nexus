@@ -207,6 +207,7 @@ java:check            与升级前基线对比
 | 硬性红线 | `java-reference/references/quick-constraints.md` |
 | 模块归属 | `java-reference/references/module-ownership.md` |
 | 包结构（领域优先） | `java-reference/references/package-structure.md` |
+| sample 示例工程与扩展 DDD | `java-reference/references/sample-extension-layout.md` |
 | 作用域层级 | `java-reference/references/scope-hierarchy.md` |
 | 领域建模 | `java-reference/references/domain-modeling.md` |
 | API 契约 | `java-reference/references/api-contract.md` |
@@ -218,6 +219,7 @@ java:check            与升级前基线对比
 | 实现交付物（格式/目录） | `java-develop/references/develop-deliverables.md` |
 | 工程交付物（POM/模块） | `java-project/references/project-deliverables.md` |
 | 设计四步法门禁 | `java-design/references/design-four-steps.md` |
+| 设计八面清单（实体/枚举/状态码/异常/接口/DDD/模块/包） | `java-design/references/structural-design-blueprint.md` |
 | 设计场景与 L0–L3 | `java-design/references/design-scenarios.md` |
 | 持久化与配置（reference） | `java-reference/references/persistence-config.md` |
 | 持久化契约（设计） | `java-design/references/persistence-contract.md` |

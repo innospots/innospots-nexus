@@ -12,7 +12,7 @@ description: |
   触发词：外部工程、产品工程、nexmux、新建仓库、*-console、*-service、客户项目、
   Maven、BOM、parent、依赖引用、spring、quarkus、构建配置。
 category: java
-version: 1.4.0
+version: 1.5.0
 ---
 
 # 工程创建、结构、构建与项目配置
@@ -131,6 +131,8 @@ innospots-nexus-spring / innospots-nexus-quarkus
 
 见根 `AGENTS.md` 与 [module-layout.md](references/module-layout.md)。
 
+**本仓库示例聚合器** `innospots-nexus-sample`（不发布）：reactor 内 **全量陈列** 各类可运行子模块与扩展库，供对照；**新建工程只按需创建子集**（见 sample-extension-layout §1.1、§2.2）。
+
 ## 新建模块流程
 
 完整步骤与交付清单见 [project-deliverables.md](references/project-deliverables.md)。
@@ -186,4 +188,5 @@ mvn versions:display-dependency-updates   # 依赖升级候选（需人工评估
 - [build-config.md](references/build-config.md) — parent/BOM/插件、POM 模板、排错
 - [external-project-layout.md](references/external-project-layout.md) — **外部产品**模块职责与 reactor
 - [module-layout.md](references/module-layout.md) — **innospots-nexus 平台库**模块职责
+- [sample-extension-layout.md](../java-reference/references/sample-extension-layout.md) — **innospots-nexus-sample** reactor 与扩展库边界
 - [agents-template.md](../java-reference/references/agents-template.md) — 新建模块时根 AGENTS.md 增补片段

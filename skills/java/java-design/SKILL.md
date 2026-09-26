@@ -2,15 +2,14 @@
 name: java:design
 display_name: Java 架构与设计
 description: |
-  Java 架构、模块、接口、类与技术方案设计。产出为设计文档或 PR 内结构化结论
-  （非实现代码）。新设计前必经 grill-me，并须对照 AGENTS.md 模块职责与依赖规则。
-  当用户要做领域建模、划分模块与包结构、设计接口/类/方法签名、定义 REST 契约、
-  设计领域事件、规划状态机与生命周期、做技术选型，或需要产出架构/技术方案评审
-  意见时使用。
-  触发词：架构设计、方案设计、领域建模、模块划分、接口设计、类设计、API 设计、
-  技术选型、事件设计、状态机、契约设计、设计评审、防过度设计、方案瘦身。
+  Java 架构与技术方案设计。产出为设计文档或 PR 内结构化结论（非实现代码），须覆盖
+  工程模块划分、包结构与 DDD 边界、Entity 实体、枚举、StatusCode 状态码、
+  NexusException 异常语义、HTTP/Java 接口与 REST 契约。新设计前必经 grill-me，
+  并对照 AGENTS.md。触发词：架构设计、方案设计、领域建模、模块划分、包结构、
+  Entity 设计、枚举设计、状态码、异常契约、接口设计、API 设计、DDD 边界、
+  技术选型、设计评审。
 category: java
-version: 1.8.0
+version: 2.0.0
 ---
 
 # 架构、模块、接口与类设计
@@ -19,7 +18,19 @@ version: 1.8.0
 
 负责**设计决策**：这块能力归谁、边界在哪、契约长什么样、状态怎么流转。
 产出是**设计文档或 PR 内结构化结论**（Markdown，契约骨架），**不是**可运行实现。
-文档格式、章节结构、存放目录见 [design-deliverables.md](references/design-deliverables.md)。
+
+**须覆盖的设计面**（清单与门禁见 [structural-design-blueprint.md](references/structural-design-blueprint.md)）：
+
+1. **工程模块划分**（Maven 归属与依赖）
+2. **工程包结构 + DDD 有界上下文**
+3. **Entity**（表、基类、主键/稳定键、索引）
+4. **枚举**（领域 enum，与 StatusCode 区分）
+5. **状态码**（九字符 `StatusCode`）
+6. **异常**（`NexusException` 抛出边界）
+7. **接口**（Jakarta REST 端点、按需 Java API）
+8. **分层调用**（endpoint → service → operator → dao）
+
+文档格式、L2 章节结构、存放目录见 [design-deliverables.md](references/design-deliverables.md)。
 实现交给 `java:develop`；新建 Maven 模块交给 `java:project`。
 
 规范与契约条文**不在本技能正文复述**，统一通过 `java:reference` 引用。
@@ -72,11 +83,11 @@ npx skills use "https://github.com/mattpocock/skills" --skill "grill-me"
 `module-ownership.md` 是执行参考，AGENTS.md 是上位边界。
 
 ```text
-1. 定归属  →  AGENTS.md 模块职责 + java-reference → module-ownership.md（+ 是否 java:project）
-2. 建词汇  →  java-reference → standards-index.md / naming.md
-3. 划边界  →  package-structure.md、domain-modeling.md、scope-hierarchy.md
-4. 定契约  →  api-contract、exception-contract、persistence-contract、
-               event-contract（按需）、test-scope.md、quick-constraints.md
+1. 定归属  →  工程模块（module-ownership、module-layout）+ 是否 java:project
+2. 建词汇  →  命名 + 枚举语义 + 状态码 module 前缀（naming、exception-status-code）
+3. 划边界  →  包结构、DDD 表、Entity 基类与作用域（package-structure、domain-modeling、scope-hierarchy）
+4. 定契约  →  实体/枚举/端点/接口/失败矩阵（structural-design-blueprint §3–§7、
+               api-contract、exception-contract、persistence-contract、test-scope）
 ```
 
 每一步出口门禁未通过不得进入下一步，也不得进入 `java:develop`。
@@ -90,6 +101,7 @@ npx skills use "https://github.com/mattpocock/skills" --skill "grill-me"
 
 - [ ] 归属模块与业务域正确（含 plugin / console 边界），未与相邻域混同
 - [ ] 包结构领域优先（`role/endpoint`，禁止 `endpoint/role`）；大领域已划功能子模块；单包 ≤15 类（见 package-structure.md）
+- [ ] 若为 sample 扩展：交付面（core/console/inbound）与 `/platform/.../sample/...` 路径已定义（见 sample-extension-design.md）
 - [ ] 术语在端点/实体/DAO/数据库/测试之间一致
 - [ ] 运行时作用域（Session）与持久化范围（Entity 基类）已分别判定
 - [ ] 技术主键与稳定业务键已区分，稳定键的不可变性已定义
@@ -110,11 +122,13 @@ npx skills use "https://github.com/mattpocock/skills" --skill "grill-me"
 - [ ] 领域事件（若有）符合 event-contract.md
 - [ ] 测试范围已定义（契约测试 + 行为单测；见 test-scope.md），实现由 `java:develop` 测试先行交付
 - [ ] 四步法分步门禁已勾选（design-four-steps.md）
+- [ ] [structural-design-blueprint.md](references/structural-design-blueprint.md) §1–§7 设计门禁已对照
 
 ## 详细参考
 
 ### 本技能（设计专属）
 
+- [structural-design-blueprint.md](references/structural-design-blueprint.md) — **实体/枚举/状态码/异常/接口/DDD/模块/包** 设计清单与门禁
 - [design-deliverables.md](references/design-deliverables.md) — 产出形态、Markdown 结构、目录、交接 project/develop
 - [design-four-steps.md](references/design-four-steps.md) — 四步法分步门禁
 - [design-scenarios.md](references/design-scenarios.md) — 场景与 L0–L3 选型
@@ -125,11 +139,13 @@ npx skills use "https://github.com/mattpocock/skills" --skill "grill-me"
 - [test-scope.md](references/test-scope.md) — 测试范围与契约测试清单（设计侧）
 - [agents-template.md](../java-reference/references/agents-template.md) — L2 AGENTS 对齐节与根 AGENTS 增补片段
 - [code-quality-constraints.md](../java-reference/references/code-quality-constraints.md) — 防过度设计、结构 owner、双轨与投机分层
+- [sample-extension-design.md](references/sample-extension-design.md) — sample-platform 扩展设计补充（归属、交付面、路径）
 
 ### 规范复用（`java:reference`，不在此重复）
 
 - [module-ownership.md](../java-reference/references/module-ownership.md) — 模块归属决策
 - [package-structure.md](../java-reference/references/package-structure.md) — 领域优先包结构
+- [sample-extension-layout.md](../java-reference/references/sample-extension-layout.md) — sample 工程与 DDD 边界标准
 - [scope-hierarchy.md](../java-reference/references/scope-hierarchy.md) — Session 与持久化作用域
 - [domain-modeling.md](../java-reference/references/domain-modeling.md) — 实体/请求/VO/事件建模
 - [api-contract.md](../java-reference/references/api-contract.md) — 方法签名、分层、事务、兼容性
