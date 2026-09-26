@@ -21,6 +21,7 @@
 | `createdAt` | `LocalDateTime` | 创建时间 |
 | `updatedAt` | `LocalDateTime` | 最后更新时间 |
 
+
 ## DictionaryTypeOptionVo
 
 **类型：** record
@@ -34,6 +35,7 @@
 | `dictionaryTypeId` | `String` | type 标识符 |
 | `typeCode` | `String` | 稳定的类型编码 |
 | `typeName` | `String` | 显示名称 |
+
 
 ## DictionaryTypeVo
 

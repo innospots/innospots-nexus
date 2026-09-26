@@ -10,8 +10,9 @@
 
 | 常量 | 说明 |
 |------|------|
-| `INTERNAL` | 在应用框架内打开。 |
-| `NEW_WINDOW` | 在新浏览器窗口或标签页中打开。 |
+| `INTERNAL` | — |
+| `NEW_WINDOW` | — |
+
 
 ## MenuType
 
@@ -23,6 +24,6 @@
 
 | 常量 | 说明 |
 |------|------|
-| `DIRECTORY` | 分组子菜单节点且无导航目标。 |
-| `PAGE` | 渲染内部应用页面。 |
-| `EXTERNAL_LINK` | 打开外部 URL。 |
+| `DIRECTORY` | — |
+| `PAGE` | — |
+| `EXTERNAL_LINK` | — |

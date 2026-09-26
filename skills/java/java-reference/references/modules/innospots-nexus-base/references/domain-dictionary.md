@@ -4,7 +4,7 @@
 
 **类型：** record
 
-字典类型内的单个键值条目。显示名称与类型名称均支持国际化（{@link I18nObject}）。
+字典类型内的单个键值条目。显示名称与类型名称均支持国际化（I18nObject）。
 
 ### 组件（record）
 
@@ -16,11 +16,12 @@
 | `typeName` | `I18nObject` | 国际化类型名称 |
 | `status` | `BasicStatus` | 状态 |
 
+
 ## DictionaryType
 
 **类型：** record
 
-字典类型（如 "gender"、"country"），用于分组相关的 {@link DictionaryItem} 条目。 显示名称支持国际化。
+字典类型（如 "gender"、"country"），用于分组相关的 DictionaryItem 条目。 显示名称支持国际化。
 
 ### 组件（record）
 

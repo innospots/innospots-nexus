@@ -10,5 +10,5 @@
 
 | 常量 | 说明 |
 |------|------|
-| `ENABLED` | 已启用 |
-| `DISABLED` | 已禁用 |
+| `ENABLED` | — |
+| `DISABLED` | — |

@@ -10,8 +10,9 @@
 
 | 常量 | 说明 |
 |------|------|
-| `USER` | 平台用户或租户成员身份。 |
-| `ORG_UNIT` | 租户组织单元。 |
+| `USER` | — |
+| `ORG_UNIT` | — |
+
 
 ## RoleOwnerType
 
@@ -23,6 +24,6 @@
 
 | 常量 | 说明 |
 |------|------|
-| `PLATFORM` | 运维域平台角色。 |
-| `TENANT` | 租户级 role。 |
-| `WORKSPACE` | 工作区作用域内的 role。 |
+| `PLATFORM` | — |
+| `TENANT` | — |
+| `WORKSPACE` | — |

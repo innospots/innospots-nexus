@@ -127,7 +127,8 @@ version: 1.9.0
 | `innospots-nexus-base` | [README.md](references/modules/innospots-nexus-base/README.md) |
 | `innospots-nexus-core` | [README.md](references/modules/innospots-nexus-core/README.md) |
 | `innospots-nexus-console` | [README.md](references/modules/innospots-nexus-console/README.md) |
-| `innospots-nexus-plugin` | 暂无 API 索引；归属见 [module-ownership.md](references/module-ownership.md)；设计见 `innospots-nexus-plugin/docs/plugin/design/` |
+| `innospots-nexus-plugin` | [README.md](references/modules/innospots-nexus-plugin/README.md)（设计见 `innospots-nexus-plugin/docs/plugin/design/`） |
+| `innospots-nexus-plugin-ui-spec` | [README.md](references/modules/innospots-nexus-plugin-ui-spec/README.md)（Pactor Page DSL 1.0 YAML 规范，非 Maven 模块） |
 | `innospots-nexus-portal` | 暂无 API 索引；归属见 [module-ownership.md](references/module-ownership.md)；包结构见 [package-structure.md](references/package-structure.md) |
 | `innospots-nexus-platform` | 暂无 API 索引；归属见 [module-ownership.md](references/module-ownership.md) |
 | `innospots-nexus-sample` | 结构/契约见 [sample-extension-layout.md](references/sample-extension-layout.md)（非模块 API 索引） |

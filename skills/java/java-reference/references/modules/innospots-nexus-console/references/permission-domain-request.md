@@ -10,8 +10,15 @@
 
 | 名称 | 类型 | 说明 |
 |------|------|------|
-| `resourceId` | `String` | 被授权的资源主键。 |
-| `constraintDefinition` | `String` | datasource 授权对应的管理端附加查询条件，可为空。 |
+| `resourceId` | `/**
+         * 被授权的资源主键。
+         */
+        String` | — |
+| `constraintDefinition` | `/**
+         * datasource 授权对应的管理端附加查询条件，可为空。
+         */
+        String` | — |
+
 
 ## PermissionGrantReplaceRequest
 
@@ -23,10 +30,7 @@
 
 | 名称 | 类型 | 说明 |
 |------|------|------|
-| `grants` | `List<PermissionGrantItemRequest>` | 前端提交的完整授权集合；空集合表示清空该主体的授权。 |
-
-### 构造方法
-
-#### `PermissionGrantReplaceRequest()`
-
-- **说明：** 将空请求规范化为空集合，并复制集合避免调用方后续修改请求内容。
+| `grants` | `/**
+         * 前端提交的完整授权集合；空集合表示清空该主体的授权。
+         */
+        List<PermissionGrantItemRequest>` | — |

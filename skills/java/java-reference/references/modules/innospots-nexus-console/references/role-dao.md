@@ -6,6 +6,7 @@
 
 角色绑定记录的 MyBatis-Plus Mapper。
 
+
 ## RoleDao
 
 **类型：** interface

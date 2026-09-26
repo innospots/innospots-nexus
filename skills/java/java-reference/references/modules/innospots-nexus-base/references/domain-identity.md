@@ -19,7 +19,6 @@
 ### 方法
 
 #### `of(String roleId, String roleName, String roleCode, BasicStatus status) → RoleSnapshot`
-
 - **说明：** 创建不含成员用户 ID 的角色信息。
 - **参数：**
   - `roleId` — 角色 ID
@@ -27,6 +26,7 @@
   - `roleCode` — 角色编码
   - `status` — 状态
 - **返回：** 角色快照
+
 
 ## UserGroupSnapshot
 
@@ -46,79 +46,22 @@
 | `assistantUserIds` | `List<Long>` | 协助人用户 ID 列表 |
 | `status` | `BasicStatus` | 状态 |
 
-### 构造方法
-
-#### `UserGroupSnapshot()`
 
 ## UserSnapshot
 
 **类型：** class
 
-用户的会话/传输快照。包含不可变身份字段（{@code userId}、{@code userName}、{@code realName}）及可变属性如邮箱、头像、组成员与分配角色。非 portal 领域实体。
+用户的会话/传输快照。包含不可变身份字段（userId、userName、realName）及可变属性如邮箱、头像、组成员与分配角色。非 portal 领域实体。
 
 ### 方法
 
-#### `simple(Long userId, String userName, String realName) → UserSnapshot`
-
-
 #### `fromContextOptional() → Optional<UserSnapshot>`
-
-- **说明：** 当 {@link TLC} 中存在身份键时，从当前线程上下文重建快照。
+- **说明：** 当 TLC 中存在身份键时，从当前线程上下文重建快照。
 - **返回：** 快照可选值，无用户 ID 时为空
 
 #### `fromContext() → UserSnapshot`
-
-- **说明：** 从当前 {@link TLC} 身份键重建快照。
+- **说明：** 从当前 TLC 身份键重建快照。
 - **返回：** 用户快照
-- **异常：** NexusException 当 {@link TLC#userId()} 缺失时
 
 #### `fromClaims(Map<String, ?> claims) → UserSnapshot`
-
-- **说明：** 从令牌或会话声明构建快照。键与 {@link TLC} 常量 （{@link TLC#USER_ID}、{@link TLC#USER_NAME} 等）对齐。
-
-#### `userId() → Long`
-
-
-#### `userName() → String`
-
-
-#### `realName() → String`
-
-
-#### `displayName() → String`
-
-
-#### `email() → String`
-
-
-#### `email(String email) → UserSnapshot`
-
-
-#### `avatarKey() → String`
-
-
-#### `avatarKey(String avatarKey) → UserSnapshot`
-
-
-#### `lastAccessTime() → LocalDateTime`
-
-
-#### `lastAccessTime(LocalDateTime lastAccessTime) → UserSnapshot`
-
-
-#### `status() → BasicStatus`
-
-
-#### `status(BasicStatus status) → UserSnapshot`
-
-
-#### `group() → UserGroupSnapshot`
-
-
-#### `group(UserGroupSnapshot group) → UserSnapshot`
-
-
-#### `roles() → List<RoleSnapshot>`
-
-
-#### `role(RoleSnapshot role) → UserSnapshot`
+- **说明：** 从令牌或会话声明构建快照。键与 TLC 常量 （TLC、TLC 等）对齐。 / public static UserSnapshot fromClaims(Map claims)

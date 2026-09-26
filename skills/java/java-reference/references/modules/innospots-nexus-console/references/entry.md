@@ -1,5 +1,12 @@
 # 包 `entry`
 
+## BuiltinConsoleEntryPlugins
+
+**类型：** class
+
+内置控制台 entry 插件身份常量。
+
+
 ## ConsoleModuleDescriptor
 
 **类型：** record
@@ -12,7 +19,7 @@
 |------|------|------|
 | `pluginId` | `String` | 反向域名插件标识 |
 | `moduleKey` | `String` | 控制台模块键与 PageDsl 目录名 |
-| `pageKey` | `String` | PageDsl 页面键，通常为 {@code {moduleKey}-main} |
+| `pageKey` | `String` | PageDsl 页面键，通常为 {moduleKey-main} |
 | `pagePath` | `String` | 前端路由路径 |
 | `menuKey` | `String` | 模块内菜单 entry 键 |
 | `menuIcon` | `String` | 可选 menu icon |
@@ -24,8 +31,22 @@
 ### 方法
 
 #### `mainPageKey(String moduleKey) → String`
-
 - **说明：** 返回控制台模块的主页面键。
 - **参数：**
   - `moduleKey` — 控制台模块键
-- **返回：** stable 页面键，例如 {@code menu-main}
+- **返回：** stable 页面键，例如 menu-main
+
+
+## ConsoleModuleEntrySupport
+
+**类型：** class
+
+内置控制台模块 entry 插件的共享组装辅助工具。
+
+### 方法
+
+#### `definition(ConsoleModuleDescriptor descriptor) → PluginDefinition`
+- **说明：** 为单个控制台主页面构建仅贡献型插件定义。
+- **参数：**
+  - `descriptor` — 内置模块元数据
+- **返回：** immutable 插件定义

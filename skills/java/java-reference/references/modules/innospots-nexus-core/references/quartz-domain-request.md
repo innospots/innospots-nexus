@@ -4,7 +4,7 @@
 
 **类型：** record
 
-调度 Quartz 作业的请求；构造时校验必填字段。
+调度 Quartz 作业的请求；构造时校验必填字段。 可使用静态工厂方法便捷创建常见调度类型：{@link #cron}、{@link #once}、{@link #scheduled}。
 
 ### 组件（record）
 
@@ -18,15 +18,12 @@
 | `endTime` | `Date` | SCHEDULED 模式的结束时间 |
 | `dataMap` | `Map<String, ?>` | 作业数据映射（防御性复制） |
 
-### 构造方法
-
-#### `QuartzJobRequest()`
-
-
 ### 方法
 
-#### `cron(String jobName, Class<? extends Job> jobClass, String cronExpression, Map<String, ?> dataMap) → QuartzJobRequest`
-
+#### `cron(String jobName,
+            Class<? extends Job> jobClass,
+            String cronExpression,
+            Map<String, ?> dataMap) → QuartzJobRequest`
 - **说明：** 创建 Cron 触发作业请求。
 - **参数：**
   - `jobName` — 作业名称
@@ -35,8 +32,10 @@
   - `dataMap` — 作业数据
 - **返回：** 作业请求
 
-#### `once(String jobName, Class<? extends Job> jobClass, Date startTime, Map<String, ?> dataMap) → QuartzJobRequest`
-
+#### `once(String jobName,
+            Class<? extends Job> jobClass,
+            Date startTime,
+            Map<String, ?> dataMap) → QuartzJobRequest`
 - **说明：** 创建在指定开始时间触发一次的作业请求。
 - **参数：**
   - `jobName` — 作业名称
@@ -45,8 +44,11 @@
   - `dataMap` — 作业数据
 - **返回：** 作业请求
 
-#### `scheduled(String jobName, Class<? extends Job> jobClass, String cronExpression, Date endTime, Map<String, ?> dataMap) → QuartzJobRequest`
-
+#### `scheduled(String jobName,
+            Class<? extends Job> jobClass,
+            String cronExpression,
+            Date endTime,
+            Map<String, ?> dataMap) → QuartzJobRequest`
 - **说明：** 创建带 Cron 表达式与可选结束时间的调度作业请求。
 - **参数：**
   - `jobName` — 作业名称

@@ -14,24 +14,13 @@
 | `itemName` | `String` | 显示名称 |
 | `sortOrder` | `Integer` | 显示顺序 |
 
+
 ## DictionaryItemPageRequest
 
-**类型：** record
+**类型：** class
 
 由管理控制台查询参数绑定的分页字典项查询。
 
-### 组件（record）
-
-| 名称 | 类型 | 说明 |
-|------|------|------|
-| `input` | `String` | 字典项名称或值的模糊匹配 |
-| `status` | `BasicStatus` | 可选 生命周期状态 |
-| `pageNo` | `long` | 从 1 开始的页码 |
-| `pageSize` | `long` | 分页大小 |
-
-### 构造方法
-
-#### `DictionaryItemPageRequest()`
 
 ## DictionaryItemStatusUpdateRequest
 
@@ -45,6 +34,7 @@
 |------|------|------|
 | `status` | `BasicStatus` | 目标字典项状态 |
 
+
 ## DictionaryItemUpdateRequest
 
 **类型：** record
@@ -57,6 +47,7 @@
 |------|------|------|
 | `itemName` | `String` | 显示名称 |
 | `sortOrder` | `Integer` | 显示顺序 |
+
 
 ## DictionaryTypeCreateRequest
 
@@ -73,25 +64,13 @@
 | `securityRealm` | `SecurityRealm` | PLATFORM 或 TENANT |
 | `sortOrder` | `Integer` | 显示顺序 |
 
+
 ## DictionaryTypePageRequest
 
-**类型：** record
+**类型：** class
 
 由管理控制台查询参数绑定的分页字典类型查询。
 
-### 组件（record）
-
-| 名称 | 类型 | 说明 |
-|------|------|------|
-| `input` | `String` | 类型名称或编码的模糊匹配 |
-| `status` | `BasicStatus` | 可选 生命周期状态 |
-| `builtIn` | `Boolean` | 可选 built-in type filter |
-| `pageNo` | `long` | 从 1 开始的页码 |
-| `pageSize` | `long` | 分页大小 |
-
-### 构造方法
-
-#### `DictionaryTypePageRequest()`
 
 ## DictionaryTypeStatusUpdateRequest
 
@@ -104,6 +83,7 @@
 | 名称 | 类型 | 说明 |
 |------|------|------|
 | `status` | `BasicStatus` | 目标类型状态 |
+
 
 ## DictionaryTypeUpdateRequest
 

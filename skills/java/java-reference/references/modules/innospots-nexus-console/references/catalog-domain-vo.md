@@ -20,7 +20,3 @@
 | `displayName` | `String` | 展示名称 |
 | `sortOrder` | `Integer` | 同级排序 |
 | `children` | `List<CatalogNodeVo>` | 子节点 |
-
-### 构造方法
-
-#### `CatalogNodeVo()`

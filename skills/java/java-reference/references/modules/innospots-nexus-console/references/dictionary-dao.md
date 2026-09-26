@@ -6,6 +6,7 @@
 
 字典项记录的 MyBatis-Plus Mapper。
 
+
 ## DictionaryTypeDao
 
 **类型：** interface

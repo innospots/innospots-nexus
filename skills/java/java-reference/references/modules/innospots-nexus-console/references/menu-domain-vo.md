@@ -16,6 +16,7 @@
 | `menuType` | `MenuType` | 菜单节点类型 |
 | `disabled` | `Boolean` | 选项是否不可选择 |
 
+
 ## MenuVo
 
 **类型：** record
@@ -45,9 +46,6 @@
 | `updatedAt` | `LocalDateTime` | 最后更新时间 |
 | `children` | `List<MenuVo>` | 嵌套子菜单 |
 
-### 构造方法
-
-#### `MenuVo()`
 
 ## NavigationMenuVo
 
@@ -71,7 +69,3 @@
 | `moduleKey` | `String` | 控制台模块键 |
 | `pageKey` | `String` | 关联页面标识 |
 | `children` | `List<NavigationMenuVo>` | 嵌套可见导航节点 |
-
-### 构造方法
-
-#### `NavigationMenuVo()`

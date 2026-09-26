@@ -15,36 +15,28 @@
 | `status` | `String` | 生命周期状态 name |
 | `realm` | `SecurityRealm` | 所属安全域 |
 
+
 ## CredentialRecord
 
 **类型：** record
 
-域用户的密码凭证快照。
+域用户的鉴权凭据快照（opaque verifier，由 algorithm 解释）。
 
 ### 组件（record）
 
 | 名称 | 类型 | 说明 |
 |------|------|------|
-| `userId` | `String` | owner 标识符 |
-| `passwordHash` | `String` | 存储的哈希值 |
-| `passwordSalt` | `String` | 哈希盐值 |
-| `passwordAlgorithm` | `String` | 算法名称 |
+| `subjectId` | `String` | 用户主体 ID（platform_user_id 或 tenant_user_id） |
+| `credentialKind` | `String` | 凭据类型 name（如 PASSWORD） |
+| `algorithm` | `String` | 可插拔算法 ID |
+| `verifier` | `String` | 不透明验证材料 |
+| `verifierParams` | `String` | 算法私有参数（console 不解析） |
+| `credentialVersion` | `Integer` | 凭据版本 |
 | `failedAttempts` | `Integer` | 连续失败次数 |
-| `lockedUntil` | `LocalDateTime` | 锁定过期时间 |
-| `forceReset` | `Boolean` | 下次登录是否必须修改密码 |
+| `lockedUntil` | `LocalDateTime` | 锁定截止时间 |
+| `forceReset` | `Boolean` | 下次登录是否必须改密 |
+| `expiredAt` | `LocalDateTime` | 过期时间 |
 
-## TenantMembership
-
-**类型：** record
-
-租户域身份认证后使用的活跃租户成员关系。
-
-### 组件（record）
-
-| 名称 | 类型 | 说明 |
-|------|------|------|
-| `tenantId` | `String` | tenant 标识符 |
-| `tenantMemberId` | `String` | tenant member 标识符 |
 
 ## TokenClaims
 

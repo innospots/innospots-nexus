@@ -2,12 +2,13 @@
 
 ## CurrentAuthorizationEndpoint
 
-**类型：** interface
+**类型：** class
 
-查询当前用户可见权限资源的管理接口契约。
+当前用户可见权限资源的 REST 资源。
+
 
 ## GrantManagementEndpoint
 
-**类型：** interface
+**类型：** class
 
-角色和组织单元权限全量替换的管理接口契约。
+角色与组织单元权限全量替换的管理 REST 资源。

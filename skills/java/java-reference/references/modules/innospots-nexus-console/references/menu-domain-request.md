@@ -23,6 +23,7 @@
 | `visible` | `Boolean` | 节点是否在导航中可见 |
 | `sortOrder` | `Integer` | sibling 显示顺序 |
 
+
 ## MenuOrderRequest
 
 **类型：** record
@@ -36,9 +37,6 @@
 | `parentId` | `String` | 可选 parent 菜单标识符 for root menus |
 | `menuIds` | `List<String>` | menu 标识符s in target 显示顺序 |
 
-### 构造方法
-
-#### `MenuOrderRequest()`
 
 ## MenuStatusUpdateRequest
 
@@ -52,6 +50,7 @@
 |------|------|------|
 | `status` | `BasicStatus` | target 生命周期状态 |
 
+
 ## MenuTreeRequest
 
 **类型：** record
@@ -62,10 +61,11 @@
 
 | 名称 | 类型 | 说明 |
 |------|------|------|
-| `input` | `String` | 菜单名称或键的模糊匹配 |
-| `menuType` | `MenuType` | 可选 menu 字典类型 |
-| `status` | `BasicStatus` | 可选 生命周期状态 |
-| `visible` | `Boolean` | 可选 navigation visibility |
+| `input` | `@QueryParam("input") String` | 菜单名称或键的模糊匹配 |
+| `menuType` | `@QueryParam("menuType") MenuType` | 可选 menu 字典类型 |
+| `status` | `@QueryParam("status") BasicStatus` | 可选 生命周期状态 |
+| `visible` | `@QueryParam("visible") Boolean` | 可选 navigation visibility |
+
 
 ## MenuUpdateRequest
 

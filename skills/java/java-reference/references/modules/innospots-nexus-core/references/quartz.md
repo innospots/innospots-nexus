@@ -27,19 +27,9 @@
 
 静态工厂：`cron(...)`、`once(...)`、`scheduled(...)`。
 
-| 字段 | 说明 |
-|-------|-------|
-| `jobName` | 组内唯一 |
-| `jobClass` | `org.quartz.Job` 实现 |
-| `scheduleMode` | 必填 |
-| `cronExpression` | `CRON` / `SCHEDULED` 时必填 |
-| `dataMap` | 防御性复制的作业数据 |
-
-作业实现类位于**上层模块**（portal/platform/plugin）；core 仅提供调度基础设施。
-
 ## QuartzJobInfo / QuartzTriggerInfo
 
-**类型：** class
+**类型：** record
 
 用于列出作业和触发器的读模型（名称、组、cron、下次触发时间、状态）。
 
@@ -48,3 +38,9 @@
 **类型：** class / enum
 
 从命名周期构建或解析 cron 表达式的辅助工具。
+
+作业实现类位于**上层模块**（portal/platform/plugin）；core 仅提供调度基础设施。
+
+细分 API 见 [`quartz-service.md`](quartz-service.md)、[`quartz-domain-request.md`](quartz-domain-request.md)、
+[`quartz-domain-model.md`](quartz-domain-model.md)、[`quartz-domain-enums.md`](quartz-domain-enums.md)、
+[`quartz-enums.md`](quartz-enums.md)、[`quartz-converter.md`](quartz-converter.md)。

@@ -9,7 +9,6 @@
 ### 方法
 
 #### `save(FileResource resource, String module, String moduleKey, String storeMode) → MetaResource`
-
 - **说明：** 存储文件，并在资源要求时持久化元数据。
 - **参数：**
   - `resource` — 文件载荷
@@ -19,21 +18,18 @@
 - **返回：** 存储后的元数据
 
 #### `read(String resourceId) → Optional<byte[]>`
-
 - **说明：** 按资源标识读取二进制内容。
 - **参数：**
   - `resourceId` — 资源标识
 - **返回：** 找到时的二进制载荷
 
 #### `delete(String resourceId) → boolean`
-
 - **说明：** 删除已存储资源及其元数据行。
 - **参数：**
   - `resourceId` — 资源标识
-- **返回：** 记录存在且删除成功时返回 {@code true}
+- **返回：** 记录存在且删除成功时返回 true
 
 #### `findById(String resourceId) → Optional<MetaResource>`
-
 - **说明：** 按资源标识查找持久化元数据。
 - **参数：**
   - `resourceId` — 资源标识

@@ -4,7 +4,7 @@
 
 **类型：** record
 
-带内容流与元数据标志的文件资源。 当 {@code saveMeta} 为 true 时，资源存储会同时持久化元数据与二进制内容。
+带内容流与元数据标志的文件资源。 当 saveMeta 为 true 时，资源存储会同时持久化元数据与二进制内容。
 
 ### 组件（record）
 
@@ -16,11 +16,12 @@
 | `inputStream` | `InputStream` | 内容输入流 |
 | `saveMeta` | `boolean` | 是否同时保存元数据 |
 
+
 ## MetaResource
 
 **类型：** record
 
-已存储资源的不变元数据记录。将资源关联到模块上下文（{@code module} + {@code moduleKey}）， 并记录存储详情（URI、存储模式、创建时间）。
+已存储资源的不变元数据记录。将资源关联到模块上下文（module + moduleKey）， 并记录存储详情（URI、存储模式、创建时间）。
 
 ### 组件（record）
 
@@ -36,6 +37,7 @@
 | `storeMode` | `String` | 存储模式 |
 | `createdAt` | `Instant` | 创建时间 |
 
+
 ## ResourceEvent
 
 **类型：** record
@@ -46,60 +48,48 @@
 
 | 名称 | 类型 | 说明 |
 |------|------|------|
-| `metaResource` | `MetaResource` | 已保存的资源元数据 |
+| `eventType(` | `MetaResource metaResource) implements DomainEvent {
+
+    /**
+     * 返回事件类型标识。
+     *
+     * @return 事件类型字符串
+     */
+    @Override
+    public String` | — |
 
 ### 方法
 
 #### `eventType() → String`
-
 - **说明：** 返回事件类型标识。
 - **返回：** 事件类型字符串
+
 
 ## ResourcePatternResolver
 
 **类型：** class
 
-\/*.xml}）解析为 {@link Resource} 列表。 支持以下位置前缀： <ul> <li>{@code classpath*:} — 扫描所有 classpath 根目录以匹配资源</li> <li>{@code classpath:} — 仅扫描第一个匹配的 classpath 根目录</li> <li>（无前缀）— 同 {@code classpath*:}</li> </ul> 模式匹配使用 Hutool 的 {@link AntPathMatcher}，语法与 Spring AntPathMatcher 相同 （{@code **}、{@code *}、{@code ?}）。
+将资源位置模式（如 classpath*:mapper/**\/*.xml）解析为 Resource 列表。 支持以下位置前缀： classpath*: — 扫描所有 classpath 根目录以匹配资源 classpath: — 仅扫描第一个匹配的 classpath 根目录 （无前缀）— 同 classpath*: 模式匹配使用 Hutool 的 AntPathMatcher，语法与 Spring AntPathMatcher 相同 （**、*、?）。
 
 ### 方法
 
 #### `getResources(String locationPattern) → List<Resource>`
-
-- **说明：** \/*.xml}）
+- **说明：** 使用默认类加载器创建解析器。 / public ResourcePatternResolver() { this(ClassUtil.getClassLoader()); } /** 使用指定类加载器创建解析器。
+- **参数：**
+  - `classLoader` — 用于 classpath 扫描的类加载器
+  - `locationPattern` — 资源位置模式（如 classpath*:mapper/**\/*.xml）
 - **返回：** 匹配的资源列表（永不为 null）
-- **异常：** IOException classpath 扫描失败时
 
 #### `getMatchedResources(String locationPattern) → List<MatchedResource>`
-
-- **说明：** 返回匹配给定位置模式的 {@link MatchedResource} 列表。 与 {@link #getResources(String)} 不同，每个结果保留原始匹配的 classpath 路径。
+- **说明：** 返回匹配给定位置模式的 MatchedResource 列表。 与 {@link #getResources(String)} 不同，每个结果保留原始匹配的 classpath 路径。
 - **参数：**
   - `locationPattern` — 资源位置模式
 - **返回：** 带路径信息的匹配资源列表（永不为 null）
-- **异常：** IOException classpath 扫描失败时
-
-#### `getPath() → String`
-
-- **说明：** 返回 classpath 相对匹配路径。
-- **返回：** 匹配路径
 
 #### `getResource() → Resource`
-
 - **说明：** 返回底层委托资源。
 - **返回：** 委托资源
 
-#### `getName() → String`
-
-
-#### `getUrl() → URL`
-
-
-#### `getStream() → InputStream`
-
-
-#### `isModified() → boolean`
-
-
-#### `toString() → String`
 
 ## ResourceStore
 

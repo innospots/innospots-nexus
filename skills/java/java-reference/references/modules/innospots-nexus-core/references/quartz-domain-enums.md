@@ -10,7 +10,7 @@ Quartz 作业的调度模式。
 
 | 常量 | 说明 |
 |------|------|
-| `ONCE` | 在指定开始时间触发一次。 |
-| `SCHEDULED` | 按 Cron 调度直至结束时间。 |
-| `CRON` | 按 Cron 无限期调度。 |
-| `MANUAL` | 仅手动触发，不自动调度。 |
+| `ONCE` | — |
+| `SCHEDULED` | — |
+| `CRON` | — |
+| `MANUAL` | — |

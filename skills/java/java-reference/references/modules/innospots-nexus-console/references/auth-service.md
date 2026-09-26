@@ -4,37 +4,33 @@
 
 **类型：** class
 
-编排域登录、租户选择与令牌刷新。 用户行保留在 platform 或 portal；本门面仅使用目录端口。
+运维平台域登录与令牌刷新编排。租户域认证见 portal.auth.service.TenantAuthFacade。
 
 ### 方法
 
-#### `login(SecurityRealm realm, AuthLoginRequest request) → AuthTokenVo`
+#### `realm() → SecurityRealm`
+- **说明：** 所属安全域（构造时绑定）。 / public SecurityRealm realm()
 
+#### `issueLoginCaptcha(String clientKey) → AuthCaptchaVo`
+- **说明：** 发放登录用图形验证码。
+- **参数：**
+  - `clientKey` — 客户端事务键；空白时由服务端生成
+
+#### `login(AuthLoginRequest request) → AuthTokenVo`
 - **说明：** 认证域用户并签发令牌对。
 - **参数：**
-  - `realm` — PLATFORM 或 TENANT
   - `request` — 登录身份与加密密码
 - **返回：** issued 令牌对
 
-#### `selectTenant(String tenantUserId, SelectTenantRequest request) → AuthTokenVo`
-
-- **说明：** 将租户身份交换为绑定单一成员关系的业务令牌。
-- **参数：**
-  - `tenantUserId` — tenant-realm user 标识符
-  - `request` — 待激活的租户
-- **返回：** TENANT 业务令牌
-
-#### `refresh(SecurityRealm realm, TokenRefreshRequest request) → AuthTokenVo`
-
+#### `refresh(TokenRefreshRequest request) → AuthTokenVo`
 - **说明：** 从同域刷新令牌签发新令牌对。
 - **参数：**
-  - `realm` — 期望的安全域
   - `request` — 刷新令牌
 - **返回：** new 令牌对
 
 #### `logout() → void`
+- **说明：** 完成登出。紧凑令牌在过期前仍然有效。 / public void logout()
 
-- **说明：** 完成登出。紧凑令牌在过期前仍然有效。
 
 ## AuthSessionScope
 
@@ -52,6 +48,7 @@
 | `workspaceId` | `String` | 作用域 BUSINESS 令牌上的活跃工作区 |
 | `projectId` | `String` | 作用域 BUSINESS 令牌上的活跃项目 |
 
+
 ## AuthTokenPairIssuer
 
 **类型：** class
@@ -61,13 +58,34 @@
 ### 方法
 
 #### `issue(SecurityRealm realm, String userId, AuthSessionScope scope) → AuthTokenVo`
-
 - **说明：** 为给定域用户与会话作用域签发令牌对。
 - **参数：**
   - `realm` — PLATFORM 或 TENANT
   - `userId` — platform or tenant user 标识符
   - `scope` — 编码进声明的会话作用域
 - **返回：** issued 令牌对
+
+
+## LoginCaptchaGate
+
+**类型：** class
+
+登录前图形验证码策略与编排；实现委托 CaptchaChallengeService。
+
+### 方法
+
+#### `isRequired(SecurityRealm realm) → boolean`
+- **说明：** 当前安全域是否要求登录图形码。 / public boolean isRequired(SecurityRealm realm)
+
+#### `issueForLogin(SecurityRealm realm, String clientKey) → AuthCaptchaVo`
+- **说明：** 发放登录用图形验证码。
+- **参数：**
+  - `realm` — 平台或租户域
+  - `clientKey` — 客户端事务键；空白时自动生成
+
+#### `verifyIfRequired(SecurityRealm realm, AuthLoginRequest request) → void`
+- **说明：** 若策略开启则校验登录请求中的图形码；失败对外统一为认证失败。 / public void verifyIfRequired(SecurityRealm realm, AuthLoginRequest request)
+
 
 ## TokenIssuer
 
@@ -78,25 +96,21 @@
 ### 方法
 
 #### `issue(TokenClaims claims) → String`
-
 - **说明：** 将声明加密为紧凑令牌字符串。
 - **参数：**
   - `claims` — 令牌声明
 - **返回：** AES-GCM 紧凑令牌
 
 #### `parse(String token) → TokenClaims`
-
 - **说明：** 将紧凑令牌解密为声明。
 - **参数：**
   - `token` — 紧凑令牌
 - **返回：** parsed 声明
 
 #### `accessTokenTtlSeconds() → long`
-
 - **说明：** 返回访问令牌有效期（秒）。
 - **返回：** access TTL
 
 #### `refreshTokenTtlSeconds() → long`
-
 - **说明：** 返回刷新令牌有效期（秒）。
 - **返回：** refresh TTL

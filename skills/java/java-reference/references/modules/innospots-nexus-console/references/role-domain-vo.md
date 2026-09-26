@@ -16,6 +16,7 @@
 | `subjectId` | `String` | subject 标识符 |
 | `createdAt` | `LocalDateTime` | 分配时间 |
 
+
 ## RoleOptionVo
 
 **类型：** record
@@ -30,6 +31,7 @@
 | `roleName` | `String` | 显示名称 |
 | `roleCode` | `String` | 稳定编码 |
 | `administrator` | `Boolean` | 是否为管理员角色 |
+
 
 ## RoleVo
 
