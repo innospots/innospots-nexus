@@ -13,9 +13,10 @@ public interface PageDslLoader {
     /**
      * 加载一个页面 DSL 文档。
      *
+     * @param domainKey 项目领域键
      * @param moduleKey 所属模块键
      * @param pageKey 与 {@code page.id} 匹配的页面键
      * @return 页面 DSL 文档
      */
-    PageDsl load(String moduleKey, String pageKey);
+    PageDsl load(String domainKey, String moduleKey, String pageKey);
 }

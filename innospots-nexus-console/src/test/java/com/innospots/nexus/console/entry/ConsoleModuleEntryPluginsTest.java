@@ -37,12 +37,16 @@ class ConsoleModuleEntryPluginsTest {
                 .orElseThrow();
 
         ConsoleModuleDeclaration module = contribution.modules().getFirst();
-        String pageKey = ConsoleModuleDescriptor.mainPageKey(module.moduleKey());
+        String entryPageKey = ConsoleModuleDescriptor.mainPageKey(module.moduleKey());
         assertThat(module.moduleKey()).isNotBlank();
         assertThat(module.pages()).singleElement()
-                .satisfies(page -> assertThat(page.pageKey()).isEqualTo(pageKey));
+                .satisfies(page -> {
+                    assertThat(page.pageKey()).isEqualTo(entryPageKey);
+                    assertThat(page.pagePath()).isEqualTo(ConsoleModuleDescriptor.pagePath(
+                            module.domainKey(), module.moduleKey(), entryPageKey));
+                });
         assertThat(module.menuTree()).singleElement()
-                .satisfies(menu -> assertThat(menu.pageKey()).isEqualTo(pageKey));
+                .satisfies(menu -> assertThat(menu.pageKey()).isEqualTo(entryPageKey));
         assertThat(definition.capabilities()).isEmpty();
     }
 
@@ -56,7 +60,7 @@ class ConsoleModuleEntryPluginsTest {
                 new JacksonPageDslParser(config),
                 getClass().getClassLoader());
 
-        PageDsl document = loader.load(moduleKey, pageKey);
+        PageDsl document = loader.load(ConsoleModuleDescriptor.BUILTIN_DOMAIN_KEY, moduleKey, pageKey);
 
         assertThat(document.getPage().getId()).isEqualTo(pageKey);
         assertThat(document.getPage().getType()).isEqualTo("general");

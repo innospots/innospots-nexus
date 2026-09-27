@@ -1,9 +1,8 @@
 package com.innospots.nexus.console.entry;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import com.innospots.nexus.core.plugin.capability.Tags;
 import com.innospots.nexus.core.plugin.contribution.console.ConsoleModuleDeclaration;
 import com.innospots.nexus.core.plugin.contribution.console.ConsolePluginContribution;
 import com.innospots.nexus.core.plugin.contribution.console.MenuDeclaration;
@@ -31,23 +30,35 @@ public final class ConsoleModuleEntrySupport {
         return PluginDefinition.builder(descriptor.pluginId())
                 .displayName(descriptor.displayName())
                 .description(descriptor.description())
-                .version("1.0.0")
-                .tags(Tags.from(Map.of("scope", "console", "module", descriptor.moduleKey())))
+                .version(BuiltinConsoleEntryPlugins.pluginVersion())
+                .tags(BuiltinConsoleEntryPlugins.tagsFor(descriptor))
                 .contribute(consoleContribution(descriptor))
                 .build();
     }
 
     private static ConsolePluginContribution consoleContribution(ConsoleModuleDescriptor descriptor) {
         return new ConsolePluginContribution(List.of(new ConsoleModuleDeclaration(
+                descriptor.domainKey(),
                 descriptor.moduleKey(),
                 descriptor.displayName(),
                 descriptor.description(),
-                List.of(new UiSpecPageDeclaration(descriptor.pageKey(), descriptor.pagePath(), List.of())),
+                buildPageDeclarations(descriptor),
                 List.of(MenuDeclaration.page(
                         descriptor.menuKey(),
                         descriptor.pageTitle(),
                         descriptor.menuIcon(),
                         descriptor.orderIndex(),
-                        descriptor.pageKey())))));
+                        descriptor.entryPageKey())))));
+    }
+
+    private static List<UiSpecPageDeclaration> buildPageDeclarations(ConsoleModuleDescriptor descriptor) {
+        List<UiSpecPageDeclaration> pages = new ArrayList<>();
+        for (String pageKey : descriptor.allPageKeys()) {
+            pages.add(new UiSpecPageDeclaration(
+                    pageKey,
+                    ConsoleModuleDescriptor.pagePath(descriptor.domainKey(), descriptor.moduleKey(), pageKey),
+                    List.of()));
+        }
+        return List.copyOf(pages);
     }
 }

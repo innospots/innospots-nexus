@@ -37,13 +37,13 @@ public final class DefaultPageDslEndpoint implements PageDslEndpoint {
     }
 
     @Override
-    public PageDsl render(String moduleKey, String pageKey, Map<String, Object> parameters) {
-        if (!hasText(moduleKey) || !hasText(pageKey)) {
+    public PageDsl render(String domainKey, String moduleKey, String pageKey, Map<String, Object> parameters) {
+        if (!hasText(domainKey) || !hasText(moduleKey) || !hasText(pageKey)) {
             throw NexusException.build(
                     NexusStatusCode.CONFIG_ERROR.fullCode(),
-                    "PageDsl moduleKey and pageKey are required");
+                    "PageDsl domainKey, moduleKey and pageKey are required");
         }
-        PageDsl document = loader.load(moduleKey, pageKey);
+        PageDsl document = loader.load(domainKey, moduleKey, pageKey);
         PageDslRenderContext context = PageDslRenderContext.of(moduleKey, pageKey, document, parameters);
         return filterChain.process(context);
     }

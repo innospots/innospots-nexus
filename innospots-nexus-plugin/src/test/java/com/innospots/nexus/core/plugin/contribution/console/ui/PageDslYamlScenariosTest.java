@@ -37,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class PageDslYamlScenariosTest {
 
-    private static final String FIXTURE = "ui-pages/demo/customer-list.yaml";
+    private static final String FIXTURE = "ui-pages/demo/demo/customer-list.yaml";
 
     private PageDsl document;
     private String yamlContent;
@@ -120,6 +120,7 @@ class PageDslYamlScenariosTest {
                 PageDslFilterChain.create().add(new StateBindingPageDslFilter()));
 
         PageDsl rendered = endpoint.render(
+                "demo",
                 "demo",
                 "customer-list",
                 Map.of("keyword", "Acme", "page", 3));

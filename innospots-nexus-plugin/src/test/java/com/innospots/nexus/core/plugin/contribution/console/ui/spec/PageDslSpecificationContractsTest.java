@@ -264,7 +264,7 @@ class PageDslSpecificationContractsTest {
                 parser,
                 getClass().getClassLoader());
 
-        PageDsl document = loader.load("demo", pageKey);
+        PageDsl document = loader.load("demo", "demo", pageKey);
 
         assertThat(document.getDsl()).isEqualTo(PageDsl.SPEC_VERSION);
         assertThat(document.getPage().getId()).isEqualTo(pageKey);

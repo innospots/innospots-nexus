@@ -57,7 +57,7 @@ class ConsoleCatalogSyncServiceTest {
         approve.setParams(Map.of("dataSource", "approve"));
         document.getActions().put("approve", new ActionOrList(List.of(approve)));
 
-        PageDslLoader loader = (moduleKey, pageKey) -> document;
+        PageDslLoader loader = (domainKey, moduleKey, pageKey) -> document;
         ConsoleCatalogResourceDao resourceDao = mock(ConsoleCatalogResourceDao.class);
         List<ConsoleCatalogResourceEntity> inserted = new ArrayList<>();
         doAnswer(invocation -> {
@@ -100,7 +100,7 @@ class ConsoleCatalogSyncServiceTest {
         PageDsl firstDocument = ordersPage(httpDataSource("GET", "/api/orders"));
         PageDsl secondDocument = ordersPage(httpDataSource("POST", "/api/orders/search"));
         PageDsl[] current = {firstDocument};
-        PageDslLoader loader = (moduleKey, pageKey) -> current[0];
+        PageDslLoader loader = (domainKey, moduleKey, pageKey) -> current[0];
         ConsoleCatalogResourceDao resourceDao = mock(ConsoleCatalogResourceDao.class);
         List<ConsoleCatalogResourceEntity> stored = new ArrayList<>();
         doAnswer(invocation -> {
@@ -169,6 +169,7 @@ class ConsoleCatalogSyncServiceTest {
 
     private static ConsolePluginContribution contribution() {
         return new ConsolePluginContribution(List.of(new ConsoleModuleDeclaration(
+                        "sales",
                         "sales",
                         com.innospots.nexus.base.i18n.I18nObject.of("en", "Sales"),
                         com.innospots.nexus.base.i18n.I18nObject.of("en", "Sales module"),

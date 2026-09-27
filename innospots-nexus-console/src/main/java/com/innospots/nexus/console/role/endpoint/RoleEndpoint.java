@@ -22,6 +22,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import com.innospots.nexus.base.domain.enums.BasicStatus;
 import com.innospots.nexus.base.domain.response.PageResult;
 import com.innospots.nexus.base.domain.response.R;
+import com.innospots.nexus.console.config.ConsoleConstant;
 import com.innospots.nexus.console.role.domain.request.RoleCreateRequest;
 import com.innospots.nexus.console.role.domain.request.RolePageRequest;
 import com.innospots.nexus.console.role.domain.request.RoleStatusUpdateRequest;
@@ -34,7 +35,7 @@ import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 /**
  * 角色生命周期与查询 REST 资源，可直接继承以扩展路由或响应包装。
  */
-@Path("/console/roles")
+@Path(ConsoleConstant.API_PREFIX + "/roles")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Role", description = "角色与绑定")

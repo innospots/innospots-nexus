@@ -13,6 +13,7 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
  * @date 2026/09/13
  */
 public record ConsoleModuleDeclaration(
+        String domainKey,
         String moduleKey,
         I18nObject displayName,
         I18nObject description,
@@ -24,9 +25,8 @@ public record ConsoleModuleDeclaration(
 
     /** 校验模块身份并复制本地化文本和子声明。 */
     public ConsoleModuleDeclaration {
-        if (moduleKey == null || moduleKey.length() > 128 || !KEY_PATTERN.matcher(moduleKey).matches()) {
-            invalid("invalid moduleKey: " + moduleKey);
-        }
+        domainKey = requireKey(domainKey, "domainKey");
+        moduleKey = requireKey(moduleKey, "moduleKey");
         displayName = ConsoleI18n.copy(
                 displayName, true, "displayName", PluginStatusCode.RESOURCE_CONFLICT);
         description = ConsoleI18n.copy(
@@ -41,6 +41,13 @@ public record ConsoleModuleDeclaration(
     /** 返回模块稳定资源身份。 */
     public String resourceKey() {
         return "module:" + moduleKey;
+    }
+
+    private static String requireKey(String value, String field) {
+        if (value == null || value.length() > 128 || !KEY_PATTERN.matcher(value).matches()) {
+            invalid("invalid " + field + ": " + value);
+        }
+        return value;
     }
 
     private static void invalid(String message) {

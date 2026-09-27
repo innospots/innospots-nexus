@@ -30,7 +30,7 @@ class DictionaryEndpointContractsTest {
     void dictionaryTypeEndpointOwnsCatalogOperations() throws NoSuchMethodException {
         assertThat(DictionaryTypeEndpoint.class.isInterface()).isFalse();
         assertThat(DictionaryTypeEndpoint.class.getAnnotation(Path.class).value())
-                .isEqualTo("/console/dictionary-types");
+                .isEqualTo("/api/nexus/dictionary-types");
         assertHttpMethod(DictionaryTypeEndpoint.class, "pageDictionaryTypes",
                 GET.class, DictionaryTypePageRequest.class);
         assertHttpMethod(DictionaryTypeEndpoint.class, "getDictionaryType", GET.class, String.class);
@@ -48,7 +48,7 @@ class DictionaryEndpointContractsTest {
     void dictionaryItemEndpointIsNestedUnderTypeCode() throws NoSuchMethodException {
         assertThat(DictionaryItemEndpoint.class.isInterface()).isFalse();
         assertThat(DictionaryItemEndpoint.class.getAnnotation(Path.class).value())
-                .isEqualTo("/console/dictionary-types/{typeCode}/items");
+                .isEqualTo("/api/nexus/dictionary-types/{typeCode}/items");
         assertHttpMethod(DictionaryItemEndpoint.class, "pageDictionaryItems",
                 GET.class, String.class, DictionaryItemPageRequest.class);
         assertHttpMethod(DictionaryItemEndpoint.class, "createDictionaryItem",

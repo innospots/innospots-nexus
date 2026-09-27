@@ -9,6 +9,8 @@ import jakarta.ws.rs.core.MediaType;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
+import com.innospots.nexus.console.config.ConsoleConstant;
+
 /**
  * 根管理控制台端点契约。
  * <p>
@@ -20,7 +22,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
  * @author Smars
  * @date 2026/09/13
  */
-@Path("/console")
+@Path(ConsoleConstant.API_PREFIX)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Console", description = "控制台状态与健康")

@@ -17,6 +17,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogSyncService;
+import com.innospots.nexus.console.config.ConsoleConstant;
 import com.innospots.nexus.console.plugin.converter.PluginManagementConverter;
 import com.innospots.nexus.console.plugin.domain.vo.PluginManagementVo;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
@@ -26,7 +27,7 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 /**
  * 管理端插件查询、安装、启停和失败重试接口；不提供 JAR 删除或卸载操作。
  */
-@Path("/console/plugins")
+@Path(ConsoleConstant.API_PREFIX + "/plugins")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Plugin", description = "插件生命周期")

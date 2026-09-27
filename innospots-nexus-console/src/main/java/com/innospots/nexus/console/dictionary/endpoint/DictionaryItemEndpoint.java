@@ -17,6 +17,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import com.innospots.nexus.base.domain.response.PageResult;
 import com.innospots.nexus.base.domain.response.R;
+import com.innospots.nexus.console.config.ConsoleConstant;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryItemCreateRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryItemPageRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryItemStatusUpdateRequest;
@@ -28,7 +29,7 @@ import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 /**
  * 字典项管理 REST 资源。
  */
-@Path("/console/dictionary-types/{typeCode}/items")
+@Path(ConsoleConstant.API_PREFIX + "/dictionary-types/{typeCode}/items")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Dictionary", description = "租户级字典")

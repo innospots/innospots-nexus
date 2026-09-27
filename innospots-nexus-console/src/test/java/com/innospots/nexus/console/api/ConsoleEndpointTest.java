@@ -14,7 +14,7 @@ class ConsoleEndpointTest {
 
     @Test
     void consoleEndpointUsesJakartaJaxRsContract() throws NoSuchMethodException {
-        assertThat(ConsoleEndpoint.class.getAnnotation(Path.class).value()).isEqualTo("/console");
+        assertThat(ConsoleEndpoint.class.getAnnotation(Path.class).value()).isEqualTo("/api/nexus");
         assertThat(ConsoleEndpoint.class.getAnnotation(Produces.class).value()).containsExactly(MediaType.APPLICATION_JSON);
         assertThat(ConsoleEndpoint.class.getAnnotation(Consumes.class).value()).containsExactly(MediaType.APPLICATION_JSON);
         assertThat(ConsoleEndpoint.class.getMethod("status").getAnnotation(GET.class)).isNotNull();

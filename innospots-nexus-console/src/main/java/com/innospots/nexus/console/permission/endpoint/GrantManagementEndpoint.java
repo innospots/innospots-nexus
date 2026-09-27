@@ -13,6 +13,7 @@ import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import com.innospots.nexus.base.domain.response.R;
+import com.innospots.nexus.console.config.ConsoleConstant;
 import com.innospots.nexus.console.permission.domain.enums.PermissionSubjectType;
 import com.innospots.nexus.console.permission.domain.request.PermissionGrantReplaceRequest;
 import com.innospots.nexus.console.permission.service.PermissionGrantService;
@@ -21,7 +22,7 @@ import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 /**
  * 角色与组织单元权限全量替换的管理 REST 资源。
  */
-@Path("/console")
+@Path(ConsoleConstant.API_PREFIX)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Permission", description = "授权与可见资源")

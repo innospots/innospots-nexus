@@ -67,6 +67,7 @@ class PluginConsoleAssemblyTest {
                     .contribute(new ConsolePluginContribution(List.of(
                             new ConsoleModuleDeclaration(
                                     "sales",
+                                    "sales",
                                     I18nObject.of("en", "Sales"),
                                     null,
                                     List.of(new UiSpecPageDeclaration("home", "/sales", List.of())),

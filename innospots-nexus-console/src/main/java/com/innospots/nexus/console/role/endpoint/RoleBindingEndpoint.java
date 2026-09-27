@@ -16,6 +16,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import com.innospots.nexus.base.domain.response.PageResult;
 import com.innospots.nexus.base.domain.response.R;
+import com.innospots.nexus.console.config.ConsoleConstant;
 import com.innospots.nexus.console.role.domain.request.RoleBindingAddRequest;
 import com.innospots.nexus.console.role.domain.request.RoleBindingPageRequest;
 import com.innospots.nexus.console.role.domain.vo.RoleBindingVo;
@@ -25,7 +26,7 @@ import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 /**
  * 角色绑定 REST 资源。
  */
-@Path("/console/roles/{roleId}/bindings")
+@Path(ConsoleConstant.API_PREFIX + "/roles/{roleId}/bindings")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Role", description = "角色与绑定")

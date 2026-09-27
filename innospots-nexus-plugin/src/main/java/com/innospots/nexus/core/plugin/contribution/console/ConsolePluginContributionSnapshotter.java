@@ -31,6 +31,7 @@ public final class ConsolePluginContributionSnapshotter
 
     private static Map<String, Object> module(ConsoleModuleDeclaration module) {
         Map<String, Object> value = new LinkedHashMap<>();
+        value.put("domainKey", module.domainKey());
         value.put("moduleKey", module.moduleKey());
         value.put("resourceKey", module.resourceKey());
         value.put("pages", module.pages().stream()

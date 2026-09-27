@@ -30,7 +30,7 @@ class RoleEndpointContractsTest {
 
     @Test
     void roleEndpointKeepsRoleLifecycleOperationsTogether() throws NoSuchMethodException {
-        assertThat(RoleEndpoint.class.getAnnotation(Path.class).value()).isEqualTo("/console/roles");
+        assertThat(RoleEndpoint.class.getAnnotation(Path.class).value()).isEqualTo("/api/nexus/roles");
         assertHttpMethod(RoleEndpoint.class, "pageRoles", GET.class, RolePageRequest.class);
         assertHttpMethod(RoleEndpoint.class, "getRole", GET.class, String.class);
         assertHttpMethod(RoleEndpoint.class, "createRole", POST.class, RoleCreateRequest.class);
@@ -46,7 +46,7 @@ class RoleEndpointContractsTest {
         assertThat(RoleBindingEndpoint.class.isInterface()).isFalse();
         assertThat(RoleEndpoint.class.isInterface()).isFalse();
         assertThat(RoleBindingEndpoint.class.getAnnotation(Path.class).value())
-                .isEqualTo("/console/roles/{roleId}/bindings");
+                .isEqualTo("/api/nexus/roles/{roleId}/bindings");
         assertHttpMethod(RoleBindingEndpoint.class, "pageRoleBindings",
                 GET.class, String.class, RoleBindingPageRequest.class);
         assertHttpMethod(RoleBindingEndpoint.class, "addRoleBindings",

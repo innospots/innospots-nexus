@@ -74,12 +74,12 @@ class PageDslFilterContractsTest {
     @Test
     void defaultEndpointLoadsAndProcessesThroughFilterChain() {
         PageDsl source = PageDsl.of(PageMeta.of("customer-list"));
-        PageDslLoader loader = (moduleKey, pageKey) -> source;
+        PageDslLoader loader = (domainKey, moduleKey, pageKey) -> source;
         PageDslEndpoint endpoint = new DefaultPageDslEndpoint(
                 loader,
                 PageDslFilterChain.create().add(new StateBindingPageDslFilter()));
 
-        PageDsl result = endpoint.render("sales", "customer-list", Map.of("tenantId", "t1"));
+        PageDsl result = endpoint.render("sales", "sales", "customer-list", Map.of("tenantId", "t1"));
 
         assertThat(result.state()).containsEntry("tenantId", "t1");
     }
@@ -100,12 +100,14 @@ class PageDslFilterContractsTest {
 
     @Test
     void endpointRejectsMissingPageIdentity() {
-        PageDslLoader loader = (moduleKey, pageKey) -> PageDsl.of(PageMeta.of(pageKey));
+        PageDslLoader loader = (domainKey, moduleKey, pageKey) -> PageDsl.of(PageMeta.of(pageKey));
         PageDslEndpoint endpoint = new DefaultPageDslEndpoint(loader, PageDslFilterChain.create());
 
-        assertThatThrownBy(() -> endpoint.render("", "customer-list", Map.of()))
+        assertThatThrownBy(() -> endpoint.render("", "sales", "customer-list", Map.of()))
                 .isInstanceOf(NexusException.class);
-        assertThatThrownBy(() -> endpoint.render("sales", "", Map.of()))
+        assertThatThrownBy(() -> endpoint.render("sales", "", "customer-list", Map.of()))
+                .isInstanceOf(NexusException.class);
+        assertThatThrownBy(() -> endpoint.render("sales", "sales", "", Map.of()))
                 .isInstanceOf(NexusException.class);
     }
 }

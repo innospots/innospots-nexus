@@ -145,7 +145,7 @@ public final class ConsoleCatalogSyncService {
         for (UiSpecPageDeclaration page : pages) {
             String pageIdentity = pageIdentity(module.moduleKey(), page.pageKey());
             String pageResourceKey = page.resourceKey(module.moduleKey());
-            PageDsl document = pageDslLoader.load(module.moduleKey(), page.pageKey());
+            PageDsl document = pageDslLoader.load(module.domainKey(), module.moduleKey(), page.pageKey());
             validatePageSpec(module, page, document);
             add(definitions, new ResourceDefinition(
                     ownerPluginId,
@@ -153,7 +153,7 @@ public final class ConsoleCatalogSyncService {
                     CatalogResourceType.PAGE,
                     pageResourceKey,
                     parentResourceKey == null ? module.resourceKey() : parentResourceKey,
-                    pageIdentity,
+                    page.pageKey(),
                     null,
                     page.pagePath(),
                     null,

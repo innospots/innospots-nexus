@@ -39,8 +39,8 @@ Maven 依赖：`innospots-nexus-core`、`innospots-nexus-plugin`、`jakarta.ws.r
 | **credential** | 归属化鉴权凭据 | 统一表 `nx_user_credential`；`CredentialService`（登录 `authenticate` + 生命周期）与 OTP/TOTP 子包。 |
 | **catalog** | 控制台目录索引 | 将插件 `console@1` 贡献与 Page DSL 同步到表 `nx_console_catalog_resource`（`ConsoleCatalogSyncService`）；为权限 UI 提供目录树读取（`ConsoleCatalogService`）。启动钩子：`ConsoleCatalogSyncStartupTask`。 |
 | **permission** | 授权运行时 | 持久化 `nx_permission_grant`；`PermissionGrantService` 管理角色/组织单元的授权替换；`PermissionVisibilityService` 计算当前用户可见资源；`ConsolePagePermissionAuthorizer` 基于目录与授权做 PAGE/DATASOURCE 判定（框架中立，由 adapter 过滤器调用）。REST：授权管理、当前用户权限等。 |
-| **navigation** | 运行时导航 | `NavigationMenuAssembler` 结合目录与授权，组装侧边栏用的 `NavigationMenuVo`（与管理端菜单 CRUD 的 `MenuVo` 区分）。REST：`/console/navigation/menus`。 |
-| **menu** | 菜单能力（无管理 REST） | 实体 `MenuEntity`、DAO 与领域类型供库内能力预留；运行时侧栏走 **navigation** + **catalog**。不提供 `/console/menus`。内置 `MenuEntryPlugin`。 |
+| **navigation** | 运行时导航 | `NavigationMenuAssembler` 结合目录与授权，组装侧边栏用的 `NavigationMenuVo`（与管理端菜单 CRUD 的 `MenuVo` 区分）。REST：`/api/nexus/navigation/menus`。 |
+| **menu** | 菜单能力（无管理 REST） | 实体 `MenuEntity`、DAO 与领域类型供库内能力预留；运行时侧栏走 **navigation** + **catalog**。不提供 `/api/nexus/menus`。内置 `MenuEntryPlugin`。 |
 | **role** | 角色与绑定 | 表 `nx_role`、`nx_role_binding`；`service` / `operator` / `endpoint` 均在 console，端点为可继承的具体类。内置 `RoleEntryPlugin`。 |
 | **dictionary** | 租户级字典 | `DictionaryType` / `DictionaryItem` Operator、Service 与 REST（TENANT ownership）。内置 `DictionaryEntryPlugin`。 |
 | **plugin** | 插件管理 API | `PluginManagementEndpoint`：安装、启用、禁用、重试等，委托 `PluginInstallationManager`（plugin 模块）。内置 `PluginManagementEntryPlugin`。 |
@@ -64,7 +64,7 @@ Maven 依赖：`innospots-nexus-core`、`innospots-nexus-plugin`、`jakarta.ws.r
 
 | 前缀 | 典型能力 |
 |------|----------|
-| `/console/**` | 目录、插件、导航、角色/菜单/字典管理契约、当前用户权限 |
+| `/api/nexus/**` | 目录、插件、导航、角色/菜单/字典管理契约、当前用户权限 |
 | `/tenant/auth`、`/tenant/scope` | 租户域注册、登录、刷新、作用域选择 |
 | `/platform/auth` | 运维平台域登录（无公开自注册） |
 

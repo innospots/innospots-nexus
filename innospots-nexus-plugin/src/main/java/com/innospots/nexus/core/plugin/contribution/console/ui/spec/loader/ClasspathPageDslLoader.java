@@ -59,8 +59,8 @@ public final class ClasspathPageDslLoader implements PageDslLoader {
     }
 
     @Override
-    public PageDsl load(String moduleKey, String pageKey) {
-        String resourcePath = config.resourcePath(moduleKey, pageKey);
+    public PageDsl load(String domainKey, String moduleKey, String pageKey) {
+        String resourcePath = config.resourcePath(domainKey, moduleKey, pageKey);
         try (InputStream inputStream = classLoader.getResourceAsStream(resourcePath)) {
             if (inputStream == null) {
                 throw NexusException.build(

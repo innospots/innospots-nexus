@@ -37,7 +37,7 @@ public final class ConsoleCatalogService {
     }
 
     /**
-     * 返回已启用的插件目录资源树。
+     * 返回已启用的插件目录资源树（模块下 children 为 PageDsl 子页面）。
      *
      * @return 根节点列表
      */
@@ -64,20 +64,72 @@ public final class ConsoleCatalogService {
                 Comparator.nullsLast(Integer::compareTo)));
         List<CatalogNodeVo> nodes = new ArrayList<>();
         for (ConsoleCatalogResourceEntity root : roots) {
-            nodes.add(toNode(root, childrenByParent));
+            nodes.add(toPermissionTreeNode(root, childrenByParent));
         }
         return List.copyOf(nodes);
+    }
+
+    private static CatalogNodeVo toPermissionTreeNode(
+            ConsoleCatalogResourceEntity resource,
+            Map<String, List<ConsoleCatalogResourceEntity>> childrenByParent
+    ) {
+        if (resource.getResourceType().equals(CatalogResourceType.MODULE.name())) {
+            return moduleNode(resource, childrenByParent);
+        }
+        return toNode(resource, childrenByParent);
+    }
+
+    private static CatalogNodeVo moduleNode(
+            ConsoleCatalogResourceEntity module,
+            Map<String, List<ConsoleCatalogResourceEntity>> childrenByParent
+    ) {
+        List<ConsoleCatalogResourceEntity> children = sortedChildren(module, childrenByParent);
+        List<CatalogNodeVo> pageNodes = new ArrayList<>();
+        String domainKey = null;
+        for (ConsoleCatalogResourceEntity child : children) {
+            if (!CatalogResourceType.PAGE.name().equals(child.getResourceType())) {
+                continue;
+            }
+            CatalogNodeVo pageNode = pagePermissionNode(child);
+            pageNodes.add(pageNode);
+            if (domainKey == null) {
+                domainKey = pageNode.domainKey();
+            }
+        }
+        return new CatalogNodeVo(
+                module.getResourceId(),
+                module.getOwnerPluginId(),
+                domainKey,
+                module.getModuleKey(),
+                CatalogResourceType.MODULE,
+                module.getResourceKey(),
+                null,
+                null,
+                module.getDisplayName(),
+                module.getSortOrder(),
+                List.copyOf(pageNodes));
+    }
+
+    private static CatalogNodeVo pagePermissionNode(ConsoleCatalogResourceEntity page) {
+        return new CatalogNodeVo(
+                page.getResourceId(),
+                page.getOwnerPluginId(),
+                domainKeyFromRoute(page.getRoutePath()),
+                page.getModuleKey(),
+                CatalogResourceType.PAGE,
+                page.getResourceKey(),
+                page.getPageKey(),
+                page.getRoutePath(),
+                page.getDisplayName(),
+                page.getSortOrder(),
+                List.of());
     }
 
     private static CatalogNodeVo toNode(
             ConsoleCatalogResourceEntity resource,
             Map<String, List<ConsoleCatalogResourceEntity>> childrenByParent
     ) {
-        List<ConsoleCatalogResourceEntity> children = childrenByParent.getOrDefault(
-                resource.getResourceId(), List.of());
-        children = new ArrayList<>(children);
-        children.sort(Comparator.comparing(ConsoleCatalogResourceEntity::getSortOrder,
-                Comparator.nullsLast(Integer::compareTo)));
+        List<ConsoleCatalogResourceEntity> children = sortedChildren(resource, childrenByParent);
         List<CatalogNodeVo> childNodes = new ArrayList<>();
         for (ConsoleCatalogResourceEntity child : children) {
             childNodes.add(toNode(child, childrenByParent));
@@ -85,6 +137,7 @@ public final class ConsoleCatalogService {
         return new CatalogNodeVo(
                 resource.getResourceId(),
                 resource.getOwnerPluginId(),
+                domainKeyFromRoute(resource.getRoutePath()),
                 resource.getModuleKey(),
                 CatalogResourceType.valueOf(resource.getResourceType()),
                 resource.getResourceKey(),
@@ -93,5 +146,29 @@ public final class ConsoleCatalogService {
                 resource.getDisplayName(),
                 resource.getSortOrder(),
                 childNodes);
+    }
+
+    private static List<ConsoleCatalogResourceEntity> sortedChildren(
+            ConsoleCatalogResourceEntity resource,
+            Map<String, List<ConsoleCatalogResourceEntity>> childrenByParent
+    ) {
+        List<ConsoleCatalogResourceEntity> children = new ArrayList<>(
+                childrenByParent.getOrDefault(resource.getResourceId(), List.of()));
+        children.sort(Comparator.comparing(ConsoleCatalogResourceEntity::getSortOrder,
+                Comparator.nullsLast(Integer::compareTo)));
+        return children;
+    }
+
+    static String domainKeyFromRoute(String routePath) {
+        if (routePath == null || routePath.isBlank()) {
+            return null;
+        }
+        String normalized = routePath.startsWith("/") ? routePath.substring(1) : routePath;
+        int slash = normalized.indexOf('/');
+        if (slash < 0) {
+            return normalized.isBlank() ? null : normalized;
+        }
+        String domainKey = normalized.substring(0, slash);
+        return domainKey.isBlank() ? null : domainKey;
     }
 }

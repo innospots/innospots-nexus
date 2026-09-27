@@ -29,7 +29,7 @@ class NavigationMenuEndpointContractsTest {
     void navigationEndpointRemainsReadOnlyAndSeparate() throws NoSuchMethodException {
         assertThat(NavigationMenuEndpoint.class.isInterface()).isFalse();
         assertThat(NavigationMenuEndpoint.class.getAnnotation(Path.class).value())
-                .isEqualTo("/console/navigation/menus");
+                .isEqualTo("/api/nexus/navigation/menus");
         assertHttpMethod(NavigationMenuEndpoint.class, "listNavigationMenus", GET.class);
         assertThat(Arrays.stream(NavigationMenuEndpoint.class.getMethods())
                 .filter(method -> method.getDeclaringClass().equals(NavigationMenuEndpoint.class)))

@@ -6,7 +6,7 @@ import com.innospots.nexus.base.status.NexusStatusCode;
 /**
  * 定位与解析 Pactor 页面 DSL 文件的不可变配置。
  *
- * <p>默认资源位于 {@code ui-pages/{moduleKey}/{pageKey}.yaml}。</p>
+ * <p>默认资源位于 {@code ui-pages/{domainKey}/{moduleKey}/{pageKey}.yaml}。</p>
  *
  * @param basePath classpath 基础目录
  * @param fileSuffix 页面文件后缀，通常为 {@code .yaml}
@@ -40,14 +40,16 @@ public record PageDslConfig(
     /**
      * 构建一个模块页面的 classpath 资源路径。
      *
+     * @param domainKey 项目领域键
      * @param moduleKey 所属模块键
      * @param pageKey 与 {@code page.id} 匹配的页面键
      * @return classpath 资源路径
      */
-    public String resourcePath(String moduleKey, String pageKey) {
+    public String resourcePath(String domainKey, String moduleKey, String pageKey) {
+        requireSegment(domainKey, "domainKey");
         requireSegment(moduleKey, "moduleKey");
         requireSegment(pageKey, "pageKey");
-        return basePath + "/" + moduleKey + "/" + pageKey + fileSuffix;
+        return basePath + "/" + domainKey + "/" + moduleKey + "/" + pageKey + fileSuffix;
     }
 
     private static String normalizeBasePath(String basePath) {

@@ -15,6 +15,7 @@ import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.base.thread.SessionContext;
+import com.innospots.nexus.console.config.ConsoleConstant;
 import com.innospots.nexus.console.menu.domain.vo.NavigationMenuVo;
 import com.innospots.nexus.console.navigation.service.NavigationMenuAssembler;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubjectResolver;
@@ -23,7 +24,7 @@ import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 /**
  * 当前用户可见的侧边栏导航接口。
  */
-@Path("/console/navigation/menus")
+@Path(ConsoleConstant.API_PREFIX + "/navigation/menus")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Navigation", description = "运行时导航")

@@ -26,6 +26,7 @@ class ConsolePluginContributionHandlerTest {
         ConsolePluginContribution contribution = new ConsolePluginContribution(List.of(
                 new ConsoleModuleDeclaration(
                         "sales",
+                        "sales",
                         I18nObject.of("en", "Sales"),
                         I18nObject.of("en", "Sales administration"),
                         List.of(new UiSpecPageDeclaration("orders", "/sales/orders", List.of())),
@@ -58,6 +59,7 @@ class ConsolePluginContributionHandlerTest {
     void rejectsMenuPageWithRequiredPathVariables() {
         ConsolePluginContribution contribution = new ConsolePluginContribution(List.of(
                 new ConsoleModuleDeclaration(
+                        "sales",
                         "sales",
                         I18nObject.of("en", "Sales"),
                         I18nObject.of("en", "Sales administration"),
@@ -95,6 +97,7 @@ class ConsolePluginContributionHandlerTest {
                 "type", "console",
                 "majorVersion", 1,
                 "modules", List.of(Map.of(
+                        "domainKey", "sales",
                         "moduleKey", "sales",
                         "displayName", Map.of("en", "Sales"),
                         "pages", List.of(Map.of("pageKey", "home", "pagePath", "/sales"))))));
@@ -106,6 +109,7 @@ class ConsolePluginContributionHandlerTest {
 
         assertThatThrownBy(() -> new ConsolePluginContributionDecoder().decode(Map.of(
                 "type", "console", "majorVersion", 1, "modules", List.of(Map.of(
+                        "domainKey", "sales",
                         "moduleKey", "sales",
                         "displayName", Map.of("en", "Sales"),
                         "pages", List.of())))))
@@ -126,6 +130,7 @@ class ConsolePluginContributionHandlerTest {
                 "pagePath", "/sales",
                 "unknown", true);
         Map<String, Object> unknownModule = Map.of(
+                "domainKey", "sales",
                 "moduleKey", "sales",
                 "displayName", Map.of("en", "Sales"),
                 "pages", List.of(unknownPage));
@@ -143,6 +148,7 @@ class ConsolePluginContributionHandlerTest {
                 "orderIndex", 1.5,
                 "pageKey", "home");
         Map<String, Object> fractionalOrderModule = Map.of(
+                "domainKey", "sales",
                 "moduleKey", "sales",
                 "displayName", Map.of("en", "Sales"),
                 "pages", List.of(Map.of("pageKey", "home", "pagePath", "/sales")),
@@ -160,6 +166,7 @@ class ConsolePluginContributionHandlerTest {
     void rejectsInvalidProgrammaticLocalizedText() {
         assertThatThrownBy(() -> new ConsoleModuleDeclaration(
                 "sales",
+                "sales",
                 I18nObject.of(Map.of("en", " ")),
                 I18nObject.of("en", "Sales"),
                 List.of(new UiSpecPageDeclaration("home", "/sales", List.of())),
@@ -171,6 +178,7 @@ class ConsolePluginContributionHandlerTest {
     void snapshotsDirectoryMenusWithoutNullValues() {
         ConsolePluginContribution contribution = new ConsolePluginContribution(List.of(
                 new ConsoleModuleDeclaration(
+                        "sales",
                         "sales",
                         I18nObject.of("en", "Sales"),
                         null,
@@ -187,6 +195,7 @@ class ConsolePluginContributionHandlerTest {
 
     private static ConsoleModuleDeclaration module(String moduleKey, String pageKey, String pagePath) {
         return new ConsoleModuleDeclaration(
+                moduleKey,
                 moduleKey,
                 I18nObject.of("en", moduleKey),
                 I18nObject.of("en", moduleKey + " administration"),

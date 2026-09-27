@@ -13,6 +13,7 @@ import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import com.innospots.nexus.base.domain.response.R;
+import com.innospots.nexus.console.config.ConsoleConstant;
 import com.innospots.nexus.console.catalog.domain.model.CatalogSyncResult;
 import com.innospots.nexus.console.catalog.domain.vo.CatalogNodeVo;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogService;
@@ -23,7 +24,7 @@ import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 /**
  * 权限设置页目录树与显式同步接口。
  */
-@Path("/console/catalog")
+@Path(ConsoleConstant.API_PREFIX + "/catalog")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Catalog", description = "控制台目录索引")
