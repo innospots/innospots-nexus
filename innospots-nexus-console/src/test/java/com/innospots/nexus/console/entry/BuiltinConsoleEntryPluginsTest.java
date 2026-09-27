@@ -33,7 +33,9 @@ class BuiltinConsoleEntryPluginsTest {
     void tagsForDescriptorReflectsDomainAndModule() {
         ConsoleModuleDescriptor descriptor = ConsoleModuleDescriptor.builtin(
                 BuiltinConsoleEntryPlugins.ROLE,
+                ConsoleModuleDescriptor.BUILTIN_DOMAIN_KEY,
                 "role",
+                "role-main",
                 "team",
                 30,
                 I18nObject.of("en", "Role"),

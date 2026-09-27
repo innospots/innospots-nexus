@@ -15,9 +15,14 @@ import com.innospots.nexus.core.plugin.declaration.PluginDefinition;
  */
 public final class MenuEntryPlugin implements Plugin {
 
+    private static final String DOMAIN_KEY = ConsoleModuleDescriptor.BUILTIN_DOMAIN_KEY;
+    private static final String ENTRY_PAGE_KEY = "menu-main";
+
     private static final ConsoleModuleDescriptor DESCRIPTOR = ConsoleModuleDescriptor.builtin(
             BuiltinConsoleEntryPlugins.MENU,
+            DOMAIN_KEY,
             "menu",
+            ENTRY_PAGE_KEY,
             "menu",
             10,
             I18nObject.of("en", "Menu", "zh", "菜单"),

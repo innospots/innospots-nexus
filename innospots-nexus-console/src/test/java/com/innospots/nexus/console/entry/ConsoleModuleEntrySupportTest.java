@@ -18,7 +18,9 @@ class ConsoleModuleEntrySupportTest {
     void buildsMultiplePagesForSingleModule() {
         ConsoleModuleDescriptor module = ConsoleModuleDescriptor.builtin(
                 "com.example.multi-page",
+                "sales",
                 "reports",
+                "reports-home",
                 "chart",
                 10,
                 I18nObject.of("en", "Reports"),
@@ -31,7 +33,7 @@ class ConsoleModuleEntrySupportTest {
         ConsoleModuleDeclaration declared = soleModule(definition);
 
         assertThat(declared.pages()).extracting("pageKey")
-                .containsExactly("reports-main", "reports-detail");
+                .containsExactly("reports-home", "reports-detail");
         assertThat(declared.menuTree()).hasSize(1);
     }
 
@@ -39,7 +41,9 @@ class ConsoleModuleEntrySupportTest {
     void buildsMultipleMenuEntriesForSingleModule() {
         ConsoleModuleDescriptor module = ConsoleModuleDescriptor.builtin(
                 "com.example.multi-menu",
+                "nexus",
                 "settings",
+                "settings-main",
                 null,
                 0,
                 I18nObject.of("en", "Settings"),
@@ -71,7 +75,9 @@ class ConsoleModuleEntrySupportTest {
     void buildsMultipleModulesInOnePlugin() {
         ConsoleModuleDescriptor alpha = ConsoleModuleDescriptor.builtin(
                 "com.example.bundle",
+                "nexus",
                 "alpha",
+                "alpha-home",
                 "a",
                 10,
                 I18nObject.of("en", "Alpha"),
@@ -79,7 +85,9 @@ class ConsoleModuleEntrySupportTest {
                 I18nObject.of("en", "Alpha"));
         ConsoleModuleDescriptor beta = ConsoleModuleDescriptor.builtin(
                 "com.example.bundle",
+                "sales",
                 "beta",
+                "beta-home",
                 "b",
                 20,
                 I18nObject.of("en", "Beta"),
@@ -100,13 +108,36 @@ class ConsoleModuleEntrySupportTest {
         assertThat(contribution.modules().get(1).moduleKey()).isEqualTo("beta");
         assertThat(BuiltinConsoleEntryPlugins.tagsFor(entry).get(BuiltinConsoleEntryPlugins.TAG_MODULE))
                 .contains("alpha,beta");
+        assertThat(BuiltinConsoleEntryPlugins.tagsFor(entry).get(BuiltinConsoleEntryPlugins.TAG_DOMAIN))
+                .contains("nexus,sales");
+    }
+
+    @Test
+    void buildsPagePathForCustomDomain() {
+        ConsoleModuleDescriptor module = ConsoleModuleDescriptor.builtin(
+                "com.example.custom-domain",
+                "sales",
+                "orders",
+                "order-list",
+                "list",
+                0,
+                I18nObject.of("en", "Orders"),
+                I18nObject.of("en", "Orders"),
+                I18nObject.of("en", "Orders"));
+
+        ConsoleModuleDeclaration declared = soleModule(ConsoleModuleEntrySupport.definition(module));
+
+        assertThat(declared.domainKey()).isEqualTo("sales");
+        assertThat(declared.pages().getFirst().pagePath()).isEqualTo("/sales/orders/order-list");
     }
 
     @Test
     void rejectsMismatchedModulePluginId() {
         ConsoleModuleDescriptor otherPlugin = ConsoleModuleDescriptor.builtin(
                 "com.example.other",
+                "nexus",
                 "lonely",
+                "lonely-home",
                 "x",
                 0,
                 I18nObject.of("en", "Lonely"),

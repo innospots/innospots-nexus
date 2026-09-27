@@ -15,7 +15,7 @@
 | 多页面 | `additionalPageKeys` + 对应 YAML |
 | 多顶层菜单 | `menuEntries`（`ConsoleMenuItemDescriptor`） |
 
-入口页键默认为 **`{moduleKey}-main`**，须与 Page DSL `page.id` 及 `ui-pages/nexus/{moduleKey}/{pageKey}.yaml` 一致。
+`builtin(pluginId, domainKey, moduleKey, entryPageKey, …)` 中 **显式传入** `domainKey` 与 `entryPageKey`，须与 `ui-pages/{domainKey}/{moduleKey}/{pageKey}.yaml` 及 Page DSL `page.id` 一致（内置 entry 的 `domainKey` 为 `BUILTIN_DOMAIN_KEY`）。
 
 **规范全文：** [console-entry-and-pages.md](../../../console-entry-and-pages.md)、[entry.md → 入口页与 pageKey 规范](entry.md#入口页与-pagekey-规范)  
 **菜单 entry 示例：** [menu-entry.md](menu-entry.md)

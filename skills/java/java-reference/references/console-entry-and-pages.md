@@ -43,14 +43,16 @@ console: ConsoleCatalogSyncService  →  nx_console_catalog_resource（MODULE / 
 
 六个 `*EntryPlugin` 仍为「一插件一模块」；捆绑多模块时使用同一 `pluginId` 的 `ConsoleEntryPluginDescriptor.of(...)`。
 
+`ConsoleModuleDescriptor.builtin(pluginId, domainKey, moduleKey, entryPageKey, …)` **不推导** pageKey 或 domain；六个内置 entry 使用 `BUILTIN_DOMAIN_KEY`（`nexus`）仅为本模块默认常量，其它产品域传各自 `domainKey`。自定义 `menuKey` 时用 `ConsoleModuleDescriptor.of(...)`。
+
 ## `pageKey` 速查
 
 | 项 | 规则 |
 |----|------|
 | 格式 | `[a-z][a-z0-9]*(?:-[a-z0-9]+)*`，≤ 128 字符 |
 | 一致性 | `console@1.pageKey` = YAML `page.id` = 文件名 `{pageKey}.yaml` |
-| 内置入口页 | `entryPageKey = {moduleKey}-main`（`ConsoleModuleDescriptor.mainPageKey`） |
-| 内置 `domainKey` | `nexus`（`BUILTIN_DOMAIN_KEY`） |
+| 内置入口页 | 各 `*EntryPlugin` 内显式常量（如 `ENTRY_PAGE_KEY = "menu-main"`），经 `builtin(..., entryPageKey, ...)` 传入 |
+| `domainKey` | 与 `console@1`、`ui-pages/{domainKey}/...` 一致；内置六个 entry 使用 `BUILTIN_DOMAIN_KEY`（`nexus`），**非 API 强制** |
 | 前端路由 | `/{domainKey}/{moduleKey}/{pageKey}`（`ConsoleModuleDescriptor.pagePath`） |
 
 ## 易混概念

@@ -19,7 +19,7 @@ src/main/resources/ui-pages/sales/sales/order-list.yaml
 
 | 段 | 说明 |
 |----|------|
-| `domainKey` | 项目领域键；与 `console@1` 贡献中 `ConsoleModuleDeclaration.domainKey` 一致。内置控制台 entry 默认为 `nexus`（`ConsoleModuleDescriptor.BUILTIN_DOMAIN_KEY`） |
+| `domainKey` | 项目领域键；与 `console@1`、`ConsoleModuleDescriptor.builtin(..., domainKey, ...)` 一致。本仓库内置 entry 使用 `BUILTIN_DOMAIN_KEY`（`nexus`），其它域可任意合法键 |
 | `moduleKey` | 模块键；与 `ConsoleModuleDeclaration.moduleKey` 一致 |
 | `pageKey` | 与 YAML 内 `page.id` 一致（通常同为 kebab-case 文件名） |
 
@@ -30,7 +30,7 @@ src/main/resources/ui-pages/sales/sales/order-list.yaml
 | 模式 | `[a-z][a-z0-9]*(?:-[a-z0-9]+)*`（`PageDslValidator` / `UiSpecPageDeclaration`） |
 | 长度 | ≤ 128 |
 | 一致性 | `console@1` 的 `pageKey` = YAML `page.id` = 文件名 `{pageKey}.yaml` |
-| 内置入口页 | `entryPageKey = {moduleKey}-main`（`ConsoleModuleDescriptor.mainPageKey`） |
+| 内置入口页 | 在 entry 插件中显式声明 `entryPageKey`（与 YAML `page.id` 一致），传入 `ConsoleModuleDescriptor.builtin` |
 | 子页 | 在贡献中声明 `pageKey`，YAML 设置 `page.parentPageKey` 为父页 `page.id` |
 
 内置控制台 entry 插件（`MenuEntryPlugin` 等）的完整说明见
@@ -41,7 +41,7 @@ src/main/resources/ui-pages/sales/sales/order-list.yaml
 
 | 场景 | 调用 |
 |------|------|
-| 单模块（六个内置 entry） | `ConsoleModuleEntrySupport.definition(ConsoleModuleDescriptor)` |
+| 单模块（六个内置 entry） | `ConsoleModuleEntrySupport.definition(ConsoleModuleDescriptor)`（`builtin(..., domainKey, ...)`） |
 | 单插件多模块 | `ConsoleModuleEntrySupport.definition(ConsoleEntryPluginDescriptor.of(pluginId, …, modules))` |
 | 模块内多顶层菜单 | `ConsoleModuleDescriptor.builtin(..., additionalPageKeys, menuEntries)` |
 

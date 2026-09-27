@@ -5,6 +5,7 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import com.innospots.nexus.core.plugin.contribution.console.ui.spec.PageDsl;
@@ -37,23 +38,20 @@ class ConsoleModuleEntryPluginsTest {
                 .orElseThrow();
 
         ConsoleModuleDeclaration module = contribution.modules().getFirst();
-        String entryPageKey = ConsoleModuleDescriptor.mainPageKey(module.moduleKey());
+        String entryPageKey = module.pages().getFirst().pageKey();
         assertThat(module.moduleKey()).isNotBlank();
+        assertThat(entryPageKey).isNotBlank();
         assertThat(module.pages()).singleElement()
-                .satisfies(page -> {
-                    assertThat(page.pageKey()).isEqualTo(entryPageKey);
-                    assertThat(page.pagePath()).isEqualTo(ConsoleModuleDescriptor.pagePath(
-                            module.domainKey(), module.moduleKey(), entryPageKey));
-                });
+                .satisfies(page -> assertThat(page.pagePath()).isEqualTo(ConsoleModuleDescriptor.pagePath(
+                        module.domainKey(), module.moduleKey(), entryPageKey)));
         assertThat(module.menuTree()).singleElement()
                 .satisfies(menu -> assertThat(menu.pageKey()).isEqualTo(entryPageKey));
         assertThat(definition.capabilities()).isEmpty();
     }
 
     @ParameterizedTest
-    @MethodSource("moduleKeys")
-    void loadsPageDslFromClasspath(String moduleKey) {
-        String pageKey = ConsoleModuleDescriptor.mainPageKey(moduleKey);
+    @MethodSource("moduleEntryPages")
+    void loadsPageDslFromClasspath(String moduleKey, String pageKey) {
         PageDslConfig config = PageDslConfig.defaults();
         ClasspathPageDslLoader loader = new ClasspathPageDslLoader(
                 config,
@@ -96,7 +94,13 @@ class ConsoleModuleEntryPluginsTest {
                 new PluginManagementEntryPlugin());
     }
 
-    private static Stream<String> moduleKeys() {
-        return Stream.of("menu", "dictionary", "logger", "permission", "plugin", "role");
+    private static Stream<Arguments> moduleEntryPages() {
+        return Stream.of(
+                Arguments.of("menu", "menu-main"),
+                Arguments.of("dictionary", "dictionary-main"),
+                Arguments.of("logger", "logger-main"),
+                Arguments.of("permission", "permission-main"),
+                Arguments.of("plugin", "plugin-main"),
+                Arguments.of("role", "role-main"));
     }
 }

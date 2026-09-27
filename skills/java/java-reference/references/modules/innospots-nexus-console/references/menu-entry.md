@@ -23,9 +23,9 @@
 | 字段 | 值 |
 |------|-----|
 | `pluginId` | `BuiltinConsoleEntryPlugins.MENU`（`com.innospots.nexus.console.menu`） |
-| `domainKey` | `nexus` |
+| `domainKey` | `ConsoleModuleDescriptor.BUILTIN_DOMAIN_KEY`（`nexus`） |
 | `moduleKey` | `menu` |
-| `entryPageKey` | `menu-main`（`ConsoleModuleDescriptor.mainPageKey("menu")`） |
+| `entryPageKey` | `menu-main`（`MenuEntryPlugin.ENTRY_PAGE_KEY` 显式常量） |
 | `menuKey` | `menu-main`（与入口页键相同） |
 | `menuIcon` | `menu` |
 | `orderIndex` | `10` |
@@ -55,7 +55,7 @@ YAML 必填：`page.id: menu-main`（与 `entryPageKey`、文件名一致）。
 
 1. 在 `com.innospots.nexus.console.<domain>.entry` 增加 `*EntryPlugin`。
 2. 在 `BuiltinConsoleEntryPlugins` 增加 `pluginId` 常量（若需纳入 `REQUIRED_PLUGIN_IDS`）。
-3. `ConsoleModuleDescriptor.builtin(...)` 或 `ConsoleModuleEntrySupport.definition(ConsoleEntryPluginDescriptor.of(...))`（多模块捆绑时）。
+3. `ConsoleModuleDescriptor.builtin(pluginId, domainKey, moduleKey, entryPageKey, …)` 或 `ConsoleModuleEntrySupport.definition(ConsoleEntryPluginDescriptor.of(...))`（多模块捆绑时）。
 4. 添加 `ui-pages/nexus/{moduleKey}/{moduleKey}-main.yaml`，`page.id` 为 `{moduleKey}-main`；多页/多菜单见 [entry.md](entry.md)。
 5. 测试可参考 `ConsoleModuleEntryPluginsTest`、`ConsoleModuleEntrySupportTest`、`BuiltinConsoleEntryPluginsTest`。
 

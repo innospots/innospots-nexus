@@ -24,7 +24,7 @@
 | **`pageKey`** | 模块内页面稳定标识；与 `UiSpecPageDeclaration.pageKey`、`PageDsl.page.id`、YAML 文件名（无后缀）**必须一致** |
 | **`entryPageKey`** | 模块**入口页**的 `pageKey`；侧栏菜单 `MenuDeclaration.page` 指向该键 |
 | **`additionalPageKeys`** | 同模块内除入口页外、需在目录/权限中出现的其它页面键（通常含子页；父子关系由 YAML `parentPageKey` 定义） |
-| **`domainKey`** | Page DSL classpath 第一段；内置模块固定为 `nexus`（`ConsoleModuleDescriptor.BUILTIN_DOMAIN_KEY`） |
+| **`domainKey`** | Page DSL classpath 第一段；与 `ConsoleModuleDeclaration.domainKey` 一致；**调用方显式传入**（`BUILTIN_DOMAIN_KEY` 仅为本仓库六个内置 entry 的默认值 `nexus`） |
 | **`moduleKey`** | 模块键；与 `ui-pages/{domainKey}/{moduleKey}/` 目录名、`ConsoleModuleDeclaration.moduleKey` 一致 |
 
 ### 命名规则（与校验器一致）
@@ -44,16 +44,9 @@
 
 `PageDslValidator` 与 `UiSpecPageDeclaration` 使用同一 `KEY_PATTERN`；YAML 中 `page.parentPageKey` 也须满足该模式，且**不得等于** `page.id`。
 
-### 内置模块默认入口页键
+### 内置模块入口页键（显式配置）
 
-对 `ConsoleModuleDescriptor.builtin(...)`：
-
-```text
-entryPageKey = ConsoleModuleDescriptor.mainPageKey(moduleKey)
-             = {moduleKey}-main
-```
-
-示例：`moduleKey=menu` → 入口页 `menu-main`；`moduleKey=plugin` → `plugin-main`。
+`ConsoleModuleDescriptor.builtin(pluginId, domainKey, moduleKey, entryPageKey, …)` **不做** pageKey 或 domain 拼接；`domainKey` / `entryPageKey` 由各 `*EntryPlugin` 以常量声明（内置 entry 通常 `DOMAIN_KEY = BUILTIN_DOMAIN_KEY`），并与 classpath / YAML 对齐。
 
 对应资源：
 
@@ -61,7 +54,7 @@ entryPageKey = ConsoleModuleDescriptor.mainPageKey(moduleKey)
 ui-pages/nexus/{moduleKey}/{entryPageKey}.yaml
 ```
 
-示例：`ui-pages/nexus/menu/menu-main.yaml`，且 YAML 内 `page.id: menu-main`。
+示例：`MenuEntryPlugin` 使用 `entryPageKey=menu-main` → `ui-pages/nexus/menu/menu-main.yaml`，`page.id: menu-main`。
 
 ### `pagePath`（前端路由）
 
@@ -95,17 +88,17 @@ console@1 pages[].pageKey  ==  PageDsl page.id  ==  {pageKey}.yaml 文件名
 
 | 维度 | 入口页 | 子页（非入口） |
 |------|--------|----------------|
-| 在描述符中 | `entryPageKey`（或 `mainPageKey` 推导） | `additionalPageKeys` 列表项 |
+| 在描述符中 | `entryPageKey`（调用方显式传入） | `additionalPageKeys` 列表项 |
 | 在 `console@1` | `pages` 中第一项（`allPageKeys()` 顺序） | 同列表后续项 |
 | 在菜单 | 单菜单：`MenuDeclaration.page(entryPageKey)`；多菜单：`menuEntries` → 多条 `MenuDeclaration.page` | 子页通常不单独占顶层菜单；由 `parentPageKey` 或页内导航 |
 | 在 YAML | 通常**无** `parentPageKey` | 设置 `page.parentPageKey` 为父页 `page.id` |
 | 在权限树 API | MODULE 下的一级 PAGE | 嵌套在父 PAGE 下 |
 
-内置六个模块当前均为**单入口页、单顶层菜单**；扩展子页用 `builtin(..., List.of("other-page"))`；扩展多菜单用 `builtin(..., additionalPageKeys, menuEntries)`。
+内置六个模块当前均为**单入口页、单顶层菜单**；扩展子页用 `builtin(..., entryPageKey, …, List.of("other-page"))`；扩展多菜单用 `builtin(..., entryPageKey, …, additionalPageKeys, menuEntries)`。
 
 ### 与 `menuKey` 的关系（内置）
 
-`ConsoleModuleDescriptor.builtin` 将 **`menuKey` 设为与 `entryPageKey` 相同**（均为 `{moduleKey}-main`）。`menuKey` 是 `console@1` 菜单树节点的稳定键，与租户库表 `nx_menu` **无关**。
+单菜单模式下，`builtin` 默认 **`menuKey` = `entryPageKey`**（二者均由调用方通过 `entryPageKey` 参数确定）。`menuKey` 是 `console@1` 菜单树节点的稳定键，与租户库表 `nx_menu` **无关**。需与入口页不同的菜单键时使用 `ConsoleModuleDescriptor.of(...)`。
 
 ### 第三方插件（非内置 entry）
 
@@ -161,9 +154,9 @@ PluginDefinition.builder(pluginId)
 
 单条顶层菜单：`menuKey`、`title`、`icon`、`orderIndex`、`pageKey`（须出现在该模块 `allPageKeys()` 中）。
 
-### `ConsoleModuleDescriptor.module(...)`
+### `ConsoleModuleDescriptor.of(...)`
 
-入口页键不必为 `{moduleKey}-main` 时，使用 `module(...)` 工厂；行为与 `builtin` 相同，仅 `entryPageKey` / `domainKey` 可自定义。
+独立 `menuKey` 或完整字段控制时使用 `of(...)`；`builtin` 为单菜单 `menuKey=entryPageKey` 的便捷封装（`domainKey` 仍由调用方传入）。
 
 ---
 
@@ -226,14 +219,9 @@ PluginDefinition.builder(pluginId)
 
 #### `BUILTIN_DOMAIN_KEY`
 
-- **值：** `"nexus"` — 内置控制台 Page DSL 默认 `domainKey`。
+- **值：** `"nexus"` — 本仓库六个内置 entry 插件沿用的领域键常量；**不**限制 `builtin` / `of` 只能使用该值。
 
 ### 方法
-
-#### `mainPageKey(String moduleKey) → String`
-
-- **说明：** 默认入口页键 `{moduleKey}-main`。
-- **示例：** `mainPageKey("menu")` → `menu-main`。
 
 #### `pagePath(String domainKey, String moduleKey, String pageKey) → String`
 
@@ -245,12 +233,12 @@ PluginDefinition.builder(pluginId)
 
 #### `builtin(...) → ConsoleModuleDescriptor`
 
-- **说明：** 构建内置描述符；`domainKey=nexus`，`entryPageKey=mainPageKey(moduleKey)`，`menuKey=entryPageKey`。
-- **重载：** 仅 `additionalPageKeys`；或 `additionalPageKeys` + `menuEntries`。
+- **说明：** **必填** `domainKey`、`entryPageKey`；单菜单时 `menuKey=entryPageKey`。
+- **签名：** `builtin(pluginId, domainKey, moduleKey, entryPageKey, menuIcon, orderIndex, displayName, description, pageTitle)` 及带 `additionalPageKeys` / `menuEntries` 的重载。
 
-#### `module(...) → ConsoleModuleDescriptor`
+#### `of(...) → ConsoleModuleDescriptor`
 
-- **说明：** 自定义 `entryPageKey` / `domainKey` 的模块描述符（不必 `{moduleKey}-main`）。
+- **说明：** 全字段显式模块描述符（含 `domainKey`、独立 `menuKey`）。
 
 ---
 

@@ -15,9 +15,14 @@ import com.innospots.nexus.core.plugin.declaration.PluginDefinition;
  */
 public final class PermissionEntryPlugin implements Plugin {
 
+    private static final String DOMAIN_KEY = ConsoleModuleDescriptor.BUILTIN_DOMAIN_KEY;
+    private static final String ENTRY_PAGE_KEY = "permission-main";
+
     private static final ConsoleModuleDescriptor DESCRIPTOR = ConsoleModuleDescriptor.builtin(
             BuiltinConsoleEntryPlugins.PERMISSION,
+            DOMAIN_KEY,
             "permission",
+            ENTRY_PAGE_KEY,
             "lock",
             40,
             I18nObject.of("en", "Permission", "zh", "权限"),

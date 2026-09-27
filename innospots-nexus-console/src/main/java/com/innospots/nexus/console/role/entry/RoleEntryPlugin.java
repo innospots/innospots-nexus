@@ -15,9 +15,14 @@ import com.innospots.nexus.core.plugin.declaration.PluginDefinition;
  */
 public final class RoleEntryPlugin implements Plugin {
 
+    private static final String DOMAIN_KEY = ConsoleModuleDescriptor.BUILTIN_DOMAIN_KEY;
+    private static final String ENTRY_PAGE_KEY = "role-main";
+
     private static final ConsoleModuleDescriptor DESCRIPTOR = ConsoleModuleDescriptor.builtin(
             BuiltinConsoleEntryPlugins.ROLE,
+            DOMAIN_KEY,
             "role",
+            ENTRY_PAGE_KEY,
             "team",
             30,
             I18nObject.of("en", "Role", "zh", "角色"),
