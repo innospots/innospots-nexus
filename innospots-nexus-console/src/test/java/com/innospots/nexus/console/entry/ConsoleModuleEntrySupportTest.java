@@ -128,7 +128,7 @@ class ConsoleModuleEntrySupportTest {
         ConsoleModuleDeclaration declared = soleModule(ConsoleModuleEntrySupport.definition(module));
 
         assertThat(declared.domainKey()).isEqualTo("sales");
-        assertThat(declared.pages().getFirst().pagePath()).isEqualTo("/sales/orders/order-list");
+        assertThat(declared.pages().getFirst().pagePath()).isEqualTo("/page/sales/orders/order-list");
     }
 
     @Test

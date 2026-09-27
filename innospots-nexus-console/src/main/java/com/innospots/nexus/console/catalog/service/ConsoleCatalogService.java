@@ -15,6 +15,7 @@ import com.innospots.nexus.console.catalog.domain.vo.CatalogNodeVo;
 import com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao;
 import com.innospots.nexus.console.catalog.domain.entity.ConsoleCatalogResourceEntity;
 import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
+import com.innospots.nexus.console.entry.ConsoleModuleDescriptor;
 
 /**
  * 从宿主级目录索引组装权限设置树。
@@ -170,15 +171,6 @@ public final class ConsoleCatalogService {
     }
 
     static String domainKeyFromRoute(String routePath) {
-        if (routePath == null || routePath.isBlank()) {
-            return null;
-        }
-        String normalized = routePath.startsWith("/") ? routePath.substring(1) : routePath;
-        int slash = normalized.indexOf('/');
-        if (slash < 0) {
-            return normalized.isBlank() ? null : normalized;
-        }
-        String domainKey = normalized.substring(0, slash);
-        return domainKey.isBlank() ? null : domainKey;
+        return ConsoleModuleDescriptor.domainKeyFromPageRoute(routePath);
     }
 }

@@ -61,12 +61,12 @@ ui-pages/nexus/{moduleKey}/{entryPageKey}.yaml
 不手写进 `builtin()`；由 `ConsoleModuleEntrySupport` 按统一公式生成：
 
 ```text
-pagePath = /{domainKey}/{moduleKey}/{pageKey}
+pagePath = /page/{domainKey}/{moduleKey}/{pageKey}
 ```
 
 实现：`ConsoleModuleDescriptor.pagePath(domainKey, moduleKey, pageKey)`。
 
-内置示例：`/nexus/menu/menu-main`。
+内置示例：`/page/nexus/menu/menu-main`（`PAGE_ROUTE_PREFIX` = `/page`）。
 
 第三方插件在 `plugin.yaml` 的 `console@1` 中声明 `pageKey` + `pagePath` 时，**推荐**与上述公式一致，并与 classpath 布局对齐。
 
@@ -225,7 +225,11 @@ PluginDefinition.builder(pluginId)
 
 #### `pagePath(String domainKey, String moduleKey, String pageKey) → String`
 
-- **说明：** `/{domainKey}/{moduleKey}/{pageKey}`。
+- **说明：** `/page/{domainKey}/{moduleKey}/{pageKey}`。
+
+#### `domainKeyFromPageRoute(String routePath) → String`
+
+- **说明：** 从 Page 路由解析 `domainKey`（须以 `/page/` 开头）。
 
 #### `allPageKeys() → List<String>`
 

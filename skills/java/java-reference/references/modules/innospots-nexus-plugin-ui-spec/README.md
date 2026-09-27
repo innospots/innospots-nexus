@@ -45,7 +45,7 @@ Console 目录同步 / 运行时加载（PageDslLoader）
 | Console 贡献设计 | `innospots-nexus-plugin/docs/plugin/design/plugin-console-contribution-design.md` |
 | **页面 YAML（本文）** | 本目录 `references/` |
 
-`console@1` 中 `ConsoleModuleDeclaration.domainKey` 与 `UiSpecPageDeclaration.pagePath`（`/{domain}/{module}/{pageKey}`）与 classpath 布局对齐；默认路径与目录同步见
+`console@1` 中 `ConsoleModuleDeclaration.domainKey` 与 `UiSpecPageDeclaration.pagePath`（`/page/{domain}/{module}/{pageKey}`）与 classpath 布局对齐；默认路径与目录同步见
 [`workflow-and-layout.md`](references/workflow-and-layout.md)。
 
 内置控制台 **入口页 `pageKey`（各 entry 插件显式 `entryPageKey`）** 与 **entry 组装**（含多模块 `ConsoleEntryPluginDescriptor`）见

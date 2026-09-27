@@ -40,7 +40,7 @@ YAML 必填：`page.id: menu-main`（与 `entryPageKey`、文件名一致）。
 
 ### 生成的 `console@1` 形状（概念）
 
-- **pages：** 一条 `UiSpecPageDeclaration("menu-main", "/nexus/menu/menu-main", [])`
+- **pages：** 一条 `UiSpecPageDeclaration("menu-main", "/page/nexus/menu/menu-main", [])`
 - **menuTree：** 一条 `MenuDeclaration.page("menu-main", pageTitle, "menu", 10, "menu-main")`
 
 完整 `pageKey` 命名与三层一致性见 [`entry.md` → 入口页与 pageKey 规范](entry.md#入口页与-pagekey-规范)。

@@ -21,7 +21,7 @@ class ConsoleCatalogServiceTest {
         ConsoleCatalogResourceEntity menu = resource("menu-1", "module-1", CatalogResourceType.MENU,
                 "menu:sales.orders", 1, null, null);
         ConsoleCatalogResourceEntity page = resource("page-1", "module-1", CatalogResourceType.PAGE,
-                "page:sales.orders", 2, "orders", "/nexus/sales/orders");
+                "page:sales.orders", 2, "orders", "/page/nexus/sales/orders");
         ConsoleCatalogService service = new ConsoleCatalogService(
                 permissionResourceDao(List.of(module, menu, page)));
 
@@ -34,7 +34,7 @@ class ConsoleCatalogServiceTest {
                 .satisfies(child -> {
                     assertThat(child.resourceType()).isEqualTo(CatalogResourceType.PAGE);
                     assertThat(child.pageKey()).isEqualTo("orders");
-                    assertThat(child.routePath()).isEqualTo("/nexus/sales/orders");
+                    assertThat(child.routePath()).isEqualTo("/page/nexus/sales/orders");
                     assertThat(child.children()).isEmpty();
                 });
     }
@@ -44,9 +44,9 @@ class ConsoleCatalogServiceTest {
         ConsoleCatalogResourceEntity module = resource("module-1", null, CatalogResourceType.MODULE,
                 "module:sales", 0, null, null);
         ConsoleCatalogResourceEntity parentPage = resource("page-1", "module-1", CatalogResourceType.PAGE,
-                "page:sales.orders", 0, "orders", "/nexus/sales/orders");
+                "page:sales.orders", 0, "orders", "/page/nexus/sales/orders");
         ConsoleCatalogResourceEntity childPage = resource("page-2", "page-1", CatalogResourceType.PAGE,
-                "page:sales.order-detail", 1, "order-detail", "/nexus/sales/order-detail");
+                "page:sales.order-detail", 1, "order-detail", "/page/nexus/sales/order-detail");
         ConsoleCatalogService service = new ConsoleCatalogService(
                 permissionResourceDao(List.of(module, parentPage, childPage)));
 
@@ -63,7 +63,7 @@ class ConsoleCatalogServiceTest {
 
     @Test
     void parsesDomainKeyFromRoutePath() {
-        assertThat(ConsoleCatalogService.domainKeyFromRoute("/nexus/menu/menu-main")).isEqualTo("nexus");
+        assertThat(ConsoleCatalogService.domainKeyFromRoute("/page/nexus/menu/menu-main")).isEqualTo("nexus");
     }
 
     private static com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao permissionResourceDao(

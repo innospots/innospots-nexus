@@ -48,6 +48,9 @@ public record ConsoleModuleDescriptor(
      */
     public static final String BUILTIN_DOMAIN_KEY = "nexus";
 
+    /** 控制台 Page 前端路由固定前缀（{@code /page/{domainKey}/{moduleKey}/{pageKey}}）。 */
+    public static final String PAGE_ROUTE_PREFIX = "/page";
+
     public ConsoleModuleDescriptor {
         domainKey = requireKey(domainKey, "domainKey");
         moduleKey = requireKey(moduleKey, "moduleKey");
@@ -56,7 +59,7 @@ public record ConsoleModuleDescriptor(
     }
 
     /**
-     * 构建模块页面的前端路由路径：{@code /{domainKey}/{moduleKey}/{pageKey}}。
+     * 构建模块页面的前端路由路径：{@code /page/{domainKey}/{moduleKey}/{pageKey}}。
      *
      * @param domainKey 领域键
      * @param moduleKey 模块键
@@ -64,7 +67,26 @@ public record ConsoleModuleDescriptor(
      * @return 绝对路径
      */
     public static String pagePath(String domainKey, String moduleKey, String pageKey) {
-        return "/" + domainKey + "/" + moduleKey + "/" + pageKey;
+        requireKey(pageKey, "pageKey");
+        return PAGE_ROUTE_PREFIX + "/" + domainKey + "/" + moduleKey + "/" + pageKey;
+    }
+
+    /**
+     * 从 Page 路由路径解析 {@code domainKey}（路径须以 {@link #PAGE_ROUTE_PREFIX} 开头）。
+     *
+     * @param routePath 页面路由，例如 {@code /page/nexus/menu/menu-main}
+     * @return 领域键；无法解析时 {@code null}
+     */
+    public static String domainKeyFromPageRoute(String routePath) {
+        if (routePath == null || routePath.isBlank()) {
+            return null;
+        }
+        String normalized = routePath.startsWith("/") ? routePath.substring(1) : routePath;
+        String[] segments = normalized.split("/", -1);
+        if (segments.length < 3 || !"page".equals(segments[0]) || segments[1].isBlank()) {
+            return null;
+        }
+        return segments[1];
     }
 
     /**

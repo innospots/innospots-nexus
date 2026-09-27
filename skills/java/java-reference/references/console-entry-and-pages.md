@@ -53,7 +53,7 @@ console: ConsoleCatalogSyncService  →  nx_console_catalog_resource（MODULE / 
 | 一致性 | `console@1.pageKey` = YAML `page.id` = 文件名 `{pageKey}.yaml` |
 | 内置入口页 | 各 `*EntryPlugin` 内显式常量（如 `ENTRY_PAGE_KEY = "menu-main"`），经 `builtin(..., entryPageKey, ...)` 传入 |
 | `domainKey` | 与 `console@1`、`ui-pages/{domainKey}/...` 一致；内置六个 entry 使用 `BUILTIN_DOMAIN_KEY`（`nexus`），**非 API 强制** |
-| 前端路由 | `/{domainKey}/{moduleKey}/{pageKey}`（`ConsoleModuleDescriptor.pagePath`） |
+| 前端路由 | `/page/{domainKey}/{moduleKey}/{pageKey}`（`ConsoleModuleDescriptor.pagePath`） |
 
 ## 易混概念
 

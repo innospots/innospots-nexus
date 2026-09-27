@@ -17,7 +17,7 @@
 | `pages` | `UiSpecPageDeclaration`（`pageKey`、`pagePath`、可选嵌套 `children`） |
 | `menuTree` | `MenuDeclaration`（目录或页面入口；页面节点绑定 `pageKey`） |
 
-`pageKey` 须与 Page DSL `page.id` 及 YAML 文件名一致；路径推荐 `/{domainKey}/{moduleKey}/{pageKey}`。
+`pageKey` 须与 Page DSL `page.id` 及 YAML 文件名一致；路径推荐 `/page/{domainKey}/{moduleKey}/{pageKey}`（`ConsoleModuleDescriptor.pagePath`）。
 
 ## 内置 entry 组装（console 模块）
 

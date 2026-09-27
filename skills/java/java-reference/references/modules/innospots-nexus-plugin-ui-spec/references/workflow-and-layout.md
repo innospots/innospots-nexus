@@ -48,10 +48,10 @@ src/main/resources/ui-pages/sales/sales/order-list.yaml
 前端路由 `UiSpecPageDeclaration.pagePath` 推荐与 classpath 对齐：
 
 ```text
-/{domainKey}/{moduleKey}/{pageKey}
+/page/{domainKey}/{moduleKey}/{pageKey}
 ```
 
-例如：`/nexus/menu/menu-main`。
+例如：`/page/nexus/menu/menu-main`（由 `ConsoleModuleDescriptor.pagePath` 生成）。
 
 ## 模块页面清单 vs 页面父子关系
 
