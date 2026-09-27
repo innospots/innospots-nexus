@@ -23,6 +23,7 @@ import com.innospots.nexus.spring.core.plugin.NexusPluginInstallationDaoConfigur
 @Documented
 @Import({
         NexusPersistenceConfiguration.class,
+        NexusTransactionConfiguration.class,
         NexusPluginInstallationDaoConfiguration.class,
         NexusStartupConfiguration.class,
         NexusI18nConfiguration.class,
