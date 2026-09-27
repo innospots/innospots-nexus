@@ -57,6 +57,7 @@ permission:
 - 权限 **代码字符串** 与 `nx_permission_grant`、目录资源码一致（由 console 权限运行时解析）。
 - Page DSL 只**声明**所需权限；**不**存储授权关系。
 - 页面能否打开还受 catalog 中 PAGE 资源与 `ConsolePagePermissionAuthorizer` 约束。
+- 目录同步后，一级 PAGE 挂在 MODULE 下；带 `parentPageKey` 的 PAGE 挂在父 PAGE 下。权限树 API（`/api/nexus/catalog/tree`）按该结构返回嵌套 PAGE，不含 MENU 节点。
 
 ## 校验
 

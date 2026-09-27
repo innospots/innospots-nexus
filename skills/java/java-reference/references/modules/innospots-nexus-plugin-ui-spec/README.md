@@ -45,8 +45,11 @@ Console 目录同步 / 运行时加载（PageDslLoader）
 | Console 贡献设计 | `innospots-nexus-plugin/docs/plugin/design/plugin-console-contribution-design.md` |
 | **页面 YAML（本文）** | 本目录 `references/` |
 
-`console@1` 中 `UiSpecPageDeclaration.pagePath` 指向 classpath 上的页面资源；默认布局见
+`console@1` 中 `ConsoleModuleDeclaration.domainKey` 与 `UiSpecPageDeclaration.pagePath`（`/{domain}/{module}/{pageKey}`）与 classpath 布局对齐；默认路径与目录同步见
 [`workflow-and-layout.md`](references/workflow-and-layout.md)。
+
+内置控制台 **入口页 `pageKey`**（`{moduleKey}-main`、`entryPageKey` 与 `*EntryPlugin`）见
+[`innospots-nexus-console` → entry.md](../innospots-nexus-console/references/entry.md#入口页与-pagekey-规范)。
 
 ## 规范章节（契约速查）
 
@@ -67,7 +70,7 @@ Console 目录同步 / 运行时加载（PageDslLoader）
 | 类 | 类型 | 说明 |
 |------|------|------|
 | `PageDsl` | `class` | YAML 根文档；`SPEC_VERSION = "1.0"` |
-| `PageMeta` | `class` | `page.id`（kebab-case）等元数据 |
+| `PageMeta` | `class` | `page.id`（kebab-case）、`parentPageKey` 等元数据 |
 | `RequiresConfig` | `class` | 运行时与组件版本要求 |
 | `LifecycleConfig` | `class` | `onInit` … `onDestroy` 钩子 |
 | `DataSourceConfig` | `interface` | 数据源 sealed 层次 |
@@ -77,7 +80,7 @@ Console 目录同步 / 运行时加载（PageDslLoader）
 | `PageDslValidator` | `class` | 结构校验（不校验宿主是否实现动作/服务） |
 | `JacksonPageDslParser` | `class` | YAML → `PageDsl` |
 | `PageDslConfig` | `record` | 默认 `ui-pages/**/*.yaml`，未知字段失败 |
-| `PageDslLoader` | `interface` | 按 `moduleKey` + `pageKey` 加载 |
+| `PageDslLoader` | `interface` | 按 `domainKey` + `moduleKey` + `pageKey` 加载 |
 
 更多类型见 [`java-runtime.md`](references/java-runtime.md) 与
 [`innospots-nexus-plugin` 包级索引](../innospots-nexus-plugin/README.md) 中 `contribution-console-ui-spec-*`。
@@ -97,6 +100,6 @@ Console 目录同步 / 运行时加载（PageDslLoader）
 
 ## 示例
 
-- 完整列表页：[`customer-list.yaml`](../../../../../innospots-nexus-plugin/src/test/resources/ui-pages/demo/customer-list.yaml)
-- 最小页：[`order-list.yaml`](../../../../../innospots-nexus-plugin/src/test/resources/ui-pages/sales/order-list.yaml)
-- 内置模块页：[`ui-pages/`](../../../../../innospots-nexus-console/src/main/resources/ui-pages/)
+- 完整列表页：[`customer-list.yaml`](../../../../../innospots-nexus-plugin/src/test/resources/ui-pages/demo/demo/customer-list.yaml)
+- 最小页：[`order-list.yaml`](../../../../../innospots-nexus-plugin/src/test/resources/ui-pages/sales/sales/order-list.yaml)
+- 内置模块页：[`ui-pages/nexus/`](../../../../../innospots-nexus-console/src/main/resources/ui-pages/nexus/)

@@ -45,12 +45,13 @@
 
 | 字段 | 必填 | 说明 |
 |------|------|------|
-| `id` | 是 | 页面唯一键，与 `pageKey` / 资源文件名一致 |
+| `id` | 是 | 页面唯一键，与 `console@1` 的 `pageKey`、资源文件名 `{pageKey}.yaml` 一致；格式与内置入口页约定见 [console entry.md](../../innospots-nexus-console/references/entry.md#入口页与-pagekey-规范) |
 | `name` | 否 | camelCase 程序化名称 |
 | `title` | 否 | 展示标题 |
 | `description` | 否 | 描述 |
 | `type` | 否 | 模式：`list`、`detail`、`form`、`dashboard`、`general` 等 |
 | `permission` | 否 | 页面级权限，见 [`permissions.md`](permissions.md) |
+| `parentPageKey` | 否 | 父页面 `page.id`；未设置表示一级页面；设置后为子页面，见 [`workflow-and-layout.md`](workflow-and-layout.md) |
 
 ## `requires` 对象
 

@@ -11,9 +11,9 @@
 | `PageDsl` | 根文档模型 |
 | `PageDslParser` / `JacksonPageDslParser` | YAML 解析 |
 | `PageDslValidator` | 结构校验 |
-| `PageDslConfig` | classpath 路径与严格性 |
+| `PageDslConfig` | classpath 路径（`ui-pages/{domain}/{module}/{page}.yaml`）与严格性 |
 | `ClasspathPageDslLoader` | 默认 classpath `PageDslLoader` 实现 |
-| `PageDslLoader` | 加载端口（宿主可替换） |
+| `PageDslLoader` | `load(domainKey, moduleKey, pageKey)` 加载端口（宿主可替换） |
 | `PageDslFilter` / `PageDslFilterChain` | 渲染前变换 |
 
 ## 子包
@@ -46,4 +46,4 @@
 | 插件清单、console@1 模块/菜单树 | `plugin.yaml` / `PluginDefinition` |
 | 页面 UI 正文 | 本 Page DSL YAML |
 
-二者通过 `pageKey` 与 `pagePath` 关联，内容不得混用 schema。
+二者通过 `domainKey`、`moduleKey`、`pageKey` 与 `pagePath` 关联；页面父子关系在 Page DSL 的 `page.parentPageKey` 中声明，内容不得混用 schema。
