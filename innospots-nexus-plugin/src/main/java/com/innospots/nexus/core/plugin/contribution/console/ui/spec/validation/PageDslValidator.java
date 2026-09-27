@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.status.NexusStatusCode;
@@ -31,6 +32,8 @@ import com.innospots.nexus.core.plugin.contribution.console.ui.spec.node.DslSour
  */
 public final class PageDslValidator {
 
+    private static final Pattern PAGE_KEY_PATTERN = Pattern.compile("[a-z][a-z0-9]*(?:-[a-z0-9]+)*");
+
     private static final Set<String> HTTP_METHODS = Set.of(
             "GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS");
 
@@ -50,6 +53,7 @@ public final class PageDslValidator {
         if (document.getPage() == null || !hasText(document.getPage().getId())) {
             invalid("PageDsl page.id is required");
         }
+        validateParentPageKey(document.getPage().getId(), document.getPage().getParentPageKey());
         validateDataSources(document.getDataSources());
         validateNamedActions(document.getActions(), document.getDataSources(), "actions");
         validateComponents(document.getComponents());
@@ -267,6 +271,18 @@ public final class PageDslValidator {
             action.setParams(actual);
         }
         return action;
+    }
+
+    private void validateParentPageKey(String pageId, String parentPageKey) {
+        if (!hasText(parentPageKey)) {
+            return;
+        }
+        if (pageId.equals(parentPageKey)) {
+            invalid("PageDsl page.parentPageKey must not equal page.id");
+        }
+        if (parentPageKey.length() > 128 || !PAGE_KEY_PATTERN.matcher(parentPageKey).matches()) {
+            invalid("PageDsl page.parentPageKey is invalid: " + parentPageKey);
+        }
     }
 
     private static boolean hasText(String value) {

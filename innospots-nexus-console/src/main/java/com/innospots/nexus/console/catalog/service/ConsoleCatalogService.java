@@ -90,7 +90,7 @@ public final class ConsoleCatalogService {
             if (!CatalogResourceType.PAGE.name().equals(child.getResourceType())) {
                 continue;
             }
-            CatalogNodeVo pageNode = pagePermissionNode(child);
+            CatalogNodeVo pageNode = buildPagePermissionNode(child, childrenByParent);
             pageNodes.add(pageNode);
             if (domainKey == null) {
                 domainKey = pageNode.domainKey();
@@ -110,7 +110,17 @@ public final class ConsoleCatalogService {
                 List.copyOf(pageNodes));
     }
 
-    private static CatalogNodeVo pagePermissionNode(ConsoleCatalogResourceEntity page) {
+    private static CatalogNodeVo buildPagePermissionNode(
+            ConsoleCatalogResourceEntity page,
+            Map<String, List<ConsoleCatalogResourceEntity>> childrenByParent
+    ) {
+        List<ConsoleCatalogResourceEntity> children = sortedChildren(page, childrenByParent);
+        List<CatalogNodeVo> childPages = new ArrayList<>();
+        for (ConsoleCatalogResourceEntity child : children) {
+            if (CatalogResourceType.PAGE.name().equals(child.getResourceType())) {
+                childPages.add(buildPagePermissionNode(child, childrenByParent));
+            }
+        }
         return new CatalogNodeVo(
                 page.getResourceId(),
                 page.getOwnerPluginId(),
@@ -122,7 +132,7 @@ public final class ConsoleCatalogService {
                 page.getRoutePath(),
                 page.getDisplayName(),
                 page.getSortOrder(),
-                List.of());
+                List.copyOf(childPages));
     }
 
     private static CatalogNodeVo toNode(
