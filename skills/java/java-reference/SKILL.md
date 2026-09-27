@@ -10,7 +10,7 @@ description: |
   触发词：Java 规范、编码规范、命名规范、代码风格、注释规范、API 设计、
   异常规范、状态码、java 标准、standards。
 category: java
-version: 1.9.0
+version: 1.9.1
 ---
 
 # Java 通用规范与标准
@@ -54,6 +54,7 @@ version: 1.9.0
 | 结构简化与防过度设计 | [code-quality-constraints.md](references/code-quality-constraints.md) | 冗余、死代码、wrapper、双轨 API、diff 体量 smell |
 | 规范章节地图 | [standards-index.md](references/standards-index.md) | 定位规则在哪份 standards 文件的哪一节 |
 | 模块归属 | [module-ownership.md](references/module-ownership.md) | Maven 模块与业务域判定 |
+| 控制台 entry 与 pageKey | [console-entry-and-pages.md](references/console-entry-and-pages.md) | 内置 entry 组装、多模块/多页、classpath 与 catalog 分工 |
 | 包结构（领域优先） | [package-structure.md](references/package-structure.md) | 领域 → 功能子模块 → 职责；禁止 service 堆积；单包 ≤15 类 |
 | sample 示例工程 | [sample-extension-layout.md](references/sample-extension-layout.md) | reactor、交付面×领域 DDD、HTTP 前缀、扩展与 platform 边界 |
 | 作用域层级 | [scope-hierarchy.md](references/scope-hierarchy.md) | Session/Snapshot 与 Entity 基类 |

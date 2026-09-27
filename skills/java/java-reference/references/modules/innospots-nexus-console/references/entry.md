@@ -1,6 +1,8 @@
 # 包 `entry`
 
-内置控制台 **entry 插件**：每个插件贡献一个 `console@1` 模块、该模块下的 Page DSL 页面清单、以及一条顶层菜单节点。页面正文在 classpath `ui-pages/`；本包负责元数据组装。
+内置控制台 **entry 插件**：通过 `ConsoleModuleEntrySupport` 产出 `console@1` 贡献（**可单插件多模块**；每模块可多页面、多顶层菜单）。页面正文在 classpath `ui-pages/`；本包负责元数据组装。
+
+**技能总索引：** [`console-entry-and-pages.md`](../../../console-entry-and-pages.md)
 
 **相关文档：**
 
@@ -95,11 +97,11 @@ console@1 pages[].pageKey  ==  PageDsl page.id  ==  {pageKey}.yaml 文件名
 |------|--------|----------------|
 | 在描述符中 | `entryPageKey`（或 `mainPageKey` 推导） | `additionalPageKeys` 列表项 |
 | 在 `console@1` | `pages` 中第一项（`allPageKeys()` 顺序） | 同列表后续项 |
-| 在菜单 | `menuTree` 中 `MenuDeclaration.page(entryPageKey)` | 一般不单独占顶层菜单项；由入口页内导航或 `parentPageKey` 树展示 |
+| 在菜单 | 单菜单：`MenuDeclaration.page(entryPageKey)`；多菜单：`menuEntries` → 多条 `MenuDeclaration.page` | 子页通常不单独占顶层菜单；由 `parentPageKey` 或页内导航 |
 | 在 YAML | 通常**无** `parentPageKey` | 设置 `page.parentPageKey` 为父页 `page.id` |
 | 在权限树 API | MODULE 下的一级 PAGE | 嵌套在父 PAGE 下 |
 
-内置六个模块当前均为**单入口页**（无 `additionalPageKeys`）；扩展子页时使用 `builtin(..., List.of("other-page"))`  overload。
+内置六个模块当前均为**单入口页、单顶层菜单**；扩展子页用 `builtin(..., List.of("other-page"))`；扩展多菜单用 `builtin(..., additionalPageKeys, menuEntries)`。
 
 ### 与 `menuKey` 的关系（内置）
 
@@ -134,24 +136,34 @@ console@1 pages[].pageKey  ==  PageDsl page.id  ==  {pageKey}.yaml 文件名
 
 ## 组装流程（`ConsoleModuleEntrySupport`）
 
+支持 **单模块**（`definition(ConsoleModuleDescriptor)`）与 **多模块**（`definition(ConsoleEntryPluginDescriptor)`）。
+每个模块可声明 **多页面**（`additionalPageKeys` + `allPageKeys()`）与 **多顶层菜单**（`menuEntries` 非空时按 `orderIndex` 排序）。
+
 ```text
-ConsoleModuleDescriptor
+ConsoleEntryPluginDescriptor(pluginId, displayName, description, modules[])
         │
         ▼
 PluginDefinition.builder(pluginId)
   .version(BuiltinConsoleEntryPlugins.pluginVersion())
-  .tags(BuiltinConsoleEntryPlugins.tagsFor(descriptor))
-  .contribute(ConsolePluginContribution)
+  .tags(BuiltinConsoleEntryPlugins.tagsFor(entry))   // 多模块时 domain/module 为逗号拼接
+  .contribute(ConsolePluginContribution(modules[]))
         │
         ▼
-ConsoleModuleDeclaration(
-  domainKey, moduleKey, displayName, description,
-  pages = allPageKeys → UiSpecPageDeclaration(pageKey, pagePath(...), []),
-  menuTree = [ MenuDeclaration.page(menuKey, pageTitle, menuIcon, orderIndex, entryPageKey) ]
-)
+每个 ConsoleModuleDeclaration:
+  pages = allPageKeys → UiSpecPageDeclaration(...)
+  menuTree = menuEntries[] 或 单条 MenuDeclaration.page(...)
 ```
 
-各 `*EntryPlugin` 仅持有静态 `ConsoleModuleDescriptor` 并调用 `ConsoleModuleEntrySupport.definition(DESCRIPTOR)`。
+各内置 `*EntryPlugin` 仍使用单模块 `ConsoleModuleDescriptor` + `definition(DESCRIPTOR)`。
+捆绑多模块时使用 `ConsoleEntryPluginDescriptor.of(pluginId, …, List.of(moduleA, moduleB))`，且各模块的 `pluginId` 必须与 entry 一致。
+
+### `ConsoleMenuItemDescriptor`
+
+单条顶层菜单：`menuKey`、`title`、`icon`、`orderIndex`、`pageKey`（须出现在该模块 `allPageKeys()` 中）。
+
+### `ConsoleModuleDescriptor.module(...)`
+
+入口页键不必为 `{moduleKey}-main` 时，使用 `module(...)` 工厂；行为与 `builtin` 相同，仅 `entryPageKey` / `domainKey` 可自定义。
 
 ---
 
@@ -179,7 +191,11 @@ ConsoleModuleDeclaration(
 
 #### `tagsFor(ConsoleModuleDescriptor descriptor) → Tags`
 
-- **说明：** 默认标签：`kind=entry`、`domain={domainKey}`、`module={moduleKey}`。
+- **说明：** 委托 `tagsFor(ConsoleEntryPluginDescriptor.of(descriptor))`。
+
+#### `tagsFor(ConsoleEntryPluginDescriptor entry) → Tags`
+
+- **说明：** `kind=entry`；`domain` / `module` 为多模块时按字母序逗号拼接。
 
 ---
 
@@ -203,7 +219,8 @@ ConsoleModuleDeclaration(
 | `orderIndex` | `int` | 同级菜单排序 |
 | `displayName` | `I18nObject` | 模块显示名称 |
 | `description` | `I18nObject` | 模块描述 |
-| `pageTitle` | `I18nObject` | 入口菜单与入口页面标题 |
+| `pageTitle` | `I18nObject` | 单菜单模式下的菜单与入口页标题 |
+| `menuEntries` | `List<ConsoleMenuItemDescriptor>` | 非空时生成多条顶层菜单；为空时使用 `menuKey` / `pageTitle` 等单菜单字段 |
 
 ### 常量
 
@@ -229,7 +246,33 @@ ConsoleModuleDeclaration(
 #### `builtin(...) → ConsoleModuleDescriptor`
 
 - **说明：** 构建内置描述符；`domainKey=nexus`，`entryPageKey=mainPageKey(moduleKey)`，`menuKey=entryPageKey`。
-- **重载：** 无 `additionalPageKeys` 或传入 `List<String> additionalPageKeys`。
+- **重载：** 仅 `additionalPageKeys`；或 `additionalPageKeys` + `menuEntries`。
+
+#### `module(...) → ConsoleModuleDescriptor`
+
+- **说明：** 自定义 `entryPageKey` / `domainKey` 的模块描述符（不必 `{moduleKey}-main`）。
+
+---
+
+## ConsoleEntryPluginDescriptor
+
+**类型：** record
+
+单个 entry 插件元数据；`modules` 至少一项，且每项 `pluginId` 与 entry 的 `pluginId` 相同。
+
+### 方法
+
+#### `of(ConsoleModuleDescriptor module) → ConsoleEntryPluginDescriptor`
+
+#### `of(String pluginId, I18nObject displayName, I18nObject description, List<ConsoleModuleDescriptor> modules) → ConsoleEntryPluginDescriptor`
+
+---
+
+## ConsoleMenuItemDescriptor
+
+**类型：** record
+
+模块内一条顶层 `MenuDeclaration.page` 的源数据（`menuKey`、`title`、`icon`、`orderIndex`、`pageKey`）。
 
 ---
 
@@ -237,13 +280,17 @@ ConsoleModuleDeclaration(
 
 **类型：** class
 
-内置控制台模块 entry 插件的共享组装辅助工具。
+内置控制台 entry 插件的共享组装辅助工具。
 
 ### 方法
 
 #### `definition(ConsoleModuleDescriptor descriptor) → PluginDefinition`
 
-- **说明：** 为单个控制台模块构建仅贡献型 `PluginDefinition`（含 `console@1` 模块、全部 `UiSpecPageDeclaration`、单条 `MenuDeclaration.page`）。
+- **说明：** 等价于 `definition(ConsoleEntryPluginDescriptor.of(descriptor))`。
+
+#### `definition(ConsoleEntryPluginDescriptor entry) → PluginDefinition`
+
+- **说明：** 为一个或多个控制台模块构建仅贡献型 `PluginDefinition`（`console@1` 含全部模块、页面与菜单树）。
 - **参数：**
-  - `descriptor` — 内置模块元数据
+  - `entry` — entry 插件元数据
 - **返回：** immutable 插件定义

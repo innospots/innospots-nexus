@@ -20,7 +20,8 @@ import com.innospots.nexus.base.i18n.I18nObject;
  * @param orderIndex           同级菜单排序
  * @param displayName          module 显示名称
  * @param description          module 描述
- * @param pageTitle            入口菜单与入口页面标题
+ * @param pageTitle            单菜单模式下的入口菜单与页面标题
+ * @param menuEntries          非空时使用多菜单节点；为空时使用 {@code menuKey} 等单菜单字段
  */
 public record ConsoleModuleDescriptor(
         String pluginId,
@@ -33,7 +34,8 @@ public record ConsoleModuleDescriptor(
         int orderIndex,
         I18nObject displayName,
         I18nObject description,
-        I18nObject pageTitle
+        I18nObject pageTitle,
+        List<ConsoleMenuItemDescriptor> menuEntries
 ) {
 
     /** 内置控制台模块 PageDsl 默认领域键。 */
@@ -41,6 +43,7 @@ public record ConsoleModuleDescriptor(
 
     public ConsoleModuleDescriptor {
         additionalPageKeys = additionalPageKeys == null ? List.of() : List.copyOf(additionalPageKeys);
+        menuEntries = menuEntries == null ? List.of() : List.copyOf(menuEntries);
     }
 
     /**
@@ -102,7 +105,8 @@ public record ConsoleModuleDescriptor(
             I18nObject description,
             I18nObject pageTitle
     ) {
-        return builtin(pluginId, moduleKey, menuIcon, orderIndex, displayName, description, pageTitle, List.of());
+        return builtin(
+                pluginId, moduleKey, menuIcon, orderIndex, displayName, description, pageTitle, List.of(), List.of());
     }
 
     /**
@@ -128,6 +132,43 @@ public record ConsoleModuleDescriptor(
             I18nObject pageTitle,
             List<String> additionalPageKeys
     ) {
+        return builtin(
+                pluginId,
+                moduleKey,
+                menuIcon,
+                orderIndex,
+                displayName,
+                description,
+                pageTitle,
+                additionalPageKeys,
+                List.of());
+    }
+
+    /**
+     * 构建内置控制台模块描述符，并声明额外页面键与多条顶层菜单入口。
+     *
+     * @param pluginId             反向域名插件标识
+     * @param moduleKey            模块键
+     * @param menuIcon             单菜单模式下的图标（多菜单时可为 {@code null})
+     * @param orderIndex           单菜单模式下的排序
+     * @param displayName          模块显示名称
+     * @param description          模块描述
+     * @param pageTitle            单菜单模式下的菜单标题
+     * @param additionalPageKeys   子页面 PageDsl 键
+     * @param menuEntries          多菜单节点；非空时忽略单菜单字段
+     * @return 描述符
+     */
+    public static ConsoleModuleDescriptor builtin(
+            String pluginId,
+            String moduleKey,
+            String menuIcon,
+            int orderIndex,
+            I18nObject displayName,
+            I18nObject description,
+            I18nObject pageTitle,
+            List<String> additionalPageKeys,
+            List<ConsoleMenuItemDescriptor> menuEntries
+    ) {
         String entryPageKey = mainPageKey(moduleKey);
         return new ConsoleModuleDescriptor(
                 pluginId,
@@ -140,6 +181,53 @@ public record ConsoleModuleDescriptor(
                 orderIndex,
                 displayName,
                 description,
-                pageTitle);
+                pageTitle,
+                menuEntries);
+    }
+
+    /**
+     * 构建自定义入口页键的控制台模块描述符（非 {@link #mainPageKey} 约定）。
+     *
+     * @param pluginId             插件标识
+     * @param domainKey            PageDsl 领域键
+     * @param moduleKey            模块键
+     * @param entryPageKey         入口页 pageKey
+     * @param additionalPageKeys   同模块其它页面键
+     * @param menuEntries          菜单树顶层节点；为空时使用单菜单参数
+     * @param menuKey              单菜单节点键
+     * @param menuIcon             单菜单图标
+     * @param orderIndex           单菜单排序
+     * @param displayName          模块显示名称
+     * @param description          模块描述
+     * @param pageTitle            单菜单标题
+     * @return 描述符
+     */
+    public static ConsoleModuleDescriptor module(
+            String pluginId,
+            String domainKey,
+            String moduleKey,
+            String entryPageKey,
+            List<String> additionalPageKeys,
+            List<ConsoleMenuItemDescriptor> menuEntries,
+            String menuKey,
+            String menuIcon,
+            int orderIndex,
+            I18nObject displayName,
+            I18nObject description,
+            I18nObject pageTitle
+    ) {
+        return new ConsoleModuleDescriptor(
+                pluginId,
+                domainKey,
+                moduleKey,
+                entryPageKey,
+                additionalPageKeys,
+                menuKey,
+                menuIcon,
+                orderIndex,
+                displayName,
+                description,
+                pageTitle,
+                menuEntries);
     }
 }

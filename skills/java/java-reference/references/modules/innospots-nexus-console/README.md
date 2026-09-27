@@ -13,15 +13,15 @@
 
 | 能力 | 说明 |
 |------|------|
-| **REST 表面** | `/console/**` 与 `/openapi/specs`（租户/平台认证在 portal/platform） |
+| **REST 表面** | `/api/nexus/**`（`ConsoleConstant.API_PREFIX`）与 `/openapi/specs`（租户/平台认证在 portal/platform） |
 | **归属与作用域** | `ConsoleOwnership*`、`SessionScopeBinder` 端口 |
 | **目录索引** | 插件贡献同步到 `nx_console_catalog_resource` |
 | **权限运行时** | `ConsolePagePermissionAuthorizer`、`PermissionGrantService` |
-| **导航** | `NavigationMenuAssembler` + `/console/navigation/menus` |
+| **导航** | `NavigationMenuAssembler` + `/api/nexus/navigation/menus` |
 | **凭据** | 密码、OTP、TOTP 与 `nx_user_credential` |
 | **插件管理** | `PluginManagementEndpoint` |
 | **OpenAPI** | 构建期 bundled 规范目录与 Scalar 文档钩子 |
-| **内置入口** | 六个 `*EntryPlugin` + Page DSL 资源 |
+| **内置入口** | 六个 `*EntryPlugin`、`ConsoleModuleEntrySupport`（单/多模块、多页、多菜单）+ `ui-pages/nexus/**` |
 | **审计** | `nx_audit_log` 与调用日志管道 |
 
 **不包含：** Spring Boot 自动配置、Servlet 绑定、租户 `/tenant/**` 与平台 `/platform/**` 认证端点实现（归属 portal/platform）、
@@ -61,7 +61,7 @@ endpoint → service → operator → dao
 | `nx_permission_grant` | `PermissionGrantEntity` | `OwnershipEntity` |
 | `nx_role` | `RoleEntity` | `BaseEntity` + `ownerType`/`ownerId`/`securityRealm` 列 |
 | `nx_role_binding` | `RoleBindingEntity` | `OwnershipEntity` |
-| `nx_menu` | `MenuEntity` | `OwnershipEntity`（无 `/console/menus` REST） |
+| `nx_menu` | `MenuEntity` | `OwnershipEntity`（无 `/api/nexus/menus` REST） |
 | `nx_dictionary_*` | `DictionaryTypeEntity` / `DictionaryItemEntity` | `OwnershipEntity` |
 | `nx_user_credential` | `UserCredentialEntity` | `OwnershipEntity` |
 | `nx_audit_log` | `AuditLogEntity` | `OwnershipEntity` |
@@ -88,17 +88,19 @@ endpoint → service → operator → dao
 
 | 路径前缀 | 端点 | 说明 |
 |-------------|----------|------|
-| `/console` | `ConsoleEndpoint` | 健康/状态 |
-| `/console/catalog` | `ConsoleCatalogEndpoint` | 目录树与同步 |
-| `/console/plugins` | `PluginManagementEndpoint` | 插件安装生命周期 |
-| `/console/navigation/menus` | `NavigationMenuEndpoint` | 授权过滤后的侧栏 |
-| `/console/me/permissions` | `CurrentAuthorizationEndpoint` | 当前用户可见资源 |
-| `/console/roles` | `RoleEndpoint` | 角色 CRUD（可继承） |
-| `/console/roles/{roleId}/bindings` | `RoleBindingEndpoint` | 角色绑定 |
-| `/console` | `GrantManagementEndpoint` | 角色/组织单元授权替换 |
-| `/console/dictionary-types` | `DictionaryTypeEndpoint` | 字典类型 |
-| `/console/dictionary-types/{typeCode}/items` | `DictionaryItemEndpoint` | 字典项 |
+| `/api/nexus` | `ConsoleEndpoint` | 健康/状态 |
+| `/api/nexus/catalog` | `ConsoleCatalogEndpoint` | 目录树与同步 |
+| `/api/nexus/plugins` | `PluginManagementEndpoint` | 插件安装生命周期 |
+| `/api/nexus/navigation/menus` | `NavigationMenuEndpoint` | 授权过滤后的侧栏 |
+| `/api/nexus/me/permissions` | `CurrentAuthorizationEndpoint` | 当前用户可见资源 |
+| `/api/nexus/roles` | `RoleEndpoint` | 角色 CRUD（可继承） |
+| `/api/nexus/roles/{roleId}/bindings` | `RoleBindingEndpoint` | 角色绑定 |
+| `/api/nexus` | `GrantManagementEndpoint` | 角色/组织单元授权替换 |
+| `/api/nexus/dictionary-types` | `DictionaryTypeEndpoint` | 字典类型 |
+| `/api/nexus/dictionary-types/{typeCode}/items` | `DictionaryItemEndpoint` | 字典项 |
 | `/openapi/specs` | `OpenApiCatalogEndpoint` | OpenAPI YAML 目录 |
+
+内置 entry 与 `pageKey` 规范见 [console-entry-and-pages.md](../../console-entry-and-pages.md) 与 [references/entry.md](references/entry.md)。
 
 租户 `/tenant/**`、平台 `/platform/**` 契约由 **portal** / **platform** 实现，见对应模块文档。
 
@@ -465,8 +467,10 @@ java:check      → mvn clean compile / test
 | 类 | 类型 | 说明 |
 |------|------|------|
 | `BuiltinConsoleEntryPlugins` | `class` | 内置控制台 entry 插件身份常量 |
-| `ConsoleModuleDescriptor` | `record` | 单个内置控制台模块 entry 插件的不可变元数据 |
-| `ConsoleModuleEntrySupport` | `class` | 内置控制台模块 entry 插件的共享组装辅助工具 |
+| `ConsoleEntryPluginDescriptor` | `record` | 单插件多模块 entry 元数据 |
+| `ConsoleMenuItemDescriptor` | `record` | 模块内单条顶层菜单节点 |
+| `ConsoleModuleDescriptor` | `record` | 单模块 PageDsl / 菜单元数据 |
+| `ConsoleModuleEntrySupport` | `class` | 组装 `console@1` 与 `PluginDefinition` |
 
 ### 包 `logger`
 

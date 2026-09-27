@@ -48,6 +48,7 @@ version: 2.0.0
 | **依赖规则** | 依赖方向单向、最小依赖；portal 与 platform 不得互依 |
 | **DDD 规则** | 领域概念与基础设施分离；ports and adapters |
 | **编码规范入口** | 契约细节回查 `skills/java/java-reference/standards/` |
+| **控制台 entry / Page DSL** | `console@1` 与 `pageKey` 见 [console-entry-and-pages.md](../java-reference/references/console-entry-and-pages.md) |
 | **Agent 工作流** | 新需求/新设计须先 grill-me；Java 任务按 AGENTS.md 技能路由表选用对应 `java:*` 技能 |
 
 设计结论须显式说明**为何符合 AGENTS.md 模块边界**（L0 模板亦须有一句归属判定）。

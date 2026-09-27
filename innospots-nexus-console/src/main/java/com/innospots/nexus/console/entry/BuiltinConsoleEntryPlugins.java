@@ -2,6 +2,7 @@ package com.innospots.nexus.console.entry;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.innospots.nexus.core.plugin.capability.Tags;
 
@@ -71,10 +72,27 @@ public final class BuiltinConsoleEntryPlugins {
      * @return 不可变标签集合
      */
     public static Tags tagsFor(ConsoleModuleDescriptor descriptor) {
+        return tagsFor(ConsoleEntryPluginDescriptor.of(descriptor));
+    }
+
+    /**
+     * 根据 entry 描述符生成内置 entry 插件默认标签。
+     *
+     * @param entry entry 插件元数据
+     * @return 不可变标签集合
+     */
+    public static Tags tagsFor(ConsoleEntryPluginDescriptor entry) {
         Map<String, String> values = new LinkedHashMap<>();
         values.put(TAG_KIND, TAG_KIND_ENTRY);
-        values.put(TAG_DOMAIN, descriptor.domainKey());
-        values.put(TAG_MODULE, descriptor.moduleKey());
+        values.put(TAG_DOMAIN, entry.modules().stream()
+                .map(ConsoleModuleDescriptor::domainKey)
+                .distinct()
+                .sorted()
+                .collect(Collectors.joining(",")));
+        values.put(TAG_MODULE, entry.modules().stream()
+                .map(ConsoleModuleDescriptor::moduleKey)
+                .sorted()
+                .collect(Collectors.joining(",")));
         return Tags.from(values);
     }
 }

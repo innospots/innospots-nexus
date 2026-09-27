@@ -5,31 +5,33 @@
 
 运行时 CDI/Spring/Quarkus 绑定在 **adapter/application** — 不在本模块。
 
+JAX-RS 类路径使用 `com.innospots.nexus.console.config.ConsoleConstant.API_PREFIX`（当前为 **`/api/nexus`**）。下文完整路径均基于该前缀。
+
 ## 路径约定
 
 | 前缀 | 交付模块 | 说明 |
 |--------|----------|------|
-| `/console/**` | **console** | 工作空间/租户会话下的管理 API |
+| `/api/nexus/**` | **console** | 工作空间/租户会话下的管理 API |
 | `/openapi/specs` | **console** | OpenAPI YAML 目录（构建期 bundled） |
 | `/tenant/auth`、`/tenant/scope` | **portal** | 租户身份与作用域令牌链 |
 | `/platform/auth` | **platform** | 运维平台登录 |
 
-## `/console`
+## `/api/nexus`
 
-### `ConsoleEndpoint` — `/console`
+### `ConsoleEndpoint` — `/api/nexus`
 
 | 方法 | 路径 | 响应 |
 |--------|------|----------|
 | GET | `/status` | `String`（非 `R`） |
 
-### `ConsoleCatalogEndpoint` — `/console/catalog`
+### `ConsoleCatalogEndpoint` — `/api/nexus/catalog`
 
 | 方法 | 路径 | 响应 |
 |--------|------|----------|
 | GET | `/tree` | `R<List<CatalogNodeVo>>` |
 | POST | `/sync` | `R<PermissionResourceSyncVo>` |
 
-### `PluginManagementEndpoint` — `/console/plugins`
+### `PluginManagementEndpoint` — `/api/nexus/plugins`
 
 | 方法 | 路径 | 响应 |
 |--------|------|----------|
@@ -40,19 +42,19 @@
 | POST | `/{pluginId}/disable` | `R<PluginManagementVo>` |
 | POST | `/{pluginId}/retry` | `R<PluginManagementVo>` |
 
-### `NavigationMenuEndpoint` — `/console/navigation/menus`
+### `NavigationMenuEndpoint` — `/api/nexus/navigation/menus`
 
 | 方法 | 路径 | 响应 |
 |--------|------|----------|
 | GET | `/` | `R<List<NavigationMenuVo>>` |
 
-### `CurrentAuthorizationEndpoint` — `/console/me/permissions`
+### `CurrentAuthorizationEndpoint` — `/api/nexus/me/permissions`
 
 | 方法 | 路径 | 响应 |
 |--------|------|----------|
 | GET | `/` | `R<List<PermissionResourceVo>>` |
 
-### `GrantManagementEndpoint` — `/console`
+### `GrantManagementEndpoint` — `/api/nexus`
 
 | 方法 | 路径 | 响应 |
 |--------|------|----------|
@@ -63,7 +65,7 @@
 
 PUT 为授权 + 数据源条件的**全量替换**。
 
-### `RoleEndpoint` — `/console/roles`
+### `RoleEndpoint` — `/api/nexus/roles`
 
 | 方法 | 路径 | 响应 |
 |--------|------|----------|
@@ -75,7 +77,7 @@ PUT 为授权 + 数据源条件的**全量替换**。
 | DELETE | `/{roleId}` | `R<Void>` |
 | GET | `/options` | `R<List<RoleOptionVo>>` |
 
-### `RoleBindingEndpoint` — `/console/roles/{roleId}/bindings`
+### `RoleBindingEndpoint` — `/api/nexus/roles/{roleId}/bindings`
 
 | 方法 | 路径 | 响应 |
 |--------|------|----------|
@@ -83,7 +85,7 @@ PUT 为授权 + 数据源条件的**全量替换**。
 | POST | `/` | `R<Void>` |
 | DELETE | `/{bindingId}` | `R<Void>` |
 
-### `DictionaryTypeEndpoint` — `/console/dictionary-types`
+### `DictionaryTypeEndpoint` — `/api/nexus/dictionary-types`
 
 | 方法 | 路径 | 响应 |
 |--------|------|----------|
@@ -95,7 +97,7 @@ PUT 为授权 + 数据源条件的**全量替换**。
 | DELETE | `/{dictionaryTypeId}` | `R<Void>` |
 | GET | `/options` | `R<List<DictionaryTypeOptionVo>>` |
 
-### `DictionaryItemEndpoint` — `/console/dictionary-types/{typeCode}/items`
+### `DictionaryItemEndpoint` — `/api/nexus/dictionary-types/{typeCode}/items`
 
 | 方法 | 路径 | 响应 |
 |--------|------|----------|

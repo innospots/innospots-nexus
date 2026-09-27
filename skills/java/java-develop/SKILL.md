@@ -43,6 +43,7 @@ version: 1.7.0
 
 - 设计输入与实现输出 → [develop-deliverables.md](references/develop-deliverables.md)
 - 归属与模块边界 → [module-ownership.md](../java-reference/references/module-ownership.md)
+- 控制台内置 entry / Page `pageKey` → [console-entry-and-pages.md](../java-reference/references/console-entry-and-pages.md)
 - 包结构（领域优先） → [package-structure.md](../java-reference/references/package-structure.md)
 - sample 扩展实施 → [sample-extension-development.md](references/sample-extension-development.md)
 - 作用域层级 → [scope-hierarchy.md](../java-reference/references/scope-hierarchy.md)

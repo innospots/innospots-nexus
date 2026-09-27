@@ -16,6 +16,9 @@
 **YAML 规范与使用方式（权威）：**
 [`innospots-nexus-plugin-ui-spec` 规范索引](../innospots-nexus-plugin-ui-spec/README.md)。
 
+**`pageKey` 与内置 entry 组装：**
+[console-entry-and-pages.md](../../console-entry-and-pages.md)。
+
 插件清单 DSL（`plugin.yaml`）：`innospots-nexus-plugin/docs/plugin/design/plugin-dsl-spec.md`。
 
 包级 Java API：所有 `contribution-console-ui-spec-*.md` 文件。

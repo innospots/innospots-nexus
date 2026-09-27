@@ -103,7 +103,7 @@ Maven 模块（portal / console / platform / adapter …）   ← 部署与依�
 ```text
 com.innospots.nexus.console.permission
   ├── authorization/          # 请求鉴权（与 grant 分离）
-  ├── entry/                # 插件入口
+  ├── entry/                # 控制台 entry 插件（见 java:reference → console-entry-and-pages.md）
   ├── grant/                # 授权授予（继续长大时自带 service/operator/domain）
   │   ├── service/
   │   ├── operator/

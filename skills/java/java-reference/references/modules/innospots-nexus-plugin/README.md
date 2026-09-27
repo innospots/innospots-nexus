@@ -52,7 +52,8 @@ Java 包名：`com.innospots.nexus.core.plugin.*`（兼容既有 import）。Mav
 
 **Pactor Page DSL 1.0（页面 YAML）规范索引：**
 `skills/java/java-reference/references/modules/innospots-nexus-plugin-ui-spec/README.md`
-（与 `plugin.yaml` 分离；默认路径 `ui-pages/{moduleKey}/{pageKey}.yaml`）。
+（与 `plugin.yaml` 分离；默认路径 `ui-pages/{domainKey}/{moduleKey}/{pageKey}.yaml`）。
+内置控制台 entry 与 `pageKey` 约定见 [console-entry-and-pages.md](../console-entry-and-pages.md)。
 
 ## 技能用法（java:reference）
 

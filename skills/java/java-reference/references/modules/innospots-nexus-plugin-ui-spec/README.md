@@ -48,7 +48,8 @@ Console 目录同步 / 运行时加载（PageDslLoader）
 `console@1` 中 `ConsoleModuleDeclaration.domainKey` 与 `UiSpecPageDeclaration.pagePath`（`/{domain}/{module}/{pageKey}`）与 classpath 布局对齐；默认路径与目录同步见
 [`workflow-and-layout.md`](references/workflow-and-layout.md)。
 
-内置控制台 **入口页 `pageKey`**（`{moduleKey}-main`、`entryPageKey` 与 `*EntryPlugin`）见
+内置控制台 **入口页 `pageKey`** 与 **entry 组装**（含多模块 `ConsoleEntryPluginDescriptor`）见
+[console-entry-and-pages.md](../console-entry-and-pages.md) 与
 [`innospots-nexus-console` → entry.md](../innospots-nexus-console/references/entry.md#入口页与-pagekey-规范)。
 
 ## 规范章节（契约速查）

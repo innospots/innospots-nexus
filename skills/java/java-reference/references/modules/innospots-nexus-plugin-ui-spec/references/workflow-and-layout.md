@@ -35,6 +35,15 @@ src/main/resources/ui-pages/sales/sales/order-list.yaml
 
 内置控制台 entry 插件（`MenuEntryPlugin` 等）的完整说明见
 [`innospots-nexus-console` → entry.md](../../innospots-nexus-console/references/entry.md#入口页与-pagekey-规范)。
+多模块/多页/多菜单组装见 [`console-entry-and-pages.md`](../../console-entry-and-pages.md)。
+
+### 组装 API（console 模块）
+
+| 场景 | 调用 |
+|------|------|
+| 单模块（六个内置 entry） | `ConsoleModuleEntrySupport.definition(ConsoleModuleDescriptor)` |
+| 单插件多模块 | `ConsoleModuleEntrySupport.definition(ConsoleEntryPluginDescriptor.of(pluginId, …, modules))` |
+| 模块内多顶层菜单 | `ConsoleModuleDescriptor.builtin(..., additionalPageKeys, menuEntries)` |
 
 前端路由 `UiSpecPageDeclaration.pagePath` 推荐与 classpath 对齐：
 
