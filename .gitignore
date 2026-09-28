@@ -38,3 +38,4 @@ logs
 scripts/
 /.lithe/
 out
+node_modules/
