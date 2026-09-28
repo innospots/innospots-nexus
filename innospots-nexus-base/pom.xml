@@ -59,6 +59,7 @@
             <artifactId>mapstruct-processor</artifactId>
             <scope>provided</scope>
         </dependency>
+        <!-- OpenAPI 注解（仅 API）；下游经 base 传递，勿在 console/core 等重复声明 -->
         <dependency>
             <groupId>org.eclipse.microprofile.openapi</groupId>
             <artifactId>microprofile-openapi-api</artifactId>
