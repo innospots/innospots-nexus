@@ -10,8 +10,8 @@ import org.springframework.context.annotation.Primary;
 
 import com.innospots.nexus.console.auth.service.TokenIssuer;
 import com.innospots.nexus.console.config.AuthConfig;
-import com.innospots.nexus.console.openapi.endpoint.OpenApiCatalogEndpoint;
-import com.innospots.nexus.console.openapi.operator.OpenApiCatalogOperator;
+import com.innospots.nexus.core.openapi.catalog.OpenApiCatalogEndpoint;
+import com.innospots.nexus.core.openapi.catalog.OpenApiCatalogOperator;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubject;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubjectResolver;
 import com.innospots.nexus.console.permission.authorization.ConsolePagePermissionAuthorizer;

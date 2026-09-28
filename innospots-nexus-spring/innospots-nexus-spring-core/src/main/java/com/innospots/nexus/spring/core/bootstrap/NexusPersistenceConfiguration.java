@@ -5,6 +5,8 @@ import org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import org.apache.ibatis.logging.slf4j.Slf4jImpl;
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.autoconfigure.MybatisPlusAutoConfiguration;
 import com.baomidou.mybatisplus.autoconfigure.MybatisPlusProperties;
@@ -34,7 +36,7 @@ public class NexusPersistenceConfiguration {
     }
 
     /**
-     * MyBatis-Plus 默认 ORM 行为（可被 {@code application.yaml} 覆盖）。
+     * MyBatis-Plus 默认 ORM 行为（Spring 宿主统一在此装配，不在 {@code application.yaml} 重复声明）。
      */
     @Bean
     MybatisPlusPropertiesCustomizer mybatisPlusPropertiesCustomizer(AuditMetaObjectHandler auditMetaObjectHandler) {
@@ -43,12 +45,14 @@ public class NexusPersistenceConfiguration {
                 properties.setConfiguration(new MybatisPlusProperties.CoreConfiguration());
             }
             properties.getConfiguration().setMapUnderscoreToCamelCase(true);
+            properties.getConfiguration().setLogImpl(Slf4jImpl.class);
             if (properties.getGlobalConfig() == null) {
                 properties.setGlobalConfig(new GlobalConfig());
             }
             if (properties.getGlobalConfig().getDbConfig() == null) {
                 properties.getGlobalConfig().setDbConfig(new GlobalConfig.DbConfig());
             }
+            properties.getGlobalConfig().setBanner(false);
             properties.getGlobalConfig().getDbConfig().setIdType(IdType.ASSIGN_UUID);
             properties.getGlobalConfig().setMetaObjectHandler(auditMetaObjectHandler);
         };

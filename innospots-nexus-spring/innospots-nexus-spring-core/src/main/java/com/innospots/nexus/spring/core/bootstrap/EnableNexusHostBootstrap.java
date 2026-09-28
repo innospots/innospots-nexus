@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Import;
 
 import com.innospots.nexus.spring.core.i18n.NexusI18nConfiguration;
 import com.innospots.nexus.spring.core.i18n.NexusI18nWebConfiguration;
+import com.innospots.nexus.spring.core.openapi.OpenApiCatalogConfiguration;
 import com.innospots.nexus.spring.core.plugin.NexusPluginInstallationDaoConfiguration;
 
 /**
@@ -27,7 +28,8 @@ import com.innospots.nexus.spring.core.plugin.NexusPluginInstallationDaoConfigur
         NexusPluginInstallationDaoConfiguration.class,
         NexusStartupConfiguration.class,
         NexusI18nConfiguration.class,
-        NexusI18nWebConfiguration.class
+        NexusI18nWebConfiguration.class,
+        OpenApiCatalogConfiguration.class
 })
 public @interface EnableNexusHostBootstrap {
 }

@@ -1,11 +1,12 @@
-package com.innospots.nexus.console.openapi.scalar;
+package com.innospots.nexus.core.openapi.scalar;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.innospots.nexus.console.openapi.domain.vo.OpenApiSpecItemVo;
-import com.innospots.nexus.console.openapi.operator.OpenApiCatalogOperator;
+import com.innospots.nexus.core.openapi.OpenApiCatalogPaths;
+import com.innospots.nexus.core.openapi.catalog.OpenApiCatalogOperator;
+import com.innospots.nexus.core.openapi.catalog.OpenApiSpecItemVo;
 import com.scalar.maven.core.ScalarHtmlRenderer;
 import com.scalar.maven.core.ScalarProperties;
 import com.scalar.maven.core.config.ScalarAgentOptions;
@@ -16,17 +17,13 @@ import com.scalar.maven.core.config.ScalarSource;
  */
 public final class OpenApiScalarDocumentation {
 
-    public static final String DEFAULT_DOCS_PATH = "/openapi/ui";
-
-    public static final String SPEC_URL_PREFIX = "/openapi/specs/";
-
     private OpenApiScalarDocumentation() {
     }
 
     public static ScalarProperties createDefaultProperties() {
         ScalarProperties properties = new ScalarProperties();
         properties.setEnabled(true);
-        properties.setPath(DEFAULT_DOCS_PATH);
+        properties.setPath(OpenApiCatalogPaths.UI_DEFAULT);
         properties.setPageTitle("Nexus API Reference");
         properties.setWithDefaultFonts(false);
         ScalarAgentOptions agent = new ScalarAgentOptions();
@@ -37,7 +34,7 @@ public final class OpenApiScalarDocumentation {
 
     public static String normalizeDocsPath(String path) {
         if (path == null || path.isBlank()) {
-            return DEFAULT_DOCS_PATH;
+            return OpenApiCatalogPaths.UI_DEFAULT;
         }
         if (!path.startsWith("/")) {
             return "/" + path;
@@ -58,7 +55,7 @@ public final class OpenApiScalarDocumentation {
         boolean first = true;
         for (OpenApiSpecItemVo item : specs) {
             ScalarSource source = new ScalarSource();
-            source.setUrl(SPEC_URL_PREFIX + item.specId());
+            source.setUrl(OpenApiCatalogPaths.SPECS_ITEM_PREFIX + item.specId());
             source.setTitle(item.specId());
             source.setSlug(item.specId());
             source.setDefault(first);

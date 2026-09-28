@@ -1,0 +1,17 @@
+# spring.profiles.active=prod — 仅数据源差异化（公共项见 application.yaml）
+# 生产库 DDL 需自行迁移；运行时 classpath 需包含 MySQL JDBC 驱动（示例模块默认仅打包 H2）。
+spring:
+  datasource:
+    driver-class-name: ${DB_DRIVER:com.mysql.cj.jdbc.Driver}
+    url: jdbc:mysql://${DB_IP}:${DB_PORT:3306}/${DB_NAME}?allowMultiQueries=true&useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=${DB_TIMEZONE:GMT%2B8}&zeroDateTimeBehavior=CONVERT_TO_NULL
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 32
+      minimum-idle: 2
+      pool-name: nexus-platform-db-pool
+      max-lifetime: 1800000
+      idle-timeout: 600000
+  sql:
+    init:
+      mode: never

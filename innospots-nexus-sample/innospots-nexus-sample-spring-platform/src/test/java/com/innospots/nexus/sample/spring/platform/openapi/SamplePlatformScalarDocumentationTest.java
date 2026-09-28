@@ -4,8 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.innospots.nexus.console.openapi.operator.OpenApiCatalogOperator;
-import com.innospots.nexus.console.openapi.scalar.OpenApiScalarDocumentation;
+import com.innospots.nexus.core.openapi.catalog.OpenApiCatalogOperator;
+import com.innospots.nexus.core.openapi.scalar.OpenApiScalarDocumentation;
 import com.innospots.nexus.sample.spring.platform.openapi.support.OpenApiJerseyTestApplication;
 import com.scalar.maven.core.ScalarProperties;
 

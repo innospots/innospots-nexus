@@ -1,4 +1,4 @@
-package com.innospots.nexus.console.openapi.internal;
+package com.innospots.nexus.core.openapi.catalog.internal;
 
 import java.io.IOException;
 import java.io.InputStream;

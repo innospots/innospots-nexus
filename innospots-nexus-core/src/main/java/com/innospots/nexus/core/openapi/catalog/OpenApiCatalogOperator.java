@@ -1,9 +1,8 @@
-package com.innospots.nexus.console.openapi.operator;
+package com.innospots.nexus.core.openapi.catalog;
 
 import java.util.List;
 
-import com.innospots.nexus.console.openapi.domain.vo.OpenApiSpecItemVo;
-import com.innospots.nexus.console.openapi.internal.OpenApiBundledSpecs;
+import com.innospots.nexus.core.openapi.catalog.internal.OpenApiBundledSpecs;
 
 /**
  * 按文件名加载 {@link OpenApiBundledSpecs#RESOURCE_ROOT} 下的 OpenAPI YAML。

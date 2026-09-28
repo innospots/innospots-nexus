@@ -13,13 +13,13 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.innospots.nexus.console.openapi.operator.OpenApiCatalogOperator;
-import com.innospots.nexus.console.openapi.scalar.OpenApiScalarDocumentation;
+import com.innospots.nexus.core.openapi.catalog.OpenApiCatalogOperator;
+import com.innospots.nexus.core.openapi.scalar.OpenApiScalarDocumentation;
 import com.scalar.maven.core.ScalarProperties;
 
 /**
  * 通过 {@link NexusJerseyResourceConfigurer} 暴露 Scalar 文档页与内置 {@code scalar.js}，
- * OpenAPI 规范仍由 {@link com.innospots.nexus.console.openapi.endpoint.OpenApiCatalogEndpoint} 提供。
+ * OpenAPI 规范仍由 {@link com.innospots.nexus.core.openapi.catalog.OpenApiCatalogEndpoint} 提供。
  */
 @Configuration
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)

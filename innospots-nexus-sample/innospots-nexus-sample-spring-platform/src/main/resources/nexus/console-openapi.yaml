@@ -2,7 +2,13 @@
 # OpenAPI 文档页（Scalar）与规范目录 HTTP
 #
 # Scalar 绑定: com.scalar.maven.core.ScalarProperties（prefix scalar）
-# 装配: NexusScalarJerseyConfiguration、ConsoleOpenApiConfiguration
+# 装配: NexusScalarJerseyConfiguration、OpenApiCatalogConfiguration（spring-core）
+#
+# 规范正文来自各模块构建产物 classpath:META-INF/nexus-openapi/<artifactId>.yaml
+# （如 innospots-nexus-console、innospots-nexus-platform）。若 Scalar 提示
+# Document '<specId>' could not be loaded，请对 console/platform 执行:
+#   mvn -pl innospots-nexus-console,innospots-nexus-platform process-classes
+# 或在 IDEA 中启用 Build → Delegate to Maven，再 Rebuild。
 #
 # 接口:
 #   GET /openapi/specs

@@ -1,4 +1,4 @@
-package com.innospots.nexus.console.openapi.operator;
+package com.innospots.nexus.core.openapi.catalog;
 
 import org.junit.jupiter.api.Test;
 

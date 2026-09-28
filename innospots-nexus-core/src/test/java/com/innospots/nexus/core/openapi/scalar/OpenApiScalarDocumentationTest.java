@@ -1,8 +1,9 @@
-package com.innospots.nexus.console.openapi.scalar;
+package com.innospots.nexus.core.openapi.scalar;
 
 import org.junit.jupiter.api.Test;
 
-import com.innospots.nexus.console.openapi.operator.OpenApiCatalogOperator;
+import com.innospots.nexus.core.openapi.OpenApiCatalogPaths;
+import com.innospots.nexus.core.openapi.catalog.OpenApiCatalogOperator;
 import com.scalar.maven.core.ScalarProperties;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -12,9 +13,9 @@ class OpenApiScalarDocumentationTest {
     @Test
     void normalizeDocsPathDefaultsWhenBlank() {
         assertThat(OpenApiScalarDocumentation.normalizeDocsPath(null))
-                .isEqualTo(OpenApiScalarDocumentation.DEFAULT_DOCS_PATH);
+                .isEqualTo(OpenApiCatalogPaths.UI_DEFAULT);
         assertThat(OpenApiScalarDocumentation.normalizeDocsPath(" "))
-                .isEqualTo(OpenApiScalarDocumentation.DEFAULT_DOCS_PATH);
+                .isEqualTo(OpenApiCatalogPaths.UI_DEFAULT);
     }
 
     @Test

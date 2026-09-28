@@ -7,9 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.innospots.nexus.base.domain.response.R;
-import com.innospots.nexus.console.openapi.domain.vo.OpenApiSpecItemVo;
-import com.innospots.nexus.console.openapi.endpoint.OpenApiCatalogEndpoint;
-import com.innospots.nexus.console.openapi.operator.OpenApiCatalogOperator;
+import com.innospots.nexus.core.openapi.catalog.OpenApiCatalogEndpoint;
+import com.innospots.nexus.core.openapi.catalog.OpenApiCatalogOperator;
+import com.innospots.nexus.core.openapi.catalog.OpenApiSpecItemVo;
 import com.innospots.nexus.sample.spring.platform.openapi.support.OpenApiJerseyTestApplication;
 
 import static org.assertj.core.api.Assertions.assertThat;

@@ -3,7 +3,7 @@ package com.innospots.nexus.sample.spring.platform.openapi.support;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Import;
 
-import com.innospots.nexus.spring.console.config.ConsoleOpenApiConfiguration;
+import com.innospots.nexus.spring.core.openapi.OpenApiCatalogConfiguration;
 import com.innospots.nexus.spring.console.jaxrs.NexusJaxRsConfiguration;
 import com.innospots.nexus.spring.console.jaxrs.NexusScalarJerseyConfiguration;
 
@@ -12,7 +12,7 @@ import com.innospots.nexus.spring.console.jaxrs.NexusScalarJerseyConfiguration;
  */
 @SpringBootApplication
 @Import({
-        ConsoleOpenApiConfiguration.class,
+        OpenApiCatalogConfiguration.class,
         NexusJaxRsConfiguration.class,
         NexusScalarJerseyConfiguration.class
 })

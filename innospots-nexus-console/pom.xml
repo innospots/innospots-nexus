@@ -35,10 +35,6 @@
             <artifactId>microprofile-openapi-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.scalar.maven</groupId>
-            <artifactId>scalar-core</artifactId>
-        </dependency>
-        <dependency>
             <groupId>jakarta.transaction</groupId>
             <artifactId>jakarta.transaction-api</artifactId>
         </dependency>
@@ -61,7 +57,7 @@
                             <goal>generate-schema</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.directory}/generated/openapi</outputDirectory>
+                            <outputDirectory>${project.build.outputDirectory}/META-INF/nexus-openapi</outputDirectory>
                             <schemaFilename>${project.artifactId}</schemaFilename>
                             <outputFileTypeFilter>YAML</outputFileTypeFilter>
                             <encoding>UTF-8</encoding>
@@ -76,31 +72,6 @@
                             <infoVersion>1.0.0</infoVersion>
                             <infoDescription>管理控制台 Jakarta REST 契约；运行时仅暴露构建期生成的 OpenAPI。</infoDescription>
                             <infoContactName>Innospots Nexus</infoContactName>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>package-openapi</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.outputDirectory}/META-INF/nexus-openapi</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>${project.build.directory}/generated/openapi</directory>
-                                    <includes>
-                                        <include>${project.artifactId}.yaml</include>
-                                    </includes>
-                                    <filtering>false</filtering>
-                                </resource>
-                            </resources>
                         </configuration>
                     </execution>
                 </executions>

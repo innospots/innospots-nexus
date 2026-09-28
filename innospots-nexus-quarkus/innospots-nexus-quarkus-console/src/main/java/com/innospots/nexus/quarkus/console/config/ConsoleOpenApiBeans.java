@@ -4,8 +4,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Singleton;
 
-import com.innospots.nexus.console.openapi.endpoint.OpenApiCatalogEndpoint;
-import com.innospots.nexus.console.openapi.operator.OpenApiCatalogOperator;
+import com.innospots.nexus.core.openapi.catalog.OpenApiCatalogEndpoint;
+import com.innospots.nexus.core.openapi.catalog.OpenApiCatalogOperator;
 
 @ApplicationScoped
 public class ConsoleOpenApiBeans {

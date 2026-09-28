@@ -1,4 +1,4 @@
-package com.innospots.nexus.console.openapi.endpoint;
+package com.innospots.nexus.core.openapi.catalog;
 
 import java.util.List;
 
@@ -13,13 +13,12 @@ import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import com.innospots.nexus.base.domain.response.R;
-import com.innospots.nexus.console.openapi.domain.vo.OpenApiSpecItemVo;
-import com.innospots.nexus.console.openapi.operator.OpenApiCatalogOperator;
+import com.innospots.nexus.core.openapi.OpenApiCatalogPaths;
 
 /**
  * 构建期 OpenAPI 规范目录：列表与按 specId 读取 YAML。
  */
-@Path("/openapi/specs")
+@Path(OpenApiCatalogPaths.SPECS_BASE)
 @Tag(name = "OpenApiCatalog", description = "OpenAPI 规范目录")
 public final class OpenApiCatalogEndpoint {
 

@@ -1,4 +1,4 @@
-package com.innospots.nexus.console.openapi.domain.vo;
+package com.innospots.nexus.core.openapi.catalog;
 
 /**
  * classpath 上的单个 OpenAPI 模块规范。

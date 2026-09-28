@@ -1,4 +1,6 @@
 spring:
+  profiles:
+    default: local
   application:
     name: nexus-platform-console
   jersey:
@@ -13,16 +15,22 @@ spring:
       - optional:classpath:nexus/console-openapi.yaml
       - optional:classpath:nexus/console-plugins.yaml
       # 本地覆盖：可选放置同名文件，例如 optional:file:./config/nexus/console-web.yaml
-  datasource:
-    url: jdbc:h2:mem:nexus-platform-console;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-  sql:
-    init:
-      mode: always
-      # plugin 安装表（本模块 resources）+ 目录索引（innospots-nexus-core JAR）
-      schema-locations: classpath:nexus/schema/plugin-installation-h2.sql,classpath:nexus/schema/console-catalog-h2.sql
 
 server:
   port: 8082
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: info,health,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
