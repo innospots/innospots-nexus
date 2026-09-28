@@ -2,6 +2,8 @@ package com.innospots.nexus.base.domain.response;
 
 import java.util.List;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
 /**
  * 分页 API 响应包装器。在构造时校验分页边界，并根据总记录数与每页大小计算总页数。
  *
@@ -10,11 +12,17 @@ import java.util.List;
  * @param <T> 记录类型
  * @see com.innospots.nexus.base.domain.data.DataPage
  */
+@Schema(name = "PageResult", description = "分页结果")
 public record PageResult<T>(
+        @Schema(description = "当前页记录列表", required = true)
         List<T> records,
+        @Schema(description = "从 1 开始的页码", required = true, minimum = "1", examples = {"1"})
         long pageNo,
+        @Schema(description = "每页记录数", required = true, minimum = "1", examples = {"20"})
         long pageSize,
+        @Schema(description = "总记录数", required = true, minimum = "0", examples = {"0"})
         long total,
+        @Schema(description = "总页数", required = true, minimum = "0", examples = {"0"})
         long pages
 ) {
 

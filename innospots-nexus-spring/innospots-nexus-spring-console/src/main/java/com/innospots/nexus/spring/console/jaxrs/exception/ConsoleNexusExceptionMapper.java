@@ -20,6 +20,7 @@ public final class ConsoleNexusExceptionMapper implements ExceptionMapper<NexusE
 
     @Override
     public Response toResponse(NexusException exception) {
+        exceptionSupport.logNexusFailure(exception);
         return exceptionSupport.toResponse(exception);
     }
 }

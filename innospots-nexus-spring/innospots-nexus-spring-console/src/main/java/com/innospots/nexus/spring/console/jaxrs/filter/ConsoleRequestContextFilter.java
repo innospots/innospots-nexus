@@ -12,6 +12,7 @@ import jakarta.ws.rs.ext.Provider;
 
 import com.innospots.nexus.base.thread.TLC;
 import com.innospots.nexus.spring.console.jaxrs.support.ConsoleHttpHeaders;
+import com.innospots.nexus.spring.console.jaxrs.support.ConsoleJaxRsRequestScope;
 import com.innospots.nexus.spring.console.jaxrs.support.ConsoleTokenSessionBinder;
 import com.innospots.nexus.spring.console.jaxrs.support.ConsoleWebRequestProperties;
 
@@ -24,6 +25,7 @@ public final class ConsoleRequestContextFilter implements ContainerRequestFilter
 
     @Override
     public void filter(ContainerRequestContext requestContext) {
+        ConsoleJaxRsRequestScope.bind(requestContext);
         String requestId = requestContext.getHeaderString(ConsoleHttpHeaders.REQUEST_ID);
         if (requestId == null || requestId.isBlank()) {
             requestId = UUID.randomUUID().toString().replace("-", "");
@@ -39,5 +41,6 @@ public final class ConsoleRequestContextFilter implements ContainerRequestFilter
             responseContext.getHeaders().putSingle(ConsoleHttpHeaders.REQUEST_ID, String.valueOf(requestId));
         }
         ConsoleTokenSessionBinder.clear();
+        ConsoleJaxRsRequestScope.clear();
     }
 }

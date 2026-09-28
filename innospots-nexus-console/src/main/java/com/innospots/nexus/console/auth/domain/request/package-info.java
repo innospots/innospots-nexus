@@ -1,5 +1,6 @@
 /**
- * 认证端点请求记录。
+ * 认证端点请求 DTO（{@code record} + {@link org.eclipse.microprofile.openapi.annotations.media.Schema}）。
+ *
  * @author Smars
  * @date 2026/09/13
  */

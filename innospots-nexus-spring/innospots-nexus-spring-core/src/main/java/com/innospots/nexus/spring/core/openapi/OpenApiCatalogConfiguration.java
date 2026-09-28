@@ -1,6 +1,9 @@
 package com.innospots.nexus.spring.core.openapi;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.jersey.autoconfigure.ResourceConfigCustomizer;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,6 +17,7 @@ import com.innospots.nexus.core.openapi.catalog.OpenApiCatalogOperator;
  */
 @Configuration
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+@ConditionalOnClass(ResourceConfigCustomizer.class)
 public class OpenApiCatalogConfiguration {
 
     @Bean
@@ -24,5 +28,14 @@ public class OpenApiCatalogConfiguration {
     @Bean
     OpenApiCatalogEndpoint openApiCatalogEndpoint(OpenApiCatalogOperator openApiCatalogOperator) {
         return new OpenApiCatalogEndpoint(openApiCatalogOperator);
+    }
+
+    @Bean
+    static ResourceConfigCustomizer openApiCatalogJerseyEndpointCustomizer(ApplicationContext applicationContext) {
+        return resourceConfig -> {
+            if (applicationContext.containsBean("openApiCatalogEndpoint")) {
+                resourceConfig.register(applicationContext.getBean(OpenApiCatalogEndpoint.class));
+            }
+        };
     }
 }

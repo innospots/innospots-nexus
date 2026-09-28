@@ -1,5 +1,6 @@
 package com.innospots.nexus.spring.console.jaxrs.exception;
 
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
@@ -21,6 +22,10 @@ public final class ConsoleThrowableExceptionMapper implements ExceptionMapper<Th
 
     @Override
     public Response toResponse(Throwable exception) {
+        if (exception instanceof WebApplicationException webApplicationException) {
+            return exceptionSupport.toWebApplicationResponse(webApplicationException);
+        }
+        exceptionSupport.logUnhandledFailure(exception);
         NexusException nexusException = NexusException.build(NexusStatusCode.SYSTEM_ERROR, exception);
         return exceptionSupport.toResponse(nexusException);
     }

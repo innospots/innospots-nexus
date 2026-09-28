@@ -2,6 +2,8 @@ package com.innospots.nexus.console.dictionary.domain.vo;
 
 import java.time.LocalDateTime;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
 import com.innospots.nexus.base.domain.enums.BasicStatus;
 import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
 
@@ -20,15 +22,25 @@ import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
  * @param createdAt        创建时间
  * @param updatedAt        最后更新时间
  */
+@Schema(name = "DictionaryTypeVo", description = "字典类型视图")
 public record DictionaryTypeVo(
+        @Schema(description = "type 标识符", required = true)
         String dictionaryTypeId,
+        @Schema(description = "稳定的类型编码", required = true)
         String typeCode,
+        @Schema(description = "显示名称", required = true)
         String typeName,
+        @Schema(description = "PLATFORM 或 TENANT", required = true)
         SecurityRealm securityRealm,
+        @Schema(description = "生命周期状态", required = true)
         BasicStatus status,
+        @Schema(description = "显示顺序")
         Integer sortOrder,
+        @Schema(description = "类型是否由系统管理", required = true)
         Boolean builtIn,
+        @Schema(description = "创建时间", required = true)
         LocalDateTime createdAt,
+        @Schema(description = "最后更新时间", required = true)
         LocalDateTime updatedAt
 ) {
 }

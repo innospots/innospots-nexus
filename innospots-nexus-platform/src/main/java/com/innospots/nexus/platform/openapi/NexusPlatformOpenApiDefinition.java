@@ -9,13 +9,17 @@ import org.eclipse.microprofile.openapi.annotations.info.Info;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityScheme;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
+import com.innospots.nexus.console.config.ConsoleConstant;
 import com.innospots.nexus.core.openapi.NexusOpenApiSecurityNames;
 
 /**
  * Platform OpenAPI 全局元数据（构建期扫描；非 JAX-RS {@code Application}，以便与 console 共宿主）。
- * <p>带 {@link Path} 以便 SmallRye JAX-RS 扫描器拾取 {@link OpenAPIDefinition}，运行时不暴露端点。</p>
+ *
+ * <p>带 {@link Path} 以便 SmallRye JAX-RS 扫描器拾取 {@link OpenAPIDefinition}；
+ * 类本身无资源方法，运行时不额外暴露 HTTP 端点。产物写入
+ * {@code META-INF/nexus-openapi/innospots-nexus-platform.yaml}。</p>
  */
-@Path("/platform")
+@Path(ConsoleConstant.PLATFORM_API_PREFIX)
 @OpenAPIDefinition(
         info = @Info(
                 title = "Innospots Nexus Platform API",

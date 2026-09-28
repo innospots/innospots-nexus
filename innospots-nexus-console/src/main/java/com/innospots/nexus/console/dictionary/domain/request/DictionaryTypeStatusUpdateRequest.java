@@ -1,5 +1,7 @@
 package com.innospots.nexus.console.dictionary.domain.request;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
 import com.innospots.nexus.base.domain.enums.BasicStatus;
 
 /**
@@ -9,5 +11,9 @@ import com.innospots.nexus.base.domain.enums.BasicStatus;
  * @date 2026/09/13
  * @param status 目标类型状态
  */
-public record DictionaryTypeStatusUpdateRequest(BasicStatus status) {
+@Schema(name = "DictionaryTypeStatusUpdateRequest", description = "更新字典类型状态请求")
+public record DictionaryTypeStatusUpdateRequest(
+        @Schema(description = "目标类型状态", required = true)
+        BasicStatus status
+) {
 }

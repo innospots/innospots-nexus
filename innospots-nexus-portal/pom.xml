@@ -44,7 +44,12 @@
                             <scanners>
                                 <scanner>JAX-RS</scanner>
                             </scanners>
-                            <scanPackages>com.innospots.nexus.portal</scanPackages>
+                            <scanPackages>
+                                com.innospots.nexus.portal,
+                                com.innospots.nexus.base.domain.response,
+                                com.innospots.nexus.base.i18n,
+                                com.innospots.nexus.base.domain.enums
+                            </scanPackages>
                             <scanDependenciesDisable>false</scanDependenciesDisable>
                             <openApiVersion>3.1.0</openApiVersion>
                             <operationIdStrategy>CLASS_METHOD</operationIdStrategy>

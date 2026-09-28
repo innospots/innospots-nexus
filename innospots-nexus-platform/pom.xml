@@ -22,6 +22,10 @@
             <groupId>com.innospots</groupId>
             <artifactId>innospots-nexus-console</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.microprofile.openapi</groupId>
+            <artifactId>microprofile-openapi-api</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -44,7 +48,12 @@
                             <scanners>
                                 <scanner>JAX-RS</scanner>
                             </scanners>
-                            <scanPackages>com.innospots.nexus.platform</scanPackages>
+                            <scanPackages>
+                                com.innospots.nexus.platform,
+                                com.innospots.nexus.base.domain.response,
+                                com.innospots.nexus.base.i18n,
+                                com.innospots.nexus.base.domain.enums
+                            </scanPackages>
                             <scanDependenciesDisable>false</scanDependenciesDisable>
                             <openApiVersion>3.1.0</openApiVersion>
                             <operationIdStrategy>CLASS_METHOD</operationIdStrategy>

@@ -2,6 +2,8 @@ package com.innospots.nexus.console.catalog.domain.vo;
 
 import java.util.List;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
 import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
 
 /**
@@ -24,17 +26,29 @@ import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
  * @param sortOrder     同级排序
  * @param children      子节点
  */
+@Schema(name = "CatalogNodeVo", description = "目录树节点")
 public record CatalogNodeVo(
+        @Schema(description = "资源主键", required = true)
         String resourceId,
+        @Schema(description = "来源插件", required = true)
         String ownerPluginId,
+        @Schema(description = "领域键")
         String domainKey,
+        @Schema(description = "模块 key", required = true)
         String moduleKey,
+        @Schema(description = "资源类型", required = true)
         CatalogResourceType resourceType,
+        @Schema(description = "稳定资源 key", required = true)
         String resourceKey,
+        @Schema(description = "PageDsl 页面键")
         String pageKey,
+        @Schema(description = "页面路由")
         String routePath,
+        @Schema(description = "展示名称", required = true)
         String displayName,
+        @Schema(description = "同级排序")
         Integer sortOrder,
+        @Schema(description = "子节点", required = true)
         List<CatalogNodeVo> children
 ) {
 

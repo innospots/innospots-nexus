@@ -1,5 +1,7 @@
 package com.innospots.nexus.console.role.domain.request;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
 import com.innospots.nexus.base.domain.enums.BasicStatus;
 
 /**
@@ -9,5 +11,9 @@ import com.innospots.nexus.base.domain.enums.BasicStatus;
  * @date 2026/09/13
  * @param status 目标角色状态
  */
-public record RoleStatusUpdateRequest(BasicStatus status) {
+@Schema(name = "RoleStatusUpdateRequest", description = "更新角色状态请求")
+public record RoleStatusUpdateRequest(
+        @Schema(description = "目标角色状态", required = true)
+        BasicStatus status
+) {
 }

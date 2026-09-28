@@ -5,6 +5,9 @@ import java.util.Arrays;
 
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.innospots.nexus.console.auth.domain.request.AuthLoginRequest;
@@ -19,6 +22,9 @@ class PlatformAuthEndpointContractsTest {
     @Test
     void platformAuthEndpointHasNoPublicRegister() throws NoSuchMethodException {
         assertThat(PlatformAuthEndpoint.class.getAnnotation(Path.class).value()).isEqualTo("/platform/auth");
+        assertThat(PlatformAuthEndpoint.class.getAnnotation(Tag.class).name()).isEqualTo("PlatformAuth");
+        assertThat(PlatformAuthEndpoint.class.getMethod("login", AuthLoginRequest.class)
+                .getAnnotation(Operation.class).operationId()).isEqualTo("platformAuthLogin");
         assertHttpMethod(PlatformAuthEndpoint.class, "login", POST.class, AuthLoginRequest.class);
         assertHttpMethod(PlatformAuthEndpoint.class, "refresh", POST.class, TokenRefreshRequest.class);
         assertHttpMethod(PlatformAuthEndpoint.class, "logout", POST.class);

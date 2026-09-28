@@ -1,5 +1,7 @@
 package com.innospots.nexus.base.domain.response;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.i18n.I18nObject;
 import com.innospots.nexus.base.status.StatusCode;
@@ -15,11 +17,17 @@ import com.innospots.nexus.base.util.Checks;
  * @see StatusCode
  * @see NexusException
  */
+@Schema(name = "R", description = "统一 API 响应包装")
 public record R<T>(
+        @Schema(description = "是否成功", required = true, examples = {"true", "false"})
         boolean success,
+        @Schema(description = "结果码", required = true, examples = {"OK", "AIO030017"})
         String code,
+        @Schema(description = "摘要消息", required = true, examples = {"OK"})
         String message,
+        @Schema(description = "业务数据载荷；失败时通常为 null")
         T data,
+        @Schema(description = "失败时供前端展示的国际化文案")
         I18nObject display
 ) {
 

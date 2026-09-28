@@ -1,5 +1,8 @@
 package com.innospots.nexus.base.i18n;
 
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.innospots.nexus.base.json.I18nObjectDeserializer;
@@ -21,6 +24,11 @@ import java.util.Set;
  */
 @JsonSerialize(using = I18nObjectSerializer.class)
 @JsonDeserialize(using = I18nObjectDeserializer.class)
+@Schema(
+        name = "I18nObject",
+        description = "按 BCP 47 语言标签索引的展示文案",
+        type = SchemaType.OBJECT,
+        example = "{\"en\":\"Human readable message\",\"zh-CN\":\"可读消息\"}")
 public class I18nObject extends LinkedHashMap<String, String> {
 
     private static final String DEFAULT_LANGUAGE = Locale.US.getLanguage();

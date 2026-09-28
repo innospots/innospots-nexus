@@ -7,6 +7,10 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import lombok.RequiredArgsConstructor;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
+
 import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.status.NexusStatusCode;
@@ -19,16 +23,21 @@ import com.innospots.nexus.console.auth.domain.request.PasswordChangeRequest;
 import com.innospots.nexus.console.auth.domain.request.PasswordResetRequest;
 import com.innospots.nexus.console.auth.domain.request.TokenRefreshRequest;
 import com.innospots.nexus.console.auth.domain.vo.AuthTokenVo;
+import com.innospots.nexus.console.config.ConsoleConstant;
 import com.innospots.nexus.console.auth.service.AuthFacade;
 import com.innospots.nexus.console.credential.password.PasswordDecryptor;
+import com.innospots.nexus.core.openapi.NexusOpenApiSecurityNames;
 import com.innospots.nexus.platform.auth.operator.PlatformPasswordOperator;
 
 /**
- * 运维域认证 REST 资源。无公开注册。
+ * 运维域认证 REST 资源。
+ *
+ * <p>不提供公开自助注册；登录、刷新与验证码为匿名接口，登出与改密需 PLATFORM Bearer 令牌。</p>
  */
-@Path("/platform/auth")
+@Path(ConsoleConstant.PLATFORM_AUTH_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Tag(name = "PlatformAuth", description = "运维域认证")
 @RequiredArgsConstructor
 public class PlatformAuthEndpoint {
 
@@ -38,6 +47,7 @@ public class PlatformAuthEndpoint {
 
     @POST
     @Path("/captcha/issue")
+    @Operation(operationId = "platformAuthCaptchaIssue", summary = "签发登录验证码")
     public R<AuthCaptchaVo> issueLoginCaptcha(AuthCaptchaIssueRequest request) {
         String clientKey = request == null ? null : request.clientKey();
         return R.ok(authFacade.issueLoginCaptcha(clientKey));
@@ -45,18 +55,22 @@ public class PlatformAuthEndpoint {
 
     @POST
     @Path("/login")
+    @Operation(operationId = "platformAuthLogin", summary = "运维域登录")
     public R<AuthTokenVo> login(AuthLoginRequest request) {
         return R.ok(authFacade.login(request));
     }
 
     @POST
     @Path("/refresh")
+    @Operation(operationId = "platformAuthRefresh", summary = "刷新访问令牌")
     public R<AuthTokenVo> refresh(TokenRefreshRequest request) {
         return R.ok(authFacade.refresh(request));
     }
 
     @POST
     @Path("/logout")
+    @Operation(operationId = "platformAuthLogout", summary = "登出当前会话")
+    @SecurityRequirement(name = NexusOpenApiSecurityNames.BEARER_AUTH)
     public R<Void> logout() {
         authFacade.logout();
         return R.ok();
@@ -64,6 +78,8 @@ public class PlatformAuthEndpoint {
 
     @POST
     @Path("/password/change")
+    @Operation(operationId = "platformAuthPasswordChange", summary = "修改当前用户密码")
+    @SecurityRequirement(name = NexusOpenApiSecurityNames.BEARER_AUTH)
     public R<Void> changePassword(PasswordChangeRequest request) {
         Checks.notNull(request, "request");
         String platformUserId = requirePlatformUserId();
@@ -75,6 +91,7 @@ public class PlatformAuthEndpoint {
 
     @POST
     @Path("/password/reset")
+    @Operation(operationId = "platformAuthPasswordReset", summary = "凭验证码重置密码")
     public R<Void> resetPassword(PasswordResetRequest request) {
         Checks.notNull(request, "request");
         String newPassword = passwordDecryptor.decrypt(request.newEncryptedPassword());

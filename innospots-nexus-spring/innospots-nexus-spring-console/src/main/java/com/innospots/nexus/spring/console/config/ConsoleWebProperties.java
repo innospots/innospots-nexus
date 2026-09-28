@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import com.innospots.nexus.console.config.ConsoleConstant;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -122,7 +124,7 @@ public class ConsoleWebProperties {
             patterns.add("/openapi/**");
             patterns.add("/auth/**");
             patterns.add("/tenant/auth/**");
-            patterns.add("/platform/auth/**");
+            patterns.add(ConsoleConstant.PLATFORM_AUTH_PATH + "/**");
             patterns.add("/health");
             patterns.add("/actuator/health/**");
             return patterns;

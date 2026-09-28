@@ -8,7 +8,13 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+
 import com.innospots.nexus.base.domain.response.R;
+import com.innospots.nexus.console.config.ConsoleConstant;
+import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 import com.innospots.nexus.platform.user.domain.request.PlatformUserCreateRequest;
 import com.innospots.nexus.platform.user.domain.vo.PlatformUserVo;
 
@@ -19,9 +25,11 @@ import com.innospots.nexus.platform.user.domain.vo.PlatformUserVo;
  * @author Smars
  * @date 2026/09/13
  */
-@Path("/platform/users")
+@Path(ConsoleConstant.PLATFORM_USERS_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Tag(name = "PlatformUser", description = "平台用户管理")
+@NexusAuthenticatedApi
 public interface PlatformUserEndpoint {
 
     /**
@@ -31,6 +39,7 @@ public interface PlatformUserEndpoint {
      * @return created user 概要
      */
     @POST
+    @Operation(operationId = "platformUserCreate", summary = "创建平台用户")
     R<PlatformUserVo> createUser(PlatformUserCreateRequest request);
 
     /**
@@ -41,5 +50,7 @@ public interface PlatformUserEndpoint {
      */
     @GET
     @Path("/{platformUserId}")
-    R<PlatformUserVo> getUser(@PathParam("platformUserId") String platformUserId);
+    @Operation(operationId = "platformUserGet", summary = "查询平台用户")
+    R<PlatformUserVo> getUser(
+            @Parameter(description = "平台用户 ID", required = true) @PathParam("platformUserId") String platformUserId);
 }

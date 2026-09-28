@@ -7,7 +7,12 @@ import java.util.Arrays;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.junit.jupiter.api.Test;
+
+import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 
 import com.innospots.nexus.platform.user.domain.request.PlatformUserCreateRequest;
 import com.innospots.nexus.platform.user.domain.vo.PlatformUserVo;
@@ -19,6 +24,10 @@ class PlatformUserEndpointContractsTest {
     @Test
     void platformUserEndpointExposesAdminCreateWithoutPublicRegister() throws NoSuchMethodException {
         assertThat(PlatformUserEndpoint.class.getAnnotation(Path.class).value()).isEqualTo("/platform/users");
+        assertThat(PlatformUserEndpoint.class.getAnnotation(Tag.class).name()).isEqualTo("PlatformUser");
+        assertThat(PlatformUserEndpoint.class.getAnnotation(NexusAuthenticatedApi.class)).isNotNull();
+        assertThat(PlatformUserEndpoint.class.getMethod("createUser", PlatformUserCreateRequest.class)
+                .getAnnotation(Operation.class).operationId()).isEqualTo("platformUserCreate");
         assertHttpMethod(PlatformUserEndpoint.class, "createUser", POST.class, PlatformUserCreateRequest.class);
         assertHttpMethod(PlatformUserEndpoint.class, "getUser", GET.class, String.class);
         assertThat(Arrays.stream(PlatformUserEndpoint.class.getMethods()).map(Method::getName))

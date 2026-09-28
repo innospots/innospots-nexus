@@ -63,7 +63,7 @@ class SamplePlatformOpenApiSpringTest {
     void consoleBundledYamlContainsCatalogPaths() {
         String yaml = openApiCatalogOperator.readYaml(CONSOLE_SPEC_ID);
         assertThat(yaml).contains("openapi:");
-        assertThat(yaml).contains("/openapi/specs");
+        assertThat(yaml).contains("/api/nexus/status");
     }
 
     @Test

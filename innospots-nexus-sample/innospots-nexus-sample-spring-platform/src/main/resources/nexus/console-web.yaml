@@ -15,18 +15,18 @@ nexus:
       security:
         # 请求侧安全总开关（Bearer 鉴权 + ConsolePagePermissionFilter）；默认 true。
         # 关闭后不做鉴权与页面 permission 判定；登录/令牌仍由 console-auth.yaml 配置（仅建议本地调试）。
-        # enabled: false
+        enabled: false
 
         # dev-session：仅当 security.enabled=false 时生效；注入固定 SessionContext（本地调试）。
         # 生产务必保持 dev-session.enabled=false；建议配合 spring.profiles.active 含 dev。
-        # dev-session:
-        #   enabled: true
-        #   user-id: "1"
-        #   tenant-id: dev-tenant
-        #   workspace-id: dev-workspace
-        #   project-id: dev-project
-        #   realm: TENANT
-        #   tenant-member-id: member-1
+        dev-session:
+          enabled: true
+          user-id: "1"
+          tenant-id: dev-tenant
+          workspace-id: dev-workspace
+          project-id: dev-project
+          realm: TENANT
+          tenant-member-id: member-1
 
         # permit-all-patterns：ConsoleAuthenticationFilter 使用（security.enabled=true 时）。
         # 命中则跳过 Bearer 令牌校验（OpenAPI、登录、健康检查等）；与下方 console 页面权限配置无关。

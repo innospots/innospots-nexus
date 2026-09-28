@@ -17,6 +17,15 @@ class OpenApiBuildContractsTest {
         assertThat(yaml).contains("Innospots Nexus Platform API");
         assertThat(yaml).contains("/platform/auth/login");
         assertThat(yaml).contains("/platform/tenants");
+        assertThat(yaml).contains("/platform/users");
+        assertThat(yaml).contains("operationId: platformAuthLogin");
+        assertThat(yaml).contains("operationId: platformTenantCreate");
+        assertThat(yaml).contains("operationId: platformUserCreate");
+        assertThat(yaml).contains("name: PlatformAuth");
+        assertThat(yaml).contains("name: PlatformTenant");
+        assertThat(yaml).contains("name: PlatformUser");
         assertThat(yaml).contains("bearerAuth");
+        assertThat(yaml).contains("TenantCreateRequest:");
+        assertThat(yaml).contains("PlatformUserVo:");
     }
 }

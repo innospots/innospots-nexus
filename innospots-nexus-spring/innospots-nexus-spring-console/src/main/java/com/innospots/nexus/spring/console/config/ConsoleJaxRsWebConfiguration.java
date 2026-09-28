@@ -15,6 +15,7 @@ import com.innospots.nexus.console.permission.authorization.ConsolePagePermissio
 import com.innospots.nexus.spring.console.jaxrs.exception.ConsoleJaxRsExceptionSupport;
 import com.innospots.nexus.spring.console.jaxrs.exception.ConsoleNexusExceptionMapper;
 import com.innospots.nexus.spring.console.jaxrs.exception.ConsoleThrowableExceptionMapper;
+import com.innospots.nexus.spring.console.jaxrs.exception.ConsoleWebApplicationExceptionMapper;
 import com.innospots.nexus.spring.console.jaxrs.filter.ConsoleAuthenticationFilter;
 import com.innospots.nexus.spring.console.jaxrs.filter.ConsoleCorsFilter;
 import com.innospots.nexus.spring.console.jaxrs.filter.ConsoleDevSessionFilter;
@@ -100,6 +101,13 @@ public class ConsoleJaxRsWebConfiguration {
         return new ConsoleThrowableExceptionMapper(exceptionSupport);
     }
 
+    /** 映射 {@link jakarta.ws.rs.WebApplicationException}，避免 404 等被当作系统错误。 */
+    @Bean
+    ConsoleWebApplicationExceptionMapper consoleWebApplicationExceptionMapper(
+            ConsoleJaxRsExceptionSupport exceptionSupport) {
+        return new ConsoleWebApplicationExceptionMapper(exceptionSupport);
+    }
+
     /**
      * 将上述过滤器与异常映射注册到 Jersey {@code ResourceConfig}（与业务 {@code @Path} 资源并列）。
      */
@@ -111,7 +119,8 @@ public class ConsoleJaxRsWebConfiguration {
             ConsolePagePermissionFilter pagePermissionFilter,
             ConsoleRequestContextFilter requestContextFilter,
             ConsoleNexusExceptionMapper nexusExceptionMapper,
-            ConsoleThrowableExceptionMapper throwableExceptionMapper) {
+            ConsoleThrowableExceptionMapper throwableExceptionMapper,
+            ConsoleWebApplicationExceptionMapper webApplicationExceptionMapper) {
         return resourceConfig -> {
             resourceConfig.register(corsFilter);
             resourceConfig.register(authenticationFilter);
@@ -119,6 +128,7 @@ public class ConsoleJaxRsWebConfiguration {
             resourceConfig.register(pagePermissionFilter);
             resourceConfig.register(requestContextFilter);
             resourceConfig.register(nexusExceptionMapper);
+            resourceConfig.register(webApplicationExceptionMapper);
             resourceConfig.register(throwableExceptionMapper);
         };
     }

@@ -51,6 +51,10 @@ public class ConsoleRoleConfiguration {
         return new RoleService(roleOperator, roleBindingOperator);
     }
 
+    /**
+     * {@code @Lazy} 推迟端点单例创建，避免在 Spring 刷新早期拉起整条 service/DAO 链；
+     * Jersey 注册阶段仍会 {@code getBean} 一次以绑定路由。
+     */
     @Bean
     @Lazy
     RoleEndpoint roleEndpoint(RoleService roleService) {

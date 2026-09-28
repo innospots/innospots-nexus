@@ -7,7 +7,12 @@ import java.util.Arrays;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.junit.jupiter.api.Test;
+
+import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 
 import com.innospots.nexus.platform.tenant.domain.request.TenantCreateRequest;
 import com.innospots.nexus.platform.tenant.domain.vo.TenantVo;
@@ -19,6 +24,10 @@ class TenantEndpointContractsTest {
     @Test
     void tenantEndpointExposesPlatformTenantLifecycle() throws NoSuchMethodException {
         assertThat(TenantEndpoint.class.getAnnotation(Path.class).value()).isEqualTo("/platform/tenants");
+        assertThat(TenantEndpoint.class.getAnnotation(Tag.class).name()).isEqualTo("PlatformTenant");
+        assertThat(TenantEndpoint.class.getAnnotation(NexusAuthenticatedApi.class)).isNotNull();
+        assertThat(TenantEndpoint.class.getMethod("createTenant", TenantCreateRequest.class)
+                .getAnnotation(Operation.class).operationId()).isEqualTo("platformTenantCreate");
         assertHttpMethod(TenantEndpoint.class, "createTenant", POST.class, TenantCreateRequest.class);
         assertHttpMethod(TenantEndpoint.class, "getTenant", GET.class, String.class);
     }

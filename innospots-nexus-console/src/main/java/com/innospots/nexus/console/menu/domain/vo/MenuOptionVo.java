@@ -1,5 +1,7 @@
 package com.innospots.nexus.console.menu.domain.vo;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
 import com.innospots.nexus.console.menu.domain.enums.MenuType;
 
 /**
@@ -13,11 +15,17 @@ import com.innospots.nexus.console.menu.domain.enums.MenuType;
  * @param menuType 菜单节点类型
  * @param disabled 选项是否不可选择
  */
+@Schema(name = "MenuOptionVo", description = "菜单选项")
 public record MenuOptionVo(
+        @Schema(description = "菜单标识符", required = true)
         String menuId,
+        @Schema(description = "可选 parent 菜单标识符")
         String parentId,
+        @Schema(description = "显示名称", required = true)
         String menuName,
+        @Schema(description = "菜单节点类型", required = true)
         MenuType menuType,
+        @Schema(description = "选项是否不可选择", required = true)
         Boolean disabled
 ) {
 }

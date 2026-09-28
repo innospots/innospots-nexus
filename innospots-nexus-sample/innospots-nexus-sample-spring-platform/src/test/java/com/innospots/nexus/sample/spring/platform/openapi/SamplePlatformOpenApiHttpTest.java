@@ -96,7 +96,7 @@ class SamplePlatformOpenApiHttpTest {
     void openApiSpecDetailEndpointReturnsConsoleYaml() throws Exception {
         HttpResponse<String> response = get("/openapi/specs/" + CONSOLE_SPEC_ID);
         assertThat(response.statusCode()).isEqualTo(200);
-        assertThat(response.body()).contains("/openapi/specs");
+        assertThat(response.body()).contains("/api/nexus/status");
     }
 
     private HttpResponse<String> get(String path) throws Exception {

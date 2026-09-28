@@ -11,6 +11,18 @@ public final class ConsoleConstant {
     /** 控制台管理 REST API 根路径前缀。 */
     public static final String API_PREFIX = "/api/nexus";
 
+    /** 运营域（platform）REST API 根路径前缀。 */
+    public static final String PLATFORM_API_PREFIX = "/platform";
+
+    /** 运营域认证：{@value} */
+    public static final String PLATFORM_AUTH_PATH = PLATFORM_API_PREFIX + "/auth";
+
+    /** 运营域租户生命周期：{@value} */
+    public static final String PLATFORM_TENANTS_PATH = PLATFORM_API_PREFIX + "/tenants";
+
+    /** 运营域平台用户：{@value} */
+    public static final String PLATFORM_USERS_PATH = PLATFORM_API_PREFIX + "/users";
+
     private ConsoleConstant() {
     }
 
@@ -28,5 +40,21 @@ public final class ConsoleConstant {
             return API_PREFIX + "/" + suffix;
         }
         return API_PREFIX + suffix;
+    }
+
+    /**
+     * 拼接 {@link #PLATFORM_API_PREFIX} 下的子路径。
+     *
+     * @param suffix 以 {@code /} 开头的相对路径；空串表示仅前缀
+     * @return 完整 JAX-RS 路径
+     */
+    public static String platformPath(String suffix) {
+        if (suffix == null || suffix.isEmpty()) {
+            return PLATFORM_API_PREFIX;
+        }
+        if (!suffix.startsWith("/")) {
+            return PLATFORM_API_PREFIX + "/" + suffix;
+        }
+        return PLATFORM_API_PREFIX + suffix;
     }
 }

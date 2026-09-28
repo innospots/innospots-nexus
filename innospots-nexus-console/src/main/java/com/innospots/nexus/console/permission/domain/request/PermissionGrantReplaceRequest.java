@@ -2,16 +2,17 @@ package com.innospots.nexus.console.permission.domain.request;
 
 import java.util.List;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
 /**
  * 一个角色或组织单元最终应拥有的完整资源授权集合。
  *
  * @author Smars
  * @date 2026/09/13
  */
+@Schema(name = "PermissionGrantReplaceRequest", description = "权限授权全量替换请求")
 public record PermissionGrantReplaceRequest(
-        /**
-         * 前端提交的完整授权集合；空集合表示清空该主体的授权。
-         */
+        @Schema(description = "前端提交的完整授权集合；空集合表示清空该主体的授权", required = true)
         List<PermissionGrantItemRequest> grants
 ) {
 
