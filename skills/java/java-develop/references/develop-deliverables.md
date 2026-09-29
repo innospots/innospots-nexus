@@ -242,7 +242,7 @@ develop **不得**在代码里硬扩边界；出现下列信号应**暂停提交
 |----|------|
 | public 类/接口/record/枚举 | 类级 Javadoc + `@author` + `@date`（`yyyy/MM/dd`）+ 有则 `@see` |
 | public/protected 方法 | 方法 Javadoc（`@param` / `@return` / `@throws`） |
-| 端点 | `jakarta.ws.rs`，返回 `R<T>`；**禁止** Spring MVC 注解 |
+| 端点 | `jakarta.ws.rs`，返回 `R<T>`；**禁止** Spring MVC 注解；须 `@Operation` / `@Schema` 等见 `java:reference` → [openapi-contract.md](../../java-reference/references/openapi-contract.md) |
 | 事务 | `jakarta.transaction.Transactional`；**禁止** Spring 事务注解 |
 | 业务失败 | `NexusException` + `StatusCode`（见 [exception-handling.md](exception-handling.md)） |
 

@@ -40,6 +40,7 @@ version: 1.9.1
 | [`code-comments.md`](standards/code-comments.md) | 包/类型/方法/行内注释与 TODO | `java:develop`、`java:check` |
 | [`exception-status-code.md`](standards/exception-status-code.md) | 异常、`NexusException`、状态码九字符格式与扩展 | `java:design`、`java:develop` |
 | [`domain-module-initialization.md`](standards/domain-module-initialization.md) | 六阶段领域初始化权威流程 | `java:develop` |
+| [`openapi.md`](standards/openapi.md) | MicroProfile OpenAPI 注解、Schema、构建期 YAML | `java:design`、`java:develop` |
 | [`module-skills.md`](standards/module-skills.md) | 模块 API 参考生成策略（`README.md` 索引，非技能） | 仅开发者显式请求扫描时 |
 
 仓库另有 [`AGENTS.md`](../../../AGENTS.md) 定义模块职责与依赖方向。
@@ -60,6 +61,8 @@ version: 1.9.1
 | 作用域层级 | [scope-hierarchy.md](references/scope-hierarchy.md) | Session/Snapshot 与 Entity 基类 |
 | 领域建模 | [domain-modeling.md](references/domain-modeling.md) | 实体/请求/VO/事件建模决策 |
 | API 契约 | [api-contract.md](references/api-contract.md) | 签名、分层、事务、兼容性；含 Console interface 例外 |
+| OpenAPI 契约 | [openapi-contract.md](references/openapi-contract.md) | 端点/Schema 注解、检查清单 |
+| OpenAPI Maven 插件 | [openapi-maven-plugin.md](references/openapi-maven-plugin.md) | 对外 REST 模块 `smallrye-open-api-maven-plugin` POM |
 | 持久化与配置 | [persistence-config.md](references/persistence-config.md) | yaml、禁 XML/properties、Dao 组织细则 |
 | 六阶段 checklist | [domain-initialization-checklist.md](references/domain-initialization-checklist.md) | develop 执行清单 |
 | 测试规范路由 | [testing-index.md](references/testing-index.md) | 设计/实现/检查测试文档索引 |
@@ -130,6 +133,7 @@ version: 1.9.1
 | `innospots-nexus-console` | [README.md](references/modules/innospots-nexus-console/README.md) |
 | `innospots-nexus-plugin` | [README.md](references/modules/innospots-nexus-plugin/README.md)（设计见 `innospots-nexus-plugin/docs/plugin/design/`） |
 | `innospots-nexus-plugin-ui-spec` | [README.md](references/modules/innospots-nexus-plugin-ui-spec/README.md)（Pactor Page DSL 1.0 YAML 规范，非 Maven 模块） |
+| `innospots-nexus-openapi` | [README.md](references/modules/innospots-nexus-openapi/README.md)（REST OpenAPI 构建与注解索引，非 Maven 模块） |
 | `innospots-nexus-portal` | 暂无 API 索引；归属见 [module-ownership.md](references/module-ownership.md)；包结构见 [package-structure.md](references/package-structure.md) |
 | `innospots-nexus-platform` | 暂无 API 索引；归属见 [module-ownership.md](references/module-ownership.md) |
 | `innospots-nexus-sample` | 结构/契约见 [sample-extension-layout.md](references/sample-extension-layout.md)（非模块 API 索引） |

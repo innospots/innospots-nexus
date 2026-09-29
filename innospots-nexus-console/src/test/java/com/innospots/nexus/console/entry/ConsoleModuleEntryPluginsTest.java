@@ -8,10 +8,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import com.innospots.nexus.core.plugin.contribution.console.ui.spec.PageDsl;
-import com.innospots.nexus.core.plugin.contribution.console.ui.spec.config.PageDslConfig;
-import com.innospots.nexus.core.plugin.contribution.console.ui.spec.loader.ClasspathPageDslLoader;
-import com.innospots.nexus.core.plugin.contribution.console.ui.spec.parser.JacksonPageDslParser;
+import com.innospots.nexus.console.ui.spec.PageDsl;
+import com.innospots.nexus.console.ui.spec.config.PageDslConfig;
+import com.innospots.nexus.console.ui.spec.loader.ClasspathPageDslLoader;
+import com.innospots.nexus.console.ui.spec.parser.JacksonPageDslParser;
 import com.innospots.nexus.console.dictionary.entry.DictionaryEntryPlugin;
 import com.innospots.nexus.console.logger.entry.LoggerEntryPlugin;
 import com.innospots.nexus.console.menu.entry.MenuEntryPlugin;

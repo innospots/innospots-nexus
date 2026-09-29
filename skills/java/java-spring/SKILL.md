@@ -29,6 +29,10 @@ version: 1.1.0
 端点与事务规范通过 `java:reference` 消费（`quick-constraints.md`、`standards-index.md`），
 **优先级高于** Spring 的惯用写法。
 
+OpenAPI 文档由 **MicroProfile 注解 + SmallRye Maven 插件**生成，运行时通过 console 规范目录与
+`OpenApiScalarDocumentation` 挂载 Scalar；**不要**用 Springdoc 替代该流程。见
+`java:reference` → [openapi-contract.md](../java-reference/references/openapi-contract.md)。
+
 Spring 集成边界未定时（如 filter 与 `SessionContext` 绑定、Boot 自动配置落位），
 在改代码前调用 `grill-me`（见 `java:reference` → `grill-me.md`）。
 

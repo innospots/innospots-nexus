@@ -1,4 +1,4 @@
-# 包 `contribution.console.ui.spec.config`
+# 包 `console.ui.spec.config`
 
 ## PageDslConfig
 

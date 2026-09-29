@@ -142,7 +142,7 @@ java:check      → mvn -pl innospots-nexus-plugin -am test
 | `ReservedPluginResourceCatalog` | `class` | 由 Core 安全快照提供的历史插件资源身份保留目录 |
 | `UiSpecPageDeclaration` | `record` | 由 PageDsl page.id 唯一对应的页面身份声明 |
 
-### 包 `contribution.console.ui.spec`
+### 包 `console.ui.spec`
 
 | 类 | 类型 | 说明 |
 |------|------|------|
@@ -153,20 +153,20 @@ java:check      → mvn -pl innospots-nexus-plugin -am test
 | `PaginationConfig` | `class` | 返回分页结果的数据源的分页绑定配置 |
 | `RequiresConfig` | `class` | 由 PageDsl 声明的运行时与组件能力要求 |
 
-### 包 `contribution.console.ui.spec.action`
+### 包 `console.ui.spec.action`
 
 | 类 | 类型 | 说明 |
 |------|------|------|
 | `ActionConfig` | `class` | 在运行时动作注册表中注册的一次动作调用 |
 | `ActionOrList` | `record` | 单个动作或有序动作序列 |
 
-### 包 `contribution.console.ui.spec.config`
+### 包 `console.ui.spec.config`
 
 | 类 | 类型 | 说明 |
 |------|------|------|
 | `PageDslConfig` | `record` | 定位与解析 Pactor 页面 DSL 文件的不可变配置 |
 
-### 包 `contribution.console.ui.spec.datasource`
+### 包 `console.ui.spec.datasource`
 
 | 类 | 类型 | 说明 |
 |------|------|------|
@@ -178,14 +178,14 @@ java:check      → mvn -pl innospots-nexus-plugin -am test
 | `ServiceDataSource` | `class` | 服务注册表支持的数据源；业务页面首选，因 DSL 不直接绑定 HTTP 端点 |
 | `StaticDataSource` | `class` | 文档内静态数据源，用于枚举、固定配置与演示数据 |
 
-### 包 `contribution.console.ui.spec.endpoint`
+### 包 `console.ui.endpoint`
 
 | 类 | 类型 | 说明 |
 |------|------|------|
 | `DefaultPageDslEndpoint` | `class` | 默认 PageDslEndpoint 实现：从 classpath 加载页面 DSL 文档，并通过已配置的过滤器链处理 |
 | `PageDslEndpoint` | `interface` | 加载与准备页面 DSL 文档的渲染时 API |
 
-### 包 `contribution.console.ui.spec.filter`
+### 包 `console.ui.spec.filter`
 
 | 类 | 类型 | 说明 |
 |------|------|------|
@@ -194,33 +194,33 @@ java:check      → mvn -pl innospots-nexus-plugin -am test
 | `PageDslRenderContext` | `class` | 在 PageDslFilterChain 中传递的渲染时上下文 |
 | `StateBindingPageDslFilter` | `class` | 将请求参数绑定到页面 DSL 的 state 映射 |
 
-### 包 `contribution.console.ui.spec.jackson`
+### 包 `console.ui.spec.jackson`
 
 | 类 | 类型 | 说明 |
 |------|------|------|
 | `ActionOrListDeserializer` | `class` | 将单个动作或动作数组反序列化为 ActionOrList |
 | `ActionOrListMapDeserializer` | `class` | 反序列化命名动作映射 |
-| `ChildrenDeserializer` | `class` | 从 YAML 数组或单个 com.innospots.nexus.core.plugin.contribution.console.ui.spec.node.DslSourceRef 对象反序列化 com.innospots.nexus.core.plugin.contribution.console.ui.spec… |
+| `ChildrenDeserializer` | `class` | 从 YAML 数组或单个 com.innospots.nexus.console.ui.spec.node.DslSourceRef 对象反序列化 com.innospots.nexus.console.ui.spec… |
 | `DslNodeDeserializer` | `class` | 反序列化 DslNode 实例 |
 | `DslRenderableDeserializer` | `class` | 反序列化一个可渲染 DSL 片段 |
 | `DslRenderableMapDeserializer` | `class` | 反序列化命名可渲染组件映射 |
 | `EventMapDeserializer` | `class` | 反序列化组件事件映射 |
 | `ExpressionOrBooleanDeserializer` | `class` | 反序列化表达式字符串或布尔字面量 |
 
-### 包 `contribution.console.ui.spec.loader`
+### 包 `console.ui.spec.loader`
 
 | 类 | 类型 | 说明 |
 |------|------|------|
-| `ClasspathPageDslLoader` | `class` | 使用 com.innospots.nexus.core.plugin.contribution.console.ui.spec.config.PageDslConfig 从 classpath 加载页面 DSL 文档 |
+| `ClasspathPageDslLoader` | `class` | 使用 com.innospots.nexus.console.ui.spec.config.PageDslConfig 从 classpath 加载页面 DSL 文档 |
 | `PageDslLoader` | `interface` | 从后端存储加载页面 DSL 文档 |
 
-### 包 `contribution.console.ui.spec.node`
+### 包 `console.ui.spec.node`
 
 | 类 | 类型 | 说明 |
 |------|------|------|
 | `Children` | `record` | 以数组或单个动态源引用声明的子可渲染节点 |
 | `ComponentNode` | `class` | 以注册表 type 声明的内联组件节点 |
-| `ComponentReferenceNode` | `class` | 对 com.innospots.nexus.core.plugin.contribution.console.ui.spec.PageDsl 中声明的命名组件的引用 |
+| `ComponentReferenceNode` | `class` | 对 com.innospots.nexus.console.ui.spec.PageDsl 中声明的命名组件的引用 |
 | `DslHttpSource` | `class` | HTTP 支持的动态 DSL 源 |
 | `DslNode` | `interface` | 以 type 或 component 声明的 UI 树节点 |
 | `DslRenderable` | `interface` | 可渲染 DSL 片段：内联节点或动态源 |
@@ -228,14 +228,14 @@ java:check      → mvn -pl innospots-nexus-plugin -am test
 | `DslSource` | `interface` | DslSourceRef 的动态 DSL 源定义 |
 | `DslSourceRef` | `class` | 从服务或 HTTP 源加载的动态 DSL 片段 |
 
-### 包 `contribution.console.ui.spec.parser`
+### 包 `console.ui.spec.parser`
 
 | 类 | 类型 | 说明 |
 |------|------|------|
 | `JacksonPageDslParser` | `class` | 基于 Jackson 的 Pactor 页面 DSL 严格 YAML 解析器 |
 | `PageDslParser` | `interface` | 解析与序列化 Pactor 页面 DSL 文档 |
 
-### 包 `contribution.console.ui.spec.permission`
+### 包 `console.ui.spec.permission`
 
 | 类 | 类型 | 说明 |
 |------|------|------|
@@ -243,7 +243,7 @@ java:check      → mvn -pl innospots-nexus-plugin -am test
 | `PermissionConfigDeserializer` | `class` | 从字符串、数组或对象形式反序列化 PermissionConfig |
 | `PermissionDenied` | `enum` | 未授予访问权限时的拒绝行为 |
 
-### 包 `contribution.console.ui.spec.validation`
+### 包 `console.ui.spec.validation`
 
 | 类 | 类型 | 说明 |
 |------|------|------|
@@ -408,18 +408,18 @@ java:check      → mvn -pl innospots-nexus-plugin -am test
 | `contract` | [`references/contract.md`](references/contract.md) |
 | `contribution` | [`references/contribution.md`](references/contribution.md) |
 | `contribution.console` | [`references/contribution-console.md`](references/contribution-console.md) |
-| `contribution.console.ui.spec` | [`references/contribution-console-ui-spec.md`](references/contribution-console-ui-spec.md) |
-| `contribution.console.ui.spec.action` | [`references/contribution-console-ui-spec-action.md`](references/contribution-console-ui-spec-action.md) |
-| `contribution.console.ui.spec.config` | [`references/contribution-console-ui-spec-config.md`](references/contribution-console-ui-spec-config.md) |
-| `contribution.console.ui.spec.datasource` | [`references/contribution-console-ui-spec-datasource.md`](references/contribution-console-ui-spec-datasource.md) |
-| `contribution.console.ui.spec.endpoint` | [`references/contribution-console-ui-spec-endpoint.md`](references/contribution-console-ui-spec-endpoint.md) |
-| `contribution.console.ui.spec.filter` | [`references/contribution-console-ui-spec-filter.md`](references/contribution-console-ui-spec-filter.md) |
-| `contribution.console.ui.spec.jackson` | [`references/contribution-console-ui-spec-jackson.md`](references/contribution-console-ui-spec-jackson.md) |
-| `contribution.console.ui.spec.loader` | [`references/contribution-console-ui-spec-loader.md`](references/contribution-console-ui-spec-loader.md) |
-| `contribution.console.ui.spec.node` | [`references/contribution-console-ui-spec-node.md`](references/contribution-console-ui-spec-node.md) |
-| `contribution.console.ui.spec.parser` | [`references/contribution-console-ui-spec-parser.md`](references/contribution-console-ui-spec-parser.md) |
-| `contribution.console.ui.spec.permission` | [`references/contribution-console-ui-spec-permission.md`](references/contribution-console-ui-spec-permission.md) |
-| `contribution.console.ui.spec.validation` | [`references/contribution-console-ui-spec-validation.md`](references/contribution-console-ui-spec-validation.md) |
+| `console.ui.spec` | [`references/contribution-console-ui-spec.md`](references/contribution-console-ui-spec.md) |
+| `console.ui.spec.action` | [`references/contribution-console-ui-spec-action.md`](references/contribution-console-ui-spec-action.md) |
+| `console.ui.spec.config` | [`references/contribution-console-ui-spec-config.md`](references/contribution-console-ui-spec-config.md) |
+| `console.ui.spec.datasource` | [`references/contribution-console-ui-spec-datasource.md`](references/contribution-console-ui-spec-datasource.md) |
+| `console.ui.endpoint` | [`references/contribution-console-ui-spec-endpoint.md`](references/contribution-console-ui-spec-endpoint.md) |
+| `console.ui.spec.filter` | [`references/contribution-console-ui-spec-filter.md`](references/contribution-console-ui-spec-filter.md) |
+| `console.ui.spec.jackson` | [`references/contribution-console-ui-spec-jackson.md`](references/contribution-console-ui-spec-jackson.md) |
+| `console.ui.spec.loader` | [`references/contribution-console-ui-spec-loader.md`](references/contribution-console-ui-spec-loader.md) |
+| `console.ui.spec.node` | [`references/contribution-console-ui-spec-node.md`](references/contribution-console-ui-spec-node.md) |
+| `console.ui.spec.parser` | [`references/contribution-console-ui-spec-parser.md`](references/contribution-console-ui-spec-parser.md) |
+| `console.ui.spec.permission` | [`references/contribution-console-ui-spec-permission.md`](references/contribution-console-ui-spec-permission.md) |
+| `console.ui.spec.validation` | [`references/contribution-console-ui-spec-validation.md`](references/contribution-console-ui-spec-validation.md) |
 | `declaration` | [`references/declaration.md`](references/declaration.md) |
 | `dependency` | [`references/dependency.md`](references/dependency.md) |
 | `discovery` | [`references/discovery.md`](references/discovery.md) |

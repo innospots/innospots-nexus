@@ -1,7 +1,7 @@
 # innospots-nexus-plugin-ui-spec — Pactor Page DSL 规范索引
 
 > **规范与契约索引**（非 Maven 模块、非 Cursor 技能），由 `java:reference` 消费。
-> 描述 `com.innospots.nexus.core.plugin.contribution.console.ui.spec` 下的 **Pactor Page DSL 1.0** YAML。
+> 描述 `com.innospots.nexus.console.ui.spec` 下的 **Pactor Page DSL 1.0** YAML。
 > Java API 快照见 [`innospots-nexus-plugin`](../innospots-nexus-plugin/README.md)。
 
 快照版本：0.1.0-SNAPSHOT
@@ -66,7 +66,7 @@ Console 目录同步 / 运行时加载（PageDslLoader）
 
 ## 类参考（Java 绑定模型）
 
-实现包：`com.innospots.nexus.core.plugin.contribution.console.ui.spec`（artifact：`innospots-nexus-plugin`）。
+实现包：`com.innospots.nexus.console.ui.spec`（artifact：`innospots-nexus-plugin`）。
 
 | 类 | 类型 | 说明 |
 |------|------|------|

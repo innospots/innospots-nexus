@@ -2,6 +2,10 @@
 
 MicroProfile OpenAPI 安全契约。
 
+规范条文与端点/Schema 注解要求见
+[`standards/openapi.md`](../../../../standards/openapi.md)、
+[`openapi-contract.md`](../../openapi-contract.md)。
+
 ## NexusAuthenticatedApi
 
 **类型：** annotation

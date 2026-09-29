@@ -158,7 +158,7 @@ grill-me  →  java:project（需新建/改模块时）  →  java:design  →  
   但不得绑定 Spring Boot auto-configuration。
 - **禁止出现在 core**（归属 plugin、console、portal、platform 或
   adapter）：
-  - Classpath plugin runtime、contribution decoders、Page DSL、plugin
+  - Classpath plugin runtime、contribution decoders、plugin
     installation tables
   - Jakarta REST endpoints 与 console VO
   - User/role/permission/menu/dictionary 业务实体与工作流
@@ -174,8 +174,9 @@ grill-me  →  java:project（需新建/改模块时）  →  java:design  →  
 - 在 `innospots-nexus-core` 之上扩展 classpath plugin runtime 与 contribution
   处理。
 - 拥有 plugin discovery、declaration、lifecycle、installation、capability
-  routing、contribution decode/validate/snapshot，以及
-  `core.plugin.contribution.console.ui.spec` 下的 **Pactor Page DSL 1.0**。
+  routing、contribution decode/validate/snapshot。
+  **Pactor Page DSL 1.0** Java 运行时与 REST 端点归属 `innospots-nexus-console`
+ （`console.ui.spec`、`console.ui.endpoint`）。
 - 拥有 `console@1` contribution 契约与 runtime handler；**不**拥有
   持久化 console catalog 索引（`nx_console_catalog_resource` — 归属
   `innospots-nexus-console`）。
@@ -187,6 +188,8 @@ grill-me  →  java:project（需新建/改模块时）  →  java:design  →  
 ### `innospots-nexus-console`
 
 - 基于 Core 与 Plugin 构建的 management-console **API surface** 模块。
+- 拥有 **Pactor Page DSL 1.0** 解析/校验/加载与页面渲染端点（`console.ui.spec`、
+  `console.ui.endpoint`）。
 - 提供 Jakarta REST management endpoints、request/response VO、converter，
   以及持久化 **console catalog index**（`console.catalog.*`）。
 - **不得**拥有 plugin specification 或 contribution constraint 定义；
@@ -270,6 +273,7 @@ grill-me  →  java:project（需新建/改模块时）  →  java:design  →  
 | [`skills/java/java-reference/standards/code-comments.md`](skills/java/java-reference/standards/code-comments.md) | Javadoc 层级（class、method、inline） |
 | [`skills/java/java-reference/standards/naming.md`](skills/java/java-reference/standards/naming.md) | Java、包、文件命名约定 |
 | [`skills/java/java-reference/standards/api-design.md`](skills/java/java-reference/standards/api-design.md) | 方法签名、不可变性、null 处理、异常 |
+| [`skills/java/java-reference/standards/openapi.md`](skills/java/java-reference/standards/openapi.md) | MicroProfile OpenAPI 注解、Schema、构建期 YAML |
 | [`skills/java/java-reference/standards/domain-module-initialization.md`](skills/java/java-reference/standards/domain-module-initialization.md) | 业务域初始化的分阶段工作流 |
 | [`skills/java/java-reference/standards/module-skills.md`](skills/java/java-reference/standards/module-skills.md) | 模块 API 索引（`README.md`）与 references/ 目录格式 |
 

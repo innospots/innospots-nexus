@@ -115,6 +115,27 @@ Lombok 只消除访问器样板，**不替代**领域类的显式行为方法。
 
 ---
 
+## OpenAPI（构建期契约）
+
+REST 端点除 JAX-RS 绑定外，须满足 **MicroProfile OpenAPI** 注解，使 `mvn package` 生成
+`META-INF/nexus-openapi/*.yaml`。
+
+| 层级 | 要求 |
+|------|------|
+| 模块 | `*OpenApiDefinition`：`@Info`、`tags`、`@SecurityScheme(bearerAuth)` |
+| 端点类 | `@Tag` + `@NexusAuthenticatedApi`（需登录时）；`@Operation` 每方法 |
+| request/vo | `@Schema` 类名与每个字段/组件 `description` |
+| BeanParam 查询类 | 字段 `@Schema` + `@QueryParam` |
+| 共享 `R` / `PageResult` | 已在 base 注解；勿重复定义竞争 schema |
+
+权威条文：[`standards/openapi.md`](../standards/openapi.md)。
+开发模板与检查清单：[openapi-contract.md](openapi-contract.md)。
+索引：[`modules/innospots-nexus-openapi/README.md`](modules/innospots-nexus-openapi/README.md)。
+
+设计交付的端点表须包含 **HTTP 方法、路径、`operationId`、`@Tag`**，与实现一致。
+
+---
+
 ## 分层契约
 
 ```text

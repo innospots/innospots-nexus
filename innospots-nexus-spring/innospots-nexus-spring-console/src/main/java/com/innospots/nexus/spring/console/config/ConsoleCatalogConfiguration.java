@@ -11,12 +11,14 @@ import com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao;
 import com.innospots.nexus.console.catalog.endpoint.ConsoleCatalogEndpoint;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogService;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogSyncService;
+import com.innospots.nexus.console.ui.endpoint.DefaultPageDslEndpoint;
+import com.innospots.nexus.console.ui.spec.filter.PageDslFilterChain;
 import com.innospots.nexus.core.bootstrap.NexusStartupTask;
 import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributionCatalog;
-import com.innospots.nexus.core.plugin.contribution.console.ui.spec.config.PageDslConfig;
-import com.innospots.nexus.core.plugin.contribution.console.ui.spec.loader.ClasspathPageDslLoader;
-import com.innospots.nexus.core.plugin.contribution.console.ui.spec.loader.PageDslLoader;
-import com.innospots.nexus.core.plugin.contribution.console.ui.spec.parser.JacksonPageDslParser;
+import com.innospots.nexus.console.ui.spec.config.PageDslConfig;
+import com.innospots.nexus.console.ui.spec.loader.ClasspathPageDslLoader;
+import com.innospots.nexus.console.ui.spec.loader.PageDslLoader;
+import com.innospots.nexus.console.ui.spec.parser.JacksonPageDslParser;
 
 /**
  * {@code console.catalog} 域 Spring 装配：插件贡献目录索引与 Page DSL 加载。
@@ -35,6 +37,11 @@ public class ConsoleCatalogConfiguration {
     PageDslLoader pageDslLoader() {
         PageDslConfig config = PageDslConfig.defaults();
         return new ClasspathPageDslLoader(config, new JacksonPageDslParser(config), null);
+    }
+
+    @Bean
+    DefaultPageDslEndpoint defaultPageDslEndpoint(PageDslLoader pageDslLoader) {
+        return new DefaultPageDslEndpoint(pageDslLoader, PageDslFilterChain.create());
     }
 
     @Bean

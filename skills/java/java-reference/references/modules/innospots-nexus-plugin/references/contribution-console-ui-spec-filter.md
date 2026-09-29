@@ -1,4 +1,4 @@
-# 包 `contribution.console.ui.spec.filter`
+# 包 `console.ui.spec.filter`
 
 ## PageDslFilter
 

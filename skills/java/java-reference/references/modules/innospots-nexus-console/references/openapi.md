@@ -1,5 +1,9 @@
 # 包 `openapi`
 
+OpenAPI 注解与构建说明见
+[`innospots-nexus-openapi` 索引](../innospots-nexus-openapi/README.md)、
+[`openapi-contract.md`](../../openapi-contract.md)。
+
 ## NexusConsoleOpenApiDefinition
 
 **类型：** class

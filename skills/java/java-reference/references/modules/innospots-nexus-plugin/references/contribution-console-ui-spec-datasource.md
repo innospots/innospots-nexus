@@ -1,4 +1,4 @@
-# 包 `contribution.console.ui.spec.datasource`
+# 包 `console.ui.spec.datasource`
 
 ## ComputedDataSource
 

@@ -1,4 +1,4 @@
-# 包 `contribution.console.ui.spec.permission`
+# 包 `console.ui.spec.permission`
 
 ## PermissionConfig
 

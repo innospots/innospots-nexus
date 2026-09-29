@@ -47,7 +47,7 @@ version: 1.7.0
 - 包结构（领域优先） → [package-structure.md](../java-reference/references/package-structure.md)
 - sample 扩展实施 → [sample-extension-development.md](references/sample-extension-development.md)
 - 作用域层级 → [scope-hierarchy.md](../java-reference/references/scope-hierarchy.md)
-- 建模与契约 → [domain-modeling.md](../java-reference/references/domain-modeling.md)、[api-contract.md](../java-reference/references/api-contract.md)
+- 建模与契约 → [domain-modeling.md](../java-reference/references/domain-modeling.md)、[api-contract.md](../java-reference/references/api-contract.md)、[openapi-contract.md](../java-reference/references/openapi-contract.md)
 - 注释 → [code-comments.md](../java-reference/standards/code-comments.md)
 - 异常实现 → [exception-handling.md](references/exception-handling.md)
 - 测试范围（设计侧） → `java:design` → [test-scope.md](../java-design/references/test-scope.md)

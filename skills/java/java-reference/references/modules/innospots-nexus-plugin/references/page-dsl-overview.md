@@ -1,6 +1,6 @@
 # Pactor Page DSL 1.0
 
-位于 `contribution.console.ui.spec` 及子包：
+位于 `console.ui.spec` 及子包：
 
 | 子域 | 说明 |
 |------|------|

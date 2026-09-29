@@ -16,6 +16,7 @@
 | 领域事件 | [domain-events.md](domain-events.md) |
 | 集成测试 `*IT` | [integration-tests.md](integration-tests.md) |
 | MyBatis-Plus / yaml / 禁 XML | [persistence-mybatis.md](persistence-mybatis.md) |
+| OpenAPI 注解与 package 生成 | `java:reference` → [openapi-contract.md](../../java-reference/references/openapi-contract.md) |
 | 插件 vs portal 归属 | `java:reference` → [module-ownership.md](../../java-reference/references/module-ownership.md) |
 
 ---

@@ -1,4 +1,4 @@
-# 包 `contribution.console.ui.spec.action`
+# 包 `console.ui.spec.action`
 
 ## ActionConfig
 

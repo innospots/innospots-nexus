@@ -1,4 +1,4 @@
-# 包 `contribution.console.ui.spec.node`
+# 包 `console.ui.spec.node`
 
 ## Children
 
@@ -47,7 +47,7 @@
 
 **类型：** class
 
-对 com.innospots.nexus.core.plugin.contribution.console.ui.spec.PageDsl 中声明的命名组件的引用。
+对 com.innospots.nexus.console.ui.spec.PageDsl 中声明的命名组件的引用。
 
 
 ## DslHttpSource

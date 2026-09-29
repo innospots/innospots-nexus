@@ -31,6 +31,7 @@ import com.innospots.nexus.core.openapi.NexusOpenApiSecurityNames;
                 @Tag(name = "Navigation", description = "运行时导航"),
                 @Tag(name = "Dictionary", description = "租户级字典"),
                 @Tag(name = "Plugin", description = "插件生命周期"),
+                @Tag(name = "UiPage", description = "Pactor 页面 DSL 加载与渲染"),
                 @Tag(name = "OpenApiCatalog", description = "OpenAPI 规范目录")
         }
 )

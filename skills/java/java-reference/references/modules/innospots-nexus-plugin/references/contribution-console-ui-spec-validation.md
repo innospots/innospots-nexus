@@ -1,4 +1,4 @@
-# 包 `contribution.console.ui.spec.validation`
+# 包 `console.ui.spec.validation`
 
 ## PageDslValidator
 

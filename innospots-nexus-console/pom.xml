@@ -38,6 +38,10 @@
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-extension</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -64,7 +68,8 @@
                                 com.innospots.nexus.console,
                                 com.innospots.nexus.base.domain.response,
                                 com.innospots.nexus.base.i18n,
-                                com.innospots.nexus.base.domain.enums
+                                com.innospots.nexus.base.domain.enums,
+                                com.innospots.nexus.core.plugin.installation.domain.enums
                             </scanPackages>
                             <scanDependenciesDisable>false</scanDependenciesDisable>
                             <openApiVersion>3.1.0</openApiVersion>

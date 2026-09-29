@@ -88,13 +88,18 @@ DAO 方法可用 `select/insert/update/delete` 对齐 `BaseMapper`；面向应�
 service / operator **不得**构造 `R<T>`，只返回领域值或 `PageResult<T>`。
 约 7 个内聚方法即触发端点边界复审。
 
+OpenAPI（构建期 YAML）：每个 HTTP 方法 `@Operation(operationId, summary)`；需登录类
+`@NexusAuthenticatedApi`；request/vo `@Schema`；新 Tag 同步 `*OpenApiDefinition`。
+见 [openapi-contract.md](openapi-contract.md)、[`standards/openapi.md`](../standards/openapi.md)。
+
 ---
 
-## 6. 写 Request / VO
+## 6. 写 Request / VO（含 OpenAPI Schema）
 
 | 必须 | 禁止 |
 |------|------|
-| record 类型 | class + Lombok |
+| record 类型（+ 类/`@Schema` 描述） | 无 `@Schema` 的契约 request/vo |
+| `@BeanParam` 分页类：字段 `@QueryParam` + `@Schema` | 用 record 承载 `@BeanParam`（除非框架已验证可行） |
 | `XxxCreateRequest` / `XxxUpdateRequest` / `XxxStatusUpdateRequest` / `XxxPageRequest` / `XxxTreeRequest` / `XxxOrderRequest` / `XxxAddRequest` / `XxxReplaceRequest` | 一个笼统 `XxxRequest` 承担不同修改权的操作 |
 | `XxxVo` 主视图，`XxxOptionVo` 特定投影 | 大写 `VO`、`Dto`、`Response`、`Result` |
 | 紧凑构造器里 `List.copyOf`/`Set.copyOf`/`Map.copyOf` 防御拷贝 | 暴露调用方可变集合 |

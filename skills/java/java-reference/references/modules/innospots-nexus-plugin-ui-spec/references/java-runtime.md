@@ -2,7 +2,7 @@
 
 实现位于 **`innospots-nexus-plugin`**，包根：
 
-`com.innospots.nexus.core.plugin.contribution.console.ui.spec`
+`com.innospots.nexus.console.ui.spec`
 
 ## 核心类型
 

@@ -1,12 +1,27 @@
 # 规范章节级索引
 
-`java:reference` 对 `standards/` 下 7 份规范的章节地图。用于快速定位
+`java:reference` 对 `standards/` 下 8 份规范的章节地图。用于快速定位
 「哪条规则在哪份文件的哪一节」。内容发生疑义时一律回源到 `../standards/` 原文。
 
 跨技能专题（模块归属、**包结构**、作用域、建模、契约）见同目录下的专题参考文件，不在此重复。
 包结构权威专题：[package-structure.md](package-structure.md)。
 `innospots-nexus-sample` 工程与扩展 DDD 边界：[sample-extension-layout.md](sample-extension-layout.md)。
 控制台内置 entry、`pageKey` 与 Page DSL 路径：[console-entry-and-pages.md](console-entry-and-pages.md)。
+OpenAPI：条文 [openapi.md](../standards/openapi.md)；注解 [openapi-contract.md](openapi-contract.md)；
+对外模块 Maven 插件 [openapi-maven-plugin.md](openapi-maven-plugin.md)。
+
+---
+
+## openapi.md — OpenAPI
+
+| 章节 | 关键规则 |
+|------|---------|
+| 适用范围 | console/portal/platform 端点；MP 注解；禁止 Spring MVC 文档注解 |
+| 模块 `@OpenAPIDefinition` | 独立 `*OpenApiDefinition` + 占位 `@Path`；tags 与端点 `@Tag` 一致 |
+| 端点 | `@Operation(operationId, summary)` 必填；路径参 `@Parameter`；管理 API `@NexusAuthenticatedApi` |
+| request/vo | 类与组件 `@Schema(description)`；BeanParam 字段 `@Schema` + JAX-RS 参数注解 |
+| 构建 | `smallrye-open-api-maven-plugin` → `META-INF/nexus-openapi/<artifactId>.yaml`（配置见 [openapi-maven-plugin.md](openapi-maven-plugin.md)） |
+| 安全 | 仅 `bearerAuth`（`NexusOpenApiSecurityNames`） |
 
 ---
 

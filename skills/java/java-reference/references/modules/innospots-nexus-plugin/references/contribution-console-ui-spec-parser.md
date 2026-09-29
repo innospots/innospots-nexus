@@ -1,4 +1,4 @@
-# 包 `contribution.console.ui.spec.parser`
+# 包 `console.ui.spec.parser`
 
 ## JacksonPageDslParser
 

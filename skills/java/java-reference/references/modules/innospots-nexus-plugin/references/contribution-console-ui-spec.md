@@ -1,4 +1,4 @@
-# 包 `contribution.console.ui.spec`
+# 包 `console.ui.spec`
 
 ## HttpRequest
 
@@ -40,7 +40,7 @@ Pactor Page DSL 1.0 的根文档。
 ### 方法
 
 #### `create() → PageDsl`
-- **说明：** DSL 规范版本，必须为 {@link #SPEC_VERSION}。 public static final String SPEC_VERSION = "1.0"; /** 必填 DSL 版本字段（dsl: '1.0'）。 private String dsl; /** 运行时与组件能力要求。 private RequiresConfig requires; /** 必填的页面标识与展示元数据。 private PageMeta page; /** 供工具使用的文档元数据；运行时不得依赖此对象。 private Map meta = new LinkedHashMap<>(); /** 页面初始状态，运行时通过 {@link #bindState(Map)} 更新。 private Map state = new LinkedHashMap<>(); /** 表达式中以 ${data.name} 引用的命名数据源。 private Map dataSources = new LinkedHashMap<>(); /** 通过 call 动作调用的命名可复用动作序列。 private Map actions = new LinkedHashMap<>(); /** 由 component 节点引用的命名可复用 UI 片段。 private Map components = new LinkedHashMap<>(); /** 页面生命周期钩子，如 onInit 与 onLoad。 private LifecycleConfig lifecycle; /** 完整页面的首选 UI 根节点。 private com.innospots.nexus.core.plugin.contribution.console.ui.spec.node.DslNode body; /** 无 body 时，部分 DSL 文档的替代根节点。 private Children children; /** 创建空页面 DSL，用于反序列化或组装。 public PageDsl() { } /** 创建空的页面 DSL 文档。
+- **说明：** DSL 规范版本，必须为 {@link #SPEC_VERSION}。 public static final String SPEC_VERSION = "1.0"; /** 必填 DSL 版本字段（dsl: '1.0'）。 private String dsl; /** 运行时与组件能力要求。 private RequiresConfig requires; /** 必填的页面标识与展示元数据。 private PageMeta page; /** 供工具使用的文档元数据；运行时不得依赖此对象。 private Map meta = new LinkedHashMap<>(); /** 页面初始状态，运行时通过 {@link #bindState(Map)} 更新。 private Map state = new LinkedHashMap<>(); /** 表达式中以 ${data.name} 引用的命名数据源。 private Map dataSources = new LinkedHashMap<>(); /** 通过 call 动作调用的命名可复用动作序列。 private Map actions = new LinkedHashMap<>(); /** 由 component 节点引用的命名可复用 UI 片段。 private Map components = new LinkedHashMap<>(); /** 页面生命周期钩子，如 onInit 与 onLoad。 private LifecycleConfig lifecycle; /** 完整页面的首选 UI 根节点。 private com.innospots.nexus.console.ui.spec.node.DslNode body; /** 无 body 时，部分 DSL 文档的替代根节点。 private Children children; /** 创建空页面 DSL，用于反序列化或组装。 public PageDsl() { } /** 创建空的页面 DSL 文档。
 - **返回：** 空文档
 
 #### `of(PageMeta page) → PageDsl`

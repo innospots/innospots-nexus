@@ -1,4 +1,4 @@
-# 包 `contribution.console.ui.spec.endpoint`
+# 包 `console.ui.endpoint`
 
 ## DefaultPageDslEndpoint
 

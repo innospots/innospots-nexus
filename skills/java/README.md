@@ -41,7 +41,7 @@ java-<name>/
 java-reference/
 ├── README.md
 ├── SKILL.md          规范总索引（java:reference）
-├── standards/        规范权威原文（7 份，随技能包安装）
+├── standards/        规范权威原文（8 份，随技能包安装）
 └── references/       专题参考、模块 API 索引
 ```
 

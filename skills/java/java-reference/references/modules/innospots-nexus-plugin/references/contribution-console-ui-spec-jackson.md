@@ -1,4 +1,4 @@
-# 包 `contribution.console.ui.spec.jackson`
+# 包 `console.ui.spec.jackson`
 
 ## ActionOrListDeserializer
 
@@ -18,7 +18,7 @@
 
 **类型：** class
 
-从 YAML 数组或单个 com.innospots.nexus.core.plugin.contribution.console.ui.spec.node.DslSourceRef 对象反序列化 com.innospots.nexus.core.plugin.contribution.console.ui.spec.node.Children。
+从 YAML 数组或单个 com.innospots.nexus.console.ui.spec.node.DslSourceRef 对象反序列化 com.innospots.nexus.console.ui.spec.node.Children。
 
 
 ## DslNodeDeserializer
