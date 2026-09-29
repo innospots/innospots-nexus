@@ -95,12 +95,13 @@ class ConsoleModuleEntryPluginsTest {
     }
 
     private static Stream<Arguments> moduleEntryPages() {
+        String domain = ConsoleModuleDescriptor.BUILTIN_DOMAIN_KEY;
         return Stream.of(
-                Arguments.of("menu", "menu-main"),
-                Arguments.of("dictionary", "dictionary-main"),
-                Arguments.of("logger", "logger-main"),
-                Arguments.of("permission", "permission-main"),
-                Arguments.of("plugin", "plugin-main"),
-                Arguments.of("role", "role-main"));
+                Arguments.of("menu", ConsoleModuleDescriptor.compositePageKey(domain, "menu", "main")),
+                Arguments.of("dictionary", ConsoleModuleDescriptor.compositePageKey(domain, "dictionary", "main")),
+                Arguments.of("logger", ConsoleModuleDescriptor.compositePageKey(domain, "logger", "main")),
+                Arguments.of("permission", ConsoleModuleDescriptor.compositePageKey(domain, "permission", "main")),
+                Arguments.of("plugin", ConsoleModuleDescriptor.compositePageKey(domain, "plugin", "main")),
+                Arguments.of("role", ConsoleModuleDescriptor.compositePageKey(domain, "role", "main")));
     }
 }

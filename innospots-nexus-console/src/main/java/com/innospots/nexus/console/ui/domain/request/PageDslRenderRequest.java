@@ -12,33 +12,20 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
  * 由 {@link com.innospots.nexus.console.ui.endpoint.DefaultPageDslEndpoint} 从 {@link jakarta.ws.rs.core.UriInfo}
  * 收集，不放在本类型中。</p>
  */
-@Schema(name = "PageDslRenderRequest", description = "页面 DSL 渲染路径参数（domain / module / page）")
+@Schema(
+        name = "PageDslRenderRequest",
+        description = "页面 DSL 复合 pageKey（{domainKey}-{moduleKey}-{xxx}）")
 public final class PageDslRenderRequest {
 
-    @Parameter(description = "项目领域键（classpath 路径段，如 demo、sales）", required = true)
-    @Schema(description = "项目领域键", required = true, examples = {"nexus"})
-    @PathParam("domainKey")
-    private String domainKey;
-
-    @Parameter(description = "模块键，与 ui-pages 目录层级一致", required = true)
-    @Schema(description = "模块键", required = true, examples = {"role"})
-    @PathParam("moduleKey")
-    private String moduleKey;
-
-    @Parameter(description = "页面键，与 Page DSL 中 page.id 一致", required = true)
-    @Schema(description = "页面键", required = true, examples = {"role-main"})
+    @Parameter(
+            description = "复合 pageKey：{domainKey}-{moduleKey}-{xxx}（domain/module 不含连字符）",
+            required = true,
+            example = "nexus-role-main")
+    @Schema(description = "复合 pageKey", required = true, examples = {"nexus-menu-main"})
     @PathParam("pageKey")
     private String pageKey;
 
     public PageDslRenderRequest() {
-    }
-
-    public String domainKey() {
-        return domainKey;
-    }
-
-    public String moduleKey() {
-        return moduleKey;
     }
 
     public String pageKey() {

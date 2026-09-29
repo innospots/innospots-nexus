@@ -3,6 +3,7 @@ package com.innospots.nexus.console.ui.spec;
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.console.ui.spec.action.ActionConfig;
 import com.innospots.nexus.console.ui.spec.action.ActionOrList;
+import com.innospots.nexus.console.ui.spec.PageDslPageRef;
 import com.innospots.nexus.console.ui.spec.config.PageDslConfig;
 import com.innospots.nexus.console.ui.spec.datasource.ComputedDataSource;
 import com.innospots.nexus.console.ui.spec.datasource.HttpDataSource;
@@ -258,7 +259,8 @@ class PageDslSpecificationContractsTest {
             "customer-list",
             "fragment-list"
     })
-    void loadsClasspathDemoPages(String pageKey) {
+    void loadsClasspathDemoPages(String pageSuffix) {
+        String pageKey = PageDslPageRef.encode("demo", "demo", pageSuffix);
         ClasspathPageDslLoader loader = new ClasspathPageDslLoader(
                 PageDslConfig.defaults(),
                 parser,

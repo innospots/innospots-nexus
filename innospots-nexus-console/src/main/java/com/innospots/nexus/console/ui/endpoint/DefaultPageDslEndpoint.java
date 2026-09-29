@@ -23,6 +23,7 @@ import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.console.config.ConsoleConstant;
 import com.innospots.nexus.console.ui.domain.request.PageDslRenderRequest;
 import com.innospots.nexus.console.ui.spec.PageDsl;
+import com.innospots.nexus.console.ui.spec.PageDslPageRef;
 import com.innospots.nexus.console.ui.spec.filter.PageDslFilterChain;
 import com.innospots.nexus.console.ui.spec.filter.PageDslRenderContext;
 import com.innospots.nexus.console.ui.spec.loader.PageDslLoader;
@@ -34,7 +35,7 @@ import com.innospots.nexus.console.ui.spec.loader.PageDslLoader;
  * @author Smars
  * @date 2026/09/13
  */
-@Path(ConsoleConstant.PUBLIC_API_PREFIX + "/ui/pages/{domainKey}/{moduleKey}/{pageKey}")
+@Path(ConsoleConstant.PUBLIC_API_PREFIX + "/pages/{pageKey}")
 @Produces(MediaType.APPLICATION_JSON)
 @Tag(name = "UiPage", description = "Pactor 页面 DSL 加载与渲染")
 public final class DefaultPageDslEndpoint implements PageDslEndpoint {
@@ -65,7 +66,8 @@ public final class DefaultPageDslEndpoint implements PageDslEndpoint {
             description = "路径参数定位 YAML；其余查询参数（?key=value）绑定到页面 state，无固定字段名。")
     public R<PageDsl> render(@BeanParam PageDslRenderRequest request, @Context UriInfo uriInfo) {
         Map<String, Object> parameters = queryParameters(uriInfo);
-        return R.ok(render(request.domainKey(), request.moduleKey(), request.pageKey(), parameters));
+        PageDslPageRef resolved = PageDslPageRef.decode(request.pageKey());
+        return R.ok(render(resolved.domainKey(), resolved.moduleKey(), resolved.pageKey(), parameters));
     }
 
     @Override

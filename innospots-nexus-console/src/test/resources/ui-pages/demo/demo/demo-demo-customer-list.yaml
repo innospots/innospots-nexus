@@ -8,7 +8,7 @@ requires:
     Table: '>=1.0'
 
 page:
-  id: customer-list
+  id: demo-demo-customer-list
   name: customerList
   title: 客户管理
   description: 客户查询、查看、编辑和删除页面

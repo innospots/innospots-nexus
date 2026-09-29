@@ -1,7 +1,7 @@
 dsl: '1.0'
 
 page:
-  id: plugin-main
+  id: nexus-plugin-main
   name: pluginMain
   title: Plugin Management
   description: Install, enable, and monitor console plugins.

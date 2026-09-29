@@ -44,8 +44,8 @@ class SitemapYamlLoadTest {
         assertThat(resource.getId()).isEqualTo("site");
         assertThat(resource.getPages()).hasSize(6);
         assertThat(resource.getMenus()).hasSize(6);
-        assertThat(resource.getPages().getFirst().getId()).isEqualTo("menu-main");
-        assertThat(resource.getPages().getFirst().getPath()).isEqualTo("/page/nexus/menu/menu-main");
+        assertThat(resource.getPages().getFirst().getId()).isEqualTo("nexus-menu-main");
+        assertThat(resource.getPages().getFirst().getPath()).isEqualTo("/page/nexus/menu/nexus-menu-main");
         assertThat(resource.getLayouts().get("login").getBody().getType()).isEqualTo("Flex");
     }
 }

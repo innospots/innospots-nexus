@@ -139,12 +139,12 @@ class PageDslContractsTest {
                 new JacksonPageDslParser(config),
                 getClass().getClassLoader());
 
-        PageDsl document = loader.load("sales", "sales", "order-list");
+        PageDsl document = loader.load("sales", "sales", "sales-sales-order-list");
 
-        assertThat(document.getPage().getId()).isEqualTo("order-list");
+        assertThat(document.getPage().getId()).isEqualTo("sales-sales-order-list");
         assertThat(document.dataSources()).containsKey("orders");
-        assertThat(config.resourcePath("sales", "sales", "order-list"))
-                .isEqualTo("ui-pages/sales/sales/order-list.yaml");
+        assertThat(config.resourcePath("sales", "sales", "sales-sales-order-list"))
+                .isEqualTo("ui-pages/sales/sales/sales-sales-order-list.yaml");
     }
 
     @Test
@@ -170,8 +170,8 @@ class PageDslContractsTest {
 
         assertThat(document.getPage().getId()).isEqualTo("order-list");
         assertThat(parser.parse(yaml).dataSources()).containsKey("orders");
-        assertThat(config.resourcePath("sales", "sales", "order-list"))
-                .isEqualTo("ui-pages/sales/sales/order-list.yml");
+        assertThat(config.resourcePath("sales", "sales", "sales-sales-order-list"))
+                .isEqualTo("ui-pages/sales/sales/sales-sales-order-list.yml");
     }
 
     @Test

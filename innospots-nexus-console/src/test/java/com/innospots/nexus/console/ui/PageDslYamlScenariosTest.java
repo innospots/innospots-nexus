@@ -37,7 +37,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class PageDslYamlScenariosTest {
 
-    private static final String FIXTURE = "ui-pages/demo/demo/customer-list.yaml";
+    private static final String FIXTURE = "ui-pages/demo/demo/demo-demo-customer-list.yaml";
+    private static final String DEMO_CUSTOMER_PAGE_KEY = "demo-demo-customer-list";
 
     private PageDsl document;
     private String yamlContent;
@@ -55,7 +56,7 @@ class PageDslYamlScenariosTest {
     @Test
     void parsesFullCustomerListFixture() {
         assertThat(document.getDsl()).isEqualTo(PageDsl.SPEC_VERSION);
-        assertThat(document.getPage().getId()).isEqualTo("customer-list");
+        assertThat(document.getPage().getId()).isEqualTo(DEMO_CUSTOMER_PAGE_KEY);
         assertThat(document.getPage().getName()).isEqualTo("customerList");
         assertThat(document.getPage().getType()).isEqualTo("list");
         assertThat(document.getPage().getPermission().getCode()).isEqualTo("customer:view");
@@ -122,10 +123,10 @@ class PageDslYamlScenariosTest {
         PageDsl rendered = endpoint.render(
                 "demo",
                 "demo",
-                "customer-list",
+                DEMO_CUSTOMER_PAGE_KEY,
                 Map.of("keyword", "Acme", "page", 3));
 
-        assertThat(rendered.getPage().getId()).isEqualTo("customer-list");
+        assertThat(rendered.getPage().getId()).isEqualTo(DEMO_CUSTOMER_PAGE_KEY);
         assertThat(rendered.state()).containsEntry("keyword", "Acme");
         assertThat(rendered.state()).containsEntry("page", 3);
         assertThat(rendered.components().get("searchForm")).isInstanceOf(ComponentNode.class);
@@ -147,6 +148,6 @@ class PageDslYamlScenariosTest {
                 yamlContent.getBytes(StandardCharsets.UTF_8).length);
 
         System.out.println(summary);
-        assertThat(summary).contains("customer-list");
+        assertThat(summary).contains(DEMO_CUSTOMER_PAGE_KEY);
     }
 }

@@ -19,7 +19,7 @@ import com.innospots.nexus.console.sitemap.service.SitemapService;
  *
  * <p>当前返回 YAML 全量结构；后续按登录用户与权限裁剪 pages / menus。</p>
  */
-@Path(ConsoleConstant.PUBLIC_API_PREFIX + "/ui/sitemap/" + ConsoleModuleDescriptor.BUILTIN_DOMAIN_KEY)
+@Path(ConsoleConstant.PUBLIC_API_PREFIX + "/sitemap/" + ConsoleModuleDescriptor.BUILTIN_DOMAIN_KEY)
 @Produces(MediaType.APPLICATION_JSON)
 @Tag(name = "UiSitemap", description = "动态页面 Sitemap 加载与渲染")
 public final class NexusSitemapEndpoint implements SitemapEndpoint {

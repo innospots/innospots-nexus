@@ -1,7 +1,7 @@
 dsl: '1.0'
 
 page:
-  id: fragment-list
+  id: demo-demo-fragment-list
   title: Fragment List
   type: list
 

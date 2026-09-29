@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import com.innospots.nexus.base.i18n.I18nObject;
+import com.innospots.nexus.console.ui.spec.PageDslPageRef;
 
 /**
  * 控制台模块 entry 贡献的不可变元数据（PageDsl 页面清单与菜单树源数据）。
@@ -50,6 +51,13 @@ public record ConsoleModuleDescriptor(
 
     /** 控制台 Page 前端路由固定前缀（{@code /page/{domainKey}/{moduleKey}/{pageKey}}）。 */
     public static final String PAGE_ROUTE_PREFIX = "/page";
+
+    /**
+     * 构建复合 PageDsl {@code pageKey}：{@code {domainKey}-{moduleKey}-{pageSuffix}}。
+     */
+    public static String compositePageKey(String domainKey, String moduleKey, String pageSuffix) {
+        return PageDslPageRef.encode(domainKey, moduleKey, pageSuffix);
+    }
 
     public ConsoleModuleDescriptor {
         domainKey = requireKey(domainKey, "domainKey");

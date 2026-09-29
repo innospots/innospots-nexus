@@ -6,7 +6,7 @@
  *
  * <p>页面 YAML 推荐资源布局：</p>
  * <pre>
- * ui-pages/{domainKey}/{moduleKey}/{pageId}.yaml
+ * ui-pages/{domainKey}/{moduleKey}/{pageKey}.yaml，pageKey={domainKey}-{moduleKey}-{xxx}（HTTP：/api/public/pages/{pageKey})
  * </pre>
  *
  * <p>结构权威来源：{@link com.innospots.nexus.console.ui.spec.PageDsl}

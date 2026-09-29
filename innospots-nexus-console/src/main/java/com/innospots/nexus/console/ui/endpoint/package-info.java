@@ -4,7 +4,7 @@
  * <ul>
  *   <li>{@link PageDslEndpoint} — 程序化渲染端口</li>
  *   <li>{@link DefaultPageDslEndpoint} — 默认实现与
- *       {@code GET /api/public/ui/pages/{domainKey}/{moduleKey}/{pageKey}}?…}</li>
+ *       {@code GET /api/public/pages/{pageKey}}?…}（{@code pageKey}={domain}-{module}-{xxx}）</li>
  * </ul>
  *
  * <p>HTTP 请求体见 {@code com.innospots.nexus.console.ui.domain.request.PageDslRenderRequest}；

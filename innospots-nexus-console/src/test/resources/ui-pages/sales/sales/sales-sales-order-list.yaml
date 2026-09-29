@@ -1,7 +1,7 @@
 dsl: '1.0'
 
 page:
-  id: order-list
+  id: sales-sales-order-list
   title: Orders
   type: list
 

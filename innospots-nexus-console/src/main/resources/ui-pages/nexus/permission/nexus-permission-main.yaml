@@ -1,7 +1,7 @@
 dsl: '1.0'
 
 page:
-  id: permission-main
+  id: nexus-permission-main
   name: permissionMain
   title: Permission Management
   description: Manage console permission resources and grants.

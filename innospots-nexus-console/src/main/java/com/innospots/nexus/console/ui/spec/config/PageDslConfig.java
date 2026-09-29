@@ -2,11 +2,11 @@ package com.innospots.nexus.console.ui.spec.config;
 
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.status.NexusStatusCode;
-
 /**
  * 定位与解析 Pactor 页面 DSL 文件的不可变配置。
  *
- * <p>默认资源位于 {@code ui-pages/{domainKey}/{moduleKey}/{pageKey}.yaml}。</p>
+ * <p>默认资源位于 {@code ui-pages/{domainKey}/{moduleKey}/{pageKey}.yaml}，其中 {@code pageKey}
+ * 为完整复合键 {@code {domainKey}-{moduleKey}-{xxx}}（见 {@link com.innospots.nexus.console.ui.spec.PageDslPageRef}）。</p>
  *
  * @param basePath classpath 基础目录
  * @param fileSuffix 页面文件后缀，通常为 {@code .yaml}
