@@ -21,7 +21,7 @@ import com.innospots.nexus.console.sitemap.service.SitemapService;
  */
 @Path(ConsoleConstant.PUBLIC_API_PREFIX + "/sitemap/" + ConsoleModuleDescriptor.BUILTIN_DOMAIN_KEY)
 @Produces(MediaType.APPLICATION_JSON)
-@Tag(name = "UiSitemap", description = "动态页面 Sitemap 加载与渲染")
+@Tag(name = "NexusSitemap", description = "动态页面 Sitemap 加载与渲染")
 public final class NexusSitemapEndpoint implements SitemapEndpoint {
 
     private final SitemapService sitemapService;
