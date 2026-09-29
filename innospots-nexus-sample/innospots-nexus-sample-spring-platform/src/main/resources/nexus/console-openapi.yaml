@@ -1,8 +1,8 @@
 # ---------------------------------------------------------------------------
 # OpenAPI 文档页（Scalar）与规范目录 HTTP
 #
-# Scalar 绑定: com.scalar.maven.core.ScalarProperties（prefix scalar）
-# 装配: NexusScalarJerseyConfiguration、OpenApiCatalogConfiguration（spring-core）
+# Scalar UI 绑定: OpenApiScalarSpringProperties（prefix scalar，继承 ScalarProperties）
+# 装配: NexusScalarJerseyConfiguration（spring-console）、OpenApiCatalogConfiguration（spring-core）
 #
 # 规范正文来自各模块构建产物 classpath:META-INF/nexus-openapi/<artifactId>.yaml
 # （如 innospots-nexus-console、innospots-nexus-platform）。若 Scalar 提示
@@ -10,18 +10,50 @@
 #   mvn -pl innospots-nexus-console,innospots-nexus-platform process-classes
 # 或在 IDEA 中启用 Build → Delegate to Maven，再 Rebuild。
 #
-# 接口:
-#   GET /openapi/specs
-#   GET /openapi/specs/{specId}
-#   GET /openapi/ui（默认 path，可改 scalar.path）
-#   GET /openapi/ui/scalar.js
+# HTTP 路由（与下方 scalar.path / scalar.specs-base 默认值一致）:
+#   GET /openapi/specs              — 规范列表（JSON）
+#   GET /openapi/specs/{specId}     — 规范正文（YAML）
+#   GET /openapi/ui                 — Scalar 文档 HTML
+#   GET /openapi/ui/scalar.js       — Scalar 前端脚本
 # ---------------------------------------------------------------------------
 scalar:
-  # 是否启用 Scalar 文档页；默认 true
-  enabled: true
-  # 文档页路径；默认 /openapi/ui
+  # --- Nexus 路由（须与 Jersey 端点一致）---
+  # OpenAPI 规范目录根路径；Scalar 拉取 YAML 时使用，须与 OpenApiCatalogEndpoint 相同
+  specs-base: /openapi/specs
+  # Scalar HTML 文档页路径；同时作为 scalar.js 的父路径
   path: /openapi/ui
+  # 文档页下的脚本文件名；完整路径为 path + "/" + script-segment
+  script-segment: scalar.js
+
+  # --- 开关 ---
+  # 是否注册 Scalar 文档页与 scalar.js；false 时仅保留 /openapi/specs*
+  enabled: true
+
+  # --- 页面与布局 ---
+  # 浏览器标签页标题
   page-title: Nexus API Reference
+  # UI 布局：modern | classic
+  layout: modern
+  # 配色主题：default | alternate | moon | purple 等（见 ScalarTheme）
+  theme: default
+  # 是否显示左侧导航
+  show-sidebar: true
+  # 进入页面时是否默认展开第一个 tag
+  default-open-first-tag: true
+  # 是否使用 Scalar 内置 Web 字体；Nexus 通常沿用宿主字体
   with-default-fonts: false
+
+  # --- 外观与交互 ---
+  # 初始是否为暗色；用户仍可通过 toggle 切换（除非 hide-dark-mode-toggle）
+  dark-mode: false
+  hide-dark-mode-toggle: false
+  # 是否在 UI 中隐藏「Try it」试调按钮
+  hide-test-request-button: false
+  # 是否在浏览器本地持久化鉴权头（便于反复试调 API）
+  persist-auth: true
+  # 是否向 Scalar 上报遥测
+  telemetry: false
+
+  # --- Scalar Agent（文档内 AI 助手）---
   agent:
     disabled: true

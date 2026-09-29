@@ -25,6 +25,20 @@ class OpenApiScalarDocumentationTest {
     }
 
     @Test
+    void scalarJavascriptPathUsesDocumentationPathAndSegment() {
+        assertThat(OpenApiCatalogPaths.scalarJavascriptPath("/openapi/ui", "scalar.js"))
+                .isEqualTo("/openapi/ui/scalar.js");
+        assertThat(OpenApiCatalogPaths.scalarJavascriptPath("docs", null))
+                .isEqualTo("/docs/scalar.js");
+    }
+
+    @Test
+    void specItemUrlPrefixNormalizesSpecsBase() {
+        assertThat(OpenApiCatalogPaths.specItemUrlPrefix("openapi/specs/"))
+                .isEqualTo("/openapi/specs/");
+    }
+
+    @Test
     void renderedHtmlIncludesCatalogSpecIds() throws Exception {
         ScalarProperties properties = OpenApiScalarDocumentation.createDefaultProperties();
         OpenApiCatalogOperator operator = new OpenApiCatalogOperator();

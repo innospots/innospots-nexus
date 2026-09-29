@@ -7,7 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import com.innospots.nexus.core.openapi.catalog.OpenApiCatalogOperator;
 import com.innospots.nexus.core.openapi.scalar.OpenApiScalarDocumentation;
 import com.innospots.nexus.sample.spring.platform.openapi.support.OpenApiJerseyTestApplication;
-import com.scalar.maven.core.ScalarProperties;
+import com.innospots.nexus.spring.console.config.OpenApiScalarSpringProperties;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,7 +20,7 @@ class SamplePlatformScalarDocumentationTest {
     private static final String PLATFORM_SPEC_ID = "innospots-nexus-platform";
 
     @Autowired
-    private ScalarProperties scalarProperties;
+    private OpenApiScalarSpringProperties scalarProperties;
 
     @Autowired
     private OpenApiCatalogOperator openApiCatalogOperator;
