@@ -13,7 +13,7 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import com.innospots.nexus.base.domain.response.R;
-import com.innospots.nexus.console.config.ConsoleConstant;
+import com.innospots.nexus.platform.config.PlatformConstant;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 import com.innospots.nexus.platform.user.domain.request.PlatformUserCreateRequest;
 import com.innospots.nexus.platform.user.domain.vo.PlatformUserVo;
@@ -25,7 +25,7 @@ import com.innospots.nexus.platform.user.domain.vo.PlatformUserVo;
  * @author Smars
  * @date 2026/09/13
  */
-@Path(ConsoleConstant.PLATFORM_USERS_PATH)
+@Path(PlatformConstant.USERS_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "PlatformUser", description = "平台用户管理")

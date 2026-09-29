@@ -9,7 +9,7 @@ import org.eclipse.microprofile.openapi.annotations.info.Info;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityScheme;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
-import com.innospots.nexus.console.config.ConsoleConstant;
+import com.innospots.nexus.platform.config.PlatformConstant;
 import com.innospots.nexus.core.openapi.NexusOpenApiSecurityNames;
 
 /**
@@ -19,7 +19,7 @@ import com.innospots.nexus.core.openapi.NexusOpenApiSecurityNames;
  * 类本身无资源方法，运行时不额外暴露 HTTP 端点。产物写入
  * {@code META-INF/nexus-openapi/innospots-nexus-platform.yaml}。</p>
  */
-@Path(ConsoleConstant.PLATFORM_API_PREFIX)
+@Path(PlatformConstant.API_PREFIX)
 @OpenAPIDefinition(
         info = @Info(
                 title = "Innospots Nexus Platform API",

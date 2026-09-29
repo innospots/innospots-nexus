@@ -15,13 +15,15 @@ import com.innospots.nexus.console.permission.authorization.AuthorizationSubject
 import com.innospots.nexus.console.permission.authorization.ConsolePagePermissionAuthorizer;
 import com.innospots.nexus.spring.console.config.ConsoleWebProperties;
 import com.innospots.nexus.spring.console.jaxrs.support.ConsoleAntPathMatcher;
+import com.innospots.nexus.spring.console.jaxrs.support.ConsolePublicApiPaths;
 import com.innospots.nexus.spring.console.jaxrs.support.ConsoleWebRequestProperties;
 
 /**
  * 对 {@link ConsoleWebProperties.Security#getConsolePathPatterns()} 命中的路径执行控制台页面权限校验
  *（在 {@link ConsoleAuthenticationFilter} Bearer 鉴权之后）。
  *
- * <p>将 HTTP 方法、路径与 {@link ConsoleWebProperties.Security#getPageKeyHeader()} 转为
+ * <p>公共 API（{@link com.innospots.nexus.console.config.ConsoleConstant#PUBLIC_API_PREFIX}）不执行页面权限校验。
+ * 将 HTTP 方法、路径与 {@link ConsoleWebProperties.Security#getPageKeyHeader()} 转为
  * {@link AuthorizationRequest}，委托 {@link ConsolePagePermissionAuthorizer} 判定 catalog PAGE/DATASOURCE
  * 授权；与「是否已登录」的认证 Filter 语义区分。</p>
  */
@@ -48,6 +50,9 @@ public final class ConsolePagePermissionFilter implements ContainerRequestFilter
             return;
         }
         String path = normalizedPath(requestContext);
+        if (ConsolePublicApiPaths.matches(path)) {
+            return;
+        }
         if (!ConsoleAntPathMatcher.matchesAny(security.getConsolePathPatterns(), path)) {
             return;
         }

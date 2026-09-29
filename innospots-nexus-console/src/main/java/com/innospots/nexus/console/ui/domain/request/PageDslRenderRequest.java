@@ -16,17 +16,17 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 public final class PageDslRenderRequest {
 
     @Parameter(description = "项目领域键（classpath 路径段，如 demo、sales）", required = true)
-    @Schema(description = "项目领域键", required = true, examples = {"demo"})
+    @Schema(description = "项目领域键", required = true, examples = {"nexus"})
     @PathParam("domainKey")
     private String domainKey;
 
     @Parameter(description = "模块键，与 ui-pages 目录层级一致", required = true)
-    @Schema(description = "模块键", required = true, examples = {"demo"})
+    @Schema(description = "模块键", required = true, examples = {"role"})
     @PathParam("moduleKey")
     private String moduleKey;
 
     @Parameter(description = "页面键，与 Page DSL 中 page.id 一致", required = true)
-    @Schema(description = "页面键", required = true, examples = {"customer-list"})
+    @Schema(description = "页面键", required = true, examples = {"role-main"})
     @PathParam("pageKey")
     private String pageKey;
 

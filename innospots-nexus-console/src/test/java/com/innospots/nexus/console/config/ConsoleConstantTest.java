@@ -7,12 +7,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ConsoleConstantTest {
 
     @Test
-    void platformPathsMatchOperationalEndpoints() {
-        assertThat(ConsoleConstant.PLATFORM_API_PREFIX).isEqualTo("/platform");
-        assertThat(ConsoleConstant.PLATFORM_AUTH_PATH).isEqualTo("/platform/auth");
-        assertThat(ConsoleConstant.PLATFORM_TENANTS_PATH).isEqualTo("/platform/tenants");
-        assertThat(ConsoleConstant.PLATFORM_USERS_PATH).isEqualTo("/platform/users");
-        assertThat(ConsoleConstant.platformPath("/auth")).isEqualTo(ConsoleConstant.PLATFORM_AUTH_PATH);
-        assertThat(ConsoleConstant.platformPath("tenants")).isEqualTo(ConsoleConstant.PLATFORM_TENANTS_PATH);
+    void publicPathsMatchOpenApiPrefix() {
+        assertThat(ConsoleConstant.PUBLIC_API_PREFIX).isEqualTo("/api/public");
+        assertThat(ConsoleConstant.publicPath("/health")).isEqualTo("/api/public/health");
+        assertThat(ConsoleConstant.publicPath("status")).isEqualTo("/api/public/status");
+        assertThat(ConsoleConstant.publicPath("")).isEqualTo("/api/public");
     }
 }

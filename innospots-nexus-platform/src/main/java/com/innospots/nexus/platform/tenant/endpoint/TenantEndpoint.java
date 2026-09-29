@@ -13,7 +13,7 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import com.innospots.nexus.base.domain.response.R;
-import com.innospots.nexus.console.config.ConsoleConstant;
+import com.innospots.nexus.platform.config.PlatformConstant;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 import com.innospots.nexus.platform.tenant.domain.request.TenantCreateRequest;
 import com.innospots.nexus.platform.tenant.domain.vo.TenantVo;
@@ -24,7 +24,7 @@ import com.innospots.nexus.platform.tenant.domain.vo.TenantVo;
  * @author Smars
  * @date 2026/09/13
  */
-@Path(ConsoleConstant.PLATFORM_TENANTS_PATH)
+@Path(PlatformConstant.TENANTS_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "PlatformTenant", description = "租户生命周期")

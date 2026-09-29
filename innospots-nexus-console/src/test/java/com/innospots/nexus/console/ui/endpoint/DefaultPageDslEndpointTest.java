@@ -20,7 +20,7 @@ class DefaultPageDslEndpointTest {
     @Test
     void exposesPlannedRenderOperation() throws NoSuchMethodException {
         assertThat(DefaultPageDslEndpoint.class.getAnnotation(Path.class).value())
-                .isEqualTo("/api/nexus/ui/pages/{domainKey}/{moduleKey}/{pageKey}");
+                .isEqualTo("/api/public/ui/pages/{domainKey}/{moduleKey}/{pageKey}");
         assertThat(DefaultPageDslEndpoint.class.getDeclaredMethod(
                         "render",
                         PageDslRenderRequest.class,

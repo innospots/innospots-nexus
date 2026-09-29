@@ -26,8 +26,6 @@ import com.innospots.nexus.console.ui.spec.PageDsl;
 import com.innospots.nexus.console.ui.spec.filter.PageDslFilterChain;
 import com.innospots.nexus.console.ui.spec.filter.PageDslRenderContext;
 import com.innospots.nexus.console.ui.spec.loader.PageDslLoader;
-import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
-
 /**
  * 从 classpath 加载 Pactor Page DSL 并通过过滤器链渲染；同时作为 Jakarta REST 资源暴露。
  *
@@ -36,10 +34,9 @@ import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
  * @author Smars
  * @date 2026/09/13
  */
-@Path(ConsoleConstant.API_PREFIX + "/ui/pages/{domainKey}/{moduleKey}/{pageKey}")
+@Path(ConsoleConstant.PUBLIC_API_PREFIX + "/ui/pages/{domainKey}/{moduleKey}/{pageKey}")
 @Produces(MediaType.APPLICATION_JSON)
 @Tag(name = "UiPage", description = "Pactor 页面 DSL 加载与渲染")
-@NexusAuthenticatedApi
 public final class DefaultPageDslEndpoint implements PageDslEndpoint {
 
     private final PageDslLoader loader;

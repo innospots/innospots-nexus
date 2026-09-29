@@ -1,6 +1,6 @@
 # Nexus 内置控制台 Sitemap（与 *EntryPlugin / ui-pages/nexus/{module}/{module}-main.yaml 对齐）。
 # 页面路由：/page/nexus/{moduleKey}/{pageKey}（见 ConsoleModuleDescriptor.PAGE_ROUTE_PREFIX）。
-# 页面正文 lazy 加载：GET /api/nexus/ui/pages/nexus/{moduleKey}/{pageKey}
+# 页面正文 lazy 加载：GET /api/public/ui/pages/nexus/{moduleKey}/{pageKey}
 # 可见性后续按会话裁剪；updatedAt / user / permissions 由渲染层注入。
 
 id: site

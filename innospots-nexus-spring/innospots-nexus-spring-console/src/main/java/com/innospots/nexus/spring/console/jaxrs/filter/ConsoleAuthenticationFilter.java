@@ -12,10 +12,14 @@ import com.innospots.nexus.console.auth.service.TokenIssuer;
 import com.innospots.nexus.spring.console.config.ConsoleWebProperties;
 import com.innospots.nexus.spring.console.jaxrs.support.ConsoleAntPathMatcher;
 import com.innospots.nexus.spring.console.jaxrs.support.ConsoleHttpHeaders;
+import com.innospots.nexus.spring.console.jaxrs.support.ConsolePublicApiPaths;
 import com.innospots.nexus.spring.console.jaxrs.support.ConsoleTokenSessionBinder;
 
 /**
  * 解析 Bearer 访问令牌并填充 {@link com.innospots.nexus.base.thread.SessionContext}。
+ *
+ * <p>{@linkplain com.innospots.nexus.console.config.ConsoleConstant#PUBLIC_API_PREFIX 公共 API}
+ * 无 {@code Authorization} 时不鉴权；若携带 Bearer 则仍校验并绑定会话。</p>
  */
 @Provider
 @Priority(Priorities.AUTHENTICATION)
@@ -39,6 +43,14 @@ public final class ConsoleAuthenticationFilter implements ContainerRequestFilter
             return;
         }
         String authorization = requestContext.getHeaderString(ConsoleHttpHeaders.AUTHORIZATION);
+        if (ConsolePublicApiPaths.matches(path)) {
+            if (authorization == null || authorization.isBlank()) {
+                return;
+            }
+            String token = extractBearerToken(authorization);
+            ConsoleTokenSessionBinder.bindAccessToken(tokenIssuer.parse(token));
+            return;
+        }
         if (authorization == null || authorization.isBlank()) {
             throw NexusException.build(NexusStatusCode.AUTHENTICATION_FAILED);
         }

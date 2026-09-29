@@ -23,7 +23,7 @@ import com.innospots.nexus.console.auth.domain.request.PasswordChangeRequest;
 import com.innospots.nexus.console.auth.domain.request.PasswordResetRequest;
 import com.innospots.nexus.console.auth.domain.request.TokenRefreshRequest;
 import com.innospots.nexus.console.auth.domain.vo.AuthTokenVo;
-import com.innospots.nexus.console.config.ConsoleConstant;
+import com.innospots.nexus.platform.config.PlatformConstant;
 import com.innospots.nexus.console.auth.service.AuthFacade;
 import com.innospots.nexus.console.credential.password.PasswordDecryptor;
 import com.innospots.nexus.core.openapi.NexusOpenApiSecurityNames;
@@ -34,7 +34,7 @@ import com.innospots.nexus.platform.auth.operator.PlatformPasswordOperator;
  *
  * <p>不提供公开自助注册；登录、刷新与验证码为匿名接口，登出与改密需 PLATFORM Bearer 令牌。</p>
  */
-@Path(ConsoleConstant.PLATFORM_AUTH_PATH)
+@Path(PlatformConstant.AUTH_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "PlatformAuth", description = "运维域认证")
