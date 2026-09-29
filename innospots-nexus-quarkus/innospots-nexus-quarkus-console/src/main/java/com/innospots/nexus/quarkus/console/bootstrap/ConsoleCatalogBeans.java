@@ -4,6 +4,12 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Singleton;
 
+import com.innospots.nexus.console.sitemap.config.SitemapYamlConfig;
+import com.innospots.nexus.console.sitemap.endpoint.NexusSitemapEndpoint;
+import com.innospots.nexus.console.sitemap.loader.SitemapConfigLoader;
+import com.innospots.nexus.console.sitemap.parser.SitemapYamlParser;
+import com.innospots.nexus.console.sitemap.service.SitemapMapper;
+import com.innospots.nexus.console.sitemap.service.SitemapService;
 import com.innospots.nexus.console.ui.endpoint.DefaultPageDslEndpoint;
 import com.innospots.nexus.console.ui.spec.config.PageDslConfig;
 import com.innospots.nexus.console.ui.spec.filter.PageDslFilterChain;
@@ -53,6 +59,36 @@ public class ConsoleCatalogBeans {
     @Singleton
     DefaultPageDslEndpoint defaultPageDslEndpoint(PageDslLoader pageDslLoader) {
         return new DefaultPageDslEndpoint(pageDslLoader, PageDslFilterChain.create());
+    }
+
+    /**
+     * Sitemap YAML 配置加载器。
+     */
+    @Produces
+    @Singleton
+    SitemapConfigLoader sitemapConfigLoader() {
+        return new SitemapConfigLoader(
+                SitemapYamlConfig.defaults(),
+                new SitemapYamlParser(),
+                null);
+    }
+
+    /**
+     * Sitemap 渲染服务。
+     */
+    @Produces
+    @Singleton
+    SitemapService sitemapService(SitemapConfigLoader sitemapConfigLoader) {
+        return new SitemapService(sitemapConfigLoader, new SitemapMapper());
+    }
+
+    /**
+     * Sitemap REST 资源。
+     */
+    @Produces
+    @Singleton
+    NexusSitemapEndpoint nexusSitemapEndpoint(SitemapService sitemapService) {
+        return new NexusSitemapEndpoint(sitemapService);
     }
 
     /**

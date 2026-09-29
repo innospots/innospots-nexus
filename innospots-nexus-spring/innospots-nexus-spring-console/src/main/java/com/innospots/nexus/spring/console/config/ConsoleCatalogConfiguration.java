@@ -11,6 +11,12 @@ import com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao;
 import com.innospots.nexus.console.catalog.endpoint.ConsoleCatalogEndpoint;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogService;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogSyncService;
+import com.innospots.nexus.console.sitemap.endpoint.NexusSitemapEndpoint;
+import com.innospots.nexus.console.sitemap.loader.SitemapConfigLoader;
+import com.innospots.nexus.console.sitemap.parser.SitemapYamlParser;
+import com.innospots.nexus.console.sitemap.service.SitemapMapper;
+import com.innospots.nexus.console.sitemap.service.SitemapService;
+import com.innospots.nexus.console.sitemap.config.SitemapYamlConfig;
 import com.innospots.nexus.console.ui.endpoint.DefaultPageDslEndpoint;
 import com.innospots.nexus.console.ui.spec.filter.PageDslFilterChain;
 import com.innospots.nexus.core.bootstrap.NexusStartupTask;
@@ -42,6 +48,24 @@ public class ConsoleCatalogConfiguration {
     @Bean
     DefaultPageDslEndpoint defaultPageDslEndpoint(PageDslLoader pageDslLoader) {
         return new DefaultPageDslEndpoint(pageDslLoader, PageDslFilterChain.create());
+    }
+
+    @Bean
+    SitemapConfigLoader sitemapConfigLoader() {
+        return new SitemapConfigLoader(
+                SitemapYamlConfig.defaults(),
+                new SitemapYamlParser(),
+                null);
+    }
+
+    @Bean
+    SitemapService sitemapService(SitemapConfigLoader sitemapConfigLoader) {
+        return new SitemapService(sitemapConfigLoader, new SitemapMapper());
+    }
+
+    @Bean
+    NexusSitemapEndpoint nexusSitemapEndpoint(SitemapService sitemapService) {
+        return new NexusSitemapEndpoint(sitemapService);
     }
 
     @Bean

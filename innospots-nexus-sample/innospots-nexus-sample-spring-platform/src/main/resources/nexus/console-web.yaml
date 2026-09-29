@@ -50,13 +50,21 @@ nexus:
         # 页面权限鉴权专用请求头名；仅匹配 console-path-patterns 时必填，缺省返回 403。
         page-key-header: X-Nexus-Page-Key
       cors:
-        # 是否输出 CORS 响应头；默认 false
-        enabled: false
-        # allowed-origins:
-        #   - "*"
-        # allowed-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD
-        # allowed-headers:
-        #   - "*"
-        # exposed-headers: []
-        # allow-credentials: false
-        # max-age-seconds: 3600
+        # 是否输出 CORS 响应头（Jersey ConsoleCorsFilter）；本地 UI 直连 API 时开启
+        enabled: true
+        allowed-origins:
+          - "*"
+        allowed-methods:
+          - GET
+          - POST
+          - PUT
+          - PATCH
+          - DELETE
+          - OPTIONS
+          - HEAD
+        allowed-headers:
+          - "*"
+        exposed-headers: []
+        # 带 Cookie 会话时改为 true，且 allowed-origins 须列出具体源（不能用 *）
+        allow-credentials: false
+        max-age-seconds: 3600

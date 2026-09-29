@@ -1,0 +1,89 @@
+# Nexus 内置控制台 Sitemap（与 *EntryPlugin / ui-pages/nexus/{module}/{module}-main.yaml 对齐）。
+# 页面路由：/page/nexus/{moduleKey}/{pageKey}（见 ConsoleModuleDescriptor.PAGE_ROUTE_PREFIX）。
+# 页面正文 lazy 加载：GET /api/nexus/ui/pages/nexus/{moduleKey}/{pageKey}
+# 可见性后续按会话裁剪；updatedAt / user / permissions 由渲染层注入。
+
+id: site
+resourceType: sitemap
+version: 1
+dslVersion: "1.0"
+app: { name: Innospots Nexus Console }
+layout: admin
+auth: { loginPath: /login }
+
+pages:
+  - { id: menu-main, path: /page/nexus/menu/menu-main, title: 菜单管理, version: 1, lazy: true }
+  - { id: dictionary-main, path: /page/nexus/dictionary/dictionary-main, title: 字典管理, version: 1, lazy: true }
+  - { id: role-main, path: /page/nexus/role/role-main, title: 角色管理, version: 1, lazy: true }
+  - { id: permission-main, path: /page/nexus/permission/permission-main, title: 权限管理, version: 1, lazy: true }
+  - { id: logger-main, path: /page/nexus/logger/logger-main, title: 审计日志, version: 1, lazy: true }
+  - { id: plugin-main, path: /page/nexus/plugin/plugin-main, title: 插件管理, version: 1, lazy: true }
+
+menus:
+  - { id: menu-main, type: page, pageId: menu-main, title: 菜单管理, icon: menu, layout: admin, order: 10 }
+  - { id: dictionary-main, type: page, pageId: dictionary-main, title: 字典管理, icon: book, layout: admin, order: 20 }
+  - { id: role-main, type: page, pageId: role-main, title: 角色管理, icon: team, layout: admin, order: 30 }
+  - { id: permission-main, type: page, pageId: permission-main, title: 权限管理, icon: lock, layout: admin, order: 40 }
+  - { id: logger-main, type: page, pageId: logger-main, title: 审计日志, icon: file-text, layout: admin, order: 50 }
+  - { id: plugin-main, type: page, pageId: plugin-main, title: 插件管理, icon: appstore, layout: admin, order: 60 }
+
+layouts:
+  admin:
+    dsl: "1.0"
+    body:
+      type: Layout
+      props: { className: shell-root }
+      children:
+        - type: Sidebar
+          props:
+            className: shell-main
+            brand: { title: Innospots Nexus, logo: /logo.svg }
+            collapsible: true
+            content:
+              type: SitemapMenu
+              props:
+                items: ${data.session.menus}
+                collapsible: true
+                className: shell-menu
+              events:
+                onSelect:
+                  - action: navigate
+                    params: { to: "${event}" }
+          children:
+            - type: Header
+              props:
+                className: shell-header
+                user:
+                  name: ${data.session.user.name}
+                  items:
+                    - { label: 退出登录, value: logout, icon: log-out }
+              events:
+                onUserSelect:
+                  - action: if
+                    params:
+                      condition: ${event == 'logout'}
+                      then:
+                        - action: request
+                          params:
+                            method: POST
+                            url: /tenant/auth/logout
+                        - action: app.reload
+                          params: { to: /login }
+              children:
+                - type: ThemeSwitcher
+            - type: Content
+              props: { className: shell-content }
+              children:
+                - type: PageOutlet
+  login:
+    dsl: "1.0"
+    body:
+      type: Flex
+      props:
+        className: login-page
+      children:
+        - type: PageOutlet
+  blank:
+    dsl: "1.0"
+    body:
+      type: PageOutlet
