@@ -3,7 +3,7 @@ package com.innospots.nexus.base.domain.tenant;
 import com.innospots.nexus.base.domain.enums.BasicStatus;
 
 /**
- * 平台租户（{@code nx_tenant}）的会话/传输快照。
+ * 平台租户（{@code nx_pl_tenant}）的会话/传输快照。
  * 与租户企业档案（{@link com.innospots.nexus.base.domain.organization.OrganizationSnapshot}）一一对应。
  *
  * @author Smars

@@ -19,7 +19,7 @@ import com.innospots.nexus.platform.tenant.domain.request.TenantCreateRequest;
 import com.innospots.nexus.platform.tenant.domain.vo.TenantVo;
 
 /**
- * 租户生命周期的运维域契约（开通、查询）。
+ * 租户生命周期的运营管理平台契约（开通、查询）。
  *
  * @author Smars
  * @date 2026/09/13

@@ -20,7 +20,7 @@ class EnterpriseEntityContractsTest {
 
     @Test
     void enterpriseEntityExposesGlobalPersistenceTable() {
-        assertPersistenceTable(EnterpriseEntity.class, "nx_enterprise");
+        assertPersistenceTable(EnterpriseEntity.class, "nx_pl_enterprise");
         assertThat(EnterpriseEntity.class.getSuperclass()).isEqualTo(BaseEntity.class);
         assertThat(new EnterpriseEntity().idPrefix()).isEqualTo("ent");
     }
@@ -42,7 +42,7 @@ class EnterpriseEntityContractsTest {
 
     @Test
     void enterpriseEntityDeclaresOneToOneTenantIndex() {
-        assertIndex(EnterpriseEntity.class, "uk_nx_enterprise_tenant", "tenant_id", true);
+        assertIndex(EnterpriseEntity.class, "uk_nx_pl_enterprise_tenant", "tenant_id", true);
     }
 
     private static void assertPersistenceTable(Class<?> entityType, String tableName) {

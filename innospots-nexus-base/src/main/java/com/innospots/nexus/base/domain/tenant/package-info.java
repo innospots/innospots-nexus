@@ -1,5 +1,5 @@
 /**
- * 租户作用域的传输快照（{@code nx_tenant}）。
+ * 租户作用域的传输快照（{@code nx_pl_tenant}）。
  *
  * @author Smars
  * @date 2026/09/13

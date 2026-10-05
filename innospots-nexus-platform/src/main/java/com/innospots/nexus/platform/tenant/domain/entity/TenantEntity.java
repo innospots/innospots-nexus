@@ -16,23 +16,24 @@ import com.innospots.nexus.platform.tenant.domain.enums.TenantStatus;
 
 /**
  * 平台侧拥有的租户生命周期记录。
- * <p>企业法定档案单独存储于 {@code nx_enterprise}；
- * 本表是运维侧租户身份。</p>
+ * <p>企业法定档案单独存储于 {@code nx_pl_enterprise}；
+ * 本表是运营管理平台的租户身份记录。</p>
  *
  * @author Smars
  * @date 2026/09/13
  * @see TenantStatus
+ * @see com.innospots.nexus.platform.tenant.domain.enums.TenantType
  */
 @Getter
 @Setter
 @Entity
 @Table(name = TenantEntity.TABLE_NAME, indexes = {
-        @Index(name = "uk_nx_tenant_code", columnList = "tenant_code", unique = true)
+        @Index(name = "uk_nx_pl_tenant_code", columnList = "tenant_code", unique = true)
 })
 @TableName(TenantEntity.TABLE_NAME)
 public class TenantEntity extends BaseEntity {
 
-    public static final String TABLE_NAME = "nx_tenant";
+    public static final String TABLE_NAME = "nx_pl_tenant";
 
     /**
      * 租户标识符。
@@ -63,6 +64,12 @@ public class TenantEntity extends BaseEntity {
      */
     @Column(length = 64, nullable = false)
     private String tenantCode;
+
+    /**
+     * 以 {@link com.innospots.nexus.platform.tenant.domain.enums.TenantType} 名称持久化的租户类型。
+     */
+    @Column(length = 32, nullable = false)
+    private String tenantType;
 
     /**
      * 以 {@link TenantStatus} 名称持久化的生命周期状态。

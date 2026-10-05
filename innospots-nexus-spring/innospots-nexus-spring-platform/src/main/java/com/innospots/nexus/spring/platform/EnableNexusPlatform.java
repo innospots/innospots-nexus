@@ -12,7 +12,7 @@ import com.innospots.nexus.spring.console.EnableNexusConsole;
 import com.innospots.nexus.spring.platform.config.PlatformAuthConfiguration;
 
 /**
- * 显式启用 Nexus 管理控制台与 platform 运维域 Spring 装配。
+ * 显式启用 Nexus 管理控制台与运营管理平台 Spring 装配。
  *
  * <p>组合 {@link EnableNexusConsole} 与 platform 域 {@code Platform*Configuration}。</p>
  *

@@ -1,23 +1,23 @@
 package com.innospots.nexus.platform.config;
 
 /**
- * 运营域（platform）REST API 路径常量。
+ * 运营管理平台（platform）REST API 路径常量。
  *
  * @author Smars
  * @date 2026/09/29
  */
 public final class PlatformConstant {
 
-    /** 运营域 REST API 根路径前缀。 */
+    /** 运营管理平台 REST API 根路径前缀。 */
     public static final String API_PREFIX = "/platform";
 
-    /** 运营域认证：{@value} */
+    /** 运营管理平台认证：{@value} */
     public static final String AUTH_PATH = API_PREFIX + "/auth";
 
-    /** 运营域租户生命周期：{@value} */
+    /** 运营管理平台租户生命周期：{@value} */
     public static final String TENANTS_PATH = API_PREFIX + "/tenants";
 
-    /** 运营域平台用户：{@value} */
+    /** 运营管理平台用户：{@value} */
     public static final String USERS_PATH = API_PREFIX + "/users";
 
     private PlatformConstant() {

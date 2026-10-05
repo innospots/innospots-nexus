@@ -40,6 +40,7 @@ class TenantEndpointContractsTest {
                 .containsExactly(
                         "tenantName",
                         "tenantCode",
+                        "tenantType",
                         "planCode",
                         "ownerTenantUserId",
                         "legalName",
@@ -56,6 +57,7 @@ class TenantEndpointContractsTest {
                         "tenantId",
                         "tenantName",
                         "tenantCode",
+                        "tenantType",
                         "status",
                         "planCode",
                         "ownerTenantUserId",

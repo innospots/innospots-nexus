@@ -22,7 +22,7 @@ import com.innospots.nexus.platform.scope.PlatformSessionScopeBinder;
 import com.innospots.nexus.platform.user.dao.PlatformUserDao;
 
 /**
- * platform 运维域认证与用户相关 Quarkus CDI 装配。
+ * 运营管理平台认证与用户相关 Quarkus CDI 装配。
  */
 @ApplicationScoped
 public class PlatformAuthBeans {

@@ -10,6 +10,7 @@ import com.innospots.nexus.platform.enterprise.domain.entity.EnterpriseEntity;
 import com.innospots.nexus.platform.tenant.dao.TenantDao;
 import com.innospots.nexus.platform.tenant.domain.entity.TenantEntity;
 import com.innospots.nexus.platform.tenant.domain.enums.TenantStatus;
+import com.innospots.nexus.platform.tenant.domain.enums.TenantType;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -33,6 +34,7 @@ class TenantOperatorTest {
         TenantEntity tenant = new TenantEntity();
         tenant.setTenantName("Acme");
         tenant.setTenantCode("acme");
+        tenant.setTenantType(TenantType.TEAM.name());
         EnterpriseEntity enterprise = new EnterpriseEntity();
         enterprise.setLegalName("Acme Ltd");
 
@@ -40,6 +42,7 @@ class TenantOperatorTest {
 
         assertThat(created.getTenantId()).isEqualTo("tnt01HZY8J6Y3D6S4V7N9X2M5Q8");
         assertThat(created.getStatus()).isEqualTo(TenantStatus.ACTIVE.name());
+        assertThat(created.getTenantType()).isEqualTo(TenantType.TEAM.name());
         assertThat(enterprise.getTenantId()).isEqualTo("tnt01HZY8J6Y3D6S4V7N9X2M5Q8");
         verify(tenantDao).insert(tenant);
         verify(enterpriseDao).insert(enterprise);
@@ -51,8 +54,23 @@ class TenantOperatorTest {
         TenantEntity tenant = new TenantEntity();
         tenant.setTenantName("Acme");
         tenant.setTenantCode("acme");
+        tenant.setTenantType(TenantType.TEAM.name());
 
         assertThatThrownBy(() -> operator.create(tenant, new EnterpriseEntity()))
+                .isInstanceOf(NexusException.class);
+    }
+
+    @Test
+    void createRejectsInvalidTenantType() {
+        TenantOperator operator = new TenantOperator(mock(TenantDao.class), mock(EnterpriseDao.class));
+        TenantEntity tenant = new TenantEntity();
+        tenant.setTenantName("Acme");
+        tenant.setTenantCode("acme");
+        tenant.setTenantType("INVALID");
+        EnterpriseEntity enterprise = new EnterpriseEntity();
+        enterprise.setLegalName("Acme Ltd");
+
+        assertThatThrownBy(() -> operator.create(tenant, enterprise))
                 .isInstanceOf(NexusException.class);
     }
 

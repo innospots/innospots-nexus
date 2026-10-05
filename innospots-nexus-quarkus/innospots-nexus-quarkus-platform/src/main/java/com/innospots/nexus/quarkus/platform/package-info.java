@@ -1,4 +1,4 @@
 /**
- * platform 运维域 Quarkus 装配（依赖 {@code innospots-nexus-quarkus-console}）。
+ * 运营管理平台 Quarkus 装配（依赖 {@code innospots-nexus-quarkus-console}）。
  */
 package com.innospots.nexus.quarkus.platform;

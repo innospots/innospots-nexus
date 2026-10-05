@@ -26,7 +26,7 @@ import com.innospots.nexus.platform.scope.PlatformSessionScopeBinder;
 import com.innospots.nexus.platform.user.dao.PlatformUserDao;
 
 /**
- * platform 运维域认证与用户相关 Spring 装配。
+ * 运营管理平台认证与用户相关 Spring 装配。
  *
  * @author Smars
  * @date 2026/09/23

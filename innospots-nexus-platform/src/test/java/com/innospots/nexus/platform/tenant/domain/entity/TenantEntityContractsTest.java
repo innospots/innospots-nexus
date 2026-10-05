@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import com.innospots.nexus.core.persistence.entity.BaseEntity;
 import com.innospots.nexus.platform.tenant.domain.enums.TenantStatus;
+import com.innospots.nexus.platform.tenant.domain.enums.TenantType;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -21,7 +22,7 @@ class TenantEntityContractsTest {
 
     @Test
     void tenantEntityExposesGlobalPersistenceTable() {
-        assertPersistenceTable(TenantEntity.class, "nx_tenant");
+        assertPersistenceTable(TenantEntity.class, "nx_pl_tenant");
         assertThat(TenantEntity.class.getSuperclass()).isEqualTo(BaseEntity.class);
         assertThat(new TenantEntity().idPrefix()).isEqualTo("tnt");
     }
@@ -32,6 +33,7 @@ class TenantEntityContractsTest {
         assertField(TenantEntity.class, "tenantId", String.class, 32, false);
         assertField(TenantEntity.class, "tenantName", String.class, 128, false);
         assertField(TenantEntity.class, "tenantCode", String.class, 64, false);
+        assertField(TenantEntity.class, "tenantType", String.class, 32, false);
         assertField(TenantEntity.class, "status", String.class, 32, false);
         assertField(TenantEntity.class, "planCode", String.class, 64, true);
         assertField(TenantEntity.class, "ownerTenantUserId", String.class, 32, true);
@@ -44,8 +46,14 @@ class TenantEntityContractsTest {
     }
 
     @Test
+    void tenantTypeEnumeratesOrganizationKinds() {
+        assertThat(TenantType.values()).containsExactly(
+                TenantType.ENTERPRISE, TenantType.TEAM, TenantType.INDIVIDUAL);
+    }
+
+    @Test
     void tenantEntityDeclaresTenantCodeUniqueIndex() {
-        assertIndex(TenantEntity.class, "uk_nx_tenant_code", "tenant_code", true);
+        assertIndex(TenantEntity.class, "uk_nx_pl_tenant_code", "tenant_code", true);
     }
 
     private static void assertPersistenceTable(Class<?> entityType, String tableName) {

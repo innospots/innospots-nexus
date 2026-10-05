@@ -14,7 +14,7 @@ import lombok.Setter;
 import com.innospots.nexus.core.persistence.entity.BaseEntity;
 
 /**
- * 运维侧法定企业档案，与 {@code nx_tenant} 一对一。
+ * 运营管理平台侧企业法定档案，与 {@code nx_pl_tenant} 一对一。
  *
  * @author Smars
  * @date 2026/09/13
@@ -23,12 +23,12 @@ import com.innospots.nexus.core.persistence.entity.BaseEntity;
 @Setter
 @Entity
 @Table(name = EnterpriseEntity.TABLE_NAME, indexes = {
-        @Index(name = "uk_nx_enterprise_tenant", columnList = "tenant_id", unique = true)
+        @Index(name = "uk_nx_pl_enterprise_tenant", columnList = "tenant_id", unique = true)
 })
 @TableName(EnterpriseEntity.TABLE_NAME)
 public class EnterpriseEntity extends BaseEntity {
 
-    public static final String TABLE_NAME = "nx_enterprise";
+    public static final String TABLE_NAME = "nx_pl_enterprise";
 
     /**
      * 企业标识符。

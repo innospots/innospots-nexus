@@ -30,14 +30,14 @@ import com.innospots.nexus.core.openapi.NexusOpenApiSecurityNames;
 import com.innospots.nexus.platform.auth.operator.PlatformPasswordOperator;
 
 /**
- * 运维域认证 REST 资源。
+ * 运营管理平台认证 REST 资源。
  *
  * <p>不提供公开自助注册；登录、刷新与验证码为匿名接口，登出与改密需 PLATFORM Bearer 令牌。</p>
  */
 @Path(PlatformConstant.AUTH_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-@Tag(name = "PlatformAuth", description = "运维域认证")
+@Tag(name = "PlatformAuth", description = "运营管理平台认证")
 @RequiredArgsConstructor
 public class PlatformAuthEndpoint {
 
@@ -55,7 +55,7 @@ public class PlatformAuthEndpoint {
 
     @POST
     @Path("/login")
-    @Operation(operationId = "platformAuthLogin", summary = "运维域登录")
+    @Operation(operationId = "platformAuthLogin", summary = "运营管理平台登录")
     public R<AuthTokenVo> login(AuthLoginRequest request) {
         return R.ok(authFacade.login(request));
     }

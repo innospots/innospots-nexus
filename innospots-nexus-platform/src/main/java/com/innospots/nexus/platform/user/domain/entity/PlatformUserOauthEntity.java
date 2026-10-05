@@ -25,14 +25,14 @@ import com.innospots.nexus.core.persistence.entity.BaseEntity;
 @Setter
 @Entity
 @Table(name = PlatformUserOauthEntity.TABLE_NAME, indexes = {
-        @Index(name = "idx_nx_platform_user_oauth_user", columnList = "platform_user_id"),
-        @Index(name = "uk_nx_platform_user_oauth_provider_subject",
+        @Index(name = "idx_nx_pl_user_oauth_user", columnList = "platform_user_id"),
+        @Index(name = "uk_nx_pl_user_oauth_provider_subject",
                 columnList = "provider, provider_subject", unique = true)
 })
 @TableName(PlatformUserOauthEntity.TABLE_NAME)
 public class PlatformUserOauthEntity extends BaseEntity {
 
-    public static final String TABLE_NAME = "nx_platform_user_oauth";
+    public static final String TABLE_NAME = "nx_pl_user_oauth";
 
     /**
      * OAuth 身份绑定标识符。

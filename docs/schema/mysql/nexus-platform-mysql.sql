@@ -1,7 +1,7 @@
 -- MySQL DDL for innospots-nexus-platform entities.
 -- IDs are application assigned; inherited audit columns are expanded per entity.
 
-CREATE TABLE IF NOT EXISTS nx_enterprise (
+CREATE TABLE IF NOT EXISTS nx_pl_enterprise (
     enterprise_id  VARCHAR(32)   NOT NULL,
     tenant_id      VARCHAR(32)   NOT NULL,
     legal_name     VARCHAR(256)  NOT NULL,
@@ -17,13 +17,14 @@ CREATE TABLE IF NOT EXISTS nx_enterprise (
     created_by     VARCHAR(64),
     updated_by     VARCHAR(64),
     PRIMARY KEY (enterprise_id),
-    CONSTRAINT uk_nx_enterprise_tenant UNIQUE (tenant_id)
+    CONSTRAINT uk_nx_pl_enterprise_tenant UNIQUE (tenant_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS nx_tenant (
+CREATE TABLE IF NOT EXISTS nx_pl_tenant (
     tenant_id             VARCHAR(32)  NOT NULL,
     tenant_name           VARCHAR(128) NOT NULL,
     tenant_code           VARCHAR(64)  NOT NULL,
+    tenant_type           VARCHAR(32)  NOT NULL,
     status                VARCHAR(32)  NOT NULL,
     plan_code             VARCHAR(64),
     owner_tenant_user_id  VARCHAR(32),
@@ -32,10 +33,10 @@ CREATE TABLE IF NOT EXISTS nx_tenant (
     created_by            VARCHAR(64),
     updated_by            VARCHAR(64),
     PRIMARY KEY (tenant_id),
-    CONSTRAINT uk_nx_tenant_code UNIQUE (tenant_code)
+    CONSTRAINT uk_nx_pl_tenant_code UNIQUE (tenant_code)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS nx_platform_user (
+CREATE TABLE IF NOT EXISTS nx_pl_user (
     platform_user_id  VARCHAR(32)  NOT NULL,
     login_name        VARCHAR(64)  NOT NULL,
     display_name      VARCHAR(128),
@@ -50,11 +51,11 @@ CREATE TABLE IF NOT EXISTS nx_platform_user (
     created_by        VARCHAR(64),
     updated_by        VARCHAR(64),
     PRIMARY KEY (platform_user_id),
-    CONSTRAINT uk_nx_platform_user_login_name UNIQUE (login_name),
-    KEY idx_nx_platform_user_status (status)
+    CONSTRAINT uk_nx_pl_user_login_name UNIQUE (login_name),
+    KEY idx_nx_pl_user_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS nx_platform_user_oauth (
+CREATE TABLE IF NOT EXISTS nx_pl_user_oauth (
     identity_id           VARCHAR(32)  NOT NULL,
     platform_user_id      VARCHAR(32)  NOT NULL,
     provider              VARCHAR(64)  NOT NULL,
@@ -71,6 +72,6 @@ CREATE TABLE IF NOT EXISTS nx_platform_user_oauth (
     created_by            VARCHAR(64),
     updated_by            VARCHAR(64),
     PRIMARY KEY (identity_id),
-    KEY idx_nx_platform_user_oauth_user (platform_user_id),
-    CONSTRAINT uk_nx_platform_user_oauth_provider_subject UNIQUE (provider, provider_subject)
+    KEY idx_nx_pl_user_oauth_user (platform_user_id),
+    CONSTRAINT uk_nx_pl_user_oauth_provider_subject UNIQUE (provider, provider_subject)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

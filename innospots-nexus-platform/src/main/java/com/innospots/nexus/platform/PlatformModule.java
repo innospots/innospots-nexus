@@ -1,10 +1,10 @@
 package com.innospots.nexus.platform;
 
 /**
- * 运维域平台模块标记。
+ * 运营管理平台模块标记。
  * <p>
- * 本模块拥有租户生命周期与企业档案契约。它
- * 依赖 console 且不得依赖 portal。
+ * 面向业务的统一管理平台：租户生命周期、企业主体档案与平台 IAM。
+ * 依赖 console，不得依赖 portal。
  * </p>
  *
  * @author Smars

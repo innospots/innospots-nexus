@@ -10,6 +10,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
  * @param tenantId           tenant 标识符
  * @param tenantName         显示名称
  * @param tenantCode         唯一租户编码
+ * @param tenantType         租户类型
  * @param status             生命周期状态
  * @param planCode           可选 plan reference
  * @param ownerTenantUserId  可选 initial tenant-user owner
@@ -24,6 +25,8 @@ public record TenantVo(
         String tenantName,
         @Schema(description = "唯一租户编码", required = true)
         String tenantCode,
+        @Schema(description = "租户类型", examples = {"TEAM"})
+        String tenantType,
         @Schema(description = "生命周期状态", examples = {"ACTIVE"})
         String status,
         @Schema(description = "套餐/计划编码")

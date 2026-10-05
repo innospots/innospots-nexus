@@ -22,8 +22,8 @@ class PlatformUserEntityContractsTest {
 
     @Test
     void platformUserEntitiesExposeOpsRealmPersistenceTables() {
-        assertPersistenceTable(PlatformUserEntity.class, "nx_platform_user");
-        assertPersistenceTable(PlatformUserOauthEntity.class, "nx_platform_user_oauth");
+        assertPersistenceTable(PlatformUserEntity.class, "nx_pl_user");
+        assertPersistenceTable(PlatformUserOauthEntity.class, "nx_pl_user_oauth");
         assertThat(PlatformUserEntity.class.getSuperclass()).isEqualTo(BaseEntity.class);
         assertThat(new PlatformUserEntity().idPrefix()).isEqualTo("pus");
         assertThat(new PlatformUserOauthEntity().idPrefix()).isEqualTo("poi");
@@ -46,14 +46,14 @@ class PlatformUserEntityContractsTest {
     @Test
     void platformUserOauthBindsPlatformUserId() throws NoSuchFieldException {
         assertField(PlatformUserOauthEntity.class, "platformUserId", String.class, 32, false);
-        assertIndex(PlatformUserOauthEntity.class, "idx_nx_platform_user_oauth_user",
+        assertIndex(PlatformUserOauthEntity.class, "idx_nx_pl_user_oauth_user",
                 "platform_user_id", false);
     }
 
     @Test
     void platformUserEntityDeclaresLoginNameUniqueIndex() {
-        assertIndex(PlatformUserEntity.class, "uk_nx_platform_user_login_name", "login_name", true);
-        assertIndex(PlatformUserEntity.class, "idx_nx_platform_user_status", "status", false);
+        assertIndex(PlatformUserEntity.class, "uk_nx_pl_user_login_name", "login_name", true);
+        assertIndex(PlatformUserEntity.class, "idx_nx_pl_user_status", "status", false);
     }
 
     @Test

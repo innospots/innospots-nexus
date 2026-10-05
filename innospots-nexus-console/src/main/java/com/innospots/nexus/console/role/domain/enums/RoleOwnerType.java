@@ -9,7 +9,7 @@ package com.innospots.nexus.console.role.domain.enums;
 public enum RoleOwnerType {
 
     /**
-     * 运维域平台角色。
+     * 运营管理平台角色。
      */
     PLATFORM,
 

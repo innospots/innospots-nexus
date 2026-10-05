@@ -66,7 +66,7 @@ Maven 依赖：`innospots-nexus-core`、`innospots-nexus-plugin`、`jakarta.ws.r
 |------|----------|
 | `/api/nexus/**` | 目录、插件、导航、角色/菜单/字典管理契约、当前用户权限 |
 | `/tenant/auth`、`/tenant/scope` | 租户域注册、登录、刷新、作用域选择 |
-| `/platform/auth` | 运维平台域登录（无公开自注册） |
+| `/platform/auth` | 运营管理平台登录（无公开自注册） |
 
 安全域通过 `SecurityRealm` 分离 **PLATFORM** 与 **TENANT**。完整方法表与 record 索引见下方「进一步阅读」。
 
@@ -79,7 +79,7 @@ OpenAPI 在 **`mvn package`** 时由 `smallrye-open-api-maven-plugin` 扫描各 
 | 插件发现、贡献解码、Page DSL 规范 | `innospots-nexus-plugin` |
 | `nx_console_catalog_resource` 索引同步与读取 | **本模块** `catalog` |
 | 权限授权存储与 `ConsolePagePermissionAuthorizer` | **本模块** `permission` |
-| 用户/角色/菜单/字典 **业务工作流**与多数端点 **实现** | `innospots-nexus-portal`（platform 负责运维域数据） |
+| 用户/角色/菜单/字典 **业务工作流**与多数端点 **实现** | `innospots-nexus-portal`（platform 负责运营管理平台数据） |
 | JAX-RS Bean 注册、鉴权过滤器、`AuthorizationSubjectResolver` 实现 | adapter / application |
 
 ## 进一步阅读

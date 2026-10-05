@@ -19,7 +19,7 @@ import com.innospots.nexus.platform.user.domain.request.PlatformUserCreateReques
 import com.innospots.nexus.platform.user.domain.vo.PlatformUserVo;
 
 /**
- * 平台用户管理的运维域契约。
+ * 平台用户管理的运营管理平台契约。
  * <p>不暴露公开自助注册。账号由管理员创建。</p>
  *
  * @author Smars

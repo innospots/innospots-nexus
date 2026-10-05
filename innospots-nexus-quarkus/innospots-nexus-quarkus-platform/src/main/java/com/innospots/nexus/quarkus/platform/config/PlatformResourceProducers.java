@@ -14,7 +14,7 @@ import com.innospots.nexus.platform.auth.endpoint.PlatformAuthEndpoint;
 import com.innospots.nexus.platform.auth.operator.PlatformPasswordOperator;
 
 /**
- * platform 运维域 REST 资源生产者。
+ * 运营管理平台 REST 资源生产者。
  */
 @ApplicationScoped
 public class PlatformResourceProducers {

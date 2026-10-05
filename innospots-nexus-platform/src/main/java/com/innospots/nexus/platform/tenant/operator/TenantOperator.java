@@ -11,6 +11,7 @@ import com.innospots.nexus.platform.enterprise.domain.entity.EnterpriseEntity;
 import com.innospots.nexus.platform.tenant.dao.TenantDao;
 import com.innospots.nexus.platform.tenant.domain.entity.TenantEntity;
 import com.innospots.nexus.platform.tenant.domain.enums.TenantStatus;
+import com.innospots.nexus.platform.tenant.domain.enums.TenantType;
 
 /**
  * 持久化平台租户及其一对一企业档案。
@@ -36,11 +37,13 @@ public class TenantOperator {
     public TenantEntity create(TenantEntity tenant, EnterpriseEntity enterprise) {
         requireText(tenant == null ? null : tenant.getTenantName(), "tenantName");
         requireText(tenant == null ? null : tenant.getTenantCode(), "tenantCode");
+        requireTenantType(tenant == null ? null : tenant.getTenantType());
         requireText(enterprise == null ? null : enterprise.getLegalName(), "legalName");
 
         if (tenant.getStatus() == null || tenant.getStatus().isBlank()) {
             tenant.setStatus(TenantStatus.ACTIVE.name());
         }
+        tenant.setTenantType(TenantType.valueOf(tenant.getTenantType().trim().toUpperCase()).name());
         tenantDao.insert(tenant);
         enterprise.setTenantId(tenant.getTenantId());
         enterpriseDao.insert(enterprise);
@@ -53,6 +56,17 @@ public class TenantOperator {
             throw NexusException.build(
                     NexusStatusCode.INVALID_PARAMETER.fullCode(),
                     fieldName + " is required");
+        }
+    }
+
+    private static void requireTenantType(String tenantType) {
+        requireText(tenantType, "tenantType");
+        try {
+            TenantType.valueOf(tenantType.trim().toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            throw NexusException.build(
+                    NexusStatusCode.INVALID_PARAMETER.fullCode(),
+                    "tenantType is invalid");
         }
     }
 }

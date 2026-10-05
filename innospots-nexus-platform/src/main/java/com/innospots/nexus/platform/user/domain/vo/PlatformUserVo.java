@@ -3,7 +3,7 @@ package com.innospots.nexus.platform.user.domain.vo;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 /**
- * 运维 API 返回的平台用户概要。
+ * 运营管理 API 返回的平台用户概要。
  *
  * @author Smars
  * @date 2026/09/13

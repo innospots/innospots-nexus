@@ -15,7 +15,7 @@
     <packaging>jar</packaging>
 
     <name>innospots-nexus-platform</name>
-    <description>租户生命周期与平台 IAM 的运营域平台。</description>
+    <description>面向业务统一管理的运营管理平台（租户生命周期、平台 IAM）。</description>
 
     <dependencies>
         <dependency>
@@ -55,7 +55,7 @@
                             <operationIdStrategy>CLASS_METHOD</operationIdStrategy>
                             <infoTitle>Innospots Nexus Platform API</infoTitle>
                             <infoVersion>1.0.0</infoVersion>
-                            <infoDescription>运维域租户生命周期与平台 IAM Jakarta REST 契约；运行时仅暴露构建期生成的 OpenAPI。</infoDescription>
+                            <infoDescription>运营管理平台租户生命周期与平台 IAM Jakarta REST 契约；运行时仅暴露构建期生成的 OpenAPI。</infoDescription>
                             <infoContactName>Innospots Nexus</infoContactName>
                         </configuration>
                     </execution>

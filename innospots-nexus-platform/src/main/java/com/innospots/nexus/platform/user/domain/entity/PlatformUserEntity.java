@@ -17,7 +17,7 @@ import com.innospots.nexus.core.persistence.entity.BaseEntity;
 import com.innospots.nexus.platform.user.domain.enums.PlatformUserStatus;
 
 /**
- * 运维域登录身份。平台用户由管理员创建，
+ * 运营管理平台登录身份。平台用户由管理员创建，
  * 而非公开自助注册。
  *
  * @author Smars
@@ -28,13 +28,13 @@ import com.innospots.nexus.platform.user.domain.enums.PlatformUserStatus;
 @Setter
 @Entity
 @Table(name = PlatformUserEntity.TABLE_NAME, indexes = {
-        @Index(name = "uk_nx_platform_user_login_name", columnList = "login_name", unique = true),
-        @Index(name = "idx_nx_platform_user_status", columnList = "status")
+        @Index(name = "uk_nx_pl_user_login_name", columnList = "login_name", unique = true),
+        @Index(name = "idx_nx_pl_user_status", columnList = "status")
 })
 @TableName(PlatformUserEntity.TABLE_NAME)
 public class PlatformUserEntity extends BaseEntity {
 
-    public static final String TABLE_NAME = "nx_platform_user";
+    public static final String TABLE_NAME = "nx_pl_user";
 
     /**
      * 平台域 user 标识符。
@@ -61,7 +61,7 @@ public class PlatformUserEntity extends BaseEntity {
     private String loginName;
 
     /**
-     * 运维控制台展示的显示名称。
+     * 运营管理控制台展示的显示名称。
      */
     @Column(length = 128)
     private String displayName;

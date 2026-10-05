@@ -9,7 +9,7 @@ package com.innospots.nexus.console.auth.domain.enums;
 public enum SecurityRealm {
 
     /**
-     * 运维域平台。
+     * 运营管理平台。
      */
     PLATFORM,
 
