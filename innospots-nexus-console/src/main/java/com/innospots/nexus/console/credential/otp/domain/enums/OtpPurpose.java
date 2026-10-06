@@ -28,5 +28,25 @@ public enum OtpPurpose {
     /**
      * 图形人机校验（登录前、发送短信 OTP 前等）。
      */
-    CAPTCHA
+    CAPTCHA,
+
+    /**
+     * 平台邀请在线交付（新建/重发邀请时通知受邀人）。
+     */
+    PLATFORM_INVITE_DELIVERY,
+
+    /**
+     * 平台主动注册申请时的身份验证码。
+     */
+    PLATFORM_ACCESS_VERIFY,
+
+    /**
+     * 平台接受邀请页的身份验证码。
+     */
+    PLATFORM_INVITE_ACCEPT,
+
+    /**
+     * 平台完全开放自助注册时的身份验证码。
+     */
+    PLATFORM_OPEN_REGISTRATION
 }

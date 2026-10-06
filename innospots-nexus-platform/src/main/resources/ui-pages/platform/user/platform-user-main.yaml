@@ -1,0 +1,8 @@
+dsl: '1.0'
+
+page:
+  id: platform-user-main
+  name: platformUserMain
+  title: Platform Users
+  description: Platform user list and lifecycle.
+  type: general

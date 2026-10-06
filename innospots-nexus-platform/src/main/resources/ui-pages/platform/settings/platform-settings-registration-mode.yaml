@@ -1,0 +1,8 @@
+dsl: '1.0'
+
+page:
+  id: platform-settings-registration-mode
+  name: platformSettingsRegistrationMode
+  title: Registration Mode
+  description: OPEN / INVITE / APPROVAL self-service registration mode.
+  type: general

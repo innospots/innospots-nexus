@@ -1,94 +1,132 @@
 package com.innospots.nexus.platform.user.operator;
 
+import java.util.List;
 import java.util.Optional;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import com.innospots.nexus.base.domain.response.PageResult;
 import com.innospots.nexus.base.exception.NexusException;
-import com.innospots.nexus.base.status.NexusStatusCode;
-import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
-import com.innospots.nexus.console.credential.password.PasswordDecryptor;
-import com.innospots.nexus.console.credential.password.service.CredentialService;
+import com.innospots.nexus.base.util.Checks;
 import com.innospots.nexus.platform.user.dao.PlatformUserDao;
 import com.innospots.nexus.platform.user.domain.entity.PlatformUserEntity;
 import com.innospots.nexus.platform.user.domain.enums.PlatformUserStatus;
-import com.innospots.nexus.platform.user.domain.request.PlatformUserCreateRequest;
-import com.innospots.nexus.platform.user.domain.vo.PlatformUserVo;
+import com.innospots.nexus.platform.user.domain.request.PlatformUserPageRequest;
+import com.innospots.nexus.platform.user.status.PlatformUserStatusCode;
 
 /**
- * 持久化平台用户及其本地密码凭证。
- * <p>无公开自助注册路径。管理员通过本 Operator 创建账号。</p>
- *
- * @author Smars
- * @date 2026/09/13
+ * {@code nx_pl_user} 单表读写与生命周期字段变更。
  */
 @Slf4j
 @RequiredArgsConstructor
 public class PlatformUserOperator {
 
     private final PlatformUserDao platformUserDao;
-    private final CredentialService credentialService;
-    private final PasswordDecryptor passwordDecryptor;
 
-    /**
-     * 按标识符查找平台用户。
-     *
-     * @param platformUserId platform-realm user 标识符
-     * @return 找到时返回用户概要
-     */
-    public Optional<PlatformUserVo> findById(String platformUserId) {
+    @Transactional
+    public void insert(PlatformUserEntity entity) {
+        platformUserDao.insert(entity);
+    }
+
+    @Transactional
+    public void update(PlatformUserEntity entity) {
+        platformUserDao.updateById(entity);
+    }
+
+    public Optional<PlatformUserEntity> findById(String platformUserId) {
         if (platformUserId == null) {
             return Optional.empty();
         }
-        return Optional.ofNullable(platformUserDao.selectById(platformUserId)).map(this::toVo);
+        return Optional.ofNullable(platformUserDao.selectById(platformUserId));
     }
 
-    /**
-     * 使用本地密码创建平台用户。不签发令牌。
-     *
-     * @param request admin create 请求
-     * @return created user 概要
-     */
-    @Transactional
-    public PlatformUserVo createWithPassword(PlatformUserCreateRequest request) {
-        requireText(request == null ? null : request.loginName(), "loginName");
-        requireText(request == null ? null : request.encryptedPassword(), "encryptedPassword");
-
-        PlatformUserEntity user = new PlatformUserEntity();
-        user.setLoginName(request.loginName());
-        user.setDisplayName(request.displayName());
-        user.setEmail(request.email());
-        user.setMobile(request.mobile());
-        user.setEmployeeNo(request.employeeNo());
-        user.setStatus(PlatformUserStatus.ACTIVE.name());
-        platformUserDao.insert(user);
-
-        String rawPassword = passwordDecryptor.decrypt(request.encryptedPassword());
-        credentialService.enrollPassword(SecurityRealm.PLATFORM, user.getPlatformUserId(), rawPassword);
-
-        log.info("Created platform user {}", user.getPlatformUserId());
-        return toVo(user);
-    }
-
-    private PlatformUserVo toVo(PlatformUserEntity entity) {
-        return new PlatformUserVo(
-                entity.getPlatformUserId(),
-                entity.getLoginName(),
-                entity.getDisplayName(),
-                entity.getEmail(),
-                entity.getMobile(),
-                entity.getEmployeeNo(),
-                entity.getStatus()
-        );
-    }
-
-    private static void requireText(String value, String fieldName) {
-        if (value == null || value.isBlank()) {
-            throw NexusException.build(
-                    NexusStatusCode.INVALID_PARAMETER.fullCode(),
-                    fieldName + " is required");
+    public PlatformUserEntity requireById(String platformUserId) {
+        Checks.notBlank(platformUserId, "platformUserId");
+        PlatformUserEntity entity = platformUserDao.selectById(platformUserId);
+        if (entity == null) {
+            throw NexusException.build(PlatformUserStatusCode.PLATFORM_USER_NOT_FOUND);
         }
+        return entity;
+    }
+
+    public PageResult<PlatformUserEntity> page(PlatformUserPageRequest request) {
+        PlatformUserPageRequest pageRequest = request == null ? new PlatformUserPageRequest() : request;
+        LambdaQueryWrapper<PlatformUserEntity> query = new LambdaQueryWrapper<>();
+        if (pageRequest.status() != null) {
+            query.eq(PlatformUserEntity::getStatus, pageRequest.status().name());
+        }
+        String input = pageRequest.input();
+        if (input != null && !input.isBlank()) {
+            String keyword = input.trim();
+            query.and(wrapper -> wrapper
+                    .like(PlatformUserEntity::getLoginName, keyword)
+                    .or()
+                    .like(PlatformUserEntity::getDisplayName, keyword));
+        }
+        query.orderByDesc(PlatformUserEntity::getCreatedAt);
+        IPage<PlatformUserEntity> selectedPage = platformUserDao.selectPage(
+                new Page<>(pageRequest.pageNo(), pageRequest.pageSize()),
+                query);
+        List<PlatformUserEntity> records = selectedPage.getRecords();
+        return PageResult.of(records, pageRequest.pageNo(), pageRequest.pageSize(), selectedPage.getTotal());
+    }
+
+    public void ensureLoginNameAvailable(String loginName) {
+        Checks.notBlank(loginName, "loginName");
+        if (existsLoginName(loginName.trim())) {
+            throw NexusException.build(PlatformUserStatusCode.LOGIN_NAME_DUPLICATED);
+        }
+    }
+
+    public PlatformUserEntity newEntity(
+            String loginName,
+            String displayName,
+            String email,
+            String mobile,
+            String employeeNo,
+            PlatformUserStatus status
+    ) {
+        PlatformUserEntity user = new PlatformUserEntity();
+        user.setLoginName(loginName);
+        user.setDisplayName(displayName);
+        user.setEmail(email);
+        user.setMobile(mobile);
+        user.setEmployeeNo(employeeNo);
+        user.setStatus(status.name());
+        return user;
+    }
+
+    @Transactional
+    public void updateStatus(PlatformUserEntity entity, PlatformUserStatus status) {
+        entity.setStatus(status.name());
+        platformUserDao.updateById(entity);
+        log.info("Updated platform user {} status to {}", entity.getPlatformUserId(), status);
+    }
+
+    @Transactional
+    public void activatePendingApproval(PlatformUserEntity entity) {
+        if (!PlatformUserStatus.PENDING_APPROVAL.name().equals(entity.getStatus())) {
+            throw NexusException.build(PlatformUserStatusCode.PLATFORM_USER_NOT_PENDING_APPROVAL);
+        }
+        entity.setStatus(PlatformUserStatus.ACTIVE.name());
+        platformUserDao.updateById(entity);
+        log.info("Activated platform user {} from registration approval", entity.getPlatformUserId());
+    }
+
+    @Transactional
+    public void markDisabled(PlatformUserEntity entity) {
+        entity.setStatus(PlatformUserStatus.DISABLED.name());
+        platformUserDao.updateById(entity);
+        log.info("Disabled platform user {}", entity.getPlatformUserId());
+    }
+
+    private boolean existsLoginName(String loginName) {
+        return platformUserDao.selectCount(new LambdaQueryWrapper<PlatformUserEntity>()
+                .eq(PlatformUserEntity::getLoginName, loginName)) > 0;
     }
 }

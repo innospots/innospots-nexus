@@ -81,14 +81,10 @@ nexus:
     # nexus.plugins.required
     # 含义: 宿主启动后这些插件必须处于 ACTIVE，否则启动失败并回滚。
     # 装配: PluginRuntimeConfig.requiredPluginIds → DefaultPluginManager
-    # 常量: BuiltinConsoleEntryPlugins.REQUIRED_PLUGIN_IDS
+    # 常量: BuiltinConsoleEntryPlugins.REQUIRED_PLUGIN_IDS（portal 宿主）
+    #       BuiltinPlatformEntryPlugins.REQUIRED_PLUGIN_IDS（platform 宿主）
     required:
-      - com.innospots.nexus.console.menu
-      - com.innospots.nexus.console.dictionary
-      - com.innospots.nexus.console.logger
-      - com.innospots.nexus.console.permission
-      - com.innospots.nexus.console.role
-      - com.innospots.nexus.console.plugin-management
+      - com.innospots.nexus.platform.console
 
     # nexus.plugins.disabled
     # 含义: 永不自动启动的插件 ID；与 required 不能重叠。

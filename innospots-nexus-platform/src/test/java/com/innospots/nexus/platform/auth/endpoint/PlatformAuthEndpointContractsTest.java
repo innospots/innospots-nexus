@@ -21,7 +21,8 @@ class PlatformAuthEndpointContractsTest {
 
     @Test
     void platformAuthEndpointHasNoPublicRegister() throws NoSuchMethodException {
-        assertThat(PlatformAuthEndpoint.class.getAnnotation(Path.class).value()).isEqualTo("/platform/auth");
+        assertThat(PlatformAuthEndpoint.class.getAnnotation(Path.class).value())
+                .isEqualTo(com.innospots.nexus.platform.config.PlatformConstant.AUTH_PATH);
         assertThat(PlatformAuthEndpoint.class.getAnnotation(Tag.class).name()).isEqualTo("PlatformAuth");
         assertThat(PlatformAuthEndpoint.class.getMethod("login", AuthLoginRequest.class)
                 .getAnnotation(Operation.class).operationId()).isEqualTo("platformAuthLogin");

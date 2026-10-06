@@ -35,7 +35,9 @@ import com.innospots.nexus.platform.user.dao.PlatformUserDao;
 @Configuration
 @MapperScan(
         basePackages = {
-            "com.innospots.nexus.platform.user.dao"
+            "com.innospots.nexus.platform.user.dao",
+            "com.innospots.nexus.platform.invite.dao",
+            "com.innospots.nexus.platform.access.dao"
         },
         annotationClass = Mapper.class,
         sqlSessionFactoryRef = "sqlSessionFactory")

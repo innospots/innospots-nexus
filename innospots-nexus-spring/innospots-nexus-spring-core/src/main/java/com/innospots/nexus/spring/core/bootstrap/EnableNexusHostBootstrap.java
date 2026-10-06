@@ -12,6 +12,7 @@ import com.innospots.nexus.spring.core.i18n.NexusI18nConfiguration;
 import com.innospots.nexus.spring.core.i18n.NexusI18nWebConfiguration;
 import com.innospots.nexus.spring.core.openapi.OpenApiCatalogConfiguration;
 import com.innospots.nexus.spring.core.plugin.NexusPluginInstallationDaoConfiguration;
+import com.innospots.nexus.spring.core.setting.NexusSystemSettingConfiguration;
 
 /**
  * 显式启用 Nexus 宿主公共启动引导（持久化、插件安装 DAO、启动编排、i18n）。
@@ -25,6 +26,7 @@ import com.innospots.nexus.spring.core.plugin.NexusPluginInstallationDaoConfigur
 @Import({
         NexusPersistenceConfiguration.class,
         NexusTransactionConfiguration.class,
+        NexusSystemSettingConfiguration.class,
         NexusPluginInstallationDaoConfiguration.class,
         NexusStartupConfiguration.class,
         NexusI18nConfiguration.class,

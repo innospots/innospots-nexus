@@ -23,7 +23,8 @@ class TenantEndpointContractsTest {
 
     @Test
     void tenantEndpointExposesPlatformTenantLifecycle() throws NoSuchMethodException {
-        assertThat(TenantEndpoint.class.getAnnotation(Path.class).value()).isEqualTo("/platform/tenants");
+        assertThat(TenantEndpoint.class.getAnnotation(Path.class).value())
+                .isEqualTo(com.innospots.nexus.platform.config.PlatformConstant.TENANTS_PATH);
         assertThat(TenantEndpoint.class.getAnnotation(Tag.class).name()).isEqualTo("PlatformTenant");
         assertThat(TenantEndpoint.class.getAnnotation(NexusAuthenticatedApi.class)).isNotNull();
         assertThat(TenantEndpoint.class.getMethod("createTenant", TenantCreateRequest.class)

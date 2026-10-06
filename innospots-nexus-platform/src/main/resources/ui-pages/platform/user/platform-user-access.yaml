@@ -1,0 +1,8 @@
+dsl: '1.0'
+
+page:
+  id: platform-user-access
+  name: platformUserAccess
+  title: Registration Approval
+  description: Pending registration requests.
+  type: general

@@ -59,7 +59,11 @@ class PlatformUserEntityContractsTest {
     @Test
     void platformUserStatusEnumeratesOpsLifecycle() {
         assertThat(PlatformUserStatus.values()).containsExactly(
-                PlatformUserStatus.ACTIVE, PlatformUserStatus.DISABLED, PlatformUserStatus.LOCKED);
+                PlatformUserStatus.PENDING_ACTIVATION,
+                PlatformUserStatus.PENDING_APPROVAL,
+                PlatformUserStatus.ACTIVE,
+                PlatformUserStatus.DISABLED,
+                PlatformUserStatus.LOCKED);
     }
 
     private static void assertPersistenceTable(Class<?> entityType, String tableName) {

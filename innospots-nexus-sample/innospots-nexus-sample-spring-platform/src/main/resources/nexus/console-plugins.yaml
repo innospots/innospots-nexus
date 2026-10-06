@@ -15,12 +15,7 @@ nexus:
   plugins:
     # 启动后必须处于 ACTIVE 的插件 ID；与 disabled 不能重叠
     required:
-      - com.innospots.nexus.console.menu
-      - com.innospots.nexus.console.dictionary
-      - com.innospots.nexus.console.logger
-      - com.innospots.nexus.console.permission
-      - com.innospots.nexus.console.role
-      - com.innospots.nexus.console.plugin-management
+      - com.innospots.nexus.platform.console
 
     # 永不自动启动的插件 ID
     # disabled: []

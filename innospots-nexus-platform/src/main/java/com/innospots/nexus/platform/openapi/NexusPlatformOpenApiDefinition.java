@@ -30,7 +30,13 @@ import com.innospots.nexus.core.openapi.NexusOpenApiSecurityNames;
         tags = {
                 @Tag(name = "PlatformAuth", description = "运营管理平台认证"),
                 @Tag(name = "PlatformTenant", description = "租户生命周期"),
-                @Tag(name = "PlatformUser", description = "平台用户管理")
+                @Tag(name = "PlatformUser", description = "平台用户管理"),
+                @Tag(name = "PlatformInvite", description = "平台用户邀请"),
+                @Tag(name = "PlatformAccessRegistration", description = "主动注册审批"),
+                @Tag(name = "PlatformSettingsRegistrationMode", description = "平台设置：自助注册模式"),
+                @Tag(name = "PlatformPublicInvite", description = "邀请注册"),
+                @Tag(name = "PlatformPublicAccessRegistration", description = "主动注册（待审批）"),
+                @Tag(name = "PlatformPublicOpenRegistration", description = "完全开放注册")
         }
 )
 @SecurityScheme(

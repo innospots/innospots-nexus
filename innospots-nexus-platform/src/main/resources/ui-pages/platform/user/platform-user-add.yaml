@@ -1,0 +1,8 @@
+dsl: '1.0'
+
+page:
+  id: platform-user-add
+  name: platformUserAdd
+  title: Add Platform User
+  description: Invite or provision platform users.
+  type: general

@@ -8,10 +8,20 @@ class PlatformConstantTest {
 
     @Test
     void platformPathsMatchOperationalEndpoints() {
-        assertThat(PlatformConstant.API_PREFIX).isEqualTo("/platform");
-        assertThat(PlatformConstant.AUTH_PATH).isEqualTo("/platform/auth");
-        assertThat(PlatformConstant.TENANTS_PATH).isEqualTo("/platform/tenants");
-        assertThat(PlatformConstant.USERS_PATH).isEqualTo("/platform/users");
+        assertThat(PlatformConstant.API_PREFIX).isEqualTo("/api/platform");
+        assertThat(PlatformConstant.AUTH_PATH).isEqualTo("/api/platform/auth");
+        assertThat(PlatformConstant.TENANTS_PATH).isEqualTo("/api/platform/tenants");
+        assertThat(PlatformConstant.USERS_PATH).isEqualTo("/api/platform/users");
+        assertThat(PlatformConstant.INVITES_PATH).isEqualTo("/api/platform/invites");
+        assertThat(PlatformConstant.PUBLIC_INVITES_PATH).isEqualTo("/api/platform/public/invites");
+        assertThat(PlatformConstant.PUBLIC_OPEN_REGISTRATION_PATH)
+                .isEqualTo("/api/platform/public/registration/open");
+        assertThat(PlatformConstant.PUBLIC_ACCESS_REGISTRATION_PATH)
+                .isEqualTo("/api/platform/public/registration/access-requests");
+        assertThat(PlatformConstant.REGISTRATION_ACCESS_REQUESTS_PATH)
+                .isEqualTo("/api/platform/registration/access-requests");
+        assertThat(PlatformConstant.SETTINGS_REGISTRATION_MODE_PATH)
+                .isEqualTo("/api/platform/settings/registration-mode");
         assertThat(PlatformConstant.apiPath("/auth")).isEqualTo(PlatformConstant.AUTH_PATH);
         assertThat(PlatformConstant.apiPath("tenants")).isEqualTo(PlatformConstant.TENANTS_PATH);
     }

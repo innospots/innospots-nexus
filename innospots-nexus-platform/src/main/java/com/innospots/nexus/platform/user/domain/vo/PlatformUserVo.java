@@ -1,5 +1,7 @@
 package com.innospots.nexus.platform.user.domain.vo;
 
+import java.time.LocalDateTime;
+
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 /**
@@ -7,13 +9,6 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
  *
  * @author Smars
  * @date 2026/09/13
- * @param platformUserId platform-realm user 标识符
- * @param loginName      唯一登录名
- * @param displayName    显示名称
- * @param email          邮箱地址
- * @param mobile         手机号
- * @param employeeNo     内部员工编号
- * @param status         生命周期状态
  */
 @Schema(name = "PlatformUserVo", description = "平台用户概要")
 public record PlatformUserVo(
@@ -30,6 +25,12 @@ public record PlatformUserVo(
         @Schema(description = "员工编号")
         String employeeNo,
         @Schema(description = "状态", examples = {"ACTIVE"})
-        String status
+        String status,
+        @Schema(description = "上次成功登录时间")
+        LocalDateTime lastLoginTime,
+        @Schema(description = "上次成功登录 IP")
+        String lastLoginIp,
+        @Schema(description = "创建时间")
+        LocalDateTime createdAt
 ) {
 }

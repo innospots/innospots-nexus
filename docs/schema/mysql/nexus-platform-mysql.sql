@@ -75,3 +75,51 @@ CREATE TABLE IF NOT EXISTS nx_pl_user_oauth (
     KEY idx_nx_pl_user_oauth_user (platform_user_id),
     CONSTRAINT uk_nx_pl_user_oauth_provider_subject UNIQUE (provider, provider_subject)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS nx_pl_invite (
+    invite_id           VARCHAR(32)   NOT NULL,
+    invite_token        VARCHAR(64)   NOT NULL,
+    invite_code         VARCHAR(32)   NOT NULL,
+    email               VARCHAR(128),
+    mobile              VARCHAR(32),
+    login_name          VARCHAR(64),
+    default_role_codes  VARCHAR(512),
+    status              VARCHAR(32)   NOT NULL,
+    delivery_mode       VARCHAR(32)   NOT NULL,
+    expires_at          DATETIME(6)   NOT NULL,
+    accepted_at         DATETIME(6),
+    platform_user_id    VARCHAR(32),
+    revoked_at          DATETIME(6),
+    code_failed_attempts INT          NOT NULL DEFAULT 0,
+    created_at          DATETIME(6),
+    updated_at          DATETIME(6),
+    created_by          VARCHAR(64),
+    updated_by          VARCHAR(64),
+    PRIMARY KEY (invite_id),
+    CONSTRAINT uk_nx_pl_invite_token UNIQUE (invite_token),
+    CONSTRAINT uk_nx_pl_invite_code UNIQUE (invite_code),
+    KEY idx_nx_pl_invite_status (status),
+    KEY idx_nx_pl_invite_expires (expires_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS nx_pl_access_request (
+    access_request_id   VARCHAR(32)   NOT NULL,
+    applicant_name      VARCHAR(128)  NOT NULL,
+    login_name          VARCHAR(64),
+    platform_user_id    VARCHAR(32),
+    email               VARCHAR(128),
+    mobile              VARCHAR(32),
+    description         VARCHAR(512),
+    status              VARCHAR(32)   NOT NULL,
+    reject_reason       VARCHAR(512),
+    approved_invite_id  VARCHAR(32),
+    reviewed_at         DATETIME(6),
+    reviewed_by         VARCHAR(64),
+    created_at          DATETIME(6),
+    updated_at          DATETIME(6),
+    created_by          VARCHAR(64),
+    updated_by          VARCHAR(64),
+    PRIMARY KEY (access_request_id),
+    KEY idx_nx_pl_access_request_status (status),
+    KEY idx_nx_pl_access_request_user (platform_user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
