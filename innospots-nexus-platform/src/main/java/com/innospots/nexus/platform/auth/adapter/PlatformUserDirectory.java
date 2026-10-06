@@ -2,12 +2,12 @@ package com.innospots.nexus.platform.auth.adapter;
 
 import java.util.Optional;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 
 import com.innospots.nexus.console.auth.api.UserDirectory;
 import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
 import com.innospots.nexus.console.auth.domain.model.AuthUser;
+import com.innospots.nexus.platform.auth.support.PlatformUserIdentityResolver;
 import com.innospots.nexus.platform.user.dao.PlatformUserDao;
 import com.innospots.nexus.platform.user.domain.entity.PlatformUserEntity;
 import com.innospots.nexus.platform.user.domain.enums.PlatformUserStatus;
@@ -19,13 +19,14 @@ import com.innospots.nexus.platform.user.domain.enums.PlatformUserStatus;
 public class PlatformUserDirectory implements UserDirectory {
 
     private final PlatformUserDao platformUserDao;
+    private final PlatformUserIdentityResolver identityResolver;
 
     @Override
     public Optional<AuthUser> findByLogin(String identity) {
         if (identity == null || identity.isBlank()) {
             return Optional.empty();
         }
-        PlatformUserEntity user = resolveUser(identity);
+        PlatformUserEntity user = identityResolver.findByIdentity(identity);
         if (user == null || !PlatformUserStatus.ACTIVE.name().equals(user.getStatus())) {
             return Optional.empty();
         }
@@ -50,20 +51,5 @@ public class PlatformUserDirectory implements UserDirectory {
                 loginName,
                 user.getStatus(),
                 SecurityRealm.PLATFORM);
-    }
-
-    private PlatformUserEntity resolveUser(String identity) {
-        PlatformUserEntity byLogin = platformUserDao.selectOne(new LambdaQueryWrapper<PlatformUserEntity>()
-                .eq(PlatformUserEntity::getLoginName, identity));
-        if (byLogin != null) {
-            return byLogin;
-        }
-        PlatformUserEntity byEmail = platformUserDao.selectOne(new LambdaQueryWrapper<PlatformUserEntity>()
-                .eq(PlatformUserEntity::getEmail, identity));
-        if (byEmail != null) {
-            return byEmail;
-        }
-        return platformUserDao.selectOne(new LambdaQueryWrapper<PlatformUserEntity>()
-                .eq(PlatformUserEntity::getMobile, identity));
     }
 }

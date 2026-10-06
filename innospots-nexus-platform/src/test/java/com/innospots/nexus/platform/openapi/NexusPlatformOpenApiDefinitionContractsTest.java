@@ -28,7 +28,9 @@ class NexusPlatformOpenApiDefinitionContractsTest {
         Tag[] tags = NexusPlatformOpenApiDefinition.class.getAnnotation(OpenAPIDefinition.class).tags();
         assertThat(tags).extracting(Tag::name)
                 .containsExactly(
-                        "PlatformAuth",
+                        "PlatformPublicAuth",
+                        "PlatformPublicPasswordReset",
+                        "PlatformAuthSession",
                         "PlatformTenant",
                         "PlatformUser",
                         "PlatformInvite",

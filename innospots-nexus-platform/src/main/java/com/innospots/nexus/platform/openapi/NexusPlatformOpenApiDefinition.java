@@ -28,7 +28,9 @@ import com.innospots.nexus.core.openapi.NexusOpenApiSecurityNames;
                 contact = @Contact(name = "Innospots Nexus")
         ),
         tags = {
-                @Tag(name = "PlatformAuth", description = "运营管理平台认证"),
+                @Tag(name = "PlatformPublicAuth", description = "运营管理平台匿名认证"),
+                @Tag(name = "PlatformPublicPasswordReset", description = "运营管理平台密码重置"),
+                @Tag(name = "PlatformAuthSession", description = "运营管理平台会话"),
                 @Tag(name = "PlatformTenant", description = "租户生命周期"),
                 @Tag(name = "PlatformUser", description = "平台用户管理"),
                 @Tag(name = "PlatformInvite", description = "平台用户邀请"),

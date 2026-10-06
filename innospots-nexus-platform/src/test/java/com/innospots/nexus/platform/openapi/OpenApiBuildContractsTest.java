@@ -15,7 +15,10 @@ class OpenApiBuildContractsTest {
         assertThat(spec).exists();
         String yaml = Files.readString(spec);
         assertThat(yaml).contains("Innospots Nexus Platform API");
-        assertThat(yaml).contains("/api/platform/auth/login");
+        assertThat(yaml).contains("/api/platform/public/auth/login");
+        assertThat(yaml).contains("/api/platform/auth/refresh");
+        assertThat(yaml).contains("/api/platform/public/auth/password/reset");
+        assertThat(yaml).contains("/api/platform/auth/logout");
         assertThat(yaml).contains("/api/platform/tenants");
         assertThat(yaml).contains("/api/platform/users");
         assertThat(yaml).contains("/api/platform/invites");
@@ -36,7 +39,8 @@ class OpenApiBuildContractsTest {
         assertThat(yaml).contains("operationId: platformPublicInvitePreview");
         assertThat(yaml).contains("operationId: platformPublicOpenRegistrationSubmit");
         assertThat(yaml).contains("operationId: platformPublicAccessRegistrationSubmit");
-        assertThat(yaml).contains("name: PlatformAuth");
+        assertThat(yaml).contains("name: PlatformPublicAuth");
+        assertThat(yaml).contains("name: PlatformAuthSession");
         assertThat(yaml).contains("name: PlatformTenant");
         assertThat(yaml).contains("name: PlatformUser");
         assertThat(yaml).contains("bearerAuth");

@@ -124,7 +124,8 @@ public class ConsoleWebProperties {
             patterns.add("/openapi/**");
             patterns.add("/auth/**");
             patterns.add("/tenant/auth/**");
-            patterns.add("/platform/auth/**");
+            patterns.add("/platform/public/**");
+            patterns.add("/platform/auth/refresh");
             patterns.add("/health");
             patterns.add("/actuator/health/**");
             return patterns;

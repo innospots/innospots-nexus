@@ -10,6 +10,10 @@ class PlatformConstantTest {
     void platformPathsMatchOperationalEndpoints() {
         assertThat(PlatformConstant.API_PREFIX).isEqualTo("/api/platform");
         assertThat(PlatformConstant.AUTH_PATH).isEqualTo("/api/platform/auth");
+        assertThat(PlatformConstant.PUBLIC_AUTH_PATH).isEqualTo("/api/platform/public/auth");
+        assertThat(PlatformConstant.PUBLIC_AUTH_PASSWORD_PATH)
+                .isEqualTo("/api/platform/public/auth/password");
+        assertThat(PlatformConstant.AUTH_REFRESH_PATH).isEqualTo("/api/platform/auth/refresh");
         assertThat(PlatformConstant.TENANTS_PATH).isEqualTo("/api/platform/tenants");
         assertThat(PlatformConstant.USERS_PATH).isEqualTo("/api/platform/users");
         assertThat(PlatformConstant.INVITES_PATH).isEqualTo("/api/platform/invites");

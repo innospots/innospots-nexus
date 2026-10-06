@@ -34,7 +34,8 @@ nexus:
         #   - /openapi/**
         #   - /auth/**
         #   - /tenant/auth/**
-        #   - /platform/auth/**
+        #   - /platform/public/**
+        #   - /platform/auth/refresh
         # /api/public/** 不在 permit-all：无 Authorization 可访问；若携带 Bearer 仍由 ConsoleAuthenticationFilter 校验。
         #   - /health
         #   - /actuator/health/**

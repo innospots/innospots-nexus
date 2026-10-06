@@ -19,8 +19,17 @@ public final class PlatformConstant {
     /** 无需登录的公开 API 前缀。 */
     public static final String PUBLIC_PREFIX = API_PREFIX + "/public";
 
-    /** 运营管理平台认证：{@value} */
+    /** 运营管理平台认证（已登录会话）：{@value} */
     public static final String AUTH_PATH = API_PREFIX + "/auth";
+
+    /** 运营管理平台匿名认证（登录、验证码）：{@value} */
+    public static final String PUBLIC_AUTH_PATH = PUBLIC_PREFIX + "/auth";
+
+    /** 运营管理平台令牌刷新（与 {@link #AUTH_PATH} 同前缀）：{@value} */
+    public static final String AUTH_REFRESH_PATH = AUTH_PATH + "/refresh";
+
+    /** 运营管理平台匿名密码重置：{@value} */
+    public static final String PUBLIC_AUTH_PASSWORD_PATH = PUBLIC_AUTH_PATH + "/password";
 
     /** 运营管理平台租户生命周期：{@value} */
     public static final String TENANTS_PATH = API_PREFIX + "/tenants";

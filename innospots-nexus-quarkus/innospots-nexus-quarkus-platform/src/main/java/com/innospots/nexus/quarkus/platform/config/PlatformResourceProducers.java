@@ -4,14 +4,14 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
-import jakarta.inject.Named;
 
 import io.quarkus.arc.Unremovable;
 
-import com.innospots.nexus.console.auth.service.AuthFacade;
-import com.innospots.nexus.console.credential.password.PasswordDecryptor;
-import com.innospots.nexus.platform.auth.endpoint.PlatformAuthEndpoint;
-import com.innospots.nexus.platform.auth.operator.PlatformPasswordOperator;
+import com.innospots.nexus.platform.auth.endpoint.PlatformAuthSessionEndpoint;
+import com.innospots.nexus.platform.auth.endpoint.PlatformPublicAuthEndpoint;
+import com.innospots.nexus.platform.auth.endpoint.PlatformPublicPasswordResetEndpoint;
+import com.innospots.nexus.platform.auth.service.PlatformAuthService;
+import com.innospots.nexus.platform.auth.service.PlatformPasswordService;
 import com.innospots.nexus.platform.access.endpoint.PlatformAccessRequestEndpoint;
 import com.innospots.nexus.platform.access.endpoint.PlatformPublicAccessRegistrationEndpoint;
 import com.innospots.nexus.platform.access.endpoint.PlatformPublicOpenRegistrationEndpoint;
@@ -32,9 +32,8 @@ import com.innospots.nexus.platform.user.service.PlatformUserService;
 @ApplicationScoped
 public class PlatformResourceProducers {
 
-    private final AuthFacade platformAuthFacade;
-    private final PlatformPasswordOperator platformPasswordOperator;
-    private final PasswordDecryptor passwordDecryptor;
+    private final PlatformAuthService platformAuthService;
+    private final PlatformPasswordService platformPasswordService;
     private final PlatformUserService platformUserService;
     private final PlatformInviteService platformInviteService;
     private final PlatformPublicInviteService platformPublicInviteService;
@@ -44,18 +43,16 @@ public class PlatformResourceProducers {
 
     @Inject
     public PlatformResourceProducers(
-            @Named("platformAuthFacade") AuthFacade platformAuthFacade,
-            PlatformPasswordOperator platformPasswordOperator,
-            PasswordDecryptor passwordDecryptor,
+            PlatformAuthService platformAuthService,
+            PlatformPasswordService platformPasswordService,
             PlatformUserService platformUserService,
             PlatformInviteService platformInviteService,
             PlatformPublicInviteService platformPublicInviteService,
             PlatformAccessRequestService platformAccessRequestService,
             PlatformOpenRegistrationService platformOpenRegistrationService,
             PlatformRegistrationModeSettingService platformRegistrationModeSettingService) {
-        this.platformAuthFacade = platformAuthFacade;
-        this.platformPasswordOperator = platformPasswordOperator;
-        this.passwordDecryptor = passwordDecryptor;
+        this.platformAuthService = platformAuthService;
+        this.platformPasswordService = platformPasswordService;
         this.platformUserService = platformUserService;
         this.platformInviteService = platformInviteService;
         this.platformPublicInviteService = platformPublicInviteService;
@@ -67,8 +64,22 @@ public class PlatformResourceProducers {
     @Produces
     @Dependent
     @Unremovable
-    PlatformAuthEndpoint platformAuthEndpoint() {
-        return new PlatformAuthEndpoint(platformAuthFacade, platformPasswordOperator, passwordDecryptor);
+    PlatformPublicAuthEndpoint platformPublicAuthEndpoint() {
+        return new PlatformPublicAuthEndpoint(platformAuthService);
+    }
+
+    @Produces
+    @Dependent
+    @Unremovable
+    PlatformPublicPasswordResetEndpoint platformPublicPasswordResetEndpoint() {
+        return new PlatformPublicPasswordResetEndpoint(platformPasswordService);
+    }
+
+    @Produces
+    @Dependent
+    @Unremovable
+    PlatformAuthSessionEndpoint platformAuthSessionEndpoint() {
+        return new PlatformAuthSessionEndpoint(platformAuthService, platformPasswordService);
     }
 
     @Produces

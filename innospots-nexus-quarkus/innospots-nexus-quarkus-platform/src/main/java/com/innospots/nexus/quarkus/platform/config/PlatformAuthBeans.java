@@ -17,9 +17,12 @@ import com.innospots.nexus.console.credential.password.PasswordVerificationOpera
 import com.innospots.nexus.console.credential.password.service.CredentialService;
 import com.innospots.nexus.console.scope.service.SessionScopeBinder;
 import com.innospots.nexus.platform.auth.adapter.PlatformUserDirectory;
-import com.innospots.nexus.platform.auth.operator.PlatformPasswordOperator;
+import com.innospots.nexus.platform.auth.support.PlatformUserIdentityResolver;
+import com.innospots.nexus.platform.auth.service.PlatformAuthService;
+import com.innospots.nexus.platform.auth.service.PlatformPasswordService;
 import com.innospots.nexus.platform.scope.PlatformSessionScopeBinder;
 import com.innospots.nexus.platform.user.dao.PlatformUserDao;
+import com.innospots.nexus.platform.user.operator.PlatformUserOperator;
 
 /**
  * 运营管理平台认证与用户相关 Quarkus CDI 装配。
@@ -29,8 +32,16 @@ public class PlatformAuthBeans {
 
     @Produces
     @Singleton
-    PlatformUserDirectory platformUserDirectory(PlatformUserDao platformUserDao) {
-        return new PlatformUserDirectory(platformUserDao);
+    PlatformUserIdentityResolver platformUserIdentityResolver(PlatformUserDao platformUserDao) {
+        return new PlatformUserIdentityResolver(platformUserDao);
+    }
+
+    @Produces
+    @Singleton
+    PlatformUserDirectory platformUserDirectory(
+            PlatformUserDao platformUserDao,
+            PlatformUserIdentityResolver platformUserIdentityResolver) {
+        return new PlatformUserDirectory(platformUserDao, platformUserIdentityResolver);
     }
 
     @Produces
@@ -81,10 +92,23 @@ public class PlatformAuthBeans {
 
     @Produces
     @Singleton
-    PlatformPasswordOperator platformPasswordOperator(
-            PlatformUserDao platformUserDao,
+    PlatformAuthService platformAuthService(@Named("platformAuthFacade") AuthFacade authFacade) {
+        return new PlatformAuthService(authFacade);
+    }
+
+    @Produces
+    @Singleton
+    PlatformPasswordService platformPasswordService(
+            PlatformUserOperator platformUserOperator,
+            PlatformUserIdentityResolver platformUserIdentityResolver,
             CredentialService credentialService,
-            PasswordVerificationOperator passwordVerificationOperator) {
-        return new PlatformPasswordOperator(platformUserDao, credentialService, passwordVerificationOperator);
+            PasswordVerificationOperator passwordVerificationOperator,
+            PasswordDecryptor passwordDecryptor) {
+        return new PlatformPasswordService(
+                platformUserOperator,
+                platformUserIdentityResolver,
+                credentialService,
+                passwordVerificationOperator,
+                passwordDecryptor);
     }
 }

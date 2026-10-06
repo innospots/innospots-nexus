@@ -56,7 +56,8 @@ class SamplePlatformOpenApiSpringTest {
         String yaml = openApiCatalogOperator.readYaml(PLATFORM_SPEC_ID);
         assertThat(yaml).contains("openapi:");
         assertThat(yaml).contains("/platform/tenants");
-        assertThat(yaml).contains("/platform/auth/login");
+        assertThat(yaml).contains("/platform/public/auth/login");
+        assertThat(yaml).contains("/platform/auth/refresh");
     }
 
     @Test

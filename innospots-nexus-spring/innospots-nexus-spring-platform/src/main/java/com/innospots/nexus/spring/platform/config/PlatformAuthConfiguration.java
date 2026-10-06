@@ -20,17 +20,23 @@ import com.innospots.nexus.console.credential.password.PasswordVerificationOpera
 import com.innospots.nexus.console.credential.password.service.CredentialService;
 import com.innospots.nexus.console.scope.service.SessionScopeBinder;
 import com.innospots.nexus.platform.auth.adapter.PlatformUserDirectory;
-import com.innospots.nexus.platform.auth.endpoint.PlatformAuthEndpoint;
-import com.innospots.nexus.platform.auth.operator.PlatformPasswordOperator;
+import com.innospots.nexus.platform.auth.support.PlatformUserIdentityResolver;
+import com.innospots.nexus.platform.auth.endpoint.PlatformAuthSessionEndpoint;
+import com.innospots.nexus.platform.auth.endpoint.PlatformPublicAuthEndpoint;
+import com.innospots.nexus.platform.auth.endpoint.PlatformPublicPasswordResetEndpoint;
+import com.innospots.nexus.platform.auth.service.PlatformAuthService;
+import com.innospots.nexus.platform.auth.service.PlatformPasswordService;
 import com.innospots.nexus.platform.scope.PlatformSessionScopeBinder;
 import com.innospots.nexus.platform.user.dao.PlatformUserDao;
+import com.innospots.nexus.platform.user.operator.PlatformUserOperator;
 
 /**
  * 运营管理平台认证与用户相关 Spring 装配。
  *
  * @author Smars
  * @date 2026/09/23
- * @see PlatformAuthEndpoint
+ * @see PlatformPublicAuthEndpoint
+ * @see PlatformAuthSessionEndpoint
  */
 @Configuration
 @MapperScan(
@@ -45,8 +51,15 @@ import com.innospots.nexus.platform.user.dao.PlatformUserDao;
 public class PlatformAuthConfiguration {
 
     @Bean
-    PlatformUserDirectory platformUserDirectory(PlatformUserDao platformUserDao) {
-        return new PlatformUserDirectory(platformUserDao);
+    PlatformUserIdentityResolver platformUserIdentityResolver(PlatformUserDao platformUserDao) {
+        return new PlatformUserIdentityResolver(platformUserDao);
+    }
+
+    @Bean
+    PlatformUserDirectory platformUserDirectory(
+            PlatformUserDao platformUserDao,
+            PlatformUserIdentityResolver platformUserIdentityResolver) {
+        return new PlatformUserDirectory(platformUserDao, platformUserIdentityResolver);
     }
 
     @Bean
@@ -90,19 +103,43 @@ public class PlatformAuthConfiguration {
     }
 
     @Bean
-    PlatformPasswordOperator platformPasswordOperator(
-            PlatformUserDao platformUserDao,
+    PlatformAuthService platformAuthService(@Qualifier("platformAuthFacade") AuthFacade authFacade) {
+        return new PlatformAuthService(authFacade);
+    }
+
+    @Bean
+    PlatformPasswordService platformPasswordService(
+            PlatformUserOperator platformUserOperator,
+            PlatformUserIdentityResolver platformUserIdentityResolver,
             CredentialService credentialService,
-            PasswordVerificationOperator passwordVerificationOperator) {
-        return new PlatformPasswordOperator(platformUserDao, credentialService, passwordVerificationOperator);
+            PasswordVerificationOperator passwordVerificationOperator,
+            PasswordDecryptor passwordDecryptor) {
+        return new PlatformPasswordService(
+                platformUserOperator,
+                platformUserIdentityResolver,
+                credentialService,
+                passwordVerificationOperator,
+                passwordDecryptor);
     }
 
     @Bean
     @Lazy
-    PlatformAuthEndpoint platformAuthEndpoint(
-            @Qualifier("platformAuthFacade") AuthFacade authFacade,
-            PlatformPasswordOperator platformPasswordOperator,
-            PasswordDecryptor passwordDecryptor) {
-        return new PlatformAuthEndpoint(authFacade, platformPasswordOperator, passwordDecryptor);
+    PlatformPublicAuthEndpoint platformPublicAuthEndpoint(PlatformAuthService platformAuthService) {
+        return new PlatformPublicAuthEndpoint(platformAuthService);
+    }
+
+    @Bean
+    @Lazy
+    PlatformPublicPasswordResetEndpoint platformPublicPasswordResetEndpoint(
+            PlatformPasswordService platformPasswordService) {
+        return new PlatformPublicPasswordResetEndpoint(platformPasswordService);
+    }
+
+    @Bean
+    @Lazy
+    PlatformAuthSessionEndpoint platformAuthSessionEndpoint(
+            PlatformAuthService platformAuthService,
+            PlatformPasswordService platformPasswordService) {
+        return new PlatformAuthSessionEndpoint(platformAuthService, platformPasswordService);
     }
 }
