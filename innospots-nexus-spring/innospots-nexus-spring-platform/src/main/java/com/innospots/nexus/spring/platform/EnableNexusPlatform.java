@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Import;
 
 import com.innospots.nexus.spring.console.EnableNexusConsole;
 import com.innospots.nexus.spring.platform.config.PlatformAuthConfiguration;
+import com.innospots.nexus.spring.platform.config.PlatformOrganizationConfiguration;
 import com.innospots.nexus.spring.platform.config.PlatformProvisioningConfiguration;
 import com.innospots.nexus.spring.platform.config.PlatformSettingsConfiguration;
 import com.innospots.nexus.spring.platform.config.PlatformUserConfiguration;
@@ -31,6 +32,7 @@ import com.innospots.nexus.spring.platform.config.PlatformUserConfiguration;
 @Import({
         PlatformAuthConfiguration.class,
         PlatformUserConfiguration.class,
+        PlatformOrganizationConfiguration.class,
         PlatformProvisioningConfiguration.class,
         PlatformSettingsConfiguration.class
 })

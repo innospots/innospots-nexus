@@ -34,6 +34,9 @@ public final class PlatformConstant {
     /** 运营管理平台租户生命周期：{@value} */
     public static final String TENANTS_PATH = API_PREFIX + "/tenants";
 
+    /** 指定租户下企业法定档案：{@value} */
+    public static final String TENANT_ENTERPRISE_PATH = TENANTS_PATH + "/{tenantId}/enterprise";
+
     /** 运营管理平台用户：{@value} */
     public static final String USERS_PATH = API_PREFIX + "/users";
 

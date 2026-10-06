@@ -33,7 +33,7 @@ public record PlatformEntryPluginDescriptor(
     }
 
     /**
-     * 默认 platform 管理控制台 entry：租户、平台用户、注册策略三个模块。
+     * 默认 platform 管理控制台 entry：组织、平台用户、注册策略三个模块。
      *
      * @return 不可变 entry 描述符
      */
@@ -43,11 +43,11 @@ public record PlatformEntryPluginDescriptor(
                 I18nObject.of("en", "Platform Console", "zh", "运营管理平台"),
                 I18nObject.of(
                         "en",
-                        "Tenant lifecycle, platform users, invites, and registration policy.",
+                        "Organizations, platform users, invites, and registration policy.",
                         "zh",
-                        "租户生命周期、平台用户、邀请与注册策略。"),
+                        "组织开通、平台用户、邀请与注册策略。"),
                 List.of(
-                        PlatformModuleDescriptors.TENANT,
+                        PlatformModuleDescriptors.ORGANIZATION,
                         PlatformModuleDescriptors.USERS,
                         PlatformModuleDescriptors.SETTINGS));
     }

@@ -1,8 +1,0 @@
-dsl: '1.0'
-
-page:
-  id: platform-tenant-main
-  name: tenantMain
-  title: Tenant Management
-  description: Platform tenant lifecycle.
-  type: general

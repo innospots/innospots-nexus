@@ -39,7 +39,7 @@ class PlatformConsoleEntryPluginTest {
                 .orElseThrow();
 
         assertThat(contribution.modules()).extracting(ConsoleModuleDeclaration::moduleKey)
-                .containsExactly("tenant", "user", "settings");
+                .containsExactly("organization", "user", "settings");
         assertThat(definition.capabilities()).isEmpty();
     }
 
@@ -97,7 +97,9 @@ class PlatformConsoleEntryPluginTest {
 
     private static Stream<Arguments> platformEntryPages() {
         return Stream.of(
-                Arguments.of("tenant", ConsoleModuleDescriptor.compositePageKey(DOMAIN, "tenant", "main")),
+                Arguments.of(
+                        "organization",
+                        ConsoleModuleDescriptor.compositePageKey(DOMAIN, "organization", "main")),
                 Arguments.of("user", ConsoleModuleDescriptor.compositePageKey(DOMAIN, "user", "main")),
                 Arguments.of("user", ConsoleModuleDescriptor.compositePageKey(DOMAIN, "user", "add")),
                 Arguments.of("user", ConsoleModuleDescriptor.compositePageKey(DOMAIN, "user", "invite")),

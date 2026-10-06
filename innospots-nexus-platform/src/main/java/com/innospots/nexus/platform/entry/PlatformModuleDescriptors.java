@@ -18,16 +18,20 @@ public final class PlatformModuleDescriptors {
     private static final String PLUGIN_ID = BuiltinPlatformEntryPlugins.PLATFORM_CONSOLE;
     private static final String DOMAIN = BuiltinPlatformEntryPlugins.DOMAIN_KEY;
 
-    public static final ConsoleModuleDescriptor TENANT = ConsoleModuleDescriptor.builtin(
+    public static final ConsoleModuleDescriptor ORGANIZATION = ConsoleModuleDescriptor.builtin(
             PLUGIN_ID,
             DOMAIN,
-            "tenant",
-            pageKey("tenant", "main"),
+            "organization",
+            pageKey("organization", "main"),
             "apartment",
             10,
-            I18nObject.of("en", "Tenants", "zh", "租户"),
-            I18nObject.of("en", "Platform tenant lifecycle.", "zh", "平台租户生命周期管理。"),
-            I18nObject.of("en", "Tenants", "zh", "租户管理"));
+            I18nObject.of("en", "Organizations", "zh", "组织"),
+            I18nObject.of(
+                    "en",
+                    "Platform organizations (enterprise, team, or individual).",
+                    "zh",
+                    "平台组织开通与生命周期（企业、团队或个人形态）。"),
+            I18nObject.of("en", "Organizations", "zh", "组织管理"));
 
     public static final ConsoleModuleDescriptor USERS = ConsoleModuleDescriptor.of(
             PLUGIN_ID,

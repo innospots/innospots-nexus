@@ -4,7 +4,7 @@
  * <p>REST 契约前缀 {@code /api/platform}；匿名自助能力在 {@code /api/platform/public} 下。
  * 本模块依赖 {@code innospots-nexus-console}，不得依赖 portal。</p>
  *
- * <p>按职责分包：{@code tenant}、{@code user}、{@code invite}、{@code access}、
+ * <p>按职责分包：{@code organization}、{@code user}、{@code invite}、{@code access}、
  * {@code registration}、{@code auth}、{@code entry}（PageDsl / 插件 SPI）等。</p>
  *
  * @author Smars

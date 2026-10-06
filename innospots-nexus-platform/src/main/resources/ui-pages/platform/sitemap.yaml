@@ -8,7 +8,7 @@ layout: admin
 auth: { loginPath: /login }
 
 pages:
-  - { id: platform-tenant-main, path: /page/platform/tenant/platform-tenant-main, title: 租户管理, version: 1, lazy: true }
+  - { id: platform-organization-main, path: /page/platform/organization/platform-organization-main, title: 组织管理, version: 1, lazy: true }
   - { id: platform-user-main, path: /page/platform/user/platform-user-main, title: 用户列表, version: 1, lazy: true }
   - { id: platform-user-add, path: /page/platform/user/platform-user-add, title: 添加用户, version: 1, lazy: true }
   - { id: platform-user-invite, path: /page/platform/user/platform-user-invite, title: 邀请列表, version: 1, lazy: true }
@@ -16,7 +16,7 @@ pages:
   - { id: platform-settings-registration-mode, path: /page/platform/settings/platform-settings-registration-mode, title: 注册模式, version: 1, lazy: true }
 
 menus:
-  - { id: platform-tenant-main, type: page, pageId: platform-tenant-main, title: 租户管理, icon: apartment, layout: admin, order: 10 }
+  - { id: platform-organization-main, type: page, pageId: platform-organization-main, title: 组织管理, icon: apartment, layout: admin, order: 10 }
   - { id: platform-user-main, type: page, pageId: platform-user-main, title: 用户列表, icon: team, layout: admin, order: 20 }
   - { id: platform-user-add, type: page, pageId: platform-user-add, title: 添加用户, icon: user-add, layout: admin, order: 15 }
   - { id: platform-user-invite, type: page, pageId: platform-user-invite, title: 邀请列表, icon: mail, layout: admin, order: 21 }

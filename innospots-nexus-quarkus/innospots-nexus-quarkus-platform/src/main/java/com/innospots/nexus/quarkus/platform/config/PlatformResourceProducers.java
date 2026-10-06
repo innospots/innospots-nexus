@@ -23,6 +23,10 @@ import com.innospots.nexus.platform.invite.service.PlatformInviteService;
 import com.innospots.nexus.platform.invite.service.PlatformPublicInviteService;
 import com.innospots.nexus.platform.settings.endpoint.PlatformRegistrationModeSettingEndpoint;
 import com.innospots.nexus.platform.settings.service.PlatformRegistrationModeSettingService;
+import com.innospots.nexus.platform.organization.endpoint.TenantEndpoint;
+import com.innospots.nexus.platform.organization.endpoint.EnterpriseProfileEndpoint;
+import com.innospots.nexus.platform.organization.service.PlatformEnterpriseProfileService;
+import com.innospots.nexus.platform.organization.service.PlatformTenantService;
 import com.innospots.nexus.platform.user.endpoint.PlatformUserEndpoint;
 import com.innospots.nexus.platform.user.service.PlatformUserService;
 
@@ -40,6 +44,8 @@ public class PlatformResourceProducers {
     private final PlatformAccessRequestService platformAccessRequestService;
     private final PlatformOpenRegistrationService platformOpenRegistrationService;
     private final PlatformRegistrationModeSettingService platformRegistrationModeSettingService;
+    private final PlatformTenantService platformTenantService;
+    private final PlatformEnterpriseProfileService platformEnterpriseProfileService;
 
     @Inject
     public PlatformResourceProducers(
@@ -50,7 +56,9 @@ public class PlatformResourceProducers {
             PlatformPublicInviteService platformPublicInviteService,
             PlatformAccessRequestService platformAccessRequestService,
             PlatformOpenRegistrationService platformOpenRegistrationService,
-            PlatformRegistrationModeSettingService platformRegistrationModeSettingService) {
+            PlatformRegistrationModeSettingService platformRegistrationModeSettingService,
+            PlatformTenantService platformTenantService,
+            PlatformEnterpriseProfileService platformEnterpriseProfileService) {
         this.platformAuthService = platformAuthService;
         this.platformPasswordService = platformPasswordService;
         this.platformUserService = platformUserService;
@@ -59,6 +67,8 @@ public class PlatformResourceProducers {
         this.platformAccessRequestService = platformAccessRequestService;
         this.platformOpenRegistrationService = platformOpenRegistrationService;
         this.platformRegistrationModeSettingService = platformRegistrationModeSettingService;
+        this.platformTenantService = platformTenantService;
+        this.platformEnterpriseProfileService = platformEnterpriseProfileService;
     }
 
     @Produces
@@ -87,6 +97,20 @@ public class PlatformResourceProducers {
     @Unremovable
     PlatformUserEndpoint platformUserEndpoint() {
         return new PlatformUserEndpoint(platformUserService);
+    }
+
+    @Produces
+    @Dependent
+    @Unremovable
+    TenantEndpoint tenantEndpoint() {
+        return new TenantEndpoint(platformTenantService);
+    }
+
+    @Produces
+    @Dependent
+    @Unremovable
+    EnterpriseProfileEndpoint enterpriseProfileEndpoint() {
+        return new EnterpriseProfileEndpoint(platformEnterpriseProfileService);
     }
 
     @Produces

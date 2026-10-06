@@ -15,6 +15,8 @@ class PlatformConstantTest {
                 .isEqualTo("/api/platform/public/auth/password");
         assertThat(PlatformConstant.AUTH_REFRESH_PATH).isEqualTo("/api/platform/auth/refresh");
         assertThat(PlatformConstant.TENANTS_PATH).isEqualTo("/api/platform/tenants");
+        assertThat(PlatformConstant.TENANT_ENTERPRISE_PATH)
+                .isEqualTo("/api/platform/tenants/{tenantId}/enterprise");
         assertThat(PlatformConstant.USERS_PATH).isEqualTo("/api/platform/users");
         assertThat(PlatformConstant.INVITES_PATH).isEqualTo("/api/platform/invites");
         assertThat(PlatformConstant.PUBLIC_INVITES_PATH).isEqualTo("/api/platform/public/invites");
