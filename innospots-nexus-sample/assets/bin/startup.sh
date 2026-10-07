@@ -65,6 +65,7 @@ startup() {
     exit 0
   fi
   echo "Starting ${SERVER_MAIN_CLASS} profile=${PROFILE}"
+  cd "${APP_DIR}" || exit 1
   nohup "${JAVA}" ${JAVA_OPT} -cp "${CLASSPATH}" "${SERVER_MAIN_CLASS}" >> "${LOG_FILE}" 2>&1 &
   echo $! > "${PID_FILE}"
   sleep 2
