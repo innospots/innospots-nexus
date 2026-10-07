@@ -2,6 +2,8 @@ package com.innospots.nexus.core.openapi.catalog;
 
 import java.util.List;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.innospots.nexus.core.openapi.catalog.internal.OpenApiBundledSpecCodec;
 import com.innospots.nexus.core.openapi.catalog.internal.OpenApiBundledSpecs;
 
 /**
@@ -27,5 +29,12 @@ public final class OpenApiCatalogOperator {
 
     public String readYaml(String specId) {
         return OpenApiBundledSpecs.readYaml(classLoader, specId);
+    }
+
+    /**
+     * 读取打包 YAML 并解析为 OpenAPI 文档 JSON（供 HTTP {@code application/json} 响应）。
+     */
+    public JsonNode readOpenApiDocument(String specId) {
+        return OpenApiBundledSpecCodec.parseYamlDocument(readYaml(specId));
     }
 }

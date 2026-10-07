@@ -12,13 +12,13 @@
 #
 # HTTP 路由（与下方 scalar.path / scalar.specs-base 默认值一致）:
 #   GET /openapi/specs              — 规范列表（JSON）
-#   GET /openapi/specs/{specId}     — 规范正文（YAML）
+#   GET /openapi/specs/{specId}     — 规范正文（application/json，由打包 YAML 解析）
 #   GET /openapi/ui                 — Scalar 文档 HTML
 #   GET /openapi/ui/scalar.js       — Scalar 前端脚本
 # ---------------------------------------------------------------------------
 scalar:
   # --- Nexus 路由（须与 Jersey 端点一致）---
-  # OpenAPI 规范目录根路径；Scalar 拉取 YAML 时使用，须与 OpenApiCatalogEndpoint 相同
+  # OpenAPI 规范目录根路径；Scalar 拉取 JSON 规范时使用，须与 OpenApiCatalogEndpoint 相同
   specs-base: /openapi/specs
   # Scalar HTML 文档页路径；同时作为 scalar.js 的父路径
   path: /openapi/ui

@@ -22,7 +22,11 @@ public class OpenApiCatalogConfiguration {
 
     @Bean
     OpenApiCatalogOperator openApiCatalogOperator() {
-        return new OpenApiCatalogOperator();
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        if (loader == null) {
+            loader = OpenApiCatalogOperator.class.getClassLoader();
+        }
+        return new OpenApiCatalogOperator(loader);
     }
 
     @Bean

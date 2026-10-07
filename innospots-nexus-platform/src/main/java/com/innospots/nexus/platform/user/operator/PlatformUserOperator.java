@@ -83,6 +83,36 @@ public class PlatformUserOperator {
         }
     }
 
+    public void ensureEmailAvailable(String email, String excludePlatformUserId) {
+        if (email == null || email.isBlank()) {
+            return;
+        }
+        String normalized = email.trim();
+        LambdaQueryWrapper<PlatformUserEntity> query = new LambdaQueryWrapper<PlatformUserEntity>()
+                .apply("LOWER(email) = {0}", normalized.toLowerCase());
+        if (excludePlatformUserId != null && !excludePlatformUserId.isBlank()) {
+            query.ne(PlatformUserEntity::getPlatformUserId, excludePlatformUserId);
+        }
+        if (platformUserDao.selectCount(query) > 0) {
+            throw NexusException.build(PlatformUserStatusCode.EMAIL_DUPLICATED);
+        }
+    }
+
+    public void ensureMobileAvailable(String mobile, String excludePlatformUserId) {
+        if (mobile == null || mobile.isBlank()) {
+            return;
+        }
+        String normalized = normalizeMobile(mobile);
+        LambdaQueryWrapper<PlatformUserEntity> query = new LambdaQueryWrapper<PlatformUserEntity>()
+                .eq(PlatformUserEntity::getMobile, normalized);
+        if (excludePlatformUserId != null && !excludePlatformUserId.isBlank()) {
+            query.ne(PlatformUserEntity::getPlatformUserId, excludePlatformUserId);
+        }
+        if (platformUserDao.selectCount(query) > 0) {
+            throw NexusException.build(PlatformUserStatusCode.MOBILE_DUPLICATED);
+        }
+    }
+
     public PlatformUserEntity newEntity(
             String loginName,
             String displayName,
@@ -128,5 +158,9 @@ public class PlatformUserOperator {
     private boolean existsLoginName(String loginName) {
         return platformUserDao.selectCount(new LambdaQueryWrapper<PlatformUserEntity>()
                 .eq(PlatformUserEntity::getLoginName, loginName)) > 0;
+    }
+
+    private static String normalizeMobile(String mobile) {
+        return mobile.trim().replace(" ", "");
     }
 }

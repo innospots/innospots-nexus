@@ -2,6 +2,7 @@ package com.innospots.nexus.spring.console.jaxrs.exception;
 
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import org.slf4j.Logger;
@@ -122,6 +123,7 @@ public final class ConsoleJaxRsExceptionSupport {
         int httpStatus = resolveHttpStatus(exception);
         R<Void> body = R.fail(exception.code(), exception.getMessage(), exception.display());
         return Response.status(httpStatus)
+                .type(MediaType.APPLICATION_JSON)
                 .header(ConsoleHttpHeaders.REQUEST_ID, requestId)
                 .entity(body)
                 .build();

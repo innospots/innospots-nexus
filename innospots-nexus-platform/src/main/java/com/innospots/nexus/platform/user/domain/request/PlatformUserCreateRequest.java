@@ -12,6 +12,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
  * @param email             邮箱地址
  * @param mobile            手机号
  * @param employeeNo        内部员工编号
+ * @param roleCodes         默认 PLATFORM 角色编码，逗号分隔；空则跳过
  * @param encryptedPassword 前端加密密码载荷
  */
 @Schema(name = "PlatformUserCreateRequest", description = "创建平台用户请求")
@@ -26,6 +27,8 @@ public record PlatformUserCreateRequest(
         String mobile,
         @Schema(description = "内部员工编号")
         String employeeNo,
+        @Schema(description = "默认角色编码，逗号分隔")
+        String roleCodes,
         @Schema(description = "前端加密密码", required = true)
         String encryptedPassword
 ) {

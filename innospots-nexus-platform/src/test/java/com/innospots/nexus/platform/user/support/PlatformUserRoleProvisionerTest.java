@@ -10,7 +10,7 @@ import com.innospots.nexus.console.role.dao.RoleDao;
 import com.innospots.nexus.console.role.domain.entity.RoleBindingEntity;
 import com.innospots.nexus.console.role.domain.entity.RoleEntity;
 import com.innospots.nexus.console.role.domain.enums.RoleOwnerType;
-import com.innospots.nexus.platform.invite.status.PlatformInviteStatusCode;
+import com.innospots.nexus.platform.user.status.PlatformUserStatusCode;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -63,6 +63,6 @@ class PlatformUserRoleProvisionerTest {
         assertThatThrownBy(() -> provisioner.assignDefaultRolesIfPresent("usr-1", "missing"))
                 .isInstanceOf(NexusException.class)
                 .extracting(ex -> ((NexusException) ex).code())
-                .isEqualTo(PlatformInviteStatusCode.INVITE_DEFAULT_ROLE_NOT_FOUND.fullCode());
+                .isEqualTo(PlatformUserStatusCode.ROLE_CODE_NOT_FOUND.fullCode());
     }
 }

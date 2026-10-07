@@ -18,6 +18,18 @@ public enum PlatformUserStatusCode implements StatusCode {
             "0003",
             StatusCategory.BUSINESS_RULE,
             "Platform user is not pending registration approval",
+            409),
+    EMAIL_DUPLICATED("0004", StatusCategory.DATA_CONSISTENCY, "Email already exists", 409),
+    MOBILE_DUPLICATED("0005", StatusCategory.DATA_CONSISTENCY, "Mobile already exists", 409),
+    ROLE_CODE_NOT_FOUND(
+            "0006",
+            StatusCategory.RESOURCE_DATA,
+            "Platform role code was not found",
+            404),
+    STATUS_UPDATE_NOT_ALLOWED(
+            "0007",
+            StatusCategory.BUSINESS_RULE,
+            "Only ACTIVE or DISABLED may be set via admin status API",
             409);
 
     private static final String MODULE = "PLU";

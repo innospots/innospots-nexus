@@ -7,16 +7,16 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexus.core.openapi.OpenApiCatalogPaths;
 
 /**
- * 构建期 OpenAPI 规范目录：列表与按 specId 读取 YAML。
+ * 构建期 OpenAPI 规范目录：列表（{@link R}）与按 specId 返回 OpenAPI JSON 文档。
  */
 @Path(OpenApiCatalogPaths.SPECS_BASE)
 @Tag(name = "OpenApiCatalog", description = "OpenAPI 规范目录")
@@ -37,9 +37,9 @@ public final class OpenApiCatalogEndpoint {
 
     @GET
     @Path("/{specId}")
-    @Produces({"application/yaml", "text/yaml"})
-    @Operation(operationId = "openApiSpecDetail", summary = "OpenAPI 规范明细")
-    public Response getSpec(@PathParam("specId") String specId) {
-        return Response.ok(catalogOperator.readYaml(specId)).type("application/yaml").build();
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "openApiSpecDetail", summary = "OpenAPI 规范明细（JSON 文档）")
+    public JsonNode getSpec(@PathParam("specId") String specId) {
+        return catalogOperator.readOpenApiDocument(specId);
     }
 }

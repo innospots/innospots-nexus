@@ -47,3 +47,21 @@ CREATE TABLE IF NOT EXISTS nx_service_registry (
 );
 
 CREATE INDEX IF NOT EXISTS idx_nx_service_registry_name_service_status ON nx_service_registry (service_name, service_status);
+
+CREATE TABLE IF NOT EXISTS nx_system_setting (
+    setting_id      VARCHAR(32)   NOT NULL,
+    setting_domain  VARCHAR(64)   NOT NULL,
+    setting_scope   VARCHAR(32)   NOT NULL,
+    scope_id        VARCHAR(32)   NOT NULL,
+    setting_key     VARCHAR(128)  NOT NULL,
+    value_type      VARCHAR(32)   NOT NULL,
+    setting_value   VARCHAR(2048) NOT NULL,
+    created_at      TIMESTAMP,
+    updated_at      TIMESTAMP,
+    created_by      VARCHAR(64),
+    updated_by      VARCHAR(64),
+    PRIMARY KEY (setting_id),
+    CONSTRAINT uk_nx_system_setting_scope_key UNIQUE (setting_domain, setting_scope, scope_id, setting_key)
+);
+
+CREATE INDEX IF NOT EXISTS idx_nx_system_setting_domain ON nx_system_setting (setting_domain);

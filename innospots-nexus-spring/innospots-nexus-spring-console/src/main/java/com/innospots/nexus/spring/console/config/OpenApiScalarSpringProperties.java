@@ -17,7 +17,7 @@ import com.scalar.maven.core.ScalarProperties;
  * <ul>
  *   <li>文档 HTML：{@link #getPath()}（默认 {@link OpenApiCatalogPaths#UI_DEFAULT}）</li>
  *   <li>前端脚本：{@link #resolveScalarJavascriptPath()}</li>
- *   <li>规范 YAML：{@link #getSpecsBase()} + {@code /{specId}}，与 {@link OpenApiCatalogEndpoint} 对齐</li>
+ *   <li>规范 JSON：{@link #getSpecsBase()} + {@code /{specId}}，与 {@link OpenApiCatalogEndpoint} 对齐</li>
  * </ul>
  */
 @ConfigurationProperties(prefix = "scalar")
@@ -69,7 +69,7 @@ public class OpenApiScalarSpringProperties extends ScalarProperties {
     }
 
     /**
-     * 单个 OpenAPI 规范 YAML 的 URL 前缀，形如 {@code /openapi/specs/}。
+     * 单个 OpenAPI 规范 JSON 的 URL 前缀，形如 {@code /openapi/specs/}。
      */
     public String resolveSpecItemUrlPrefix() {
         return OpenApiCatalogPaths.specItemUrlPrefix(specsBase);

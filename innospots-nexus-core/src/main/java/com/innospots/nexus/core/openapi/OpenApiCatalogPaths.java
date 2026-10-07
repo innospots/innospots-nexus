@@ -35,7 +35,7 @@ public final class OpenApiCatalogPaths {
     }
 
     /**
-     * 单个规范 YAML 的 HTTP 前缀，形如 {@code /openapi/specs/}。
+     * 单个规范 JSON 文档的 HTTP 前缀，形如 {@code /openapi/specs/}。
      */
     public static String specItemUrlPrefix(String specsBase) {
         return normalizeSpecsBase(specsBase) + "/";

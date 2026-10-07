@@ -43,5 +43,9 @@
             <groupId>com.scalar.maven</groupId>
             <artifactId>scalar-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+        </dependency>
     </dependencies>
 </project>

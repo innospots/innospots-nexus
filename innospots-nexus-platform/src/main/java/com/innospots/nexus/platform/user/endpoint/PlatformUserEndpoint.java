@@ -74,7 +74,7 @@ public class PlatformUserEndpoint {
 
     @PUT
     @Path("/{platformUserId}/status")
-    @Operation(operationId = "platformUserUpdateStatus", summary = "更新平台用户状态")
+    @Operation(operationId = "platformUserUpdateStatus", summary = "更新平台用户状态（仅 ACTIVE 或 DISABLED）")
     public R<Void> updateUserStatus(
             @Parameter(description = "平台用户 ID", required = true) @PathParam("platformUserId") String platformUserId,
             PlatformUserStatusUpdateRequest request) {

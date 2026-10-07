@@ -18,7 +18,10 @@ import com.innospots.nexus.platform.user.domain.request.PlatformUserPageRequest;
 import com.innospots.nexus.platform.user.domain.request.PlatformUserStatusUpdateRequest;
 import com.innospots.nexus.platform.user.domain.request.PlatformUserUpdateRequest;
 import com.innospots.nexus.platform.user.domain.vo.PlatformUserVo;
+import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.platform.user.operator.PlatformUserOperator;
+import com.innospots.nexus.platform.user.status.PlatformUserStatusCode;
+import com.innospots.nexus.platform.user.support.PlatformUserRoleProvisioner;
 
 /**
  * 平台用户管理工作流：档案 CRUD、密码登记与自助注册 provisioning。
@@ -34,6 +37,7 @@ public class PlatformUserService {
     private final PlatformUserOperator platformUserOperator;
     private final CredentialService credentialService;
     private final PasswordDecryptor passwordDecryptor;
+    private final PlatformUserRoleProvisioner platformUserRoleProvisioner;
 
     public PageResult<PlatformUserVo> pageUsers(PlatformUserPageRequest request) {
         PageResult<PlatformUserEntity> page = platformUserOperator.page(request);
@@ -55,18 +59,21 @@ public class PlatformUserService {
         Checks.notBlank(request.encryptedPassword(), "encryptedPassword");
         String loginName = request.loginName().trim();
         platformUserOperator.ensureLoginNameAvailable(loginName);
+        platformUserOperator.ensureEmailAvailable(request.email(), null);
+        platformUserOperator.ensureMobileAvailable(request.mobile(), null);
 
         PlatformUserEntity user = platformUserOperator.newEntity(
                 loginName,
                 request.displayName(),
                 request.email(),
-                request.mobile(),
+                normalizeMobileForStorage(request.mobile()),
                 request.employeeNo(),
                 PlatformUserStatus.ACTIVE);
         platformUserOperator.insert(user);
 
         String rawPassword = passwordDecryptor.decrypt(request.encryptedPassword());
         enrollPassword(user.getPlatformUserId(), rawPassword);
+        platformUserRoleProvisioner.assignDefaultRolesIfPresent(user.getPlatformUserId(), request.roleCodes());
         log.info("Created platform user {}", user.getPlatformUserId());
         return toVo(user);
     }
@@ -131,10 +138,13 @@ public class PlatformUserService {
             entity.setDisplayName(request.displayName());
         }
         if (request.email() != null) {
-            entity.setEmail(request.email());
+            platformUserOperator.ensureEmailAvailable(request.email(), platformUserId);
+            entity.setEmail(request.email().trim());
         }
         if (request.mobile() != null) {
-            entity.setMobile(request.mobile());
+            String normalizedMobile = normalizeMobileForStorage(request.mobile());
+            platformUserOperator.ensureMobileAvailable(normalizedMobile, platformUserId);
+            entity.setMobile(normalizedMobile);
         }
         if (request.employeeNo() != null) {
             entity.setEmployeeNo(request.employeeNo());
@@ -148,6 +158,9 @@ public class PlatformUserService {
     public void updateUserStatus(String platformUserId, PlatformUserStatusUpdateRequest request) {
         Objects.requireNonNull(request, "request");
         Checks.notNull(request.status(), "status");
+        if (request.status() != PlatformUserStatus.ACTIVE && request.status() != PlatformUserStatus.DISABLED) {
+            throw NexusException.build(PlatformUserStatusCode.STATUS_UPDATE_NOT_ALLOWED);
+        }
         PlatformUserEntity entity = platformUserOperator.requireById(platformUserId);
         platformUserOperator.updateStatus(entity, request.status());
     }
@@ -165,12 +178,14 @@ public class PlatformUserService {
         Checks.notBlank(rawPassword, "rawPassword");
         String normalizedLogin = loginName.trim();
         platformUserOperator.ensureLoginNameAvailable(normalizedLogin);
+        platformUserOperator.ensureEmailAvailable(email, null);
+        platformUserOperator.ensureMobileAvailable(mobile, null);
 
         PlatformUserEntity user = platformUserOperator.newEntity(
                 normalizedLogin,
                 displayName,
                 email,
-                mobile,
+                normalizeMobileForStorage(mobile),
                 employeeNo,
                 status);
         platformUserOperator.insert(user);
@@ -181,6 +196,13 @@ public class PlatformUserService {
 
     private void enrollPassword(String platformUserId, String rawPassword) {
         credentialService.enrollPassword(SecurityRealm.PLATFORM, platformUserId, rawPassword);
+    }
+
+    private static String normalizeMobileForStorage(String mobile) {
+        if (mobile == null || mobile.isBlank()) {
+            return mobile;
+        }
+        return mobile.trim().replace(" ", "");
     }
 
     private PlatformUserVo toVo(PlatformUserEntity entity) {

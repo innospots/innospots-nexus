@@ -14,12 +14,7 @@ public enum PlatformInviteStatusCode implements StatusCode {
     INVITE_EXPIRED("0003", StatusCategory.BUSINESS_RULE, "Invite has expired", 410),
     INVITE_CONTACT_MISMATCH("0004", StatusCategory.BUSINESS_RULE, "Contact does not match invite", 400),
     INVITE_CODE_LOCKED("0005", StatusCategory.PERMISSION_SECURITY, "Invite code is locked", 423),
-    INVITE_CONTACT_REQUIRED("0006", StatusCategory.INPUT_VALIDATION, "Email or mobile is required", 400),
-    INVITE_DEFAULT_ROLE_NOT_FOUND(
-            "0007",
-            StatusCategory.RESOURCE_DATA,
-            "Default role code was not found for platform realm",
-            404);
+    INVITE_CONTACT_REQUIRED("0006", StatusCategory.INPUT_VALIDATION, "Email or mobile is required", 400);
 
     private static final String MODULE = "PIN";
 

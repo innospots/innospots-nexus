@@ -32,6 +32,18 @@ class PlatformUserOperatorTest {
     }
 
     @Test
+    void ensureEmailAvailableRejectsDuplicateIgnoringCase() {
+        PlatformUserDao userDao = mock(PlatformUserDao.class);
+        when(userDao.selectCount(any())).thenReturn(1L);
+        PlatformUserOperator operator = new PlatformUserOperator(userDao);
+
+        assertThatThrownBy(() -> operator.ensureEmailAvailable("Alice@Example.com", null))
+                .isInstanceOf(NexusException.class)
+                .extracting(ex -> ((NexusException) ex).code())
+                .isEqualTo(PlatformUserStatusCode.EMAIL_DUPLICATED.fullCode());
+    }
+
+    @Test
     void updateStatusPersistsTargetStatus() {
         PlatformUserDao userDao = mock(PlatformUserDao.class);
         PlatformUserEntity entity = new PlatformUserEntity();

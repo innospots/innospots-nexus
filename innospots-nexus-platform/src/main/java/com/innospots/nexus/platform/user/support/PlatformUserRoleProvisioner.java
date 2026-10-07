@@ -20,7 +20,7 @@ import com.innospots.nexus.console.role.domain.enums.RoleBindingSubjectType;
 import com.innospots.nexus.console.role.domain.enums.RoleOwnerType;
 import com.innospots.nexus.console.scope.ConsoleOwnership;
 import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
-import com.innospots.nexus.platform.invite.status.PlatformInviteStatusCode;
+import com.innospots.nexus.platform.user.status.PlatformUserStatusCode;
 
 /**
  * 在无会话上下文的开通流程中，将平台用户绑定到 PLATFORM 作用域角色。
@@ -61,7 +61,7 @@ public class PlatformUserRoleProvisioner {
                         .eq(RoleEntity::getStatus, BasicStatus.ENABLED.name()),
                 PLATFORM_ROLE_OWNERSHIP));
         if (role == null) {
-            throw NexusException.build(PlatformInviteStatusCode.INVITE_DEFAULT_ROLE_NOT_FOUND);
+            throw NexusException.build(PlatformUserStatusCode.ROLE_CODE_NOT_FOUND);
         }
         return role;
     }

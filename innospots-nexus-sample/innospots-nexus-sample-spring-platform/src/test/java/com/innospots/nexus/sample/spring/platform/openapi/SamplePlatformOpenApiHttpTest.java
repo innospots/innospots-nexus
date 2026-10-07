@@ -80,23 +80,23 @@ class SamplePlatformOpenApiHttpTest {
     }
 
     @Test
-    void openApiSpecDetailEndpointReturnsPlatformYaml() throws Exception {
+    void openApiSpecDetailEndpointReturnsPlatformOpenApiJson() throws Exception {
         HttpResponse<String> response = get("/openapi/specs/" + PLATFORM_SPEC_ID);
         assertThat(response.statusCode()).isEqualTo(200);
         assertThat(response.headers().firstValue("content-type").orElse(""))
-                .contains("yaml");
+                .contains("application/json");
 
-        String yaml = response.body();
-        assertThat(yaml).contains("openapi:");
-        assertThat(yaml).contains("paths:");
-        assertThat(yaml).contains("/platform/tenants");
+        JsonNode document = OBJECT_MAPPER.readTree(response.body());
+        assertThat(document.get("openapi").asText()).startsWith("3.");
+        assertThat(document.get("paths").toString()).contains("/platform/tenants");
     }
 
     @Test
-    void openApiSpecDetailEndpointReturnsConsoleYaml() throws Exception {
+    void openApiSpecDetailEndpointReturnsConsoleOpenApiJson() throws Exception {
         HttpResponse<String> response = get("/openapi/specs/" + CONSOLE_SPEC_ID);
         assertThat(response.statusCode()).isEqualTo(200);
-        assertThat(response.body()).contains("/api/nexus/status");
+        JsonNode document = OBJECT_MAPPER.readTree(response.body());
+        assertThat(document.get("paths").toString()).contains("/api/d/nexus/status");
     }
 
     private HttpResponse<String> get(String path) throws Exception {

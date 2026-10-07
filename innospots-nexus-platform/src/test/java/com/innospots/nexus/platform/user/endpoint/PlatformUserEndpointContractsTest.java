@@ -64,6 +64,7 @@ class PlatformUserEndpointContractsTest {
                         "email",
                         "mobile",
                         "employeeNo",
+                        "roleCodes",
                         "encryptedPassword");
         assertThat(PlatformUserVo.class.isRecord()).isTrue();
         assertThat(Arrays.stream(PlatformUserVo.class.getRecordComponents())

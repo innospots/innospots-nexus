@@ -36,7 +36,12 @@ public class PlatformUserBeans {
     PlatformUserService platformUserService(
             PlatformUserOperator platformUserOperator,
             CredentialService credentialService,
-            PasswordDecryptor passwordDecryptor) {
-        return new PlatformUserService(platformUserOperator, credentialService, passwordDecryptor);
+            PasswordDecryptor passwordDecryptor,
+            PlatformUserRoleProvisioner platformUserRoleProvisioner) {
+        return new PlatformUserService(
+                platformUserOperator,
+                credentialService,
+                passwordDecryptor,
+                platformUserRoleProvisioner);
     }
 }

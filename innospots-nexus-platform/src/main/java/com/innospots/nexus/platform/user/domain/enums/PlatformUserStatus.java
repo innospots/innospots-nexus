@@ -12,7 +12,8 @@ package com.innospots.nexus.platform.user.domain.enums;
 public enum PlatformUserStatus {
 
     /**
-     * 账号已创建或邀请已发出，尚未完成激活（例如未设密或未接受邀请）。
+     * 预留：账号尚未完成激活。当前开通路径（邀请/直创）直接写入 {@link #ACTIVE} 或 {@link #PENDING_APPROVAL}，
+     * 邀请进度以 {@code nx_pl_invite} 为准。
      */
     PENDING_ACTIVATION,
 
@@ -32,7 +33,7 @@ public enum PlatformUserStatus {
     DISABLED,
 
     /**
-     * 因策略或多次失败被临时锁定。
+     * 预留：临时锁定。MVP 不由本模块写入；账户保护由 console 凭证/登录策略承担。
      */
     LOCKED
 }

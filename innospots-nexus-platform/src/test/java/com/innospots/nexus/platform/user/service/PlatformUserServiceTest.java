@@ -11,9 +11,11 @@ import com.innospots.nexus.platform.user.dao.PlatformUserDao;
 import com.innospots.nexus.platform.user.domain.entity.PlatformUserEntity;
 import com.innospots.nexus.platform.user.domain.enums.PlatformUserStatus;
 import com.innospots.nexus.platform.user.domain.request.PlatformUserCreateRequest;
+import com.innospots.nexus.platform.user.domain.request.PlatformUserStatusUpdateRequest;
 import com.innospots.nexus.platform.user.domain.vo.PlatformUserVo;
 import com.innospots.nexus.platform.user.operator.PlatformUserOperator;
 import com.innospots.nexus.platform.user.status.PlatformUserStatusCode;
+import com.innospots.nexus.platform.user.support.PlatformUserRoleProvisioner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -27,10 +29,11 @@ import static org.mockito.Mockito.when;
 class PlatformUserServiceTest {
 
     @Test
-    void createUserPersistsUserThenCredential() {
+    void createUserPersistsUserThenCredentialAndRoles() {
         PlatformUserDao userDao = mock(PlatformUserDao.class);
         CredentialService credentialService = mock(CredentialService.class);
         PasswordDecryptor decryptor = mock(PasswordDecryptor.class);
+        PlatformUserRoleProvisioner roleProvisioner = mock(PlatformUserRoleProvisioner.class);
         DbPrimaryGenerator generator = new DbPrimaryGenerator();
         when(userDao.selectCount(any())).thenReturn(0L);
         doAnswer(invocation -> {
@@ -43,7 +46,8 @@ class PlatformUserServiceTest {
         PlatformUserService service = new PlatformUserService(
                 new PlatformUserOperator(userDao),
                 credentialService,
-                decryptor);
+                decryptor,
+                roleProvisioner);
 
         PlatformUserVo created = service.createUser(new PlatformUserCreateRequest(
                 "ops.alice",
@@ -51,6 +55,7 @@ class PlatformUserServiceTest {
                 "alice@innospots.com",
                 "13800000001",
                 "E001",
+                "ops,viewer",
                 "front-encrypted-password"));
 
         assertThat(created.platformUserId()).startsWith("pus");
@@ -61,17 +66,15 @@ class PlatformUserServiceTest {
                 eq(SecurityRealm.PLATFORM),
                 eq(created.platformUserId()),
                 eq("raw-secret"));
+        verify(roleProvisioner).assignDefaultRolesIfPresent(created.platformUserId(), "ops,viewer");
     }
 
     @Test
     void createUserRejectsMissingLoginName() {
-        PlatformUserService service = new PlatformUserService(
-                new PlatformUserOperator(mock(PlatformUserDao.class)),
-                mock(CredentialService.class),
-                mock(PasswordDecryptor.class));
+        PlatformUserService service = serviceWithMocks(mock(PlatformUserDao.class));
 
         assertThatThrownBy(() -> service.createUser(new PlatformUserCreateRequest(
-                " ", "Alice", null, null, null, "encrypted")))
+                " ", "Alice", null, null, null, null, "encrypted")))
                 .isInstanceOf(NexusException.class);
     }
 
@@ -79,10 +82,7 @@ class PlatformUserServiceTest {
     void createUserRejectsDuplicateLoginName() {
         PlatformUserDao userDao = mock(PlatformUserDao.class);
         when(userDao.selectCount(any())).thenReturn(1L);
-        PlatformUserService service = new PlatformUserService(
-                new PlatformUserOperator(userDao),
-                mock(CredentialService.class),
-                mock(PasswordDecryptor.class));
+        PlatformUserService service = serviceWithMocks(userDao);
 
         assertThatThrownBy(() -> service.createUser(new PlatformUserCreateRequest(
                 "ops.alice",
@@ -90,9 +90,36 @@ class PlatformUserServiceTest {
                 null,
                 null,
                 null,
+                null,
                 "encrypted")))
                 .isInstanceOf(NexusException.class)
                 .extracting(ex -> ((NexusException) ex).code())
                 .isEqualTo(PlatformUserStatusCode.LOGIN_NAME_DUPLICATED.fullCode());
+    }
+
+    @Test
+    void updateUserStatusRejectsNonAdminStatuses() {
+        PlatformUserDao userDao = mock(PlatformUserDao.class);
+        PlatformUserEntity entity = new PlatformUserEntity();
+        entity.setPlatformUserId("pus-1");
+        entity.setStatus(PlatformUserStatus.ACTIVE.name());
+        when(userDao.selectById("pus-1")).thenReturn(entity);
+
+        PlatformUserService service = serviceWithMocks(userDao);
+
+        assertThatThrownBy(() -> service.updateUserStatus(
+                        "pus-1",
+                        new PlatformUserStatusUpdateRequest(PlatformUserStatus.LOCKED)))
+                .isInstanceOf(NexusException.class)
+                .extracting(ex -> ((NexusException) ex).code())
+                .isEqualTo(PlatformUserStatusCode.STATUS_UPDATE_NOT_ALLOWED.fullCode());
+    }
+
+    private static PlatformUserService serviceWithMocks(PlatformUserDao userDao) {
+        return new PlatformUserService(
+                new PlatformUserOperator(userDao),
+                mock(CredentialService.class),
+                mock(PasswordDecryptor.class),
+                mock(PlatformUserRoleProvisioner.class));
     }
 }
