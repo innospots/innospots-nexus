@@ -12,6 +12,10 @@ nexus:
     web:
       # 是否启用 Web 横切；默认 true（与 @ConditionalOnProperty matchIfMissing 一致）
       enabled: true
+      # Jersey Filter 路由（与 spring.jersey.type=filter 配合）
+      # jersey:
+      #   root-path: /openapi/ui          # GET / 重定向目标（默认 Scalar 文档页）
+      #   forward-on-404: false           # 未匹配 JAX-RS 时是否交给 Spring MVC
       security:
         # 请求侧安全总开关（Bearer 鉴权 + ConsolePagePermissionFilter）；默认 true。
         # 关闭后不做鉴权与页面 permission 判定；登录/令牌仍由 console-auth.yaml 配置（仅建议本地调试）。

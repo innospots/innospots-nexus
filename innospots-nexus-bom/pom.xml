@@ -38,6 +38,7 @@
         <jakarta-persistence.version>3.2.0</jakarta-persistence.version>
         <jakarta-transaction.version>2.0.1</jakarta-transaction.version>
         <jakarta-ws-rs.version>4.0.0</jakarta-ws-rs.version>
+        <jakarta-annotation.version>2.1.1</jakarta-annotation.version>
         <microprofile-openapi.version>4.1.1</microprofile-openapi.version>
         <smallrye-open-api.version>4.3.5</smallrye-open-api.version>
         <mapstruct.version>1.6.3</mapstruct.version>
@@ -316,6 +317,11 @@
                 <groupId>jakarta.ws.rs</groupId>
                 <artifactId>jakarta.ws.rs-api</artifactId>
                 <version>${jakarta-ws-rs.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.annotation</groupId>
+                <artifactId>jakarta.annotation-api</artifactId>
+                <version>${jakarta-annotation.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.microprofile.openapi</groupId>

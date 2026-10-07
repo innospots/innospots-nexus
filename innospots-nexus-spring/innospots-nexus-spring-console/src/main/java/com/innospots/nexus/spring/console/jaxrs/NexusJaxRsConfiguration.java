@@ -12,10 +12,13 @@ import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.jersey.autoconfigure.ResourceConfigCustomizer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import com.innospots.nexus.spring.console.config.ConsoleWebProperties;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.type.MethodMetadata;
@@ -27,18 +30,25 @@ import java.util.List;
 
 /**
  * 将 Spring 容器中带 {@link Path} 的 Bean 注册为 Jersey 资源，直接对外暴露 Jakarta REST 契约。
+ *
+ * <p>Filter 模式下 404 是否透传 Spring MVC 由 {@link ConsoleWebProperties#getJersey()} 的
+ * {@code forward-on-404} 控制（默认由 Jersey 直接 404）。</p>
  */
 @Configuration
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+@EnableConfigurationProperties(ConsoleWebProperties.class)
 public class NexusJaxRsConfiguration {
 
     private static final Logger LOG = LoggerFactory.getLogger(NexusJaxRsConfiguration.class);
 
     @Bean
-    ResourceConfig nexusJaxRsResourceConfig(List<NexusJerseyResourceConfigurer> jerseyResourceConfigurers) {
+    ResourceConfig nexusJaxRsResourceConfig(
+            List<NexusJerseyResourceConfigurer> jerseyResourceConfigurers,
+            ConsoleWebProperties webProperties) {
         ResourceConfig resourceConfig = new ResourceConfig();
         resourceConfig.register(SpringComponentProvider.class);
-        resourceConfig.property(ServletProperties.FILTER_FORWARD_ON_404, true);
+        resourceConfig.property(
+                ServletProperties.FILTER_FORWARD_ON_404, webProperties.getJersey().isForwardOn404());
         for (NexusJerseyResourceConfigurer configurer : jerseyResourceConfigurers) {
             configurer.configure(resourceConfig);
         }
