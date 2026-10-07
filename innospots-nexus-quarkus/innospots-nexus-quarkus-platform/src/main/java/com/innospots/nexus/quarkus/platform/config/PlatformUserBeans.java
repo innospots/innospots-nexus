@@ -6,9 +6,12 @@ import jakarta.inject.Singleton;
 
 import com.innospots.nexus.console.credential.password.PasswordDecryptor;
 import com.innospots.nexus.console.credential.password.service.CredentialService;
+import com.innospots.nexus.console.role.dao.RoleBindingDao;
+import com.innospots.nexus.console.role.dao.RoleDao;
 import com.innospots.nexus.platform.user.dao.PlatformUserDao;
 import com.innospots.nexus.platform.user.operator.PlatformUserOperator;
 import com.innospots.nexus.platform.user.service.PlatformUserService;
+import com.innospots.nexus.platform.user.support.PlatformUserRoleProvisioner;
 
 /**
  * 运营管理平台用户 Quarkus CDI 装配。
@@ -20,6 +23,12 @@ public class PlatformUserBeans {
     @Singleton
     PlatformUserOperator platformUserOperator(PlatformUserDao platformUserDao) {
         return new PlatformUserOperator(platformUserDao);
+    }
+
+    @Produces
+    @Singleton
+    PlatformUserRoleProvisioner platformUserRoleProvisioner(RoleDao roleDao, RoleBindingDao roleBindingDao) {
+        return new PlatformUserRoleProvisioner(roleDao, roleBindingDao);
     }
 
     @Produces

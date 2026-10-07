@@ -27,6 +27,7 @@ import com.innospots.nexus.platform.settings.domain.enums.PlatformRegistrationMo
 import com.innospots.nexus.platform.settings.service.PlatformRegistrationModeSettingService;
 import com.innospots.nexus.platform.user.domain.vo.PlatformUserVo;
 import com.innospots.nexus.platform.user.service.PlatformUserService;
+import com.innospots.nexus.platform.user.support.PlatformUserRoleProvisioner;
 
 /**
  * 公开邀请注册：链接 token 接受与注册页邀请码激活（INVITE 模式门禁仅作用于邀请码路径）。
@@ -43,6 +44,7 @@ public class PlatformPublicInviteService {
     private final OtpChallengeService otpChallengeService;
     private final PasswordDecryptor passwordDecryptor;
     private final PlatformRegistrationModeSettingService registrationModeSettingService;
+    private final PlatformUserRoleProvisioner platformUserRoleProvisioner;
 
     /**
      * 匿名预览邀请令牌（掩码联系方式）。
@@ -115,7 +117,12 @@ public class PlatformPublicInviteService {
         return completeInviteActivation(invite, request.loginName(), request.encryptedPassword());
     }
 
-    /** 创建 ACTIVE 用户并将邀请单标记为已接受。 */
+    /**
+     * 创建 ACTIVE 用户、按邀请单授予默认角色（非空时），并将邀请单标记为已接受。
+     *
+     * <p>登录名或联系方式与已有用户冲突时由 {@link PlatformUserService} 抛出异常，邀请单保持
+     * {@link com.innospots.nexus.platform.invite.domain.enums.PlatformInviteStatus#PENDING}。</p>
+     */
     private String completeInviteActivation(PlatformInviteEntity invite, String loginName, String encryptedPassword) {
         String resolvedLoginName = resolveLoginName(invite, loginName);
         String rawPassword = passwordDecryptor.decrypt(encryptedPassword);
@@ -124,6 +131,7 @@ public class PlatformPublicInviteService {
                 invite.getEmail(),
                 invite.getMobile(),
                 rawPassword);
+        platformUserRoleProvisioner.assignDefaultRolesIfPresent(user.platformUserId(), invite.getDefaultRoleCodes());
         inviteOperator.markAccepted(invite, user.platformUserId());
         return user.platformUserId();
     }

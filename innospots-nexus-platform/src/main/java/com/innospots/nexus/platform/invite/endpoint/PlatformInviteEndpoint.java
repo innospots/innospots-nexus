@@ -24,6 +24,13 @@ import com.innospots.nexus.platform.invite.domain.request.PlatformInvitePageRequ
 import com.innospots.nexus.platform.invite.domain.vo.PlatformInviteVo;
 import com.innospots.nexus.platform.invite.service.PlatformInviteService;
 
+/**
+ * 平台用户邀请管理端 API（发邀请、重发、撤销）。
+ *
+ * @author Smars
+ * @date 2026/10/06
+ * @see com.innospots.nexus.platform.invite.service.PlatformInviteService
+ */
 @Path(PlatformConstant.INVITES_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)

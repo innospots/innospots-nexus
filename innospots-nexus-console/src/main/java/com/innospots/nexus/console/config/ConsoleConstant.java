@@ -9,7 +9,7 @@ package com.innospots.nexus.console.config;
 public final class ConsoleConstant {
 
     /** 控制台管理 REST API 根路径前缀。 */
-    public static final String API_PREFIX = "/api/nexus";
+    public static final String API_PREFIX = "/api/d/nexus";
 
     /**
      * 公共开放 REST API 根路径前缀（无需鉴权）。

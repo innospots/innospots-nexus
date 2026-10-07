@@ -20,6 +20,7 @@ import com.innospots.nexus.platform.invite.support.PlatformInviteLinkBuilder;
 import com.innospots.nexus.platform.invite.support.PlatformInviteOtpNotifier;
 import com.innospots.nexus.platform.settings.service.PlatformRegistrationModeSettingService;
 import com.innospots.nexus.platform.user.service.PlatformUserService;
+import com.innospots.nexus.platform.user.support.PlatformUserRoleProvisioner;
 
 @ApplicationScoped
 public class PlatformProvisioningBeans {
@@ -59,13 +60,15 @@ public class PlatformProvisioningBeans {
             PlatformUserService platformUserService,
             OtpChallengeService otpChallengeService,
             PasswordDecryptor passwordDecryptor,
-            PlatformRegistrationModeSettingService registrationModeSettingService) {
+            PlatformRegistrationModeSettingService registrationModeSettingService,
+            PlatformUserRoleProvisioner platformUserRoleProvisioner) {
         return new PlatformPublicInviteService(
                 platformInviteOperator,
                 platformUserService,
                 otpChallengeService,
                 passwordDecryptor,
-                registrationModeSettingService);
+                registrationModeSettingService,
+                platformUserRoleProvisioner);
     }
 
     @Produces

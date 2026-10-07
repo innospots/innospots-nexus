@@ -14,7 +14,7 @@ package com.innospots.nexus.platform.config;
 public final class PlatformConstant {
 
     /** 运营管理平台 REST API 根路径前缀。 */
-    public static final String API_PREFIX = "/api/platform";
+    public static final String API_PREFIX = "/api/d/platform";
 
     /** 无需登录的公开 API 前缀。 */
     public static final String PUBLIC_PREFIX = API_PREFIX + "/public";
