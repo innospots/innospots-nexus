@@ -12,15 +12,16 @@ import com.innospots.nexus.console.auth.service.TokenIssuer;
 import com.innospots.nexus.console.config.AuthConfig;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubjectResolver;
 import com.innospots.nexus.console.permission.authorization.ConsolePagePermissionAuthorizer;
-import com.innospots.nexus.spring.console.jaxrs.exception.ConsoleJaxRsExceptionSupport;
-import com.innospots.nexus.spring.console.jaxrs.exception.ConsoleNexusExceptionMapper;
-import com.innospots.nexus.spring.console.jaxrs.exception.ConsoleThrowableExceptionMapper;
-import com.innospots.nexus.spring.console.jaxrs.exception.ConsoleWebApplicationExceptionMapper;
-import com.innospots.nexus.spring.console.jaxrs.filter.ConsoleAuthenticationFilter;
-import com.innospots.nexus.spring.console.jaxrs.filter.ConsoleCorsFilter;
-import com.innospots.nexus.spring.console.jaxrs.filter.ConsoleDevSessionFilter;
-import com.innospots.nexus.spring.console.jaxrs.filter.ConsolePagePermissionFilter;
-import com.innospots.nexus.spring.console.jaxrs.filter.ConsoleRequestContextFilter;
+import com.innospots.nexus.console.jaxrs.exception.ConsoleJaxRsExceptionSupport;
+import com.innospots.nexus.console.jaxrs.exception.ConsoleNexusExceptionMapper;
+import com.innospots.nexus.console.jaxrs.exception.ConsoleThrowableExceptionMapper;
+import com.innospots.nexus.console.jaxrs.exception.ConsoleWebApplicationExceptionMapper;
+import com.innospots.nexus.console.jaxrs.filter.ConsoleAuthenticationFilter;
+import com.innospots.nexus.console.jaxrs.filter.ConsoleCorsFilter;
+import com.innospots.nexus.console.jaxrs.filter.ConsoleDevSessionFilter;
+import com.innospots.nexus.console.jaxrs.filter.ConsolePagePermissionFilter;
+import com.innospots.nexus.console.jaxrs.filter.ConsoleRequestContextFilter;
+import com.innospots.nexus.console.endpoint.MainRootEndpoint;
 
 /**
  * 管理控制台 Jersey 横切过滤器与异常映射的 Spring 装配。
@@ -57,7 +58,7 @@ public class ConsoleJaxRsWebConfiguration {
     /** 按 {@link ConsoleWebProperties#getCors()} 输出 CORS 响应头。 */
     @Bean
     ConsoleCorsFilter consoleCorsFilter(ConsoleWebProperties webProperties) {
-        return new ConsoleCorsFilter(webProperties);
+        return new ConsoleCorsFilter(webProperties.getCors());
     }
 
     /** 解析 Bearer 令牌并填充 {@link com.innospots.nexus.base.thread.SessionContext}。 */
@@ -65,28 +66,35 @@ public class ConsoleJaxRsWebConfiguration {
     ConsoleAuthenticationFilter consoleAuthenticationFilter(
             ConsoleWebProperties webProperties,
             TokenIssuer tokenIssuer) {
-        return new ConsoleAuthenticationFilter(webProperties, tokenIssuer);
+        return new ConsoleAuthenticationFilter(webProperties.getSecurity(), tokenIssuer);
     }
 
-    /** 关闭请求侧安全时，按 {@link ConsoleWebProperties.Security#getDevSession()} 注入开发会话。 */
+    /** 关闭请求侧安全时，按 {@link com.innospots.nexus.console.jaxrs.web.ConsoleWebSecuritySettings#getDevSession()} 注入开发会话。 */
     @Bean
     ConsoleDevSessionFilter consoleDevSessionFilter(ConsoleWebProperties webProperties) {
-        return new ConsoleDevSessionFilter(webProperties);
+        return new ConsoleDevSessionFilter(webProperties.getSecurity());
     }
 
-    /** 对 {@link ConsoleWebProperties.Security#getConsolePathPatterns()} 命中路径执行页面权限校验。 */
+    /** 对 {@link com.innospots.nexus.console.jaxrs.web.ConsoleWebSecuritySettings#getConsolePathPatterns()} 命中路径执行页面权限校验。 */
     @Bean
     ConsolePagePermissionFilter consolePagePermissionFilter(
             ConsoleWebProperties webProperties,
             ConsolePagePermissionAuthorizer pagePermissionAuthorizer,
             AuthorizationSubjectResolver subjectResolver) {
-        return new ConsolePagePermissionFilter(webProperties, pagePermissionAuthorizer, subjectResolver);
+        return new ConsolePagePermissionFilter(
+                webProperties.getSecurity(), pagePermissionAuthorizer, subjectResolver);
     }
 
     /** 分配 {@code X-Request-Id}、写入 TLC，并在响应结束后清理线程上下文。 */
     @Bean
     ConsoleRequestContextFilter consoleRequestContextFilter() {
         return new ConsoleRequestContextFilter();
+    }
+
+    /** {@code GET /} 重定向至 {@link com.innospots.nexus.console.jaxrs.web.ConsoleWebJerseySettings#getRootPath()}。 */
+    @Bean
+    MainRootEndpoint mainRootEndpoint(ConsoleWebProperties webProperties) {
+        return new MainRootEndpoint(webProperties.getJersey().getRootPath());
     }
 
     /** 映射 {@link com.innospots.nexus.base.exception.NexusException}。 */

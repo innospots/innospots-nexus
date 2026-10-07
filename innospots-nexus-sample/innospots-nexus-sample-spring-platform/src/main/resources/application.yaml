@@ -19,6 +19,7 @@ spring:
 server:
   port: 8082
 
+# 须 classpath 上有 spring-boot-starter-actuator（见 sample-platform pom）；Jersey filter 模式下端点由 Boot 注册到 JAX-RS，非 Spring MVC 转发。
 management:
   endpoints:
     web:
