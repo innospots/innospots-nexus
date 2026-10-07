@@ -47,4 +47,18 @@ class OpenApiScalarDocumentationTest {
         assertThat(operator.listSpecs()).isNotEmpty();
         assertThat(html).contains(operator.listSpecs().getFirst().specId());
     }
+
+    @Test
+    void prepareForServingDoesNotMutateTemplateProperties() {
+        ScalarProperties template = OpenApiScalarDocumentation.createDefaultProperties();
+        template.setPath("docs/api");
+        OpenApiCatalogOperator operator = new OpenApiCatalogOperator();
+
+        ScalarProperties prepared = OpenApiScalarDocumentation.prepareForServing(template, operator);
+
+        assertThat(prepared.getPath()).isEqualTo("/docs/api");
+        assertThat(prepared.getSources()).isNotEmpty();
+        assertThat(template.getPath()).isEqualTo("docs/api");
+        assertThat(template.getSources()).isNull();
+    }
 }

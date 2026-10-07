@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.innospots.nexus.core.openapi.OpenApiCatalogPaths;
 import com.innospots.nexus.core.openapi.catalog.OpenApiCatalogOperator;
+import com.innospots.nexus.base.util.BeanUtils;
 import com.innospots.nexus.core.openapi.catalog.OpenApiSpecItemVo;
 import com.scalar.maven.core.ScalarHtmlRenderer;
 import com.scalar.maven.core.ScalarProperties;
@@ -115,13 +116,30 @@ public final class OpenApiScalarDocumentation {
         return prepareForServing(scalarProperties, operator, OpenApiCatalogPaths.SPECS_BASE);
     }
 
+    /**
+     * 基于模板配置生成可渲染快照；不修改传入的 {@code template}（例如 Spring {@code scalar.*} Bean）。
+     */
     public static ScalarProperties prepareForServing(
             ScalarProperties scalarProperties,
             OpenApiCatalogOperator operator,
             String specsBase) {
-        String docsPath = normalizeDocsPath(scalarProperties.getPath());
-        scalarProperties.setPath(docsPath);
-        applyCatalogSources(scalarProperties, operator.listSpecs(), specsBase);
-        return scalarProperties;
+        ScalarProperties prepared = copyScalarTemplate(scalarProperties);
+        String docsPath = normalizeDocsPath(prepared.getPath());
+        prepared.setPath(docsPath);
+        applyCatalogSources(prepared, operator.listSpecs(), specsBase);
+        return prepared;
+    }
+
+    private static ScalarProperties copyScalarTemplate(ScalarProperties template) {
+        if (template == null) {
+            return new ScalarProperties();
+        }
+        ScalarProperties copy = BeanUtils.copyProperties(template, ScalarProperties.class);
+        if (copy == null) {
+            copy = new ScalarProperties();
+        }
+        // 避免与模板共享 sources 列表；catalog 由 applyCatalogSources 在快照上单独绑定。
+        copy.setSources(null);
+        return copy;
     }
 }
