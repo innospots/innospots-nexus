@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# GitHub Self-hosted Runner 会在子进程中设置 RUNNER_TRACKING_ID，Job 结束可能清理 nohup 起的 Java
+unset RUNNER_TRACKING_ID
+
 if [[ -z "$JAVA_HOME" ]]; then
   echo "ERROR: Set JAVA_HOME to a JDK 25+ installation."
   exit 1
