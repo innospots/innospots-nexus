@@ -35,21 +35,28 @@ public class NexusScalarJerseyConfiguration {
             };
         }
 
-        String html = OpenApiScalarDocumentation.renderDocumentationHtml(
-                scalarProperties,
-                openApiCatalogOperator,
-                scalarProperties.getSpecsBase());
         String docsPath = scalarProperties.resolveDocumentationPath();
         String scriptPath = scalarProperties.resolveScalarJavascriptPath();
         byte[] javascript = OpenApiScalarDocumentation.scalarJavascriptContent();
+        String specsBase = scalarProperties.getSpecsBase();
 
         return resourceConfig -> {
             Resource.Builder page = Resource.builder(docsPath);
             page.addMethod(HttpMethod.GET)
                     .produces(MediaType.TEXT_HTML)
-                    .handledBy((ContainerRequestContext request) ->
-                            Response.ok(html, "text/html;charset=UTF-8").build()
-                    );
+                    .handledBy((ContainerRequestContext request) -> {
+                        try {
+                            String html = OpenApiScalarDocumentation.renderDocumentationHtml(
+                                    scalarProperties,
+                                    openApiCatalogOperator,
+                                    specsBase);
+                            return Response.ok(html, "text/html;charset=UTF-8").build();
+                        } catch (IOException exception) {
+                            return Response.serverError()
+                                    .entity("Failed to render OpenAPI documentation UI")
+                                    .build();
+                        }
+                    });
 
             Resource.Builder script = Resource.builder(scriptPath);
             script.addMethod(HttpMethod.GET)
