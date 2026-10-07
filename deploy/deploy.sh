@@ -56,17 +56,23 @@ extract_release() {
     local package_path="$1"
     local release_dir="$2"
     local package_name="$3"
+    local stage_dir="${release_dir}.staging.$$"
 
-    mkdir -p "${release_dir}"
-    # 发行包带一级根目录 <artifactId>/；解压后展平到 release_dir
-    tar -xzf "${package_path}" -C "${release_dir}"
-    local inner="${release_dir}/${package_name}"
+    rm -rf "${stage_dir}"
+    mkdir -p "${stage_dir}"
+    # 发行包带一级根目录 <artifactId>/；在 staging 内展平后再原子替换 release_dir
+    tar -xzf "${package_path}" -C "${stage_dir}"
+    local inner="${stage_dir}/${package_name}"
     if [[ -d "${inner}" ]]; then
         shopt -s dotglob
-        mv "${inner}"/* "${release_dir}/"
+        mv "${inner}"/* "${stage_dir}/"
         rmdir "${inner}"
         shopt -u dotglob
     fi
+    if [[ -e "${release_dir}" ]]; then
+        mv "${release_dir}" "${release_dir}.old.$(date +%s)"
+    fi
+    mv "${stage_dir}" "${release_dir}"
 }
 
 link_shared_dirs() {
