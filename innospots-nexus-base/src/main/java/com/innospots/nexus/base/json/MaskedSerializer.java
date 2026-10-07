@@ -7,10 +7,9 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import java.io.IOException;
 
 /**
- * Jackson serializer that applies field-level masking.
+ * 应用字段级脱敏的 Jackson 序列化器。
  * <p>
- * This serializer is automatically wired by {@link MaskingModule} and
- * should not be referenced directly.
+ * 此序列化器由 {@link MaskingModule} 自动装配，不应直接引用。
  */
 final class MaskedSerializer extends StdSerializer<Object> {
 

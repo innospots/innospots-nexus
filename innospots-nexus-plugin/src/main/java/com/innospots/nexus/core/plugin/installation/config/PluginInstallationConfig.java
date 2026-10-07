@@ -7,6 +7,8 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
  * 插件安装策略配置；默认开启首次发现自动安装。
  *
  * @param autoInstall 首次发现时是否自动安装
+ * @author Smars
+ * @date 2026/09/13
  */
 public record PluginInstallationConfig(boolean autoInstall) {
 

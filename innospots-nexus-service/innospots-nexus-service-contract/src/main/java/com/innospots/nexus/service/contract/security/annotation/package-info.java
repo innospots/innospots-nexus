@@ -1,5 +1,5 @@
 /**
- * Level-1 security annotations for resources and operations.
+ * 面向资源与操作的一级安全注解。
  *
  * @author Smars
  * @date 2026/09/13

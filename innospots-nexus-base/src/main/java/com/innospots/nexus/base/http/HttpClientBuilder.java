@@ -14,8 +14,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Fluent builder for {@link CloseableHttpClient} instances with sensible
- * defaults (10s connect timeout, 30s response timeout, redirects enabled).
+ * {@link CloseableHttpClient} 的流式构建器，提供合理默认值
+ * （连接超时 10s、响应超时 30s、启用重定向）。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @see HttpUtils
  */
 public final class HttpClientBuilder {
 
@@ -28,11 +32,21 @@ public final class HttpClientBuilder {
     private HttpClientBuilder() {
     }
 
+    /**
+     * 创建构建器实例。
+     *
+     * @return 构建器
+     */
     public static HttpClientBuilder create() {
         return new HttpClientBuilder();
     }
 
-    /** Sets the connection timeout. Falls back to default (10s) if null. */
+    /**
+     * 设置连接超时。为 null 时回退到默认值（10s）。
+     *
+     * @param connectTimeout 连接超时
+     * @return 当前构建器
+     */
     public HttpClientBuilder connectTimeout(Duration connectTimeout) {
         if (connectTimeout != null) {
             this.connectTimeout = connectTimeout;
@@ -40,7 +54,12 @@ public final class HttpClientBuilder {
         return this;
     }
 
-    /** Sets the response/socket timeout. Falls back to default (30s) if null. */
+    /**
+     * 设置响应/套接字超时。为 null 时回退到默认值（30s）。
+     *
+     * @param responseTimeout 响应超时
+     * @return 当前构建器
+     */
     public HttpClientBuilder responseTimeout(Duration responseTimeout) {
         if (responseTimeout != null) {
             this.responseTimeout = responseTimeout;
@@ -48,19 +67,35 @@ public final class HttpClientBuilder {
         return this;
     }
 
-    /** Enables or disables HTTP redirect following (default: enabled). */
+    /**
+     * 启用或禁用 HTTP 重定向跟随（默认：启用）。
+     *
+     * @param redirectsEnabled 是否跟随重定向
+     * @return 当前构建器
+     */
     public HttpClientBuilder redirectsEnabled(boolean redirectsEnabled) {
         this.redirectsEnabled = redirectsEnabled;
         return this;
     }
 
-    /** Sets the User-Agent header to be sent with every request. */
+    /**
+     * 设置每个请求发送的 User-Agent 请求头。
+     *
+     * @param userAgent User-Agent 值
+     * @return 当前构建器
+     */
     public HttpClientBuilder userAgent(String userAgent) {
         this.userAgent = userAgent;
         return this;
     }
 
-    /** Adds a default header to be sent with every request. */
+    /**
+     * 添加每个请求默认发送的请求头。
+     *
+     * @param name  请求头名称
+     * @param value 请求头值
+     * @return 当前构建器
+     */
     public HttpClientBuilder defaultHeader(String name, String value) {
         if (name != null && value != null) {
             defaultHeaders.add(new BasicHeader(name, value));
@@ -69,8 +104,10 @@ public final class HttpClientBuilder {
     }
 
     /**
-     * Builds a {@link CloseableHttpClient} with the configured settings.
-     * Uses a pooled connection manager with a single connection config.
+     * 按配置构建 {@link CloseableHttpClient}。
+     * 使用带单一连接配置的池化连接管理器。
+     *
+     * @return HTTP 客户端
      */
     public CloseableHttpClient build() {
         ConnectionConfig connectionConfig = ConnectionConfig.custom()

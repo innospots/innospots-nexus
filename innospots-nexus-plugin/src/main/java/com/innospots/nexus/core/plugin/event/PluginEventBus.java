@@ -6,6 +6,8 @@ import java.util.function.Consumer;
  * 限定在一个插件管理器内的同步尽力而为事件通道。
  *
  * <p>观察者在发布线程同步执行；单个观察者失败不会中断其他观察者。</p>
+ * @author Smars
+ * @date 2026/09/13
  */
 public interface PluginEventBus {
 

@@ -171,7 +171,7 @@ public class RoleEntity extends WorkspaceBaseEntity {
 
 - HTTP API 边界必须使用 `*Endpoint` 后缀，并放在 `endpoint` 包中。
 - 新领域初始化默认使用具体 endpoint 类。仅当开发者明确要求独立传输契约时才声明接口。
-- **`innospots-nexus-console` 例外：** 管理台 REST **传输契约**可声明为 `interface *Endpoint`，由 `kernel` 或 `platform` 提供实现类。这不属于「仅为 mock 建接口」；须满足：契约与 VO 留在 console、实现不含 console 业务工作流、路径与 `R<T>` 形状在 console 锁定。详见 [`api-contract.md`](../references/api-contract.md)「Console 传输契约」。
+- **`innospots-nexus-console` 例外：** 管理台 REST **传输契约**可声明为 `interface *Endpoint`，由 `portal` 或 `platform` 提供实现类。这不属于「仅为 mock 建接口」；须满足：契约与 VO 留在 console、实现不含 console 业务工作流、路径与 `R<T>` 形状在 console 锁定。详见 [`api-contract.md`](../references/api-contract.md)「Console 传输契约」。
 - 使用 Jakarta REST（`jakarta.ws.rs`）注解声明资源路径、HTTP 方法、媒体类型和请求参数。
 - 保持 endpoint 签名面向传输。将校验、编排、事务处理和持久化委托给 service 或 operator 边界。
 - 有意延后的具体方法必须包含聚焦的 `TODO`，并抛出 `NexusException.build(合适的 StatusCode)`（如暂无专用码可用 `NexusStatusCode.SYSTEM_ERROR`），而非 `UnsupportedOperationException` 或返回伪造数据。
@@ -227,7 +227,7 @@ public class RoleEntity extends WorkspaceBaseEntity {
 - `com.innospots.nexus.base.events.EventBus` 是用于领域事件发布与订阅的进程内事件总线。
 - 使用领域事件解耦协作方，而不改变允许的模块依赖方向。事件发布不是同级业务模块相互依赖的理由。
 - 当消费者可合法依赖该领域时，发布业务领域拥有事件契约。放在发布方的 `domain.event` 包下，命名为 `XxxEvent`，并实现 `com.innospots.nexus.base.events.DomainEvent`。
-- kernel 和 platform 等并行业务模块不得相互导入对方的事件类型。通过可同时依赖两者的 application/adapter 模块协调，或仅在契约真正业务中立时通过刻意共享的较低层契约协调。不要仅为绕过依赖规则而将具体业务事件移到 core 或 console。
+- portal 和 platform 等并行业务模块不得相互导入对方的事件类型。通过可同时依赖两者的 application/adapter 模块协调，或仅在契约真正业务中立时通过刻意共享的较低层契约协调。不要仅为绕过依赖规则而将具体业务事件移到 core 或 console。
 - 领域事件应为不可变 record，仅包含消费者所需数据。不要通过事件暴露 DAO、service、可变实体或基础设施对象。
 - 允许引用事件契约的消费者在其自身领域的 `handler` 包中定义 `XxxEventHandler` 类型，并实现 `EventHandler<XxxEvent>`。
 - 发布方仅依赖事件契约和 `EventBus`；不得依赖消费者 handler 或消费者实现类型。

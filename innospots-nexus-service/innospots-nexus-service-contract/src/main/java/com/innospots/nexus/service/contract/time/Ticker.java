@@ -1,7 +1,7 @@
 package com.innospots.nexus.service.contract.time;
 
 /**
- * Monotonic nanosecond source used by {@link Deadline}.
+ * {@link Deadline} 使用的单调纳秒时钟源。
  *
  * @author Smars
  * @date 2026/09/13
@@ -11,16 +11,16 @@ package com.innospots.nexus.service.contract.time;
 public interface Ticker {
 
     /**
-     * Returns a monotonic timestamp in nanoseconds.
+     * 返回单调纳秒时间戳。
      *
-     * @return nanoseconds
+     * @return 纳秒数
      */
     long readNanos();
 
     /**
-     * Returns a ticker backed by {@link System#nanoTime()}.
+     * 返回基于 {@link System#nanoTime()} 的 ticker。
      *
-     * @return system ticker
+     * @return 系统 ticker
      */
     static Ticker system() {
         return System::nanoTime;

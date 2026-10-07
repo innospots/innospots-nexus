@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * 线程安全的资源栈，按注册逆序执行每个释放器且每个释放器最多执行一次。
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class DefaultResourceScope implements ResourceScope {
 

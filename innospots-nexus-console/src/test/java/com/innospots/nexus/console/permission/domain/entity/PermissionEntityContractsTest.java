@@ -7,20 +7,23 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import org.junit.jupiter.api.Test;
 
+import com.innospots.nexus.core.persistence.entity.OwnershipEntity;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class PermissionEntityContractsTest {
 
     @Test
-    void grantEntityUsesWorkspaceScopedGrantTable() {
+    void grantEntityUsesOwnershipScopedGrantTable() {
         assertThat(PermissionGrantEntity.class.getAnnotation(Entity.class)).isNotNull();
         assertThat(PermissionGrantEntity.class.getAnnotation(TableName.class).value())
                 .isEqualTo("nx_permission_grant");
+        assertThat(PermissionGrantEntity.class.getSuperclass()).isEqualTo(OwnershipEntity.class);
     }
 
     @Test
     void grantEntityIsolatesBySecurityRealm() throws NoSuchFieldException {
-        Field field = PermissionGrantEntity.class.getDeclaredField("securityRealm");
+        Field field = OwnershipEntity.class.getDeclaredField("securityRealm");
         Column column = field.getAnnotation(Column.class);
         assertThat(field.getType()).isEqualTo(String.class);
         assertThat(column).isNotNull();

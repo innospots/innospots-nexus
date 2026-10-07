@@ -6,14 +6,14 @@ import java.util.Set;
 import com.innospots.nexus.base.util.Checks;
 
 /**
- * Immutable caller identity. Collections are copied. Anonymous principals use id {@code anonymous}.
+ * 不可变调用方身份。集合被复制。匿名主体标识为 {@code anonymous}。
  *
- * @param id          principal identifier
- * @param type        principal kind
- * @param realm       authentication realm
- * @param roles       declared roles, not a permission bypass
- * @param permissions declared permission keys
- * @param attributes  additional identity attributes
+ * @param id          主体标识
+ * @param type        主体类型
+ * @param realm       认证域
+ * @param roles       声明角色，非权限绕过
+ * @param permissions 声明权限键
+ * @param attributes  额外身份属性
  * @author Smars
  * @date 2026/09/13
  * @see PrincipalType
@@ -44,10 +44,10 @@ public record ServicePrincipal(
     }
 
     /**
-     * Returns an anonymous principal for {@code realm}.
+     * 返回 {@code realm} 的匿名主体。
      *
-     * @param realm authentication realm
-     * @return anonymous principal
+     * @param realm 认证域
+     * @return 匿名主体
      */
     public static ServicePrincipal anonymous(String realm) {
         return new ServicePrincipal(ANONYMOUS_ID, PrincipalType.ANONYMOUS, realm, Set.of(), Set.of(), Map.of());

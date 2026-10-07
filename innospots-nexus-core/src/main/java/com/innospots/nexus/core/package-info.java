@@ -1,8 +1,11 @@
 /**
- * Business-neutral platform infrastructure: persistence bases, scheduling, server
- * lifecycle, watcher runtime, startup SPI, and file metadata coordination.
+ * 业务中立的平台基础设施：持久化基类、调度、服务节点生命周期、Watcher 运行时、启动 SPI、
+ * 系统设置（{@code nx_system_setting}）与文件元数据协调。
  *
- * <p>Plugin runtime and Page DSL live in {@code innospots-nexus-plugin}. Console
- * catalog persistence lives in {@code innospots-nexus-console}.</p>
+ * <p>插件运行时与 Page DSL 位于 {@code innospots-nexus-plugin}。控制台目录持久化位于
+ * {@code innospots-nexus-console}。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 package com.innospots.nexus.core;

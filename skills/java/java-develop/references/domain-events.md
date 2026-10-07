@@ -24,7 +24,7 @@
 
 - 事件由**拥有业务事实的域**定义与发布（如 `RoleCreatedEvent` 由 role 域发布）。
 - **禁止**把具体业务事件塞进 `core`/`console` 仅为让两模块通信。
-- `kernel` 与 `platform` **不得**通过事件互引依赖；跨边界用 application 模块协调。
+- `portal` 与 `platform` **不得**通过事件互引依赖；跨边界用 application 模块协调。
 
 ---
 

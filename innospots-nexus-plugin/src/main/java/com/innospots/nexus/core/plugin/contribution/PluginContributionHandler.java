@@ -9,6 +9,8 @@ import com.innospots.nexus.core.plugin.discovery.PluginCatalog;
  * 负责一种 Contribution 全局校验和事务准备的宿主处理器。
  *
  * @param <T> 处理的贡献类型
+ * @author Smars
+ * @date 2026/09/13
  */
 public interface PluginContributionHandler<T extends PluginContribution> {
 

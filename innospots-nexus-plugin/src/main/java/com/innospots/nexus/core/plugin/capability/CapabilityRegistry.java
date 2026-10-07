@@ -20,6 +20,8 @@ import org.slf4j.LoggerFactory;
  *
  * <p>读操作无锁；写操作通过同步方法原子发布新快照。查询方法返回的 Provider
  * 实例由所属插件拥有，调用方不得跨插件生命周期持有。</p>
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class CapabilityRegistry implements CapabilityManager {
 

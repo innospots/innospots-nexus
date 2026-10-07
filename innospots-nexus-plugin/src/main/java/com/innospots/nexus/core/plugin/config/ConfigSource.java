@@ -11,6 +11,8 @@ import java.util.Map;
  *
  * <p>实现应返回不可变快照；调用方不得修改 {@link #values()} 返回的映射。
  * 不得由插件 JAR 提供，避免与 {@code PluginManager} 启动形成循环依赖。</p>
+ * @author Smars
+ * @date 2026/09/13
  */
 public interface ConfigSource {
 

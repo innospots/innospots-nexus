@@ -6,6 +6,10 @@ import java.util.List;
 
 /**
  * 启动后初始化编排入口；宿主在配置期组装任务，运行期仅调用 {@link #run()}。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @see NexusStartupTask
  */
 public final class NexusStartup {
 
@@ -34,7 +38,12 @@ public final class NexusStartup {
         }
     }
 
-    /** 组装 {@link NexusStartup} 实例。 */
+    /**
+     * 组装 {@link NexusStartup} 实例的构建器。
+     *
+     * @author Smars
+     * @date 2026/09/13
+     */
     public static final class Builder {
 
         private final List<NexusStartupTask> tasks = new ArrayList<>();

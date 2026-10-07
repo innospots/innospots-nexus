@@ -8,13 +8,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import com.innospots.nexus.base.thread.TLC;
-import com.innospots.nexus.core.plugin.contribution.console.ui.spec.HttpRequest;
-import com.innospots.nexus.core.plugin.contribution.console.ui.spec.PageDsl;
-import com.innospots.nexus.core.plugin.contribution.console.ui.spec.PageMeta;
-import com.innospots.nexus.core.plugin.contribution.console.ui.spec.action.ActionConfig;
-import com.innospots.nexus.core.plugin.contribution.console.ui.spec.action.ActionOrList;
-import com.innospots.nexus.core.plugin.contribution.console.ui.spec.datasource.HttpDataSource;
-import com.innospots.nexus.core.plugin.contribution.console.ui.spec.loader.PageDslLoader;
+import com.innospots.nexus.console.ui.spec.HttpRequest;
+import com.innospots.nexus.console.ui.spec.PageDsl;
+import com.innospots.nexus.console.ui.spec.PageMeta;
+import com.innospots.nexus.console.ui.spec.action.ActionConfig;
+import com.innospots.nexus.console.ui.spec.action.ActionOrList;
+import com.innospots.nexus.console.ui.spec.datasource.HttpDataSource;
+import com.innospots.nexus.console.ui.spec.loader.PageDslLoader;
 import com.innospots.nexus.core.plugin.capability.ProviderRef;
 import com.innospots.nexus.core.plugin.config.PluginConfig;
 import com.innospots.nexus.core.plugin.contribution.PluginContributionContext;
@@ -32,6 +32,7 @@ import com.innospots.nexus.console.catalog.domain.model.CatalogSyncResult;
 import com.innospots.nexus.core.plugin.lifecycle.PluginAvailability;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -57,7 +58,7 @@ class ConsoleCatalogSyncServiceTest {
         approve.setParams(Map.of("dataSource", "approve"));
         document.getActions().put("approve", new ActionOrList(List.of(approve)));
 
-        PageDslLoader loader = (moduleKey, pageKey) -> document;
+        PageDslLoader loader = (domainKey, moduleKey, pageKey) -> document;
         ConsoleCatalogResourceDao resourceDao = mock(ConsoleCatalogResourceDao.class);
         List<ConsoleCatalogResourceEntity> inserted = new ArrayList<>();
         doAnswer(invocation -> {
@@ -94,13 +95,69 @@ class ConsoleCatalogSyncServiceTest {
     }
 
     @Test
+    void syncsPageParentageFromPageMeta() {
+        ConsoleContributionCatalog registry = activeCatalogWithPages(
+                List.of(
+                        new UiSpecPageDeclaration("orders", "/sales/orders", List.of()),
+                        new UiSpecPageDeclaration("order-detail", "/sales/order-detail", List.of())));
+        PageDsl orders = ordersPage(httpDataSource("GET", "/api/orders"));
+        PageDsl detail = PageDsl.of(PageMeta.of("order-detail", "Order Detail"));
+        detail.getPage().setParentPageKey("orders");
+        PageDslLoader loader = (domainKey, moduleKey, pageKey) -> {
+            if ("order-detail".equals(pageKey)) {
+                return detail;
+            }
+            return orders;
+        };
+        ConsoleCatalogResourceDao resourceDao = mock(ConsoleCatalogResourceDao.class);
+        List<ConsoleCatalogResourceEntity> inserted = new ArrayList<>();
+        doAnswer(invocation -> {
+            ConsoleCatalogResourceEntity entity = invocation.getArgument(0);
+            entity.setResourceId("resource-" + inserted.size());
+            inserted.add(entity);
+            return 1;
+        }).when(resourceDao).insert(any(ConsoleCatalogResourceEntity.class));
+        when(resourceDao.selectList(any())).thenReturn(List.of());
+
+        ConsoleCatalogSyncService service = new ConsoleCatalogSyncService(
+                resourceDao, registry, loader);
+        service.sync();
+
+        ConsoleCatalogResourceEntity parent = inserted.stream()
+                .filter(entity -> CatalogResourceType.PAGE.name().equals(entity.getResourceType()))
+                .filter(entity -> "orders".equals(entity.getPageKey()))
+                .findFirst()
+                .orElseThrow();
+        ConsoleCatalogResourceEntity child = inserted.stream()
+                .filter(entity -> CatalogResourceType.PAGE.name().equals(entity.getResourceType()))
+                .filter(entity -> "order-detail".equals(entity.getPageKey()))
+                .findFirst()
+                .orElseThrow();
+        assertThat(child.getParentResourceId()).isEqualTo(parent.getResourceId());
+    }
+
+    @Test
+    void rejectsUnknownParentPageKeyDuringSync() {
+        ConsoleContributionCatalog registry = activeCatalogWithPages(List.of(
+                new UiSpecPageDeclaration("order-detail", "/sales/order-detail", List.of())));
+        PageDsl detail = PageDsl.of(PageMeta.of("order-detail", "Order Detail"));
+        detail.getPage().setParentPageKey("orders");
+        PageDslLoader loader = (domainKey, moduleKey, pageKey) -> detail;
+        ConsoleCatalogSyncService service = new ConsoleCatalogSyncService(
+                mock(ConsoleCatalogResourceDao.class), registry, loader);
+
+        assertThatThrownBy(service::sync)
+                .hasMessageContaining("parentPageKey");
+    }
+
+    @Test
     void updatesChangedResourceMetadata() {
         ConsoleContributionCatalog registry = activeCatalog();
 
         PageDsl firstDocument = ordersPage(httpDataSource("GET", "/api/orders"));
         PageDsl secondDocument = ordersPage(httpDataSource("POST", "/api/orders/search"));
         PageDsl[] current = {firstDocument};
-        PageDslLoader loader = (moduleKey, pageKey) -> current[0];
+        PageDslLoader loader = (domainKey, moduleKey, pageKey) -> current[0];
         ConsoleCatalogResourceDao resourceDao = mock(ConsoleCatalogResourceDao.class);
         List<ConsoleCatalogResourceEntity> stored = new ArrayList<>();
         doAnswer(invocation -> {
@@ -152,6 +209,10 @@ class ConsoleCatalogSyncServiceTest {
     }
 
     private static ConsoleContributionCatalog activeCatalog() {
+        return activeCatalogWithPages(List.of(new UiSpecPageDeclaration("orders", "/orders", List.of())));
+    }
+
+    private static ConsoleContributionCatalog activeCatalogWithPages(List<UiSpecPageDeclaration> pages) {
         ConsoleContributionCatalog catalog = new ConsoleContributionCatalog();
         ConsolePluginContributionHandler handler = new ConsolePluginContributionHandler(
                 catalog, new ReservedPluginResourceCatalog(List.of()));
@@ -160,34 +221,59 @@ class ConsoleCatalogSyncServiceTest {
                 new PluginContributionContext(
                         new ProviderRef("com.example.sales", "contribution-console-1"),
                         emptyConfig(), availability),
-                contribution());
+                contribution(pages));
         prepared.stage();
         prepared.commit();
         availability.activate();
         return catalog;
     }
 
-    private static ConsolePluginContribution contribution() {
+    private static ConsolePluginContribution contribution(List<UiSpecPageDeclaration> pages) {
+        String menuPageKey = pages.getFirst().pageKey();
         return new ConsolePluginContribution(List.of(new ConsoleModuleDeclaration(
+                        "sales",
                         "sales",
                         com.innospots.nexus.base.i18n.I18nObject.of("en", "Sales"),
                         com.innospots.nexus.base.i18n.I18nObject.of("en", "Sales module"),
-                        List.of(new UiSpecPageDeclaration("orders", "/orders", List.of())),
+                        pages,
                         List.of(MenuDeclaration.page(
-                                "orders",
+                                menuPageKey,
                                 com.innospots.nexus.base.i18n.I18nObject.of("en", "Orders"),
                                 null,
                                 0,
-                                "orders")))));
+                                menuPageKey)))));
     }
 
     private static PluginConfig emptyConfig() {
         return new PluginConfig() {
             @Override public java.util.Optional<String> get(String key) { return java.util.Optional.empty(); }
-            @Override public String require(String key) { throw new IllegalArgumentException(key); }
-            @Override public int getInt(String key, int defaultValue) { return defaultValue; }
-            @Override public long getLong(String key, long defaultValue) { return defaultValue; }
-            @Override public boolean getBoolean(String key, boolean defaultValue) { return defaultValue; }
+                        /**
+                         * 执行require。
+                         * @param key 键
+                         * @return 操作结果
+                         */
+                        @Override public String require(String key) { throw new IllegalArgumentException(key); }
+                        /**
+                         * 获取Int。
+                         * @param key 键
+                         * @param defaultValue 默认值
+                         * @return 操作结果
+                         */
+                        @Override public int getInt(String key, int defaultValue) { return defaultValue; }
+                        /**
+                         * 获取Long。
+                         * @param key 键
+                         * @param defaultValue 默认值
+                         * @return 操作结果
+                         */
+                        @Override public long getLong(String key, long defaultValue) { return defaultValue; }
+                        /**
+                         * 获取Boolean。
+                         * @param key 键
+                         * @param defaultValue 默认值
+                         * @return 操作结果
+                         */
+                        @Override public boolean getBoolean(String key, boolean defaultValue) { return defaultValue; }
             @Override public java.time.Duration getDuration(String key, java.time.Duration defaultValue) { return defaultValue; }
             @Override public com.innospots.nexus.core.plugin.config.SecretValue requireSecret(String key) { throw new IllegalArgumentException(key); }
         };

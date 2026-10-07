@@ -3,7 +3,7 @@ package com.innospots.nexus.service.contract.policy;
 import java.util.Optional;
 
 /**
- * Looks up resolved policies by operation identifier.
+ * 按操作标识查找已解析策略。
  *
  * @author Smars
  * @date 2026/09/13
@@ -13,18 +13,18 @@ import java.util.Optional;
 public interface PolicyCatalog {
 
     /**
-     * Finds the policy for {@code operationId}.
+     * 查找 {@code operationId} 对应的策略。
      *
-     * @param operationId operation identifier
-     * @return policy or empty
+     * @param operationId 操作标识
+     * @return 策略，不存在时为空
      */
     Optional<OperationPolicy> find(String operationId);
 
     /**
-     * Finds the static descriptor for {@code operationId}.
+     * 查找 {@code operationId} 的静态描述符。
      *
-     * @param operationId operation identifier
-     * @return descriptor or empty
+     * @param operationId 操作标识
+     * @return 描述符，不存在时为空
      */
     Optional<OperationDescriptor> descriptor(String operationId);
 }

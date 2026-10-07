@@ -3,10 +3,10 @@ package com.innospots.nexus.service.contract.audit;
 import java.util.Map;
 
 /**
- * Safe before/after snapshots for audit. Values must already be JSON-compatible trees.
+ * 审计用的安全前后快照。值必须为 JSON 兼容树结构。
  *
- * @param before previous state
- * @param after  next state
+ * @param before 变更前状态
+ * @param after  变更后状态
  * @author Smars
  * @date 2026/09/13
  * @see AuditSnapshotProvider

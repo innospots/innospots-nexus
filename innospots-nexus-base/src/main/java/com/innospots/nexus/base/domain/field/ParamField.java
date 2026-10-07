@@ -1,9 +1,11 @@
 package com.innospots.nexus.base.domain.field;
 
 /**
- * A parameter field with a specific {@link FieldValueType}, required flag,
- * and optional default value. Its scope is automatically set to
- * {@link FieldScope#PARAMETER}.
+ * 具有特定 {@link FieldValueType}、必填标志与可选默认值的参数字段。其作用域自动设为 {@link FieldScope#PARAMETER}。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @see DomainField
  */
 public class ParamField extends DomainField {
 

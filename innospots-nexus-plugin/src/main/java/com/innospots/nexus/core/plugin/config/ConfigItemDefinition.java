@@ -17,6 +17,8 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
  * @param secret 诊断信息是否必须遮罩该值；SECRET 类型会强制为 {@code true}
  * @param description 面向用户的配置说明
  * @param enumValues ENUM 类型允许的值；非 ENUM 类型必须为空
+ * @author Smars
+ * @date 2026/09/13
  */
 public record ConfigItemDefinition(
         String key,

@@ -23,9 +23,13 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 
 /**
- * Cryptographic utilities: password hashing (BCrypt), symmetric encryption
- * (AES-GCM), and asymmetric encryption (RSA/OAEP). RSA operations support
- * block-mode encryption for large payloads.
+ * 密码学工具类：密码哈希（BCrypt）、对称加密（AES-GCM）与不对称加密（RSA/OAEP）。
+ * RSA 操作支持大块数据的分块加密模式。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @see com.innospots.nexus.base.exception.NexusException
+ * @see com.innospots.nexus.base.status.NexusStatusCode
  */
 public final class CryptoUtils {
 
@@ -39,16 +43,21 @@ public final class CryptoUtils {
     private CryptoUtils() {
     }
 
-    /** Computes SHA-256 hex digest of the given string. */
+    /**
+     * 计算给定字符串的 SHA-256 十六进制摘要。
+     *
+     * @param value 待摘要的字符串
+     * @return SHA-256 十六进制字符串
+     */
     public static String sha256Hex(String value) {
         return SecureUtil.sha256(value);
     }
 
     /**
-     * Encrypts a raw password using BCrypt.
+     * 使用 BCrypt 加密原始密码。
      *
-     * @param rawPassword the plain-text password (must not be null)
-     * @return the BCrypt hash string
+     * @param rawPassword 明文密码（不得为 null）
+     * @return BCrypt 哈希字符串
      */
     public static String encryptPassword(String rawPassword) {
         Checks.notNull(rawPassword, "rawPassword");
@@ -60,9 +69,9 @@ public final class CryptoUtils {
     }
 
     /**
-     * Generates a BCrypt salt for password hashing.
+     * 生成用于密码哈希的 BCrypt 盐值。
      *
-     * @return the BCrypt salt string
+     * @return BCrypt 盐值字符串
      */
     public static String generatePasswordSalt() {
         try {
@@ -73,11 +82,11 @@ public final class CryptoUtils {
     }
 
     /**
-     * Encrypts a raw password using BCrypt and an externally supplied salt.
+     * 使用外部提供的盐值，以 BCrypt 加密原始密码。
      *
-     * @param rawPassword the plain-text password (must not be null)
-     * @param salt        externally supplied BCrypt salt (must not be blank)
-     * @return the BCrypt hash string
+     * @param rawPassword 明文密码（不得为 null）
+     * @param salt        外部提供的 BCrypt 盐值（不得为空白）
+     * @return BCrypt 哈希字符串
      */
     public static String encryptPassword(String rawPassword, String salt) {
         Checks.notNull(rawPassword, "rawPassword");
@@ -90,9 +99,11 @@ public final class CryptoUtils {
     }
 
     /**
-     * Verifies a raw password against a BCrypt hash.
+     * 校验原始密码是否与 BCrypt 哈希匹配。
      *
-     * @return true if the password matches the hash
+     * @param rawPassword       明文密码
+     * @param encryptedPassword BCrypt 哈希字符串
+     * @return 匹配时返回 {@code true}
      */
     public static boolean matchesPassword(String rawPassword, String encryptedPassword) {
         if (rawPassword == null || encryptedPassword == null || encryptedPassword.isBlank()) {
@@ -106,12 +117,12 @@ public final class CryptoUtils {
     }
 
     /**
-     * Encrypts plaintext using AES-GCM with a random 12-byte IV.
-     * The IV is prepended to the ciphertext; the result is Base64-encoded.
+     * 使用 AES-GCM 及随机 12 字节 IV 加密明文。
+     * IV 前置拼接在密文之前，结果经 Base64 编码。
      *
-     * @param plaintext the text to encrypt
-     * @param secret    the AES secret key bytes
-     * @return Base64-encoded IV + ciphertext
+     * @param plaintext 待加密的明文
+     * @param secret    AES 密钥字节
+     * @return Base64 编码的 IV + 密文
      */
     public static String encryptAesGcm(String plaintext, String secret) {
         try {
@@ -129,12 +140,12 @@ public final class CryptoUtils {
     }
 
     /**
-     * Decrypts AES-GCM ciphertext produced by {@link #encryptAesGcm}.
-     * Expects the first 12 bytes to be the IV.
+     * 解密由 {@link #encryptAesGcm} 产生的 AES-GCM 密文。
+     * 期望前 12 字节为 IV。
      *
-     * @param encrypted Base64-encoded IV + ciphertext
-     * @param secret    the AES secret key bytes
-     * @return the decrypted plaintext
+     * @param encrypted Base64 编码的 IV + 密文
+     * @param secret    AES 密钥字节
+     * @return 解密后的明文
      */
     public static String decryptAesGcm(String encrypted, String secret) {
         try {
@@ -149,16 +160,20 @@ public final class CryptoUtils {
         }
     }
 
-    /** Generates an RSA key pair with the default 2048-bit key size. */
+    /**
+     * 生成默认 2048 位密钥长度的 RSA 密钥对。
+     *
+     * @return Base64 编码的公钥/私钥对
+     */
     public static AsymmetricKeyPair generateRsaKeyPair() {
         return generateRsaKeyPair(DEFAULT_RSA_KEY_SIZE);
     }
 
     /**
-     * Generates an RSA key pair with the specified key size.
+     * 生成指定密钥长度的 RSA 密钥对。
      *
-     * @param keySize must be at least 2048
-     * @return the Base64-encoded public/private key pair
+     * @param keySize 密钥长度（位），至少为 2048
+     * @return Base64 编码的公钥/私钥对
      */
     public static AsymmetricKeyPair generateRsaKeyPair(int keySize) {
         Checks.isTrue(keySize >= DEFAULT_RSA_KEY_SIZE, "RSA key size must be at least 2048 bits");
@@ -176,12 +191,12 @@ public final class CryptoUtils {
     }
 
     /**
-     * Encrypts plaintext using RSA-OAEP with SHA-256.
-     * Supports block-mode encryption for data larger than the key modulus.
+     * 使用 RSA-OAEP（SHA-256）加密明文。
+     * 对超过密钥模数长度的数据支持分块加密模式。
      *
-     * @param plaintext the text to encrypt
-     * @param publicKey Base64-encoded X.509 public key
-     * @return Base64-encoded ciphertext
+     * @param plaintext 待加密的明文
+     * @param publicKey Base64 编码的 X.509 公钥
+     * @return Base64 编码的密文
      */
     public static String encryptRsa(String plaintext, String publicKey) {
         try {
@@ -197,11 +212,11 @@ public final class CryptoUtils {
     }
 
     /**
-     * Decrypts RSA ciphertext using the corresponding private key.
+     * 使用对应私钥解密 RSA 密文。
      *
-     * @param encrypted  Base64-encoded ciphertext
-     * @param privateKey Base64-encoded PKCS#8 private key
-     * @return decrypted plaintext
+     * @param encrypted  Base64 编码的密文
+     * @param privateKey Base64 编码的 PKCS#8 私钥
+     * @return 解密后的明文
      */
     public static String decryptRsa(String encrypted, String privateKey) {
         try {
@@ -246,6 +261,14 @@ public final class CryptoUtils {
         return output.toByteArray();
     }
 
+    /**
+     * RSA 不对称密钥对，公钥与私钥均为 Base64 编码字符串。
+     *
+     * @author Smars
+     * @date 2026/09/13
+     * @param publicKey  Base64 编码的公钥
+     * @param privateKey Base64 编码的私钥
+     */
     public record AsymmetricKeyPair(String publicKey, String privateKey) {
     }
 }

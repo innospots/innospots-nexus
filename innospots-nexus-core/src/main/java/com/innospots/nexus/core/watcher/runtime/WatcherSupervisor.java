@@ -11,9 +11,12 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Supervisor that manages a pool of background {@link IWatcher} threads.
- * <p>Implements {@link AutoCloseable} for graceful shutdown via
- * try-with-resources.</p>
+ * 管理后台 {@link IWatcher} 线程池的监督器。
+ * <p>实现 {@link AutoCloseable}，可通过 try-with-resources 优雅关闭。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @see IWatcher
  */
 public class WatcherSupervisor implements AutoCloseable {
 
@@ -25,8 +28,8 @@ public class WatcherSupervisor implements AutoCloseable {
     private NexusThreadPoolExecutor executor;
 
     /**
-     * @param maxSize maximum concurrent watchers / thread pool size
-     * @param name    pool name for thread naming
+     * @param maxSize 最大并发 Watcher 数 / 线程池大小
+     * @param name    线程池名称，用于线程命名
      */
     public WatcherSupervisor(int maxSize, String name) {
         this.maxSize = maxSize;
@@ -35,13 +38,15 @@ public class WatcherSupervisor implements AutoCloseable {
         this.executor = ThreadPoolBuilder.build(maxSize, maxSize, 0, name);
     }
 
-    /** Creates a supervisor with the default name {@code watcher-supervisor}. */
+    /** 使用默认名称 {@code watcher-supervisor} 创建监督器。 */
     public WatcherSupervisor(int maxSize) {
         this(maxSize, "watcher-supervisor");
     }
 
     /**
-     * Registers and starts a watcher in the thread pool.
+     * 在线程池中注册并启动 Watcher。
+     *
+     * @param watcher 待注册的 Watcher
      */
     public void register(IWatcher watcher) {
         logger.info("Register watcher: {}", watcher.getClass().getSimpleName());
@@ -52,13 +57,13 @@ public class WatcherSupervisor implements AutoCloseable {
         watchers.add(watcher);
     }
 
-    /** Returns the number of currently registered watchers. */
+    /** 返回当前已注册的 Watcher 数量。 */
     public int activeCount() {
         return watchers.size();
     }
 
     /**
-     * Graceful shutdown: stops all watchers, waits 1s, then shuts down the pool.
+     * 优雅关闭：停止全部 Watcher，等待 1 秒后关闭线程池。
      */
     @Override
     public void close() {

@@ -7,9 +7,10 @@ description: |
   转换器/Operator/Service 的代码骨架与对应单元测试时使用。遵循测试先行与六阶段
   领域初始化；每批改动后 `mvn clean compile`，功能交付前必须有通过的单元测试。
   触发词：写功能、开发、实现、新增接口、改功能、修 Bug、缺陷修复、重构、
-  领域初始化、建实体、建端点、建 DAO、代码模板、单元测试、契约测试、JUnit。
+  领域初始化、建实体、建端点、建 DAO、代码模板、单元测试、契约测试、JUnit、
+  去冗余、结构简化、死代码清理。
 category: java
-version: 1.5.0
+version: 1.7.0
 ---
 
 # 功能开发、修改、Bug 修复、重构与单元测试
@@ -17,6 +18,8 @@ version: 1.5.0
 ## 定位
 
 负责**实现代码与配套单元测试**。设计结论来自 `java:design`，规范来自 `java:reference`，
+结构简化与防过度设计见 `java:reference` →
+[code-quality-constraints.md](../java-reference/references/code-quality-constraints.md)，
 全量验证交给 `java:check`。**测试不再是独立技能**——与实现同一交付单元完成。
 
 产出形态、文件树、交付清单见 [develop-deliverables.md](references/develop-deliverables.md)。
@@ -40,9 +43,11 @@ version: 1.5.0
 
 - 设计输入与实现输出 → [develop-deliverables.md](references/develop-deliverables.md)
 - 归属与模块边界 → [module-ownership.md](../java-reference/references/module-ownership.md)
+- 控制台内置 entry / Page `pageKey` → [console-entry-and-pages.md](../java-reference/references/console-entry-and-pages.md)
 - 包结构（领域优先） → [package-structure.md](../java-reference/references/package-structure.md)
+- sample 扩展实施 → [sample-extension-development.md](references/sample-extension-development.md)
 - 作用域层级 → [scope-hierarchy.md](../java-reference/references/scope-hierarchy.md)
-- 建模与契约 → [domain-modeling.md](../java-reference/references/domain-modeling.md)、[api-contract.md](../java-reference/references/api-contract.md)
+- 建模与契约 → [domain-modeling.md](../java-reference/references/domain-modeling.md)、[api-contract.md](../java-reference/references/api-contract.md)、[openapi-contract.md](../java-reference/references/openapi-contract.md)
 - 注释 → [code-comments.md](../java-reference/standards/code-comments.md)
 - 异常实现 → [exception-handling.md](references/exception-handling.md)
 - 测试范围（设计侧） → `java:design` → [test-scope.md](../java-design/references/test-scope.md)
@@ -54,7 +59,10 @@ version: 1.5.0
 | 新业务领域初始化 | [domain-initialization.md](references/domain-initialization.md) + checklist | `mvn test` + `java:check` |
 | 在已有域加功能 | [change-workflow.md](references/change-workflow.md) | 聚焦单测 + `mvn clean compile` + `mvn test` |
 | 修 Bug | change-workflow 缺陷分支 | **先写复现测试** → 修实现 → `mvn test` |
-| 重构 | change-workflow 重构分支 | 行为锁定测试 + 全量 `mvn test` |
+| 重构 / 去冗余 / 死代码 | change-workflow 重构分支 + code-quality-constraints | 行为锁定测试 + 删旧路径 + 全量 `mvn test` |
+
+实现时默认 **最小增量**：不预建分层、不引入未在设计清单内的类型；每批改动后对照
+code-quality-constraints「增加代码前的门禁」。
 
 ## 测试先行（强制）
 
@@ -99,6 +107,8 @@ version: 1.5.0
 - [persistence-mybatis.md](references/persistence-mybatis.md) — MyBatis-Plus、LambdaWrapper、yaml 配置、禁 XML/properties
 - [exception-handling.md](references/exception-handling.md) — 异常实现
 - [change-workflow.md](references/change-workflow.md) — 加功能/改功能/修 Bug/重构
+- [sample-extension-development.md](references/sample-extension-development.md) — innospots-nexus-sample-platform 实施顺序与装配
+- [code-quality-constraints.md](../java-reference/references/code-quality-constraints.md) — 简化、去冗余、删无效代码
 
 ## 六阶段领域初始化
 
@@ -119,6 +129,9 @@ version: 1.5.0
 | Spring MVC / Spring 事务注解 | 端点 `jakarta.ws.rs`；事务 `jakarta.transaction.Transactional` |
 | `mapper.xml` / `beans.xml` / 新建 `*.properties` | MyBatis-Plus + LambdaWrapper + yaml 配置（见 persistence-mybatis.md） |
 | 复制遗留源码/POM | 遗留工程只作行为参考 |
+| 为「整洁」堆抽象/adapter/wrapper | 见 code-quality-constraints；先合并再删旧路径 |
+| 未确认引用就删 public API | 走 dead-code 引用确认流程 |
+| 小需求写出巨型 diff | 停手做结构复审，不得继续堆转发类 |
 
 规范红线 → [quick-constraints.md](../java-reference/references/quick-constraints.md)。
 

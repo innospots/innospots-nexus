@@ -11,7 +11,11 @@ import com.innospots.nexus.core.plugin.contribution.PreparedPluginContribution;
 import com.innospots.nexus.core.plugin.lifecycle.PluginAvailability;
 import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
-/** Console Contribution 的活动资源目录，不保存安装事实或 PluginState。 */
+/**
+ * Console Contribution 的活动资源目录，不保存安装事实或 PluginState。
+ * @author Smars
+ * @date 2026/09/13
+ */
 public final class ConsoleContributionCatalog {
 
     /** 按 ownerPluginId 索引；与 {@link PluginAvailability} 共同决定对外可见性。 */

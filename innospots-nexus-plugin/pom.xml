@@ -15,7 +15,7 @@
     <packaging>jar</packaging>
 
     <name>innospots-nexus-plugin</name>
-    <description>Classpath plugin runtime, contributions, and Page DSL for innospots-nexus.</description>
+    <description>innospots-nexus 的 classpath 插件运行时、贡献处理与 Page DSL。</description>
 
     <dependencies>
         <dependency>

@@ -15,28 +15,52 @@
     <packaging>jar</packaging>
 
     <name>innospots-nexus-platform</name>
-    <description>Ops-domain platform for tenant lifecycle and platform IAM.</description>
+    <description>面向业务统一管理的运营管理平台（租户生命周期、平台 IAM）。</description>
 
     <dependencies>
         <dependency>
             <groupId>com.innospots</groupId>
             <artifactId>innospots-nexus-console</artifactId>
         </dependency>
-        <dependency>
-            <groupId>jakarta.persistence</groupId>
-            <artifactId>jakarta.persistence-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>jakarta.transaction</groupId>
-            <artifactId>jakarta.transaction-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-extension</artifactId>
-        </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>io.smallrye</groupId>
+                <artifactId>smallrye-open-api-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>generate-openapi</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>generate-schema</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.outputDirectory}/META-INF/nexus-openapi</outputDirectory>
+                            <schemaFilename>${project.artifactId}</schemaFilename>
+                            <outputFileTypeFilter>YAML</outputFileTypeFilter>
+                            <encoding>UTF-8</encoding>
+                            <scanners>
+                                <scanner>JAX-RS</scanner>
+                            </scanners>
+                            <scanPackages>
+                                com.innospots.nexus.platform,
+                                com.innospots.nexus.base.domain.response,
+                                com.innospots.nexus.base.i18n,
+                                com.innospots.nexus.base.domain.enums
+                            </scanPackages>
+                            <scanDependenciesDisable>false</scanDependenciesDisable>
+                            <openApiVersion>3.1.0</openApiVersion>
+                            <operationIdStrategy>CLASS_METHOD</operationIdStrategy>
+                            <infoTitle>Innospots Nexus Platform API</infoTitle>
+                            <infoVersion>1.0.0</infoVersion>
+                            <infoDescription>运营管理平台租户生命周期与平台 IAM Jakarta REST 契约；运行时仅暴露构建期生成的 OpenAPI。</infoDescription>
+                            <infoContactName>Innospots Nexus</infoContactName>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

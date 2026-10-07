@@ -19,6 +19,7 @@
 | `code-comments.md` | 注释与 TODO |
 | `exception-status-code.md` | 异常与状态码 |
 | `domain-module-initialization.md` | 六阶段领域初始化 |
+| `openapi.md` | MicroProfile OpenAPI 注解、构建期 YAML、端点/request/vo Schema |
 | `module-skills.md` | 模块 API 参考生成策略（`README.md` 索引，非技能） |
 
 仓库级模块职责见根目录 `AGENTS.md`。

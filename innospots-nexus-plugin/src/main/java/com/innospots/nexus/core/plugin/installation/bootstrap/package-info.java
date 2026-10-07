@@ -3,5 +3,7 @@
  *
  * <p>宿主只需通过 {@link com.innospots.nexus.core.plugin.installation.bootstrap.PluginHostBootstrap}
  * 提交依赖并完成启用；发现、对账、运行时创建与启动顺序由 Core 封装。</p>
+ * @author Smars
+ * @date 2026/09/13
  */
 package com.innospots.nexus.core.plugin.installation.bootstrap;

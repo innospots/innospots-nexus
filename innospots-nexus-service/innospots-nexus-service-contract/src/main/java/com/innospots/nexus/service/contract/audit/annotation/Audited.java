@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 import com.innospots.nexus.service.contract.policy.AuditMode;
 
 /**
- * Declares an audit action on an application service method. Place on Application Service, not Domain.
+ * 在应用服务方法上声明审计动作。应标注于 Application Service，而非 Domain。
  *
  * @author Smars
  * @date 2026/09/13
@@ -22,30 +22,30 @@ import com.innospots.nexus.service.contract.policy.AuditMode;
 public @interface Audited {
 
     /**
-     * Audit action name.
+     * 审计动作名称。
      *
-     * @return action
+     * @return 动作名称
      */
     String action();
 
     /**
-     * Resource type. Empty means the resource resolver must supply it at startup.
+     * 资源类型。为空表示启动时由资源解析器提供。
      *
-     * @return resource type
+     * @return 资源类型
      */
     String resourceType() default "";
 
     /**
-     * Snapshot provider key. Empty means empty before/after maps.
+     * 快照提供者键。为空表示前后映射为空。
      *
-     * @return snapshot key
+     * @return 快照键
      */
     String snapshot() default "";
 
     /**
-     * Persistence mode.
+     * 持久化模式。
      *
-     * @return audit mode
+     * @return 审计模式
      */
     AuditMode mode() default AuditMode.BEST_EFFORT;
 }

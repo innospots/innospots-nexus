@@ -7,7 +7,10 @@ import org.apache.ibatis.annotations.Mapper;
 import com.innospots.nexus.console.logger.domain.entity.AuditLogEntity;
 
 /**
- * Single-table mapper for append-only audit log records.
+ * 仅追加审计日志记录的单表 Mapper。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @Mapper
 public interface AuditLogDao extends BaseMapper<AuditLogEntity> {

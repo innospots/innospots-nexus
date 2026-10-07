@@ -15,7 +15,7 @@
     <packaging>jar</packaging>
 
     <name>innospots-nexus-console</name>
-    <description>Management console API module using Jakarta JAX-RS contracts.</description>
+    <description>使用 Jakarta JAX-RS 契约的管理控制台 API 模块。</description>
 
     <dependencies>
         <dependency>
@@ -34,5 +34,54 @@
             <groupId>jakarta.transaction</groupId>
             <artifactId>jakarta.transaction-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-extension</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+        </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>io.smallrye</groupId>
+                <artifactId>smallrye-open-api-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>generate-openapi</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>generate-schema</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.outputDirectory}/META-INF/nexus-openapi</outputDirectory>
+                            <schemaFilename>${project.artifactId}</schemaFilename>
+                            <outputFileTypeFilter>YAML</outputFileTypeFilter>
+                            <encoding>UTF-8</encoding>
+                            <scanners>
+                                <scanner>JAX-RS</scanner>
+                            </scanners>
+                            <scanPackages>
+                                com.innospots.nexus.console,
+                                com.innospots.nexus.base.domain.response,
+                                com.innospots.nexus.base.i18n,
+                                com.innospots.nexus.base.domain.enums,
+                                com.innospots.nexus.core.plugin.installation.domain.enums
+                            </scanPackages>
+                            <scanDependenciesDisable>false</scanDependenciesDisable>
+                            <openApiVersion>3.1.0</openApiVersion>
+                            <operationIdStrategy>CLASS_METHOD</operationIdStrategy>
+                            <infoTitle>Innospots Nexus Console API</infoTitle>
+                            <infoVersion>1.0.0</infoVersion>
+                            <infoDescription>管理控制台 Jakarta REST 契约；运行时仅暴露构建期生成的 OpenAPI。</infoDescription>
+                            <infoContactName>Innospots Nexus</infoContactName>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

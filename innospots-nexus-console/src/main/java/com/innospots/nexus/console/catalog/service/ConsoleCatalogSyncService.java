@@ -1,5 +1,6 @@
 package com.innospots.nexus.console.catalog.service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -11,13 +12,14 @@ import com.innospots.nexus.base.domain.enums.BasicStatus;
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.base.thread.TLC;
-import com.innospots.nexus.core.plugin.contribution.console.ui.spec.PageDsl;
-import com.innospots.nexus.core.plugin.contribution.console.ui.spec.action.ActionConfig;
-import com.innospots.nexus.core.plugin.contribution.console.ui.spec.action.ActionOrList;
-import com.innospots.nexus.core.plugin.contribution.console.ui.spec.datasource.DataSourceConfig;
-import com.innospots.nexus.core.plugin.contribution.console.ui.spec.datasource.HttpDataSource;
-import com.innospots.nexus.core.plugin.contribution.console.ui.spec.datasource.ServiceDataSource;
-import com.innospots.nexus.core.plugin.contribution.console.ui.spec.loader.PageDslLoader;
+import com.innospots.nexus.console.ui.spec.PageDsl;
+import com.innospots.nexus.console.ui.spec.PageMeta;
+import com.innospots.nexus.console.ui.spec.action.ActionConfig;
+import com.innospots.nexus.console.ui.spec.action.ActionOrList;
+import com.innospots.nexus.console.ui.spec.datasource.DataSourceConfig;
+import com.innospots.nexus.console.ui.spec.datasource.HttpDataSource;
+import com.innospots.nexus.console.ui.spec.datasource.ServiceDataSource;
+import com.innospots.nexus.console.ui.spec.loader.PageDslLoader;
 import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributionCatalog;
 import com.innospots.nexus.core.plugin.contribution.console.ConsoleModuleDeclaration;
 import com.innospots.nexus.core.plugin.contribution.console.MenuDeclaration;
@@ -31,6 +33,9 @@ import com.innospots.nexus.console.catalog.domain.model.CatalogSyncResult;
  * 将已激活 Console Contribution 和 PageDsl 同步为宿主级目录索引。
  *
  * <p>Console Contribution 和 PageDsl 是唯一事实源；同步不会自动授权。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class ConsoleCatalogSyncService {
 
@@ -38,7 +43,9 @@ public final class ConsoleCatalogSyncService {
     private final ConsoleContributionCatalog contributionCatalog;
     private final PageDslLoader pageDslLoader;
 
-    /** 创建 Console 目录同步服务。 */
+    /**
+     * 创建 Console 目录同步服务。
+     */
     public ConsoleCatalogSyncService(
             ConsoleCatalogResourceDao resourceDao,
             ConsoleContributionCatalog contributionCatalog,
@@ -93,7 +100,7 @@ public final class ConsoleCatalogSyncService {
             for (ConsoleModuleDeclaration module : active.contribution().modules()) {
                 add(definitions, moduleDefinition(ownerPluginId, module));
                 collectMenus(definitions, ownerPluginId, module, module.menuTree(), null);
-                collectPages(definitions, ownerPluginId, module, module.pages(), null);
+                collectModulePages(definitions, ownerPluginId, module);
             }
         }
         return List.copyOf(definitions.values());
@@ -129,26 +136,38 @@ public final class ConsoleCatalogSyncService {
         }
     }
 
-    private void collectPages(
+    private void collectModulePages(
             Map<String, ResourceDefinition> definitions,
             String ownerPluginId,
-            ConsoleModuleDeclaration module,
-            List<UiSpecPageDeclaration> pages,
-            String parentResourceKey
+            ConsoleModuleDeclaration module
     ) {
+        List<UiSpecPageDeclaration> declarations = flattenPageDeclarations(module.pages());
+        Map<String, UiSpecPageDeclaration> declarationByKey = new LinkedHashMap<>();
+        Map<String, PageDsl> documents = new LinkedHashMap<>();
+        for (UiSpecPageDeclaration declaration : declarations) {
+            if (declarationByKey.containsKey(declaration.pageKey())) {
+                invalid("duplicate pageKey in module " + module.moduleKey() + ": " + declaration.pageKey());
+            }
+            declarationByKey.put(declaration.pageKey(), declaration);
+            PageDsl document = pageDslLoader.load(
+                    module.domainKey(), module.moduleKey(), declaration.pageKey());
+            validatePageSpec(module, declaration, document);
+            documents.put(declaration.pageKey(), document);
+        }
+        validatePageParentage(module, documents);
         int order = 0;
-        for (UiSpecPageDeclaration page : pages) {
+        for (String pageKey : orderPagesForCatalog(documents)) {
+            UiSpecPageDeclaration page = declarationByKey.get(pageKey);
+            PageDsl document = documents.get(pageKey);
             String pageIdentity = pageIdentity(module.moduleKey(), page.pageKey());
             String pageResourceKey = page.resourceKey(module.moduleKey());
-            PageDsl document = pageDslLoader.load(module.moduleKey(), page.pageKey());
-            validatePageSpec(module, page, document);
             add(definitions, new ResourceDefinition(
                     ownerPluginId,
                     module.moduleKey(),
                     CatalogResourceType.PAGE,
                     pageResourceKey,
-                    parentResourceKey == null ? module.resourceKey() : parentResourceKey,
-                    pageIdentity,
+                    parentPageResourceKey(module, document),
+                    page.pageKey(),
                     null,
                     page.pagePath(),
                     null,
@@ -159,8 +178,109 @@ public final class ConsoleCatalogSyncService {
                     pageResourceKey);
             collectDatasources(definitions, ownerPluginId, module, document, pageIdentity,
                     pageResourceKey);
-            collectPages(definitions, ownerPluginId, module, page.children(), pageResourceKey);
         }
+    }
+
+    private static List<UiSpecPageDeclaration> flattenPageDeclarations(List<UiSpecPageDeclaration> pages) {
+        List<UiSpecPageDeclaration> flattened = new ArrayList<>();
+        flattenPageDeclarations(pages, flattened);
+        return List.copyOf(flattened);
+    }
+
+    private static void flattenPageDeclarations(
+            List<UiSpecPageDeclaration> pages,
+            List<UiSpecPageDeclaration> flattened
+    ) {
+        if (pages == null) {
+            return;
+        }
+        for (UiSpecPageDeclaration page : pages) {
+            flattened.add(page);
+            flattenPageDeclarations(page.children(), flattened);
+        }
+    }
+
+    private void validatePageParentage(ConsoleModuleDeclaration module, Map<String, PageDsl> documents) {
+        for (Map.Entry<String, PageDsl> entry : documents.entrySet()) {
+            String pageKey = entry.getKey();
+            String parentPageKey = readParentPageKey(entry.getValue());
+            if (!hasText(parentPageKey)) {
+                continue;
+            }
+            if (!documents.containsKey(parentPageKey)) {
+                invalid("PageDsl parentPageKey is not declared in module "
+                        + module.moduleKey() + ": " + pageKey + " -> " + parentPageKey);
+            }
+        }
+        for (String pageKey : documents.keySet()) {
+            if (hasParentCycle(pageKey, documents, new HashSet<>())) {
+                invalid("PageDsl parentPageKey cycle detected in module "
+                        + module.moduleKey() + ": " + pageKey);
+            }
+        }
+    }
+
+    private boolean hasParentCycle(String pageKey, Map<String, PageDsl> documents, Set<String> visiting) {
+        if (!visiting.add(pageKey)) {
+            return true;
+        }
+        String parentPageKey = readParentPageKey(documents.get(pageKey));
+        if (!hasText(parentPageKey)) {
+            visiting.remove(pageKey);
+            return false;
+        }
+        boolean cycle = hasParentCycle(parentPageKey, documents, visiting);
+        visiting.remove(pageKey);
+        return cycle;
+    }
+
+    private static List<String> orderPagesForCatalog(Map<String, PageDsl> documents) {
+        List<String> ordered = new ArrayList<>();
+        Set<String> remaining = new HashSet<>(documents.keySet());
+        while (!remaining.isEmpty()) {
+            boolean progressed = false;
+            for (String pageKey : List.copyOf(remaining)) {
+                String parentPageKey = readParentPageKey(documents.get(pageKey));
+                if (!hasText(parentPageKey) || ordered.contains(parentPageKey)) {
+                    ordered.add(pageKey);
+                    remaining.remove(pageKey);
+                    progressed = true;
+                }
+            }
+            if (!progressed) {
+                throw NexusException.build(
+                        NexusStatusCode.CONFIG_ERROR,
+                        "PageDsl parentPageKey graph cannot be ordered");
+            }
+        }
+        return ordered;
+    }
+
+    private static String parentPageResourceKey(ConsoleModuleDeclaration module, PageDsl document) {
+        String parentPageKey = readParentPageKey(document);
+        if (!hasText(parentPageKey)) {
+            return module.resourceKey();
+        }
+        return pageResourceKey(module.moduleKey(), parentPageKey);
+    }
+
+    private static String pageResourceKey(String moduleKey, String pageKey) {
+        return "page:" + moduleKey + "." + pageKey;
+    }
+
+    private static String readParentPageKey(PageDsl document) {
+        if (document == null) {
+            return null;
+        }
+        PageMeta page = document.getPage();
+        if (page == null) {
+            return null;
+        }
+        String parentPageKey = page.getParentPageKey();
+        if (parentPageKey == null || parentPageKey.isBlank()) {
+            return null;
+        }
+        return parentPageKey.trim();
     }
 
     private void collectActions(

@@ -6,6 +6,8 @@ import com.innospots.nexus.core.plugin.config.PluginConfig;
 
 /**
  * 面向一个已声明 Capability Provider 的专用插件上下文。
+ * @author Smars
+ * @date 2026/09/13
  */
 public interface CapabilityProviderContext extends PluginContext {
 

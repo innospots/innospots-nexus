@@ -13,7 +13,7 @@ innospots-nexus-plugin
         ↓
 innospots-nexus-console
         ↓
-kernel / platform
+portal / platform
 ```
 
 Core **不再**包含插件运行时、Page DSL、console catalog 索引或会话/对话领域。详见根目录
@@ -39,7 +39,7 @@ BaseEntity
             └─ ProjectBaseEntity  projectId
 ```
 
-上层模块（console、kernel、platform）的业务实体应继承对应层级，而不是在 core 中定义业务表。
+上层模块（console、portal、platform）的业务实体应继承对应层级，而不是在 core 中定义业务表。
 
 ## 资源存储
 

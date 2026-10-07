@@ -5,7 +5,7 @@ import java.time.Duration;
 import com.innospots.nexus.service.contract.invocation.InvocationOutcome;
 
 /**
- * Per-invocation metric recorder.
+ * 每次调用的指标记录器。
  *
  * @author Smars
  * @date 2026/09/13
@@ -14,24 +14,24 @@ import com.innospots.nexus.service.contract.invocation.InvocationOutcome;
 public interface InvocationObservation {
 
     /**
-     * Records time to first output.
+     * 记录首次输出耗时。
      *
-     * @param latency latency from start
+     * @param latency 自开始起的延迟
      */
     void firstOutput(Duration latency);
 
     /**
-     * Records additional output volume.
+     * 记录额外输出量。
      *
-     * @param count item count
-     * @param bytes byte count
+     * @param count 项数
+     * @param bytes 字节数
      */
     void output(long count, long bytes);
 
     /**
-     * Completes the observation.
+     * 完成观测。
      *
-     * @param outcome terminal outcome
+     * @param outcome 终态结果
      */
     void finish(InvocationOutcome outcome);
 }

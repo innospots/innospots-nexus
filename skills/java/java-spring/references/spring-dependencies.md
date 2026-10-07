@@ -48,13 +48,13 @@ innospots-nexus-spring / *-spring-app / *-spring-console
 ## 禁止的 Spring 组件
 
 本仓库**不使用** Spring Data 与 Spring Security。认证、授权、持久化分别由
-`innospots-nexus-kernel` / `console`（Jakarta REST + 领域服务）与 **MyBatis-Plus**
+`innospots-nexus-portal` / `console`（Jakarta REST + 领域服务）与 **MyBatis-Plus**
 （`innospots-nexus-core`）承担。
 
 | 禁止 | 包括但不限于 | 替代 |
 |------|-------------|------|
 | **Spring Data** | `spring-boot-starter-data-jpa`、`spring-boot-starter-data-redis`、`spring-boot-starter-data-mongodb`、`spring-data-*` | `mybatis-plus-spring-boot4-starter` + `*Dao` / `BaseMapper`；缓存/消息走明确 adapter（未来模块） |
-| **Spring Security** | `spring-boot-starter-security`、`spring-security-*`、`SecurityFilterChain` 配置 | `kernel` / `console` 认证与 `permission` 域；HTTP 边界仍为 **Jakarta REST**，不用 Spring MVC 安全链 |
+| **Spring Security** | `spring-boot-starter-security`、`spring-security-*`、`SecurityFilterChain` 配置 | `portal` / `console` 认证与 `permission` 域；HTTP 边界仍为 **Jakarta REST**，不用 Spring MVC 安全链 |
 
 ### 为何禁止
 
@@ -63,7 +63,7 @@ innospots-nexus-spring / *-spring-app / *-spring-console
 | Spring Data | 与「DAO 单表、禁 join、禁 XML」及 Jakarta Persistence 注解 + MyBatis-Plus 栈冲突；易引入 JPA 懒加载、Repository 语义与项目分层不一致 |
 | Spring Security | 与现有 `NexusException` + 状态码 + console 鉴权模型重复；易与 Jakarta REST 端点、多租户 Session 模型产生两套安全边界 |
 
-需要新能力时，先走 `java:design` 评估是否扩展现有 kernel/console 契约，**不得**默认引入上述 starter。
+需要新能力时，先走 `java:design` 评估是否扩展现有 portal/console 契约，**不得**默认引入上述 starter。
 
 ---
 

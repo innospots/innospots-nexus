@@ -10,6 +10,8 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
  * @param key 稳定的 Capability 标识
  * @param api 宿主与插件共享的 Capability 契约
  * @param <T> Provider 契约类型
+ * @author Smars
+ * @date 2026/09/13
  */
 public record CapabilityType<T extends CapabilityProvider>(CapabilityKey key, Class<T> api) {
 

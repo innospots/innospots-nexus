@@ -63,9 +63,9 @@
 |------|-------------|
 | 插件运行时、Page DSL、安装 | `innospots-nexus-plugin/docs/plugin/design/` |
 | Catalog 索引、管理台 REST 契约 | console 域 + `docs/design/` 或 console `docs/` |
-| 租户侧用户/权限实现 | kernel |
+| 租户侧用户/权限实现 | portal |
 
-设计阶段须写明：**贡献声明** vs **持久化索引** vs **kernel 业务** 分工，禁止混在单一「菜单」概念下。
+设计阶段须写明：**贡献声明** vs **持久化索引** vs **portal 业务** 分工，禁止混在单一「菜单」概念下。
 
 ---
 

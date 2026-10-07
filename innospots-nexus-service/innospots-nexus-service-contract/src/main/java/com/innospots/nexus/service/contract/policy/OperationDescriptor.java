@@ -6,13 +6,13 @@ import com.innospots.nexus.base.util.Checks;
 import com.innospots.nexus.service.contract.invocation.ExecutionMode;
 
 /**
- * Static operation metadata captured at startup.
+ * 启动时捕获的静态操作元数据。
  *
- * @param operationId         stable operation identifier
- * @param routeTemplate       route template
- * @param transport           transport name such as http or websocket
- * @param declaredResultType  declared result type
- * @param executionMode       execution mode
+ * @param operationId         稳定操作标识
+ * @param routeTemplate       路由模板
+ * @param transport           传输名称，如 http 或 websocket
+ * @param declaredResultType  声明的结果类型
+ * @param executionMode       执行模式
  * @author Smars
  * @date 2026/09/13
  * @see OperationPolicy

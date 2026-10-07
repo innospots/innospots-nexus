@@ -17,7 +17,7 @@
 ### 正确 — 领域优先（Domain-first）
 
 ```text
-com.innospots.nexus.kernel
+com.innospots.nexus.portal
   ├── role
   │   ├── endpoint
   │   ├── dao
@@ -45,7 +45,7 @@ com.innospots.nexus.kernel
 ### 错误 — 技术层优先（Layer-first）
 
 ```text
-com.innospots.nexus.kernel
+com.innospots.nexus.portal
   ├── endpoint
   │   ├── role
   │   ├── menu
@@ -77,8 +77,8 @@ com.innospots.nexus.kernel
 
 | 层级 | 划分依据 | 示例 |
 |------|---------|------|
-| **Maven 模块** | 部署边界、依赖方向、可独立测试 | `innospots-nexus-kernel`、`innospots-nexus-console` |
-| **Java 包（业务模块内）** | 业务领域 → 职责 | `kernel.role.endpoint`、`kernel.role.dao` |
+| **Maven 模块** | 部署边界、依赖方向、可独立测试 | `innospots-nexus-portal`、`innospots-nexus-console` |
+| **Java 包（业务模块内）** | 业务领域 → 职责 | `portal.role.endpoint`、`portal.role.dao` |
 
 - 不要在未证明边界清晰时，为每个技术层再建一个 Maven 模块。
 - 在**同一个** Maven 模块内，仍必须**领域优先**，不得用「再拆一个 dao 模块」替代包结构。
@@ -130,7 +130,7 @@ com.innospots.nexus.kernel
 ### 三层结构
 
 ```text
-Maven 模块（kernel / console / platform）
+Maven 模块（portal / console / platform）
   └── 业务领域（role / permission / catalog）     ← 第一刀：有界上下文
         └── 功能子模块（grant / authorization / entry）  ← 第二刀：领域内功能曲面（按需）
               └── 职责包（endpoint / service / dao / domain/…）  ← 第三刀：技术职责
@@ -180,9 +180,9 @@ permission/
 
 ```text
 # ✗ 模块级：所有业务塞进一个 service 包
-kernel.service.RoleService
-kernel.service.MenuService
-kernel.service.PermissionGrantService
+portal.service.RoleService
+portal.service.MenuService
+portal.service.PermissionGrantService
 …（数十个 *Service）
 
 # ✗ 领域级：一个扁平 service 包堆满编排类
@@ -296,7 +296,7 @@ role/entity/RoleEntity.java             ✗  缺少 domain 层（request/vo 无�
 - 共享契约下沉：`innospots-nexus-base`（轻量）、`innospots-nexus-console`（管理台契约）、
   `innospots-nexus-core`（平台基础设施）。
 - 同一 Maven 模块内两领域协作：通过 **service** 编排或 **领域事件**，而不是合并包树。
-- `kernel` 与 `platform` **不得** Maven 互依；需要同时暴露时用 application 组装模块
+- `portal` 与 `platform` **不得** Maven 互依；需要同时暴露时用 application 组装模块
   （见 [dependency-conventions.md](../../java-project/references/dependency-conventions.md)）。
 
 ---
@@ -321,7 +321,34 @@ com.innospots.nexus.console
   └── entry                # 模块级装配（非业务 service 桶）
 ```
 
-新建 kernel/platform 领域时，**对齐同一模式**：`com.innospots.nexus.kernel.<domain>.<responsibility>`。
+新建 portal/platform 领域时，**对齐同一模式**：`com.innospots.nexus.portal.<domain>.<responsibility>`。
+
+---
+
+## 平台扩展库（交付面优先）
+
+适用：`innospots-nexus-sample-platform` 及同类 **在 platform 之上的无框架扩展 JAR**（非 `innospots-nexus-platform` 本体）。
+
+在扩展库内 **第一级为交付面、第二级为领域**，第三级仍为职责包（与上文「领域内」规则相同）：
+
+```text
+com.innospots.nexus.sample.platform
+  ├── core.<domain>/{dao,domain,operator,service,loader}
+  ├── console.<domain>/{endpoint,service}
+  └── inbound.<domain>/{endpoint,service,…}
+```
+
+| 交付面 | 禁止 |
+|--------|------|
+| `core` | Jakarta REST `endpoint`、Spring/Quarkus 类型 |
+| `console` / `inbound` | `dao`、`domain.entity`（应引用 `core` 类型） |
+| 任意 | `inbound` → `console` 包依赖；模块根多领域 `service` 桶 |
+
+**与平台库并存：** `com.innospots.nexus.platform.tenant.endpoint` 仍是领域优先；
+扩展库多一刀交付面是为路径与装配隔离，**领域内**仍禁止 `endpoint/<domain>` 式技术层优先。
+
+完整工程、路径前缀、Maven 模块树见
+[sample-extension-layout.md](sample-extension-layout.md)。
 
 ---
 
@@ -338,6 +365,7 @@ com.innospots.nexus.console
 - [ ] 没有 `impl`、`common`、`misc` 逃避归属？
 - [ ] 初始面是否最小（未投机性创建 `service`/`event`/空包）？
 - [ ] 共享类型是否已放到正确的 **Maven 模块** 而非塞进邻近领域包？
+- [ ] 若为 **sample 扩展库**：交付面（core/console/inbound）与领域二级包是否正确？`core` 是否未放 endpoint？
 
 疑义回源：[standards/naming.md](../standards/naming.md)「包命名」、
 [standards/domain-module-initialization.md](../standards/domain-module-initialization.md) 阶段零。

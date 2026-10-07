@@ -31,3 +31,13 @@ replay_pid*
 *.iml
 logs
 .vscode
+.claude/
+.cursor/
+.agents/
+.workbuddy/
+scripts/
+/.lithe/
+out
+node_modules/
+.next/
+next-env.d.ts

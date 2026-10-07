@@ -6,9 +6,11 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * A condition that supports nesting — each {@link EmbedCondition} can contain
- * child sub-conditions recursively. The final statement wraps nested groups
- * in parentheses.
+ * 支持嵌套的条件——每个 {@link EmbedCondition} 可递归包含子条件。最终语句将嵌套组包裹在括号中。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @see SimpleCondition
  */
 public class EmbedCondition extends SimpleCondition {
 
@@ -19,7 +21,7 @@ public class EmbedCondition extends SimpleCondition {
     }
 
     /**
-     * Creates an embeddable condition with nesting support.
+     * 创建支持嵌套的可嵌入条件。
      */
     public static EmbedCondition create(Mode mode, Relation relation) {
         return new EmbedCondition(mode, relation);
@@ -36,8 +38,8 @@ public class EmbedCondition extends SimpleCondition {
     }
 
     /**
-     * Adds a nested sub-condition. On rebuild, embedded conditions are wrapped
-     * in parentheses and joined by the parent relation.
+     * 添加嵌套子条件。重建时，嵌入条件被包裹
+     * 在括号中并由父关系连接。
      */
     public EmbedCondition addCondition(EmbedCondition condition) {
         if (condition != null) {
@@ -59,7 +61,7 @@ public class EmbedCondition extends SimpleCondition {
     protected StringBuilder rebuild(IFactorStatement fs) {
         StringBuilder buf = super.rebuild(fs);
 
-        // Append nested conditions in parentheses: parent(cond1 AND cond2)
+        // 在括号中追加嵌套条件：parent(cond1 AND cond2)
         if (!embeds.isEmpty()) {
             boolean brace = buf.length() > 0;
             if (brace) {

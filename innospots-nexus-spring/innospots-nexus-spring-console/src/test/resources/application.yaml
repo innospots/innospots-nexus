@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: nexus-spring-console-it
+  datasource:
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:nexus/schema/role-h2.sql
+  jersey:
+    type: filter
+
+nexus:
+  console:
+    web:
+      enabled: true
+      security:
+        enabled: false
+        dev-session:
+          enabled: true
+          tenant-id: tnt-it
+          workspace-id: wks-it
+          realm: TENANT

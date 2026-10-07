@@ -27,6 +27,8 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
  * @param enabledAt 最近一次启用时间
  * @param disabledAt 最近一次禁用时间
  * @param missingAt 标记为缺失的时间
+ * @author Smars
+ * @date 2026/09/13
  */
 public record PluginInstallation(
         String installationId,

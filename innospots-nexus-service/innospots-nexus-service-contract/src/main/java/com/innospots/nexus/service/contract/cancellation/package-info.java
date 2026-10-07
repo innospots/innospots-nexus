@@ -1,5 +1,5 @@
 /**
- * Cooperative cancellation token and registration contracts.
+ * 协作式取消令牌与注册契约。
  *
  * @author Smars
  * @date 2026/09/13

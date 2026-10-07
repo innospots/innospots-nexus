@@ -1,7 +1,7 @@
 package com.innospots.nexus.service.contract.invocation;
 
 /**
- * How the business supplier may execute.
+ * 业务供应方如何执行。
  *
  * @author Smars
  * @date 2026/09/13

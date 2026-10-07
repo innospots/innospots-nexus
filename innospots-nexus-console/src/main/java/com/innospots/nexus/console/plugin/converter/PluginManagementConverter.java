@@ -8,14 +8,23 @@ import com.innospots.nexus.base.mapstruct.BaseMapperConfig;
 import com.innospots.nexus.console.plugin.domain.vo.PluginManagementVo;
 import com.innospots.nexus.core.plugin.installation.domain.model.PluginManagementView;
 
-/** 使用 MapStruct 将 Core 管理聚合视图转换为 Console VO。 */
+/**
+ * 使用 MapStruct 将 Core 管理聚合视图转换为 Console VO。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ */
 @Mapper(config = BaseMapperConfig.class)
 public interface PluginManagementConverter {
 
-    /** 默认的无状态转换器实例。 */
+    /**
+     * 默认的无状态转换器实例。
+     */
     PluginManagementConverter INSTANCE = Mappers.getMapper(PluginManagementConverter.class);
 
-    /** 转换安装事实、运行快照和诊断字段。 */
+    /**
+     * 转换安装事实、运行快照和诊断字段。
+     */
     @Mapping(source = "installation.pluginId", target = "pluginId")
     @Mapping(source = "installation.pluginVersion", target = "version")
     @Mapping(source = "installation.presence", target = "presence")

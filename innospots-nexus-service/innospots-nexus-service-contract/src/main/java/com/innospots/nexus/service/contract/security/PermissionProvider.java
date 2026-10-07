@@ -3,7 +3,7 @@ package com.innospots.nexus.service.contract.security;
 import java.util.concurrent.CompletionStage;
 
 /**
- * Authorizes a principal against a {@link PermissionCheck}.
+ * 根据 {@link PermissionCheck} 授权主体。
  *
  * @author Smars
  * @date 2026/09/13
@@ -13,12 +13,12 @@ import java.util.concurrent.CompletionStage;
 public interface PermissionProvider {
 
     /**
-     * Authorizes {@code principal} in {@code scope} for {@code check}.
+     * 在 {@code scope} 中为 {@code check} 授权 {@code principal}。
      *
-     * @param principal caller
-     * @param scope     resource scope
-     * @param check     permission request
-     * @return decision
+     * @param principal 调用方
+     * @param scope     资源作用域
+     * @param check     权限请求
+     * @return 决策
      */
     CompletionStage<PermissionDecision> authorize(
             ServicePrincipal principal,

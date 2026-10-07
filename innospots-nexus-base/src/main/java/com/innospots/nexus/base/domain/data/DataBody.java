@@ -4,9 +4,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * A self-timing data payload. Automatically records the start time at
- * construction and computes elapsed millis when {@link #end()} is called.
- * Carries optional {@link DataSchema} metadata and a free-form meta map.
+ * 自带计时的数据载荷。构造时自动记录开始时间，调用 {@link #end()} 时计算耗时毫秒数。携带可选 {@link DataSchema} 元数据与自由格式 meta 映射。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @see DataSchema
  */
 public class DataBody<T> {
 
@@ -22,7 +24,7 @@ public class DataBody<T> {
     }
 
     /**
-     * Wraps data into a new DataBody with automatic start-time recording.
+     * 将数据包装为自动记录开始时间的新 DataBody。
      */
     public static <T> DataBody<T> of(T data) {
         return new DataBody<>(data);
@@ -60,7 +62,7 @@ public class DataBody<T> {
     }
 
     /**
-     * Stops the timer and records elapsed milliseconds since construction.
+     * 停止计时并记录自构造以来的耗时毫秒数。
      */
     public DataBody<T> end() {
         this.elapsedMillis = System.currentTimeMillis() - startTimeMillis;

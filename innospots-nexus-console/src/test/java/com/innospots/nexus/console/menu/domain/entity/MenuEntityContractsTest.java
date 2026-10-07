@@ -12,7 +12,7 @@ import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import org.junit.jupiter.api.Test;
 
-import com.innospots.nexus.core.persistence.entity.WorkspaceBaseEntity;
+import com.innospots.nexus.core.persistence.entity.OwnershipEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -23,7 +23,7 @@ class MenuEntityContractsTest {
         assertThat(MenuEntity.class.getAnnotation(Entity.class)).isNotNull();
         assertThat(MenuEntity.class.getAnnotation(Table.class).name()).isEqualTo("nx_menu");
         assertThat(MenuEntity.class.getAnnotation(TableName.class).value()).isEqualTo("nx_menu");
-        assertThat(MenuEntity.class.getSuperclass()).isEqualTo(WorkspaceBaseEntity.class);
+        assertThat(MenuEntity.class.getSuperclass()).isEqualTo(OwnershipEntity.class);
     }
 
     @Test
@@ -44,14 +44,13 @@ class MenuEntityContractsTest {
         assertField("status", String.class, 32, false);
         assertField("sortOrder", Integer.class, 255, false);
         assertField("builtIn", Boolean.class, 255, false);
-        assertField("securityRealm", String.class, 32, false);
     }
 
     @Test
     void menuEntityDeclaresTreeAndManagementIndexes() {
-        assertIndex("uk_nx_menu_project_key", "workspace_id,menu_key", true);
-        assertIndex("idx_nx_menu_project_parent_order", "workspace_id,parent_id,sort_order", false);
-        assertIndex("idx_nx_menu_project_status_visible", "workspace_id,status,visible", false);
+        assertIndex("uk_nx_menu_owner_key", "owner_type,owner_id,security_realm,menu_key", true);
+        assertIndex("idx_nx_menu_owner_parent_order", "owner_type,owner_id,parent_id,sort_order", false);
+        assertIndex("idx_nx_menu_owner_status_visible", "owner_type,owner_id,status,visible", false);
         assertIndex("idx_nx_menu_realm", "security_realm", false);
     }
 

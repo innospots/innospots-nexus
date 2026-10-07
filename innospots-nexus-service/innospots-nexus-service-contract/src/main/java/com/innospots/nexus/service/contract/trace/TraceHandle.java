@@ -3,7 +3,7 @@ package com.innospots.nexus.service.contract.trace;
 import com.innospots.nexus.service.contract.invocation.InvocationOutcome;
 
 /**
- * Active span handle created by {@link TraceProvider}.
+ * 由 {@link TraceProvider} 创建的活跃 Span 句柄。
  *
  * @author Smars
  * @date 2026/09/13
@@ -12,16 +12,16 @@ import com.innospots.nexus.service.contract.invocation.InvocationOutcome;
 public interface TraceHandle {
 
     /**
-     * Returns the snapshot for the active span.
+     * 返回活跃 Span 的快照。
      *
-     * @return current snapshot
+     * @return 当前快照
      */
     TraceSnapshot snapshot();
 
     /**
-     * Completes the span with the invocation outcome.
+     * 以调用结果完成 Span。
      *
-     * @param outcome terminal outcome
+     * @param outcome 终态结果
      */
     void finish(InvocationOutcome outcome);
 }

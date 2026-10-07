@@ -1,0 +1,85 @@
+# Platform 运营管理 entry（与 ui-pages/platform 对齐）
+id: site
+resourceType: sitemap
+version: 1
+dslVersion: "1.0"
+app: { name: Innospots Platform Console }
+layout: admin
+auth: { loginPath: /login }
+
+pages:
+  - { id: platform-organization-main, path: /page/platform/organization/platform-organization-main, title: 组织管理, version: 1, lazy: true }
+  - { id: platform-user-main, path: /page/platform/user/platform-user-main, title: 用户列表, version: 1, lazy: true }
+  - { id: platform-user-add, path: /page/platform/user/platform-user-add, title: 添加用户, version: 1, lazy: true }
+  - { id: platform-user-invite, path: /page/platform/user/platform-user-invite, title: 邀请列表, version: 1, lazy: true }
+  - { id: platform-user-access, path: /page/platform/user/platform-user-access, title: 注册审批, version: 1, lazy: true }
+  - { id: platform-settings-registration-mode, path: /page/platform/settings/platform-settings-registration-mode, title: 注册模式, version: 1, lazy: true }
+
+menus:
+  - { id: platform-organization-main, type: page, pageId: platform-organization-main, title: 组织管理, icon: apartment, layout: admin, order: 10 }
+  - { id: platform-user-main, type: page, pageId: platform-user-main, title: 用户列表, icon: team, layout: admin, order: 20 }
+  - { id: platform-user-add, type: page, pageId: platform-user-add, title: 添加用户, icon: user-add, layout: admin, order: 15 }
+  - { id: platform-user-invite, type: page, pageId: platform-user-invite, title: 邀请列表, icon: mail, layout: admin, order: 21 }
+  - { id: platform-user-access, type: page, pageId: platform-user-access, title: 注册审批, icon: audit, layout: admin, order: 22 }
+  - { id: platform-settings-registration-mode, type: page, pageId: platform-settings-registration-mode, title: 注册模式, icon: setting, layout: admin, order: 40 }
+
+layouts:
+  admin:
+    dsl: "1.0"
+    body:
+      type: Layout
+      props: { className: shell-root }
+      children:
+        - type: Sidebar
+          props:
+            className: shell-main
+            brand: { title: Innospots Platform, logo: /logo.svg }
+            collapsible: true
+            content:
+              type: SitemapMenu
+              props:
+                items: ${data.session.menus}
+                collapsible: true
+                className: shell-menu
+              events:
+                onSelect:
+                  - action: navigate
+                    params: { to: "${event}" }
+          children:
+            - type: Header
+              props:
+                className: shell-header
+                user:
+                  name: ${data.session.user.name}
+                  items:
+                    - { label: 退出登录, value: logout, icon: log-out }
+              events:
+                onUserSelect:
+                  - action: if
+                    params:
+                      condition: ${event == 'logout'}
+                      then:
+                        - action: request
+                          params:
+                            method: POST
+                            url: /api/platform/auth/logout
+                        - action: app.reload
+                          params: { to: /login }
+              children:
+                - type: ThemeSwitcher
+            - type: Content
+              props: { className: shell-content }
+              children:
+                - type: PageOutlet
+  login:
+    dsl: "1.0"
+    body:
+      type: Flex
+      props:
+        className: login-page
+      children:
+        - type: PageOutlet
+  blank:
+    dsl: "1.0"
+    body:
+      type: PageOutlet

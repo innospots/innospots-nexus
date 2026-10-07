@@ -44,4 +44,18 @@ class ThreadPoolBuilderTest {
 
         assertThat(result.get(2, TimeUnit.SECONDS)).startsWith("shared-agent-");
     }
+
+    @Test
+    void backgroundPoolCreatesDaemonWorkerThreads() throws Exception {
+        executor = ThreadPoolBuilder.builder("bg-worker")
+                .coreSize(1)
+                .maxSize(1)
+                .queueCapacity(1)
+                .background()
+                .build();
+
+        Future<Boolean> daemon = executor.submit(() -> Thread.currentThread().isDaemon());
+
+        assertThat(daemon.get(2, TimeUnit.SECONDS)).isTrue();
+    }
 }

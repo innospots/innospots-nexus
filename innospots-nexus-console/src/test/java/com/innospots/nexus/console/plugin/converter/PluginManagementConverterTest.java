@@ -22,7 +22,9 @@ import com.innospots.nexus.core.plugin.lifecycle.PluginState;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/** MapStruct 管理视图转换测试，确保安装事实和运行事实不混淆。 */
+/**
+ * MapStruct 管理视图转换测试，确保安装事实和运行事实不混淆。
+ */
 class PluginManagementConverterTest {
 
     @Test

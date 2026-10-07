@@ -1,0 +1,22 @@
+package com.innospots.nexus.console.ui.spec.node;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.innospots.nexus.console.ui.spec.HttpRequest;
+
+import lombok.Getter;
+import lombok.Setter;
+
+/**
+ * HTTP 支持的动态 DSL 源。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ */
+@Getter
+@Setter
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+public final class DslHttpSource implements DslSource {
+
+    private String type = "http";
+    private HttpRequest request;
+}

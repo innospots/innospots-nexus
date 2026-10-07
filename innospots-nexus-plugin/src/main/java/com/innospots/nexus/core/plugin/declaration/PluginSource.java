@@ -11,6 +11,8 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
  * @param sourceType 来源类型标识，例如 {@code JAVA} 或 {@code YAML}
  * @param location classpath 类名或资源路径
  * @param discoveredAt 发现时间戳
+ * @author Smars
+ * @date 2026/09/13
  */
 public record PluginSource(String sourceType, String location, Instant discoveredAt) {
 

@@ -1,0 +1,25 @@
+package com.innospots.nexus.console.ui.spec.datasource;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import lombok.Getter;
+import lombok.Setter;
+
+/**
+ * 服务注册表支持的数据源；业务页面首选，因 DSL 不直接绑定 HTTP 端点。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ */
+@Getter
+@Setter
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+public final class ServiceDataSource extends OptionMappingDataSource implements DataSourceConfig {
+
+    private String type = "service";
+    private String service;
+    private Map<String, Object> params = new LinkedHashMap<>();
+}

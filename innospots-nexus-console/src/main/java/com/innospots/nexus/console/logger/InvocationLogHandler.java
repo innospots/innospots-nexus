@@ -3,19 +3,21 @@ package com.innospots.nexus.console.logger;
 import com.innospots.nexus.console.logger.domain.context.InvocationLogContext;
 
 /**
- * Common interception handler port.
- * <p>Receives a fully assembled {@link InvocationLogContext} and is responsible
- * for persisting or forwarding it. Implementations remain framework-independent
- * and may, for example, write an {@code AuditLogEntity} through
- * {@code AuditLogDao} or publish the context to another sink.</p>
+ * 通用拦截处理器端口。
+ * <p>接收完整组装的 {@link InvocationLogContext}，负责将其持久化或转发。
+ * 实现保持框架无关，例如可通过 {@code AuditLogDao} 写入 {@code AuditLogEntity}，
+ * 或将上下文发布到其他接收端。</p>
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @FunctionalInterface
 public interface InvocationLogHandler {
 
     /**
-     * Handles a completed invocation context.
+     * 处理已完成的调用上下文。
      *
-     * @param context assembled invocation data, never null
+     * @param context 已组装的调用数据，永不为 null
      */
     void handle(InvocationLogContext context);
 }

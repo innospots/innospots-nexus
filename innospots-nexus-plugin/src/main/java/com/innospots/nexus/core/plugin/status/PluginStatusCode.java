@@ -8,6 +8,8 @@ import com.innospots.nexus.base.status.StatusCode;
  * 轻量级插件运行时产生的状态码。
  *
  * <p>所有状态码归属 {@code PLG} 模块，HTTP 状态由 {@link #httpStatusCode()} 提供。</p>
+ * @author Smars
+ * @date 2026/09/13
  */
 public enum PluginStatusCode implements StatusCode {
 

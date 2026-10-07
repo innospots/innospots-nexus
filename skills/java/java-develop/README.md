@@ -29,7 +29,7 @@
 | 设计产物（必经） | L0：PR「设计结论」块；L1+：`<module>/docs/*-design.md`、`docs/design/`（见 [design-deliverables.md](../java-design/references/design-deliverables.md)） |
 | 测试范围 | `java:design` → [test-scope.md](../java-design/references/test-scope.md) |
 | 任务类型 | 新领域 / 加功能 / 修 Bug / 重构 |
-| 模块与包 | `innospots-nexus-kernel`、`com.innospots.nexus.kernel.role` |
+| 模块与包 | `innospots-nexus-portal`、`com.innospots.nexus.portal.role` |
 | Bug 复现 | 步骤、期望/实际、失败语义归属 |
 
 **无设计产物** → 不回退到口头约定，先 `java:design`。

@@ -21,6 +21,8 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
 /**
  * 解析插件默认值、宿主配置、动态配置来源、环境变量、系统属性和运行时覆盖值。
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class ConfigurationManager {
 

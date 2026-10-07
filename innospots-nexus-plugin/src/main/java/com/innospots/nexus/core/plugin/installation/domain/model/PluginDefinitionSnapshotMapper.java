@@ -14,7 +14,11 @@ import com.innospots.nexus.core.plugin.declaration.PluginDefinition;
 import com.innospots.nexus.core.plugin.declaration.PluginSource;
 import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
-/** 在运行时定义与持久化摘要之间执行显式、安全映射。 */
+/**
+ * 在运行时定义与持久化摘要之间执行显式、安全映射。
+ * @author Smars
+ * @date 2026/09/13
+ */
 public final class PluginDefinitionSnapshotMapper {
 
     private PluginDefinitionSnapshotMapper() {

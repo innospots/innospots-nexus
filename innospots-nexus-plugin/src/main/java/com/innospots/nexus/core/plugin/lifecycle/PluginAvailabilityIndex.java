@@ -8,6 +8,8 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
 /**
  * 将插件标识映射到运行时可用性门控，供 Capability 查询过滤未激活 Provider。
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class PluginAvailabilityIndex {
 

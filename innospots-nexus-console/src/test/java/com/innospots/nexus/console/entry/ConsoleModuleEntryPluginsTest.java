@@ -5,12 +5,13 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import com.innospots.nexus.core.plugin.contribution.console.ui.spec.PageDsl;
-import com.innospots.nexus.core.plugin.contribution.console.ui.spec.config.PageDslConfig;
-import com.innospots.nexus.core.plugin.contribution.console.ui.spec.loader.ClasspathPageDslLoader;
-import com.innospots.nexus.core.plugin.contribution.console.ui.spec.parser.JacksonPageDslParser;
+import com.innospots.nexus.console.ui.spec.PageDsl;
+import com.innospots.nexus.console.ui.spec.config.PageDslConfig;
+import com.innospots.nexus.console.ui.spec.loader.ClasspathPageDslLoader;
+import com.innospots.nexus.console.ui.spec.parser.JacksonPageDslParser;
 import com.innospots.nexus.console.dictionary.entry.DictionaryEntryPlugin;
 import com.innospots.nexus.console.logger.entry.LoggerEntryPlugin;
 import com.innospots.nexus.console.menu.entry.MenuEntryPlugin;
@@ -37,26 +38,27 @@ class ConsoleModuleEntryPluginsTest {
                 .orElseThrow();
 
         ConsoleModuleDeclaration module = contribution.modules().getFirst();
-        String pageKey = ConsoleModuleDescriptor.mainPageKey(module.moduleKey());
+        String entryPageKey = module.pages().getFirst().pageKey();
         assertThat(module.moduleKey()).isNotBlank();
+        assertThat(entryPageKey).isNotBlank();
         assertThat(module.pages()).singleElement()
-                .satisfies(page -> assertThat(page.pageKey()).isEqualTo(pageKey));
+                .satisfies(page -> assertThat(page.pagePath()).isEqualTo(ConsoleModuleDescriptor.pagePath(
+                        module.domainKey(), module.moduleKey(), entryPageKey)));
         assertThat(module.menuTree()).singleElement()
-                .satisfies(menu -> assertThat(menu.pageKey()).isEqualTo(pageKey));
+                .satisfies(menu -> assertThat(menu.pageKey()).isEqualTo(entryPageKey));
         assertThat(definition.capabilities()).isEmpty();
     }
 
     @ParameterizedTest
-    @MethodSource("moduleKeys")
-    void loadsPageDslFromClasspath(String moduleKey) {
-        String pageKey = ConsoleModuleDescriptor.mainPageKey(moduleKey);
+    @MethodSource("moduleEntryPages")
+    void loadsPageDslFromClasspath(String moduleKey, String pageKey) {
         PageDslConfig config = PageDslConfig.defaults();
         ClasspathPageDslLoader loader = new ClasspathPageDslLoader(
                 config,
                 new JacksonPageDslParser(config),
                 getClass().getClassLoader());
 
-        PageDsl document = loader.load(moduleKey, pageKey);
+        PageDsl document = loader.load(ConsoleModuleDescriptor.BUILTIN_DOMAIN_KEY, moduleKey, pageKey);
 
         assertThat(document.getPage().getId()).isEqualTo(pageKey);
         assertThat(document.getPage().getType()).isEqualTo("general");
@@ -92,7 +94,14 @@ class ConsoleModuleEntryPluginsTest {
                 new PluginManagementEntryPlugin());
     }
 
-    private static Stream<String> moduleKeys() {
-        return Stream.of("menu", "dictionary", "logger", "permission", "plugin", "role");
+    private static Stream<Arguments> moduleEntryPages() {
+        String domain = ConsoleModuleDescriptor.BUILTIN_DOMAIN_KEY;
+        return Stream.of(
+                Arguments.of("menu", ConsoleModuleDescriptor.compositePageKey(domain, "menu", "main")),
+                Arguments.of("dictionary", ConsoleModuleDescriptor.compositePageKey(domain, "dictionary", "main")),
+                Arguments.of("logger", ConsoleModuleDescriptor.compositePageKey(domain, "logger", "main")),
+                Arguments.of("permission", ConsoleModuleDescriptor.compositePageKey(domain, "permission", "main")),
+                Arguments.of("plugin", ConsoleModuleDescriptor.compositePageKey(domain, "plugin", "main")),
+                Arguments.of("role", ConsoleModuleDescriptor.compositePageKey(domain, "role", "main")));
     }
 }

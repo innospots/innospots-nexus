@@ -15,31 +15,16 @@
     <packaging>jar</packaging>
 
     <name>innospots-nexus-spring-app</name>
-    <description>Spring Boot application service assembly for innospots-nexus.</description>
+    <description>innospots-nexus 的 Spring Boot 应用服务装配库（无独立 main，由外部应用引用）。</description>
 
     <dependencies>
         <dependency>
             <groupId>com.innospots</groupId>
-            <artifactId>innospots-nexus-core</artifactId>
+            <artifactId>innospots-nexus-spring-core</artifactId>
         </dependency>
         <dependency>
             <groupId>com.innospots</groupId>
-            <artifactId>innospots-nexus-plugin</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-logging</artifactId>
-                </exclusion>
-            </exclusions>
+            <artifactId>innospots-nexus-spring-service</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -48,19 +33,17 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-jdbc</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-spring-boot4-starter</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <scope>runtime</scope>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -74,16 +57,4 @@
             </exclusions>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <mainClass>com.innospots.nexus.spring.server.NexusSpringAppServer</mainClass>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>

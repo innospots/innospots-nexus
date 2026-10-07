@@ -1,13 +1,20 @@
 package com.innospots.nexus.console.role.domain.enums;
 
 /**
- * Subject that can be bound to a role.
+ * 可绑定到角色的主体。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public enum RoleBindingSubjectType {
 
-    /** A platform user or tenant member identity. */
+    /**
+     * 平台用户或租户成员身份。
+     */
     USER,
 
-    /** A tenant organization unit. */
+    /**
+     * 租户组织单元。
+     */
     ORG_UNIT
 }

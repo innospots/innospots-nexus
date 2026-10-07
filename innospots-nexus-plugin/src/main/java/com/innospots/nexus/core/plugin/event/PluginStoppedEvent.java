@@ -7,6 +7,8 @@ import java.time.Instant;
  *
  * @param pluginId 稳定的插件标识
  * @param occurredAt 事件发生时间
+ * @author Smars
+ * @date 2026/09/13
  */
 public record PluginStoppedEvent(String pluginId, Instant occurredAt) implements PluginEvent {
 }

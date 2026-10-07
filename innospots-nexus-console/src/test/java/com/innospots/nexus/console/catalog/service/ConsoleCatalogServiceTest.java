@@ -15,21 +15,55 @@ import static org.mockito.Mockito.when;
 class ConsoleCatalogServiceTest {
 
     @Test
-    void buildsEnabledResourceTree() {
+    void buildsModuleTreeWithPageChildrenOnly() {
         ConsoleCatalogResourceEntity module = resource("module-1", null, CatalogResourceType.MODULE,
-                "module:sales", 0);
+                "module:sales", 0, null, null);
         ConsoleCatalogResourceEntity menu = resource("menu-1", "module-1", CatalogResourceType.MENU,
-                "menu:sales.orders", 1);
+                "menu:sales.orders", 1, null, null);
+        ConsoleCatalogResourceEntity page = resource("page-1", "module-1", CatalogResourceType.PAGE,
+                "page:sales.orders", 2, "orders", "/page/nexus/sales/orders");
         ConsoleCatalogService service = new ConsoleCatalogService(
-                permissionResourceDao(List.of(module, menu)));
+                permissionResourceDao(List.of(module, menu, page)));
 
         List<CatalogNodeVo> tree = service.tree();
 
         assertThat(tree).hasSize(1);
         assertThat(tree.getFirst().resourceType()).isEqualTo(CatalogResourceType.MODULE);
+        assertThat(tree.getFirst().domainKey()).isEqualTo("nexus");
         assertThat(tree.getFirst().children()).singleElement()
-                .extracting(CatalogNodeVo::resourceType)
-                .isEqualTo(CatalogResourceType.MENU);
+                .satisfies(child -> {
+                    assertThat(child.resourceType()).isEqualTo(CatalogResourceType.PAGE);
+                    assertThat(child.pageKey()).isEqualTo("orders");
+                    assertThat(child.routePath()).isEqualTo("/page/nexus/sales/orders");
+                    assertThat(child.children()).isEmpty();
+                });
+    }
+
+    @Test
+    void buildsNestedPageTreeUnderModule() {
+        ConsoleCatalogResourceEntity module = resource("module-1", null, CatalogResourceType.MODULE,
+                "module:sales", 0, null, null);
+        ConsoleCatalogResourceEntity parentPage = resource("page-1", "module-1", CatalogResourceType.PAGE,
+                "page:sales.orders", 0, "orders", "/page/nexus/sales/orders");
+        ConsoleCatalogResourceEntity childPage = resource("page-2", "page-1", CatalogResourceType.PAGE,
+                "page:sales.order-detail", 1, "order-detail", "/page/nexus/sales/order-detail");
+        ConsoleCatalogService service = new ConsoleCatalogService(
+                permissionResourceDao(List.of(module, parentPage, childPage)));
+
+        List<CatalogNodeVo> tree = service.tree();
+
+        assertThat(tree.getFirst().children()).singleElement()
+                .satisfies(parent -> {
+                    assertThat(parent.pageKey()).isEqualTo("orders");
+                    assertThat(parent.children()).singleElement()
+                            .extracting(CatalogNodeVo::pageKey)
+                            .isEqualTo("order-detail");
+                });
+    }
+
+    @Test
+    void parsesDomainKeyFromRoutePath() {
+        assertThat(ConsoleCatalogService.domainKeyFromRoute("/page/nexus/menu/menu-main")).isEqualTo("nexus");
     }
 
     private static com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao permissionResourceDao(
@@ -46,7 +80,9 @@ class ConsoleCatalogServiceTest {
             String parentId,
             CatalogResourceType type,
             String resourceKey,
-            int sortOrder
+            int sortOrder,
+            String pageKey,
+            String routePath
     ) {
         ConsoleCatalogResourceEntity entity = new ConsoleCatalogResourceEntity();
         entity.setResourceId(id);
@@ -58,6 +94,8 @@ class ConsoleCatalogServiceTest {
         entity.setOwnerPluginId("plugin-1");
         entity.setModuleKey("sales");
         entity.setDisplayName(resourceKey);
+        entity.setPageKey(pageKey);
+        entity.setRoutePath(routePath);
         return entity;
     }
 }

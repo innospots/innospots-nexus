@@ -16,7 +16,7 @@
 - 哪些相邻领域与之交互；
 - 哪些行为现在需要，哪些有意延后。
 
-具体管理领域通常属于 `innospots-nexus-kernel`。业务中立的 console 契约属于 `innospots-nexus-console`。不含具体业务概念的数据库和中间件基础属于 `innospots-nexus-core`。
+具体管理领域通常属于 `innospots-nexus-portal`。业务中立的 console 契约属于 `innospots-nexus-console`。不含具体业务概念的数据库和中间件基础属于 `innospots-nexus-core`。
 
 除非边界、依赖方向和独立可测试性清晰，不要创建新 Maven 模块。
 

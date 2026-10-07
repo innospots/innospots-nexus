@@ -5,11 +5,11 @@ import java.util.Set;
 import com.innospots.nexus.base.util.Checks;
 
 /**
- * Permission check against a resource.
+ * 针对资源的权限检查。
  *
- * @param operationId operation identifier
- * @param permissions required permission keys
- * @param resource    target resource
+ * @param operationId 操作标识
+ * @param permissions 所需权限键
+ * @param resource    目标资源
  * @author Smars
  * @date 2026/09/13
  * @see PermissionProvider

@@ -12,6 +12,9 @@ import com.innospots.nexus.service.contract.cancellation.CancellationRegistratio
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+/**
+ * 写侧取消源首次生效与监听器单次通知行为测试。
+ */
 class CancellationSourceTest {
 
     @Test

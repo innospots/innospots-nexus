@@ -4,6 +4,9 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+/**
+ * 开发者体验约束：禁止暴露已移除的横切注解类型。
+ */
 class DeveloperExperienceContractsTest {
 
     @Test

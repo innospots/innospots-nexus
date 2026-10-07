@@ -1,5 +1,5 @@
 /**
- * Deadline and monotonic ticker contracts for invocation time bounds.
+ * 调用时间边界的截止时间与单调 ticker 契约。
  *
  * @author Smars
  * @date 2026/09/13

@@ -6,7 +6,7 @@
 
 | 项 | 约定 | 示例 |
 |----|------|------|
-| 位置 | 测试源镜像生产包，位于 `src/test/java` | `kernel/role/service/` → `src/test/java/.../role/service/` |
+| 位置 | 测试源镜像生产包，位于 `src/test/java` | `portal/role/service/` → `src/test/java/.../role/service/` |
 | 聚焦单测 | `{TypeName}Test.java` | `PasswordValidatorTest.java` |
 | 契约族 | `{Concept}ContractsTest.java` | `RoleEntityContractsTest.java` |
 | 集成测试 | `*IT.java`（failsafe 执行） | `RoleEndpointIT.java` |

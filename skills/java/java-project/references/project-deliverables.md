@@ -22,9 +22,39 @@
 
 ---
 
-## 何时新建 Maven 模块 vs 何时只加 Java 包
+## 外部产品工程（仓库外）
 
-**默认：不新建 Maven 模块。** 先在现有 `kernel` / `platform` / `console` 内按领域加包
+适用：`java:project` 的主场景。完整约定见 [external-project-layout.md](external-project-layout.md)。
+
+### A. 新建产品工程（greenfield）
+
+| 步骤 | 动作 |
+|------|------|
+| 1 | grill-me；**询问产品形态**：仅管理平台 / 仅对外接口 / 两者兼有 |
+| 2 | **询问运行框架**：Spring Boot 或 Quarkus（**二选一**，未答复不得建两套） |
+| 3 | 创建根聚合器 + `{product}-bom`（import `innospots-nexus-bom`）+ `{product}-core` |
+| 4 | 按形态创建库模块：**仅对外** → `service` only（**不要** console、ui）；**仅管理** → `console` + 按需 `ui`；**两者** → console + service + 按需 ui |
+| 5 | 仅创建 **`{product}-spring` 或 `{product}-quarkus`** 及与之匹配的可运行子模块（如仅 `*-service` 或 `*-console`） |
+| 6 | 各一级 Java 模块 `<parent>` = `innospots-nexus-parent`；产品 `AGENTS.md` 登记职责与选型 |
+| 7 | `mvn validate` → 全 reactor `clean compile` |
+
+**禁止：** 纯对外服务仍建 console/ui；同时建 spring 与 quarkus；`{product}-portal` 等产品侧 Nexus 同名模块。
+
+### B. 已有产品工程（结构已确认）
+
+| 步骤 | 动作 |
+|------|------|
+| 1 | 读取现有 `<modules>`，**不新增**模块类型 |
+| 2 | 在目标模块 POM 上收敛 parent、BOM、Nexus **库依赖** |
+| 3 | `mvn -pl <已有模块> -am clean compile` → `dependency:tree` |
+
+**不在此技能阶段编写**业务域包（交 `java:design` → `java:develop`）。
+
+---
+
+## 何时新建 Maven 模块 vs 何时只加 Java 包（innospots-nexus 本仓库）
+
+**默认：不新建 Maven 模块。** 先在现有 `portal` / `platform` / `console` 内按领域加包
 （见 [package-structure.md](../../java-reference/references/package-structure.md)、
 [develop-deliverables.md](../../java-develop/references/develop-deliverables.md)）。
 
@@ -32,12 +62,37 @@
 
 | 信号 | 动作 |
 |------|------|
-| 只是新业务域（role、menu…） | **不建** Maven 模块 → `kernel` 下新领域包 → `java:design` |
+| 只是新业务域（role、menu…） | **不建** Maven 模块 → `portal` 下新领域包 → `java:design` |
 | 单领域类型将超 40～50 且无子模块规划 | 先 `java:design` 拆功能子模块（仍是 Java 包） |
-| 需同时依赖 kernel 与 platform | **application 组装模块**，禁止 kernel↔platform 互依 |
+| 需同时依赖 portal 与 platform | **application 组装模块**，禁止 portal↔platform 互依 |
 | 外部系统 / 客户专属集成 | **adapter** 模块 |
 | classpath 插件、不经管理台表 | **plugin** 边界或独立插件工程 |
 | 为 dao/service/endpoint 各建 Maven 子模块 | **禁止** |
+| 演示 platform 扩展、无框架 JAR + 可运行装配 | `innospots-nexus-sample-platform` + `sample-*-spring-platform`（或 Quarkus）；见下节 |
+
+---
+
+## innospots-nexus-sample（本仓库示例聚合器）
+
+**不发布**；parent 为 `innospots-nexus-sample`（再继承 `innospots-nexus-parent`）。
+
+**重要：** sample 的 reactor 是 **全量示例陈列**（app / portal / platform × Spring / Quarkus 等）。
+新建工程、外部产品或在本仓库新增能力时 **只按需创建子模块**，不得默认复制 sample 的全部 `<modules>`。
+选型表见 [sample-extension-layout.md](../../java-reference/references/sample-extension-layout.md) §1.1、§2.2。
+
+| 操作 | 动作 |
+|------|------|
+| 新增无框架运营扩展 | 在 `innospots-nexus-sample-platform` 加 `core` / `console` / `inbound` 领域包（**交付面按需裁剪**）；**不**为此再拆 Maven 模块 |
+| 新增可运行演示 | **仅**建与任务相关的 `*-spring-*` 或 `*-quarkus-*` 子模块；依赖对应 `innospots-nexus-spring-*`；框架二选一 |
+| 扩展接入运行示例 | 运行模块 POM 依赖 `innospots-nexus-sample-platform`；装配在运行模块（非扩展库） |
+| 注册 reactor | 只 **追加** 需要的模块；若兼有扩展库与可运行模块，扩展库排在运行模块之前 |
+
+权威结构、路径契约、DDD 边界：
+[sample-extension-layout.md](../../java-reference/references/sample-extension-layout.md)。
+设计/实施补充见 `java:design` → [sample-extension-design.md](../../java-design/references/sample-extension-design.md)、
+`java:develop` → [sample-extension-development.md](../../java-develop/references/sample-extension-development.md)。
+
+**禁止：** 把 sample 模块登记为对外发布产物（除非单独变更发布策略）；在 `sample-platform` 引入 Spring/Quarkus 或 `portal`。
 
 ---
 
@@ -45,11 +100,13 @@
 
 | 类型 | 何时建 | 典型 artifact | parent | 直接依赖（示例） |
 |------|--------|---------------|--------|------------------|
-| **库模块（业务）** | 极少；多数能力应落在 kernel/platform **包**内 | `innospots-nexus-kernel`（已有） | `innospots-nexus-parent` | 场景见 dependency-conventions |
+| **库模块（业务）** | 极少；多数能力应落在 portal/platform **包**内 | `innospots-nexus-portal`（已有） | `innospots-nexus-parent` | 场景见 dependency-conventions |
 | **adapter** | 外部 API、客户专属基础设施、隔离第三方 SDK | `innospots-nexus-*-adapter` | parent | `console` 或 `core` + 外部库（BOM 登记） |
-| **application** | 同进程组装 kernel+platform 或可执行 JAR 入口 | `innospots-nexus-spring-*` 下新子模块 | spring/quarkus 聚合或 parent | `*-app` + `kernel` + `platform` |
+| **application** | 同进程组装 portal+platform 或可执行 JAR 入口 | `innospots-nexus-spring-*` 下新子模块 | spring/quarkus 聚合或 parent | `*-app` + `portal` + `platform` |
 | **运行时子模块** | Spring/Quarkus 可运行服务 | `spring-console`、`spring-app` | `innospots-nexus-spring` | 见 [dependency-conventions.md](dependency-conventions.md) |
 | **plugin 扩展** | 插件运行时、贡献、非 console catalog 表 | 独立模块或插件仓库 | parent | `innospots-nexus-plugin` |
+| **sample 扩展库** | 演示或 experimental 的 platform 增量 | `innospots-nexus-sample-platform` | `innospots-nexus-sample` | `innospots-nexus-platform` |
+| **sample 可运行** | 示例进程 + 发行包 | `innospots-nexus-sample-spring-platform` 等 | `innospots-nexus-sample` | `innospots-nexus-spring-platform` 等 |
 
 完整组装决策表见 dependency-conventions →「可运行应用组装决策表」。
 
@@ -88,7 +145,7 @@
 | BOM | 新 artifact 登记 |
 | starter 版本 | **只改 BOM** `spring-boot.version`（见 java:spring） |
 
-中立库模块（base/core/console/kernel/platform）**不得**在此阶段引入 starter。
+中立库模块（base/core/console/portal/platform）**不得**在此阶段引入 starter。
 
 ---
 
@@ -136,10 +193,10 @@ mvn dependency:analyze
 - [ ] `validate` + `compile` 通过
 - [ ] `dependency:tree` 符合最小依赖（无多余 console/plugin 重复声明）
 - [ ] 未在中立库模块引入 Spring/Quarkus starter
-- [ ] kernel ↔ platform 无互依
+- [ ] portal ↔ platform 无互依
 - [ ] 仅创建包根，未预建领域 `service`/`event` 空树
-- [ ] 若模块职责变化，已评估是否更新 `AGENTS.md`（须单独说明）
-- [ ] 下一步已明确：`java:design`（非直接 develop）
+- [ ] 若模块职责变化，已按 [agents-template.md](../../java-reference/references/agents-template.md) 增补根 `AGENTS.md`（或 PR 说明为何不修订）
+- [ ] 下一步已明确：`java:design`（非直接 develop）；design 完成后 `java:check` 含 AGENTS 合规
 
 全量 L0–L5 由 `java:check` 在 develop 完成后执行。
 
@@ -164,6 +221,7 @@ mvn dependency:analyze
 | 依赖引用与可运行应用 | [dependency-conventions.md](dependency-conventions.md) |
 | parent/BOM/插件/POM 模板 | [build-config.md](build-config.md) |
 | 模块职责与包结构 | [module-layout.md](module-layout.md) |
+| AGENTS 增补 | [agents-template.md](../../java-reference/references/agents-template.md) |
 | 领域包（非 Maven 模块） | [package-structure.md](../../java-reference/references/package-structure.md) |
 | 实现交付物 | [develop-deliverables.md](../../java-develop/references/develop-deliverables.md) |
 | Spring 依赖边界 | [spring-dependencies.md](../../java-spring/references/spring-dependencies.md) |

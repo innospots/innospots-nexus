@@ -34,6 +34,8 @@ import org.slf4j.LoggerFactory;
  *
  * <p>该类只协调安装事实与当前 JVM 运行时，管理命令按“提交意图、执行运行时、记录诊断”执行，
  * 不把安装状态写入 {@link PluginRuntimeInfo}。</p>
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class PluginInstallationManager implements AutoCloseable {
 

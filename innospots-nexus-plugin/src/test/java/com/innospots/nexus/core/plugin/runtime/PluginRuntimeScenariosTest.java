@@ -29,6 +29,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 /**
  * 覆盖插件定义、配置、发现、Capability 路由、生命周期转换和边界行为的端到端场景测试，
  * 同时输出结构化诊断日志。
+ * @author Smars
+ * @date 2026/09/13
  */
 class PluginRuntimeScenariosTest {
 

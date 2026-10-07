@@ -1,5 +1,5 @@
 /**
- * Thread-bound service context installation and snapshot restore.
+ * 线程绑定的服务上下文安装与快照恢复。
  *
  * @author Smars
  * @date 2026/09/13

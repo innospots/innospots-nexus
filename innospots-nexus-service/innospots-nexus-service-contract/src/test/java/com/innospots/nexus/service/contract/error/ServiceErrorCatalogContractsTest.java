@@ -1,15 +1,27 @@
 package com.innospots.nexus.service.contract.error;
 
+import java.util.Locale;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.base.i18n.I18nConverter;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.service.contract.status.ServiceStatusCode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+/**
+ * 服务错误目录解析与未知码回退契约测试。
+ */
 class ServiceErrorCatalogContractsTest {
+
+    @BeforeEach
+    void setEnglishLocale() {
+        I18nConverter.setLocale(Locale.US);
+    }
 
     @Test
     void resolvesRegisteredServiceAndPlatformCodes() {
@@ -22,7 +34,7 @@ class ServiceErrorCatalogContractsTest {
         assertThat(contextMissing.message()).contains("Service context unavailable");
 
         ServiceError limit = catalog.resolve(NexusStatusCode.LIMIT_EXCEEDED.fullCode());
-        assertThat(limit.code()).isEqualTo("NEX100012");
+        assertThat(limit.code()).isEqualTo("AIO100012");
         assertThat(limit.httpStatus()).isEqualTo(429);
         assertThat(limit.retryable()).isTrue();
     }

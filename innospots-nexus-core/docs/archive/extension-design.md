@@ -73,11 +73,11 @@ qualified pageKey + request URL -> role permission check
 | `declaration` | 扩展、模块、页面、菜单的不可变声明 | `ExtensionDescriptor`、`ExtensionModuleDeclaration`、`UiSpecPageDeclaration`、`MenuDeclaration` |
 
 Core 不发现扩展、不保存安装记录，也不提供启停和激活操作。外部扩展工程只需要依赖 Core，
-实现 Provider 并返回声明对象，不依赖 Kernel 的运行时实现。
+实现 Provider 并返回声明对象，不依赖 Portal 的运行时实现。
 
-### 3.2 Kernel 扩展运行时职责
+### 3.2 Portal 扩展运行时职责
 
-`innospots-nexus-kernel` 的 `com.innospots.nexus.kernel.extension` 承接实际运行能力：
+`innospots-nexus-portal` 的 `com.innospots.nexus.portal.extension` 承接实际运行能力：
 
 | 子包 | 职责 | 主要类型 |
 |------|------|----------|
@@ -87,7 +87,7 @@ Core 不发现扩展、不保存安装记录，也不提供启停和激活操作
 | `dao` | 单表 MyBatis-Plus 数据访问 | `ExtensionInstallationDao` |
 | `repository` | 安装登记、状态变更和缺失扩展对账 | `ExtensionInstallationRepository` |
 
-Kernel 依赖 Core 的稳定契约执行加载和操作，Core 不反向依赖 Kernel。
+Portal 依赖 Core 的稳定契约执行加载和操作，Core 不反向依赖 Portal。
 
 ## 4. 扩展与模块模型
 
@@ -410,7 +410,7 @@ public interface ConsoleExtensionProvider {
 
 ### 7.1 SPI 配置
 
-扩展 JAR 被加入应用依赖或运行时 classpath 后，Kernel 在启动阶段使用
+扩展 JAR 被加入应用依赖或运行时 classpath 后，Portal 在启动阶段使用
 `ServiceLoader<ConsoleExtensionProvider>` 发现 Provider。SPI 不需要全 ClassPath 反射扫描，
 也不需要扩展实现类添加额外注解。
 
@@ -528,12 +528,12 @@ JAR 加入依赖/classpath（安装）
 |-------------|------|
 | `innospots-nexus-core` | 供外部工程继承和实现的 Provider 接口及扩展声明结构 |
 | `innospots-nexus-console` | 管理平台的页面 URL 权限注册与统一请求拦截；不声明扩展权限策略 |
-| `innospots-nexus-kernel` | 扩展发现、安装存储、注册启停、激活校验、管理操作、资源目录和权限业务 |
+| `innospots-nexus-portal` | 扩展发现、安装存储、注册启停、激活校验、管理操作、资源目录和权限业务 |
 | 应用/运行时适配器 | 提供 SPI ClassLoader，装配 REST 和 UiSpec 渲染运行时 |
 | UiSpec 渲染模块 | 定位 UiSpec、登记页面 URL 引用、注入路径变量并渲染页面 |
 | 业务扩展 JAR | Provider 实现、模块/页面/菜单声明和 Endpoint |
 
-`innospots-nexus-core` 不提供生命周期、注册表和安装持久化实现。Kernel 可以提供这些实际
+`innospots-nexus-core` 不提供生命周期、注册表和安装持久化实现。Portal 可以提供这些实际
 能力，但不改变 Core 对外契约，也不绑定 Spring Boot 自动配置。
 
 ## 11. 完整接入示例

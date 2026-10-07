@@ -3,17 +3,19 @@ package com.innospots.nexus.console.auth.domain.model;
 import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
 
 /**
- * Compact claims encrypted into an access or refresh token.
+ * 加密进访问或刷新令牌的紧凑声明。
  *
- * @param realm           PLATFORM or TENANT
- * @param purpose         ACCESS or REFRESH
- * @param tokenType       IDENTITY or BUSINESS
- * @param userId          platform or tenant user identifier
- * @param tenantId        tenant on BUSINESS tokens
- * @param tenantMemberId  tenant member on BUSINESS tokens
- * @param workspaceId     active workspace on scoped BUSINESS tokens
- * @param projectId       active project on scoped BUSINESS tokens
- * @param expiresAt       epoch-second expiry
+ * @author Smars
+ * @date 2026/09/13
+ * @param realm           PLATFORM 或 TENANT
+ * @param purpose         ACCESS 或 REFRESH
+ * @param tokenType       IDENTITY 或 BUSINESS
+ * @param userId          platform or tenant user 标识符
+ * @param tenantId        BUSINESS 令牌上的租户
+ * @param tenantMemberId  BUSINESS 令牌上的租户成员
+ * @param workspaceId     作用域 BUSINESS 令牌上的活跃工作区
+ * @param projectId       作用域 BUSINESS 令牌上的活跃项目
+ * @param expiresAt       epoch 秒级过期时间
  */
 public record TokenClaims(
         SecurityRealm realm,

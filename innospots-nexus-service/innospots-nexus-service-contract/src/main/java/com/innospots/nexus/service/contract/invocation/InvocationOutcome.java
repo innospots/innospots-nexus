@@ -6,14 +6,14 @@ import java.time.Instant;
 import com.innospots.nexus.base.util.Checks;
 
 /**
- * Terminal invocation outcome used by interceptors, audit, and metrics.
+ * 拦截器、审计与指标使用的终态调用结果。
  *
- * @param type        outcome classification
- * @param code        status full code
- * @param finishedAt  finish instant
- * @param duration    elapsed duration
- * @param outputCount emitted item count
- * @param outputBytes emitted byte count
+ * @param type        结果分类
+ * @param code        状态完整码
+ * @param finishedAt  完成时刻
+ * @param duration    耗时
+ * @param outputCount 输出项数量
+ * @param outputBytes 输出字节数
  * @author Smars
  * @date 2026/09/13
  * @see OutcomeType

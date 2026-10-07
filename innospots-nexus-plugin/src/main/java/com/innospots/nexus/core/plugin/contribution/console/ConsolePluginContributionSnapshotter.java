@@ -6,7 +6,11 @@ import java.util.Map;
 
 import com.innospots.nexus.core.plugin.contribution.PluginContributionSnapshotter;
 
-/** 仅保存 Console 模块、页面、菜单稳定身份的安全快照器。 */
+/**
+ * 仅保存 Console 模块、页面、菜单稳定身份的安全快照器。
+ * @author Smars
+ * @date 2026/09/13
+ */
 public final class ConsolePluginContributionSnapshotter
         implements PluginContributionSnapshotter<ConsolePluginContribution> {
 
@@ -27,6 +31,7 @@ public final class ConsolePluginContributionSnapshotter
 
     private static Map<String, Object> module(ConsoleModuleDeclaration module) {
         Map<String, Object> value = new LinkedHashMap<>();
+        value.put("domainKey", module.domainKey());
         value.put("moduleKey", module.moduleKey());
         value.put("resourceKey", module.resourceKey());
         value.put("pages", module.pages().stream()

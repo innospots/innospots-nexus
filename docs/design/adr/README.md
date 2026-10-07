@@ -8,6 +8,3 @@
 [`architecture-decision.md`](../../../skills/java/java-design/references/architecture-decision.md)。
 
 完整域方案放在 `docs/design/` 或各模块 `docs/`，ADR 只记录「一件事一个决策」，并在相关设计文档中链接。
-
-`grill-me` 会话结论（设计树）的沉淀方式见
-[`docs/grill-me-best-practices.md`](../../grill-me-best-practices.md) §7。

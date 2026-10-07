@@ -1,8 +1,7 @@
 /**
- * Shared black-box scenarios executed against Spring and Quarkus service adapters.
+ * 针对 Spring 与 Quarkus 服务适配器执行的黑盒共享场景。
  *
- * <p>This package must stay free of Spring and Quarkus types. Host adapters
- * supply URLs and run the scenarios.</p>
+ * <p>本包不得依赖 Spring 或 Quarkus 类型。宿主适配器提供 URL 并运行场景。</p>
  *
  * @author Smars
  * @date 2026/09/13

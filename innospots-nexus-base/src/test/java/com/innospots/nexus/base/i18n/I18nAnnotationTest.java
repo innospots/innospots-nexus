@@ -30,6 +30,12 @@ class I18nAnnotationTest {
     record NullablePayload(@I18n String value) {
     }
 
+    record AnnotationKeyPayload(@I18n("${app.title}") String ignored) {
+    }
+
+    record AnnotationPlainKeyPayload(@I18n("app.title") String ignored) {
+    }
+
     private static final ObjectMapper MAPPER = new JsonMapper();
 
     @Nested
@@ -88,6 +94,26 @@ class I18nAnnotationTest {
             ));
 
             assertThat(json).contains("\"title\":\"Fallback\"");
+        }
+
+        @Test
+        void resolvesKeyFromAnnotationValue() throws Exception {
+            I18nConverter.setLocale(Locale.US);
+            I18nConverter.setMessageResolver((key, locale) -> "app.title".equals(key) ? "Dashboard" : null);
+
+            String json = MAPPER.writeValueAsString(new AnnotationKeyPayload("unused"));
+
+            assertThat(json).contains("\"ignored\":\"Dashboard\"");
+        }
+
+        @Test
+        void resolvesPlainKeyFromAnnotationValue() throws Exception {
+            I18nConverter.setLocale(Locale.US);
+            I18nConverter.setMessageResolver((key, locale) -> "app.title".equals(key) ? "Dashboard" : null);
+
+            String json = MAPPER.writeValueAsString(new AnnotationPlainKeyPayload(null));
+
+            assertThat(json).contains("\"ignored\":\"Dashboard\"");
         }
 
         @Test

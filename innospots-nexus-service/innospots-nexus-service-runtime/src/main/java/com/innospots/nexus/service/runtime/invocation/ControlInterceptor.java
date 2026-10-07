@@ -10,7 +10,7 @@ import com.innospots.nexus.service.contract.invocation.InvocationLease;
 import com.innospots.nexus.service.contract.invocation.ServiceInterceptor;
 
 /**
- * First interceptor in the default chain. Logical outcome is owned by {@link InvocationEngine}.
+ * 默认链中的首个拦截器。逻辑结果由 {@link InvocationEngine} 持有。
  *
  * @author Smars
  * @date 2026/09/13

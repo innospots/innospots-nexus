@@ -14,7 +14,7 @@
     <artifactId>innospots-nexus-service-contract</artifactId>
 
     <name>innospots-nexus-service-contract</name>
-    <description>Shared service invocation contracts and extension boundaries.</description>
+    <description>共享服务调用契约与扩展边界。</description>
 
     <dependencies>
         <dependency>

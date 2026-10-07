@@ -1,5 +1,5 @@
 /**
- * Write-side cancellation for an invocation. The public token is read-only.
+ * 调用的写侧取消；公开令牌为只读。
  *
  * @author Smars
  * @date 2026/09/13

@@ -1,48 +1,43 @@
-# Agent Operating Guide
+# Agent 操作指南
 
-This repository is a greenfield reconstruction. The previous Innospots project
-is a reference, not a source template.
+本仓库为 greenfield 重建工程。旧 Innospots 项目仅作参考，不是源码模板。
 
-## Core Constraints
+## 核心约束
 
-- Never copy legacy source code into this repository.
-- Never move legacy files into this repository.
-- Never reproduce legacy POM or package structure mechanically.
-- Ask for or infer the current developer intent before creating new behavior.
-- Keep the foundation lightweight and dependency-minimal.
+- 不得将 legacy 源码复制到本仓库。
+- 不得将 legacy 文件移动到本仓库。
+- 不得机械复刻 legacy POM 或包结构。
+- 创建新行为前，应询问或推断当前开发者意图。
+- 保持 foundation 轻量、依赖最小。
 
-## Dependency Rules
+## 依赖规则
 
-- `innospots-nexus-base` must remain middleware-free.
-- Internal Java modules should inherit `innospots-nexus-parent`.
-- Dependency versions belong in `innospots-nexus-bom`.
-- Shared Java module dependencies belong in `innospots-nexus-parent`, not in the
-  root aggregator or BOM.
-- `innospots-nexus-core` may depend on `innospots-nexus-base`.
-- `innospots-nexus-core` may define port/interface-level middleware boundaries
-  later, but must not bind itself to Spring Boot auto-configuration.
-- Concrete infrastructure belongs in future adapter, plugin, extension, or
-  application modules.
+- `innospots-nexus-base` 必须保持 middleware-free。
+- 内部 Java 模块应继承 `innospots-nexus-parent`。
+- 依赖版本归属 `innospots-nexus-bom`。
+- 共享 Java 模块依赖归属 `innospots-nexus-parent`，不在根 aggregator 或 BOM 中定义。
+- `innospots-nexus-core` 可依赖 `innospots-nexus-base`。
+- `innospots-nexus-core` 后续可定义 port/interface 级中间件边界，
+  但不得绑定 Spring Boot auto-configuration。
+- 具体基础设施归属未来的 adapter、plugin、extension 或 application 模块。
 
-## DDD Rules
+## DDD 规则
 
-- Name packages and modules by responsibility and boundary.
-- Keep domain concepts independent from infrastructure implementations.
-- Prefer ports and adapters for middleware integration.
-- Add new modules only when the boundary is clear enough to test independently.
+- 按职责与边界命名包与模块。
+- 保持领域概念独立于基础设施实现。
+- 中间件集成优先采用 ports and adapters。
+- 仅在边界足够清晰、可独立测试时再新增模块。
 
-## Coding Style
+## 编码风格
 
-- All `if`, `else`, `for`, `while` blocks must use braces `{}`, even for
-  single-statement bodies. No bare statements on the same line as the
-  condition.
-- Use 4-space indentation.
-- Keep line width reasonable (prefer 120 chars max).
+- 所有 `if`、`else`、`for`、`while` 块必须使用花括号 `{}`，
+  即使只有一条语句。条件与语句不得写在同一行。
+- 使用 4 空格缩进。
+- 保持合理行宽（建议最多 120 字符）。
 
-## Verification
+## 验证
 
-Run these commands after structural changes when the local JDK supports the
-configured release:
+当本地 JDK 支持配置的 release 时，结构变更后运行：
 
 ```bash
 mvn validate
@@ -50,5 +45,4 @@ mvn test
 mvn -q help:effective-pom
 ```
 
-If the local JDK is older than 25, report the environment mismatch instead of
-lowering the project baseline.
+若本地 JDK 低于 25，应报告环境不匹配，而不是降低项目基线。

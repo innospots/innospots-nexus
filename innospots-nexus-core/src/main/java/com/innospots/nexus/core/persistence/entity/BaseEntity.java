@@ -11,13 +11,13 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 /**
- * Base JPA/MyBatis-Plus entity with automatic audit fields.
- * <p>All fields are auto-populated by {@link AuditMetaObjectHandler} via
- * MyBatis-Plus meta-object handling — no manual assignment required.</p>
+ * 带自动审计字段的 JPA/MyBatis-Plus 基类实体。
+ * <p>所有字段由 {@link AuditMetaObjectHandler} 通过 MyBatis-Plus 元对象填充自动写入，
+ * 无需在仓储层手动赋值。</p>
  *
+ * @author Smars
+ * @date 2026/09/13
  * @see AuditMetaObjectHandler
- * @see TenantBaseEntity
- * @see WorkspaceBaseEntity
  */
 @Getter
 @Setter
@@ -25,30 +25,30 @@ import java.time.LocalDateTime;
 public class BaseEntity {
 
     /**
-     * Returns the prefix used when generating this entity's primary key.
+     * 返回生成本实体主键时使用的前缀。
      *
-     * @return primary-key prefix, or an empty string when no prefix is required
+     * @return 主键前缀；无需前缀时返回空字符串
      */
     public String idPrefix() {
         return "";
     }
 
-    /** Record creation timestamp, set once on insert and never updated. */
+    /** 记录创建时间，插入时写入且不可更新。 */
     @TableField(fill = FieldFill.INSERT)
     @Column(updatable = false)
     protected LocalDateTime createdAt;
 
-    /** Record last-update timestamp, refreshed on every insert and update. */
+    /** 记录最后更新时间，每次插入与更新时刷新。 */
     @TableField(fill = FieldFill.INSERT_UPDATE)
     @Column
     protected LocalDateTime updatedAt;
 
-    /** Identity of the user who created the record. Immutable after insert. */
+    /** 创建记录的用户标识，插入后不可变。 */
     @TableField(fill = FieldFill.INSERT)
     @Column(length = 64, updatable = false)
     protected String createdBy;
 
-    /** Identity of the user who last updated the record. */
+    /** 最后更新记录的用户标识。 */
     @TableField(fill = FieldFill.INSERT_UPDATE)
     @Column(length = 64)
     protected String updatedBy;

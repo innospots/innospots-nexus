@@ -14,7 +14,7 @@ import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.base.util.Checks;
 
 /**
- * Immutable typed attribute bag. Values are frozen scalars, records, or copied collections.
+ * 不可变的类型化属性容器。值为冻结标量、记录或复制后的集合。
  *
  * @author Smars
  * @date 2026/09/13
@@ -30,20 +30,20 @@ public final class ContextAttributes {
     }
 
     /**
-     * Returns an empty attribute bag.
+     * 返回空属性容器。
      *
-     * @return empty attributes
+     * @return 空属性
      */
     public static ContextAttributes empty() {
         return new ContextAttributes(Map.of());
     }
 
     /**
-     * Finds the value for {@code key} when present and assignable.
+     * 在存在且可赋值时查找 {@code key} 对应的值。
      *
-     * @param key typed attribute key
-     * @param <T> value type
-     * @return value or empty
+     * @param key 类型化属性键
+     * @param <T> 值类型
+     * @return 值，不存在时为空
      */
     public <T> Optional<T> find(AttributeKey<T> key) {
         Checks.notNull(key, "key");
@@ -55,12 +55,12 @@ public final class ContextAttributes {
     }
 
     /**
-     * Returns a copy with {@code key} set to a frozen {@code value}.
+     * 返回将 {@code key} 设为冻结 {@code value} 后的副本。
      *
-     * @param key   typed attribute key
-     * @param value immutable-compatible value
-     * @param <T>   value type
-     * @return new attributes instance
+     * @param key   类型化属性键
+     * @param value 不可变兼容值
+     * @param <T>   值类型
+     * @return 新属性实例
      */
     public <T> ContextAttributes with(AttributeKey<T> key, T value) {
         Checks.notNull(key, "key");

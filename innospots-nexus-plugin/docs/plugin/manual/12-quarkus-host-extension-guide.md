@@ -260,7 +260,7 @@ public class PluginContributionBeans {
           ConsoleContributionCatalog catalog) {
       return List.of(new ConsolePluginContributionHandler(
               catalog,
-              new ReservedPluginResourceCatalog(List.of("platform", "kernel"))));
+              new ReservedPluginResourceCatalog(List.of("platform", "portal"))));
   }
 }
 ```

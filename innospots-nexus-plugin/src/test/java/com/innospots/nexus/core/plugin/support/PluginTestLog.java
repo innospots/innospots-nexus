@@ -12,6 +12,8 @@ import com.innospots.nexus.core.plugin.runtime.PluginManager;
 /**
  * 面向测试的结构化插件诊断记录器，同时写入 System.Logger 和标准输出，避免 Maven Surefire
  * 在没有 SLF4J 绑定时丢失可读诊断。
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class PluginTestLog {
 

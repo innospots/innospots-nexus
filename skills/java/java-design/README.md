@@ -4,10 +4,13 @@
 
 ## 是什么
 
-`java:design` 负责**设计决策**：能力归属、词汇、包边界、API 契约、异常与状态码、持久化、事件、测试范围。
+`java:design` 负责**技术/架构设计方案**：工程 **Maven 模块划分**、**包结构与 DDD 边界**、
+**Entity 实体**、**枚举**、**StatusCode**、**NexusException 语义**、**HTTP/Java 接口**、
+分层与持久化、事件、测试范围。
 
-产出是**设计文档或 PR 内结构化结论**（非可运行代码）。格式与目录见
-[design-deliverables.md](references/design-deliverables.md)。
+产出是**设计文档或 PR 内结构化结论**（非可运行代码）。八类设计面清单见
+[structural-design-blueprint.md](references/structural-design-blueprint.md)；
+L2 章节模板见 [design-deliverables.md](references/design-deliverables.md)。
 
 ## 怎么用
 

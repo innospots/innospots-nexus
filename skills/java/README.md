@@ -2,6 +2,17 @@
 
 面向 `innospots-nexus` 及同类 Java 工程的分工化技能集。
 
+## 安装（软链接，不复制）
+
+仓库内技能为源码；在本机以引用方式挂到 Agent 技能目录：
+
+```bash
+./skills/install-skills-symlinks.sh
+```
+
+- **Codex CLI**：`~/.codex/skills/java-*` → `skills/java/java-*`
+- **Cursor（本仓库）**：`.cursor/skills/java-*` → 同上（`.cursor/` 已 gitignore，每人本地执行一次）
+
 - 规范条文权威来源：`skills/java/java-reference/standards/` 与 `AGENTS.md`
 - 规范消费与复用入口：**`java:reference`**（索引、专题参考、红线速查）
 - 其他技能是**执行入口**，通过 `java:reference` 链接规范，不在 SKILL 正文重复条文
@@ -30,7 +41,7 @@ java-<name>/
 java-reference/
 ├── README.md
 ├── SKILL.md          规范总索引（java:reference）
-├── standards/        规范权威原文（7 份，随技能包安装）
+├── standards/        规范权威原文（8 份，随技能包安装）
 └── references/       专题参考、模块 API 索引
 ```
 
@@ -196,6 +207,7 @@ java:check            与升级前基线对比
 | 硬性红线 | `java-reference/references/quick-constraints.md` |
 | 模块归属 | `java-reference/references/module-ownership.md` |
 | 包结构（领域优先） | `java-reference/references/package-structure.md` |
+| sample 示例工程与扩展 DDD | `java-reference/references/sample-extension-layout.md` |
 | 作用域层级 | `java-reference/references/scope-hierarchy.md` |
 | 领域建模 | `java-reference/references/domain-modeling.md` |
 | API 契约 | `java-reference/references/api-contract.md` |
@@ -207,6 +219,7 @@ java:check            与升级前基线对比
 | 实现交付物（格式/目录） | `java-develop/references/develop-deliverables.md` |
 | 工程交付物（POM/模块） | `java-project/references/project-deliverables.md` |
 | 设计四步法门禁 | `java-design/references/design-four-steps.md` |
+| 设计八面清单（实体/枚举/状态码/异常/接口/DDD/模块/包） | `java-design/references/structural-design-blueprint.md` |
 | 设计场景与 L0–L3 | `java-design/references/design-scenarios.md` |
 | 持久化与配置（reference） | `java-reference/references/persistence-config.md` |
 | 持久化契约（设计） | `java-design/references/persistence-contract.md` |
@@ -226,7 +239,6 @@ java:check            与升级前基线对比
 **`java:project`（新建模块）与 `java:design`（新设计）开始前必经**。未安装时先执行
 `npx skills use "https://github.com/mattpocock/skills" --skill "grill-me"` 并按技能全文操作。
 调用时机与各技能衔接见 `java-reference/references/grill-me.md`。
-最佳实践见 [`docs/grill-me-best-practices.md`](../../docs/grill-me-best-practices.md)。
 
 简记：
 

@@ -1,6 +1,6 @@
-# Base 基础类补齐 Implementation Plan
+# Base 基础类补齐实施计划
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **面向 agent 工作者：** 必需子技能：使用 superpowers:subagent-driven-development（推荐）或 superpowers:executing-plans 按任务逐步实施本计划。步骤使用 checkbox（`- [ ]`）语法跟踪进度。
 
 **Goal:** 分三阶段补齐 `innospots-nexus-base` 日常开发助手，去掉上层重复样板，对齐 ID/分页类型。
 
@@ -8,9 +8,9 @@
 
 **Tech Stack:** Java 25, Jackson 2.22, JUnit 5, 现有 `NexusException` / `NexusStatusCode` / `R` / `PageResult` / `TLC`
 
-**Spec:** 对照当前 base 源码与 kernel/console/platform 调用点，不复制旧 Innospots。
+**Spec:** 对照当前 base 源码与 portal/console/platform 调用点，不复制旧 Innospots。
 
-## Global Constraints
+## 全局约束
 
 - `innospots-nexus-base` 保持 middleware-free（无 Spring / Servlet / DB）
 - 不含业务域逻辑
@@ -61,13 +61,13 @@
 | 修改 | `core/.../CoreEntityContractsTest.java` | `TLC.userId(1001L)` → 字符串 ID |
 | 修改 | `base/.../domain/response/PageResult.java` | 加 `from(DataPage)`；分页计算抽到 `Pagination` |
 | 修改 | `base/.../domain/data/DataPage.java` | 标 `@Deprecated`，内部改调 `Pagination`；新代码只用 `PageResult` |
-| 修改 | `kernel/.../user/operator/UserOperator.java`（及返回 `DataPage` 的调用点） | 返回值改为 `PageResult` |
+| 修改 | `portal/.../user/operator/UserOperator.java`（及返回 `DataPage` 的调用点） | 返回值改为 `PageResult` |
 | 修改 | 5 个 `*PageRequest` | compact constructor 改调 `Pagination.normalize*`，删除本地 `if (pageNo < 1)` |
 | | `console/.../DictionaryItemPageRequest.java` | 同上 |
 | | `console/.../DictionaryTypePageRequest.java` | 同上 |
 | | `console/.../RolePageRequest.java` | 同上 |
 | | `console/.../RoleBindingPageRequest.java` | 同上 |
-| | `kernel/.../UserPageRequest.java` | 同上 |
+| | `portal/.../UserPageRequest.java` | 同上 |
 | 修改 | `base/.../events/DomainEvent.java` | 去掉每次 new 的 default；改为要求实现提供稳定 `eventId` / `occurredAt`，或提供带缓存的抽象 |
 | 修改 | `ResourceEvent`、`TenantCreatedEvent`、`ConversationCreatedEvent`、`SessionMessageCreatedEvent`、相关测试 | 实现稳定 eventId/occurredAt（record 补字段，或构造时生成一次） |
 
@@ -85,7 +85,7 @@
 |---|---|---|
 | 新增 | `base/.../util/Tree.java` | `of(list, idFn, parentIdFn, childrenSetter)`，根节点 parentId 为 null/blank |
 | 新增 | `base/.../util/TreeTest.java` | 两层树、孤儿节点、空列表 |
-| 修改 | `base/.../status/NexusStatusCode.java` | javadoc：fullCode 是 9 位（`NEX`+2+4），不是 6/7 位 |
+| 修改 | `base/.../status/NexusStatusCode.java` | javadoc：fullCode 是 9 位（`AIO`+2+4），不是 6/7 位 |
 | 可选 | console 菜单 VO 组装、权限 catalog | 改用 `Tree.of`，仅在有现成列表→树逻辑时替换，不借机重构 |
 
 本阶段明确不做：

@@ -36,6 +36,9 @@ import com.innospots.nexus.service.runtime.context.ThreadBoundServiceContext;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+/**
+ * 调用引擎同步、异步与流式路径及拦截器链行为测试。
+ */
 class InvocationEngineTest {
 
     private final ThreadBoundServiceContext contexts = new ThreadBoundServiceContext();
@@ -204,6 +207,7 @@ class InvocationEngineTest {
                 ContextAttributes.empty());
         OperationPolicy policy = new OperationPolicy(
                 Set.of(),
+                null,
                 null,
                 null,
                 null,

@@ -14,11 +14,11 @@ class StatusCodeTest {
     void buildsFullCodeFromModuleCategoryAndLocalCode() {
         StatusCode statusCode = NexusStatusCode.CONFIG_ERROR;
 
-        assertThat(statusCode.module()).isEqualTo("NEX");
+        assertThat(statusCode.module()).isEqualTo("AIO");
         assertThat(statusCode.category()).isEqualTo(StatusCategory.CONFIGURATION);
         assertThat(statusCode.localCode()).isEqualTo("0002");
-        assertThat(statusCode.bisCode()).isEqualTo("NEX080002");
-        assertThat(statusCode.fullCode()).isEqualTo("NEX080002");
+        assertThat(statusCode.bisCode()).isEqualTo("AIO080002");
+        assertThat(statusCode.fullCode()).isEqualTo("AIO080002");
         assertThat(statusCode.httpStatusCode()).isEqualTo(500);
         assertThat(statusCode.message().enValue()).isEqualTo("Configuration error");
         assertThat(statusCode.message().cnValue()).isEqualTo("配置错误");
@@ -31,13 +31,13 @@ class StatusCodeTest {
     void validatesStatusCodeParts() {
         assertThatThrownBy(() -> StatusCodeRules.requireValid("NX", StatusCategory.GENERAL, "001"))
                 .isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> StatusCodeRules.requireValid("NEX", StatusCategory.GENERAL, "001"))
+        assertThatThrownBy(() -> StatusCodeRules.requireValid("AIO", StatusCategory.GENERAL, "001"))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void findsStatusCodeByFullCode() {
-        Optional<NexusStatusCode> statusCode = NexusStatusCode.findByFullCode("NEX010001");
+        Optional<NexusStatusCode> statusCode = NexusStatusCode.findByFullCode("AIO010001");
 
         assertThat(statusCode).contains(NexusStatusCode.INVALID_PARAMETER);
     }

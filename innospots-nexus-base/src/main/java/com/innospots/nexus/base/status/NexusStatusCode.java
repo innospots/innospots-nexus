@@ -6,9 +6,13 @@ import java.util.Arrays;
 import java.util.Optional;
 
 /**
- * Platform-wide status codes with bilingual (EN/ZH) messages and advice,
- * grouped by {@link StatusCategory}. Each code has a 6-character full code
- * in the format {@code NEX + category(2) + local(4)}.
+ * 平台级状态码枚举，提供双语（EN/ZH）消息与建议，按 {@link StatusCategory} 分组。
+ * 每个码的完整码格式为 {@code AIO + category(2) + local(4)}。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @see StatusCode
+ * @see StatusCategory
  */
 public enum NexusStatusCode implements StatusCode {
     SUCCESS("0000", StatusCategory.GENERAL,
@@ -88,7 +92,7 @@ public enum NexusStatusCode implements StatusCode {
             "Please check the key, payload, or algorithm configuration", "请检查密钥、密文或算法配置",
             500);
 
-    private static final String MODULE = "NEX";
+    private static final String MODULE = "AIO";
 
     private final String localCode;
     private final StatusCategory category;
@@ -142,10 +146,10 @@ public enum NexusStatusCode implements StatusCode {
     }
 
     /**
-     * Looks up a status code by its full code string (e.g. {@code NEX000000}).
+     * 按完整状态码字符串查找对应枚举常量（如 {@code AIO000000}）。
      *
-     * @param fullCode the full 7-character code
-     * @return the matching enum constant, or empty if not found
+     * @param fullCode 完整 7 位状态码
+     * @return 匹配的枚举常量，未找到时返回空
      */
     public static Optional<NexusStatusCode> findByFullCode(String fullCode) {
         return Arrays.stream(values())

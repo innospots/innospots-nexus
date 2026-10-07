@@ -1,7 +1,7 @@
 package com.innospots.nexus.service.contract.security;
 
 /**
- * Kind of authenticated caller.
+ * 已认证调用方类型。
  *
  * @author Smars
  * @date 2026/09/13

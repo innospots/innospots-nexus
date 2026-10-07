@@ -1,0 +1,36 @@
+spring:
+  profiles:
+    default: local
+  application:
+    name: nexus-platform-console
+  jersey:
+    # Jersey 以 Servlet Filter 接入，与 Spring MVC 共用同一端口
+    type: filter
+  config:
+    import:
+      # 控制台示例配置（完整分项见 classpath:nexus/console-*.yaml）
+      - optional:classpath:nexus/console-auth.yaml
+      - optional:classpath:nexus/console-credential.yaml
+      - optional:classpath:nexus/console-web.yaml
+      - optional:classpath:nexus/console-openapi.yaml
+      - optional:classpath:nexus/console-plugins.yaml
+      # 本地覆盖：可选放置同名文件，例如 optional:file:./config/nexus/console-web.yaml
+
+server:
+  port: 8082
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: info,health,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true

@@ -14,7 +14,7 @@
     <artifactId>innospots-nexus-service-runtime</artifactId>
 
     <name>innospots-nexus-service-runtime</name>
-    <description>Framework-neutral invocation execution and lifecycle coordination.</description>
+    <description>framework-neutral 调用执行与生命周期协调。</description>
 
     <dependencies>
         <dependency>

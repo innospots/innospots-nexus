@@ -3,11 +3,11 @@ package com.innospots.nexus.service.contract.trace;
 import com.innospots.nexus.base.util.Checks;
 
 /**
- * Immutable W3C-compatible trace identifiers. Disabled tracing uses empty strings, not fake zeros.
+ * 不可变的 W3C 兼容追踪标识。禁用追踪时使用空字符串，而非伪造零值。
  *
- * @param traceId  trace identifier, empty when tracing is off
- * @param spanId   span identifier, empty when tracing is off
- * @param sampled  whether the trace is sampled
+ * @param traceId  追踪标识，关闭追踪时为空
+ * @param spanId   Span 标识，关闭追踪时为空
+ * @param sampled  是否采样
  * @author Smars
  * @date 2026/09/13
  * @see TraceProvider
@@ -20,9 +20,9 @@ public record TraceSnapshot(String traceId, String spanId, boolean sampled) {
     }
 
     /**
-     * Returns an unsampled snapshot with empty identifiers.
+     * 返回未采样且标识为空的快照。
      *
-     * @return empty snapshot
+     * @return 空快照
      */
     public static TraceSnapshot empty() {
         return new TraceSnapshot("", "", false);

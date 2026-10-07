@@ -1,9 +1,11 @@
-# 模块结构与职责边界
+# innospots-nexus 平台库模块结构与职责
 
-> 本文档说明**模块职责与包结构约定**，供新建/调整工程时选型。
-> **工程交付物、新建 Maven 模块流程与清单**见 [project-deliverables.md](project-deliverables.md)。
-> Maven 依赖应引哪个 artifact、如何最小声明，见
-> [dependency-conventions.md](dependency-conventions.md)。
+> **适用范围：** **本仓库**内的 `innospots-nexus-*` 平台库（base、core、console、portal 等）。
+> **外部产品工程**（`{product}-console` / `{product}-service` / …）见
+> [external-project-layout.md](external-project-layout.md)。
+>
+> 工程交付物与流程见 [project-deliverables.md](project-deliverables.md)。
+> Maven 依赖选型见 [dependency-conventions.md](dependency-conventions.md)。
 
 ## 分层全景
 
@@ -15,32 +17,34 @@ innospots-nexus (root, packaging=pom)
 ├── innospots-nexus-core             业务中立的平台基础设施
 ├── innospots-nexus-plugin           插件运行时与 Page DSL
 ├── innospots-nexus-console          管理台契约与 catalog 索引（引用此模块 = 控制台地基）
-├── innospots-nexus-kernel           租户侧管理业务（业务类管理端）
+├── innospots-nexus-portal           租户侧管理业务（业务类管理端）
 ├── innospots-nexus-platform         运营域平台（系统运营类）
 ├── innospots-nexus-spring           Spring Boot 运行时聚合
-│   ├── innospots-nexus-spring-app
-│   └── innospots-nexus-spring-console
+│   ├── innospots-nexus-spring-core / -service / -app / -console / -portal / -platform
 └── innospots-nexus-quarkus          Quarkus 运行时聚合
-    ├── innospots-nexus-quarkus-app
-    └── innospots-nexus-quarkus-console
+    ├── innospots-nexus-quarkus-core / -service / -app / -console / -portal / -platform
+└── innospots-nexus-sample           可运行示例（不发布）；见下文
+    ├── innospots-nexus-sample-platform          无框架 platform 扩展库
+    ├── innospots-nexus-sample-spring-app / -spring-portal / -spring-platform
+    └── innospots-nexus-sample-quarkus-app / -quarkus-portal / -quarkus-platform
 ```
 
 库模块依赖方向严格单向：
 
 ```text
-base  →  core  →  plugin  →  console  →  kernel
+base  →  core  →  plugin  →  console  →  portal
                                     ↘ platform
 ```
 
-`kernel` 与 `platform` 是 `console` 下的两个平行业务模块，**互不依赖**。
+`portal` 与 `platform` 是 `console` 下的两个平行业务模块，**互不依赖**。
 `spring` / `quarkus` 为**运行时组装层**，依赖上层的库模块，不在中立库中反向被依赖。
 任何反向依赖或跨平级依赖都必须在设计阶段消解：
 
 | 需求 | 正确做法 | 错误做法 |
 |------|---------|---------|
-| kernel 需要 platform 的租户信息 | 把业务中立契约下沉到 `console` 或 `core` | 让 kernel 依赖 platform |
+| portal 需要 platform 的租户信息 | 把业务中立契约下沉到 `console` 或 `core` | 让 portal 依赖 platform |
 | 两个模块都要消费同一事件 | 事件契约放可共同依赖的低层，或由可同时依赖两者的 application/adapter 模块协调 | 把具体业务事件塞进 core 只为绕过依赖规则 |
-| platform 需要用户能力 | 抽象成 console 契约或独立 application 模块编排 | 让 platform 依赖 kernel |
+| platform 需要用户能力 | 抽象成 console 契约或独立 application 模块编排 | 让 platform 依赖 portal |
 
 ---
 
@@ -109,9 +113,9 @@ base  →  core  →  plugin  →  console  →  kernel
 **硬约束**：
 
 - 不拥有插件规范与 contribution 约束定义（属于 `innospots-nexus-plugin`）
-- 不实现具体管理业务功能；用户、角色、权限、注册等属于 `kernel` 之类的业务模块
+- 不实现具体管理业务功能；用户、角色、权限、注册等属于 `portal` 之类的业务模块
 
-### innospots-nexus-kernel
+### innospots-nexus-portal
 
 **定位**：**业务类管理端** — 建设在 console 之上的租户侧管理业务实现。
 
@@ -127,7 +131,7 @@ base  →  core  →  plugin  →  console  →  kernel
 
 ### innospots-nexus-platform
 
-**定位**：**系统运营类平台**，与 kernel 平行，建设在 console 地基之上。
+**定位**：**系统运营类平台**，与 portal 平行，建设在 console 地基之上。
 
 **Maven 引用场景**：租户生命周期、企业主体、平台 IAM、`/platform/**` 等运营侧能力。
 
@@ -138,7 +142,7 @@ base  →  core  →  plugin  →  console  →  kernel
 
 - 暴露 `/platform/**` 契约
 - 不提供对外自助注册
-- 依赖 `console` 及传递的 `core` / `base`；**不得依赖 `innospots-nexus-kernel`**
+- 依赖 `console` 及传递的 `core` / `base`；**不得依赖 `innospots-nexus-portal`**
 
 ### innospots-nexus-spring
 
@@ -161,8 +165,12 @@ base  →  core  →  plugin  →  console  →  kernel
 
 | 子模块 | 用途 |
 |--------|------|
-| `innospots-nexus-quarkus-app` | Quarkus 基础设施组装 |
-| `innospots-nexus-quarkus-console` | 可运行的管理端 Quarkus 应用 |
+| `innospots-nexus-quarkus-core` | 宿主引导、插件宿主（对齐 spring-core） |
+| `innospots-nexus-quarkus-service` | service 框架 Quarkus adapter |
+| `innospots-nexus-quarkus-app` | 应用服务装配库（core + service） |
+| `innospots-nexus-quarkus-console` | 管理控制台装配库（core + console） |
+| `innospots-nexus-quarkus-portal` | portal 域装配（console + portal） |
+| `innospots-nexus-quarkus-platform` | platform 域装配（console + platform） |
 
 新建 Quarkus 服务时引用此聚合下的子模块，不要在中立库模块中绑定 Quarkus 扩展。
 
@@ -175,7 +183,7 @@ base  →  core  →  plugin  →  console  →  kernel
 [java-reference → package-structure.md](../../java-reference/references/package-structure.md)。
 
 ```text
-com.innospots.nexus.kernel
+com.innospots.nexus.portal
   ├── permission                    # 较大领域：先划功能子模块
   │   ├── authorization             # 请求鉴权
   │   ├── grant                     # 授权授予（可含 service/operator/domain）
@@ -198,7 +206,7 @@ com.innospots.nexus.kernel
 
 | 必须 | 禁止 |
 |------|------|
-| 领域优先：`kernel.role.endpoint` | 技术层优先：`kernel.endpoint.role` |
+| 领域优先：`portal.role.endpoint` | 技术层优先：`portal.endpoint.role` |
 | 大领域按功能子模块：`permission.authorization`、`grant.service` | 模块根 `service` 或单包堆满 `*Service` |
 | 单包 ≤15 个 `.java` | 单包 16+ 类不分子包 |
 | 只用清单内的职责包名 | 自造层级 |
@@ -236,8 +244,25 @@ com.innospots.nexus.kernel
 - [ ] 边界是否清晰到可以独立测试？
 - [ ] 依赖方向是否单向、无环？
 - [ ] 是否确实无法并入现有模块？
-- [ ] 若属业务能力，是否应放在 `kernel` / `platform` 的某个域下而非新模块？
+- [ ] 若属业务能力，是否应放在 `portal` / `platform` 的某个域下而非新模块？
 - [ ] 若为基础设施，是业务中立（→ `core`）还是业务专属（→ 业务模块或 adapter）？
 - [ ] 是否需要被其他模块依赖？（是 → 需在 BOM 登记）
 - [ ] POM 是否只声明了最小直接依赖？（见 dependency-conventions.md）
 - [ ] `AGENTS.md` 中的模块职责是否需要同步更新？
+
+---
+
+## innospots-nexus-sample（示例聚合器）
+
+**不参与制品发布**（`maven.deploy.skip`）。reactor 内 **并列多种** 可运行子模块，用于演示 Spring/Quarkus 组装与 **platform 扩展库** 包结构；**新建工程时只按需选取其中一类或几类**，不得默认复制全套模块。选型见 [sample-extension-layout.md](../../java-reference/references/sample-extension-layout.md) §1.1、§2.2。
+
+| 模块 | 职责 |
+|------|------|
+| `innospots-nexus-sample-platform` | 依赖 `innospots-nexus-platform`；`core` / `console` / `inbound` 交付面 + 领域 DDD |
+| `innospots-nexus-sample-spring-platform` | 可运行运营平台示例 + assembly → `sample/dist` |
+| `innospots-nexus-sample-spring-portal` | 可运行租户管理端示例 |
+| `innospots-nexus-sample-spring-app` | 可运行 app/service 框架示例 |
+| `*-quarkus-*` | 与 spring 对称 |
+
+扩展库与路径、契约、自检清单：
+[sample-extension-layout.md](../../java-reference/references/sample-extension-layout.md)。

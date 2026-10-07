@@ -16,6 +16,8 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
 /**
  * 解析已声明且当前可用的 Capability 依赖，不绑定到具体 Provider 实例。
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class DependencyResolver {
 

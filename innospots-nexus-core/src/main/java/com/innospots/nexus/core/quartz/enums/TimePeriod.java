@@ -1,22 +1,25 @@
 package com.innospots.nexus.core.quartz.enums;
 
 /**
- * Common scheduling period units used by Quartz cron conversion.
+ * Quartz Cron 转换使用的常见调度周期单位。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public enum TimePeriod {
 
-    /** Repeat by minute interval, for example every 5 minutes. */
+    /** 按分钟间隔重复，例如每 5 分钟。 */
     MINUTE,
 
-    /** Repeat by hour interval or selected hours in a day. */
+    /** 按小时间隔或一天内选定小时重复。 */
     HOUR,
 
-    /** Repeat by day interval, usually at a fixed time of day. */
+    /** 按天间隔重复，通常在固定时刻触发。 */
     DAY,
 
-    /** Repeat on selected days of week, usually at a fixed time of day. */
+    /** 在选定星期几重复，通常在固定时刻触发。 */
     WEEK,
 
-    /** Repeat on selected days of month, usually at a fixed time of day. */
+    /** 在选定月中日期重复，通常在固定时刻触发。 */
     MONTH
 }

@@ -1,7 +1,7 @@
 package com.innospots.nexus.service.contract.cancellation;
 
 /**
- * Why an invocation or stream was cancelled.
+ * 调用或流被取消的原因。
  *
  * @author Smars
  * @date 2026/09/13

@@ -16,90 +16,98 @@ import lombok.Setter;
 import com.innospots.nexus.core.persistence.entity.BaseEntity;
 
 /**
- * OAuth identity binding for a platform-realm user.
+ * 平台域用户的 OAuth 身份绑定。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 @Getter
 @Setter
 @Entity
 @Table(name = PlatformUserOauthEntity.TABLE_NAME, indexes = {
-        @Index(name = "idx_nx_platform_user_oauth_user", columnList = "platform_user_id"),
-        @Index(name = "uk_nx_platform_user_oauth_provider_subject",
+        @Index(name = "idx_nx_pl_user_oauth_user", columnList = "platform_user_id"),
+        @Index(name = "uk_nx_pl_user_oauth_provider_subject",
                 columnList = "provider, provider_subject", unique = true)
 })
 @TableName(PlatformUserOauthEntity.TABLE_NAME)
 public class PlatformUserOauthEntity extends BaseEntity {
 
-    public static final String TABLE_NAME = "nx_platform_user_oauth";
+    public static final String TABLE_NAME = "nx_pl_user_oauth";
 
     /**
-     * OAuth identity binding identifier.
+     * OAuth 身份绑定标识符。
      */
     @TableId(type = IdType.ASSIGN_UUID)
     @Id
     @Column(length = 32, nullable = false)
     private String identityId;
+    /**
+     * 返回主键前缀。
+     * @return 操作结果
+     */
 
+    
     @Override
     public String idPrefix() {
         return "poi";
     }
 
     /**
-     * Platform-realm user identifier.
+     * 平台域 user 标识符。
      */
     @Column(length = 32, nullable = false)
     private String platformUserId;
 
     /**
-     * External identity provider name.
+     * 外部身份提供方名称。
      */
     @Column(length = 64, nullable = false)
     private String provider;
 
     /**
-     * Provider-side unique subject identifier.
+     * 提供方侧唯一主体标识符。
      */
     @Column(length = 256, nullable = false)
     private String providerSubject;
 
     /**
-     * Provider-side account handle.
+     * 提供方侧账号句柄。
      */
     @Column(length = 128)
     private String providerAccount;
 
     /**
-     * Display name reported by the provider.
+     * 提供方上报的显示名称。
      */
     @Column(length = 128)
     private String providerDisplayName;
 
     /**
-     * Email address reported by the provider.
+     * 身份提供方上报的邮箱地址。
      */
     @Column(length = 128)
     private String providerEmail;
 
     /**
-     * Avatar URL reported by the provider.
+     * 提供方上报的头像 URL。
      */
     @Column(length = 512)
     private String providerAvatarUrl;
 
     /**
-     * Storage key of the provider access token.
+     * 提供方访问令牌的存储键。
      */
     @Column(length = 256)
     private String accessTokenKey;
 
     /**
-     * Storage key of the provider refresh token.
+     * 提供方刷新令牌的存储键。
      */
     @Column(length = 256)
     private String refreshTokenKey;
 
     /**
-     * Access token expiry time.
+     * 访问令牌过期时间。
      */
     @Column
     private LocalDateTime tokenExpiresAt;

@@ -15,7 +15,7 @@
     <packaging>pom</packaging>
 
     <name>innospots-nexus-parent</name>
-    <description>Build parent for innospots-nexus Java modules.</description>
+    <description>innospots-nexus Java 模块的构建 parent。</description>
 
     <properties>
         <maven.compiler.release>25</maven.compiler.release>
@@ -41,6 +41,8 @@
         <versions-maven-plugin.version>2.21.0</versions-maven-plugin.version>
         <lombok.version>1.18.46</lombok.version>
         <mapstruct.version>1.6.3</mapstruct.version>
+        <smallrye-open-api-maven-plugin.version>4.3.5</smallrye-open-api-maven-plugin.version>
+        <jandex-maven-plugin.version>3.3.1</jandex-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -170,6 +172,16 @@
                     <version>${maven-dependency-plugin.version}</version>
                 </plugin>
                 <plugin>
+                    <groupId>io.smallrye</groupId>
+                    <artifactId>smallrye-open-api-maven-plugin</artifactId>
+                    <version>${smallrye-open-api-maven-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>io.smallrye</groupId>
+                    <artifactId>jandex-maven-plugin</artifactId>
+                    <version>${jandex-maven-plugin.version}</version>
+                </plugin>
+                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-install-plugin</artifactId>
                     <version>${maven-install-plugin.version}</version>
@@ -190,14 +202,6 @@
                     <version>${versions-maven-plugin.version}</version>
                     <configuration>
                         <generateBackupPoms>false</generateBackupPoms>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>flatten-maven-plugin</artifactId>
-                    <configuration>
-                        <flattenMode>resolveCiFriendliesOnly</flattenMode>
-                        <updatePomFile>true</updatePomFile>
                     </configuration>
                 </plugin>
             </plugins>
@@ -232,6 +236,56 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+            </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>central-publish</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

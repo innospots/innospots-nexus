@@ -5,7 +5,11 @@ import java.io.InputStream;
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
-/** 将 UTF-8 YAML 文档解析为严格的 {@link PluginManifest}。 */
+/**
+ * 将 UTF-8 YAML 文档解析为严格的 {@link PluginManifest}。
+ * @author Smars
+ * @date 2026/09/13
+ */
 public interface PluginManifestParser {
 
     /**

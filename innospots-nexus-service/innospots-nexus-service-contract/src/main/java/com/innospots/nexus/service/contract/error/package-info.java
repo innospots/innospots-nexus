@@ -1,5 +1,5 @@
 /**
- * Neutral error description and catalog used by HTTP and protocol adapters.
+ * HTTP 与协议适配器使用的中性错误描述与目录。
  *
  * @author Smars
  * @date 2026/09/13

@@ -16,7 +16,11 @@ import com.innospots.nexus.core.plugin.contribution.PreparedPluginContribution;
 import com.innospots.nexus.core.plugin.discovery.PluginCatalog;
 import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
-/** Console Contribution 的全局资源校验器和活动目录事务适配器。 */
+/**
+ * Console Contribution 的全局资源校验器和活动目录事务适配器。
+ * @author Smars
+ * @date 2026/09/13
+ */
 public final class ConsolePluginContributionHandler
         implements PluginContributionHandler<ConsolePluginContribution> {
 

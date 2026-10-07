@@ -19,6 +19,8 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
  * @param sourceLocation 定义来源位置
  * @param capabilities Capability 静态身份摘要列表
  * @param contributions 通用 Contribution 安全摘要列表
+ * @author Smars
+ * @date 2026/09/13
  */
 public record PluginDefinitionSnapshot(
         String pluginId,

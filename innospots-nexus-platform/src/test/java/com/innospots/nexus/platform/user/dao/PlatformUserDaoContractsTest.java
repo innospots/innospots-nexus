@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 
 import com.innospots.nexus.platform.user.domain.entity.PlatformUserEntity;
 import com.innospots.nexus.platform.user.domain.entity.PlatformUserOauthEntity;
-import com.innospots.nexus.platform.user.domain.entity.PlatformUserPasswordEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -14,7 +13,6 @@ class PlatformUserDaoContractsTest {
     @Test
     void platformUserDaosBindExpectedEntities() {
         assertMapperEntity(PlatformUserDao.class, PlatformUserEntity.class);
-        assertMapperEntity(PlatformUserPasswordDao.class, PlatformUserPasswordEntity.class);
         assertMapperEntity(PlatformUserOauthDao.class, PlatformUserOauthEntity.class);
     }
 

@@ -21,6 +21,8 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
  * @param contributionHandlers      运行时 Contribution Handler 列表
  * @param contributionSnapshotters  安装快照序列化器表
  * @param pluginClassLoader         发现用的类加载器；为 {@code null} 时回退到运行时配置或当前线程 CL
+ * @author Smars
+ * @date 2026/09/13
  */
 public record PluginHostBootstrapRequest(
         PluginInstallationDao installationDao,

@@ -1,7 +1,7 @@
 package com.innospots.nexus.service.contract.invocation;
 
 /**
- * Default interceptor identifiers used by runtime and governance adapters.
+ * 运行时与治理适配器使用的默认拦截器标识。
  *
  * @author Smars
  * @date 2026/09/13

@@ -10,106 +10,84 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import lombok.RequiredArgsConstructor;
+
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import com.innospots.nexus.base.domain.response.PageResult;
 import com.innospots.nexus.base.domain.response.R;
+import com.innospots.nexus.console.config.ConsoleConstant;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryItemCreateRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryItemPageRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryItemStatusUpdateRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryItemUpdateRequest;
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryItemVo;
+import com.innospots.nexus.console.dictionary.service.DictionaryService;
+import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 
 /**
- * Management-console endpoint for dictionary items nested under a type code.
- * <p>
- * Method workflows are deferred until the dictionary service and operator
- * boundaries are implemented.
- * </p>
+ * 字典项管理 REST 资源。
  */
-@Path("/console/dictionary-types/{typeCode}/items")
+@Path(ConsoleConstant.API_PREFIX + "/dictionary-types/{typeCode}/items")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Tag(name = "Dictionary", description = "租户级字典")
+@NexusAuthenticatedApi
+@RequiredArgsConstructor
 public class DictionaryItemEndpoint {
 
-    /**
-     * Pages dictionary items for one type.
-     *
-     * @param typeCode parent type code
-     * @param request  item page query
-     * @return matching item page
-     */
+    private final DictionaryService dictionaryService;
+
     @GET
+    @Operation(operationId = "dictionaryItemPage", summary = "分页查询字典项")
     public R<PageResult<DictionaryItemVo>> pageDictionaryItems(
             @PathParam("typeCode") String typeCode,
             @BeanParam DictionaryItemPageRequest request
     ) {
-        throw new UnsupportedOperationException("Dictionary item paging is not implemented");
+        return R.ok(dictionaryService.pageDictionaryItems(typeCode, request));
     }
 
-    /**
-     * Creates a dictionary item under the type code.
-     *
-     * @param typeCode parent type code
-     * @param request  item creation data
-     * @return created item
-     */
     @POST
+    @Operation(operationId = "dictionaryItemCreate", summary = "创建字典项")
     public R<DictionaryItemVo> createDictionaryItem(
             @PathParam("typeCode") String typeCode,
             DictionaryItemCreateRequest request
     ) {
-        throw new UnsupportedOperationException("Dictionary item creation is not implemented");
+        return R.ok(dictionaryService.createDictionaryItem(typeCode, request));
     }
 
-    /**
-     * Updates mutable dictionary item fields without changing its stable value.
-     *
-     * @param typeCode           parent type code
-     * @param dictionaryItemId   item identifier
-     * @param request            item update data
-     * @return updated item
-     */
     @PUT
     @Path("/{dictionaryItemId}")
+    @Operation(operationId = "dictionaryItemUpdate", summary = "更新字典项")
     public R<DictionaryItemVo> updateDictionaryItem(
             @PathParam("typeCode") String typeCode,
             @PathParam("dictionaryItemId") String dictionaryItemId,
             DictionaryItemUpdateRequest request
     ) {
-        throw new UnsupportedOperationException("Dictionary item update is not implemented");
+        return R.ok(dictionaryService.updateDictionaryItem(typeCode, dictionaryItemId, request));
     }
 
-    /**
-     * Enables or disables a dictionary item.
-     *
-     * @param typeCode         parent type code
-     * @param dictionaryItemId item identifier
-     * @param request          target status
-     * @return empty success response
-     */
     @PUT
     @Path("/{dictionaryItemId}/status")
+    @Operation(operationId = "dictionaryItemUpdateStatus", summary = "更新字典项状态")
     public R<Void> updateDictionaryItemStatus(
             @PathParam("typeCode") String typeCode,
             @PathParam("dictionaryItemId") String dictionaryItemId,
             DictionaryItemStatusUpdateRequest request
     ) {
-        throw new UnsupportedOperationException("Dictionary item status update is not implemented");
+        dictionaryService.updateDictionaryItemStatus(typeCode, dictionaryItemId, request);
+        return R.ok();
     }
 
-    /**
-     * Deletes a removable dictionary item.
-     *
-     * @param typeCode         parent type code
-     * @param dictionaryItemId item identifier
-     * @return empty success response
-     */
     @DELETE
     @Path("/{dictionaryItemId}")
+    @Operation(operationId = "dictionaryItemDelete", summary = "删除字典项")
     public R<Void> deleteDictionaryItem(
             @PathParam("typeCode") String typeCode,
             @PathParam("dictionaryItemId") String dictionaryItemId
     ) {
-        throw new UnsupportedOperationException("Dictionary item deletion is not implemented");
+        dictionaryService.deleteDictionaryItem(typeCode, dictionaryItemId);
+        return R.ok();
     }
 }

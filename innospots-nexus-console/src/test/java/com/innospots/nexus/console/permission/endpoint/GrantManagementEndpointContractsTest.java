@@ -17,7 +17,7 @@ class GrantManagementEndpointContractsTest {
 
     @Test
     void grantManagementUsesRoleAndOrganizationUnitSubjects() throws NoSuchMethodException {
-        assertThat(GrantManagementEndpoint.class.getAnnotation(Path.class).value()).isEqualTo("/console");
+        assertThat(GrantManagementEndpoint.class.getAnnotation(Path.class).value()).isEqualTo("/api/nexus");
         assertHttpMethod(GrantManagementEndpoint.class, "getRolePermissions", GET.class, String.class);
         assertHttpMethod(GrantManagementEndpoint.class, "replaceRolePermissions",
                 PUT.class, String.class, PermissionGrantReplaceRequest.class);

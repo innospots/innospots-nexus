@@ -1,6 +1,10 @@
 package com.innospots.nexus.core.plugin.config;
 
-/** 插件配置支持的值类型。 */
+/**
+ * 插件配置支持的值类型。
+ * @author Smars
+ * @date 2026/09/13
+ */
 public enum ConfigType {
 
     /** 任意文本值。 */

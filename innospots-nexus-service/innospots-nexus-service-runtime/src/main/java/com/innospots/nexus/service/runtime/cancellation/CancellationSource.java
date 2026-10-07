@@ -16,7 +16,7 @@ import com.innospots.nexus.service.contract.cancellation.CancellationRegistratio
 import com.innospots.nexus.service.contract.cancellation.CancellationToken;
 
 /**
- * Write-side cancellation controller. The first cancel wins; listeners run at most once.
+ * 写侧取消控制器。首次取消生效；监听器最多执行一次。
  *
  * @author Smars
  * @date 2026/09/13
@@ -32,10 +32,10 @@ public final class CancellationSource {
     private final CancellationToken token = new SourceToken();
 
     /**
-     * Requests cancellation. The first successful call returns {@code true}.
+     * 请求取消。首次成功调用返回 {@code true}。
      *
-     * @param reason cancellation reason
-     * @return {@code true} when this call performed cancellation
+     * @param reason 取消原因
+     * @return 本次调用执行取消时为 {@code true}
      */
     public boolean cancel(CancellationReason reason) {
         Checks.notNull(reason, "reason");
@@ -50,9 +50,9 @@ public final class CancellationSource {
     }
 
     /**
-     * Returns the read-only token bound to this source.
+     * 返回绑定到此源的只读令牌。
      *
-     * @return cancellation token
+     * @return 取消令牌
      */
     public CancellationToken token() {
         return token;

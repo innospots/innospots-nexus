@@ -1,13 +1,18 @@
 package com.innospots.nexus.core.quartz.domain.enums;
 
-/** Scheduling modes for Quartz jobs. */
+/**
+ * Quartz 作业的调度模式。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ */
 public enum ScheduleMode {
-    /** Fires once at a specified start time. */
+    /** 在指定开始时间触发一次。 */
     ONCE,
-    /** Fires on a cron schedule until an end time. */
+    /** 按 Cron 调度直至结束时间。 */
     SCHEDULED,
-    /** Fires indefinitely on a cron schedule. */
+    /** 按 Cron 无限期调度。 */
     CRON,
-    /** Manual trigger only — never scheduled automatically. */
+    /** 仅手动触发，不自动调度。 */
     MANUAL
 }

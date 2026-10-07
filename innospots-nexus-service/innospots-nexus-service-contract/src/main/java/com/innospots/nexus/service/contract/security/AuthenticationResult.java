@@ -5,12 +5,11 @@ import java.time.Instant;
 import com.innospots.nexus.base.util.Checks;
 
 /**
- * Result of authenticating a pre-auth context. {@code expiresAt} may be null for non-expiring
- * mechanisms such as host-validated mTLS.
+ * 预认证上下文认证结果。{@code expiresAt} 对主机校验 mTLS 等不过期机制可为 null。
  *
- * @param principal authenticated principal
- * @param scope     resolved scope
- * @param expiresAt optional expiry
+ * @param principal 已认证主体
+ * @param scope     已解析作用域
+ * @param expiresAt 可选过期时间
  * @author Smars
  * @date 2026/09/13
  * @see SecurityProvider

@@ -3,9 +3,9 @@ package com.innospots.nexus.service.runtime.context;
 import com.innospots.nexus.service.contract.context.ServiceContext;
 
 /**
- * Captured previous context used to restore a thread after an install.
+ * 安装后用于恢复线程的已捕获先前上下文。
  *
- * @param previous previous context, {@code null} when the thread had none
+ * @param previous 先前上下文，线程无绑定时为 {@code null}
  * @author Smars
  * @date 2026/09/13
  * @see ThreadBoundServiceContext

@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Describes a field within a domain schema or data structure. Carries
- * an identifier, display name, programmatic code, value type, scope,
- * optional comment, and a list of selectable options.
+ * 描述领域模式或数据结构中的字段。携带标识符、显示名称、程序化编码、值类型、作用域、可选注释以及可选项列表。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @see FieldValueType
  */
 public class DomainField {
 
@@ -25,7 +27,7 @@ public class DomainField {
     }
 
     /**
-     * Creates a field with the given display name, programmatic code, and value type name.
+     * 使用给定显示名称、程序化编码与值类型名称创建字段。
      */
     public static DomainField named(String name, String code, String valueType) {
         return new DomainField(name, code, valueType);
@@ -75,7 +77,7 @@ public class DomainField {
     }
 
     /**
-     * Adds a selectable option to this field (e.g. for dropdowns).
+     * 向此字段添加可选项（如用于下拉框）。
      */
     public DomainField option(SelectOption option) {
         if (option != null) {

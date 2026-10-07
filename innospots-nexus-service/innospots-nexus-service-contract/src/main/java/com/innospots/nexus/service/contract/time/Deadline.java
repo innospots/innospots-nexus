@@ -5,8 +5,7 @@ import java.time.Duration;
 import com.innospots.nexus.base.util.Checks;
 
 /**
- * Remaining execution bound. Remaining time is never negative. {@link #shorten(Duration)} never
- * extends the current deadline.
+ * 剩余执行边界。剩余时间永不为负。{@link #shorten(Duration)} 不会延长当前截止时间。
  *
  * @author Smars
  * @date 2026/09/13
@@ -15,49 +14,49 @@ import com.innospots.nexus.base.util.Checks;
 public interface Deadline {
 
     /**
-     * Returns remaining time, never negative.
+     * 返回剩余时间，永不为负。
      *
-     * @return remaining duration
+     * @return 剩余时长
      */
     Duration remaining();
 
     /**
-     * Returns whether the deadline has already passed.
+     * 返回截止时间是否已过。
      *
-     * @return {@code true} when expired
+     * @return 已过期时为 {@code true}
      */
     boolean isExpired();
 
     /**
-     * Returns whether this deadline has no finite bound.
+     * 返回此截止时间是否无有限边界。
      *
-     * @return {@code true} when unlimited
+     * @return 无限制时为 {@code true}
      */
     boolean isUnlimited();
 
     /**
-     * Returns a deadline that expires no later than {@code timeout} from now.
+     * 返回不晚于从现在起 {@code timeout} 后过期的截止时间。
      *
-     * @param timeout positive timeout
-     * @return shortened deadline
+     * @param timeout 正数超时
+     * @return 缩短后的截止时间
      */
     Deadline shorten(Duration timeout);
 
     /**
-     * Returns a deadline with no finite bound.
+     * 返回无有限边界的截止时间。
      *
-     * @return unlimited deadline
+     * @return 无限制截止时间
      */
     static Deadline unlimited() {
         return UnlimitedDeadline.INSTANCE;
     }
 
     /**
-     * Returns a finite deadline measured against {@code ticker}.
+     * 返回基于 {@code ticker} 度量的有限截止时间。
      *
-     * @param ticker  monotonic source
-     * @param timeout positive timeout from the current ticker reading
-     * @return finite deadline
+     * @param ticker  单调时钟源
+     * @param timeout 自当前 ticker 读数的正数超时
+     * @return 有限截止时间
      */
     static Deadline of(Ticker ticker, Duration timeout) {
         Checks.notNull(ticker, "ticker");

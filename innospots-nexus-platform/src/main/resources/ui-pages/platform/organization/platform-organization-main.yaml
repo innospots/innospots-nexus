@@ -1,0 +1,8 @@
+dsl: '1.0'
+
+page:
+  id: platform-organization-main
+  name: organizationMain
+  title: Organization Management
+  description: Platform organization lifecycle (enterprise, team, or individual).
+  type: general

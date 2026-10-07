@@ -20,7 +20,11 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** 安装表领域仓储，维护登记、对账、MISSING 和管理员意图。 */
+/**
+ * 安装表领域仓储，维护登记、对账、MISSING 和管理员意图。
+ * @author Smars
+ * @date 2026/09/13
+ */
 public final class PluginInstallationRepository {
 
     private static final Logger logger = LoggerFactory.getLogger(PluginInstallationRepository.class);

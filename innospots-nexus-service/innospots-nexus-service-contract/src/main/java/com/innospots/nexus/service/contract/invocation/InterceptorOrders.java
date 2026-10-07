@@ -1,7 +1,7 @@
 package com.innospots.nexus.service.contract.invocation;
 
 /**
- * Default interceptor order constants. Lower values enter first and finish last.
+ * 默认拦截器顺序常量。较小值先进入、后结束。
  *
  * @author Smars
  * @date 2026/09/13

@@ -12,6 +12,8 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
  * @param owner 声明 Contribution 的插件身份
  * @param config 插件共享只读配置
  * @param availability 插件与 Contribution 共用的可用性门控
+ * @author Smars
+ * @date 2026/09/13
  */
 public record PluginContributionContext(
         ProviderRef owner,

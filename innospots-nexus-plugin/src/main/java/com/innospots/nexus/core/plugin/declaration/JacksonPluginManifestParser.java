@@ -13,7 +13,11 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
-/** 基于 Jackson YAML 的严格 DSL 解析器，限制输入大小、深度和 YAML 扩展语法。 */
+/**
+ * 基于 Jackson YAML 的严格 DSL 解析器，限制输入大小、深度和 YAML 扩展语法。
+ * @author Smars
+ * @date 2026/09/13
+ */
 public final class JacksonPluginManifestParser implements PluginManifestParser {
 
     /** DSL 单文档最大字节数。 */

@@ -3,6 +3,7 @@
 `java:reference` 的跨技能复用速查表。按**工作场景**组织最常违反、代价最高的约束。
 完整规则回源 [`../standards/`](../standards/) 对应文件（通过 [standards-index.md](standards-index.md) 定位）。
 其他 `java:*` 技能链接本文件，不在各自正文中重复。
+结构简化、冗余与防过度设计见 [code-quality-constraints.md](code-quality-constraints.md)。
 
 ---
 
@@ -23,7 +24,7 @@
 | 必须 | 禁止 |
 |------|------|
 | 业务包先领域后职责：`role/endpoint`、`role/dao`、`role/domain/entity` | 技术层优先：`endpoint/role`、`dao/menu`、`domain/permission/entity` |
-| 同一领域代码聚在一个领域根下（如 `kernel/role/**`） | 为「分层」把多领域塞进同一 `endpoint/`、`dao/` 顶层包 |
+| 同一领域代码聚在一个领域根下（如 `portal/role/**`） | 为「分层」把多领域塞进同一 `endpoint/`、`dao/` 顶层包 |
 | 大领域按功能子模块：`permission/authorization`、`grant/service` | 模块根 `service` 或单包堆满全部 `*Service` |
 | 单包 ≤15 个 `.java`（达 12 规划拆分） | 单包 16+ 类仍平铺 |
 | `domain` 子包仅用 `entity`/`request`/`vo`/`model`/`enums`/`event` | `role/entity` 缺 `domain` 层；或 `domain/<领域名>/` 套娃 |
@@ -87,13 +88,18 @@ DAO 方法可用 `select/insert/update/delete` 对齐 `BaseMapper`；面向应�
 service / operator **不得**构造 `R<T>`，只返回领域值或 `PageResult<T>`。
 约 7 个内聚方法即触发端点边界复审。
 
+OpenAPI（构建期 YAML）：每个 HTTP 方法 `@Operation(operationId, summary)`；需登录类
+`@NexusAuthenticatedApi`；request/vo `@Schema`；新 Tag 同步 `*OpenApiDefinition`。
+见 [openapi-contract.md](openapi-contract.md)、[`standards/openapi.md`](../standards/openapi.md)。
+
 ---
 
-## 6. 写 Request / VO
+## 6. 写 Request / VO（含 OpenAPI Schema）
 
 | 必须 | 禁止 |
 |------|------|
-| record 类型 | class + Lombok |
+| record 类型（+ 类/`@Schema` 描述） | 无 `@Schema` 的契约 request/vo |
+| `@BeanParam` 分页类：字段 `@QueryParam` + `@Schema` | 用 record 承载 `@BeanParam`（除非框架已验证可行） |
 | `XxxCreateRequest` / `XxxUpdateRequest` / `XxxStatusUpdateRequest` / `XxxPageRequest` / `XxxTreeRequest` / `XxxOrderRequest` / `XxxAddRequest` / `XxxReplaceRequest` | 一个笼统 `XxxRequest` 承担不同修改权的操作 |
 | `XxxVo` 主视图，`XxxOptionVo` 特定投影 | 大写 `VO`、`Dto`、`Response`、`Result` |
 | 紧凑构造器里 `List.copyOf`/`Set.copyOf`/`Map.copyOf` 防御拷贝 | 暴露调用方可变集合 |
@@ -125,7 +131,7 @@ service / operator **不得**构造 `R<T>`，只返回领域值或 `PageResult<T
 响应与状态文本中禁止出现：密码、令牌、凭据、密钥、授权头、含密钥的完整 SQL、
 堆栈、请求 ID、记录 ID、文件路径、供应商原文、用户输入。
 
-`kernel` 与 `platform` 不得互引对方的状态枚举、事件类型或业务包。
+`portal` 与 `platform` 不得互引对方的状态枚举、事件类型或业务包。
 
 ---
 
@@ -148,8 +154,8 @@ endpoint → service → operator → dao
 | 契约按能力命名（`ResourceStore`、`PasswordDecryptor`） | 给每个具体类机械配接口 |
 | `DefaultXxx` 仅在存在其他合法实现时使用 | 单实现也硬套 `Default` 前缀 |
 
-模块依赖方向：`base → core → plugin → console → {kernel, platform}`。
-`kernel` 与 `platform` 平行且互不依赖。反向依赖一律禁止。
+模块依赖方向：`base → core → plugin → console → {portal, platform}`。
+`portal` 与 `platform` 平行且互不依赖。反向依赖一律禁止。
 
 ---
 

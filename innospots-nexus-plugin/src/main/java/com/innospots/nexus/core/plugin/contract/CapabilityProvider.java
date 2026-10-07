@@ -2,6 +2,8 @@ package com.innospots.nexus.core.plugin.contract;
 
 /**
  * 运行时管理的 Capability 实现所遵循的标记和生命周期契约。
+ * @author Smars
+ * @date 2026/09/13
  */
 public interface CapabilityProvider {
 

@@ -1,0 +1,85 @@
+package com.innospots.nexus.console.ui.spec;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
+import com.innospots.nexus.console.ui.spec.permission.PermissionConfig;
+
+import lombok.Getter;
+import lombok.Setter;
+
+/**
+ * 由 {@link PageDsl#page} 声明的页面标识与展示元数据。
+ *
+ * <p>{@link #id} 为必填，应使用 kebab-case。{@link #name} 为可选，存在时应使用 camelCase。</p>
+ *
+ * <p>{@link #parentPageKey} 声明页面在模块内的父子关系：未设置时表示一级页面，挂在菜单下使用；
+ * 设置时表示当前页面为对应父页面的子页面（值为父页面 {@link #id}）。</p>
+ * @author Smars
+ * @date 2026/09/13
+ */
+@Getter
+@Setter
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+@Schema(name = "PageMeta", description = "Page DSL 页面标识与展示元数据")
+public class PageMeta {
+
+    /** kebab-case 唯一页面标识，例如 {@code customer-list}。 */
+    @Schema(description = "kebab-case 唯一页面标识", required = true, examples = {"customer-list"})
+    private String id;
+
+    /** camelCase 程序化页面名称，例如 {@code customerList}。 */
+    @Schema(description = "camelCase 程序化页面名称", examples = {"customerList"})
+    private String name;
+
+    /** 人类可读的页面标题。 */
+    @Schema(description = "页面标题")
+    private String title;
+
+    /** 供控制台与工具使用的可选页面描述。 */
+    @Schema(description = "页面描述")
+    private String description;
+
+    /** 页面模式，如 {@code list}、{@code detail}、{@code form} 或 {@code dashboard}。 */
+    @Schema(description = "页面模式", examples = {"list", "form", "dashboard"})
+    private String type;
+
+    /** 可选的页面级访问权限。 */
+    @Schema(description = "页面级权限配置")
+    private PermissionConfig permission;
+
+    /**
+     * 父页面 PageDsl 键（{@link #id}）；为空时表示一级页面。
+     */
+    @Schema(description = "父页面 page.id；空表示一级页面")
+    private String parentPageKey;
+
+    /** 创建空页面元数据。 */
+    public PageMeta() {
+    }
+
+    /**
+     * 创建带必填标识的页面元数据。
+     *
+     * @param id kebab-case 唯一页面标识
+     * @return 页面元数据
+     */
+    public static PageMeta of(String id) {
+        PageMeta meta = new PageMeta();
+        meta.id = id;
+        return meta;
+    }
+
+    /**
+     * 创建带标识与标题的页面元数据。
+     *
+     * @param id 唯一页面标识
+     * @param title 展示标题
+     * @return 页面元数据
+     */
+    public static PageMeta of(String id, String title) {
+        PageMeta meta = of(id);
+        meta.title = title;
+        return meta;
+    }
+}

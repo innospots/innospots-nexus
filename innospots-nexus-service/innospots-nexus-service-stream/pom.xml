@@ -14,12 +14,16 @@
     <artifactId>innospots-nexus-service-stream</artifactId>
 
     <name>innospots-nexus-service-stream</name>
-    <description>Streaming delivery, backpressure and cancellation policies.</description>
+    <description>流式传输、背压与取消策略。</description>
 
     <dependencies>
         <dependency>
             <groupId>com.innospots</groupId>
             <artifactId>innospots-nexus-service-runtime</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
         </dependency>
     </dependencies>
 </project>

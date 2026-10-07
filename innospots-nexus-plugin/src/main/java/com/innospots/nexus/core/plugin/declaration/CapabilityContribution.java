@@ -20,6 +20,8 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
  * @param config Provider 专属配置定义
  * @param factory 不应产生副作用的 Provider 工厂
  * @param <T> Provider 契约类型
+ * @author Smars
+ * @date 2026/09/13
  */
 public record CapabilityContribution<T extends CapabilityProvider>(
         CapabilityType<T> type,

@@ -1,9 +1,17 @@
 package com.innospots.nexus.console.auth.domain.request;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
 /**
- * Refresh-token exchange.
+ * 刷新令牌交换。
  *
- * @param refreshToken refresh token issued for the same realm
+ * @author Smars
+ * @date 2026/09/13
+ * @param refreshToken 同域签发的刷新令牌
  */
-public record TokenRefreshRequest(String refreshToken) {
+@Schema(name = "TokenRefreshRequest", description = "刷新令牌请求")
+public record TokenRefreshRequest(
+        @Schema(description = "刷新令牌", required = true)
+        String refreshToken
+) {
 }

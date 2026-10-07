@@ -13,13 +13,17 @@ import com.innospots.nexus.base.i18n.I18nObject;
 import com.innospots.nexus.core.plugin.contribution.PluginContributionDecoder;
 import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
-/** 将 YAML 的通用 map 严格解码为不可变 console@1 声明。 */
+/**
+ * 将 YAML 的通用 map 严格解码为不可变 console@1 声明。
+ * @author Smars
+ * @date 2026/09/13
+ */
 public final class ConsolePluginContributionDecoder
         implements PluginContributionDecoder<ConsolePluginContribution> {
 
     private static final Set<String> CONTRIBUTION_FIELDS = Set.of("type", "majorVersion", "modules");
     private static final Set<String> MODULE_FIELDS = Set.of(
-            "moduleKey", "displayName", "description", "pages", "menuTree");
+            "domainKey", "moduleKey", "displayName", "description", "pages", "menuTree");
     private static final Set<String> PAGE_FIELDS = Set.of("pageKey", "pagePath", "children");
     private static final Set<String> MENU_FIELDS = Set.of(
             "menuKey", "title", "icon", "orderIndex", "pageKey", "children");
@@ -59,6 +63,7 @@ public final class ConsolePluginContributionDecoder
         Map<String, Object> map = object(value, "module");
         requireFields(map, MODULE_FIELDS);
         return new ConsoleModuleDeclaration(
+                text(map.get("domainKey"), "domainKey"),
                 text(map.get("moduleKey"), "moduleKey"),
                 i18n(map.get("displayName"), "displayName"),
                 optionalI18n(map.get("description"), "description"),

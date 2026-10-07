@@ -1,0 +1,55 @@
+package com.innospots.nexus.platform.openapi;
+
+import jakarta.ws.rs.Path;
+
+import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition;
+import org.eclipse.microprofile.openapi.annotations.enums.SecuritySchemeType;
+import org.eclipse.microprofile.openapi.annotations.info.Contact;
+import org.eclipse.microprofile.openapi.annotations.info.Info;
+import org.eclipse.microprofile.openapi.annotations.security.SecurityScheme;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+
+import com.innospots.nexus.platform.config.PlatformConstant;
+import com.innospots.nexus.core.openapi.NexusOpenApiSecurityNames;
+
+/**
+ * Platform OpenAPI 全局元数据（构建期扫描；非 JAX-RS {@code Application}，以便与 console 共宿主）。
+ *
+ * <p>带 {@link Path} 以便 SmallRye JAX-RS 扫描器拾取 {@link OpenAPIDefinition}；
+ * 类本身无资源方法，运行时不额外暴露 HTTP 端点。产物写入
+ * {@code META-INF/nexus-openapi/innospots-nexus-platform.yaml}。</p>
+ */
+@Path(PlatformConstant.API_PREFIX)
+@OpenAPIDefinition(
+        info = @Info(
+                title = "Innospots Nexus Platform API",
+                version = "1.0.0",
+                description = "运营管理平台租户生命周期与平台 IAM Jakarta REST 契约；运行时仅暴露构建期生成的 OpenAPI。",
+                contact = @Contact(name = "Innospots Nexus")
+        ),
+        tags = {
+                @Tag(name = "PlatformPublicAuth", description = "运营管理平台匿名认证"),
+                @Tag(name = "PlatformPublicPasswordReset", description = "运营管理平台密码重置"),
+                @Tag(name = "PlatformAuthSession", description = "运营管理平台会话"),
+                @Tag(name = "PlatformOrganization", description = "组织开通与生命周期"),
+                @Tag(name = "PlatformEnterpriseProfile", description = "企业法定档案"),
+                @Tag(name = "PlatformUser", description = "平台用户管理"),
+                @Tag(name = "PlatformInvite", description = "平台用户邀请"),
+                @Tag(name = "PlatformAccessRegistration", description = "主动注册审批"),
+                @Tag(name = "PlatformSettingsRegistrationMode", description = "平台设置：自助注册模式"),
+                @Tag(name = "PlatformPublicInvite", description = "邀请注册"),
+                @Tag(name = "PlatformPublicAccessRegistration", description = "主动注册（待审批）"),
+                @Tag(name = "PlatformPublicOpenRegistration", description = "完全开放注册")
+        }
+)
+@SecurityScheme(
+        securitySchemeName = NexusOpenApiSecurityNames.BEARER_AUTH,
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT",
+        description = "紧凑访问令牌（PLATFORM）"
+)
+public final class NexusPlatformOpenApiDefinition {
+    private NexusPlatformOpenApiDefinition() {
+    }
+}

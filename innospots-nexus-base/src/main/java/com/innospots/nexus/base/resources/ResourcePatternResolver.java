@@ -21,17 +21,19 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 /**
- * Resolves resource location patterns (e.g. {@code classpath*:mapper/**\/*.xml})
- * into a list of {@link Resource} objects.
+ * 将资源位置模式（如 {@code classpath*:mapper/**\/*.xml}）解析为 {@link Resource} 列表。
  * <p>
- * Supports the following location prefixes:
+ * 支持以下位置前缀：
  * <ul>
- *   <li>{@code classpath*:} — scan all classpath roots for matching resources</li>
- *   <li>{@code classpath:} — scan only the first matching classpath root</li>
- *   <li>(no prefix) — same as {@code classpath*:}</li>
+ *   <li>{@code classpath*:} — 扫描所有 classpath 根目录以匹配资源</li>
+ *   <li>{@code classpath:} — 仅扫描第一个匹配的 classpath 根目录</li>
+ *   <li>（无前缀）— 同 {@code classpath*:}</li>
  * </ul>
- * Pattern matching uses Hutool's {@link AntPathMatcher} with the same syntax
- * as Spring's AntPathMatcher ({@code **}, {@code *}, {@code ?}).</pre>
+ * 模式匹配使用 Hutool 的 {@link AntPathMatcher}，语法与 Spring AntPathMatcher 相同
+ * （{@code **}、{@code *}、{@code ?}）。
+ *
+ * @author Smars
+ * @date 2026/09/13
  */
 public class ResourcePatternResolver {
 
@@ -42,15 +44,17 @@ public class ResourcePatternResolver {
     private final ClassLoader classLoader;
     private final AntPathMatcher matcher;
 
-    /** Creates a resolver using the default class loader. */
+    /**
+     * 使用默认类加载器创建解析器。
+     */
     public ResourcePatternResolver() {
         this(ClassUtil.getClassLoader());
     }
 
     /**
-     * Creates a resolver with the specified class loader.
+     * 使用指定类加载器创建解析器。
      *
-     * @param classLoader the class loader used for classpath scanning
+     * @param classLoader 用于 classpath 扫描的类加载器
      */
     public ResourcePatternResolver(ClassLoader classLoader) {
         this.classLoader = classLoader != null ? classLoader : ClassUtil.getClassLoader();
@@ -58,28 +62,25 @@ public class ResourcePatternResolver {
     }
 
     /**
-     * Returns a list of {@link Resource} objects matching the given location pattern.
-     * <p>Each resource provides access to the underlying content via
-     * {@link Resource#getStream()}, {@link Resource#readUtf8Str()}, etc.
-     * The matched path information is discarded — use
-     * {@link #getMatchedResources(String)} if the original match path is needed.</p>
+     * 返回匹配给定位置模式的 {@link Resource} 列表。
+     * <p>每个资源可通过 {@link Resource#getStream()}、{@link Resource#readUtf8Str()} 等访问底层内容。
+     * 匹配路径信息会被丢弃 — 若需要原始匹配路径，请使用 {@link #getMatchedResources(String)}。</p>
      *
-     * @param locationPattern the resource location pattern (e.g. {@code classpath*:mapper/**\/*.xml})
-     * @return list of matching resources (never null)
-     * @throws IOException if classpath scanning fails
+     * @param locationPattern 资源位置模式（如 {@code classpath*:mapper/**\/*.xml}）
+     * @return 匹配的资源列表（永不为 null）
+     * @throws IOException classpath 扫描失败时
      */
     public List<Resource> getResources(String locationPattern) throws IOException {
         return new ArrayList<>(getMatchedResources(locationPattern));
     }
 
     /**
-     * Returns a list of {@link MatchedResource} objects matching the given
-     * location pattern. Unlike {@link #getResources(String)}, each result
-     * retains the original matched classpath path.
+     * 返回匹配给定位置模式的 {@link MatchedResource} 列表。
+     * 与 {@link #getResources(String)} 不同，每个结果保留原始匹配的 classpath 路径。
      *
-     * @param locationPattern the resource location pattern
-     * @return list of matched resources with path info (never null)
-     * @throws IOException if classpath scanning fails
+     * @param locationPattern 资源位置模式
+     * @return 带路径信息的匹配资源列表（永不为 null）
+     * @throws IOException classpath 扫描失败时
      */
     public List<MatchedResource> getMatchedResources(String locationPattern) throws IOException {
         Location location = parseLocation(locationPattern);
@@ -108,8 +109,10 @@ public class ResourcePatternResolver {
     }
 
     /**
-     * Matched resource that preserves the original classpath path in addition
-     * to providing full {@link Resource} access via delegation.
+     * 匹配资源，在提供完整 {@link Resource} 委托访问的同时保留原始 classpath 路径。
+     *
+     * @author Smars
+     * @date 2026/09/13
      */
     public static class MatchedResource implements Resource {
 
@@ -121,12 +124,20 @@ public class ResourcePatternResolver {
             this.resource = resource;
         }
 
-        /** Returns the classpath-relative matching path. */
+        /**
+         * 返回 classpath 相对匹配路径。
+         *
+         * @return 匹配路径
+         */
         public String getPath() {
             return path;
         }
 
-        /** Returns the underlying delegate resource. */
+        /**
+         * 返回底层委托资源。
+         *
+         * @return 委托资源
+         */
         public Resource getResource() {
             return resource;
         }
@@ -156,8 +167,6 @@ public class ResourcePatternResolver {
             return "MatchedResource{path='" + path + "', resource=" + resource + '}';
         }
     }
-
-    // ---- Parse ----
 
     private record Location(boolean scanAll, String path) {
     }
@@ -208,8 +217,6 @@ public class ResourcePatternResolver {
         return Math.min(asterisk, question);
     }
 
-    // ---- Exact match ----
-
     private List<MatchedResource> findExactResources(String path, boolean scanAll) throws IOException {
         List<MatchedResource> result = new ArrayList<>();
         if (scanAll) {
@@ -226,8 +233,6 @@ public class ResourcePatternResolver {
         }
         return distinctResources(result);
     }
-
-    // ---- Scanning ----
 
     private void scanRootUrl(URL rootUrl, String rootDir, String pathPattern, List<MatchedResource> result) {
         String protocol = rootUrl.getProtocol();
@@ -326,8 +331,7 @@ public class ResourcePatternResolver {
         return urlString;
     }
 
-    // ---- Deduplication ----
-
+    // 按 URL 去重，避免多 classpath 根目录扫描时重复返回同一资源
     private List<MatchedResource> distinctResources(List<MatchedResource> resources) {
         Map<String, MatchedResource> map = new LinkedHashMap<>();
         for (MatchedResource resource : resources) {
@@ -337,8 +341,6 @@ public class ResourcePatternResolver {
         }
         return new ArrayList<>(map.values());
     }
-
-    // ---- Factory ----
 
     private MatchedResource createMatchedResource(String path, URL url) {
         String normalizedPath = normalizePath(path);

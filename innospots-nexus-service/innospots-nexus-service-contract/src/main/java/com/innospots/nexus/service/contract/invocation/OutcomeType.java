@@ -1,7 +1,7 @@
 package com.innospots.nexus.service.contract.invocation;
 
 /**
- * Terminal classification of an invocation.
+ * 调用的终态分类。
  *
  * @author Smars
  * @date 2026/09/13

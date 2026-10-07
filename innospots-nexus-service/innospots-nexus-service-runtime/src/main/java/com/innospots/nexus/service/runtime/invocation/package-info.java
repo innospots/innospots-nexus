@@ -1,5 +1,5 @@
 /**
- * Invocation engine, control, and default interceptors.
+ * 调用引擎、控制与默认拦截器。
  *
  * @author Smars
  * @date 2026/09/13

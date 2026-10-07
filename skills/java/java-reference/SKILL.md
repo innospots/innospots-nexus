@@ -4,13 +4,13 @@ display_name: Java 规范总索引
 description: |
   Java 通用规范与标准总入口。当用户询问 Java 编码规范、命名规则、注释要求、
   API 设计原则、异常与状态码约定、代码风格，或不确定某个 Java 任务应该走哪个
-  技能时使用。提供 skills/java/java-reference/standards/ 下权威规范的索引、专题参考、硬性红线速查、规范
-  冲突裁决顺序，以及 8 个 java:* 技能的路由表；并索引跨技能的 `grill-me` 调用时机。
-  其他 java:* 技能通过本技能复用规范，不得在各自正文中重复规范条文。
+  技能时使用。提供 standards/ 下权威规范的索引、专题参考、硬性红线速查、规范
+  冲突裁决顺序、8 个 java:* 技能的路由表、AGENTS.md 生成模板，以及跨技能的
+  `grill-me` 调用时机。其他 java:* 技能通过本技能复用规范，不得在各自正文中重复规范条文。
   触发词：Java 规范、编码规范、命名规范、代码风格、注释规范、API 设计、
   异常规范、状态码、java 标准、standards。
 category: java
-version: 1.6.0
+version: 1.9.1
 ---
 
 # Java 通用规范与标准
@@ -40,6 +40,7 @@ version: 1.6.0
 | [`code-comments.md`](standards/code-comments.md) | 包/类型/方法/行内注释与 TODO | `java:develop`、`java:check` |
 | [`exception-status-code.md`](standards/exception-status-code.md) | 异常、`NexusException`、状态码九字符格式与扩展 | `java:design`、`java:develop` |
 | [`domain-module-initialization.md`](standards/domain-module-initialization.md) | 六阶段领域初始化权威流程 | `java:develop` |
+| [`openapi.md`](standards/openapi.md) | MicroProfile OpenAPI 注解、Schema、构建期 YAML | `java:design`、`java:develop` |
 | [`module-skills.md`](standards/module-skills.md) | 模块 API 参考生成策略（`README.md` 索引，非技能） | 仅开发者显式请求扫描时 |
 
 仓库另有 [`AGENTS.md`](../../../AGENTS.md) 定义模块职责与依赖方向。
@@ -51,12 +52,17 @@ version: 1.6.0
 | 专题 | 文件 | 用途 |
 |------|------|------|
 | 硬性红线速查 | [quick-constraints.md](references/quick-constraints.md) | 按场景的最常违反约束 |
+| 结构简化与防过度设计 | [code-quality-constraints.md](references/code-quality-constraints.md) | 冗余、死代码、wrapper、双轨 API、diff 体量 smell |
 | 规范章节地图 | [standards-index.md](references/standards-index.md) | 定位规则在哪份 standards 文件的哪一节 |
 | 模块归属 | [module-ownership.md](references/module-ownership.md) | Maven 模块与业务域判定 |
+| 控制台 entry 与 pageKey | [console-entry-and-pages.md](references/console-entry-and-pages.md) | 内置 entry 组装、多模块/多页、classpath 与 catalog 分工 |
 | 包结构（领域优先） | [package-structure.md](references/package-structure.md) | 领域 → 功能子模块 → 职责；禁止 service 堆积；单包 ≤15 类 |
+| sample 示例工程 | [sample-extension-layout.md](references/sample-extension-layout.md) | reactor、交付面×领域 DDD、HTTP 前缀、扩展与 platform 边界 |
 | 作用域层级 | [scope-hierarchy.md](references/scope-hierarchy.md) | Session/Snapshot 与 Entity 基类 |
 | 领域建模 | [domain-modeling.md](references/domain-modeling.md) | 实体/请求/VO/事件建模决策 |
 | API 契约 | [api-contract.md](references/api-contract.md) | 签名、分层、事务、兼容性；含 Console interface 例外 |
+| OpenAPI 契约 | [openapi-contract.md](references/openapi-contract.md) | 端点/Schema 注解、检查清单 |
+| OpenAPI Maven 插件 | [openapi-maven-plugin.md](references/openapi-maven-plugin.md) | 对外 REST 模块 `smallrye-open-api-maven-plugin` POM |
 | 持久化与配置 | [persistence-config.md](references/persistence-config.md) | yaml、禁 XML/properties、Dao 组织细则 |
 | 六阶段 checklist | [domain-initialization-checklist.md](references/domain-initialization-checklist.md) | develop 执行清单 |
 | 测试规范路由 | [testing-index.md](references/testing-index.md) | 设计/实现/检查测试文档索引 |
@@ -64,20 +70,23 @@ version: 1.6.0
 | 契约测试写法 | `java:develop` → [contract-tests.md](../java-develop/references/contract-tests.md) | 实体/DAO/端点/状态码契约测试 |
 | 测试范围（设计） | `java:design` → [test-scope.md](../java-design/references/test-scope.md) | 设计阶段测什么/不测什么 |
 | 方案压力测试 | [grill-me.md](references/grill-me.md) | 重大决策前的 `/grilling` 会话 |
+| AGENTS 生成模板 | [agents-template.md](references/agents-template.md) | 新建工程/模块/设计时生成或增补 `AGENTS.md` |
 
 ## grill-me（方案压力测试）
 
 规范条文用本技能；**方案、边界、归属有歧义或多种可行路径**时，在动手前先走
-`grill-me`（见 [grill-me.md](references/grill-me.md)）。典型时机：新业务域设计前、
-四步法结论交 develop 前、新建模块前、升级方案定稿前。
+`grill-me`（见 [grill-me.md](references/grill-me.md)）。**优先触发**见
+[`AGENTS.md`](../../../AGENTS.md) → Agent 工作流：通用宽泛问题、新需求、新设计、
+新建工程/模块。典型时机：新业务域设计前、四步法结论交 develop 前、新建模块前、
+升级方案定稿前。
 
 ## 技能路由表
 
 | 场景 | 使用技能 | 一句话判据 |
 |------|---------|-----------|
 | 查规范、问约定、不确定走哪个技能 | `java:reference` | 只读、不产出代码 |
-| 建工程、改模块结构、配 Maven/POM、调构建 | `java:project` | 动的是**工程骨架** |
-| 做架构/模块/接口/类/技术方案设计 | `java:design` | 动的是**设计决策** |
+| 建**外部产品**工程、配 Maven/POM（`*-console`/`*-service` 等） | `java:project` | 仓库外工程骨架；本仓库平台库见 `AGENTS.md` |
+| 做架构/模块/实体/枚举/状态码/异常/接口/包结构/技术方案设计 | `java:design` | 动的是**设计决策**（见 design → structural-design-blueprint） |
 | 写功能、改功能、修 Bug、重构、单元/契约测试 | `java:develop` | 动的是**实现与配套测试代码** |
 | 编译、跑测试、规范/质量/依赖/安全检查 | `java:check` | 动的是**验证动作** |
 | Spring / Spring Boot 专项能力 | `java:spring` | 涉及 **Spring 生态** |
@@ -122,15 +131,19 @@ version: 1.6.0
 | `innospots-nexus-base` | [README.md](references/modules/innospots-nexus-base/README.md) |
 | `innospots-nexus-core` | [README.md](references/modules/innospots-nexus-core/README.md) |
 | `innospots-nexus-console` | [README.md](references/modules/innospots-nexus-console/README.md) |
-| `innospots-nexus-plugin` | 暂无 API 索引；归属见 [module-ownership.md](references/module-ownership.md)；设计见 `innospots-nexus-plugin/docs/plugin/design/` |
-| `innospots-nexus-kernel` | 暂无 API 索引；归属见 [module-ownership.md](references/module-ownership.md)；包结构见 [package-structure.md](references/package-structure.md) |
+| `innospots-nexus-plugin` | [README.md](references/modules/innospots-nexus-plugin/README.md)（设计见 `innospots-nexus-plugin/docs/plugin/design/`） |
+| `innospots-nexus-plugin-ui-spec` | [README.md](references/modules/innospots-nexus-plugin-ui-spec/README.md)（Pactor Page DSL 1.0 YAML 规范，非 Maven 模块） |
+| `innospots-nexus-openapi` | [README.md](references/modules/innospots-nexus-openapi/README.md)（REST OpenAPI 构建与注解索引，非 Maven 模块） |
+| `innospots-nexus-portal` | 暂无 API 索引；归属见 [module-ownership.md](references/module-ownership.md)；包结构见 [package-structure.md](references/package-structure.md) |
 | `innospots-nexus-platform` | 暂无 API 索引；归属见 [module-ownership.md](references/module-ownership.md) |
+| `innospots-nexus-sample` | 结构/契约见 [sample-extension-layout.md](references/sample-extension-layout.md)（非模块 API 索引） |
 
-显式扫描请求时可生成 plugin/kernel/platform 索引（见 [`standards/module-skills.md`](standards/module-skills.md)）。
+显式扫描请求时可生成 plugin/portal/platform 索引（见 [`standards/module-skills.md`](standards/module-skills.md)）。
 
 ## 详细参考
 
 - [quick-constraints.md](references/quick-constraints.md)
+- [code-quality-constraints.md](references/code-quality-constraints.md)
 - [standards-index.md](references/standards-index.md)
 - [module-ownership.md](references/module-ownership.md)
 - [package-structure.md](references/package-structure.md)
@@ -141,3 +154,5 @@ version: 1.6.0
 - [testing-index.md](references/testing-index.md)
 - [domain-initialization-checklist.md](references/domain-initialization-checklist.md)
 - [grill-me.md](references/grill-me.md)
+- [agents-template.md](references/agents-template.md)
+- [sample-extension-layout.md](references/sample-extension-layout.md)

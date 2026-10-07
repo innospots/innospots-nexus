@@ -2,19 +2,18 @@
 
 ## ProjectSnapshot
 
-**Type:** record
+**类型：** record
 
-工作区内项目的会话/传输快照。项目在共享工作区下提供可选的
-业务隔离。
+工作区内项目的会话/传输快照。 项目在共享工作区下提供业务隔离。
 
-| 组件 | 类型 | 说明 |
-|-----------|------|-------------|
-| `tenantId` | `String` | 所属租户 |
-| `workspaceId` | `String` | 所属工作区 |
-| `projectId` | `String` | 项目标识 |
-| `projectCode` | `String` | 稳定的业务编码 |
-| `projectName` | `String` | 显示名称 |
-| `description` | `String` | 可选描述 |
-| `status` | `BasicStatus` | 项目可用状态 |
+### 组件（record）
 
-非内核 `ProjectEntity`；内核拥有持久化的项目记录。
+| 名称 | 类型 | 说明 |
+|------|------|------|
+| `tenantId` | `String` | 租户 ID |
+| `workspaceId` | `String` | 工作区 ID |
+| `projectId` | `String` | 项目 ID |
+| `projectCode` | `String` | 项目编码 |
+| `projectName` | `String` | 项目名称 |
+| `description` | `String` | 项目描述 |
+| `status` | `BasicStatus` | 状态 |

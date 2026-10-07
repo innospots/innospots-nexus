@@ -8,6 +8,8 @@ import com.innospots.nexus.core.plugin.resource.ResourceScope;
 
 /**
  * 一次插件启动周期内向插件暴露的只读运行时服务。
+ * @author Smars
+ * @date 2026/09/13
  */
 public interface PluginContext {
 

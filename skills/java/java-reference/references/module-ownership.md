@@ -10,11 +10,11 @@
 ## 依赖方向（不可违反）
 
 ```text
-base → core → plugin → console → kernel
+base → core → plugin → console → portal
                               ↘ platform
 ```
 
-`kernel` 与 `platform` 平行且**互不依赖**。需要协作时：
+`portal` 与 `platform` 平行且**互不依赖**。需要协作时：
 
 - 业务中立契约下沉 `console` 或 `core`
 - 或由可同时依赖两者的 application/adapter 模块编排
@@ -30,7 +30,7 @@ base → core → plugin → console → kernel
 | 业务中立的中间件/数据库/平台基础设施（持久化基类、Quartz、server、watcher、bootstrap、资源元数据） | `innospots-nexus-core`（API 索引见 `references/modules/innospots-nexus-core/README.md`） |
 | 插件运行时、contribution 解码、Page DSL、插件安装与能力路由 | `innospots-nexus-plugin` |
 | 管理台 REST 契约、VO、converter；**console catalog 索引**（`nx_console_catalog_resource`） | `innospots-nexus-console`（API 索引见 `references/modules/innospots-nexus-console/README.md`） |
-| 认证、用户、角色、权限、菜单、字典、审计、工作区/项目业务 | `innospots-nexus-kernel` |
+| 认证、用户、角色、权限、菜单、字典、审计、工作区/项目业务 | `innospots-nexus-portal` |
 | 租户生命周期、企业主体、平台用户、平台审计 | `innospots-nexus-platform` |
 | 业务专属基础设施 | 所属业务模块，或独立 adapter / plugin / extension / application 模块 |
 
@@ -42,12 +42,15 @@ base → core → plugin → console → kernel
 | Catalog 持久化索引与同步 | **console** | core、plugin |
 | 插件规范与 contribution 约束定义 | **plugin** | console |
 | 持久化基类、审计填充、ID 生成 | **core** | plugin |
-| 管理台 REST **interface** 契约与 VO | **console** | kernel 内重复定义路径 |
-| 管理台 REST **实现**与工作流 | **kernel** / **platform** | console 内业务 service |
+| 管理台 REST **interface** 契约与 VO | **console** | portal 内重复定义路径 |
+| 管理台 REST **实现**与工作流 | **portal** / **platform** | console 内业务 service |
 
 Console 传输契约 interface 模式见 [api-contract.md](api-contract.md)「Console 传输契约」。
 
 插件运行时设计文档：`innospots-nexus-plugin/docs/plugin/design/`（Page DSL、安装、贡献解码）。
+
+内置控制台 **entry 插件**（`ConsoleModuleEntrySupport`、`pageKey`、classpath `ui-pages/nexus/...`）技能索引：
+[console-entry-and-pages.md](console-entry-and-pages.md)。
 
 ---
 
@@ -59,10 +62,10 @@ Console 传输契约 interface 模式见 [api-contract.md](api-contract.md)「Co
 |------|---------------------------|
 | **base** | 业务域逻辑；ORM/JDBC/连接池；Cache；Retry/熔断；Jakarta Bean Validation；调度运行时；消息中间件；Spring/Servlet 绑定；业务实体与工作流 |
 | **core** | 插件运行时/Page DSL/安装表；Jakarta REST 端点与 console VO；用户/角色/权限/菜单/catalog 业务；认证会话/聊天产品域；Spring Boot 自动配置绑定 |
-| **plugin** | Catalog 持久化索引；console 管理 CRUD 实现；kernel/platform 业务实体 |
-| **console** | 插件规范与 contribution 约束定义；完整管理业务工作流（实现在 kernel/platform） |
-| **kernel** | 租户生命周期/企业主体（→ platform）；依赖 platform |
-| **platform** | 租户侧用户/权限/菜单实现（→ kernel）；依赖 kernel |
+| **plugin** | Catalog 持久化索引；console 管理 CRUD 实现；portal/platform 业务实体 |
+| **console** | 插件规范与 contribution 约束定义；完整管理业务工作流（实现在 portal/platform） |
+| **portal** | 租户生命周期/企业主体（→ platform）；依赖 platform |
+| **platform** | 租户侧用户/权限/菜单实现（→ portal）；依赖 portal |
 
 **base 预留（无当前消费者）：** `domain.condition`（过滤 DSL）、`execution`（执行器 SPI）。
 扩展前须有真实消费者或显式标为 experimental。
@@ -71,7 +74,7 @@ Console 传输契约 interface 模式见 [api-contract.md](api-contract.md)「Co
 
 ---
 
-## 业务域包结构（kernel / platform）
+## 业务域包结构（portal / platform）
 
 业务代码按**域优先**，再按职责分包（`role/endpoint`、`role/dao`，**禁止**
 `endpoint/role`、`dao/role`）。完整规则见 [package-structure.md](package-structure.md)。
@@ -93,6 +96,20 @@ Console 传输契约 interface 模式见 [api-contract.md](api-contract.md)「Co
 
 ---
 
+## innospots-nexus-sample 扩展（归属）
+
+| 判定 | 归属 |
+|------|------|
+| 在 platform 之上、无 Spring 的运营域增量（示例或 experimental） | `innospots-nexus-sample-platform` |
+| Spring/Quarkus 主类、配置、发行包、集成测试 | `innospots-nexus-sample-*-spring-*` / `*-quarkus-*` |
+| 已是 AGENTS.md 定义的 platform 产品能力（租户、企业、平台 IAM） | `innospots-nexus-platform`，**不得**长期留在 sample |
+| 租户侧管理业务 | `innospots-nexus-portal` 或外部产品；sample-portal **运行模块** 只演示装配 |
+
+扩展库依赖：**仅** `innospots-nexus-platform`（最小引用）；**禁止** `portal`。
+包树与 HTTP 前缀见 [sample-extension-layout.md](sample-extension-layout.md)。
+
+---
+
 ## 阶段零门禁（design → develop 硬边界）
 
 进入 `java:develop` 六阶段之前，必须已在 `java:design` 完成：
@@ -109,9 +126,9 @@ Console 传输契约 interface 模式见 [api-contract.md](api-contract.md)「Co
 ## 归属评审门禁
 
 - [ ] Maven 模块与业务域正确，未与相邻域混同
-- [ ] 依赖方向未违反（含 kernel/platform 不互依）
+- [ ] 依赖方向未违反（含 portal/platform 不互依）
 - [ ] plugin / console / core 边界未混淆
 - [ ] 术语在端点/实体/DAO/数据库/测试间一致
 - [ ] 初始面保持最小（无投机性 model/event/空分层）
 - [ ] 未把 AGENTS 禁止能力放进错误模块（见上表）
-- [ ] console interface 契约与 kernel/platform 实现分工清晰（若涉及管理台 REST）
+- [ ] console interface 契约与 portal/platform 实现分工清晰（若涉及管理台 REST）

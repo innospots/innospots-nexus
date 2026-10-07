@@ -6,20 +6,41 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import lombok.RequiredArgsConstructor;
+
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import com.innospots.nexus.base.domain.response.R;
+import com.innospots.nexus.base.thread.SessionContext;
+import com.innospots.nexus.console.config.ConsoleConstant;
+import com.innospots.nexus.console.permission.authorization.AuthorizationSubjectResolver;
 import com.innospots.nexus.console.permission.domain.vo.PermissionResourceVo;
+import com.innospots.nexus.console.permission.service.PermissionVisibilityService;
+import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 
-/** 查询当前用户可见权限资源的管理接口契约。 */
-@Path("/console/me/permissions")
+/**
+ * 当前用户可见权限资源的 REST 资源。
+ */
+@Path(ConsoleConstant.API_PREFIX + "/me/permissions")
 @Produces(MediaType.APPLICATION_JSON)
-public interface CurrentAuthorizationEndpoint {
+@Tag(name = "Permission", description = "授权与可见资源")
+@NexusAuthenticatedApi
+@RequiredArgsConstructor
+public class CurrentAuthorizationEndpoint {
 
-    /**
-     * 返回当前用户可见的菜单、页面、按钮和 datasource 资源。
-     *
-     * @return 已按角色和组织单元授权裁剪后的资源集合
-     */
+    private final AuthorizationSubjectResolver subjectResolver;
+    private final PermissionVisibilityService visibilityService;
+
     @GET
-    R<List<PermissionResourceVo>> listResources();
+    @Operation(operationId = "permissionVisibleList", summary = "当前用户可见权限资源")
+    public R<List<PermissionResourceVo>> listResources() {
+        String workspaceId = SessionContext.requireWorkspaceId();
+        return subjectResolver.resolve()
+                .map(subject -> visibilityService.visible(workspaceId, subject).stream()
+                        .map(PermissionResourceVo::from)
+                        .toList())
+                .map(R::ok)
+                .orElseGet(() -> R.ok(List.of()));
+    }
 }

@@ -9,23 +9,31 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+
 import com.innospots.nexus.base.domain.response.R;
+import com.innospots.nexus.console.config.ConsoleConstant;
+import com.innospots.nexus.console.catalog.domain.model.CatalogSyncResult;
 import com.innospots.nexus.console.catalog.domain.vo.CatalogNodeVo;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogService;
-import com.innospots.nexus.console.catalog.domain.model.CatalogSyncResult;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogSyncService;
 import com.innospots.nexus.console.permission.domain.vo.PermissionResourceSyncVo;
+import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 
-/** 权限设置页目录树与显式同步接口。 */
-@Path("/console/catalog")
+/**
+ * 权限设置页目录树与显式同步接口。
+ */
+@Path(ConsoleConstant.API_PREFIX + "/catalog")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Tag(name = "Catalog", description = "控制台目录索引")
+@NexusAuthenticatedApi
 public final class ConsoleCatalogEndpoint {
 
     private final ConsoleCatalogService catalogService;
     private final ConsoleCatalogSyncService syncService;
 
-    /** 创建目录接口。 */
     public ConsoleCatalogEndpoint(
             ConsoleCatalogService catalogService,
             ConsoleCatalogSyncService syncService
@@ -34,16 +42,16 @@ public final class ConsoleCatalogEndpoint {
         this.syncService = syncService;
     }
 
-    /** 返回已启用的插件目录资源树。 */
     @GET
     @Path("/tree")
+    @Operation(operationId = "catalogTree", summary = "目录资源树")
     public R<List<CatalogNodeVo>> tree() {
         return R.ok(catalogService.tree());
     }
 
-    /** 将 ACTIVE 插件贡献同步到权限目录。 */
     @POST
     @Path("/sync")
+    @Operation(operationId = "catalogSync", summary = "同步插件贡献到目录索引")
     public R<PermissionResourceSyncVo> sync() {
         CatalogSyncResult result = syncService.sync();
         return R.ok(new PermissionResourceSyncVo(

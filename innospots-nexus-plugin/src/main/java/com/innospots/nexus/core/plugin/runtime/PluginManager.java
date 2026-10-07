@@ -10,6 +10,8 @@ import com.innospots.nexus.core.plugin.lifecycle.PluginRuntimeInfo;
  * 宿主侧插件运行时入口，负责依赖感知生命周期、诊断和 Capability 查询。
  *
  * <p>实现不是全局单例；每个实例独立管理一组由宿主预先发现的插件。关闭后不可复用。</p>
+ * @author Smars
+ * @date 2026/09/13
  */
 public interface PluginManager extends AutoCloseable {
 

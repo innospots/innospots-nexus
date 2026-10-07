@@ -1,5 +1,5 @@
 /**
- * Test package root for shared adapter scenarios.
+ * 共享适配器场景的测试包根节点。
  *
  * @author Smars
  * @date 2026/09/13

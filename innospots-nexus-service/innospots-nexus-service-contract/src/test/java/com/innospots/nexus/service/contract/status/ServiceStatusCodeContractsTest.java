@@ -10,6 +10,9 @@ import com.innospots.nexus.base.status.StatusCode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * 服务状态码模块唯一性与重试语义契约测试。
+ */
 class ServiceStatusCodeContractsTest {
 
     @Test

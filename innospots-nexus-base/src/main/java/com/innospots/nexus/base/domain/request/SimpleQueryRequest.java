@@ -1,11 +1,14 @@
 package com.innospots.nexus.base.domain.request;
 
 /**
- * Paginated query request with a keyword filter.
+ * 带关键词过滤的分页查询请求。
  *
- * @param input    common fuzzy search keyword, may be {@code null}
- * @param pageNo   1-indexed page number, default 1
- * @param pageSize records per page, default 20
+ * @author Smars
+ * @date 2026/09/13
+ * @param input    通用模糊搜索关键词，可为 {@code null}
+ * @param pageNo   从 1 开始的页码，默认 1
+ * @param pageSize 每页记录数，默认 20
+ * @see Pagination
  */
 public record SimpleQueryRequest(
         String input,

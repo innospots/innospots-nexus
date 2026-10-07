@@ -1,7 +1,7 @@
 package com.innospots.nexus.service.contract.audit;
 
 /**
- * Host transaction commit state observed by audit.
+ * 审计观察的主机事务提交状态。
  *
  * @author Smars
  * @date 2026/09/13

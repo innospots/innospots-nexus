@@ -1,0 +1,8 @@
+dsl: '1.0'
+
+page:
+  id: platform-user-invite
+  name: platformUserInvite
+  title: Invites
+  description: Platform user invite list.
+  type: general

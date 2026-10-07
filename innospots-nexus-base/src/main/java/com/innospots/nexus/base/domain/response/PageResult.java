@@ -2,21 +2,32 @@ package com.innospots.nexus.base.domain.response;
 
 import java.util.List;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
 /**
- * Paginated API response wrapper. Validates page bounds at construction
- * and computes the total page count from total record count and page size.
+ * 分页 API 响应包装器。在构造时校验分页边界，并根据总记录数与每页大小计算总页数。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @param <T> 记录类型
+ * @see com.innospots.nexus.base.domain.data.DataPage
  */
+@Schema(name = "PageResult", description = "分页结果")
 public record PageResult<T>(
+        @Schema(description = "当前页记录列表", required = true)
         List<T> records,
+        @Schema(description = "从 1 开始的页码", required = true, minimum = "1", examples = {"1"})
         long pageNo,
+        @Schema(description = "每页记录数", required = true, minimum = "1", examples = {"20"})
         long pageSize,
+        @Schema(description = "总记录数", required = true, minimum = "0", examples = {"0"})
         long total,
+        @Schema(description = "总页数", required = true, minimum = "0", examples = {"0"})
         long pages
 ) {
 
     /**
-     * Compact constructor validates pagination parameters and ensures
-     * the records list is never null.
+     * 紧凑构造器校验分页参数并确保记录列表永不为 null。
      */
     public PageResult {
         if (pageNo < 1) {
@@ -32,29 +43,51 @@ public record PageResult<T>(
     }
 
     /**
-     * Creates a page result with auto-calculated total pages.
+     * 创建自动计算总页数的分页结果。
+     *
+     * @param records  记录列表
+     * @param pageNo   从 1 开始的页码
+     * @param pageSize 每页记录数
+     * @param total    总记录数
+     * @param <T>      记录类型
+     * @return 分页结果
      */
     public static <T> PageResult<T> of(List<T> records, long pageNo, long pageSize, long total) {
         return new PageResult<>(records, pageNo, pageSize, total, calculatePages(total, pageSize));
     }
 
     /**
-     * Returns an empty page result for the given page number and size.
+     * 返回指定页码与大小的空分页结果。
+     *
+     * @param pageNo   页码
+     * @param pageSize 每页记录数
+     * @param <T>      记录类型
+     * @return 空分页结果
      */
     public static <T> PageResult<T> empty(long pageNo, long pageSize) {
         return of(List.of(), pageNo, pageSize, 0);
     }
 
+    /**
+     * 判断是否有下一页。
+     *
+     * @return 有下一页时返回 {@code true}
+     */
     public boolean hasNext() {
         return pageNo < pages;
     }
 
+    /**
+     * 判断是否有上一页。
+     *
+     * @return 有上一页时返回 {@code true}
+     */
     public boolean hasPrevious() {
         return pageNo > 1 && pages > 0;
     }
 
     /**
-     * Calculates the total number of pages using ceiling division.
+     * 使用向上取整除法计算总页数。
      */
     private static long calculatePages(long total, long pageSize) {
         if (total <= 0) {

@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * A flat list of {@link Factor} conditions joined by a single {@link Relation}.
- * The condition renders itself as a statement string on first access via
- * {@link #statement()}, caching the result until factors change.
+ * 由单一 {@link Relation} 连接的 {@link Factor} 平面列表。条件在首次通过 {@link #statement()} 访问时渲染为语句字符串并缓存，直至因子变更。
  *
+ * @author Smars
+ * @date 2026/09/13
  * @see EmbedCondition
  */
 public class SimpleCondition {
@@ -27,7 +27,7 @@ public class SimpleCondition {
     }
 
     /**
-     * Creates a condition with the specified output mode and logical relation.
+     * 使用指定输出模式与逻辑关系创建条件。
      */
     public static SimpleCondition create(Mode mode, Relation relation) {
         return new SimpleCondition(mode, relation);
@@ -46,12 +46,12 @@ public class SimpleCondition {
     }
 
     /**
-     * Adds a factor and invalidates the cached statement.
+     * 添加因子并使缓存的语句失效。
      */
     public SimpleCondition factor(Factor factor) {
         if (factor != null) {
             factors.add(factor);
-            initialized = false;  // force re-generation on next statement() call
+            initialized = false;  // 下次 statement() 调用时强制重新生成
         }
         return this;
     }
@@ -66,7 +66,7 @@ public class SimpleCondition {
     }
 
     /**
-     * Returns the rendered condition statement, generating it lazily if needed.
+     * 返回渲染后的条件语句，必要时延迟生成。
      */
     public String statement() {
         if (!initialized) {
@@ -76,8 +76,7 @@ public class SimpleCondition {
     }
 
     /**
-     * Generates the condition statement using the appropriate
-     * {@link IFactorStatement} for the current mode.
+     * 根据当前模式初始化合适的 {@link IFactorStatement} 并渲染条件语句。
      */
     public void initialize() {
         ensureReady();
@@ -87,7 +86,7 @@ public class SimpleCondition {
     }
 
     /**
-     * Validates that the condition has at least one factor and a non-null relation.
+     * 校验条件至少有一个因子且关系非 null。
      */
     protected void ensureReady() {
         if (factors.isEmpty()) {
@@ -99,8 +98,8 @@ public class SimpleCondition {
     }
 
     /**
-     * Joins factor statements using the relation symbol.
-     * Single-factor conditions omit the relation connector.
+     * 使用关系符号连接因子语句。
+     * 单因子条件省略关系连接符。
      */
     protected StringBuilder rebuild(IFactorStatement fs) {
         StringBuilder buf = new StringBuilder();
@@ -118,8 +117,8 @@ public class SimpleCondition {
     }
 
     /**
-     * Merges the factors from another condition into this one, invalidating
-     * the cached statement.
+     * 将另一条件的因子合并到当前条件，并使
+     * 缓存的语句失效。
      */
     public void merge(SimpleCondition other) {
         if (other != null && !other.factors.isEmpty()) {
@@ -129,7 +128,7 @@ public class SimpleCondition {
     }
 
     /**
-     * Collects all field codes referenced by this condition's factors.
+     * 收集此条件因子引用的所有字段编码。
      */
     public Set<String> referFields() {
         Set<String> fields = new LinkedHashSet<>();

@@ -8,9 +8,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import com.innospots.nexus.base.thread.TLC;
 import com.innospots.nexus.core.persistence.entity.BaseEntity;
-import com.innospots.nexus.core.persistence.entity.ProjectBaseEntity;
-import com.innospots.nexus.core.persistence.entity.TenantBaseEntity;
-import com.innospots.nexus.core.persistence.entity.WorkspaceBaseEntity;
+import com.innospots.nexus.core.persistence.entity.OwnershipEntity;
 import com.innospots.nexus.core.persistence.handler.AuditMetaObjectHandler;
 import com.innospots.nexus.core.persistence.id.DbPrimaryGenerator;
 import com.innospots.nexus.core.resource.domain.entity.MetaResourceEntity;
@@ -51,33 +49,11 @@ class CoreEntityContractsTest {
     }
 
     @Test
-    void projectEntityDefinesProjectScopeFillField() throws NoSuchFieldException {
-        assertThat(ProjectBaseEntity.class.getAnnotation(MappedSuperclass.class)).isNotNull();
-        assertThat(ProjectBaseEntity.class.getSuperclass()).isEqualTo(WorkspaceBaseEntity.class);
-
-        TableField projectId = ProjectBaseEntity.class.getDeclaredField("projectId")
-                .getAnnotation(TableField.class);
-
-        assertThat(projectId.fill()).isEqualTo(FieldFill.INSERT_UPDATE);
-        assertColumnNameIsImplicit(ProjectBaseEntity.class.getDeclaredField("projectId"));
-    }
-
-    @Test
-    void workspaceEntityDefinesWorkspaceScopeFillField() throws NoSuchFieldException {
-        assertThat(WorkspaceBaseEntity.class.getAnnotation(MappedSuperclass.class)).isNotNull();
-        assertThat(TenantBaseEntity.class.getAnnotation(MappedSuperclass.class)).isNotNull();
-        assertThat(WorkspaceBaseEntity.class.getSuperclass()).isEqualTo(TenantBaseEntity.class);
-        assertThat(TenantBaseEntity.class.getSuperclass()).isEqualTo(BaseEntity.class);
-
-        TableField tenantId = TenantBaseEntity.class.getDeclaredField("tenantId")
-                .getAnnotation(TableField.class);
-        TableField workspaceId = WorkspaceBaseEntity.class.getDeclaredField("workspaceId")
-                .getAnnotation(TableField.class);
-
-        assertThat(tenantId.fill()).isEqualTo(FieldFill.INSERT_UPDATE);
-        assertThat(workspaceId.fill()).isEqualTo(FieldFill.INSERT_UPDATE);
-        assertColumnNameIsImplicit(WorkspaceBaseEntity.class.getDeclaredField("workspaceId"));
-        assertColumnNameIsImplicit(TenantBaseEntity.class.getDeclaredField("tenantId"));
+    void metaResourceEntityUsesOwnershipColumns() throws NoSuchFieldException {
+        assertThat(MetaResourceEntity.class.getSuperclass()).isEqualTo(OwnershipEntity.class);
+        assertColumnNameIsImplicit(OwnershipEntity.class.getDeclaredField("ownerType"));
+        assertColumnNameIsImplicit(OwnershipEntity.class.getDeclaredField("ownerId"));
+        assertColumnNameIsImplicit(OwnershipEntity.class.getDeclaredField("securityRealm"));
     }
 
     @Test
@@ -92,36 +68,14 @@ class CoreEntityContractsTest {
         try {
             TLC.userId(1001L);
             TLC.userName("alice");
-            TLC.tenantId("tnt01");
-            TLC.workspaceId("wks01");
             MetaResourceEntity entity = new MetaResourceEntity();
 
             new AuditMetaObjectHandler().insertFill(SystemMetaObject.forObject(entity));
 
             assertThat(entity.getCreatedBy()).isEqualTo("alice");
             assertThat(entity.getUpdatedBy()).isEqualTo("alice");
-            assertThat(entity.getTenantId()).isEqualTo("tnt01");
-            assertThat(entity.getWorkspaceId()).isEqualTo("wks01");
             assertThat(entity.getCreatedAt()).isNotNull();
             assertThat(entity.getUpdatedAt()).isNotNull();
-        } finally {
-            TLC.clear();
-        }
-    }
-
-    @Test
-    void auditMetaObjectHandlerFillsProjectIdOnProjectScopedEntities() {
-        try {
-            TLC.tenantId("tnt01");
-            TLC.workspaceId("wks01");
-            TLC.projectId("prj01");
-            ProjectScopedEntity entity = new ProjectScopedEntity();
-
-            new AuditMetaObjectHandler().insertFill(SystemMetaObject.forObject(entity));
-
-            assertThat(entity.getTenantId()).isEqualTo("tnt01");
-            assertThat(entity.getWorkspaceId()).isEqualTo("wks01");
-            assertThat(entity.getProjectId()).isEqualTo("prj01");
         } finally {
             TLC.clear();
         }
@@ -133,8 +87,6 @@ class CoreEntityContractsTest {
         assertPersistenceTable(ServiceRegistryEntity.class, ServiceRegistryEntity.TABLE_NAME);
 
         assertThat(BaseEntity.class.getAnnotation(Entity.class)).isNull();
-        assertThat(TenantBaseEntity.class.getAnnotation(Entity.class)).isNull();
-        assertThat(WorkspaceBaseEntity.class.getAnnotation(Entity.class)).isNull();
     }
 
     @Test
@@ -183,9 +135,6 @@ class CoreEntityContractsTest {
     void columnNamesStayImplicitAndStringLengthsArePowersOfTwo() {
         List<Class<?>> entityTypes = List.of(
                 BaseEntity.class,
-                TenantBaseEntity.class,
-                WorkspaceBaseEntity.class,
-                ProjectBaseEntity.class,
                 MetaResourceEntity.class,
                 ServiceRegistryEntity.class
         );
@@ -238,10 +187,6 @@ class CoreEntityContractsTest {
         assertThat(field.getAnnotation(Id.class))
                 .as("%s.%s @Id", field.getDeclaringClass().getSimpleName(), field.getName())
                 .isNotNull();
-    }
-
-    @MappedSuperclass
-    static class ProjectScopedEntity extends ProjectBaseEntity {
     }
 
     private static void assertStringAssignedUuidPrimaryKey(Field field) {

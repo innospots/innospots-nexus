@@ -385,7 +385,7 @@ DAO。应用通过只读 `ReservedPluginResourceCatalog` 向 Handler 提供所�
 `nx_console_catalog_resource`。权限授予与导航读模型基于该索引表（按 workspace 授权），而不是直接扫描
 内存中的 `ConsoleContributionCatalog`。
 
-Kernel 权限模块读取持久化 catalog 资源（经 console DAO），不再依赖已移除的内存同步服务命名
+Portal 权限模块读取持久化 catalog 资源（经 console DAO），不再依赖已移除的内存同步服务命名
 （历史文档中的 `PermissionResourceSyncService`）。
 
 运行时 Handler 仍从内存目录读取：
@@ -454,4 +454,4 @@ X-Nexus-Page-Key: sales.order-list
 - MISSING 资源身份不能被其他插件接管；
 - 权限同步记录 ownerPluginId；
 - 停用和 MISSING 不删除历史授权；
-- Kernel 不再依赖 ExtensionRegistry。
+- Portal 不再依赖 ExtensionRegistry。

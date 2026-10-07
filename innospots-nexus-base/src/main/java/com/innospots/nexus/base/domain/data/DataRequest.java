@@ -4,9 +4,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * A request to perform a {@link DataOperation} on a named target datasource.
- * Supports an optional request body, pagination parameters, a free-form
- * query map, and a metadata map for extensibility.
+ * 对命名目标数据源执行 {@link DataOperation} 的请求。支持可选请求体、分页参数、自由格式查询映射及可扩展元数据映射。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @see DataOperation
  */
 public class DataRequest<T> {
 
@@ -25,10 +27,10 @@ public class DataRequest<T> {
     }
 
     /**
-     * Creates a data request for the given target and operation.
+     * 为给定目标与操作创建数据请求。
      *
-     * @param target    datasource or entity identifier
-     * @param operation the type of operation to perform
+     * @param target    数据源或实体标识
+     * @param operation 要执行的操作类型
      */
     public static <T> DataRequest<T> create(String target, DataOperation operation) {
         return new DataRequest<>(target, operation);
@@ -43,7 +45,7 @@ public class DataRequest<T> {
     }
 
     /**
-     * The credential key used for authentication against the target datasource.
+     * 用于对目标数据源进行身份认证的凭据键。
      */
     public String credentialKey() {
         return credentialKey;
@@ -72,7 +74,7 @@ public class DataRequest<T> {
     }
 
     /**
-     * Sets pagination parameters. Both values must be positive.
+     * 设置分页参数。两个值必须为正数。
      */
     public DataRequest<T> page(int pageNo, int pageSize) {
         if (pageNo < 1) {

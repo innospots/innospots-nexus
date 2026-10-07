@@ -10,7 +10,11 @@ import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.base.util.Checks;
 
 /**
- * Registry of {@link ResourceStore} implementations keyed by {@link ResourceStore#storeMode()}.
+ * 按 {@link ResourceStore#storeMode()} 索引的 {@link ResourceStore} 实现注册表。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @see ResourceStore
  */
 public final class ResourceStorageRegistry {
 
@@ -18,10 +22,10 @@ public final class ResourceStorageRegistry {
     private String defaultStoreMode;
 
     /**
-     * Registers a storage backend.
+     * 注册存储后端。
      *
-     * @param store storage implementation
-     * @return this registry for chaining
+     * @param store 存储实现
+     * @return 当前注册表，支持链式调用
      */
     public ResourceStorageRegistry register(ResourceStore store) {
         Checks.notNull(store, "store");
@@ -34,10 +38,10 @@ public final class ResourceStorageRegistry {
     }
 
     /**
-     * Sets the default store mode used when none is requested explicitly.
+     * 设置未显式指定时使用的默认存储模式。
      *
-     * @param storeMode registered store mode
-     * @return this registry for chaining
+     * @param storeMode 已注册的存储模式
+     * @return 当前注册表，支持链式调用
      */
     public ResourceStorageRegistry defaultStoreMode(String storeMode) {
         Checks.notBlank(storeMode, "storeMode");
@@ -49,10 +53,10 @@ public final class ResourceStorageRegistry {
     }
 
     /**
-     * Resolves a store by mode, falling back to the default when mode is blank.
+     * 按模式解析存储后端；模式为空时回退到默认值。
      *
-     * @param storeMode optional store mode
-     * @return matching store
+     * @param storeMode 可选存储模式
+     * @return 匹配的存储后端
      */
     public ResourceStore requireStore(String storeMode) {
         String mode = storeMode == null || storeMode.isBlank() ? defaultStoreMode : storeMode;
@@ -67,10 +71,10 @@ public final class ResourceStorageRegistry {
     }
 
     /**
-     * Finds a registered store by mode.
+     * 按模式查找已注册的存储后端。
      *
-     * @param storeMode store mode
-     * @return store when registered
+     * @param storeMode 存储模式
+     * @return 已注册时的存储后端
      */
     public Optional<ResourceStore> findStore(String storeMode) {
         if (storeMode == null || storeMode.isBlank()) {

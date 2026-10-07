@@ -219,7 +219,7 @@ public final class PluginHostAssembly {
               null));
   }
 
-  // 【用途】供 Console 前端或 Kernel 权限同步读取已发布贡献
+  // 【用途】供 Console 前端或 Portal 权限同步读取已发布贡献
   public ConsoleContributionCatalog consoleCatalog() {
       return consoleCatalog;
   }
@@ -442,7 +442,7 @@ manager.start();
 
 - `PluginManagementEndpoint` — REST 管理接口
 - `ConsolePluginContributionHandler` — `console@1` 运行时
-- 权限资源 `ownerPluginId` — Kernel 权限模块
+- 权限资源 `ownerPluginId` — Portal 权限模块
 
 Console 依赖 Core 契约，不把装配逻辑写入 Console 模块（见 V1 实现计划）。
 

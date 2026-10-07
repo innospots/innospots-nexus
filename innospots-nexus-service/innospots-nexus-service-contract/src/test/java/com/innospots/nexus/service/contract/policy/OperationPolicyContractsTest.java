@@ -24,6 +24,9 @@ import com.innospots.nexus.service.contract.security.annotation.RequiresPermissi
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * 操作策略不可变性与空策略键语义契约测试。
+ */
 class OperationPolicyContractsTest {
 
     @Test
@@ -76,6 +79,7 @@ class OperationPolicyContractsTest {
                 "http.default",
                 "app.default",
                 "client.orders",
+                null,
                 Duration.ofSeconds(2),
                 true,
                 "ORDER_CREATE",

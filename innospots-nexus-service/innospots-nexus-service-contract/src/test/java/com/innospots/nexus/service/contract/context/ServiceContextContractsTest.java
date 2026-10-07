@@ -21,6 +21,9 @@ import com.innospots.nexus.service.contract.trace.TraceSnapshot;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+/**
+ * 服务上下文契约的不可变性与便捷访问行为测试。
+ */
 class ServiceContextContractsTest {
 
     @Test

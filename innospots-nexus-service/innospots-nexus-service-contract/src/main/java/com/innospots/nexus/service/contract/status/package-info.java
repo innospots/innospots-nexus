@@ -1,5 +1,5 @@
 /**
- * Service-runtime status codes owned by the SRV module namespace.
+ * SRV 模块命名空间拥有的服务运行时状态码。
  *
  * @author Smars
  * @date 2026/09/13

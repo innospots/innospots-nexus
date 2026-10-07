@@ -12,6 +12,8 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
  *
  * @param pluginId 所属插件的反向域名标识
  * @param providerId 插件内全局唯一的 Provider 标识
+ * @author Smars
+ * @date 2026/09/13
  */
 public record ProviderRef(String pluginId, String providerId) {
 

@@ -12,12 +12,19 @@ import com.innospots.nexus.base.resources.MetaResource;
 import com.innospots.nexus.base.resources.ResourceStore;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.base.util.Checks;
+import com.innospots.nexus.core.persistence.scope.OwnershipScope;
+import com.innospots.nexus.core.persistence.scope.PersistenceOwnership;
 import com.innospots.nexus.core.resource.dao.MetaResourceDao;
 import com.innospots.nexus.core.resource.domain.entity.MetaResourceEntity;
 import com.innospots.nexus.core.resource.storage.ResourceStorageRegistry;
 
 /**
- * Coordinates binary storage backends with persisted file metadata.
+ * 协调二进制存储后端与持久化文件元数据。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @see MetaResourceDao
+ * @see ResourceStorageRegistry
  */
 @RequiredArgsConstructor
 public class MetaResourceService {
@@ -26,13 +33,13 @@ public class MetaResourceService {
     private final ResourceStorageRegistry storageRegistry;
 
     /**
-     * Stores a file and persists metadata when requested by the resource.
+     * 存储文件，并在资源要求时持久化元数据。
      *
-     * @param resource  file payload
-     * @param module    owning module name
-     * @param moduleKey owning module key
-     * @param storeMode optional storage backend mode
-     * @return stored metadata
+     * @param resource  文件载荷
+     * @param module    所属模块名称
+     * @param moduleKey 所属模块键
+     * @param storeMode 可选存储后端模式
+     * @return 存储后的元数据
      */
     public MetaResource save(FileResource resource, String module, String moduleKey, String storeMode) {
         Checks.notNull(resource, "resource");
@@ -44,15 +51,16 @@ public class MetaResourceService {
             return stored;
         }
         MetaResourceEntity entity = toEntity(stored);
+        OwnershipScope.stamp(entity, OwnershipScope.captureFromSession());
         metaResourceDao.insert(entity);
         return stored;
     }
 
     /**
-     * Reads binary content for a stored resource identifier.
+     * 按资源标识读取二进制内容。
      *
-     * @param resourceId resource identifier
-     * @return binary payload when found
+     * @param resourceId 资源标识
+     * @return 找到时的二进制载荷
      */
     public Optional<byte[]> read(String resourceId) {
         Checks.notBlank(resourceId, "resourceId");
@@ -60,14 +68,15 @@ public class MetaResourceService {
         if (entity == null) {
             return Optional.empty();
         }
+        assertReadable(entity);
         return storageRegistry.requireStore(entity.getStoreMode()).read(resourceId);
     }
 
     /**
-     * Deletes a stored resource and its metadata row.
+     * 删除已存储资源及其元数据行。
      *
-     * @param resourceId resource identifier
-     * @return whether a record existed and deletion succeeded
+     * @param resourceId 资源标识
+     * @return 记录存在且删除成功时返回 {@code true}
      */
     public boolean delete(String resourceId) {
         Checks.notBlank(resourceId, "resourceId");
@@ -75,6 +84,7 @@ public class MetaResourceService {
         if (entity == null) {
             return false;
         }
+        assertReadable(entity);
         boolean deleted = storageRegistry.requireStore(entity.getStoreMode()).delete(resourceId);
         if (deleted) {
             metaResourceDao.deleteById(resourceId);
@@ -83,15 +93,24 @@ public class MetaResourceService {
     }
 
     /**
-     * Finds persisted metadata by resource identifier.
+     * 按资源标识查找持久化元数据。
      *
-     * @param resourceId resource identifier
-     * @return metadata when found
+     * @param resourceId 资源标识
+     * @return 找到时的元数据
      */
     public Optional<MetaResource> findById(String resourceId) {
         Checks.notBlank(resourceId, "resourceId");
         MetaResourceEntity entity = metaResourceDao.selectById(resourceId);
-        return entity == null ? Optional.empty() : Optional.of(toMetaResource(entity));
+        if (entity == null) {
+            return Optional.empty();
+        }
+        assertReadable(entity);
+        return Optional.of(toMetaResource(entity));
+    }
+
+    private static void assertReadable(MetaResourceEntity entity) {
+        PersistenceOwnership ownership = OwnershipScope.captureFromSession();
+        OwnershipScope.assertOwnership(entity, ownership);
     }
 
     private static MetaResourceEntity toEntity(MetaResource resource) {

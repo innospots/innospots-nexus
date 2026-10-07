@@ -2,7 +2,12 @@ package com.innospots.nexus.console.permission.authorization;
 
 import java.util.Optional;
 
-/** 从当前请求上下文解析鉴权主体的端口。 */
+/**
+ * 从当前请求上下文解析鉴权主体的端口。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ */
 public interface AuthorizationSubjectResolver {
 
     /**

@@ -10,6 +10,9 @@ import com.innospots.nexus.service.contract.time.Ticker;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * 单调截止时间剩余时长与缩短语义测试。
+ */
 class MonotonicDeadlineTest {
 
     @Test

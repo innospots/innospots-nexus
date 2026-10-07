@@ -7,7 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Creates an optional child span. Default request tracing does not require this annotation.
+ * 创建可选子 Span。默认请求追踪无需此注解。
  *
  * @author Smars
  * @date 2026/09/13
@@ -19,9 +19,9 @@ import java.lang.annotation.Target;
 public @interface Traced {
 
     /**
-     * Child span name.
+     * 子 Span 名称。
      *
-     * @return span name
+     * @return Span 名称
      */
     String value();
 }

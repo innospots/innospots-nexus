@@ -10,7 +10,7 @@
 目标：锁住表名、基类、主键、必填字段、长度、可空性、索引。
 
 ```java
-package com.innospots.nexus.kernel.role.domain.entity;
+package com.innospots.nexus.portal.role.domain.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -96,7 +96,7 @@ class RoleEntityContractsTest {
 目标：锁住 `BaseMapper` 泛型绑定与单表约束。
 
 ```java
-package com.innospots.nexus.kernel.role.dao;
+package com.innospots.nexus.portal.role.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.junit.jupiter.api.Test;
@@ -138,7 +138,7 @@ class RoleDaoContractsTest {
 目标：锁住类形态、路径、HTTP 注解、返回包装、推迟行为。
 
 ```java
-package com.innospots.nexus.kernel.role.endpoint;
+package com.innospots.nexus.portal.role.endpoint;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -232,10 +232,10 @@ class RoleEndpointContractsTest {
 | 11 | `NexusException.build(status, cause)` 保留 cause |
 | 12 | raw-code interop 拒绝畸形或未登记的码 |
 | 13 | 端点基础设施把状态映射为 `R.fail(...)`，且不暴露 cause 或堆栈 |
-| 14 | 模块/包归属与同级模块依赖规则被遵守（如 kernel 与 platform 不互引） |
+| 14 | 模块/包归属与同级模块依赖规则被遵守（如 portal 与 platform 不互引） |
 
 ```java
-package com.innospots.nexus.kernel.role.domain.enums;
+package com.innospots.nexus.portal.role.domain.enums;
 
 import org.junit.jupiter.api.Test;
 
@@ -395,7 +395,7 @@ void assemblesCrossTableViewInBatches() {
 非平凡或重复的 entity ↔ record/VO 映射须有 `{Domain}ConverterTest`（行为单测，非 `ContractsTest` 族）。
 
 ```java
-package com.innospots.nexus.kernel.role.converter;
+package com.innospots.nexus.portal.role.converter;
 
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;

@@ -8,7 +8,7 @@
 ## 持久化实体
 
 ```java
-package com.innospots.nexus.kernel.role.domain.entity;
+package com.innospots.nexus.portal.role.domain.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -83,14 +83,14 @@ public class RoleEntity extends WorkspaceBaseEntity {
 ## DAO
 
 ```java
-package com.innospots.nexus.kernel.role.dao;
+package com.innospots.nexus.portal.role.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 
 import org.apache.ibatis.annotations.Mapper;
 
-import com.innospots.nexus.kernel.role.domain.entity.RoleEntity;
+import com.innospots.nexus.portal.role.domain.entity.RoleEntity;
 
 import java.util.List;
 
@@ -146,8 +146,8 @@ public interface RoleDao extends BaseMapper<RoleEntity> {
 // 1) 查主表  2) 收集标识  3) 分批查各表  4) 内存映射  5) 返回组装视图
 List<RoleMemberEntity> members = roleMemberDao.selectByRoleIds(roleIds);
 List<String> userIds = members.stream().map(RoleMemberEntity::getUserId).distinct().toList();
-Map<String, KernelUserEntity> usersById = kernelUserDao.selectByUserIds(userIds).stream()
-        .collect(Collectors.toMap(KernelUserEntity::getUserId, Function.identity()));
+Map<String, PortalUserEntity> usersById = portalUserDao.selectByUserIds(userIds).stream()
+        .collect(Collectors.toMap(PortalUserEntity::getUserId, Function.identity()));
 ```
 
 禁止 N+1：不得对上一批结果的每一行再查一次关联表。
@@ -157,7 +157,7 @@ Map<String, KernelUserEntity> usersById = kernelUserDao.selectByUserIds(userIds)
 ## 请求记录（Request）
 
 ```java
-package com.innospots.nexus.kernel.role.domain.request;
+package com.innospots.nexus.portal.role.domain.request;
 
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.QueryParam;
@@ -189,7 +189,7 @@ public record RoleCreateRequest(String roleCode, String roleName, String descrip
 ```
 
 ```java
-package com.innospots.nexus.kernel.role.domain.request;
+package com.innospots.nexus.portal.role.domain.request;
 
 import java.util.List;
 
@@ -235,7 +235,7 @@ public record RolePageRequest(
 ## 视图记录（VO）
 
 ```java
-package com.innospots.nexus.kernel.role.domain.vo;
+package com.innospots.nexus.portal.role.domain.vo;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -260,7 +260,7 @@ public record RoleVo(
 ```
 
 ```java
-package com.innospots.nexus.kernel.role.domain.vo;
+package com.innospots.nexus.portal.role.domain.vo;
 
 import java.util.List;
 
@@ -299,7 +299,7 @@ public record RoleOptionVo(String roleId, String roleCode, String roleName) {
 ## 领域枚举与状态码
 
 ```java
-package com.innospots.nexus.kernel.role.domain.enums;
+package com.innospots.nexus.portal.role.domain.enums;
 
 /**
  * 角色的业务可用性。
@@ -315,7 +315,7 @@ public enum RoleStatus {
 ```
 
 ```java
-package com.innospots.nexus.kernel.role.domain.enums;
+package com.innospots.nexus.portal.role.domain.enums;
 
 import com.innospots.nexus.base.status.StatusCode;
 import com.innospots.nexus.base.status.StatusCategory;
@@ -385,16 +385,16 @@ public enum RoleStatusCode implements StatusCode {
 ## MapStruct 转换器
 
 ```java
-package com.innospots.nexus.kernel.role.converter;
+package com.innospots.nexus.portal.role.converter;
 
 import org.mapstruct.Mapper;
 
 import com.innospots.nexus.base.mapstruct.BaseBeanConverter;
 import com.innospots.nexus.base.mapstruct.BaseMapperConfig;
-import com.innospots.nexus.kernel.role.domain.entity.RoleEntity;
-import com.innospots.nexus.kernel.role.domain.model.Role;
-import com.innospots.nexus.kernel.role.domain.request.RoleCreateRequest;
-import com.innospots.nexus.kernel.role.domain.vo.RoleVo;
+import com.innospots.nexus.portal.role.domain.entity.RoleEntity;
+import com.innospots.nexus.portal.role.domain.model.Role;
+import com.innospots.nexus.portal.role.domain.request.RoleCreateRequest;
+import com.innospots.nexus.portal.role.domain.vo.RoleVo;
 
 /**
  * 角色请求、模型、实体与视图类型之间的结构转换。
@@ -421,7 +421,7 @@ public interface RoleConverter extends BaseBeanConverter<Role, RoleEntity> {
 ## Operator
 
 ```java
-package com.innospots.nexus.kernel.role.operator;
+package com.innospots.nexus.portal.role.operator;
 
 import java.util.List;
 
@@ -429,9 +429,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import com.innospots.nexus.base.exception.NexusException;
-import com.innospots.nexus.kernel.role.dao.RoleDao;
-import com.innospots.nexus.kernel.role.domain.entity.RoleEntity;
-import com.innospots.nexus.kernel.role.domain.enums.RoleStatusCode;
+import com.innospots.nexus.portal.role.dao.RoleDao;
+import com.innospots.nexus.portal.role.domain.entity.RoleEntity;
+import com.innospots.nexus.portal.role.domain.enums.RoleStatusCode;
 
 /**
  * 角色表的直接数据操作。
@@ -484,7 +484,7 @@ public final class RoleOperator {
 ## Service
 
 ```java
-package com.innospots.nexus.kernel.role.service;
+package com.innospots.nexus.portal.role.service;
 
 import java.util.List;
 
@@ -494,13 +494,13 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.innospots.nexus.base.domain.response.PageResult;
 import com.innospots.nexus.base.exception.NexusException;
-import com.innospots.nexus.kernel.role.converter.RoleConverter;
-import com.innospots.nexus.kernel.role.dao.RoleDao;
-import com.innospots.nexus.kernel.role.domain.entity.RoleEntity;
-import com.innospots.nexus.kernel.role.domain.enums.RoleStatusCode;
-import com.innospots.nexus.kernel.role.domain.model.Role;
-import com.innospots.nexus.kernel.role.domain.request.RoleCreateRequest;
-import com.innospots.nexus.kernel.role.operator.RoleOperator;
+import com.innospots.nexus.portal.role.converter.RoleConverter;
+import com.innospots.nexus.portal.role.dao.RoleDao;
+import com.innospots.nexus.portal.role.domain.entity.RoleEntity;
+import com.innospots.nexus.portal.role.domain.enums.RoleStatusCode;
+import com.innospots.nexus.portal.role.domain.model.Role;
+import com.innospots.nexus.portal.role.domain.request.RoleCreateRequest;
+import com.innospots.nexus.portal.role.operator.RoleOperator;
 
 /**
  * 协调校验、持久化与事件的角色生命周期工作流。
@@ -562,7 +562,7 @@ public final class RoleService {
 ## 端点
 
 ```java
-package com.innospots.nexus.kernel.role.endpoint;
+package com.innospots.nexus.portal.role.endpoint;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -576,10 +576,10 @@ import lombok.RequiredArgsConstructor;
 import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.status.NexusStatusCode;
-import com.innospots.nexus.kernel.role.converter.RoleConverter;
-import com.innospots.nexus.kernel.role.domain.request.RoleCreateRequest;
-import com.innospots.nexus.kernel.role.domain.vo.RoleVo;
-import com.innospots.nexus.kernel.role.service.RoleService;
+import com.innospots.nexus.portal.role.converter.RoleConverter;
+import com.innospots.nexus.portal.role.domain.request.RoleCreateRequest;
+import com.innospots.nexus.portal.role.domain.vo.RoleVo;
+import com.innospots.nexus.portal.role.service.RoleService;
 
 /**
  * 向管理控制台暴露的角色生命周期操作。
@@ -635,7 +635,7 @@ public class RoleEndpoint {
 ## 领域事件与处理器
 
 ```java
-package com.innospots.nexus.kernel.role.domain.event;
+package com.innospots.nexus.portal.role.domain.event;
 
 import com.innospots.nexus.base.events.DomainEvent;
 
@@ -655,10 +655,10 @@ public record RoleCreatedEvent(String roleId, String roleCode) implements Domain
 ```
 
 ```java
-package com.innospots.nexus.kernel.audit.handler;
+package com.innospots.nexus.portal.audit.handler;
 
 import com.innospots.nexus.base.events.EventHandler;
-import com.innospots.nexus.kernel.role.domain.event.RoleCreatedEvent;
+import com.innospots.nexus.portal.role.domain.event.RoleCreatedEvent;
 
 /**
  * 为已创建的角色记录审计条目。

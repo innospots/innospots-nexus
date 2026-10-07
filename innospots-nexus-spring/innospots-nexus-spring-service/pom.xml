@@ -14,7 +14,7 @@
     <artifactId>innospots-nexus-spring-service</artifactId>
 
     <name>innospots-nexus-spring-service</name>
-    <description>Spring adapter boundary for standardized Nexus services.</description>
+    <description>标准化 Nexus 服务的 Spring adapter 边界。</description>
 
     <dependencies>
         <dependency>
@@ -40,6 +40,56 @@
         <dependency>
             <groupId>com.innospots</groupId>
             <artifactId>innospots-nexus-service-governance</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.innospots</groupId>
+            <artifactId>innospots-nexus-service-governance-redis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-aop</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.innospots</groupId>
+            <artifactId>innospots-nexus-service-adapter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 </project>

@@ -5,16 +5,19 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Thread-Local Context — a typed {@link ThreadLocal} map for propagating
- * cross-cutting state (trace ID, tenant ID, user ID, workspace ID, etc.)
- * across asynchronous boundaries.
- * <p>Use {@link #scope(Map)} with try-with-resources for scoped context
- * injection:</p>
+ * 线程本地上下文（Thread-Local Context）—— 类型化的 {@link ThreadLocal} 映射，
+ * 用于在异步边界间传播横切状态（追踪 ID、租户 ID、用户 ID、工作区 ID 等）。
+ * <p>使用 {@link #scope(Map)} 配合 try-with-resources 进行作用域上下文注入：</p>
  * <pre>{@code
  * try (var scope = TLC.scope(Map.of(TLC.TRACE_ID, "abc"))) {
- *     // code running with the injected context
+ *     // 在注入的上下文中运行的代码
  * }
  * }</pre>
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @see SessionContext
+ * @see NexusThreadPoolExecutor
  */
 public final class TLC {
 
@@ -35,89 +38,155 @@ public final class TLC {
     private TLC() {
     }
 
-    /** Sets the tenant ID in context. Passing null removes the entry. */
+    /**
+     * 在上下文中设置租户 ID。传入 null 时移除该条目。
+     *
+     * @param tenantId 租户 ID
+     */
     public static void tenantId(String tenantId) {
         put(TENANT_ID, tenantId);
     }
 
-    /** Returns the tenant ID from context, or null. */
+    /**
+     * 从上下文中获取租户 ID。
+     *
+     * @return 租户 ID，不存在时返回 null
+     */
     public static String tenantId() {
         return getString(TENANT_ID);
     }
 
-    /** Sets the workspace ID in context. Passing null removes the entry. */
+    /**
+     * 在上下文中设置工作区 ID。传入 null 时移除该条目。
+     *
+     * @param workspaceId 工作区 ID
+     */
     public static void workspaceId(String workspaceId) {
         put(WORKSPACE_ID, workspaceId);
     }
 
-    /** Returns the workspace ID from context, or null. */
+    /**
+     * 从上下文中获取工作区 ID。
+     *
+     * @return 工作区 ID，不存在时返回 null
+     */
     public static String workspaceId() {
         return getString(WORKSPACE_ID);
     }
 
-    /** Sets the user ID in context. Passing null removes the entry. */
+    /**
+     * 在上下文中设置用户 ID。传入 null 时移除该条目。
+     *
+     * @param userId 用户 ID
+     */
     public static void userId(Long userId) {
         put(USER_ID, userId);
     }
 
-    /** Returns the user ID from context, or null. */
+    /**
+     * 从上下文中获取用户 ID。
+     *
+     * @return 用户 ID，不存在时返回 null
+     */
     public static Long userId() {
         return getLong(USER_ID);
     }
 
-    /** Sets the user name in context. Passing null removes the entry. */
+    /**
+     * 在上下文中设置用户名。传入 null 时移除该条目。
+     *
+     * @param userName 用户名
+     */
     public static void userName(String userName) {
         put(USER_NAME, userName);
     }
 
-    /** Returns the user name from context, or null. */
+    /**
+     * 从上下文中获取用户名。
+     *
+     * @return 用户名，不存在时返回 null
+     */
     public static String userName() {
         return getString(USER_NAME);
     }
 
-    /** Sets the security realm in context. Passing null removes the entry. */
+    /**
+     * 在上下文中设置安全域。传入 null 时移除该条目。
+     *
+     * @param securityRealm 安全域
+     */
     public static void securityRealm(String securityRealm) {
         put(SECURITY_REALM, securityRealm);
     }
 
-    /** Returns the security realm from context, or null. */
+    /**
+     * 从上下文中获取安全域。
+     *
+     * @return 安全域，不存在时返回 null
+     */
     public static String securityRealm() {
         return getString(SECURITY_REALM);
     }
 
-    /** Sets the tenant member ID in context. Passing null removes the entry. */
+    /**
+     * 在上下文中设置租户成员 ID。传入 null 时移除该条目。
+     *
+     * @param tenantMemberId 租户成员 ID
+     */
     public static void tenantMemberId(String tenantMemberId) {
         put(TENANT_MEMBER_ID, tenantMemberId);
     }
 
-    /** Returns the tenant member ID from context, or null. */
+    /**
+     * 从上下文中获取租户成员 ID。
+     *
+     * @return 租户成员 ID，不存在时返回 null
+     */
     public static String tenantMemberId() {
         return getString(TENANT_MEMBER_ID);
     }
 
-    /** Sets the platform user ID in context. Passing null removes the entry. */
+    /**
+     * 在上下文中设置平台用户 ID。传入 null 时移除该条目。
+     *
+     * @param platformUserId 平台用户 ID
+     */
     public static void platformUserId(String platformUserId) {
         put(PLATFORM_USER_ID, platformUserId);
     }
 
-    /** Returns the platform user ID from context, or null. */
+    /**
+     * 从上下文中获取平台用户 ID。
+     *
+     * @return 平台用户 ID，不存在时返回 null
+     */
     public static String platformUserId() {
         return getString(PLATFORM_USER_ID);
     }
 
-    /** Sets the project ID in context. Passing null removes the entry. */
+    /**
+     * 在上下文中设置项目 ID。传入 null 时移除该条目。
+     *
+     * @param projectId 项目 ID
+     */
     public static void projectId(String projectId) {
         put(PROJECT_ID, projectId);
     }
 
-    /** Returns the project ID from context, or null. */
+    /**
+     * 从上下文中获取项目 ID。
+     *
+     * @return 项目 ID，不存在时返回 null
+     */
     public static String projectId() {
         return getString(PROJECT_ID);
     }
 
     /**
-     * Sets a context value. A null value removes the key from context
-     * (equivalent to calling {@link #remove}).
+     * 设置上下文值。null 值会从上下文中移除该键（等效于调用 {@link #remove}）。
+     *
+     * @param key   上下文键
+     * @param value 上下文值
      */
     public static void put(String key, Object value) {
         if (value == null) {
@@ -128,8 +197,9 @@ public final class TLC {
     }
 
     /**
-     * Puts all entries from the given map into context.
-     * Null values in the map will remove the corresponding keys.
+     * 将给定映射中的所有条目写入上下文。映射中的 null 值会移除对应键。
+     *
+     * @param values 待写入的键值映射
      */
     public static void putAll(Map<String, ?> values) {
         if (values == null) {
@@ -138,20 +208,33 @@ public final class TLC {
         values.forEach(TLC::put);
     }
 
-    /** Gets a context value by key. */
+    /**
+     * 按键获取上下文值。
+     *
+     * @param key 上下文键
+     * @return 上下文值，不存在时返回 null
+     */
     public static Object get(String key) {
         return CONTEXT.get().get(key);
     }
 
-    /** Gets a context value as a String, or null. */
+    /**
+     * 按键获取上下文值并转为字符串。
+     *
+     * @param key 上下文键
+     * @return 字符串值，不存在时返回 null
+     */
     public static String getString(String key) {
         Object value = get(key);
         return value == null ? null : String.valueOf(value);
     }
 
     /**
-     * Gets a context value as a Long, with type-safe conversion:
-     * Long passthrough, Number -> longValue(), String -> parseLong().
+     * 按键获取上下文值并转为 {@link Long}，支持类型安全转换：
+     * Long 直通、Number → longValue()、String → parseLong()。
+     *
+     * @param key 上下文键
+     * @return Long 值，无法转换时返回 null
      */
     public static Long getLong(String key) {
         Object value = get(key);
@@ -164,17 +247,29 @@ public final class TLC {
         };
     }
 
-    /** Removes a key from context. */
+    /**
+     * 从上下文中移除指定键。
+     *
+     * @param key 上下文键
+     */
     public static void remove(String key) {
         CONTEXT.get().remove(key);
     }
 
-    /** Captures a snapshot of the current context (defensive copy). */
+    /**
+     * 捕获当前上下文的快照（防御性拷贝）。
+     *
+     * @return 上下文快照
+     */
     public static Map<String, Object> snapshot() {
         return new LinkedHashMap<>(CONTEXT.get());
     }
 
-    /** Replaces the entire context with the given map. */
+    /**
+     * 用给定映射替换整个上下文。
+     *
+     * @param context 新的上下文映射
+     */
     public static void restore(Map<String, ?> context) {
         Map<String, Object> next = new LinkedHashMap<>();
         if (context != null) {
@@ -184,12 +279,14 @@ public final class TLC {
     }
 
     /**
-     * Creates a scoped context: merges the given values into the current
-     * context, returning a {@link Scope} that restores the previous state
-     * when closed. Use with try-with-resources:
+     * 创建作用域上下文：将给定值合并到当前上下文，返回在关闭时恢复先前状态的 {@link Scope}。
+     * 配合 try-with-resources 使用：
      * <pre>{@code
      * try (var s = TLC.scope(Map.of("txId", "abc"))) { ... }
      * }</pre>
+     *
+     * @param values 待合并的上下文值
+     * @return 可自动关闭的作用域
      */
     public static Scope scope(Map<String, ?> values) {
         Map<String, Object> previous = snapshot();
@@ -201,19 +298,29 @@ public final class TLC {
         return new Scope(previous);
     }
 
-    /** Returns the raw context map (shared reference, not a copy). */
+    /**
+     * 返回原始上下文映射（共享引用，非拷贝）。
+     *
+     * @return 当前线程的上下文映射
+     */
     public static Map<String, Object> context() {
         return CONTEXT.get();
     }
 
-    /** Removes all context values for the current thread. */
+    /**
+     * 清除当前线程的所有上下文值。
+     */
     public static void clear() {
         CONTEXT.remove();
     }
 
     /**
-     * AutoCloseable scope that restores the previous context on close.
-     * Used internally by {@link TLC#scope(Map)}.
+     * 可自动关闭的作用域，在 close 时恢复先前的上下文。
+     * 由 {@link TLC#scope(Map)} 内部使用。
+     *
+     * @author Smars
+     * @date 2026/09/13
+     * @param previous 关闭时需恢复的先前上下文
      */
     public record Scope(Map<String, Object> previous) implements AutoCloseable {
 

@@ -9,6 +9,8 @@ import java.time.Instant;
  * @param phase 失败发生的生命周期阶段
  * @param errorCode 脱敏后的状态码
  * @param occurredAt 事件发生时间
+ * @author Smars
+ * @date 2026/09/13
  */
 public record PluginFailedEvent(
         String pluginId,

@@ -23,6 +23,8 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
  * @param runtimeVariables 优先级最高的运行时覆盖值
  * @param defaultRoutes 按 Capability 标识配置的默认标签
  * @param pluginClassLoader ServiceLoader 使用的类加载器；为 null 时使用 Core 类加载器
+ * @author Smars
+ * @date 2026/09/13
  */
 public record PluginRuntimeConfig(
         Set<String> requiredPluginIds,

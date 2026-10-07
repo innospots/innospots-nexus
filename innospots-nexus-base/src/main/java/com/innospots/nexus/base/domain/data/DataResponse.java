@@ -4,9 +4,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * A generic response envelope for data operations. Distinguishes success
- * from failure via the {@code success} flag and carries an optional
- * {@link DataSchema}, data payload, and metadata.
+ * 数据操作的通用响应信封。通过 {@code success} 标志区分成功与失败，并携带可选 {@link DataSchema}、数据载荷与元数据。
+ *
+ * @author Smars
+ * @date 2026/09/13
+ * @see DataRequest
  */
 public class DataResponse<T> {
 
@@ -27,14 +29,14 @@ public class DataResponse<T> {
     }
 
     /**
-     * Creates a success response with the given data payload.
+     * 创建携带给定数据载荷的成功响应。
      */
     public static <T> DataResponse<T> ok(T data) {
         return new DataResponse<>(true, OK, OK, data);
     }
 
     /**
-     * Creates a failure response with an error code and message.
+     * 创建带错误码与消息的失败响应。
      */
     public static <T> DataResponse<T> fail(String code, String message) {
         return new DataResponse<>(false, code, message, null);
@@ -75,7 +77,7 @@ public class DataResponse<T> {
     }
 
     /**
-     * Merges the given map into the existing meta.
+     * 将给定映射合并到现有 meta 中。
      */
     public DataResponse<T> meta(Map<String, Object> meta) {
         if (meta != null) {

@@ -10,6 +10,8 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
  * Capability 与 Contribution 共用的原子可用性门控。
  *
  * <p>资源可以先完成内部提交，但只有激活门控后才允许外部查询。</p>
+ * @author Smars
+ * @date 2026/09/13
  */
 public final class PluginAvailability {
 

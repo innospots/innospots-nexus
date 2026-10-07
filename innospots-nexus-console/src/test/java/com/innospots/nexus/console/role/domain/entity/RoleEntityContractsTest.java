@@ -12,10 +12,10 @@ import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import org.junit.jupiter.api.Test;
 
+import com.innospots.nexus.core.persistence.entity.OwnershipEntity;
 import com.innospots.nexus.console.role.domain.enums.RoleBindingSubjectType;
 import com.innospots.nexus.console.role.domain.enums.RoleOwnerType;
 import com.innospots.nexus.core.persistence.entity.BaseEntity;
-import com.innospots.nexus.core.persistence.entity.WorkspaceBaseEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -26,8 +26,8 @@ class RoleEntityContractsTest {
         assertPersistenceTable(RoleEntity.class, "nx_role");
         assertPersistenceTable(RoleBindingEntity.class, "nx_role_binding");
 
-        assertThat(RoleEntity.class.getSuperclass()).isEqualTo(WorkspaceBaseEntity.class);
-        assertThat(RoleBindingEntity.class.getSuperclass()).isEqualTo(BaseEntity.class);
+        assertThat(RoleEntity.class.getSuperclass()).isEqualTo(BaseEntity.class);
+        assertThat(RoleBindingEntity.class.getSuperclass()).isEqualTo(OwnershipEntity.class);
         assertThat(new RoleBindingEntity().idPrefix()).isEqualTo("rbn");
     }
 
@@ -62,11 +62,11 @@ class RoleEntityContractsTest {
 
     @Test
     void roleEntitiesDeclareOwnerAwareIndexes() {
-        assertIndex(RoleEntity.class, "uk_nx_role_owner_code", "owner_type,owner_id,role_code", true);
-        assertIndex(RoleEntity.class, "idx_nx_role_workspace_status", "workspace_id,status", false);
-        assertIndex(RoleEntity.class, "idx_nx_role_realm", "security_realm", false);
+        assertIndex(RoleEntity.class, "uk_nx_role_owner_code",
+                "owner_type,owner_id,security_realm,role_code", true);
+        assertIndex(RoleEntity.class, "idx_nx_role_owner_status", "owner_type,owner_id,status", false);
         assertIndex(RoleBindingEntity.class, "uk_nx_role_binding_subject",
-                "role_id,subject_type,subject_id", true);
+                "owner_type,owner_id,security_realm,role_id,subject_type,subject_id", true);
     }
 
     private static void assertPersistenceTable(Class<?> entityType, String tableName) {

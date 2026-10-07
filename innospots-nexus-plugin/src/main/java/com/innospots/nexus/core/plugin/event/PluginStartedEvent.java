@@ -12,6 +12,8 @@ import com.innospots.nexus.core.plugin.capability.CapabilityKey;
  * @param version 插件版本
  * @param capabilities 已发布的 Capability 身份列表
  * @param occurredAt 事件发生时间
+ * @author Smars
+ * @date 2026/09/13
  */
 public record PluginStartedEvent(
         String pluginId,

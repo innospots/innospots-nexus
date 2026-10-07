@@ -1,145 +1,134 @@
-# Exception and Status Code Standards Design
+# 异常与状态码规范设计
 
-**Date:** 2026-08-28
+**日期：** 2026-08-28
 
-**Scope:** Add a single source of truth for exception and status-code design,
-then add focused cross-references from API and domain initialization standards.
-No Java source is renamed or modified by this task.
+**范围：** 为异常与状态码设计建立单一事实来源，
+并在 API 与 domain initialization 规范中添加聚焦交叉引用。
+本任务不修改任何 Java 源码名称或实现。
 
-## Goal
+## 目标
 
-Make failures predictable across domain, infrastructure, REST, plugin, and
-extension boundaries. A reader should be able to determine which exception to
-throw, which status code to select or add, how to preserve the original cause,
-how to expose the failure to a caller, and how to extend the code system without
-breaking module ownership or compatibility.
+使 domain、infrastructure、REST、plugin 与
+extension 边界上的失败可预测。读者应能确定抛哪种异常、
+选哪种或新增哪种状态码、如何保留原始 cause、
+如何向调用方暴露失败，以及如何扩展码系而不破坏模块归属或兼容性。
 
-## Source of Truth
+## 事实来源
 
-The rules are derived from the current implementations:
+规则源自当前实现：
 
-- `NexusException` is the shared runtime exception carrying a machine-readable
-  code, summary message, optional localized display, and optional cause.
-- `StatusCode` defines module, category, four-digit local code, bilingual
-  message/advice, and HTTP status metadata.
-- `NexusStatusCode` owns platform-wide `NEX` codes.
-- `PluginStatusCode` owns plugin-runtime `PLG` codes as a technical module.
-- `StatusCodeRules` validates module/category/local-code shape.
-- `R<T>` converts a `NexusException` into a transport failure response.
+- `NexusException` 是共享 runtime 异常，携带 machine-readable
+  code、summary message、可选本地化 display 与可选 cause。
+- `StatusCode` 定义 module、category、四位 local code、
+  双语 message/advice 与 HTTP status 元数据。
+- `NexusStatusCode` 拥有平台级 `AIO` 码。
+- `PluginStatusCode` 作为 technical module 拥有 plugin-runtime `PLG` 码。
+- `StatusCodeRules` 校验 module/category/local-code 形状。
+- `R<T>` 将 `NexusException` 转换为 transport failure response。
 
-The documentation will distinguish current implementation behavior from
-recommended use. It will not silently authorize source changes that are outside
-this standards task.
+文档将区分当前实现行为与推荐用法。不会默许超出本规范任务范围的源码变更。
 
-## Target Documents
+## 目标文档
 
 ### `standards/exception-status-code.md`
 
-Create the authoritative standard with these sections:
+创建权威规范，包含以下章节：
 
-1. failure taxonomy and exception ownership;
-2. `NexusException` construction, cause preservation, display messages, and
-   sensitive-data rules;
-3. catch/rethrow/wrap and boundary translation rules;
-4. status-code structure, category selection, HTTP mapping, and naming;
-5. platform-wide status-code rules;
-6. domain and technical module extension rules;
-7. module-code and local-code allocation procedure;
-8. compatibility, i18n, serialization, and response mapping;
-9. contract-test requirements and review checklists.
+1. failure taxonomy 与 exception ownership；
+2. `NexusException` 构造、cause 保留、display message 与
+   sensitive-data 规则；
+3. catch/rethrow/wrap 与 boundary translation 规则；
+4. status-code 结构、category 选择、HTTP mapping 与命名；
+5. 平台级 status-code 规则；
+6. domain 与 technical module 扩展规则；
+7. module-code 与 local-code 分配流程；
+8. 兼容性、i18n、serialization 与 response mapping；
+9. contract-test 要求与 review checklist。
 
 ### `standards/api-design.md`
 
-Keep API-level exception and status guidance concise, link to the new source of
-truth, and clarify the existing rule that application/business failures use
-`NexusException` while pure utility programmer-precondition failures may use
-the framework-appropriate exception only when they do not cross an application
-boundary.
+保持 API 级异常与 status 指导简洁，链接到新事实来源，
+并澄清现有规则：application/business failure 使用
+`NexusException`；纯 utility programmer-precondition failure 仅在
+不跨越 application boundary 时可使用 framework 合适的异常。
 
 ### `standards/domain-module-initialization.md`
 
-Add status-code and exception checks to the domain contract and verification
-gates. The workflow will require reuse checks, domain ownership, stable code
-allocation, bilingual messages/advice, and status-code contract tests before a
-new domain failure is introduced.
+在 domain contract 与 verification gate 中添加 status-code 与 exception 检查。
+工作流要求在引入新 domain failure 前完成 reuse 检查、domain ownership、
+stable code allocation、双语 message/advice 与 status-code contract test。
 
-## Exception Model
+## 异常模型
 
-The standard will define four practical failure classes:
+规范定义四类实用 failure class：
 
-- expected caller or business failures, represented by `NexusException` and a
-  reusable `StatusCode`;
-- translated infrastructure/external failures, represented by
-  `NexusException` with the relevant status and preserved cause;
-- programmer misuse of a pure lower-level utility, which may retain the
-  framework/JDK precondition exception if it never represents user or business
-  input at an application boundary;
-- cancellation/interruption and fatal JVM errors, which must not be swallowed
-  or mislabeled as ordinary business failures.
+- 预期 caller 或 business failure，由 `NexusException` 与
+  可复用 `StatusCode` 表示；
+- 转换后的 infrastructure/external failure，由
+  带相关 status 并保留 cause 的 `NexusException` 表示；
+- 纯 lower-level utility 的 programmer misuse，若从不代表
+  application boundary 上的 user 或 business input，可保留
+  framework/JDK precondition exception；
+- cancellation/interruption 与 fatal JVM error，不得被吞掉
+  或误标为普通 business failure。
 
-No exception subclass is created per status code. `NexusException.build(...)`
-overloads are preferred over raw code strings; raw strings remain an explicit
-interop/extension boundary and must be validated and allowlisted.
+不为每个 status code 创建 exception 子类。优先使用 `NexusException.build(...)`
+overload；raw string 仍是显式 interop/extension boundary，必须校验并 allowlist。
 
-## Status-Code Model
+## 状态码模型
 
-Document the canonical format as:
+文档化 canonical 格式为：
 
 ```text
 MODULE(3 uppercase letters) + CATEGORY(2 digits) + LOCAL(4 digits)
 ```
 
-For example, `NEX080002` is the configuration error code in the `NEX` module.
-The full code is nine characters. A category communicates failure semantics;
-the HTTP status communicates transport behavior and does not replace the
-business code.
+例如 `AIO080002` 是 `AIO` module 中的 configuration error code。
+full code 为九字符。category 表达 failure 语义；
+HTTP status 表达 transport 行为，不替代 business code。
 
-Platform-wide codes belong to `NexusStatusCode`. A domain-specific business
-code belongs to the owning domain's `domain.enums` package and implements
-`StatusCode`. A reusable technical module may keep a module-local status enum
-near that module's technical boundary, as `core.plugin.status.PluginStatusCode`
-does. Sibling business modules must not import each other's status enums merely
-to share errors.
+平台级码归属 `NexusStatusCode`。domain-specific business
+code 归属 owning domain 的 `domain.enums` 包并实现
+`StatusCode`。可复用 technical module 可在该 module technical boundary 附近
+保留 module-local status enum，如 `core.plugin.status.PluginStatusCode`。
+sibling business module 不得仅为共享 error 而 import 彼此的 status enum。
 
-## Extension Procedure
+## 扩展流程
 
-Before adding a status code:
+新增 status code 前：
 
-1. search for an existing code with the same meaning and reuse it when the
-   scope and remediation are compatible;
-2. decide whether the failure is platform-wide, domain-specific, or technical;
-3. select the module code and category from the owning boundary;
-4. allocate a four-digit local code unique within that module's status family;
-5. provide stable English and Chinese message/advice text without runtime
-   values or secrets;
-6. map to the narrowest correct HTTP status;
-7. add format, uniqueness, metadata, and behavior contract tests;
-8. update consumers and documentation in the same compatibility change.
+1. 搜索同义现有 code，当 scope 与 remediation 兼容时复用；
+2. 判断 failure 是 platform-wide、domain-specific 还是 technical；
+3. 从 owning boundary 选择 module code 与 category；
+4. 在该 module status family 内分配唯一四位 local code；
+5. 提供稳定英文与中文 message/advice 文本，不含 runtime
+   value 或 secret；
+6. 映射到最窄的正确 HTTP status；
+7. 添加 format、uniqueness、metadata 与 behavior contract test；
+8. 在同一兼容性变更中更新 consumer 与文档。
 
-The extension must not introduce a new exception subclass, duplicate an
-existing status under a different enum, reuse a code for a different meaning,
-or change an existing full code/message/event contract casually.
+扩展不得引入新 exception 子类、在不同 enum 下 duplicate 现有 status、
+复用 code 表达不同含义，或随意变更现有 full code/message/event contract。
 
-## Compatibility and Verification
+## 兼容性与验证
 
-Full codes, enum constant names, HTTP mapping, event/configuration identifiers,
-and localized default messages are compatibility surfaces. Renaming or
-re-numbering requires an explicit migration or version boundary. Existing
-source-level deviations can be corrected in a separate implementation change;
-this task changes documentation only.
+full code、enum constant name、HTTP mapping、event/configuration identifier
+与 localized default message 均为 compatibility surface。重命名或
+re-numbering 需要显式 migration 或 version boundary。现有
+source-level 偏差可在单独实现变更中修正；
+本任务仅改文档。
 
-Verification consists of Markdown consistency checks, a focused review against
-the source implementations, and the repository's normal Maven validation. No
-module skill scan is triggered.
+验证包括 Markdown 一致性检查、对照源码实现的聚焦 review，
+以及仓库常规 Maven validation。不触发 module skill scan。
 
-## Completion Criteria
+## 完成标准
 
-- Exception selection and wrapping rules are unambiguous.
-- `NexusException`, raw-code interop, cause preservation, and response mapping
-  are documented consistently.
-- Status-code format, category semantics, module ownership, local allocation,
-  messages, advice, and HTTP mapping are explicit.
-- Domain and technical extensions have separate, legal placement rules.
-- Compatibility and contract-test requirements are visible before extension.
-- Only the intended standards/design/plan documents change; Java sources and
-  `standards/module-skills.md` remain untouched.
+- Exception 选择与 wrap 规则无歧义。
+- `NexusException`、raw-code interop、cause 保留与 response mapping
+  文档一致。
+- Status-code format、category 语义、module ownership、local allocation、
+  message、advice 与 HTTP mapping 明确。
+- Domain 与 technical extension 有独立、合法的 placement 规则。
+- 扩展前可见 compatibility 与 contract-test 要求。
+- 仅变更预期的 standards/design/plan 文档；Java 源码与
+  `standards/module-skills.md` 保持不变。

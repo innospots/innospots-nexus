@@ -13,7 +13,7 @@
 | `innospots-nexus-core` | 可依赖中间件 API，但**不得**绑定 Spring Boot 自动配置 | `AGENTS.md` |
 | Spring 依赖版本 | 只来自 `innospots-nexus-bom`；spring 模块 POM **禁止** `<version>` | `spring-dependencies.md` |
 | Spring Data | **禁止** `spring-boot-starter-data-*`、`spring-data-*` | 用 MyBatis-Plus + `*Dao` |
-| Spring Security | **禁止** `spring-boot-starter-security`、`spring-security-*` | 用 kernel/console 鉴权 |
+| Spring Security | **禁止** `spring-boot-starter-security`、`spring-security-*` | 用 portal/console 鉴权 |
 | service / operator | **不得**返回 `R<T>`；异常不在下层转响应 | `java:reference` → `api-contract.md` |
 
 **这些规范优先于 Spring 的惯用写法。** 冲突时以 `java:reference` 索引的 `skills/java/java-reference/standards/` 原文为准。

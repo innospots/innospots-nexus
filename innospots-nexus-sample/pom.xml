@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.innospots</groupId>
+        <artifactId>innospots-nexus-parent</artifactId>
+        <version>${revision}</version>
+        <relativePath>../innospots-nexus-parent/pom.xml</relativePath>
+    </parent>
+
+    <artifactId>innospots-nexus-sample</artifactId>
+    <packaging>pom</packaging>
+
+    <name>innospots-nexus-sample</name>
+    <description>可运行的 Spring / Quarkus 示例服务（不参与制品发布）。</description>
+
+    <properties>
+        <maven.deploy.skip>true</maven.deploy.skip>
+        <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
+    </properties>
+
+    <build>
+        <!-- 配置打进发行包 config/，thin jar 仅保留 schema 等 classpath 资源（主类由 bin/setenv.sh 指定） -->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <excludes>
+                    <exclude>**/*.properties</exclude>
+                    <exclude>**/*.yaml</exclude>
+                    <exclude>**/*.yml</exclude>
+                    <exclude>**/*.txt</exclude>
+                    <exclude>**/*.xml</exclude>
+                </excludes>
+            </resource>
+        </resources>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>${maven-assembly-plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>make-assembly</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>single</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <outputDirectory>${project.parent.basedir}/dist</outputDirectory>
+                        <appendAssemblyId>false</appendAssemblyId>
+                        <descriptors>
+                            <descriptor>${project.parent.basedir}/assets/assembly/sample-package.xml</descriptor>
+                        </descriptors>
+                        <finalName>${project.artifactId}</finalName>
+                        <updateOnly>false</updateOnly>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <modules>
+        <module>innospots-nexus-sample-platform</module>
+        <module>innospots-nexus-sample-spring-app</module>
+        <module>innospots-nexus-sample-spring-portal</module>
+        <module>innospots-nexus-sample-spring-platform</module>
+        <module>innospots-nexus-sample-quarkus-app</module>
+        <module>innospots-nexus-sample-quarkus-portal</module>
+        <module>innospots-nexus-sample-quarkus-platform</module>
+    </modules>
+</project>

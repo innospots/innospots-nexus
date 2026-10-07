@@ -1,5 +1,5 @@
 /**
- * Invocation chain types, interceptor identity, and execution modes.
+ * 调用链类型、拦截器标识与执行模式。
  *
  * @author Smars
  * @date 2026/09/13

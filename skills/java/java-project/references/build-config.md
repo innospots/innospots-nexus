@@ -139,7 +139,7 @@ BOM 用属性集中管理版本：
 
 `dependencyManagement` 中登记三类条目：
 
-1. **内部模块**：`innospots-nexus-{base,core,plugin,console,kernel,platform,spring-*,quarkus-*}`，版本 `${revision}`
+1. **内部模块**：`innospots-nexus-{base,core,plugin,console,portal,platform,spring-*,quarkus-*}`，版本 `${revision}`
 2. **第三方 BOM（import）**：`junit-bom`、`jackson-bom`
 3. **第三方普通依赖**：hutool、caffeine、commons-*、httpclient5、lombok、mapstruct、
    jakarta.*、HikariCP、mybatis-plus-*、数据库驱动、lettuce、amqp-client、
@@ -203,7 +203,7 @@ BOM 用属性集中管理版本：
         <!-- 示例：按场景选最上层模块，见 dependency-conventions.md -->
         <dependency>
             <groupId>com.innospots</groupId>
-            <artifactId>innospots-nexus-kernel</artifactId>
+            <artifactId>innospots-nexus-portal</artifactId>
         </dependency>
         <!-- 使用 MapStruct 时需要（版本由 BOM 管理） -->
         <dependency>
