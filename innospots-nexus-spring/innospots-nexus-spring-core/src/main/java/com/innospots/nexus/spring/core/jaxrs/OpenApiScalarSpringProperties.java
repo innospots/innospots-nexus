@@ -1,11 +1,10 @@
-package com.innospots.nexus.spring.console.config;
+package com.innospots.nexus.spring.core.jaxrs;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import com.innospots.nexus.core.openapi.OpenApiCatalogPaths;
 import com.innospots.nexus.core.openapi.catalog.OpenApiCatalogEndpoint;
 import com.innospots.nexus.core.openapi.scalar.OpenApiScalarDocumentation;
-import com.innospots.nexus.spring.console.jaxrs.NexusScalarJerseyConfiguration;
 import com.scalar.maven.core.ScalarProperties;
 
 /**
@@ -20,6 +19,8 @@ import com.scalar.maven.core.ScalarProperties;
  *   <li>前端脚本：{@link #resolveScalarJavascriptPath()}</li>
  *   <li>规范 JSON：{@link #getSpecsBase()} + {@code /{specId}}，与 {@link OpenApiCatalogEndpoint} 对齐</li>
  * </ul>
+ *
+ * @see NexusScalarJerseyConfiguration
  */
 @ConfigurationProperties(prefix = "scalar")
 public class OpenApiScalarSpringProperties extends ScalarProperties {

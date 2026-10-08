@@ -11,10 +11,10 @@ import jakarta.ws.rs.container.ContainerResponseFilter;
 import jakarta.ws.rs.ext.Provider;
 
 import com.innospots.nexus.base.thread.TLC;
-import com.innospots.nexus.console.jaxrs.support.ConsoleHttpHeaders;
-import com.innospots.nexus.console.jaxrs.support.ConsoleJaxRsRequestScope;
 import com.innospots.nexus.console.jaxrs.support.ConsoleTokenSessionBinder;
-import com.innospots.nexus.console.jaxrs.support.ConsoleWebRequestProperties;
+import com.innospots.nexus.core.jaxrs.support.HttpHeaderNames;
+import com.innospots.nexus.core.jaxrs.support.RequestProperties;
+import com.innospots.nexus.core.jaxrs.support.RequestScope;
 
 /**
  * 分配 requestId 并在响应结束后清理线程上下文。
@@ -25,22 +25,22 @@ public final class ConsoleRequestContextFilter implements ContainerRequestFilter
 
     @Override
     public void filter(ContainerRequestContext requestContext) {
-        ConsoleJaxRsRequestScope.bind(requestContext);
-        String requestId = requestContext.getHeaderString(ConsoleHttpHeaders.REQUEST_ID);
+        RequestScope.bind(requestContext);
+        String requestId = requestContext.getHeaderString(HttpHeaderNames.REQUEST_ID);
         if (requestId == null || requestId.isBlank()) {
             requestId = UUID.randomUUID().toString().replace("-", "");
         }
-        requestContext.setProperty(ConsoleWebRequestProperties.REQUEST_ID, requestId);
+        requestContext.setProperty(RequestProperties.REQUEST_ID, requestId);
         TLC.put(TLC.TRACE_ID, requestId);
     }
 
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
-        Object requestId = requestContext.getProperty(ConsoleWebRequestProperties.REQUEST_ID);
+        Object requestId = requestContext.getProperty(RequestProperties.REQUEST_ID);
         if (requestId != null) {
-            responseContext.getHeaders().putSingle(ConsoleHttpHeaders.REQUEST_ID, String.valueOf(requestId));
+            responseContext.getHeaders().putSingle(HttpHeaderNames.REQUEST_ID, String.valueOf(requestId));
         }
         ConsoleTokenSessionBinder.clear();
-        ConsoleJaxRsRequestScope.clear();
+        RequestScope.clear();
     }
 }

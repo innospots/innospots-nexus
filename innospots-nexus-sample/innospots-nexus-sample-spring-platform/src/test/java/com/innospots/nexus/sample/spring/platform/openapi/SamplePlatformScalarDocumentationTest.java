@@ -7,7 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import com.innospots.nexus.core.openapi.catalog.OpenApiCatalogOperator;
 import com.innospots.nexus.core.openapi.scalar.OpenApiScalarDocumentation;
 import com.innospots.nexus.sample.spring.platform.openapi.support.OpenApiJerseyTestApplication;
-import com.innospots.nexus.spring.console.config.OpenApiScalarSpringProperties;
+import com.innospots.nexus.spring.core.jaxrs.OpenApiScalarSpringProperties;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -1,4 +1,4 @@
-package com.innospots.nexus.spring.core.openapi;
+package com.innospots.nexus.spring.core.jaxrs;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -14,6 +14,8 @@ import com.innospots.nexus.core.openapi.catalog.OpenApiCatalogOperator;
  * OpenAPI 规范目录的 Jakarta REST Bean 装配（与 console/portal/platform 业务域无关）。
  *
  * <p>HTTP 路由由宿主 Jersey 配置注册；Scalar 文档页由 {@code *ScalarJerseyConfiguration} 提供。</p>
+ *
+ * @see OpenApiCatalogEndpoint
  */
 @Configuration
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)

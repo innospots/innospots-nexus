@@ -1,4 +1,4 @@
-package com.innospots.nexus.console.jaxrs.exception;
+package com.innospots.nexus.core.jaxrs.exception;
 
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
@@ -12,11 +12,11 @@ import com.innospots.nexus.base.status.NexusStatusCode;
  * 未捕获异常兜底映射。
  */
 @Provider
-public final class ConsoleThrowableExceptionMapper implements ExceptionMapper<Throwable> {
+public final class ThrowableExceptionMapper implements ExceptionMapper<Throwable> {
 
-    private final ConsoleJaxRsExceptionSupport exceptionSupport;
+    private final JaxRsExceptionSupport exceptionSupport;
 
-    public ConsoleThrowableExceptionMapper(ConsoleJaxRsExceptionSupport exceptionSupport) {
+    public ThrowableExceptionMapper(JaxRsExceptionSupport exceptionSupport) {
         this.exceptionSupport = exceptionSupport;
     }
 

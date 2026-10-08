@@ -14,8 +14,6 @@ import com.innospots.nexus.spring.console.config.ConsoleCredentialConfiguration;
 import com.innospots.nexus.spring.console.config.ConsoleDictionaryConfiguration;
 import com.innospots.nexus.spring.console.config.ConsoleLoggerConfiguration;
 import com.innospots.nexus.spring.console.config.ConsoleJaxRsWebConfiguration;
-import com.innospots.nexus.spring.console.jaxrs.NexusJaxRsConfiguration;
-import com.innospots.nexus.spring.console.jaxrs.NexusScalarJerseyConfiguration;
 import com.innospots.nexus.spring.console.config.ConsoleMenuConfiguration;
 import com.innospots.nexus.spring.console.config.ConsoleNavigationConfiguration;
 import com.innospots.nexus.spring.console.config.ConsolePermissionConfiguration;
@@ -27,8 +25,8 @@ import com.innospots.nexus.spring.core.plugin.EnableNexusPluginHost;
 /**
  * 显式启用 Nexus 管理控制台完整 Spring 装配。
  *
- * <p>组合宿主引导、插件宿主，并按 console 业务域分别
- * {@link Import} 各 {@code Console*Configuration}。</p>
+ * <p>组合宿主引导（含 {@code EnableNexusJaxRs} 通用 JAX-RS 装配）、插件宿主，
+ * 并按 console 业务域分别 {@link Import} 各 {@code Console*Configuration}。</p>
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
@@ -46,9 +44,7 @@ import com.innospots.nexus.spring.core.plugin.EnableNexusPluginHost;
         ConsoleRoleConfiguration.class,
         ConsoleDictionaryConfiguration.class,
         ConsoleLoggerConfiguration.class,
-        ConsoleJaxRsWebConfiguration.class,
-        NexusJaxRsConfiguration.class,
-        NexusScalarJerseyConfiguration.class
+        ConsoleJaxRsWebConfiguration.class
 })
 public @interface EnableNexusConsole {
 }

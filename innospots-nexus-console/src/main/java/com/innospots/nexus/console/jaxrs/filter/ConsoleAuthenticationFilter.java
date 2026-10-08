@@ -11,9 +11,9 @@ import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.console.auth.service.TokenIssuer;
 import com.innospots.nexus.console.jaxrs.support.ConsoleAntPathMatcher;
 import com.innospots.nexus.console.jaxrs.web.ConsoleWebSecuritySettings;
-import com.innospots.nexus.console.jaxrs.support.ConsoleHttpHeaders;
 import com.innospots.nexus.console.jaxrs.support.ConsolePublicApiPaths;
 import com.innospots.nexus.console.jaxrs.support.ConsoleTokenSessionBinder;
+import com.innospots.nexus.core.jaxrs.support.HttpHeaderNames;
 
 /**
  * 解析 Bearer 访问令牌并填充 {@link com.innospots.nexus.base.thread.SessionContext}。
@@ -43,7 +43,7 @@ public final class ConsoleAuthenticationFilter implements ContainerRequestFilter
         if (ConsoleAntPathMatcher.matchesAny(security.getPermitAllPatterns(), path)) {
             return;
         }
-        String authorization = requestContext.getHeaderString(ConsoleHttpHeaders.AUTHORIZATION);
+        String authorization = requestContext.getHeaderString(HttpHeaderNames.AUTHORIZATION);
         if (ConsolePublicApiPaths.matches(path)) {
             if (authorization == null || authorization.isBlank()) {
                 return;

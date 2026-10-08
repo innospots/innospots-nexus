@@ -1,4 +1,4 @@
-package com.innospots.nexus.spring.console.jaxrs;
+package com.innospots.nexus.spring.core.jaxrs;
 
 import java.io.IOException;
 
@@ -8,6 +8,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import org.glassfish.jersey.server.model.Resource;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -15,14 +16,16 @@ import org.springframework.context.annotation.Configuration;
 
 import com.innospots.nexus.core.openapi.catalog.OpenApiCatalogOperator;
 import com.innospots.nexus.core.openapi.scalar.OpenApiScalarDocumentation;
-import com.innospots.nexus.spring.console.config.OpenApiScalarSpringProperties;
 
 /**
  * 通过 {@link NexusJerseyResourceConfigurer} 暴露 Scalar 文档页与内置 {@code scalar.js}，
  * OpenAPI 规范仍由 {@link com.innospots.nexus.core.openapi.catalog.OpenApiCatalogEndpoint} 提供。
+ *
+ * @see OpenApiScalarSpringProperties
  */
 @Configuration
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+@ConditionalOnClass(Resource.class)
 @EnableConfigurationProperties(OpenApiScalarSpringProperties.class)
 public class NexusScalarJerseyConfiguration {
 
