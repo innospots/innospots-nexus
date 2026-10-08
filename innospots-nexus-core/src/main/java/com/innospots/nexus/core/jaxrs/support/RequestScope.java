@@ -1,15 +1,15 @@
-package com.innospots.nexus.console.jaxrs.support;
+package com.innospots.nexus.core.jaxrs.support;
 
 import jakarta.ws.rs.container.ContainerRequestContext;
 
 /**
  * 当前 JAX-RS 请求的线程绑定，供 {@link jakarta.ws.rs.ext.ExceptionMapper} 读取请求元数据。
  */
-public final class ConsoleJaxRsRequestScope {
+public final class RequestScope {
 
     private static final ThreadLocal<ContainerRequestContext> CURRENT = new ThreadLocal<>();
 
-    private ConsoleJaxRsRequestScope() {
+    private RequestScope() {
     }
 
     /**

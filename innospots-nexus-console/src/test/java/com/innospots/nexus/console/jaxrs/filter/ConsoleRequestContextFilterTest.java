@@ -8,9 +8,9 @@ import jakarta.ws.rs.container.ContainerResponseContext;
 import com.innospots.nexus.base.domain.identity.UserSnapshot;
 import com.innospots.nexus.base.thread.SessionContext;
 import com.innospots.nexus.base.thread.TLC;
-import com.innospots.nexus.console.jaxrs.support.ConsoleHttpHeaders;
-import com.innospots.nexus.console.jaxrs.support.ConsoleJaxRsRequestScope;
-import com.innospots.nexus.console.jaxrs.support.ConsoleWebRequestProperties;
+import com.innospots.nexus.core.jaxrs.support.HttpHeaderNames;
+import com.innospots.nexus.core.jaxrs.support.RequestProperties;
+import com.innospots.nexus.core.jaxrs.support.RequestScope;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -32,11 +32,11 @@ class ConsoleRequestContextFilterTest {
 
         filter.filter(request);
 
-        Object requestId = request.getProperty(ConsoleWebRequestProperties.REQUEST_ID);
+        Object requestId = request.getProperty(RequestProperties.REQUEST_ID);
         assertThat(requestId).isNotNull();
         assertThat(String.valueOf(requestId)).hasSize(32);
         assertThat(TLC.getString(TLC.TRACE_ID)).isEqualTo(String.valueOf(requestId));
-        assertThat(ConsoleJaxRsRequestScope.current()).isSameAs(request);
+        assertThat(RequestScope.current()).isSameAs(request);
     }
 
     @Test
@@ -44,11 +44,11 @@ class ConsoleRequestContextFilterTest {
         ContainerRequestContext request = JaxRsFilterTestSupport.mockRequest(
                 "/api/d/nexus/status",
                 "GET",
-                Map.of(ConsoleHttpHeaders.REQUEST_ID, "trace-from-client"));
+                Map.of(HttpHeaderNames.REQUEST_ID, "trace-from-client"));
 
         filter.filter(request);
 
-        assertThat(request.getProperty(ConsoleWebRequestProperties.REQUEST_ID)).isEqualTo("trace-from-client");
+        assertThat(request.getProperty(RequestProperties.REQUEST_ID)).isEqualTo("trace-from-client");
         assertThat(TLC.getString(TLC.TRACE_ID)).isEqualTo("trace-from-client");
     }
 
@@ -58,15 +58,15 @@ class ConsoleRequestContextFilterTest {
         ContainerRequestContext request = JaxRsFilterTestSupport.mockRequest(
                 "/api/d/nexus/status",
                 "GET",
-                Map.of(ConsoleHttpHeaders.REQUEST_ID, "rid-abc"));
+                Map.of(HttpHeaderNames.REQUEST_ID, "rid-abc"));
         filter.filter(request);
 
         ContainerResponseContext response = JaxRsFilterTestSupport.mockResponse();
         filter.filter(request, response);
 
-        assertThat(response.getHeaders().getFirst(ConsoleHttpHeaders.REQUEST_ID)).isEqualTo("rid-abc");
+        assertThat(response.getHeaders().getFirst(HttpHeaderNames.REQUEST_ID)).isEqualTo("rid-abc");
         assertThat(SessionContext.user()).isEmpty();
-        assertThat(ConsoleJaxRsRequestScope.current()).isNull();
+        assertThat(RequestScope.current()).isNull();
         assertThat(TLC.getString(TLC.TRACE_ID)).isNull();
     }
 }

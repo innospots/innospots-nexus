@@ -10,8 +10,8 @@ import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.base.thread.SessionContext;
 import com.innospots.nexus.console.auth.domain.model.TokenClaims;
 import com.innospots.nexus.console.auth.service.TokenIssuer;
-import com.innospots.nexus.console.jaxrs.support.ConsoleHttpHeaders;
 import com.innospots.nexus.console.jaxrs.web.ConsoleWebSecuritySettings;
+import com.innospots.nexus.core.jaxrs.support.HttpHeaderNames;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -86,7 +86,7 @@ class ConsoleAuthenticationFilterTest {
         ContainerRequestContext request = JaxRsFilterTestSupport.mockRequest(
                 "/api/d/nexus/status",
                 "GET",
-                Map.of(ConsoleHttpHeaders.AUTHORIZATION, "Bearer access-token"));
+                Map.of(HttpHeaderNames.AUTHORIZATION, "Bearer access-token"));
 
         filter.filter(request);
 
@@ -102,7 +102,7 @@ class ConsoleAuthenticationFilterTest {
         ContainerRequestContext request = JaxRsFilterTestSupport.mockRequest(
                 "/api/d/nexus/status",
                 "GET",
-                Map.of(ConsoleHttpHeaders.AUTHORIZATION, "Token not-bearer"));
+                Map.of(HttpHeaderNames.AUTHORIZATION, "Token not-bearer"));
 
         assertThatThrownBy(() -> filter.filter(request))
                 .isInstanceOf(NexusException.class)
@@ -134,7 +134,7 @@ class ConsoleAuthenticationFilterTest {
         ContainerRequestContext request = JaxRsFilterTestSupport.mockRequest(
                 "/api/public/pages/demo",
                 "GET",
-                Map.of(ConsoleHttpHeaders.AUTHORIZATION, "Bearer public-token"));
+                Map.of(HttpHeaderNames.AUTHORIZATION, "Bearer public-token"));
 
         filter.filter(request);
 

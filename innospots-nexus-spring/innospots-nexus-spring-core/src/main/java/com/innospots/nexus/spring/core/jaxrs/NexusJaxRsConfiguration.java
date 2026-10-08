@@ -1,6 +1,10 @@
-package com.innospots.nexus.spring.console.jaxrs;
+package com.innospots.nexus.spring.core.jaxrs;
 
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.ext.ContextResolver;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.spring.SpringComponentProvider;
@@ -11,32 +15,34 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.jersey.autoconfigure.ResourceConfigCustomizer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import com.innospots.nexus.spring.console.config.ConsoleWebProperties;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.innospots.nexus.base.json.Jsons;
 
 /**
  * 将 Spring 容器中带 {@link Path} 的 Bean 注册为 Jersey 资源，直接对外暴露 Jakarta REST 契约。
  *
- * <p>Filter 模式下 404 是否透传 Spring MVC 由 {@link ConsoleWebProperties#getJersey()} 的
- * {@code forward-on-404} 控制（默认由 Jersey 直接 404）。</p>
+ * <p>Filter 模式下 404 是否透传 Spring MVC 由 {@link NexusJaxRsProperties#isForwardOn404()}
+ * （{@code nexus.web.jersey.forward-on-404}）控制（默认透传）。</p>
+ *
+ * @see NexusJerseyResourceConfigurer
  */
 @Configuration
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-@EnableConfigurationProperties(ConsoleWebProperties.class)
+@ConditionalOnClass(ResourceConfig.class)
+@EnableConfigurationProperties(NexusJaxRsProperties.class)
 public class NexusJaxRsConfiguration {
 
     private static final Logger LOG = LoggerFactory.getLogger(NexusJaxRsConfiguration.class);
@@ -44,11 +50,13 @@ public class NexusJaxRsConfiguration {
     @Bean
     ResourceConfig nexusJaxRsResourceConfig(
             List<NexusJerseyResourceConfigurer> jerseyResourceConfigurers,
-            ConsoleWebProperties webProperties) {
+            ContextResolver<ObjectMapper> jsonsObjectMapperResolver,
+            NexusJaxRsProperties jaxRsProperties) {
         ResourceConfig resourceConfig = new ResourceConfig();
         resourceConfig.register(SpringComponentProvider.class);
+        resourceConfig.register(jsonsObjectMapperResolver);
         resourceConfig.property(
-                ServletProperties.FILTER_FORWARD_ON_404, webProperties.getJersey().isForwardOn404());
+                ServletProperties.FILTER_FORWARD_ON_404, jaxRsProperties.isForwardOn404());
         for (NexusJerseyResourceConfigurer configurer : jerseyResourceConfigurers) {
             configurer.configure(resourceConfig);
         }
@@ -56,8 +64,21 @@ public class NexusJaxRsConfiguration {
     }
 
     /**
+     * 让 Jersey 的 Jackson 提供者（{@code JacksonJaxbJsonProvider}）复用 {@link Jsons#mapper()}，
+     * 使 {@code I18nModule} 的 I18nObject 契约、未知字段容忍与 ISO 日期序列化对全部 JAX-RS 端点生效。
+     *
+     * <p>响应字段脱敏（{@code MaskingModule}）不属于本 resolver，由出参侧按需处理。</p>
+     *
+     * @return 绑定 {@link Jsons#mapper()} 的 resolver
+     */
+    @Bean
+    ContextResolver<ObjectMapper> jsonsObjectMapperResolver() {
+        return type -> Jsons.mapper();
+    }
+
+    /**
      * <p>扫描 Bean 定义中<strong>实现类</strong>带 {@link Path} 的单例并注册 Spring 管理实例
-     * （含各 {@code Console*Configuration} 中 {@code @Bean} 工厂方法产出的端点）。</p>
+     * （含各 {@code *Configuration} 中 {@code @Bean} 工厂方法产出的端点）。</p>
      *
      * <p>{@linkplain Ordered#LOWEST_PRECEDENCE} 尽量在其它 {@link ResourceConfigCustomizer} 之后执行，
      * 保证容器里端点 Bean 定义已就绪。</p>
@@ -95,9 +116,8 @@ public class NexusJaxRsConfiguration {
             LOG.info("Jersey @Path resource: {}", entry);
         }
         if (registeredPaths.isEmpty()) {
-            LOG.warn(
-                    "Jersey registered zero @Path resources; check @EnableNexusConsole / @EnableNexusPlatform "
-                            + "and Console*Configuration endpoint @Bean definitions");
+            LOG.warn("Jersey registered zero @Path resources; check host @Enable* bootstrap annotations "
+                    + "and endpoint @Bean definitions");
         }
     }
 

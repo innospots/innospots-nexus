@@ -9,8 +9,8 @@ import jakarta.ws.rs.container.ContainerRequestContext;
 
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.status.NexusStatusCode;
-import com.innospots.nexus.console.jaxrs.support.ConsoleWebRequestProperties;
 import com.innospots.nexus.console.jaxrs.web.ConsoleWebSecuritySettings;
+import com.innospots.nexus.core.jaxrs.support.RequestProperties;
 import com.innospots.nexus.console.permission.authorization.AuthorizationContext;
 import com.innospots.nexus.console.permission.authorization.AuthorizationDecision;
 import com.innospots.nexus.console.permission.authorization.AuthorizationRequest;
@@ -125,7 +125,7 @@ class ConsolePagePermissionFilterTest {
 
         filter.filter(request);
 
-        assertThat(request.getProperty(ConsoleWebRequestProperties.AUTHORIZATION_CONTEXT)).isEqualTo(context);
+        assertThat(request.getProperty(RequestProperties.AUTHORIZATION_CONTEXT)).isEqualTo(context);
         ArgumentCaptor<AuthorizationRequest> captor = ArgumentCaptor.forClass(AuthorizationRequest.class);
         verify(pagePermissionAuthorizer).authorize(captor.capture());
         assertThat(captor.getValue().workspaceId()).isEqualTo("ws-1");

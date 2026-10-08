@@ -10,29 +10,29 @@ import org.springframework.context.annotation.Configuration;
 
 import com.innospots.nexus.console.auth.service.TokenIssuer;
 import com.innospots.nexus.console.config.AuthConfig;
-import com.innospots.nexus.console.permission.authorization.AuthorizationSubjectResolver;
-import com.innospots.nexus.console.permission.authorization.ConsolePagePermissionAuthorizer;
-import com.innospots.nexus.console.jaxrs.exception.ConsoleJaxRsExceptionSupport;
-import com.innospots.nexus.console.jaxrs.exception.ConsoleNexusExceptionMapper;
-import com.innospots.nexus.console.jaxrs.exception.ConsoleThrowableExceptionMapper;
-import com.innospots.nexus.console.jaxrs.exception.ConsoleWebApplicationExceptionMapper;
+import com.innospots.nexus.console.endpoint.MainRootEndpoint;
 import com.innospots.nexus.console.jaxrs.filter.ConsoleAuthenticationFilter;
 import com.innospots.nexus.console.jaxrs.filter.ConsoleCorsFilter;
 import com.innospots.nexus.console.jaxrs.filter.ConsoleDevSessionFilter;
 import com.innospots.nexus.console.jaxrs.filter.ConsolePagePermissionFilter;
 import com.innospots.nexus.console.jaxrs.filter.ConsoleRequestContextFilter;
-import com.innospots.nexus.console.endpoint.MainRootEndpoint;
+import com.innospots.nexus.console.permission.authorization.AuthorizationSubjectResolver;
+import com.innospots.nexus.console.permission.authorization.ConsolePagePermissionAuthorizer;
 
 /**
- * 管理控制台 Jersey 横切过滤器与异常映射的 Spring 装配。
+ * 管理控制台 Jersey 横切过滤器的 Spring 装配。
  *
- * <p>在 Servlet + Jersey Filter 模式下将过滤器、{@link jakarta.ws.rs.ext.ExceptionMapper}
- * 注册到 {@link org.glassfish.jersey.server.ResourceConfig}；行为由 {@link ConsoleWebProperties} 驱动。</p>
+ * <p>在 Servlet + Jersey Filter 模式下将过滤器注册到
+ * {@link org.glassfish.jersey.server.ResourceConfig}；行为由 {@link ConsoleWebProperties} 驱动。</p>
+ *
+ * <p>通用异常映射（{@code JaxRsExceptionSupport} 与三个 Mapper）由宿主级的
+ * {@code com.innospots.nexus.spring.core.jaxrs.NexusJaxRsExceptionConfiguration} 提供，
+ * 此处不再重复声明。</p>
  *
  * @author Smars
  * @date 2026/09/25
  * @see ConsoleWebProperties
- * @see com.innospots.nexus.spring.console.jaxrs.NexusJaxRsConfiguration
+ * @see com.innospots.nexus.spring.core.jaxrs.NexusJaxRsConfiguration
  */
 @Configuration
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
@@ -47,12 +47,6 @@ public class ConsoleJaxRsWebConfiguration {
     @ConditionalOnMissingBean(TokenIssuer.class)
     TokenIssuer consoleTokenIssuer(AuthConfig authConfig) {
         return new TokenIssuer(authConfig);
-    }
-
-    /** 将 {@link com.innospots.nexus.base.exception.NexusException} 转为 legacy {@code R} 响应。 */
-    @Bean
-    ConsoleJaxRsExceptionSupport consoleJaxRsExceptionSupport() {
-        return new ConsoleJaxRsExceptionSupport();
     }
 
     /** 按 {@link ConsoleWebProperties#getCors()} 输出 CORS 响应头。 */
@@ -97,47 +91,20 @@ public class ConsoleJaxRsWebConfiguration {
         return new MainRootEndpoint(webProperties.getJersey().getRootPath());
     }
 
-    /** 映射 {@link com.innospots.nexus.base.exception.NexusException}。 */
-    @Bean
-    ConsoleNexusExceptionMapper consoleNexusExceptionMapper(ConsoleJaxRsExceptionSupport exceptionSupport) {
-        return new ConsoleNexusExceptionMapper(exceptionSupport);
-    }
-
-    /** 未捕获异常的兜底映射。 */
-    @Bean
-    ConsoleThrowableExceptionMapper consoleThrowableExceptionMapper(ConsoleJaxRsExceptionSupport exceptionSupport) {
-        return new ConsoleThrowableExceptionMapper(exceptionSupport);
-    }
-
-    /** 映射 {@link jakarta.ws.rs.WebApplicationException}，避免 404 等被当作系统错误。 */
-    @Bean
-    ConsoleWebApplicationExceptionMapper consoleWebApplicationExceptionMapper(
-            ConsoleJaxRsExceptionSupport exceptionSupport) {
-        return new ConsoleWebApplicationExceptionMapper(exceptionSupport);
-    }
-
-    /**
-     * 将上述过滤器与异常映射注册到 Jersey {@code ResourceConfig}（与业务 {@code @Path} 资源并列）。
-     */
+    /** 将上述过滤器注册到 Jersey {@code ResourceConfig}（异常映射由宿主级装配提供）。 */
     @Bean
     ResourceConfigCustomizer consoleJaxRsWebResourceConfigCustomizer(
             ConsoleCorsFilter corsFilter,
             ConsoleAuthenticationFilter authenticationFilter,
             ConsoleDevSessionFilter devSessionFilter,
             ConsolePagePermissionFilter pagePermissionFilter,
-            ConsoleRequestContextFilter requestContextFilter,
-            ConsoleNexusExceptionMapper nexusExceptionMapper,
-            ConsoleThrowableExceptionMapper throwableExceptionMapper,
-            ConsoleWebApplicationExceptionMapper webApplicationExceptionMapper) {
+            ConsoleRequestContextFilter requestContextFilter) {
         return resourceConfig -> {
             resourceConfig.register(corsFilter);
             resourceConfig.register(authenticationFilter);
             resourceConfig.register(devSessionFilter);
             resourceConfig.register(pagePermissionFilter);
             resourceConfig.register(requestContextFilter);
-            resourceConfig.register(nexusExceptionMapper);
-            resourceConfig.register(webApplicationExceptionMapper);
-            resourceConfig.register(throwableExceptionMapper);
         };
     }
 }

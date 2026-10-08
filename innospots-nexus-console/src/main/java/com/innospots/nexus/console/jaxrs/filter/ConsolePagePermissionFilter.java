@@ -16,7 +16,7 @@ import com.innospots.nexus.console.permission.authorization.ConsolePagePermissio
 import com.innospots.nexus.console.jaxrs.support.ConsoleAntPathMatcher;
 import com.innospots.nexus.console.jaxrs.web.ConsoleWebSecuritySettings;
 import com.innospots.nexus.console.jaxrs.support.ConsolePublicApiPaths;
-import com.innospots.nexus.console.jaxrs.support.ConsoleWebRequestProperties;
+import com.innospots.nexus.core.jaxrs.support.RequestProperties;
 
 /**
  * 对 {@link ConsoleWebSecuritySettings#getConsolePathPatterns()} 命中的路径执行控制台页面权限校验
@@ -71,7 +71,7 @@ public final class ConsolePagePermissionFilter implements ContainerRequestFilter
         if (!decision.allowed()) {
             throw NexusException.build(NexusStatusCode.NO_PERMISSION);
         }
-        requestContext.setProperty(ConsoleWebRequestProperties.AUTHORIZATION_CONTEXT, decision.context());
+        requestContext.setProperty(RequestProperties.AUTHORIZATION_CONTEXT, decision.context());
     }
 
     private static String normalizedPath(ContainerRequestContext requestContext) {

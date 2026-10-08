@@ -18,8 +18,8 @@ import com.innospots.nexus.base.thread.TLC;
 import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
 import com.innospots.nexus.console.auth.domain.model.TokenClaims;
 import com.innospots.nexus.console.auth.service.TokenIssuer;
-import com.innospots.nexus.console.jaxrs.support.ConsoleJaxRsRequestScope;
 import com.innospots.nexus.console.jaxrs.support.ConsoleTokenSessionBinder;
+import com.innospots.nexus.core.jaxrs.support.RequestScope;
 
 import org.mockito.stubbing.Answer;
 
@@ -36,7 +36,7 @@ final class JaxRsFilterTestSupport {
 
     static void clearThreadState() {
         ConsoleTokenSessionBinder.clear();
-        ConsoleJaxRsRequestScope.clear();
+        RequestScope.clear();
         SessionContext.clearUser();
         SessionContext.clearTenant();
         SessionContext.clearWorkspace();

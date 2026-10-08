@@ -1,4 +1,4 @@
-package com.innospots.nexus.console.jaxrs.exception;
+package com.innospots.nexus.core.jaxrs.exception;
 
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ContainerRequestContext;
@@ -12,36 +12,31 @@ import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.base.thread.TLC;
-import com.innospots.nexus.console.jaxrs.support.ConsoleHttpHeaders;
-import com.innospots.nexus.console.jaxrs.support.ConsoleJaxRsRequestScope;
-import com.innospots.nexus.console.jaxrs.support.ConsoleWebRequestProperties;
+import com.innospots.nexus.core.jaxrs.support.HttpHeaderNames;
+import com.innospots.nexus.core.jaxrs.support.RequestProperties;
+import com.innospots.nexus.core.jaxrs.support.RequestScope;
 
 /**
  * 将 {@link NexusException} 转为 JAX-RS {@link Response}（legacy {@link R} 形态）。
  */
-public final class ConsoleJaxRsExceptionSupport {
+public final class JaxRsExceptionSupport {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ConsoleJaxRsExceptionSupport.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JaxRsExceptionSupport.class);
 
-    /**
-     * 记录未捕获异常（映射为 {@link NexusStatusCode#SYSTEM_ERROR} 前），含完整堆栈。
-     *
-     * @param failure 原始失败
-     */
     /**
      * 记录 JAX-RS {@link WebApplicationException}（含路由未匹配的 {@link jakarta.ws.rs.NotFoundException}）。
      *
      * @param exception Web 应用异常
      */
     public void logWebApplicationFailure(WebApplicationException exception) {
-        ContainerRequestContext requestContext = ConsoleJaxRsRequestScope.current();
+        ContainerRequestContext requestContext = RequestScope.current();
         String requestId = resolveRequestId(requestContext);
         String operation = resolveOperation(requestContext);
         Response response = exception.getResponse();
         int status = response == null ? 500 : response.getStatus();
         if (status >= 500) {
             LOG.error(
-                    "Console JAX-RS web application failure requestId={} operation={} httpStatus={} message={}",
+                    "JAX-RS web application failure requestId={} operation={} httpStatus={} message={}",
                     requestId,
                     operation,
                     status,
@@ -50,7 +45,7 @@ public final class ConsoleJaxRsExceptionSupport {
             return;
         }
         LOG.warn(
-                "Console JAX-RS web application failure requestId={} operation={} httpStatus={} message={}",
+                "JAX-RS web application failure requestId={} operation={} httpStatus={} message={}",
                 requestId,
                 operation,
                 status,
@@ -59,6 +54,9 @@ public final class ConsoleJaxRsExceptionSupport {
 
     /**
      * 将 {@link WebApplicationException} 转为响应（不包装为 {@link com.innospots.nexus.base.domain.response.R}）。
+     *
+     * @param exception Web 应用异常
+     * @return 原生响应或 500 兜底
      */
     public Response toWebApplicationResponse(WebApplicationException exception) {
         logWebApplicationFailure(exception);
@@ -69,12 +67,17 @@ public final class ConsoleJaxRsExceptionSupport {
         return Response.serverError().build();
     }
 
+    /**
+     * 记录未捕获异常（映射为 {@link NexusStatusCode#SYSTEM_ERROR} 前），含完整堆栈。
+     *
+     * @param failure 原始失败
+     */
     public void logUnhandledFailure(Throwable failure) {
-        ContainerRequestContext requestContext = ConsoleJaxRsRequestScope.current();
+        ContainerRequestContext requestContext = RequestScope.current();
         String requestId = resolveRequestId(requestContext);
         String operation = resolveOperation(requestContext);
         LOG.error(
-                "Console JAX-RS unhandled failure requestId={} operation={} exceptionType={} message={}",
+                "JAX-RS unhandled failure requestId={} operation={} exceptionType={} message={}",
                 requestId,
                 operation,
                 failure.getClass().getName(),
@@ -88,7 +91,7 @@ public final class ConsoleJaxRsExceptionSupport {
      * @param exception 平台异常
      */
     public void logNexusFailure(NexusException exception) {
-        ContainerRequestContext requestContext = ConsoleJaxRsRequestScope.current();
+        ContainerRequestContext requestContext = RequestScope.current();
         String requestId = resolveRequestId(requestContext);
         String operation = resolveOperation(requestContext);
         int httpStatus = resolveHttpStatus(exception);
@@ -96,7 +99,7 @@ public final class ConsoleJaxRsExceptionSupport {
         if (httpStatus >= 500 || cause != null) {
             Throwable logged = cause != null ? cause : exception;
             LOG.error(
-                    "Console JAX-RS failure requestId={} operation={} httpStatus={} code={} message={}",
+                    "JAX-RS failure requestId={} operation={} httpStatus={} code={} message={}",
                     requestId,
                     operation,
                     httpStatus,
@@ -106,7 +109,7 @@ public final class ConsoleJaxRsExceptionSupport {
             return;
         }
         LOG.warn(
-                "Console JAX-RS rejected requestId={} operation={} httpStatus={} code={} message={}",
+                "JAX-RS rejected requestId={} operation={} httpStatus={} code={} message={}",
                 requestId,
                 operation,
                 httpStatus,
@@ -114,17 +117,30 @@ public final class ConsoleJaxRsExceptionSupport {
                 exception.getMessage());
     }
 
+    /**
+     * 将 {@link NexusException} 转为当前请求作用域下的响应。
+     *
+     * @param exception 平台异常
+     * @return 统一错误响应
+     */
     public Response toResponse(NexusException exception) {
-        return toResponse(ConsoleJaxRsRequestScope.current(), exception);
+        return toResponse(RequestScope.current(), exception);
     }
 
+    /**
+     * 将 {@link NexusException} 转为携带 requestId 头的统一错误响应。
+     *
+     * @param requestContext 当前请求（可为 {@code null}）
+     * @param exception 平台异常
+     * @return 统一错误响应
+     */
     public Response toResponse(ContainerRequestContext requestContext, NexusException exception) {
         String requestId = resolveRequestId(requestContext);
         int httpStatus = resolveHttpStatus(exception);
         R<Void> body = R.fail(exception.code(), exception.getMessage(), exception.display());
         return Response.status(httpStatus)
                 .type(MediaType.APPLICATION_JSON)
-                .header(ConsoleHttpHeaders.REQUEST_ID, requestId)
+                .header(HttpHeaderNames.REQUEST_ID, requestId)
                 .entity(body)
                 .build();
     }
@@ -137,7 +153,7 @@ public final class ConsoleJaxRsExceptionSupport {
 
     private static String resolveRequestId(ContainerRequestContext requestContext) {
         if (requestContext != null) {
-            Object value = requestContext.getProperty(ConsoleWebRequestProperties.REQUEST_ID);
+            Object value = requestContext.getProperty(RequestProperties.REQUEST_ID);
             if (value != null) {
                 String requestId = String.valueOf(value);
                 if (!requestId.isBlank()) {
