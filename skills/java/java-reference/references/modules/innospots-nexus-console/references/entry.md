@@ -39,22 +39,26 @@
 |------|------|
 | 长度 | ≤ 128 字符 |
 | 字符集 | 小写字母、数字、连字符；**不以连字符开头/结尾** |
-| 风格 | **kebab-case**（如 `menu-main`、`order-list`） |
+| 风格 | **kebab-case**；运行时渲染使用复合键 `{domainKey}-{moduleKey}-{xxx}`（如 `nexus-menu-main`） |
 | 唯一性 | 同一 `moduleKey` 下 `pageKey` 全局唯一（含入口页与子页） |
 
 `PageDslValidator` 与 `UiSpecPageDeclaration` 使用同一 `KEY_PATTERN`；YAML 中 `page.parentPageKey` 也须满足该模式，且**不得等于** `page.id`。
 
-### 内置模块入口页键（显式配置）
+### 内置模块入口页键（复合 pageKey）
 
-`ConsoleModuleDescriptor.builtin(pluginId, domainKey, moduleKey, entryPageKey, …)` **不做** pageKey 或 domain 拼接；`domainKey` / `entryPageKey` 由各 `*EntryPlugin` 以常量声明（内置 entry 通常 `DOMAIN_KEY = BUILTIN_DOMAIN_KEY`），并与 classpath / YAML 对齐。
+`entryPageKey` 使用 **复合 pageKey**：`{domainKey}-{moduleKey}-{pageSuffix}`
+（由 `ConsoleModuleDescriptor.compositePageKey(domainKey, moduleKey, pageSuffix)` 构建，
+内部委托 `PageDslPageRef.encode`）。domain 与 module 名称本身禁止含连字符（`-`）；
+`pageSuffix` 可含连字符。解析见 `PageDslPageRef.decode`（`split("-", 3)`）。
 
-对应资源：
+对应资源（`pageKey` 为完整复合键）：
 
 ```text
-ui-pages/nexus/{moduleKey}/{entryPageKey}.yaml
+ui-pages/{domainKey}/{moduleKey}/{pageKey}.yaml
 ```
 
-示例：`MenuEntryPlugin` 使用 `entryPageKey=menu-main` → `ui-pages/nexus/menu/menu-main.yaml`，`page.id: menu-main`。
+示例：`MenuEntryPlugin` 使用 `compositePageKey("nexus", "menu", "main")` → entryPageKey
+`nexus-menu-main` → `ui-pages/nexus/menu/nexus-menu-main.yaml`，`page.id: nexus-menu-main`。
 
 ### `pagePath`（前端路由）
 
@@ -66,7 +70,8 @@ pagePath = /page/{domainKey}/{moduleKey}/{pageKey}
 
 实现：`ConsoleModuleDescriptor.pagePath(domainKey, moduleKey, pageKey)`。
 
-内置示例：`/page/nexus/menu/menu-main`（`PAGE_ROUTE_PREFIX` = `/page`）。
+运行时渲染端点使用 **复合 pageKey** 定位：`GET /api/public/pages/{pageKey}`
+（`DefaultPageDslEndpoint`，`PageDslPageRef.decode` 解析为 domain/module/pageSuffix）。
 
 第三方插件在 `plugin.yaml` 的 `console@1` 中声明 `pageKey` + `pagePath` 时，**推荐**与上述公式一致，并与 classpath 布局对齐。
 
@@ -114,14 +119,14 @@ console@1 pages[].pageKey  ==  PageDsl page.id  ==  {pageKey}.yaml 文件名
 
 ## 内置 entry 插件一览
 
-| `pluginId` 常量 | `*EntryPlugin` | `moduleKey` | `entryPageKey` | YAML 资源 |
+| `pluginId` 常量 | `*EntryPlugin` | `moduleKey` | `entryPageKey`（复合） | YAML 资源 |
 |-----------------|----------------|-------------|----------------|-----------|
-| `BuiltinConsoleEntryPlugins.MENU` | `MenuEntryPlugin` | `menu` | `menu-main` | `ui-pages/nexus/menu/menu-main.yaml` |
-| `DICTIONARY` | `DictionaryEntryPlugin` | `dictionary` | `dictionary-main` | `.../dictionary/dictionary-main.yaml` |
-| `LOGGER` | `LoggerEntryPlugin` | `logger` | `logger-main` | `.../logger/logger-main.yaml` |
-| `PERMISSION` | `PermissionEntryPlugin` | `permission` | `permission-main` | `.../permission/permission-main.yaml` |
-| `ROLE` | `RoleEntryPlugin` | `role` | `role-main` | `.../role/role-main.yaml` |
-| `PLUGIN_MANAGEMENT` | `PluginManagementEntryPlugin` | `plugin` | `plugin-main` | `.../plugin/plugin-main.yaml` |
+| `BuiltinConsoleEntryPlugins.MENU` | `MenuEntryPlugin` | `menu` | `nexus-menu-main` | `ui-pages/nexus/menu/nexus-menu-main.yaml` |
+| `DICTIONARY` | `DictionaryEntryPlugin` | `dictionary` | `nexus-dictionary-main` | `.../dictionary/nexus-dictionary-main.yaml` |
+| `LOGGER` | `LoggerEntryPlugin` | `logger` | `nexus-logger-main` | `.../logger/nexus-logger-main.yaml` |
+| `PERMISSION` | `PermissionEntryPlugin` | `permission` | `nexus-permission-main` | `.../permission/nexus-permission-main.yaml` |
+| `ROLE` | `RoleEntryPlugin` | `role` | `nexus-role-main` | `.../role/nexus-role-main.yaml` |
+| `PLUGIN_MANAGEMENT` | `PluginManagementEntryPlugin` | `plugin` | `nexus-plugin-main` | `.../plugin/nexus-plugin-main.yaml` |
 
 `BuiltinConsoleEntryPlugins.REQUIRED_PLUGIN_IDS` 列出上述六个 id，供宿主校验内置 entry 是否齐全。
 
@@ -226,6 +231,11 @@ PluginDefinition.builder(pluginId)
 #### `pagePath(String domainKey, String moduleKey, String pageKey) → String`
 
 - **说明：** `/page/{domainKey}/{moduleKey}/{pageKey}`。
+
+#### `compositePageKey(String domainKey, String moduleKey, String pageSuffix) → String`
+
+- **说明：** 构建复合 PageDsl `pageKey`：`{domainKey}-{moduleKey}-{pageSuffix}`
+  （委托 `PageDslPageRef.encode`；domain/module 禁止含连字符）。
 
 #### `domainKeyFromPageRoute(String routePath) → String`
 

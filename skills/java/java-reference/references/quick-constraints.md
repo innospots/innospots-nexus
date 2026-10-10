@@ -143,13 +143,18 @@ endpoint → service → operator → dao
 
 允许简化：`endpoint → operator → dao`、`service → dao`。
 
+依赖规则：
+
+- **operator 只能依赖 dao**（外加无状态 converter 与共享底层工具）；禁止依赖 service 或另一个 operator。
+- **service 可依赖 operator、其他 service 和 dao**；跨 service 协调不得形成循环依赖。
+
 上述分层在**同一领域内**成立；包树仍须**领域优先**（`role/endpoint` → `role/service` →
 `role/operator` → `role/dao`），不得把多个领域挂在 `endpoint/`、`dao/` 顶层下。
 
 | 必须 | 禁止 |
 |------|------|
 | operator 简单数据操作，可跨多 DAO 但须简单内聚 | operator 依赖 service 或另一个 operator |
-| service 管工作流、跨 operator 协调、跨领域、事务 | 端点直接编排 DAO |
+| service 管工作流、跨 operator/service 协调、跨领域、事务 | 端点直接编排 DAO |
 | 构造器注入 + `final` 字段 + `@RequiredArgsConstructor` | 字段注入、依赖 setter |
 | 契约按能力命名（`ResourceStore`、`PasswordDecryptor`） | 给每个具体类机械配接口 |
 | `DefaultXxx` 仅在存在其他合法实现时使用 | 单实现也硬套 `Default` 前缀 |

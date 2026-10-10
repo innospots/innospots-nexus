@@ -6,6 +6,8 @@ import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
 
+import com.innospots.nexus.console.config.ConsoleConstant;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class OpenApiBuildContractsTest {
@@ -16,7 +18,7 @@ class OpenApiBuildContractsTest {
         assertThat(spec).exists();
         String yaml = Files.readString(spec);
         assertThat(yaml).contains("Innospots Nexus Console API");
-        assertThat(yaml).contains("/api/nexus/roles");
+        assertThat(yaml).contains(ConsoleConstant.apiPath("/roles"));
         assertThat(yaml).contains("operationId: rolePage");
         assertThat(yaml).contains("bearerAuth");
         assertThat(yaml).contains("AuthLoginRequest:");

@@ -236,6 +236,13 @@ BOM 用属性集中管理版本：
 | 属性升级候选 | `mvn versions:display-property-updates` |
 | 检查未声明/未使用依赖 | `mvn dependency:analyze` |
 | 安装到本地仓库 | `mvn clean install` |
+| 发布到开发私服（阿里云 RDC） | `mvn -Pdev clean deploy`（`settings.xml` 中 `dev-repo` 凭据） |
+| 发布到 Maven Central | `mvn -Pcentral,central-publish clean deploy`（`settings.xml` 中 `central-repo` 凭据 + GPG） |
+
+`distributionManagement` 仅在上表 profile 激活时生效，避免误发。开发环境与 Central 的仓库 URL 在根 `pom.xml` 的
+`innospots.maven.dev.repository.url` / `innospots.maven.central.*.repository.url` 属性中维护。
+
+完整发布流程、settings 约定与排错见仓库根 [`docs/project-build.md`](../../../../docs/project-build.md)。
 
 `versions:*` 命令只列出候选。**第三方依赖**是否升级由 `java:dependency-upgrade` 评估；
 **工程 `${revision}`** 升版用 `java:project-upgrade`（`versions:set` 或改根属性），

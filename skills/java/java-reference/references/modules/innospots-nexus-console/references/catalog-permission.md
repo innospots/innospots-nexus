@@ -13,7 +13,7 @@
 
 ### 权限树 API 形状
 
-`GET /api/nexus/catalog/tree` 返回 **MODULE → 一级 PAGE → 嵌套子 PAGE**；**不含** MENU / ACTION / DATASOURCE 节点（与 `console@1` 菜单树不同）。
+`GET /api/d/nexus/catalog/tree` 返回 **MODULE → 一级 PAGE → 嵌套子 PAGE**；**不含** MENU / ACTION / DATASOURCE 节点（与 `console@1` 菜单树不同）。
 
 ## 权限（`permission`）
 

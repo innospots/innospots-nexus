@@ -8,6 +8,7 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import org.junit.jupiter.api.Test;
 
+import com.innospots.nexus.console.config.ConsoleConstant;
 import com.innospots.nexus.console.permission.domain.enums.PermissionSubjectType;
 import com.innospots.nexus.console.permission.domain.request.PermissionGrantReplaceRequest;
 
@@ -17,7 +18,7 @@ class GrantManagementEndpointContractsTest {
 
     @Test
     void grantManagementUsesRoleAndOrganizationUnitSubjects() throws NoSuchMethodException {
-        assertThat(GrantManagementEndpoint.class.getAnnotation(Path.class).value()).isEqualTo("/api/nexus");
+        assertThat(GrantManagementEndpoint.class.getAnnotation(Path.class).value()).isEqualTo(ConsoleConstant.API_PREFIX);
         assertHttpMethod(GrantManagementEndpoint.class, "getRolePermissions", GET.class, String.class);
         assertHttpMethod(GrantManagementEndpoint.class, "replaceRolePermissions",
                 PUT.class, String.class, PermissionGrantReplaceRequest.class);

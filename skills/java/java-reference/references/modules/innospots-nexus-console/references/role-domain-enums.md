@@ -10,8 +10,8 @@
 
 | 常量 | 说明 |
 |------|------|
-| `USER` | — |
-| `ORG_UNIT` | — |
+| `USER` | 用户主体 |
+| `ORG_UNIT` | 组织单元主体 |
 
 
 ## RoleOwnerType
@@ -24,6 +24,6 @@
 
 | 常量 | 说明 |
 |------|------|
-| `PLATFORM` | — |
-| `TENANT` | — |
-| `WORKSPACE` | — |
+| `PLATFORM` | 运营管理平台角色 |
+| `TENANT` | 租户级 role |
+| `WORKSPACE` | 工作区作用域内的 role |

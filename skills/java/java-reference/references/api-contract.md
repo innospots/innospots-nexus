@@ -142,12 +142,12 @@ REST 端点除 JAX-RS 绑定外，须满足 **MicroProfile OpenAPI** 注解，�
 endpoint → service → operator → dao
 ```
 
-| 类型 | 职责 | 禁止 |
-|------|------|------|
-| `Endpoint` | 传输边界；返回 `R<T>` | 直接依赖 DAO；编排事务与持久化；返回裸实体 |
-| `Service` | 非平凡工作流、跨 operator 协调、跨领域、事务 | 返回 `R<T>` |
-| `Operator` | 面向 DAO 的直接数据操作；可跨多 DAO 但须简单内聚 | 依赖 service 或另一个 operator |
-| `Dao` | 单表操作 | join、XML、跨表编排 |
+| 类型 | 职责 | 允许依赖 | 禁止 |
+|------|------|---------|------|
+| `Endpoint` | 传输边界；返回 `R<T>` | service、operator | 直接依赖 DAO；编排事务与持久化；返回裸实体 |
+| `Service` | 非平凡工作流、跨 operator/跨 service 协调、跨领域、事务 | operator、其他 service、DAO | 返回 `R<T>`；形成 service 循环依赖 |
+| `Operator` | 面向 DAO 的直接数据操作；可跨多 DAO 但须简单内聚 | **仅 DAO**（外加无状态 converter、共享底层工具） | 依赖 service 或另一个 operator |
+| `Dao` | 单表操作 | 无上层依赖 | join、XML、跨表编排；依赖 service/operator |
 
 模块依赖：`base → core → plugin → console → {portal, platform}`。
 

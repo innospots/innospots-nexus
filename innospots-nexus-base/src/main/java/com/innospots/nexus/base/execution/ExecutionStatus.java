@@ -16,6 +16,8 @@ public enum ExecutionStatus {
     READY,
     /** 等待中 */
     PENDING,
+    /** 暂停中 */
+    PAUSED,
     /** 运行中 */
     RUNNING,
     /** 停止中 */

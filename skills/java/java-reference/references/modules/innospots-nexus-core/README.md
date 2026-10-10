@@ -7,7 +7,7 @@
 
 ## 模块概览
 
-基于 `innospots-nexus-base` 的业务中立平台基础设施：共享持久化基类、审计填充、归属列（`OwnershipEntity`）、Quartz 调度、服务节点注册、Watcher 运行时、启动 SPI、OpenAPI 安全注解，以及工作区级文件元数据。
+基于 `innospots-nexus-base` 的业务中立平台基础设施：共享持久化基类、审计填充、归属列（`OwnershipEntity`）、Quartz 调度、服务节点注册、Watcher 运行时、启动 SPI、系统设置（`nx_system_setting`）、JAX-RS 异常映射与 OpenAPI 规范目录/Scalar 文档页，以及工作区级文件元数据。
 
 **能力一览：**
 
@@ -17,10 +17,12 @@
 | **归属作用域** | `OwnershipScope`、`PersistenceOwnership`、`OwnerType` 查询隔离与写入 |
 | **审计与 ID** | `AuditMetaObjectHandler`（TLC 驱动填充）、`DbPrimaryGenerator`（ULID） |
 | **启动 SPI** | 通过 `NexusStartup` 编排有序的 `NexusStartupTask` |
+| **JAX-RS 横切** | `NexusException` → `R.fail` 统一错误响应（`X-Request-Id`），请求元数据绑定 |
 | **Quartz** | 内存型 `QuartzScheduleManager`，支持 cron/单次/定时模式 |
 | **服务节点** | `ServiceRegistry`、`ServiceNodeHolder`、`ServiceRegistryEntity` |
 | **Watchers** | `IWatcher` / `AbstractWatcher` / `WatcherSupervisor` 后台循环 |
-| **OpenAPI** | `@NexusAuthenticatedApi` Bearer 安全要求标记 |
+| **系统设置** | `SystemSettingService` + `SettingKey` 类型化键值配置（`nx_system_setting`） |
+| **OpenAPI** | `@NexusAuthenticatedApi` Bearer 安全标记、构建期规范目录与 Scalar 文档页 |
 | **文件元数据** | `nx_meta_resource`、`MetaResourceService`、`ResourceStorageRegistry` |
 
 ## 扩展指南
@@ -30,6 +32,7 @@
 | 新业务实体（portal 租户域） | portal 的 `TenantBaseEntity` 链（见 portal 模块） | 业务工作流、REST 端点 |
 | Console 归属资源 | 继承 `OwnershipEntity` + `OwnershipScope` | 用户/角色业务规则 |
 | 宿主启动后的钩子 | 实现 `NexusStartupTask`，在宿主 `NexusStartup.builder()` 中注册 | 插件/目录/会话逻辑 |
+| 实例级键值配置 | `SystemSettingService` + `SettingKey`（声明域/键/类型/解析器） | 管理端 REST、租户/业务域配置流程 |
 | 后台轮询/同步 | 继承 `AbstractWatcher`，在 `WatcherSupervisor` 上注册 | Watcher 中的领域特定业务规则 |
 | 集群服务注册 | `ServiceRegistry` + `ServiceNodeHolder` | 租户/工作空间业务数据 |
 | 定时任务 | `QuartzScheduleManager` + `QuartzJobRequest` | 任务业务逻辑（保留在上层模块的 Job 类中） |
@@ -48,12 +51,51 @@
 | `NexusStartupContext` | `class` | 启动任务执行过程中跨步骤传递的轻量上下文 |
 | `NexusStartupTask` | `interface` | 框架无关的启动后初始化步骤 |
 
+### 包 `jaxrs.exception`
+
+| 类 | 类型 | 说明 |
+|------|------|------|
+| `JaxRsExceptionSupport` | `class` | 将 NexusException 转为 JAX-RS Response（legacy R 形态）并统一异常日志 |
+| `NexusExceptionMapper` | `class` | `@Provider`：将 NexusException 映射为统一 HTTP 错误响应 |
+| `WebApplicationExceptionMapper` | `class` | `@Provider`：保留 JAX-RS 原生 HTTP 状态（如 404） |
+| `ThrowableExceptionMapper` | `class` | `@Provider`：未捕获异常兜底映射为 SYSTEM_ERROR |
+
+### 包 `jaxrs.support`
+
+| 类 | 类型 | 说明 |
+|------|------|------|
+| `HttpHeaderNames` | `class` | Jakarta REST 共享 HTTP 头名称（`X-Request-Id`、`Authorization`） |
+| `RequestProperties` | `class` | 请求属性键（requestId、authorizationContext） |
+| `RequestScope` | `class` | 当前 JAX-RS 请求的 ThreadLocal 绑定，供 ExceptionMapper 读取请求元数据 |
+
 ### 包 `openapi`
 
 | 类 | 类型 | 说明 |
 |------|------|------|
 | `NexusAuthenticatedApi` | `@interface` | 标记需要 Bearer 认证的控制台 API 资源 |
 | `NexusOpenApiSecurityNames` | `class` | MicroProfile OpenAPI 安全方案名称常量 |
+| `OpenApiCatalogPaths` | `class` | 规范目录与 Scalar 文档页 HTTP 路径常量及规范化工具 |
+
+### 包 `openapi.catalog`
+
+| 类 | 类型 | 说明 |
+|------|------|------|
+| `OpenApiCatalogEndpoint` | `class` | 构建期 OpenAPI 规范目录端点：列表（R）与按 specId 返回 JSON 文档 |
+| `OpenApiCatalogOperator` | `class` | 按 specId 加载 `META-INF/nexus-openapi` 下的打包 YAML |
+| `OpenApiSpecItemVo` | `record` | classpath 上的单个 OpenAPI 模块规范目录项 |
+
+### 包 `openapi.catalog.internal`
+
+| 类 | 类型 | 说明 |
+|------|------|------|
+| `OpenApiBundledSpecs` | `class` | 读取打包 YAML 构建期产物（文件目录与 JAR 双形态） |
+| `OpenApiBundledSpecCodec` | `class` | 将打包 YAML 正文解析为 JSON 树（application/json 响应用） |
+
+### 包 `openapi.scalar`
+
+| 类 | 类型 | 说明 |
+|------|------|------|
+| `OpenApiScalarDocumentation` | `class` | Scalar 文档 UI 的框架无关配置与 HTML/JS 渲染 |
 
 ### 包 `persistence.entity`
 
@@ -175,6 +217,49 @@
 |------|------|------|
 | `ServiceNodeHolder` | `class` | 持有本地节点的服务注册状态，并提供 Leader 判定、心跳失效检测与分片计算 |
 
+### 包 `setting.dao`
+
+| 类 | 类型 | 说明 |
+|------|------|------|
+| `SystemSettingDao` | `interface` | `nx_system_setting` 的 MyBatis-Plus Mapper（无自定义 SQL） |
+
+### 包 `setting.domain.entity`
+
+| 类 | 类型 | 说明 |
+|------|------|------|
+| `SystemSettingEntity` | `class` | 持久化系统设置项（`setting_domain + setting_scope + scope_id + setting_key` 唯一） |
+
+### 包 `setting.domain.enums`
+
+| 类 | 类型 | 说明 |
+|------|------|------|
+| `SettingScope` | `enum` | 系统设置作用范围（当前仅 `GLOBAL`） |
+| `SettingValueType` | `enum` | 设置值逻辑类型（STRING/NUMBER/BOOLEAN/ENCRYPTED/JSON） |
+
+### 包 `setting.operator`
+
+| 类 | 类型 | 说明 |
+|------|------|------|
+| `SystemSettingOperator` | `class` | `nx_system_setting` 表读写（无格式校验与类型门禁） |
+
+### 包 `setting.service`
+
+| 类 | 类型 | 说明 |
+|------|------|------|
+| `SystemSettingService` | `class` | 运行时读取/更新系统设置：长度、格式与值类型校验，缺行引导插入 |
+
+### 包 `setting.status`
+
+| 类 | 类型 | 说明 |
+|------|------|------|
+| `SystemSettingStatusCode` | `enum` | 系统设置域状态码（模块 `SET`） |
+
+### 包 `setting.support`
+
+| 类 | 类型 | 说明 |
+|------|------|------|
+| `SettingKey` | `record` | 类型化设置项标识：域、键、范围、值类型与字符串解析器 |
+
 ### 包 `watcher.contract`
 
 | 类 | 类型 | 说明 |
@@ -194,11 +279,13 @@
 | 领域 | 参考 |
 |------|-----------|
 | 启动 SPI | [`references/bootstrap.md`](references/bootstrap.md) |
+| JAX-RS 横切 | [`references/jaxrs.md`](references/jaxrs.md) |
 | 持久化 | [`references/persistence.md`](references/persistence.md) |
 | OpenAPI | [`references/openapi.md`](references/openapi.md) |
 | Quartz | [`references/quartz.md`](references/quartz.md) |
 | 资源存储 | [`references/resource.md`](references/resource.md) |
 | 服务注册 | [`references/server.md`](references/server.md) |
+| 系统设置 | [`references/setting.md`](references/setting.md) |
 | Watcher 运行时 | [`references/watcher.md`](references/watcher.md) |
 
 ## 相关模块

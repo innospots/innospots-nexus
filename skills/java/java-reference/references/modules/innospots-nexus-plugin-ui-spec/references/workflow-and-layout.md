@@ -13,24 +13,25 @@
 示例：
 
 ```text
-src/main/resources/ui-pages/nexus/menu/menu-main.yaml
-src/main/resources/ui-pages/sales/sales/order-list.yaml
+src/main/resources/ui-pages/nexus/menu/nexus-menu-main.yaml
+src/main/resources/ui-pages/sales/sales/sales-sales-order-list.yaml
 ```
 
 | 段 | 说明 |
 |----|------|
 | `domainKey` | 项目领域键；与 `console@1`、`ConsoleModuleDescriptor.builtin(..., domainKey, ...)` 一致。本仓库内置 entry 使用 `BUILTIN_DOMAIN_KEY`（`nexus`），其它域可任意合法键 |
 | `moduleKey` | 模块键；与 `ConsoleModuleDeclaration.moduleKey` 一致 |
-| `pageKey` | 与 YAML 内 `page.id` 一致（通常同为 kebab-case 文件名） |
+| `pageKey` | **复合键** `{domainKey}-{moduleKey}-{xxx}`（`PageDslPageRef`），与 YAML 内 `page.id` 一致；domain/module 不含连字符，`xxx` 可含连字符 |
 
 ### `pageKey` 格式与入口页
 
 | 规则 | 要求 |
 |------|------|
-| 模式 | `[a-z][a-z0-9]*(?:-[a-z0-9]+)*`（`PageDslValidator` / `UiSpecPageDeclaration`） |
+| 复合键 | 运行时渲染端点 `GET /api/public/pages/{pageKey}` 按 `{domainKey}-{moduleKey}-{xxx}` 解析（`PageDslPageRef.decode`） |
+| 模式 | page.id 段符合 `[a-z][a-z0-9]*(?:-[a-z0-9]+)*`（`PageDslValidator` / `UiSpecPageDeclaration`）；复合键三段均非空 |
 | 长度 | ≤ 128 |
 | 一致性 | `console@1` 的 `pageKey` = YAML `page.id` = 文件名 `{pageKey}.yaml` |
-| 内置入口页 | 在 entry 插件中显式声明 `entryPageKey`（与 YAML `page.id` 一致），传入 `ConsoleModuleDescriptor.builtin` |
+| 内置入口页 | 在 entry 插件中经 `ConsoleModuleDescriptor.compositePageKey(domainKey, moduleKey, pageSuffix)` 声明，传入 `ConsoleModuleDescriptor.builtin` |
 | 子页 | 在贡献中声明 `pageKey`，YAML 设置 `page.parentPageKey` 为父页 `page.id` |
 
 内置控制台 entry 插件（`MenuEntryPlugin` 等）的完整说明见
@@ -51,7 +52,7 @@ src/main/resources/ui-pages/sales/sales/order-list.yaml
 /page/{domainKey}/{moduleKey}/{pageKey}
 ```
 
-例如：`/page/nexus/menu/menu-main`（由 `ConsoleModuleDescriptor.pagePath` 生成）。
+例如：`/page/nexus/menu/nexus-menu-main`（由 `ConsoleModuleDescriptor.pagePath` 生成）。
 
 ## 模块页面清单 vs 页面父子关系
 
@@ -63,7 +64,7 @@ src/main/resources/ui-pages/sales/sales/order-list.yaml
 目录同步（`ConsoleCatalogSyncService`）以 **PageMeta.parentPageKey** 写入 `nx_console_catalog_resource` 的 `parent_resource_id`；
 一级 PAGE 的父资源为 MODULE，子 PAGE 的父资源为父 PAGE。
 
-权限设置接口 `GET /api/nexus/catalog/tree` 返回 **MODULE → 一级 PAGE → 嵌套子 PAGE**（不含 MENU / ACTION / DATASOURCE 节点）。
+权限设置接口 `GET /api/d/nexus/catalog/tree` 返回 **MODULE → 一级 PAGE → 嵌套子 PAGE**（不含 MENU / ACTION / DATASOURCE 节点）。
 
 ## 在插件工程中新增页面
 

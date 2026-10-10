@@ -35,8 +35,8 @@
 | 3 | 创建根聚合器 + `{product}-bom`（import `innospots-nexus-bom`）+ `{product}-core` |
 | 4 | 按形态创建库模块：**仅对外** → `service` only（**不要** console、ui）；**仅管理** → `console` + 按需 `ui`；**两者** → console + service + 按需 ui |
 | 5 | 仅创建 **`{product}-spring` 或 `{product}-quarkus`** 及与之匹配的可运行子模块（如仅 `*-service` 或 `*-console`） |
-| 6 | 各一级 Java 模块 `<parent>` = `innospots-nexus-parent`；产品 `AGENTS.md` 登记职责与选型 |
-| 7 | `mvn validate` → 全 reactor `clean compile` |
+| 6 | 各一级 Java 模块 `<parent>` = `innospots-nexus-parent`（具体版本 + `<relativePath/>`，写法见 external-project-layout.md）；产品 `AGENTS.md` 登记职责与选型 |
+| 7 | `mvn validate` → 全 reactor `clean compile`（前置：Nexus 侧 `mvn -pl innospots-nexus-bom,innospots-nexus-parent -am install` 或可从远程仓库解析） |
 
 **禁止：** 纯对外服务仍建 console/ui；同时建 spring 与 quarkus；`{product}-portal` 等产品侧 Nexus 同名模块。
 

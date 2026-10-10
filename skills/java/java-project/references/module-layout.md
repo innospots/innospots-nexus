@@ -135,7 +135,7 @@ base  →  core  →  plugin  →  console  →  portal
 
 **Maven 引用场景**：租户生命周期、企业主体、平台 IAM、`/platform/**` 等运营侧能力。
 
-**负责**：租户生命周期（`nx_tenant`）、企业主体（`nx_enterprise`），后续扩展平台用户、
+**负责**：租户生命周期（`nx_pl_tenant`）、企业主体（`nx_pl_enterprise`），后续扩展平台用户、
 支持访问、平台审计。
 
 **硬约束**：

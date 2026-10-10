@@ -255,6 +255,17 @@ find <module>/src/main/java/<package/path> -maxdepth 1 -name '*.java' | wc -l
 
 完整命名规则见 [standards/naming.md](../standards/naming.md)。
 
+### 职责包之间的依赖方向（强制）
+
+```text
+endpoint → service → operator → dao
+```
+
+- **operator 只能依赖 dao**（外加无状态 converter 与共享底层技术工具）；
+  禁止依赖 service 或另一个 operator。
+- **service 可依赖 operator、其他 service 和 dao**；跨 service 协调不得形成循环依赖。
+- 允许简化：`endpoint → operator → dao`、`service → dao`；endpoint 不得直接编排 DAO。
+
 ---
 
 ## `domain` 子包（固定约定）

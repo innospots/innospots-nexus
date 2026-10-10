@@ -5,33 +5,41 @@
 
 运行时 CDI/Spring/Quarkus 绑定在 **adapter/application** — 不在本模块。
 
-JAX-RS 类路径使用 `com.innospots.nexus.console.config.ConsoleConstant.API_PREFIX`（当前为 **`/api/nexus`**）。下文完整路径均基于该前缀。
+JAX-RS 类路径使用 `com.innospots.nexus.console.config.ConsoleConstant` 前缀：
+
+| 常量 | 值 |
+|------|-----|
+| `API_PREFIX` | **`/api/d/nexus`** |
+| `PUBLIC_API_PREFIX` | **`/api/public`**（免 Bearer 鉴权） |
+
+下文完整路径均基于上述前缀。
 
 ## 路径约定
 
 | 前缀 | 交付模块 | 说明 |
 |--------|----------|------|
-| `/api/nexus/**` | **console** | 工作空间/租户会话下的管理 API |
-| `/openapi/specs` | **console** | OpenAPI YAML 目录（构建期 bundled） |
+| `/api/d/nexus/**` | **console** | 工作空间/租户会话下的管理 API |
+| `/api/public/**` | **console** | 公共开放 API（免鉴权；另含 `/api/d/{domain}/public/**` 业务域形态） |
+| `/openapi/specs` | **console** | OpenAPI JSON 目录（构建期 bundled） |
+| `/openapi/ui` | **console** | Scalar 文档页（默认 `rootPath`） |
 | `/tenant/auth`、`/tenant/scope` | **portal** | 租户身份与作用域令牌链 |
-| `/platform/auth` | **platform** | 运维平台登录 |
+| `/platform/auth` | **platform** | 运营管理平台登录 |
 
-## `/api/nexus`
-
-### `ConsoleEndpoint` — `/api/nexus`
+## `/api/d/nexus`
+### `ConsoleEndpoint` — `/api/d/nexus`
 
 | 方法 | 路径 | 响应 |
 |--------|------|----------|
 | GET | `/status` | `String`（非 `R`） |
 
-### `ConsoleCatalogEndpoint` — `/api/nexus/catalog`
+### `ConsoleCatalogEndpoint` — `/api/d/nexus/catalog`
 
 | 方法 | 路径 | 响应 |
 |--------|------|----------|
 | GET | `/tree` | `R<List<CatalogNodeVo>>` |
 | POST | `/sync` | `R<PermissionResourceSyncVo>` |
 
-### `PluginManagementEndpoint` — `/api/nexus/plugins`
+### `PluginManagementEndpoint` — `/api/d/nexus/plugins`
 
 | 方法 | 路径 | 响应 |
 |--------|------|----------|
@@ -42,19 +50,19 @@ JAX-RS 类路径使用 `com.innospots.nexus.console.config.ConsoleConstant.API_P
 | POST | `/{pluginId}/disable` | `R<PluginManagementVo>` |
 | POST | `/{pluginId}/retry` | `R<PluginManagementVo>` |
 
-### `NavigationMenuEndpoint` — `/api/nexus/navigation/menus`
+### `NavigationMenuEndpoint` — `/api/d/nexus/navigation/menus`
 
 | 方法 | 路径 | 响应 |
 |--------|------|----------|
 | GET | `/` | `R<List<NavigationMenuVo>>` |
 
-### `CurrentAuthorizationEndpoint` — `/api/nexus/me/permissions`
+### `CurrentAuthorizationEndpoint` — `/api/d/nexus/me/permissions`
 
 | 方法 | 路径 | 响应 |
 |--------|------|----------|
 | GET | `/` | `R<List<PermissionResourceVo>>` |
 
-### `GrantManagementEndpoint` — `/api/nexus`
+### `GrantManagementEndpoint` — `/api/d/nexus`
 
 | 方法 | 路径 | 响应 |
 |--------|------|----------|
@@ -65,7 +73,7 @@ JAX-RS 类路径使用 `com.innospots.nexus.console.config.ConsoleConstant.API_P
 
 PUT 为授权 + 数据源条件的**全量替换**。
 
-### `RoleEndpoint` — `/api/nexus/roles`
+### `RoleEndpoint` — `/api/d/nexus/roles`
 
 | 方法 | 路径 | 响应 |
 |--------|------|----------|
@@ -77,7 +85,7 @@ PUT 为授权 + 数据源条件的**全量替换**。
 | DELETE | `/{roleId}` | `R<Void>` |
 | GET | `/options` | `R<List<RoleOptionVo>>` |
 
-### `RoleBindingEndpoint` — `/api/nexus/roles/{roleId}/bindings`
+### `RoleBindingEndpoint` — `/api/d/nexus/roles/{roleId}/bindings`
 
 | 方法 | 路径 | 响应 |
 |--------|------|----------|
@@ -85,7 +93,7 @@ PUT 为授权 + 数据源条件的**全量替换**。
 | POST | `/` | `R<Void>` |
 | DELETE | `/{bindingId}` | `R<Void>` |
 
-### `DictionaryTypeEndpoint` — `/api/nexus/dictionary-types`
+### `DictionaryTypeEndpoint` — `/api/d/nexus/dictionary-types`
 
 | 方法 | 路径 | 响应 |
 |--------|------|----------|
@@ -97,7 +105,7 @@ PUT 为授权 + 数据源条件的**全量替换**。
 | DELETE | `/{dictionaryTypeId}` | `R<Void>` |
 | GET | `/options` | `R<List<DictionaryTypeOptionVo>>` |
 
-### `DictionaryItemEndpoint` — `/api/nexus/dictionary-types/{typeCode}/items`
+### `DictionaryItemEndpoint` — `/api/d/nexus/dictionary-types/{typeCode}/items`
 
 | 方法 | 路径 | 响应 |
 |--------|------|----------|
@@ -108,14 +116,39 @@ PUT 为授权 + 数据源条件的**全量替换**。
 | PUT | `/{dictionaryItemId}/status` | `R<Void>` |
 | DELETE | `/{dictionaryItemId}` | `R<Void>` |
 
-## `/openapi`
+## `/api/public`（免鉴权）
+
+### `DefaultPageDslEndpoint` — `/api/public/pages/{pageKey}`（Tag `UiPage`）
+
+| 方法 | 路径 | 响应 |
+|--------|------|----------|
+| GET | `/{pageKey}` | `R<PageDsl>` |
+
+`pageKey` 为复合键 `{domainKey}-{moduleKey}-{xxx}`（`PageDslPageRef.decode` 解析）；
+其余查询参数（`?key=value`）绑定到页面 state。
+
+### `NexusSitemapEndpoint` — `/api/public/sitemap/nexus`（Tag `NexusSitemap`）
+
+| 方法 | 路径 | 响应 |
+|--------|------|----------|
+| GET | `/` | `R<SitemapResource>` |
+
+固定加载 `ui-pages/nexus/sitemap.yaml`；当前返回配置全量，后续按登录用户与权限裁剪。
+
+## `/` 与 `/openapi`
+
+### `MainRootEndpoint` — `/`
+
+| 方法 | 路径 | 响应 |
+|--------|------|----------|
+| GET | `/` | 307 重定向至文档入口（`nexus.console.web.jersey.root-path`，默认 `/openapi/ui`） |
 
 ### `OpenApiCatalogEndpoint` — `/openapi/specs`
 
 | 方法 | 路径 | 响应 |
 |--------|------|----------|
 | GET | `/` | `R<List<OpenApiSpecItemVo>>` |
-| GET | `/{specId}` | `application/yaml` 正文 |
+| GET | `/{specId}` | OpenAPI 文档 JSON（`JsonNode`） |
 
 ## 租户 / 平台（非 console 源码）
 
@@ -125,5 +158,5 @@ PUT 为授权 + 数据源条件的**全量替换**。
 ## 契约规则
 
 1. 请求体：`domain.request` **records**；分页查询使用 `@BeanParam` page request records。
-2. 错误：`NexusException` + `StatusCode`。
+2. 错误：`NexusException` + `StatusCode`（统一经 `core.jaxrs` 异常映射为 `R.fail`）。
 3. ID 路径参数使用稳定业务 ID（`roleId`、`dictionaryTypeId`、`pluginId` 等）。

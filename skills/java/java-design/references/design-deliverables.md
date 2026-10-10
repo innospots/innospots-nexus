@@ -154,7 +154,8 @@ public record XxxCreateRequest(...) {}
 
 ### 7.3 分层调用
 
-`endpoint → service → operator → dao` 职责说明；禁止项。
+`endpoint → service → operator → dao` 职责说明；依赖方向（operator 只能依赖 dao，
+service 可依赖 operator/其他 service/dao 且无循环）；禁止项（operator→service、endpoint→dao）。
 
 ## 8. 失败、状态码与异常
 

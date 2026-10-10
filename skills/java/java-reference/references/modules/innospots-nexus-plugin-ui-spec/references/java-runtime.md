@@ -1,6 +1,7 @@
 # Java 运行时 API
 
-实现位于 **`innospots-nexus-plugin`**，包根：
+实现位于 **`innospots-nexus-console`**（Pactor Page DSL 1.0 的 Java 运行时与 REST 端点归属
+console 的 `console.ui.spec`、`console.ui.endpoint`），包根：
 
 `com.innospots.nexus.console.ui.spec`
 
@@ -30,7 +31,8 @@
 | `config` | `PageDslConfig` |
 | `filter` | 渲染过滤器 |
 | `jackson` | 自定义反序列化器 |
-| `endpoint` | `DefaultPageDslEndpoint`（DSL 相关 HTTP 辅助，非业务 REST） |
+| `endpoint` | `DefaultPageDslEndpoint`（`GET /api/public/pages/{pageKey}`，复合 pageKey、免鉴权） |
+| `domain.request` | `PageDslRenderRequest`（渲染路径参数绑定） |
 
 ## 机器索引
 

@@ -7,7 +7,7 @@
 
 ## 模块概览
 
-基于 `innospots-nexus-core` 的 classpath 插件运行时：发现与声明编译、安装与生命周期、Capability 路由、贡献解码/校验/快照，以及 `console@1` 与 **Pactor Page DSL 1.0**。
+基于 `innospots-nexus-core` 的 classpath 插件运行时：发现与声明编译、安装与生命周期、Capability 路由、贡献解码/校验/快照，以及 `console@1` 贡献契约。Pactor Page DSL 1.0 的 Java 运行时与 REST 端点归属 **console**（`console.ui.spec`、`console.ui.endpoint`）；其 Java 快照表保留于本索引（历史文档布局），规范见 `innospots-nexus-plugin-ui-spec`。
 
 **能力一览：**
 
@@ -20,7 +20,7 @@
 | **Capability** | `CapabilityRouter`、`CapabilityTypeRegistry`、`ProviderRef` |
 | **贡献** | `PluginContribution*` 注册表、decoder/snapshotter |
 | **Console 贡献** | `ConsolePluginContributionHandler`、`console@1` 模型 |
-| **Page DSL** | YAML 解析、节点/数据源/动作/权限 DSL 类型 |
+| **Page DSL** | YAML 解析、节点/数据源/动作/权限 DSL 类型（Java 包归属 console，快照保留于本索引） |
 | **资源作用域** | `ResourceScope`、`ResourceRegistration` |
 
 **不包含：** Spring/Quarkus 自动配置、控制台 catalog 表持久化（`nx_console_catalog_resource` 归属 **console**）、
@@ -31,8 +31,8 @@
 | 归属 plugin | 归属 console | 归属 core |
 |-------------|--------------|-----------|
 | 发现、安装、生命周期、Capability 路由 | catalog 索引持久化与同步 REST | 持久化基类、审计、`OwnershipEntity` |
-| `console@1` 声明、Handler、贡献快照 | `ConsoleCatalogSyncService` | Quartz、server、watcher |
-| **Pactor Page DSL 1.0** 解析/校验/加载 | 权限运行时、导航组装 | `MetaResourceService` |
+| `console@1` 声明、Handler、贡献快照 | `ConsoleCatalogSyncService`、**Pactor Page DSL 1.0** 解析/校验/加载与渲染端点 | Quartz、server、watcher |
+| — | 权限运行时、导航组装 | `MetaResourceService` |
 
 Java 包名：`com.innospots.nexus.core.plugin.*`（兼容既有 import）。Maven artifact：`innospots-nexus-plugin`。
 
@@ -42,7 +42,7 @@ Java 包名：`com.innospots.nexus.core.plugin.*`（兼容既有 import）。Mav
 |------|------------------|---------------------|
 | 新 classpath 插件 | 实现 `Plugin` + `PluginDefinition` | HTTP 端点、租户业务 |
 | 控制台 UI 贡献 | `console@1` + `ConsolePluginContributionHandler` | catalog 表 DAO（console） |
-| 页面 YAML | `PageDslLoader` / `JacksonPageDslParser` | 前端渲染（产品侧） |
+| 页面 YAML | console 的 `PageDslLoader` / `JacksonPageDslParser`（快照见本索引 Page DSL 章节） | 前端渲染（产品侧） |
 | 安装/启用/禁用 | `PluginInstallationManager`、`PluginRuntimeFactory` | console 管理 REST（委托 manager） |
 | 能力暴露 | `CapabilityRouter`、`CapabilityRegistration` | 业务域服务实现 |
 | 宿主启动 | `PluginHostBootstrap`、`NexusStartupTask` 注册 | Spring `@Configuration` |
@@ -149,6 +149,7 @@ java:check      → mvn -pl innospots-nexus-plugin -am test
 | `HttpRequest` | `class` | HTTP 数据源与动态 DSL 源使用的 HTTP 请求定义 |
 | `LifecycleConfig` | `class` | 以动作序列表达的页面生命周期钩子 |
 | `PageDsl` | `class` | Pactor Page DSL 1.0 的根文档 |
+| `PageDslPageRef` | `class` | 页面 DSL 复合 pageKey（`{domainKey}-{moduleKey}-{xxx}`）的编码与解析 |
 | `PageMeta` | `class` | 由 PageDsl 声明的页面标识与展示元数据 |
 | `PaginationConfig` | `class` | 返回分页结果的数据源的分页绑定配置 |
 | `RequiresConfig` | `class` | 由 PageDsl 声明的运行时与组件能力要求 |
@@ -182,8 +183,14 @@ java:check      → mvn -pl innospots-nexus-plugin -am test
 
 | 类 | 类型 | 说明 |
 |------|------|------|
-| `DefaultPageDslEndpoint` | `class` | 默认 PageDslEndpoint 实现：从 classpath 加载页面 DSL 文档，并通过已配置的过滤器链处理 |
+| `DefaultPageDslEndpoint` | `class` | 默认 PageDslEndpoint 实现：`GET /api/public/pages/{pageKey}`（复合 pageKey、免鉴权），从 classpath 加载并通过过滤器链处理 |
 | `PageDslEndpoint` | `interface` | 加载与准备页面 DSL 文档的渲染时 API |
+
+### 包 `console.ui.domain.request`
+
+| 类 | 类型 | 说明 |
+|------|------|------|
+| `PageDslRenderRequest` | `class` | 页面 DSL 渲染路径参数：复合 pageKey（`{domainKey}-{moduleKey}-{xxx}`，`@BeanParam`） |
 
 ### 包 `console.ui.spec.filter`
 

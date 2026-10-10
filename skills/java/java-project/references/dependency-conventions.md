@@ -70,8 +70,9 @@ innospots-nexus-parent   ← 构建 parent（插件、编译基线、公共 test
 `innospots-nexus-parent` 为 parent；其子模块（如 `innospots-nexus-spring-console`）
 的 parent 可指向对应的 spring/quarkus 聚合 POM，仍通过继承链获得 BOM 版本管理。
 
-可根据实际情况调整 parent 层级（例如外部客户工程只 import BOM、不继承 parent），
-但**版本来源仍必须是 BOM**，不得自行写版本号。
+可根据实际情况调整 parent 层级，但**版本来源仍必须是 BOM**，不得自行写版本号。
+**新建外部产品工程的默认且必须做法是一级 Java 模块继承 `innospots-nexus-parent`**；
+「只 import BOM、不继承 parent」仅作为已有工程无法变更 parent 时的降级选项。
 
 ### BOM 生效方式
 
@@ -93,8 +94,10 @@ innospots-nexus-parent   ← 构建 parent（插件、编译基线、公共 test
 
 继承 `innospots-nexus-parent` 的模块自动获得 BOM 中的版本约束。
 
-**外部独立工程**（不在本 monorepo 内）若不能继承 parent，应在自己的 parent 或
-`dependencyManagement` 中 **import** `innospots-nexus-bom`（同样不写各依赖 version）。
+**外部独立工程**（不在本 monorepo 内）**新建时默认继承 `innospots-nexus-parent`**（写法见
+[external-project-layout.md](external-project-layout.md)「parent 引用写法」；`<relativePath/>` 置空、
+版本写具体值、先 install Nexus root/bom/parent）。仅当已有工程无法变更 parent 链时，才降级为在
+自己的 parent 或 `dependencyManagement` 中 **import** `innospots-nexus-bom`（同样不写各依赖 version）。
 
 ---
 

@@ -1,5 +1,6 @@
 package com.innospots.nexus.console.api;
 
+import com.innospots.nexus.console.config.ConsoleConstant;
 import com.innospots.nexus.console.endpoint.ConsoleEndpoint;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -14,7 +15,7 @@ class ConsoleEndpointTest {
 
     @Test
     void consoleEndpointUsesJakartaJaxRsContract() throws NoSuchMethodException {
-        assertThat(ConsoleEndpoint.class.getAnnotation(Path.class).value()).isEqualTo("/api/nexus");
+        assertThat(ConsoleEndpoint.class.getAnnotation(Path.class).value()).isEqualTo(ConsoleConstant.API_PREFIX);
         assertThat(ConsoleEndpoint.class.getAnnotation(Produces.class).value()).containsExactly(MediaType.APPLICATION_JSON);
         assertThat(ConsoleEndpoint.class.getAnnotation(Consumes.class).value()).containsExactly(MediaType.APPLICATION_JSON);
         assertThat(ConsoleEndpoint.class.getMethod("status").getAnnotation(GET.class)).isNotNull();

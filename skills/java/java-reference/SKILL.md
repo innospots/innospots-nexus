@@ -105,7 +105,7 @@ version: 1.9.1
 | 4 | DAO 单表、无 join、无 Mapper XML；配置用 yaml，禁 properties/beans.xml |
 | 5 | 端点只用 `jakarta.ws.rs`，返回 `R<T>` |
 | 6 | `domain.request` / `domain.vo` 必须是 record |
-| 7 | `endpoint → service → operator → dao`；operator 不得依赖 service 或其他 operator |
+| 7 | `endpoint → service → operator → dao`；operator 只能依赖 dao，禁止依赖 service/其他 operator；service 可依赖 operator、其他 service、dao |
 | 8 | 事务只用 `jakarta.transaction.Transactional` |
 | 9 | 不得复制遗留工程源码或机械复刻包结构 |
 | 10 | 未获显式请求时不得更新模块 API 索引（`README.md`）/ `references/` 文档 |

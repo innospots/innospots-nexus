@@ -80,7 +80,7 @@ com.innospots.nexus.<module>.<domain>
 ### 设计门禁
 
 - [ ] 领域优先；单包 ≤15 个 `.java`
-- [ ] `endpoint → service → operator → dao`；无 endpoint→dao、operator→service
+- [ ] `endpoint → service → operator → dao`；operator 只能依赖 dao，无 operator→service；service 可依赖 operator/其他 service/dao 且无循环；无 endpoint→dao
 - [ ] 跨表读：分批单表 + 内存组装（无 join 设计）
 
 ---

@@ -122,7 +122,7 @@
 
 | 类 | 类型 | 说明 |
 |------|------|------|
-| `TenantSnapshot` | `record` | 平台租户（nx_tenant）的会话/传输快照 |
+| `TenantSnapshot` | `record` | 平台租户（nx_pl_tenant）的会话/传输快照 |
 
 ### 包 `domain.workspace`
 

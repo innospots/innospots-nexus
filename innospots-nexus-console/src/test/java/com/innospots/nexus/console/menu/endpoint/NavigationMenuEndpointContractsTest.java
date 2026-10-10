@@ -10,6 +10,7 @@ import jakarta.ws.rs.Path;
 import org.junit.jupiter.api.Test;
 
 import com.innospots.nexus.base.domain.enums.BasicStatus;
+import com.innospots.nexus.console.config.ConsoleConstant;
 import com.innospots.nexus.console.menu.domain.enums.MenuOpenMode;
 import com.innospots.nexus.console.menu.domain.enums.MenuType;
 import com.innospots.nexus.console.menu.domain.request.MenuCreateRequest;
@@ -29,7 +30,7 @@ class NavigationMenuEndpointContractsTest {
     void navigationEndpointRemainsReadOnlyAndSeparate() throws NoSuchMethodException {
         assertThat(NavigationMenuEndpoint.class.isInterface()).isFalse();
         assertThat(NavigationMenuEndpoint.class.getAnnotation(Path.class).value())
-                .isEqualTo("/api/nexus/navigation/menus");
+                .isEqualTo(ConsoleConstant.apiPath("/navigation/menus"));
         assertHttpMethod(NavigationMenuEndpoint.class, "listNavigationMenus", GET.class);
         assertThat(Arrays.stream(NavigationMenuEndpoint.class.getMethods())
                 .filter(method -> method.getDeclaringClass().equals(NavigationMenuEndpoint.class)))

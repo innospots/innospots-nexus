@@ -200,9 +200,10 @@ public class RoleEntity extends WorkspaceBaseEntity {
 ## Service 与 Operator 边界
 
 - operator 实现直接面向数据的操作。operator 通常只使用一个 DAO，但当操作仍简单且内聚时，可使用多个 DAO。
-- service 实现复杂工作流、跨领域协调、校验以及跨多个 operator 或 DAO 的编排。
-- service 可依赖 operator 和 DAO。
-- operator 不得依赖 service 或其他 operator。其业务数据依赖限于 DAO；也可使用无状态 converter 和共享底层技术工具。
+- service 实现复杂工作流、跨领域协调、校验以及跨多个 operator、DAO 或其他 service 的编排。
+- service 可依赖 operator、其他 service 和 DAO；跨 service 协调不得形成循环依赖。
+- operator 只能依赖 DAO（业务数据依赖限于 DAO），也可使用无状态 converter 和共享底层技术工具。
+- operator 禁止依赖 service 或其他 operator。
 - 当逻辑需要协调多个 operator 时，应在 service 中定义，而不是允许 operator 之间的依赖。
 - 分页的 service 和 operator 方法必须返回 `com.innospots.nexus.base.domain.response.PageResult<T>`。
 - service 和 operator 方法不得返回 endpoint 包装 `R<T>`。

@@ -10,7 +10,8 @@
 | `action` | 动作配置与反序列化 |
 | `permission` | 页面权限 DSL |
 | `filter` / `validation` | 过滤与校验 |
-| `endpoint` | `DefaultPageDslEndpoint`（DSL 绑定辅助） |
+| `endpoint` | `DefaultPageDslEndpoint`（`GET /api/public/pages/{pageKey}`，复合 pageKey 渲染） |
+| `domain.request` | `PageDslRenderRequest`（渲染请求路径参数绑定） |
 | `jackson` | 自定义 Jackson 反序列化 |
 
 **YAML 规范与使用方式（权威）：**

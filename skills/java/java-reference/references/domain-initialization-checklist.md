@@ -54,7 +54,8 @@
 ## 阶段六：Operator / Service（按需）
 
 - [ ] 未自动脚手架；仅在规则触发时创建
-- [ ] operator 不依赖 service 或其他 operator
+- [ ] operator 只依赖 DAO（外加无状态 converter/共享工具），不依赖 service 或其他 operator
+- [ ] service 只依赖 operator、其他 service 和 DAO，且无循环依赖
 - [ ] 多 operator 协调与事务在 service
 
 ---

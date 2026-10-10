@@ -102,9 +102,34 @@ Nexus 以 **Maven 依赖**挂到产品**已有**模块上：
 
 | 项 | 约定 |
 |----|------|
-| 产品内一级 **Java** 模块 | `<parent>` = **`innospots-nexus-parent`** |
+| 产品内一级 **Java** 模块 | `<parent>` = **`innospots-nexus-parent`**（`com.innospots:innospots-nexus-parent`） |
 | `{product}-bom` | `dependencyManagement` **import** **`innospots-nexus-bom`** |
 | 禁止 | 模块 POM 内联 JAR `<version>`；禁止复制 `innospots-nexus-bom` 到产品仓库 |
+
+### parent 引用写法（仓库外工程）
+
+产品工程在 Nexus 仓库之外，**不得**用 `<relativePath>` 指向 Nexus 源码目录；
+parent 从本地/远程 Maven 仓库解析（Nexus 侧先 `mvn install` 或发布到远程仓库）：
+
+```xml
+<parent>
+    <groupId>com.innospots</groupId>
+    <artifactId>innospots-nexus-parent</artifactId>
+    <version>0.1.0-SNAPSHOT</version> <!-- 固定具体版本；随 Nexus 发版同步升级 -->
+    <relativePath/> <!-- 置空，强制从仓库解析，避免误匹配产品自身根聚合器 -->
+</parent>
+```
+
+要点：
+
+- **版本写具体值**，不写 `${revision}`（Nexus 根 POM 的 `revision` 属性对外部工程不可见）；
+  如需集中管理，可在产品根 POM 定义属性（如 `<innospots.nexus.version>`）后引用。
+- parent 已提供：Java release 基线（25）、插件版本管理、enforcer、公共 test 依赖，
+  并已 **import `innospots-nexus-bom`** —— 产品模块因此**无需**再写任何依赖 `<version>`。
+- 前置条件：本地构建前先在 Nexus 仓库执行
+  `mvn -pl innospots-nexus-bom,innospots-nexus-parent -am install`，
+  或确保 Nexus 已发布到产品可访问的远程仓库。
+- `{product}-bom` 的产品自有版本管理仍**必须** import `innospots-nexus-bom` 获取 Nexus 坐标版本。
 
 ---
 
@@ -123,6 +148,8 @@ Nexus 以 **Maven 依赖**挂到产品**已有**模块上：
 - [ ] 已询问 **产品形态**（仅管理 / 仅对外 / 两者）并按表裁剪 console、service、ui
 - [ ] 已询问并确认 **Spring 或 Quarkus 仅一套**
 - [ ] 纯对外服务时 **无** console、**无** ui
+- [ ] 一级 Java 模块 `<parent>` = `innospots-nexus-parent`（具体版本 + `<relativePath/>`）
+- [ ] Nexus root/bom/parent 已 install 或可从远程仓库解析
 - [ ] 未创建 Nexus 同名平台库模块（portal/platform 等仅为依赖）
 - [ ] grill-me / 产品 `AGENTS.md` 已记录选型
 

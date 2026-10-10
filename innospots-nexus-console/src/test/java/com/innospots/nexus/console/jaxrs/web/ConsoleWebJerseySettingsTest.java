@@ -12,6 +12,6 @@ class ConsoleWebJerseySettingsTest {
     void defaultRootPathIsOpenApiUi() {
         ConsoleWebJerseySettings settings = new ConsoleWebJerseySettings();
         assertThat(settings.getRootPath()).isEqualTo(OpenApiCatalogPaths.UI_DEFAULT);
-        assertThat(settings.isForwardOn404()).isFalse();
+        assertThat(settings.isForwardOn404()).isTrue();
     }
 }

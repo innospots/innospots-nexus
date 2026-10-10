@@ -475,7 +475,7 @@ public final class RoleOperator {
 
 - 构造器注入 + `final` 字段 + `@RequiredArgsConstructor`
 - `@Slf4j`（不是 `@Sl4j`），不手写 logger
-- **不得**依赖 service 或另一个 operator
+- **只能依赖 DAO**（外加无状态 converter、共享底层工具）；**禁止**依赖 service 或另一个 operator
 - 把 DAO 的可空缺失翻译成恰当状态码
 - 集合结果不返回 `null`
 
@@ -551,6 +551,7 @@ public final class RoleService {
 要点核对：
 
 - 事务用 `jakarta.transaction.Transactional`，方法级优先
+- 可依赖 operator、其他 service 和 DAO；跨 service 协调不得形成循环依赖
 - 返回领域值或 `PageResult<T>`，**不返回 `R<T>`**
 - `create` 遇重复稳定键失败，不静默转 update
 - 只在增加有用上下文处记录日志，不逐层重复

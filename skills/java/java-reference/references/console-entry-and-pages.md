@@ -11,7 +11,7 @@
 | **`page.id` 与 DSL 顶层字段** | [plugin-ui-spec → yaml-document.md](modules/innospots-nexus-plugin-ui-spec/references/yaml-document.md) |
 | **`console@1` Java 类型** | [innospots-nexus-plugin → contribution-console.md](modules/innospots-nexus-plugin/references/contribution-console.md) |
 | **菜单 entry 示例（`MenuEntryPlugin`）** | [console → menu-entry.md](modules/innospots-nexus-console/references/menu-entry.md) |
-| **管理 REST 前缀** | [console → endpoint-contracts.md](modules/innospots-nexus-console/references/endpoint-contracts.md)（`ConsoleConstant.API_PREFIX` = `/api/nexus`） |
+| **管理 REST 前缀** | [console → endpoint-contracts.md](modules/innospots-nexus-console/references/endpoint-contracts.md)（`ConsoleConstant.API_PREFIX` = `/api/d/nexus`） |
 | **目录树与权限 API** | [console → catalog-permission.md](modules/innospots-nexus-console/references/catalog-permission.md) |
 
 ## 分层职责
@@ -43,7 +43,7 @@ console: ConsoleCatalogSyncService  →  nx_console_catalog_resource（MODULE / 
 
 六个 `*EntryPlugin` 仍为「一插件一模块」；捆绑多模块时使用同一 `pluginId` 的 `ConsoleEntryPluginDescriptor.of(...)`。
 
-`ConsoleModuleDescriptor.builtin(pluginId, domainKey, moduleKey, entryPageKey, …)` **不推导** pageKey 或 domain；六个内置 entry 使用 `BUILTIN_DOMAIN_KEY`（`nexus`）仅为本模块默认常量，其它产品域传各自 `domainKey`。自定义 `menuKey` 时用 `ConsoleModuleDescriptor.of(...)`。
+`ConsoleModuleDescriptor.builtin(pluginId, domainKey, moduleKey, entryPageKey, …)` 中 `domainKey` 仍由调用方显式传入；六个内置 entry 使用 `BUILTIN_DOMAIN_KEY`（`nexus`）仅为本模块默认常量，其它产品域传各自 `domainKey`。入口页键使用**复合 pageKey**（`compositePageKey(domainKey, moduleKey, pageSuffix)`，见 `PageDslPageRef`）。自定义 `menuKey` 时用 `ConsoleModuleDescriptor.of(...)`。
 
 ## `pageKey` 速查
 
@@ -51,7 +51,7 @@ console: ConsoleCatalogSyncService  →  nx_console_catalog_resource（MODULE / 
 |----|------|
 | 格式 | `[a-z][a-z0-9]*(?:-[a-z0-9]+)*`，≤ 128 字符 |
 | 一致性 | `console@1.pageKey` = YAML `page.id` = 文件名 `{pageKey}.yaml` |
-| 内置入口页 | 各 `*EntryPlugin` 内显式常量（如 `ENTRY_PAGE_KEY = "menu-main"`），经 `builtin(..., entryPageKey, ...)` 传入 |
+| 内置入口页 | 各 `*EntryPlugin` 内经 `compositePageKey(domainKey, moduleKey, pageSuffix)` 声明（如 `nexus-menu-main`），经 `builtin(..., entryPageKey, ...)` 传入 |
 | `domainKey` | 与 `console@1`、`ui-pages/{domainKey}/...` 一致；内置六个 entry 使用 `BUILTIN_DOMAIN_KEY`（`nexus`），**非 API 强制** |
 | 前端路由 | `/page/{domainKey}/{moduleKey}/{pageKey}`（`ConsoleModuleDescriptor.pagePath`） |
 
@@ -61,8 +61,8 @@ console: ConsoleCatalogSyncService  →  nx_console_catalog_resource（MODULE / 
 |------|------|
 | **`MenuEntryPlugin`** | 贡献「菜单管理」**功能模块**的 entry，不是租户 `nx_menu` 数据 |
 | **`menuKey`（console@1）** | 贡献内菜单节点稳定键；内置常与 `entryPageKey` 相同 |
-| **侧栏导航 API** | `GET /api/nexus/navigation/menus`（授权后组装，与 entry 贡献不同） |
-| **权限配置树** | `GET /api/nexus/catalog/tree`（MODULE → PAGE → 子 PAGE，不含 MENU 节点） |
+| **侧栏导航 API** | `GET /api/d/nexus/navigation/menus`（授权后组装，与 entry 贡献不同） |
+| **权限配置树** | `GET /api/d/nexus/catalog/tree`（MODULE → PAGE → 子 PAGE，不含 MENU 节点） |
 
 ## 模块归属（摘要）
 

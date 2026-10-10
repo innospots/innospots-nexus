@@ -102,7 +102,8 @@
 | 检查项 | 不合格信号 |
 |--------|-----------|
 | 依赖方向 | `endpoint → service → operator → dao` 被打破 |
-| operator 不依赖 service/operator | operator 注入了 service 或另一个 operator |
+| operator 只依赖 DAO | operator 注入了 service、另一个 operator 或 DAO 之外的业务层级 |
+| service 依赖范围 | service 依赖了 operator/其他 service/DAO 之外的层级；service 之间形成循环依赖 |
 | service/operator 不返回 `R<T>` | 下层构造了响应包装 |
 | 构造器注入 + `final` | 字段注入、依赖 setter |
 | 接口有真实边界理由 | 仅为 mock 而建的接口 |

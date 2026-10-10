@@ -441,7 +441,7 @@ endpoint 定义传输边界。它们不拥有持久化或业务工作流。
 
 - 非平凡工作流或校验；
 - 跨多个写入的事务；
-- 跨多个 operator 的协调；
+- 跨多个 operator 或其他 service 的协调；
 - 跨领域行为；
 - 树级联、受保护记录或生命周期编排；
 - 授权感知的组装。
@@ -459,7 +459,8 @@ endpoint -> operator -> dao
 service -> dao
 ```
 
-operator 不得依赖另一个 operator 或 service。endpoint 不得直接编排 DAO。
+operator 只能依赖 DAO；禁止依赖另一个 operator 或 service。service 可依赖 operator、
+其他 service 和 DAO，但跨 service 协调不得形成循环依赖。endpoint 不得直接编排 DAO。
 
 在选择 `Operator`、`Service`、`Manager`、`Registry` 或其他技术后缀之前，使用 [`naming.md`](naming.md) 中的职责定义。构造函数注入、日志和依赖字段遵循 [`code-style.md`](code-style.md)。查询/命令语义、事务边界、幂等性、生命周期和资源归属遵循 [`api-design.md`](api-design.md)。
 

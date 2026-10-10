@@ -88,7 +88,7 @@ OpenAPI：条文 [openapi.md](../standards/openapi.md)；注解 [openapi-contrac
 | 领域模型 | `domain` 下按 `entity/request/vo/model/enums` 划分；配置类放模块级 `config` 包，不放 `domain` |
 | REST 端点契约 | `*Endpoint` + `endpoint` 包；`jakarta.ws.rs`；每个方法返回 `R<T>`/`R<PageResult<T>>`/`R<Void>`；**service/operator 不得返回 `R`** |
 | DAO 契约 | 同 `code-style.md`；一表一 Dao；yaml 禁 properties/XML；跨表读用分批查询+内存组装；跨表写交由事务 service；细则见 `persistence-config.md` |
-| Service 与 Operator 边界 | operator 简单数据操作，不得依赖 service 或另一 operator；service 复杂工作流；分页返回 `PageResult<T>` |
+| Service 与 Operator 边界 | operator 简单数据操作，**只能依赖 DAO**，禁止依赖 service 或另一 operator；service 复杂工作流，可依赖 operator、其他 service 和 DAO（不得循环）；分页返回 `PageResult<T>` |
 | 查询与命令语义 | 查询不改状态；`create` 遇重复稳定键失败；`update` 不接受不可变稳定键；`replace` 需定义省略是否删除；`delete` 需定义缺失是成功还是未找到；生命周期操作需定义重复调用行为 |
 | 领域事件与 EventBus | 发布域拥有事件契约，放 `domain.event`，实现 `DomainEvent`；`portal` 与 `platform` **不得互相引用事件类型**；事件是不可变 record；状态变更成功后才发布；`publish` 异步通知、`publishSync` 仅在真正需要立即结果时用；订阅者负责清理 |
 | 领域转换 | 同 `code-style.md` 的 MapStruct 规则 |
