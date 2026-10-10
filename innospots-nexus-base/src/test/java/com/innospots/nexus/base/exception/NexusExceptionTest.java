@@ -1,42 +1,57 @@
 package com.innospots.nexus.base.exception;
 
-import com.innospots.nexus.base.status.NexusStatusCode;
 import org.junit.jupiter.api.Test;
+
+import com.innospots.nexus.base.status.NexusStatusCode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * {@link NexusException} 状态码携带语义：使用 {@code StatusCode} 构建时
+ * 保留原始状态码，使用原始错误码构建时不携带。
+ */
 class NexusExceptionTest {
 
     @Test
-    void exceptionCarriesCodeAndMessage() {
-        NexusException exception = NexusException.build("CONFIG_MISSING", "Required config is missing");
-
-        assertThat(exception.code()).isEqualTo("CONFIG_MISSING");
-        assertThat(exception.getMessage()).isEqualTo("Required config is missing");
+    void retainsStatusCodeAcrossStatusCodeFactories() {
+        assertThat(NexusException.build(NexusStatusCode.NO_PERMISSION).statusCode())
+                .isEqualTo(NexusStatusCode.NO_PERMISSION);
+        assertThat(NexusException.build(NexusStatusCode.NO_PERMISSION,
+                        NexusStatusCode.NO_PERMISSION.message()).statusCode())
+                .isEqualTo(NexusStatusCode.NO_PERMISSION);
+        assertThat(NexusException.build(NexusStatusCode.NO_PERMISSION,
+                        NexusStatusCode.NO_PERMISSION.message(),
+                        new IllegalStateException("boom")).statusCode())
+                .isEqualTo(NexusStatusCode.NO_PERMISSION);
+        assertThat(NexusException.build(NexusStatusCode.NO_PERMISSION,
+                        "覆盖消息").statusCode())
+                .isEqualTo(NexusStatusCode.NO_PERMISSION);
+        assertThat(NexusException.build(NexusStatusCode.NO_PERMISSION,
+                        new IllegalStateException("boom")).statusCode())
+                .isEqualTo(NexusStatusCode.NO_PERMISSION);
     }
 
     @Test
-    void buildsExceptionFromStatusCode() {
-        NexusException exception = NexusException.build(NexusStatusCode.CONFIG_ERROR);
+    void overrideMessageFallsBackToSummaryWhenBlank() {
+        String summary = NexusStatusCode.NO_PERMISSION.summary();
 
-        assertThat(exception.code()).isEqualTo(NexusStatusCode.CONFIG_ERROR.fullCode());
-        assertThat(exception.getMessage()).contains("配置错误");
+        assertThat(NexusException.build(NexusStatusCode.NO_PERMISSION,
+                        "覆盖消息").getMessage())
+                .isEqualTo("覆盖消息");
+        assertThat(NexusException.build(NexusStatusCode.NO_PERMISSION,
+                        " ").getMessage())
+                .isEqualTo(summary);
+        assertThat(NexusException.build(NexusStatusCode.NO_PERMISSION)
+                        .getMessage())
+                .isEqualTo(summary);
     }
 
     @Test
-    void buildsExceptionFromStatusCodeWithOverrideMessage() {
-        NexusException exception = NexusException.build(NexusStatusCode.INVALID_PARAMETER, "userId must not be blank");
-
-        assertThat(exception.code()).isEqualTo(NexusStatusCode.INVALID_PARAMETER.fullCode());
-        assertThat(exception.getMessage()).isEqualTo("userId must not be blank");
-    }
-
-    @Test
-    void buildsExceptionFromStatusCodeWithCause() {
-        IllegalStateException cause = new IllegalStateException("boom");
-        NexusException exception = NexusException.build(NexusStatusCode.SERIALIZATION_FAILED, cause);
-
-        assertThat(exception.code()).isEqualTo(NexusStatusCode.SERIALIZATION_FAILED.fullCode());
-        assertThat(exception.getCause()).isSameAs(cause);
+    void rawCodeFactoriesCarryNoStatusCode() {
+        assertThat(NexusException.build("TSK139999", "custom").statusCode())
+                .isNull();
+        assertThat(NexusException.build("TSK139999", "custom",
+                        new IllegalStateException("boom")).statusCode())
+                .isNull();
     }
 }

@@ -7,9 +7,12 @@ import java.util.Objects;
 
 /**
  * 平台基础运行时异常。携带机器可读的错误码（见 {@link StatusCode}）、
- * 人类可读的消息以及可选的国际化展示信息供前端渲染。
+ * 人类可读的消息、可选的国际化展示信息，以及（使用 {@link StatusCode}
+ * 构建时）原始状态码，供 HTTP 层按状态码声明的
+ * {@link StatusCode#httpStatusCode()} 解析响应状态。
  * <p>请使用静态工厂方法（{@link #build(StatusCode)} 和
- * {@link #build(String, String)}）而非直接调用构造函数。</p>
+ * {@link #build(String, String)}）而非直接调用构造函数。使用原始错误码
+ * 构建时异常不携带状态码，HTTP 层回退到平台码解析。</p>
  *
  * @author Smars
  * @date 2026/09/13
@@ -20,29 +23,14 @@ public class NexusException extends RuntimeException {
 
     private final String code;
     private final I18nObject display;
+    private final StatusCode statusCode;
 
-    private NexusException(String code, String message) {
-        super(message);
-        this.code = Objects.requireNonNull(code, "code must not be null");
-        this.display = null;
-    }
-
-    private NexusException(String code, String message, Throwable cause) {
-        super(message, cause);
-        this.code = Objects.requireNonNull(code, "code must not be null");
-        this.display = null;
-    }
-
-    private NexusException(String code, String message, I18nObject display) {
-        super(message);
-        this.code = Objects.requireNonNull(code, "code must not be null");
-        this.display = display;
-    }
-
-    private NexusException(String code, String message, I18nObject display, Throwable cause) {
+    private NexusException(String code, String message, I18nObject display,
+                           StatusCode statusCode, Throwable cause) {
         super(message, cause);
         this.code = Objects.requireNonNull(code, "code must not be null");
         this.display = display;
+        this.statusCode = statusCode;
     }
 
     /**
@@ -53,7 +41,7 @@ public class NexusException extends RuntimeException {
      */
     public static NexusException build(StatusCode statusCode) {
         StatusCode code = Objects.requireNonNull(statusCode, "statusCode must not be null");
-        return new NexusException(code.fullCode(), code.summary());
+        return new NexusException(code.fullCode(), code.summary(), null, code, null);
     }
 
     /**
@@ -65,7 +53,7 @@ public class NexusException extends RuntimeException {
      */
     public static NexusException build(StatusCode statusCode, I18nObject display) {
         StatusCode code = Objects.requireNonNull(statusCode, "statusCode must not be null");
-        return new NexusException(code.fullCode(), code.summary(), display);
+        return new NexusException(code.fullCode(), code.summary(), display, code, null);
     }
 
     /**
@@ -78,7 +66,7 @@ public class NexusException extends RuntimeException {
      */
     public static NexusException build(StatusCode statusCode, I18nObject display, Throwable cause) {
         StatusCode code = Objects.requireNonNull(statusCode, "statusCode must not be null");
-        return new NexusException(code.fullCode(), code.summary(), display, cause);
+        return new NexusException(code.fullCode(), code.summary(), display, code, cause);
     }
 
     /**
@@ -91,7 +79,7 @@ public class NexusException extends RuntimeException {
     public static NexusException build(StatusCode statusCode, String message) {
         StatusCode code = Objects.requireNonNull(statusCode, "statusCode must not be null");
         String resolved = message == null || message.isBlank() ? code.summary() : message;
-        return new NexusException(code.fullCode(), resolved);
+        return new NexusException(code.fullCode(), resolved, null, code, null);
     }
 
     /**
@@ -103,7 +91,7 @@ public class NexusException extends RuntimeException {
      */
     public static NexusException build(StatusCode statusCode, Throwable cause) {
         StatusCode code = Objects.requireNonNull(statusCode, "statusCode must not be null");
-        return new NexusException(code.fullCode(), code.summary(), cause);
+        return new NexusException(code.fullCode(), code.summary(), null, code, cause);
     }
 
     /**
@@ -114,7 +102,7 @@ public class NexusException extends RuntimeException {
      * @return 异常实例
      */
     public static NexusException build(String code, String message) {
-        return new NexusException(code, message);
+        return new NexusException(code, message, null, null, null);
     }
 
     /**
@@ -126,7 +114,7 @@ public class NexusException extends RuntimeException {
      * @return 异常实例
      */
     public static NexusException build(String code, String message, Throwable cause) {
-        return new NexusException(code, message, cause);
+        return new NexusException(code, message, null, null, cause);
     }
 
     /**
@@ -145,5 +133,17 @@ public class NexusException extends RuntimeException {
      */
     public I18nObject display() {
         return display;
+    }
+
+    /**
+     * 返回构建异常时携带的状态码；使用原始错误码构建时为 {@code null}。
+     *
+     * <p>HTTP 层据此解析响应状态，使产品域状态码（非 {@code AIO*}
+     * 平台码）也能返回其声明的 {@link StatusCode#httpStatusCode()}。</p>
+     *
+     * @return 状态码；未携带时返回 {@code null}
+     */
+    public StatusCode statusCode() {
+        return statusCode;
     }
 }

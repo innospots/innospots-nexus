@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.status.NexusStatusCode;
+import com.innospots.nexus.base.status.StatusCode;
 import com.innospots.nexus.base.thread.TLC;
 import com.innospots.nexus.core.jaxrs.support.HttpHeaderNames;
 import com.innospots.nexus.core.jaxrs.support.RequestProperties;
@@ -146,6 +147,13 @@ public final class JaxRsExceptionSupport {
     }
 
     private static int resolveHttpStatus(NexusException exception) {
+        // 优先使用异常构建时携带的状态码：产品域状态码（非 AIO* 平台码）
+        // 也能按自身声明返回 HTTP 状态
+        StatusCode statusCode = exception.statusCode();
+        if (statusCode != null) {
+            return statusCode.httpStatusCode();
+        }
+        // 兼容仅携带原始错误码的异常：按平台码解析，未知码兜底 500
         return NexusStatusCode.findByFullCode(exception.code())
                 .map(NexusStatusCode::httpStatusCode)
                 .orElse(NexusStatusCode.SYSTEM_ERROR.httpStatusCode());
