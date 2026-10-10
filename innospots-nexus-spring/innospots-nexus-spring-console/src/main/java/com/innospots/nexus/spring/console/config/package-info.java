@@ -3,6 +3,7 @@
  * 配置项通过 {@link ConsoleAuthProperties}、{@link ConsoleCredentialTotpProperties}、
  * {@link ConsoleWebProperties}、{@link OpenApiScalarSpringProperties} 等 {@code @ConfigurationProperties} 绑定，而非 {@code @Value} 占位符。
  *
- * <p>由 {@link com.innospots.nexus.spring.console.EnableNexusConsole} 统一 {@code @Import}。</p>
+ * <p>由 {@link com.innospots.nexus.spring.console.EnableNexusSimpleConsole} 与
+ * {@link com.innospots.nexus.spring.console.EnableNexusConsole} 按需 {@code @Import}。</p>
  */
 package com.innospots.nexus.spring.console.config;

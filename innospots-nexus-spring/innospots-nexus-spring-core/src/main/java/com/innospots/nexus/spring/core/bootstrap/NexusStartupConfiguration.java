@@ -2,8 +2,8 @@ package com.innospots.nexus.spring.core.bootstrap;
 
 import java.util.List;
 
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
@@ -11,16 +11,6 @@ import org.springframework.core.annotation.Order;
 
 import com.innospots.nexus.core.bootstrap.NexusStartup;
 import com.innospots.nexus.core.bootstrap.NexusStartupTask;
-import com.innospots.nexus.core.plugin.bootstrap.PluginHostStartupTask;
-import com.innospots.nexus.core.plugin.contribution.PluginContributionDecoderRegistry;
-import com.innospots.nexus.core.plugin.contribution.PluginContributionHandler;
-import com.innospots.nexus.core.plugin.contribution.PluginContributionSnapshotterRegistry;
-import com.innospots.nexus.core.plugin.installation.bootstrap.PluginHostBootstrapRequest;
-import com.innospots.nexus.core.plugin.installation.config.PluginInstallationConfig;
-import com.innospots.nexus.core.plugin.installation.dao.PluginInstallationDao;
-import com.innospots.nexus.core.plugin.runtime.PluginRuntimeConfig;
-import com.innospots.nexus.spring.core.plugin.PluginHostProperties;
-import com.innospots.nexus.spring.core.plugin.PluginInstallationManagerHolder;
 
 /**
  * 应用服务启动编排装配。
@@ -32,43 +22,14 @@ import com.innospots.nexus.spring.core.plugin.PluginInstallationManagerHolder;
 public class NexusStartupConfiguration {
 
     /**
-     * 内置插件宿主启动任务。
+     * 组装完整启动管线；插件、console 等模块通过 {@link NexusStartupTask} Bean 扩展。
      */
     @Bean
-    PluginHostStartupTask pluginHostStartupTask(
-            ObjectProvider<PluginInstallationDao> installationDao,
-            PluginRuntimeConfig runtimeConfig,
-            PluginHostProperties properties,
-            ObjectProvider<PluginContributionDecoderRegistry> contributionDecoders,
-            List<PluginContributionHandler<?>> contributionHandlers,
-            ObjectProvider<PluginContributionSnapshotterRegistry> contributionSnapshotters,
-            PluginInstallationManagerHolder managerHolder) {
-        return new PluginHostStartupTask(
-                () -> new PluginHostBootstrapRequest(
-                        installationDao.getObject(),
-                        runtimeConfig,
-                        new PluginInstallationConfig(properties.getPlugin().isAutoInstall()),
-                        contributionDecoders.getIfAvailable(
-                                () -> PluginContributionDecoderRegistry.builder().build()),
-                        contributionHandlers,
-                        contributionSnapshotters.getIfAvailable(
-                                () -> PluginContributionSnapshotterRegistry.builder().build()),
-                        null),
-                managerHolder::setManager);
-    }
-
-    /**
-     * 组装完整启动管线；console 等模块通过额外 {@link NexusStartupTask} Bean 扩展。
-     */
-    @Bean
-    NexusStartup nexusStartup(
-            PluginHostStartupTask pluginHostStartupTask,
-            List<NexusStartupTask> startupTasks) {
-        NexusStartup.Builder builder = NexusStartup.builder().task(pluginHostStartupTask);
+    @ConditionalOnBean(NexusStartupTask.class)
+    NexusStartup nexusStartup(List<NexusStartupTask> startupTasks) {
+        NexusStartup.Builder builder = NexusStartup.builder();
         for (NexusStartupTask task : startupTasks) {
-            if (task != pluginHostStartupTask) {
-                builder.task(task);
-            }
+            builder.task(task);
         }
         return builder.build();
     }
@@ -78,8 +39,8 @@ public class NexusStartupConfiguration {
      */
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
+    @ConditionalOnBean(NexusStartup.class)
     ApplicationRunner nexusStartupRunner(NexusStartup nexusStartup) {
         return args -> nexusStartup.run();
     }
 }
-

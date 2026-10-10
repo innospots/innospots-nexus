@@ -19,7 +19,8 @@ import com.innospots.nexus.core.jaxrs.exception.WebApplicationExceptionMapper;
  * <p>将 {@code com.innospots.nexus.core.jaxrs.exception} 下的 {@link JaxRsExceptionSupport}
  * 与三个 {@link jakarta.ws.rs.ext.ExceptionMapper} 注册为 Bean，并通过
  * {@link ResourceConfigCustomizer} 挂载到宿主 Jersey {@code ResourceConfig}；
- * 各业务宿主（app/console/platform）经由 {@code EnableNexusHostBootstrap} 复用，
+ * 各业务宿主经由 {@link com.innospots.nexus.spring.core.bootstrap.EnableNexusSimpleBootstrap}
+ * 或 {@link com.innospots.nexus.spring.core.bootstrap.EnableNexusHostBootstrap} 复用，
  * 不必在各自装配中重复声明。</p>
  *
  * @see JaxRsExceptionSupport

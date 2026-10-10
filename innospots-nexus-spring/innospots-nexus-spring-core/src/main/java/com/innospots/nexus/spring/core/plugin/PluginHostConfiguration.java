@@ -19,8 +19,8 @@ import com.innospots.nexus.core.plugin.runtime.PluginRuntimeConfig;
  *
  * <p>由 {@link EnableNexusPluginHost} 显式引入。
  * Contribution 相关 Bean 由 console 模块可选注入；未引入时使用空注册表。
- * 插件子系统在 {@link com.innospots.nexus.spring.core.bootstrap.NexusStartupConfiguration}
- * 组装的 {@link com.innospots.nexus.core.bootstrap.NexusStartup} 中启用。</p>
+ * 启动任务见 {@link PluginHostStartupConfiguration}，由宿主
+ * {@link com.innospots.nexus.spring.core.bootstrap.NexusStartupConfiguration} 汇总执行。</p>
  *
  * @see PluginHostProperties
  * @see PluginHostConfigBinder

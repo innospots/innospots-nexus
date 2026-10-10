@@ -8,43 +8,29 @@ import java.lang.annotation.Target;
 
 import org.springframework.context.annotation.Import;
 
-import com.innospots.nexus.spring.console.config.ConsoleAuthConfiguration;
 import com.innospots.nexus.spring.console.config.ConsoleCatalogConfiguration;
-import com.innospots.nexus.spring.console.config.ConsoleCredentialConfiguration;
 import com.innospots.nexus.spring.console.config.ConsoleDictionaryConfiguration;
-import com.innospots.nexus.spring.console.config.ConsoleLoggerConfiguration;
-import com.innospots.nexus.spring.console.config.ConsoleJaxRsWebConfiguration;
 import com.innospots.nexus.spring.console.config.ConsoleMenuConfiguration;
-import com.innospots.nexus.spring.console.config.ConsoleNavigationConfiguration;
-import com.innospots.nexus.spring.console.config.ConsolePermissionConfiguration;
 import com.innospots.nexus.spring.console.config.ConsolePluginConfiguration;
-import com.innospots.nexus.spring.console.config.ConsoleRoleConfiguration;
-import com.innospots.nexus.spring.core.bootstrap.EnableNexusHostBootstrap;
 import com.innospots.nexus.spring.core.plugin.EnableNexusPluginHost;
 
 /**
  * 显式启用 Nexus 管理控制台完整 Spring 装配。
  *
- * <p>组合宿主引导（含 {@code EnableNexusJaxRs} 通用 JAX-RS 装配）、插件宿主，
- * 并按 console 业务域分别 {@link Import} 各 {@code Console*Configuration}。</p>
+ * <p>在 {@link EnableNexusSimpleConsole} 之上叠加插件宿主、目录索引、菜单与字典域。</p>
+ *
+ * @see EnableNexusSimpleConsole
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@EnableNexusHostBootstrap
+@EnableNexusSimpleConsole
 @EnableNexusPluginHost
 @Import({
-        ConsoleAuthConfiguration.class,
         ConsolePluginConfiguration.class,
         ConsoleCatalogConfiguration.class,
-        ConsoleCredentialConfiguration.class,
-        ConsolePermissionConfiguration.class,
-        ConsoleNavigationConfiguration.class,
         ConsoleMenuConfiguration.class,
-        ConsoleRoleConfiguration.class,
-        ConsoleDictionaryConfiguration.class,
-        ConsoleLoggerConfiguration.class,
-        ConsoleJaxRsWebConfiguration.class
+        ConsoleDictionaryConfiguration.class
 })
 public @interface EnableNexusConsole {
 }

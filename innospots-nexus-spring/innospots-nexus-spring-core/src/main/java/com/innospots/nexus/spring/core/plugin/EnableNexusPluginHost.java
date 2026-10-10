@@ -11,11 +11,11 @@ import org.springframework.context.annotation.Import;
 /**
  * 显式启用 Nexus 插件宿主 Spring 装配。
  *
- * <p>在应用主配置类上标注，引入 {@link PluginHostConfiguration}。
- * 须配合 {@link EnableNexusHostBootstrap}（或各宿主 bootstrap 注解）提供
- * {@link NexusPluginInstallationDaoConfiguration} 与
- * {@link com.innospots.nexus.core.plugin.installation.dao.PluginInstallationDao}，
- * 或自行注册等价 Bean。</p>
+ * <p>在应用主配置类上标注，引入插件宿主运行时、启动任务与安装表 DAO 扫描。
+ * 须配合 {@link com.innospots.nexus.spring.core.bootstrap.EnableNexusSimpleBootstrap}
+ * 或 {@link com.innospots.nexus.spring.core.bootstrap.EnableNexusHostBootstrap} 提供数据源与
+ * MyBatis 运行态；亦可自行注册等价
+ * {@link com.innospots.nexus.core.plugin.installation.dao.PluginInstallationDao} Bean。</p>
  *
  * <p>管理控制台请使用 {@link com.innospots.nexus.spring.console.EnableNexusConsole}。</p>
  *
@@ -25,7 +25,11 @@ import org.springframework.context.annotation.Import;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Import(PluginHostConfiguration.class)
+@Import({
+        NexusPluginInstallationDaoConfiguration.class,
+        PluginHostConfiguration.class,
+        PluginHostStartupConfiguration.class
+})
 public @interface EnableNexusPluginHost {
 }
 
