@@ -10,7 +10,7 @@ spring:
       mode: always
       schema-locations: classpath:nexus/schema/role-h2.sql
   jersey:
-    type: filter
+    type: servlet
 
 nexus:
   console:

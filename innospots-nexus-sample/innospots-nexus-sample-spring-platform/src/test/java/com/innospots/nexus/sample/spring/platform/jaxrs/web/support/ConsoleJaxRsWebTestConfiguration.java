@@ -3,7 +3,6 @@ package com.innospots.nexus.sample.spring.platform.jaxrs.web.support;
 import java.util.Optional;
 import java.util.Set;
 
-import org.springframework.boot.jersey.autoconfigure.ResourceConfigCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -70,15 +69,6 @@ public class ConsoleJaxRsWebTestConfiguration {
     @Bean
     ConsoleJaxRsWebDatasourceTestResource consoleJaxRsWebDatasourceTestResource() {
         return new ConsoleJaxRsWebDatasourceTestResource();
-    }
-
-    @Bean
-    ResourceConfigCustomizer consoleJaxRsWebTestResourceClasses() {
-        return resourceConfig -> {
-            resourceConfig.register(ConsoleJaxRsWebOpenApiTestResource.class);
-            resourceConfig.register(ConsoleJaxRsWebSecuredTestResource.class);
-            resourceConfig.register(ConsoleJaxRsWebDatasourceTestResource.class);
-        };
     }
 
 }

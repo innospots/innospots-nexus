@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.glassfish.jersey.server.ResourceConfig;
-import org.glassfish.jersey.server.ServerProperties;
-import org.glassfish.jersey.servlet.ServletProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.support.AopUtils;
@@ -20,12 +18,9 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.jersey.autoconfigure.ResourceConfigCustomizer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -34,12 +29,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.innospots.nexus.base.json.Jsons;
 
 /**
- * 将 Spring 容器中带 {@link Path} 的 Bean 注册为 Jersey 资源（注册 Spring 单例实例，保证 Filter 模式下路由可用；
- * 仅 {@code register(Class)} 时在本宿主与 {@code jersey-spring6} 组合下会出现 404，Jersey 会打出 Provider 校验 WARN）。
+ * Jakarta REST 的 Spring 装配入口：提供 {@link ResourceConfig} Bean 与 JSON {@link ContextResolver}。
  *
- * <p>Filter 模式下 404 是否透传 Spring MVC 由 {@link NexusJaxRsProperties#isForwardOn404()}
- * （{@code nexus.web.jersey.forward-on-404}）控制（默认透传）。</p>
+ * <p>Spring Boot {@code spring-boot-starter-jersey} 只负责 Servlet/Filter 与自动配置，不会自动注册业务
+ * {@link Path} 端点；{@link NexusJaxRsResourceConfig} 在创建时把容器中的根资源注册进去。</p>
  *
+ * <p>默认 Servlet 模式由 Jersey 直接处理请求，无需 Spring MVC。Filter 模式下，
+ * {@link NexusJaxRsProperties#isForwardOn404()} 控制未匹配请求是否进入后续 Servlet 链；
+ * 宿主须提供匹配的 Servlet，或启用 {@code server.servlet.register-default-servlet}。</p>
+ *
+ * @see NexusJaxRsResourceConfig
  * @see NexusJerseyResourceConfigurer
  */
 @Configuration
@@ -52,17 +51,13 @@ public class NexusJaxRsConfiguration {
 
     @Bean
     ResourceConfig nexusJaxRsResourceConfig(
+            ApplicationContext applicationContext,
             List<NexusJerseyResourceConfigurer> jerseyResourceConfigurers,
             ContextResolver<ObjectMapper> jsonsObjectMapperResolver,
             NexusJaxRsProperties jaxRsProperties) {
-        ResourceConfig resourceConfig = new ResourceConfig();
-        resourceConfig.register(jsonsObjectMapperResolver);
-        resourceConfig.property(ServerProperties.WADL_FEATURE_DISABLE, true);
-        resourceConfig.property(
-                ServletProperties.FILTER_FORWARD_ON_404, jaxRsProperties.isForwardOn404());
-        for (NexusJerseyResourceConfigurer configurer : jerseyResourceConfigurers) {
-            configurer.configure(resourceConfig);
-        }
+        NexusJaxRsResourceConfig resourceConfig = new NexusJaxRsResourceConfig(
+                jerseyResourceConfigurers, jsonsObjectMapperResolver, jaxRsProperties);
+        registerPathAnnotatedEndpoints(applicationContext, resourceConfig);
         return resourceConfig;
     }
 
@@ -80,52 +75,57 @@ public class NexusJaxRsConfiguration {
     }
 
     /**
-     * <p>扫描 Bean 定义中<strong>实现类</strong>带 {@link Path} 的单例并注册 Spring 管理实例
-     * （含各 {@code *Configuration} 中 {@code @Bean} 工厂方法产出的端点）。</p>
+     * 注册 Spring 容器中的 JAX-RS 根资源（按 BeanDefinition 解析类型，适配 {@code @Configuration} 内 {@code @Bean} 工厂端点）。
      *
-     * <p>{@linkplain Ordered#LOWEST_PRECEDENCE} 尽量在其它 {@link ResourceConfigCustomizer} 之后执行，
-     * 保证容器里端点 Bean 定义已就绪。</p>
+     * <p>使用 HK2 绑定 Spring 单例 + {@code register(Class)}，避免 {@code register(Object)} 触发
+     * Jersey provider 误报（Jersey #3700）。仅 {@code register(Class)} 且无绑定时，本宿主下曾出现 404。</p>
      */
-    @Bean
-    @Order(Ordered.LOWEST_PRECEDENCE)
-    ResourceConfigCustomizer nexusJaxRsEndpointCustomizer(ApplicationContext applicationContext) {
-        return resourceConfig -> registerPathAnnotatedEndpoints(applicationContext, resourceConfig);
-    }
-
-    private static void registerPathAnnotatedEndpoints(
+    public static void registerPathAnnotatedEndpoints(
             ApplicationContext applicationContext,
             ResourceConfig resourceConfig) {
         ConfigurableListableBeanFactory beanFactory =
                 (ConfigurableListableBeanFactory) applicationContext.getAutowireCapableBeanFactory();
         List<String> registeredPaths = new ArrayList<>();
+        List<SpringManagedJerseyResourceBinding> bindings = new ArrayList<>();
         Set<Class<?>> registeredClasses = new HashSet<>();
         for (String beanName : beanFactory.getBeanDefinitionNames()) {
             if (!beanFactory.isSingleton(beanName)) {
                 continue;
             }
             Class<?> resourceClass = resolveEndpointClass(beanFactory, beanName);
-            if (resourceClass == null) {
-                continue;
-            }
-            if (!resourceClass.isAnnotationPresent(Path.class)) {
+            if (resourceClass == null || !resourceClass.isAnnotationPresent(Path.class)) {
                 continue;
             }
             if (!registeredClasses.add(resourceClass)) {
                 continue;
             }
-            resourceConfig.register(applicationContext.getBean(beanName));
-            Path path = resourceClass.getAnnotation(Path.class);
-            String pathValue = path == null ? "" : path.value();
-            registeredPaths.add(beanName + " -> " + resourceClass.getName() + " @Path(\"" + pathValue + "\")");
+            Object resourceInstance = applicationContext.getBean(beanName);
+            bindings.add(new SpringManagedJerseyResourceBinding(resourceInstance, resourceClass));
+            appendRegisteredPath(registeredPaths, beanName, resourceClass);
         }
+        if (!bindings.isEmpty()) {
+            resourceConfig.register(new SpringManagedJerseyResourceBinder(bindings));
+            for (SpringManagedJerseyResourceBinding binding : bindings) {
+                resourceConfig.register(binding.resourceClass());
+            }
+        }
+
         LOG.info("Jersey registered {} @Path resource bean(s)", registeredPaths.size());
-        for (String entry : registeredPaths) {
-            LOG.info("Jersey @Path resource: {}", entry);
+        if (LOG.isDebugEnabled()) {
+            for (String entry : registeredPaths) {
+                LOG.debug("Jersey @Path resource: {}", entry);
+            }
         }
         if (registeredPaths.isEmpty()) {
             LOG.warn("Jersey registered zero @Path resources; check host @Enable* bootstrap annotations "
                     + "and endpoint @Bean definitions");
         }
+    }
+
+    private static void appendRegisteredPath(List<String> registeredPaths, String beanName, Class<?> resourceClass) {
+        Path path = resourceClass.getAnnotation(Path.class);
+        String pathValue = path == null ? "" : path.value();
+        registeredPaths.add(beanName + " -> " + resourceClass.getName() + " @Path(\"" + pathValue + "\")");
     }
 
     /**

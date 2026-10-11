@@ -1,6 +1,6 @@
 spring:
   jersey:
-    type: filter
+    type: servlet
   datasource:
     url: jdbc:h2:mem:nexus-jaxrs-web-it;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
     driver-class-name: org.h2.Driver

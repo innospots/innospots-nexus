@@ -22,7 +22,7 @@ import com.innospots.nexus.console.permission.authorization.ConsolePagePermissio
 /**
  * 管理控制台 Jersey 横切过滤器的 Spring 装配。
  *
- * <p>在 Servlet + Jersey Filter 模式下将过滤器注册到
+ * <p>在 Jersey Servlet 或 Filter 模式下将 JAX-RS 过滤器注册到
  * {@link org.glassfish.jersey.server.ResourceConfig}；行为由 {@link ConsoleWebProperties} 驱动。</p>
  *
  * <p>通用异常映射（{@code JaxRsExceptionSupport} 与三个 Mapper）由宿主级的

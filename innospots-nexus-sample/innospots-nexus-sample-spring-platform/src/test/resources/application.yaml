@@ -1,6 +1,6 @@
 spring:
   jersey:
-    type: filter
+    type: servlet
   config:
     import:
       - optional:classpath:nexus/console-auth.yaml

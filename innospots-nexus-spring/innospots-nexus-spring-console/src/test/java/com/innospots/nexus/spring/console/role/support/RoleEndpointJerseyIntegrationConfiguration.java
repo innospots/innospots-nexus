@@ -8,8 +8,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.innospots.nexus.console.role.endpoint.RoleBindingEndpoint;
-import com.innospots.nexus.console.role.endpoint.RoleEndpoint;
+import com.innospots.nexus.spring.core.jaxrs.NexusJaxRsConfiguration;
 
 /**
  * 角色 HTTP 集成测试用 Jersey 装配：注册 Spring 管理的端点实例。
@@ -27,9 +26,6 @@ public class RoleEndpointJerseyIntegrationConfiguration {
 
     @Bean
     ResourceConfigCustomizer roleEndpointJerseyRegistrationCustomizer(ApplicationContext applicationContext) {
-        return resourceConfig -> {
-            resourceConfig.register(applicationContext.getBean(RoleEndpoint.class));
-            resourceConfig.register(applicationContext.getBean(RoleBindingEndpoint.class));
-        };
+        return resourceConfig -> NexusJaxRsConfiguration.registerPathAnnotatedEndpoints(applicationContext, resourceConfig);
     }
 }

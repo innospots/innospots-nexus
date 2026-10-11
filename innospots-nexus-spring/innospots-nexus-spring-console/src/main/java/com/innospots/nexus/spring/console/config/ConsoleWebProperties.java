@@ -32,6 +32,6 @@ public class ConsoleWebProperties {
     /** 浏览器跨域（CORS）响应头；默认关闭。 */
     private ConsoleWebCorsSettings cors = new ConsoleWebCorsSettings();
 
-    /** Jersey Filter 路由（如 404 是否透传 Spring MVC）；默认不向 MVC 转发。 */
+    /** Jersey 路由配置（如根路径重定向）。 */
     private ConsoleWebJerseySettings jersey = new ConsoleWebJerseySettings();
 }

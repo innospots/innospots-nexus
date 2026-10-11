@@ -4,8 +4,8 @@ spring:
   application:
     name: nexus-platform-console
   jersey:
-    # Jersey 以 Servlet Filter 接入，与 Spring MVC 共用同一端口
-    type: filter
+    # Jersey Servlet 直接处理 Jakarta REST 与 Scalar 文档路由
+    type: servlet
   config:
     import:
       # 控制台示例配置（完整分项见 classpath:nexus/console-*.yaml）
@@ -19,7 +19,7 @@ spring:
 server:
   port: 8082
 
-# 须 classpath 上有 spring-boot-starter-actuator（见 sample-platform pom）；Jersey filter 模式下端点由 Boot 注册到 JAX-RS，非 Spring MVC 转发。
+# Actuator 端点由 Boot 的 Jersey 集成注册到 JAX-RS。
 management:
   endpoints:
     web:
