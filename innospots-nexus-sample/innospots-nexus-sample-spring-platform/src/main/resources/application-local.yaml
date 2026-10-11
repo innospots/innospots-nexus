@@ -5,7 +5,7 @@ spring:
     url: jdbc:h2:file:./out/db/nexus-platform-console;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;AUTO_SERVER=TRUE
     driver-class-name: org.h2.Driver
     username: sa
-    password:
+    password: sa
   sql:
     init:
       # Spring Boot 4 的 embedded 模式仅识别 jdbc:h2:mem，file 库须用 always（脚本均为 CREATE IF NOT EXISTS）

@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import com.innospots.nexus.base.domain.enums.BasicStatus;
 import com.innospots.nexus.base.domain.response.PageResult;
@@ -36,6 +37,7 @@ import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
 /**
  * 工作空间作用域内角色持久化与查询，可供子类扩展过滤或校验规则。
  */
+@Slf4j
 @RequiredArgsConstructor
 public class RoleOperator {
 
@@ -87,6 +89,7 @@ public class RoleOperator {
         entity.setBuiltIn(false);
         entity.setAdministrator(false);
         roleDao.insert(entity);
+        log.info("Created role {} with code {}", entity.getRoleId(), entity.getRoleCode());
         return roleConverter.toVo(entity, 0L);
     }
 
@@ -105,6 +108,7 @@ public class RoleOperator {
             entity.setSortOrder(request.sortOrder());
         }
         roleDao.updateById(entity);
+        log.info("Updated role {}", entity.getRoleId());
         return roleConverter.toVo(entity, countMembers(entity.getRoleId(), scope.workspaceOwnership()));
     }
 
@@ -118,6 +122,7 @@ public class RoleOperator {
         RoleEntity entity = requireWritableEntity(roleId, scope);
         entity.setStatus(roleConverter.formatStatus(request.status()));
         roleDao.updateById(entity);
+        log.info("Updated role {} status to {}", entity.getRoleId(), request.status());
     }
 
     @Transactional
@@ -131,6 +136,7 @@ public class RoleOperator {
                 new LambdaQueryWrapper<RoleBindingEntity>().eq(RoleBindingEntity::getRoleId, roleId),
                 scope.workspaceOwnership()));
         roleDao.deleteById(roleId);
+        log.info("Deleted role {}", roleId);
     }
 
     public List<RoleOptionVo> listRoleOptions(BasicStatus status) {

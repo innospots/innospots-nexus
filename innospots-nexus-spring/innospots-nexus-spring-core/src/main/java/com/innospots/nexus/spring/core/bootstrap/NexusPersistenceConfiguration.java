@@ -1,6 +1,8 @@
 package com.innospots.nexus.spring.core.bootstrap;
 
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,11 +10,14 @@ import org.springframework.context.annotation.Configuration;
 import org.apache.ibatis.logging.slf4j.Slf4jImpl;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.autoconfigure.IdentifierGeneratorAutoConfiguration;
 import com.baomidou.mybatisplus.autoconfigure.MybatisPlusAutoConfiguration;
 import com.baomidou.mybatisplus.autoconfigure.MybatisPlusProperties;
 import com.baomidou.mybatisplus.autoconfigure.MybatisPlusPropertiesCustomizer;
 import com.baomidou.mybatisplus.core.config.GlobalConfig;
+import com.baomidou.mybatisplus.core.incrementer.IdentifierGenerator;
 import com.innospots.nexus.core.persistence.handler.AuditMetaObjectHandler;
+import com.innospots.nexus.core.persistence.id.DbPrimaryGenerator;
 
 /**
  * MyBatis-Plus 公共运行态装配。
@@ -24,8 +29,18 @@ import com.innospots.nexus.core.persistence.handler.AuditMetaObjectHandler;
  * @date 2026/09/13
  */
 @Configuration
+@AutoConfigureBefore(IdentifierGeneratorAutoConfiguration.class)
 @AutoConfigureAfter({DataSourceAutoConfiguration.class, MybatisPlusAutoConfiguration.class})
 public class NexusPersistenceConfiguration {
+
+    /**
+     * Nexus 主键生成器，使 {@code IdType.ASSIGN_UUID} 使用实体 {@link com.innospots.nexus.core.persistence.entity.BaseEntity#idPrefix()}。
+     */
+    @Bean
+    @ConditionalOnMissingBean(IdentifierGenerator.class)
+    IdentifierGenerator nexusIdentifierGenerator() {
+        return new DbPrimaryGenerator();
+    }
 
     /**
      * MyBatis-Plus 审计字段自动填充处理器。

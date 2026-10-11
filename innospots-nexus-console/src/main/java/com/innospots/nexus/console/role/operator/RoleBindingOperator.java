@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import com.innospots.nexus.base.domain.response.PageResult;
 import com.innospots.nexus.base.exception.NexusException;
@@ -26,6 +27,7 @@ import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
 /**
  * 角色与主体绑定关系维护，可供子类扩展校验或同步逻辑。
  */
+@Slf4j
 @RequiredArgsConstructor
 public class RoleBindingOperator {
 
@@ -64,6 +66,7 @@ public class RoleBindingOperator {
         if (request.subjectType() == null || request.subjectIds().isEmpty()) {
             return;
         }
+        int addedCount = 0;
         for (String subjectId : request.subjectIds()) {
             if (subjectId == null || subjectId.isBlank()) {
                 continue;
@@ -77,6 +80,14 @@ public class RoleBindingOperator {
             binding.setSubjectType(request.subjectType().name());
             binding.setSubjectId(subjectId);
             roleBindingDao.insert(binding);
+            addedCount++;
+        }
+        if (addedCount > 0) {
+            log.info(
+                    "Added {} role binding(s) for role {} subjectType {}",
+                    addedCount,
+                    roleId,
+                    request.subjectType());
         }
     }
 
@@ -93,6 +104,7 @@ public class RoleBindingOperator {
             throw NexusException.build(RoleStatusCode.ROLE_BINDING_NOT_FOUND);
         }
         roleBindingDao.deleteById(bindingId);
+        log.info("Removed role binding {} from role {}", bindingId, roleId);
     }
 
     protected boolean bindingExists(
