@@ -4,10 +4,12 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.ext.ContextResolver;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.glassfish.jersey.server.ResourceConfig;
-import org.glassfish.jersey.server.spring.SpringComponentProvider;
+import org.glassfish.jersey.server.ServerProperties;
 import org.glassfish.jersey.servlet.ServletProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +34,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.innospots.nexus.base.json.Jsons;
 
 /**
- * 将 Spring 容器中带 {@link Path} 的 Bean 注册为 Jersey 资源，直接对外暴露 Jakarta REST 契约。
+ * 将 Spring 容器中带 {@link Path} 的 Bean 注册为 Jersey 资源（注册 Spring 单例实例，保证 Filter 模式下路由可用；
+ * 仅 {@code register(Class)} 时在本宿主与 {@code jersey-spring6} 组合下会出现 404，Jersey 会打出 Provider 校验 WARN）。
  *
  * <p>Filter 模式下 404 是否透传 Spring MVC 由 {@link NexusJaxRsProperties#isForwardOn404()}
  * （{@code nexus.web.jersey.forward-on-404}）控制（默认透传）。</p>
@@ -53,8 +56,8 @@ public class NexusJaxRsConfiguration {
             ContextResolver<ObjectMapper> jsonsObjectMapperResolver,
             NexusJaxRsProperties jaxRsProperties) {
         ResourceConfig resourceConfig = new ResourceConfig();
-        resourceConfig.register(SpringComponentProvider.class);
         resourceConfig.register(jsonsObjectMapperResolver);
+        resourceConfig.property(ServerProperties.WADL_FEATURE_DISABLE, true);
         resourceConfig.property(
                 ServletProperties.FILTER_FORWARD_ON_404, jaxRsProperties.isForwardOn404());
         for (NexusJerseyResourceConfigurer configurer : jerseyResourceConfigurers) {
@@ -95,6 +98,7 @@ public class NexusJaxRsConfiguration {
         ConfigurableListableBeanFactory beanFactory =
                 (ConfigurableListableBeanFactory) applicationContext.getAutowireCapableBeanFactory();
         List<String> registeredPaths = new ArrayList<>();
+        Set<Class<?>> registeredClasses = new HashSet<>();
         for (String beanName : beanFactory.getBeanDefinitionNames()) {
             if (!beanFactory.isSingleton(beanName)) {
                 continue;
@@ -104,6 +108,9 @@ public class NexusJaxRsConfiguration {
                 continue;
             }
             if (!resourceClass.isAnnotationPresent(Path.class)) {
+                continue;
+            }
+            if (!registeredClasses.add(resourceClass)) {
                 continue;
             }
             resourceConfig.register(applicationContext.getBean(beanName));

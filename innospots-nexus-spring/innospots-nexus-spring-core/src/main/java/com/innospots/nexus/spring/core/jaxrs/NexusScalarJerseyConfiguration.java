@@ -3,9 +3,7 @@ package com.innospots.nexus.spring.core.jaxrs;
 import java.io.IOException;
 
 import jakarta.ws.rs.HttpMethod;
-import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 
 import org.glassfish.jersey.server.model.Resource;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -47,26 +45,13 @@ public class NexusScalarJerseyConfiguration {
             Resource.Builder page = Resource.builder(docsPath);
             page.addMethod(HttpMethod.GET)
                     .produces(MediaType.TEXT_HTML)
-                    .handledBy((ContainerRequestContext request) -> {
-                        try {
-                            String html = OpenApiScalarDocumentation.renderDocumentationHtml(
-                                    scalarProperties,
-                                    openApiCatalogOperator,
-                                    specsBase);
-                            return Response.ok(html, "text/html;charset=UTF-8").build();
-                        } catch (IOException exception) {
-                            return Response.serverError()
-                                    .entity("Failed to render OpenAPI documentation UI")
-                                    .build();
-                        }
-                    });
+                    .handledBy(new OpenApiScalarJerseyHandlers.DocumentationHtmlInflector(
+                            scalarProperties, openApiCatalogOperator, specsBase));
 
             Resource.Builder script = Resource.builder(scriptPath);
             script.addMethod(HttpMethod.GET)
                     .produces("application/javascript")
-                    .handledBy((ContainerRequestContext request) ->
-                            Response.ok(javascript, "application/javascript;charset=UTF-8").build()
-                    );
+                    .handledBy(new OpenApiScalarJerseyHandlers.ScalarJavascriptInflector(javascript));
 
             resourceConfig.registerResources(page.build(), script.build());
         };

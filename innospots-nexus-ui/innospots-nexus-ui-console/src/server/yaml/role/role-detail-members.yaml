@@ -1,0 +1,186 @@
+dsl: "1.0"
+page:
+  id: role-detail-members
+  title: 角色成员列表
+  name: roleDetailMembers
+
+state:
+  roleId: ${route.params.roleId}
+  subjectType: USER
+  input: ""
+  pageNo: 1
+  pageSize: 20
+
+dataSources:
+  role:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/nexus/roles/${state.roleId}
+  bindings:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/nexus/roles/${state.roleId}/bindings
+      params:
+        subjectType: ${state.subjectType}
+        input: ${state.input}
+        pageNo: ${state.pageNo}
+        pageSize: ${state.pageSize}
+
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - label: 角色管理
+            href: /system/roles
+          - label: ${data.role.data.roleName}
+          - label: 成员列表
+    - type: Flex
+      props:
+        justify: space-between
+        align: center
+      children:
+        - type: Button
+          props:
+            text: ← 返回角色列表
+            variant: link
+          events:
+            onClick:
+              - action: navigate
+                params: { to: /system/roles }
+        - type: Button
+          props:
+            text: + 添加成员
+            variant: primary
+          events:
+            onClick:
+              - action: overlay.open
+                params:
+                  overlay:
+                    type: dialog
+                    title: 添加到「${data.role.data.roleName}」
+                    width: 720
+                    content:
+                      type: Text
+                      props:
+                        text: 成员目录展示需 UserDirectory 补充；请在后端就绪后对接批量添加接口 POST /api/d/nexus/roles/${state.roleId}/bindings。
+    - type: Tabs
+      props:
+        activeKey: members
+        items:
+          - { key: basic, label: 基本信息 }
+          - { key: permissions, label: 权限设置 }
+          - { key: members, label: 成员列表 }
+      events:
+        onChange:
+          - action: if
+            params:
+              condition: ${event == 'basic'}
+              then:
+                - action: navigate
+                  params:
+                    to: /system/roles/${state.roleId}
+          - action: if
+            params:
+              condition: ${event == 'permissions'}
+              then:
+                - action: navigate
+                  params:
+                    to: /system/roles/${state.roleId}/permissions
+    - type: ChipFilter
+      props:
+        mode: single
+        value: ${state.subjectType}
+        items:
+          - { label: 用户, value: USER }
+          - { label: 组织单元, value: ORG_UNIT }
+      events:
+        onChange:
+          - action: setState
+            params:
+              subjectType: ${event}
+              pageNo: 1
+          - action: reload
+            params:
+              dataSource: bindings
+    - type: Card
+      props:
+        className: mt-4
+      children:
+        - type: Form
+          props:
+            name: memberSearch
+            layout: inline
+          events:
+            onSubmit:
+              - action: setState
+                params:
+                  input: ${event.input}
+                  pageNo: 1
+              - action: reload
+                params:
+                  dataSource: bindings
+          children:
+            - type: Field
+              props:
+                label: 搜索
+              children:
+                - type: Input
+                  props:
+                    name: input
+                    placeholder: 名称 / 账号 / 组织单元
+            - type: Field
+              props:
+                label: " "
+              children:
+                - type: Button
+                  props:
+                    text: 查询
+                    submit: true
+                    htmlType: submit
+        - type: Table
+          props:
+            rowKey: bindingId
+            dataSource: ${data.bindings.data.records}
+            loading: ${dataStatus.bindings.loading}
+            className: mt-4
+            columns:
+              - title: 主体类型
+                dataIndex: subjectType
+              - title: 主体 ID
+                dataIndex: subjectId
+              - title: 操作
+                cell:
+                  type: Button
+                  props:
+                    text: 移除
+                    variant: link
+                    size: small
+                    danger: true
+                  events:
+                    onClick:
+                      - action: confirm
+                        params:
+                          title: 移除成员
+                          content: 仅解除该角色绑定，不删除用户或组织单元。确定移除吗？
+                      - action: request
+                        params:
+                          method: DELETE
+                          url: /api/d/nexus/roles/${state.roleId}/bindings/${row.bindingId}
+                      - action: message
+                        params:
+                          messageType: success
+                          text: 已移除
+                      - action: reload
+                        params:
+                          dataSource: bindings
+        - type: Text
+          props:
+            text: 共 ${data.bindings.data.total} 条
+            type: secondary
+            className: mt-3

@@ -1,0 +1,348 @@
+dsl: "1.0"
+page:
+  id: role-list
+  title: 角色管理
+  name: roleList
+
+state:
+  input: ""
+  status: ""
+  pageNo: 1
+  pageSize: 20
+
+dataSources:
+  roles:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/nexus/roles
+      params:
+        input: ${state.input}
+        status: ${state.status}
+        pageNo: ${state.pageNo}
+        pageSize: ${state.pageSize}
+
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - label: 系统管理
+          - label: 角色管理
+    - type: Flex
+      props:
+        justify: space-between
+        align: center
+      children:
+        - type: Flex
+          props:
+            direction: vertical
+            gap: 2
+          children:
+            - type: Typography
+              props:
+                variant: h3
+                text: 角色管理
+            - type: Typography
+              props:
+                variant: muted
+                text: 创建角色、配置其资源权限，并绑定用户或组织单元。
+        - type: Button
+          props:
+            text: + 新建角色
+            variant: primary
+          events:
+            onClick:
+              - action: overlay.open
+                params:
+                  overlay: &roleFormDrawer
+                    type: drawer
+                    title: 新建角色
+                    width: 640
+                    content:
+                      type: Form
+                      props:
+                        name: roleCreateForm
+                        layout: vertical
+                      events:
+                        onSubmit:
+                          - action: request
+                            params:
+                              method: POST
+                              url: /api/d/nexus/roles
+                              body:
+                                roleName: ${event.roleName}
+                                roleCode: ${event.roleCode}
+                                ownerType: ${event.ownerType}
+                                securityRealm: ${event.securityRealm}
+                                description: ${event.description}
+                                sortOrder: ${event.sortOrder}
+                          - action: message
+                            params:
+                              messageType: success
+                              text: 角色已创建
+                          - action: overlay.close
+                          - action: reload
+                            params:
+                              dataSource: roles
+                      children:
+                        - type: Field
+                          props:
+                            label: 角色名称
+                            required: true
+                          children:
+                            - type: Input
+                              props:
+                                name: roleName
+                                placeholder: 请输入角色名称
+                                rules:
+                                  - required: true
+                                    message: 请输入角色名称
+                        - type: Field
+                          props:
+                            label: 角色编码
+                            required: true
+                          children:
+                            - type: Input
+                              props:
+                                name: roleCode
+                                placeholder: 大写字母与下划线，如 OPERATOR
+                                rules:
+                                  - required: true
+                                    message: 请输入角色编码
+                        - type: Field
+                          props:
+                            label: 归属层级
+                            required: true
+                          children:
+                            - type: Select
+                              props:
+                                name: ownerType
+                                placeholder: 请选择归属层级
+                                options:
+                                  - { label: 平台, value: PLATFORM }
+                                  - { label: 租户, value: TENANT }
+                                  - { label: 工作空间, value: WORKSPACE }
+                                rules:
+                                  - required: true
+                                    message: 请选择归属层级
+                        - type: Field
+                          props:
+                            label: 安全域
+                            required: true
+                          children:
+                            - type: Select
+                              props:
+                                name: securityRealm
+                                placeholder: 请选择安全域
+                                options:
+                                  - { label: 平台, value: PLATFORM }
+                                  - { label: 租户, value: TENANT }
+                                rules:
+                                  - required: true
+                                    message: 请选择安全域
+                        - type: Field
+                          props:
+                            label: 描述
+                          children:
+                            - type: Textarea
+                              props:
+                                name: description
+                                placeholder: 角色用途说明
+                        - type: Field
+                          props:
+                            label: 排序
+                          children:
+                            - type: NumberInput
+                              props:
+                                name: sortOrder
+                                min: 0
+                                precision: 0
+                        - type: Flex
+                          props:
+                            justify: end
+                            gap: small
+                            className: mt-4
+                          children:
+                            - type: Button
+                              props:
+                                text: 取消
+                              events:
+                                onClick:
+                                  - action: overlay.close
+                            - type: Button
+                              props:
+                                text: 保存
+                                variant: primary
+                                submit: true
+                                htmlType: submit
+    - type: Card
+      children:
+        - type: Form
+          props:
+            name: roleSearch
+            layout: inline
+          events:
+            onSubmit:
+              - action: setState
+                params:
+                  input: ${event.input}
+                  status: ${event.status}
+                  pageNo: 1
+              - action: reload
+                params:
+                  dataSource: roles
+          children:
+            - type: Field
+              props:
+                label: 名称/编码
+              children:
+                - type: Input
+                  props:
+                    name: input
+                    placeholder: 模糊搜索
+            - type: Field
+              props:
+                label: 状态
+              children:
+                - type: Select
+                  props:
+                    name: status
+                    placeholder: 全部
+                    allowClear: true
+                    options:
+                      - { label: 全部, value: "" }
+                      - { label: 启用, value: ENABLED }
+                      - { label: 禁用, value: DISABLED }
+            - type: Field
+              props:
+                label: " "
+              children:
+                - type: Flex
+                  props:
+                    gap: small
+                  children:
+                    - type: Button
+                      props:
+                        text: 查询
+                        submit: true
+                        htmlType: submit
+                    - type: Button
+                      props:
+                        text: 重置
+                      events:
+                        onClick:
+                          - action: form.setValues
+                            params:
+                              form: roleSearch
+                              values:
+                                input: ""
+                                status: ""
+                          - action: setState
+                            params:
+                              input: ""
+                              status: ""
+                              pageNo: 1
+                          - action: reload
+                            params:
+                              dataSource: roles
+        - type: Table
+          props:
+            rowKey: roleId
+            dataSource: ${data.roles.data.records}
+            loading: ${dataStatus.roles.loading}
+            className: mt-4
+            columns:
+              - title: 角色名称
+                cell:
+                  type: Button
+                  props:
+                    text: ${row.roleName}
+                    variant: link
+                    size: small
+                  events:
+                    onClick:
+                      - action: navigate
+                        params:
+                          to: /system/roles/${row.roleId}
+              - title: 编码
+                dataIndex: roleCode
+              - title: 归属范围
+                dataIndex: ownerType
+              - title: 成员数
+                dataIndex: memberCount
+              - title: 状态
+                cell:
+                  type: Text
+                  props:
+                    text: "${row.status == 'ENABLED' ? '启用' : '禁用'}"
+              - title: 操作
+                cell:
+                  type: Flex
+                  props:
+                    gap: small
+                  children:
+                    - type: Button
+                      props:
+                        text: 详情
+                        variant: link
+                        size: small
+                      events:
+                        onClick:
+                          - action: navigate
+                            params:
+                              to: /system/roles/${row.roleId}
+                    - type: Button
+                      props:
+                        text: "${row.status == 'ENABLED' ? '禁用' : '启用'}"
+                        variant: link
+                        size: small
+                      events:
+                        onClick:
+                          - action: confirm
+                            params:
+                              title: 确认变更状态
+                              content: 确定要变更该角色的启用状态吗？
+                          - action: request
+                            params:
+                              method: PUT
+                              url: /api/d/nexus/roles/${row.roleId}/status
+                              body:
+                                status: "${row.status == 'ENABLED' ? 'DISABLED' : 'ENABLED'}"
+                          - action: message
+                            params:
+                              messageType: success
+                              text: 状态已更新
+                          - action: reload
+                            params:
+                              dataSource: roles
+                    - type: Button
+                      props:
+                        text: 删除
+                        variant: link
+                        size: small
+                        danger: true
+                      events:
+                        onClick:
+                          - action: confirm
+                            params:
+                              title: 删除角色
+                              content: 将解除该角色的授权与成员绑定，确定删除吗？
+                          - action: request
+                            params:
+                              method: DELETE
+                              url: /api/d/nexus/roles/${row.roleId}
+                          - action: message
+                            params:
+                              messageType: success
+                              text: 已删除
+                          - action: reload
+                            params:
+                              dataSource: roles
+        - type: Text
+          props:
+            text: 共 ${data.roles.data.total} 个角色
+            type: secondary
+            className: mt-3

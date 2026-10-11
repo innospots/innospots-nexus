@@ -1,0 +1,190 @@
+dsl: "1.0"
+page:
+  id: role-detail-permissions
+  title: 角色权限设置
+  name: roleDetailPermissions
+
+state:
+  roleId: ${route.params.roleId}
+  resourceSearch: ""
+  selectedResourceKey: ""
+  draftGrantIds: []
+  dirty: false
+
+dataSources:
+  role:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/nexus/roles/${state.roleId}
+  catalog:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/nexus/catalog/tree
+  grants:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/nexus/roles/${state.roleId}/permissions
+
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - label: 角色管理
+            href: /system/roles
+          - label: ${data.role.data.roleName}
+          - label: 权限设置
+    - type: Button
+      props:
+        text: ← 返回角色列表
+        variant: link
+      events:
+        onClick:
+          - action: navigate
+            params: { to: /system/roles }
+    - type: Typography
+      props:
+        variant: muted
+        text: ${data.role.data.roleName} · ${data.role.data.roleCode}
+    - type: Tabs
+      props:
+        activeKey: permissions
+        items:
+          - { key: basic, label: 基本信息 }
+          - { key: permissions, label: 权限设置 }
+          - { key: members, label: 成员列表 }
+      events:
+        onChange:
+          - action: if
+            params:
+              condition: ${event == 'basic'}
+              then:
+                - action: navigate
+                  params:
+                    to: /system/roles/${state.roleId}
+          - action: if
+            params:
+              condition: ${event == 'members'}
+              then:
+                - action: navigate
+                  params:
+                    to: /system/roles/${state.roleId}/members
+    - type: Flex
+      props:
+        justify: space-between
+        align: center
+        className: mt-4
+      children:
+        - type: Text
+          props:
+            text: 当前角色已选授权项以保存前草稿为准；保存将全量替换该角色现有授权。
+        - type: Input
+          props:
+            value: ${state.resourceSearch}
+            placeholder: 搜索资源名称 / Key
+          events:
+            onChange:
+              - action: setState
+                params:
+                  resourceSearch: ${event}
+    - type: Flex
+      props:
+        gap: middle
+        className: mt-4
+        align: stretch
+      children:
+        - type: Card
+          props:
+            style: { flex: 1, minWidth: 280 }
+          children:
+            - type: Text
+              props:
+                text: 后台资源目录
+                strong: true
+            - type: Tree
+              props:
+                treeData: ${data.catalog.data}
+                fieldNames:
+                  title: displayName
+                  key: resourceKey
+                  children: children
+              events:
+                onSelect:
+                  - action: setState
+                    params:
+                      selectedResourceKey: ${event.key}
+        - type: Card
+          props:
+            style: { flex: 2 }
+          children:
+            - type: Text
+              props:
+                text: 当前资源授权
+                strong: true
+            - type: Alert
+              props:
+                message: 目录树当前主要提供模块/页面层级；操作与数据源授权项需目录能力补齐后在此展示复选框。
+                variant: info
+                className: mt-2
+            - type: Empty
+              props:
+                description: 该页面暂无可配置权限或请从左侧选择页面资源
+    - type: Flex
+      props:
+        justify: space-between
+        align: center
+        className: mt-4
+      children:
+        - type: Text
+          props:
+            text: "${state.dirty ? '变更尚未保存' : '无未保存变更'}"
+            type: secondary
+        - type: Flex
+          props:
+            gap: small
+          children:
+            - type: Button
+              props:
+                text: 取消
+              events:
+                onClick:
+                  - action: reload
+                    params:
+                      dataSource: grants
+                  - action: setState
+                    params:
+                      dirty: false
+            - type: Button
+              props:
+                text: 保存完整授权
+                variant: primary
+                disabled: ${!state.dirty}
+              events:
+                onClick:
+                  - action: confirm
+                    params:
+                      title: 保存完整授权
+                      content: 本次提交会替换该角色现有的全部授权，确定继续吗？
+                  - action: request
+                    params:
+                      method: PUT
+                      url: /api/d/nexus/roles/${state.roleId}/permissions
+                      body:
+                        grants: ${data.grants.data}
+                  - action: message
+                    params:
+                      messageType: success
+                      text: 授权已保存
+                  - action: setState
+                    params:
+                      dirty: false
+                  - action: reload
+                    params:
+                      dataSource: grants

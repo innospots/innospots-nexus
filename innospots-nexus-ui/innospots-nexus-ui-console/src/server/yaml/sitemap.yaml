@@ -1,0 +1,111 @@
+# Nexus 管理控制台 Sitemap（PRD prd-diagram + OpenAPI /api/d/nexus/*）
+id: site
+resourceType: sitemap
+version: 1
+dslVersion: "1.0"
+app: { name: Nexus Console }
+auth: { loginPath: /login }
+
+pages:
+  - { id: login, path: /login, title: 登录, version: 1, public: true }
+  - { id: dashboard, path: /, title: 工作台, version: 1, lazy: true }
+  - { id: menu-config, path: /system/menus, title: 自定义导航, version: 1, lazy: true }
+  - { id: role-list, path: /system/roles, title: 角色管理, version: 1, lazy: true }
+  - { id: role-detail-basic, path: /system/roles/:roleId, title: 角色基本信息, version: 1, lazy: true }
+  - { id: role-detail-permissions, path: /system/roles/:roleId/permissions, title: 角色权限设置, version: 1, lazy: true }
+  - { id: role-detail-members, path: /system/roles/:roleId/members, title: 角色成员列表, version: 1, lazy: true }
+  - { id: dictionary-type-list, path: /system/dictionaries, title: 数据字典, version: 1, lazy: true }
+  - { id: audit-log-list, path: /system/audit-logs, title: 审计日志, version: 1, lazy: true }
+  - { id: audit-log-detail, path: /system/audit-logs/:logId, title: 审计日志详情, version: 1, lazy: true }
+  - { id: plugin-list, path: /system/plugins, title: 插件管理, version: 1, lazy: true }
+  - { id: plugin-detail, path: /system/plugins/:pluginId, title: 插件详情, version: 1, lazy: true }
+
+menus:
+  - { id: login, type: page, pageId: login, title: 登录, layout: login, public: true, hidden: true }
+  - { id: home, type: page, pageId: dashboard, title: 工作台, icon: home, layout: admin, order: 1 }
+  - id: system
+    type: group
+    title: 系统管理
+    icon: settings
+    order: 2
+    children:
+      - { id: nav-menus, type: page, pageId: menu-config, title: 菜单管理, layout: admin }
+      - { id: nav-dictionaries, type: page, pageId: dictionary-type-list, title: 数据字典, layout: admin }
+      - { id: nav-roles, type: page, pageId: role-list, title: 角色管理, layout: admin }
+      - { id: nav-audit, type: page, pageId: audit-log-list, title: 审计日志, layout: admin }
+      - { id: nav-plugins, type: page, pageId: plugin-list, title: 插件管理, layout: admin }
+  - { id: role-detail-basic, type: page, pageId: role-detail-basic, layout: admin, hidden: true, activeMenu: nav-roles }
+  - { id: role-detail-permissions, type: page, pageId: role-detail-permissions, layout: admin, hidden: true, activeMenu: nav-roles }
+  - { id: role-detail-members, type: page, pageId: role-detail-members, layout: admin, hidden: true, activeMenu: nav-roles }
+  - { id: audit-log-detail, type: page, pageId: audit-log-detail, layout: admin, hidden: true, activeMenu: nav-audit }
+  - { id: plugin-detail, type: page, pageId: plugin-detail, layout: admin, hidden: true, activeMenu: nav-plugins }
+
+layouts:
+  admin:
+    dsl: "1.0"
+    body:
+      type: Layout
+      props: { className: shell-root }
+      children:
+        - type: Sidebar
+          props:
+            className: shell-main
+            brand: { title: Nexus Console, logo: /next.svg }
+            collapsible: true
+            content:
+              type: SitemapMenu
+              props:
+                items: ${data.session.menus}
+                collapsible: true
+                className: shell-menu
+              events:
+                onSelect:
+                  - action: navigate
+                    params: { to: "${event}" }
+          children:
+            - type: Header
+              props:
+                className: shell-header
+                locales:
+                  - { label: 中文, value: zh-CN }
+                  - { label: English, value: en-US }
+                user:
+                  name: ${data.session.user.name}
+                  items:
+                    - { label: 退出登录, value: logout, icon: log-out }
+              events:
+                onUserSelect:
+                  - action: if
+                    params:
+                      condition: ${event == 'logout'}
+                      then:
+                        - action: request
+                          params:
+                            method: POST
+                            url: /api/auth/logout
+                        - action: app.reload
+                          params: { to: /login }
+                      else:
+                        - action: message
+                          params:
+                            messageType: info
+                            text: 个人中心暂未开放
+                onLocaleChange:
+                  - action: message
+                    params:
+                      messageType: info
+                      text: 语言切换为 ${event}（演示）
+              children:
+                - type: ThemeSwitcher
+            - type: Content
+              props: { className: shell-content }
+              children:
+                - type: PageOutlet
+  login:
+    dsl: "1.0"
+    body:
+      type: PageOutlet
+  blank:
+    dsl: "1.0"
+    body:
+      type: PageOutlet

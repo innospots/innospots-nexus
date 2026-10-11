@@ -1,0 +1,298 @@
+dsl: "1.0"
+page:
+  id: dictionary-type-list
+  title: 数据字典
+  name: dictionaryTypeList
+
+state:
+  input: ""
+  status: ""
+  pageNo: 1
+  pageSize: 20
+  editingTypeId: ""
+
+dataSources:
+  types:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/nexus/dictionary-types
+      params:
+        input: ${state.input}
+        status: ${state.status}
+        pageNo: ${state.pageNo}
+        pageSize: ${state.pageSize}
+  editing:
+    type: http
+    autoLoad: false
+    request:
+      method: GET
+      url: /api/d/nexus/dictionary-types/${state.editingTypeId}
+
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - label: 系统管理
+          - label: 数据字典
+    - type: Flex
+      props:
+        justify: space-between
+        align: center
+      children:
+        - type: Flex
+          props:
+            direction: vertical
+            gap: 2
+          children:
+            - type: Typography
+              props:
+                variant: h3
+                text: 数据字典
+            - type: Typography
+              props:
+                variant: muted
+                text: 维护业务可复用的字典类型和对应的值。
+        - type: Button
+          props:
+            text: + 新建类型
+            variant: primary
+          events:
+            onClick:
+              - action: setState
+                params:
+                  editingTypeId: ""
+              - action: reload
+                params:
+                  dataSource: editing
+              - action: overlay.open
+                params:
+                  overlay: &typeDrawer
+                    type: drawer
+                    title: "${state.editingTypeId == '' ? '新建字典类型' : '编辑字典类型'}"
+                    width: 720
+                    content:
+                      type: Form
+                      props:
+                        name: dictionaryTypeForm
+                        layout: vertical
+                        initialValues: ${data.editing.data}
+                      events:
+                        onSubmit:
+                          - action: if
+                            params:
+                              condition: ${state.editingTypeId == ''}
+                              then:
+                                - action: request
+                                  params:
+                                    method: POST
+                                    url: /api/d/nexus/dictionary-types
+                                    body:
+                                      typeCode: ${event.typeCode}
+                                      typeName: ${event.typeName}
+                                      securityRealm: ${event.securityRealm}
+                                      status: ${event.status}
+                              else:
+                                - action: request
+                                  params:
+                                    method: PUT
+                                    url: /api/d/nexus/dictionary-types/${state.editingTypeId}
+                                    body:
+                                      typeName: ${event.typeName}
+                                      status: ${event.status}
+                          - action: message
+                            params:
+                              messageType: success
+                              text: 已保存
+                          - action: overlay.close
+                          - action: reload
+                            params:
+                              dataSource: types
+                      children:
+                        - type: Field
+                          props:
+                            label: 类型编码
+                            required: true
+                          children:
+                            - type: Input
+                              props:
+                                name: typeCode
+                                disabled: ${state.editingTypeId != ''}
+                                rules:
+                                  - required: true
+                                    message: 请输入类型编码
+                        - type: Field
+                          props:
+                            label: 类型名称
+                            required: true
+                          children:
+                            - type: Input
+                              props:
+                                name: typeName
+                                rules:
+                                  - required: true
+                                    message: 请输入类型名称
+                        - type: Field
+                          props:
+                            label: 安全域
+                            required: true
+                          children:
+                            - type: Select
+                              props:
+                                name: securityRealm
+                                disabled: ${state.editingTypeId != ''}
+                                options:
+                                  - { label: 平台, value: PLATFORM }
+                                  - { label: 租户, value: TENANT }
+                                rules:
+                                  - required: true
+                                    message: 请选择安全域
+                        - type: Field
+                          props:
+                            label: 状态
+                          children:
+                            - type: Select
+                              props:
+                                name: status
+                                options:
+                                  - { label: 启用, value: ENABLED }
+                                  - { label: 禁用, value: DISABLED }
+                        - type: Alert
+                          props:
+                            variant: info
+                            message: 多语言名称、值类型、单值/多值及侧滑层内字典项整单保存为 PRD 目标能力；当前契约为 typeName 单字段，字典项请在类型编码就绪后通过 items 接口维护。
+                        - type: Flex
+                          props:
+                            justify: end
+                            gap: small
+                            className: mt-4
+                          children:
+                            - type: Button
+                              props:
+                                text: 取消
+                              events:
+                                onClick:
+                                  - action: overlay.close
+                            - type: Button
+                              props:
+                                text: 保存全部
+                                variant: primary
+                                submit: true
+                                htmlType: submit
+    - type: Card
+      children:
+        - type: Form
+          props:
+            name: dictSearch
+            layout: inline
+          events:
+            onSubmit:
+              - action: setState
+                params:
+                  input: ${event.input}
+                  status: ${event.status}
+                  pageNo: 1
+              - action: reload
+                params:
+                  dataSource: types
+          children:
+            - type: Field
+              props:
+                label: 编码/名称
+              children:
+                - type: Input
+                  props:
+                    name: input
+            - type: Field
+              props:
+                label: 状态
+              children:
+                - type: Select
+                  props:
+                    name: status
+                    allowClear: true
+                    options:
+                      - { label: 全部, value: "" }
+                      - { label: 启用, value: ENABLED }
+                      - { label: 禁用, value: DISABLED }
+            - type: Field
+              props:
+                label: " "
+              children:
+                - type: Flex
+                  props:
+                    gap: small
+                    align: center
+                  children:
+                    - type: Button
+                      props:
+                        text: 查询
+                        submit: true
+                        htmlType: submit
+                    - type: Button
+                      props:
+                        text: 重置
+                      events:
+                        onClick:
+                          - action: form.setValues
+                            params:
+                              form: dictSearch
+                              values:
+                                input: ""
+                                status: ""
+                          - action: setState
+                            params:
+                              input: ""
+                              status: ""
+                              pageNo: 1
+                          - action: reload
+                            params:
+                              dataSource: types
+        - type: Table
+          props:
+            rowKey: dictionaryTypeId
+            dataSource: ${data.types.data.records}
+            loading: ${dataStatus.types.loading}
+            className: mt-4
+            columns:
+              - title: 类型名称
+                cell:
+                  type: Button
+                  props:
+                    text: ${row.typeName}
+                    variant: link
+                    size: small
+                  events:
+                    onClick: &editType
+                      - action: setState
+                        params:
+                          editingTypeId: ${row.dictionaryTypeId}
+                      - action: reload
+                        params:
+                          dataSource: editing
+                      - action: overlay.open
+                        params:
+                          overlay: *typeDrawer
+              - title: 类型编码
+                dataIndex: typeCode
+              - title: 安全域
+                dataIndex: securityRealm
+              - title: 状态
+                dataIndex: status
+              - title: 操作
+                cell:
+                  type: Button
+                  props:
+                    text: 编辑
+                    variant: link
+                    size: small
+                  events:
+                    onClick: *editType
+        - type: Text
+          props:
+            text: 共 ${data.types.data.total} 种类型
+            type: secondary
+            className: mt-3

@@ -1,0 +1,225 @@
+dsl: "1.0"
+page:
+  id: audit-log-list
+  title: 审计日志
+  name: auditLogList
+
+state:
+  timeRange: last7d
+  operator: ""
+  operationType: ""
+  result: ""
+  keyword: ""
+  pageNo: 1
+  pageSize: 20
+
+dataSources:
+  logs:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/nexus/audit-logs
+      params:
+        timeRange: ${state.timeRange}
+        operator: ${state.operator}
+        operationType: ${state.operationType}
+        result: ${state.result}
+        keyword: ${state.keyword}
+        pageNo: ${state.pageNo}
+        pageSize: ${state.pageSize}
+
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - label: 系统管理
+          - label: 审计日志
+    - type: Flex
+      props:
+        justify: space-between
+        align: center
+      children:
+        - type: Flex
+          props:
+            direction: vertical
+            gap: 2
+          children:
+            - type: Typography
+              props:
+                variant: h3
+                text: 审计日志
+            - type: Typography
+              props:
+                variant: muted
+                text: 查询管理操作轨迹；敏感参数按安全策略脱敏展示。
+        - type: Flex
+          props:
+            gap: small
+          children:
+            - type: Button
+              props:
+                text: 导出
+              events:
+                onClick:
+                  - action: message
+                    params:
+                      messageType: info
+                      text: 导出需后端审计查询接口就绪后对接
+            - type: Button
+              props:
+                text: 刷新
+              events:
+                onClick:
+                  - action: reload
+                    params:
+                      dataSource: logs
+    - type: Card
+      children:
+        - type: Form
+          props:
+            name: auditSearch
+            layout: inline
+          events:
+            onSubmit:
+              - action: setState
+                params:
+                  timeRange: ${event.timeRange}
+                  operator: ${event.operator}
+                  operationType: ${event.operationType}
+                  result: ${event.result}
+                  keyword: ${event.keyword}
+                  pageNo: 1
+              - action: reload
+                params:
+                  dataSource: logs
+          children:
+            - type: Field
+              props:
+                label: 时间范围
+              children:
+                - type: Select
+                  props:
+                    name: timeRange
+                    options:
+                      - { label: 最近 7 天, value: last7d }
+                      - { label: 最近 24 小时, value: last24h }
+                      - { label: 最近 30 天, value: last30d }
+            - type: Field
+              props:
+                label: 操作者
+              children:
+                - type: Input
+                  props:
+                    name: operator
+            - type: Field
+              props:
+                label: 操作类型
+              children:
+                - type: Select
+                  props:
+                    name: operationType
+                    allowClear: true
+                    options:
+                      - { label: 全部, value: "" }
+                      - { label: 创建, value: CREATE }
+                      - { label: 更新, value: UPDATE }
+                      - { label: 删除, value: DELETE }
+                      - { label: 授权, value: GRANT }
+            - type: Field
+              props:
+                label: 结果
+              children:
+                - type: Select
+                  props:
+                    name: result
+                    allowClear: true
+                    options:
+                      - { label: 全部, value: "" }
+                      - { label: 成功, value: SUCCESS }
+                      - { label: 失败, value: FAILURE }
+            - type: Field
+              props:
+                label: 关键字
+              children:
+                - type: Input
+                  props:
+                    name: keyword
+                    placeholder: 操作/对象/方法
+            - type: Field
+              props:
+                label: " "
+              children:
+                - type: Flex
+                  props:
+                    gap: small
+                    align: center
+                  children:
+                    - type: Button
+                      props:
+                        text: 查询
+                        submit: true
+                        htmlType: submit
+                    - type: Button
+                      props:
+                        text: 重置
+                      events:
+                        onClick:
+                          - action: form.setValues
+                            params:
+                              form: auditSearch
+                              values:
+                                timeRange: last7d
+                                operator: ""
+                                operationType: ""
+                                result: ""
+                                keyword: ""
+                          - action: setState
+                            params:
+                              timeRange: last7d
+                              operator: ""
+                              operationType: ""
+                              result: ""
+                              keyword: ""
+                              pageNo: 1
+                          - action: reload
+                            params:
+                              dataSource: logs
+        - type: Table
+          props:
+            rowKey: logId
+            dataSource: ${data.logs.data.records}
+            loading: ${dataStatus.logs.loading}
+            className: mt-4
+            columns:
+              - title: 时间
+                dataIndex: occurredAt
+              - title: 操作者
+                dataIndex: operatorName
+              - title: 操作类型
+                dataIndex: operationType
+              - title: 操作对象
+                dataIndex: target
+              - title: 结果
+                dataIndex: result
+              - title: 耗时
+                dataIndex: durationMs
+              - title: 详情
+                cell:
+                  type: Button
+                  props:
+                    text: 查看
+                    variant: link
+                    size: small
+                  events:
+                    onClick:
+                      - action: navigate
+                        params:
+                          to: /system/audit-logs/${row.logId}
+        - type: Text
+          props:
+            text: 共 ${data.logs.data.total} 条
+            type: secondary
+            className: mt-3

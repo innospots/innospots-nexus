@@ -1,0 +1,47 @@
+dsl: "1.0"
+page:
+  id: login
+  title: 登录
+  name: login
+  description: Nexus 管理控制台登录
+
+body:
+  type: Login
+  props:
+    layout: split
+    authVariant: card
+    brand:
+      name: Nexus Console
+      title: 管理控制台
+      description: 配置导航、角色授权、字典、审计与插件生命周期。
+    title: 登录
+    subtitle: 演示账号 admin / pactor123（本地 UI 会话）；业务 API 需后端 8082 已登录会话。
+    submitText: 登 录
+  events:
+    onSubmit:
+      - id: loginResult
+        action: request
+        params:
+          method: POST
+          url: /api/auth/login
+          body:
+            username: ${event.username}
+            password: ${event.password}
+      - action: if
+        params:
+          condition: ${actions.loginResult == null || actions.loginResult.token == null}
+          then:
+            - action: message
+              params:
+                messageType: error
+                text: 用户名或密码错误（演示账号 admin / pactor123）
+      - action: if
+        params:
+          condition: ${actions.loginResult != null && actions.loginResult.token != null}
+          then:
+            - action: message
+              params:
+                messageType: success
+                text: 登录成功，正在跳转…
+            - action: app.reload
+              params: { to: / }

@@ -1,0 +1,116 @@
+dsl: "1.0"
+page:
+  id: audit-log-detail
+  title: 审计日志详情
+  name: auditLogDetail
+
+state:
+  logId: ${route.params.logId}
+
+dataSources:
+  log:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/nexus/audit-logs/${state.logId}
+
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - label: 审计日志
+            href: /system/audit-logs
+          - label: 记录详情
+    - type: Button
+      props:
+        text: ← 返回审计日志
+        variant: link
+      events:
+        onClick:
+          - action: navigate
+            params: { to: /system/audit-logs }
+    - type: Flex
+      props:
+        justify: space-between
+        align: center
+        className: mt-2
+      children:
+        - type: Typography
+          props:
+            variant: h3
+            text: ${data.log.data.operationType}
+        - type: Badge
+          props:
+            text: ${data.log.data.result}
+    - type: Card
+      props:
+        className: mt-4
+      children:
+        - type: Text
+          props:
+            text: 操作信息
+            strong: true
+        - type: Descriptions
+          props:
+            className: mt-2
+            items:
+              - { label: 操作者, children: "${data.log.data.operatorName}" }
+              - { label: 用户 ID, children: "${data.log.data.operatorId}" }
+              - { label: 安全域, children: "${data.log.data.securityRealm}" }
+              - { label: 操作类型, children: "${data.log.data.operationType}" }
+              - { label: 操作对象, children: "${data.log.data.target}" }
+              - { label: 执行方法, children: "${data.log.data.method}" }
+              - { label: 请求时间, children: "${data.log.data.occurredAt}" }
+    - type: Card
+      props:
+        className: mt-4
+      children:
+        - type: Text
+          props:
+            text: 执行结果
+            strong: true
+        - type: Descriptions
+          props:
+            className: mt-2
+            items:
+              - { label: 状态, children: "${data.log.data.result}" }
+              - { label: 耗时, children: "${data.log.data.durationMs}" }
+              - { label: 错误码, children: "${data.log.data.errorCode}" }
+              - { label: 结果摘要, children: "${data.log.data.summary}" }
+    - type: Card
+      props:
+        className: mt-4
+      children:
+        - type: Text
+          props:
+            text: 请求参数（敏感字段已脱敏）
+            strong: true
+        - type: Text
+          props:
+            text: ${data.log.data.requestPayload}
+            className: mt-2 font-mono text-sm
+    - type: Flex
+      props:
+        justify: end
+        gap: small
+        className: mt-4
+      children:
+        - type: Button
+          props:
+            text: 复制日志 ID
+          events:
+            onClick:
+              - action: message
+                params:
+                  messageType: success
+                  text: 已复制 ${state.logId}
+        - type: Button
+          props:
+            text: 返回
+          events:
+            onClick:
+              - action: navigate
+                params: { to: /system/audit-logs }

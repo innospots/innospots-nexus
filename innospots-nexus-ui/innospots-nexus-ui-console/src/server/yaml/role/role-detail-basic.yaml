@@ -1,0 +1,188 @@
+dsl: "1.0"
+page:
+  id: role-detail-basic
+  title: 角色基本信息
+  name: roleDetailBasic
+
+state:
+  roleId: ${route.params.roleId}
+
+dataSources:
+  role:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/nexus/roles/${state.roleId}
+
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - label: 角色管理
+            href: /system/roles
+          - label: ${data.role.data.roleName}
+    - type: Button
+      props:
+        text: ← 返回角色列表
+        variant: link
+      events:
+        onClick:
+          - action: navigate
+            params: { to: /system/roles }
+    - type: Flex
+      props:
+        direction: vertical
+        gap: 2
+        className: mt-2
+      children:
+        - type: Typography
+          props:
+            variant: h3
+            text: ${data.role.data.roleCode} · ${data.role.data.roleName}
+    - type: Tabs
+      props:
+        activeKey: basic
+        items:
+          - { key: basic, label: 基本信息 }
+          - { key: permissions, label: 权限设置 }
+          - { key: members, label: 成员列表 }
+      events:
+        onChange:
+          - action: if
+            params:
+              condition: ${event == 'permissions'}
+              then:
+                - action: navigate
+                  params:
+                    to: /system/roles/${state.roleId}/permissions
+          - action: if
+            params:
+              condition: ${event == 'members'}
+              then:
+                - action: navigate
+                  params:
+                    to: /system/roles/${state.roleId}/members
+    - type: Card
+      props:
+        className: mt-4
+      children:
+        - type: Form
+          props:
+            name: roleBasicForm
+            layout: vertical
+            initialValues: ${data.role.data}
+          events:
+            onSubmit:
+              - action: request
+                params:
+                  method: PUT
+                  url: /api/d/nexus/roles/${state.roleId}
+                  body:
+                    roleName: ${event.roleName}
+                    description: ${event.description}
+                    sortOrder: ${event.sortOrder}
+              - action: message
+                params:
+                  messageType: success
+                  text: 已保存修改
+              - action: reload
+                params:
+                  dataSource: role
+          children:
+            - type: Text
+              props:
+                text: 基本信息
+                strong: true
+            - type: Separator
+            - type: Field
+              props:
+                label: 角色名称
+                required: true
+              children:
+                - type: Input
+                  props:
+                    name: roleName
+                    rules:
+                      - required: true
+                        message: 请输入角色名称
+            - type: Grid
+              props:
+                columns: 2
+                gap: 16
+              children:
+                - type: Field
+                  props:
+                    label: 角色编码
+                    labelHint: 创建后不可修改
+                  children:
+                    - type: Input
+                      props:
+                        name: roleCode
+                        disabled: true
+                - type: Field
+                  props:
+                    label: 归属层级
+                  children:
+                    - type: Input
+                      props:
+                        name: ownerType
+                        disabled: true
+            - type: Grid
+              props:
+                columns: 2
+                gap: 16
+              children:
+                - type: Field
+                  props:
+                    label: 安全域
+                  children:
+                    - type: Input
+                      props:
+                        name: securityRealm
+                        disabled: true
+                - type: Field
+                  props:
+                    label: 排序
+                  children:
+                    - type: NumberInput
+                      props:
+                        name: sortOrder
+                        min: 0
+                        precision: 0
+            - type: Field
+              props:
+                label: 描述
+              children:
+                - type: Textarea
+                  props:
+                    name: description
+            - type: Descriptions
+              props:
+                className: mt-4
+                items:
+                  - { label: 创建时间, children: "${data.role.data.createdAt}" }
+                  - { label: 更新时间, children: "${data.role.data.updatedAt}" }
+            - type: Flex
+              props:
+                justify: end
+                gap: small
+                className: mt-4
+              children:
+                - type: Button
+                  props:
+                    text: 取消
+                  events:
+                    onClick:
+                      - action: form.setValues
+                        params:
+                          form: roleBasicForm
+                          values: ${data.role.data}
+                - type: Button
+                  props:
+                    text: 保存修改
+                    variant: primary
+                    submit: true
+                    htmlType: submit

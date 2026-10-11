@@ -1,0 +1,203 @@
+dsl: "1.0"
+page:
+  id: plugin-list
+  title: 插件管理
+  name: pluginList
+
+state:
+  installedFilter: all
+  keyword: ""
+
+dataSources:
+  plugins:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/nexus/plugins
+
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - label: 系统管理
+          - label: 插件管理
+    - type: Flex
+      props:
+        justify: space-between
+        align: center
+      children:
+        - type: Flex
+          props:
+            direction: vertical
+            gap: 2
+          children:
+            - type: Typography
+              props:
+                variant: h3
+                text: 插件管理
+            - type: Typography
+              props:
+                variant: muted
+                text: 管理插件安装状态与运行生命周期。
+        - type: Button
+          props:
+            text: 刷新状态
+          events:
+            onClick:
+              - action: reload
+                params:
+                  dataSource: plugins
+    - type: Card
+      children:
+        - type: Flex
+          props:
+            gap: middle
+            align: center
+            style:
+              flexWrap: wrap
+          children:
+            - type: ChipFilter
+              props:
+                mode: single
+                value: ${state.installedFilter}
+                items:
+                  - { label: 全部, value: all }
+                  - { label: 已安装, value: installed }
+                  - { label: 未安装, value: notInstalled }
+              events:
+                onChange:
+                  - action: setState
+                    params:
+                      installedFilter: ${event}
+            - type: Input
+              props:
+                value: ${state.keyword}
+                placeholder: 搜索插件名称
+                style: { minWidth: 240 }
+              events:
+                onChange:
+                  - action: setState
+                    params:
+                      keyword: ${event}
+        - type: Table
+          props:
+            rowKey: pluginId
+            dataSource: ${data.plugins.data}
+            loading: ${dataStatus.plugins.loading}
+            className: mt-4
+            columns:
+              - title: 插件
+                cell:
+                  type: Button
+                  props:
+                    text: ${row.pluginId}
+                    variant: link
+                    size: small
+                  events:
+                    onClick:
+                      - action: navigate
+                        params:
+                          to: /system/plugins/${row.pluginId}
+              - title: 版本
+                dataIndex: version
+              - title: 已安装
+                cell:
+                  type: Text
+                  props:
+                    text: "${row.installed ? '已安装' : '未安装'}"
+              - title: 运行状态
+                dataIndex: runtimeState
+              - title: 操作
+                cell:
+                  type: Flex
+                  props:
+                    gap: small
+                  children:
+                    - type: Button
+                      when: ${!row.installed}
+                      props:
+                        text: 安装
+                        variant: link
+                        size: small
+                      events:
+                        onClick:
+                          - action: confirm
+                            params:
+                              title: 安装插件
+                              content: 安装后可能贡献新的页面与导航，确定安装吗？
+                          - action: request
+                            params:
+                              method: POST
+                              url: /api/d/nexus/plugins/${row.pluginId}/install
+                          - action: message
+                            params:
+                              messageType: success
+                              text: 安装请求已提交
+                          - action: reload
+                            params:
+                              dataSource: plugins
+                    - type: Button
+                      when: ${row.installed && row.desiredEnabled}
+                      props:
+                        text: 停用
+                        variant: link
+                        size: small
+                      events:
+                        onClick:
+                          - action: confirm
+                            params:
+                              title: 停用插件
+                              content: 停用后相关能力将不可用，确定吗？
+                          - action: request
+                            params:
+                              method: POST
+                              url: /api/d/nexus/plugins/${row.pluginId}/disable
+                          - action: reload
+                            params:
+                              dataSource: plugins
+                    - type: Button
+                      when: ${row.installed && !row.desiredEnabled}
+                      props:
+                        text: 启用
+                        variant: link
+                        size: small
+                      events:
+                        onClick:
+                          - action: confirm
+                            params:
+                              title: 启用插件
+                              content: 确定启用该插件吗？
+                          - action: request
+                            params:
+                              method: POST
+                              url: /api/d/nexus/plugins/${row.pluginId}/enable
+                          - action: reload
+                            params:
+                              dataSource: plugins
+                    - type: Button
+                      when: ${row.lastError != null && row.lastError != ''}
+                      props:
+                        text: 重试
+                        variant: link
+                        size: small
+                      events:
+                        onClick:
+                          - action: confirm
+                            params:
+                              title: 重试启动
+                              content: 将重新尝试启动该插件，确定吗？
+                          - action: request
+                            params:
+                              method: POST
+                              url: /api/d/nexus/plugins/${row.pluginId}/retry
+                          - action: reload
+                            params:
+                              dataSource: plugins
+        - type: Text
+          props:
+            text: 共 ${data.plugins.data.length} 个插件
+            type: secondary
+            className: mt-3

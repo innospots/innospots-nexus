@@ -11,7 +11,7 @@ import { getLazyPage } from "@/server/sitemap";
  */
 export async function GET(
   request: Request,
-  context: RouteContext<"/api/pages/[id]">,
+  context: RouteContext<"/api/public/pages/[id]">,
 ) {
   const { id } = await context.params;
   const store = await cookies();

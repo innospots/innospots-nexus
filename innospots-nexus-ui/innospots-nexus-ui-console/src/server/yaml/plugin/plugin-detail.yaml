@@ -1,0 +1,160 @@
+dsl: "1.0"
+page:
+  id: plugin-detail
+  title: 插件详情
+  name: pluginDetail
+
+state:
+  pluginId: ${route.params.pluginId}
+
+dataSources:
+  plugin:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/nexus/plugins/${state.pluginId}
+
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - label: 插件管理
+            href: /system/plugins
+          - label: ${state.pluginId}
+    - type: Button
+      props:
+        text: ← 返回插件列表
+        variant: link
+      events:
+        onClick:
+          - action: navigate
+            params: { to: /system/plugins }
+    - type: Card
+      props:
+        className: mt-2
+      children:
+        - type: Flex
+          props:
+            justify: space-between
+            align: start
+          children:
+            - type: Flex
+              props:
+                direction: vertical
+                gap: small
+              children:
+                - type: Typography
+                  props:
+                    variant: h3
+                    text: ${state.pluginId}
+                - type: Typography
+                  props:
+                    variant: muted
+                    text: 版本 ${data.plugin.data.version}
+                - type: Flex
+                  props:
+                    gap: small
+                  children:
+                    - type: Badge
+                      props:
+                        text: "${data.plugin.data.installed ? '已安装' : '未安装'}"
+                    - type: Badge
+                      when: ${data.plugin.data.installed}
+                      props:
+                        text: ${data.plugin.data.runtimeState}
+            - type: Flex
+              props:
+                gap: small
+              children:
+                - type: Button
+                  when: ${!data.plugin.data.installed}
+                  props:
+                    text: 安装
+                    variant: primary
+                  events:
+                    onClick:
+                      - action: confirm
+                        params:
+                          title: 安装插件
+                          content: 确定安装吗？
+                      - action: request
+                        params:
+                          method: POST
+                          url: /api/d/nexus/plugins/${state.pluginId}/install
+                      - action: reload
+                        params:
+                          dataSource: plugin
+                - type: Button
+                  when: ${data.plugin.data.installed && data.plugin.data.desiredEnabled}
+                  props:
+                    text: 停用
+                    variant: primary
+                  events:
+                    onClick:
+                      - action: confirm
+                        params:
+                          title: 停用插件
+                          content: 确定停用吗？
+                      - action: request
+                        params:
+                          method: POST
+                          url: /api/d/nexus/plugins/${state.pluginId}/disable
+                      - action: reload
+                        params:
+                          dataSource: plugin
+                - type: Button
+                  when: ${data.plugin.data.installed && !data.plugin.data.desiredEnabled}
+                  props:
+                    text: 启用
+                    variant: primary
+                  events:
+                    onClick:
+                      - action: request
+                        params:
+                          method: POST
+                          url: /api/d/nexus/plugins/${state.pluginId}/enable
+                      - action: reload
+                        params:
+                          dataSource: plugin
+                - type: Button
+                  when: ${data.plugin.data.lastError != null && data.plugin.data.lastError != ''}
+                  props:
+                    text: 重试
+                  events:
+                    onClick:
+                      - action: request
+                        params:
+                          method: POST
+                          url: /api/d/nexus/plugins/${state.pluginId}/retry
+                      - action: reload
+                        params:
+                          dataSource: plugin
+    - type: Card
+      props:
+        className: mt-4
+      children:
+        - type: Text
+          props:
+            text: 基本信息
+            strong: true
+        - type: Descriptions
+          props:
+            className: mt-2
+            items:
+              - { label: 插件 ID, children: "${data.plugin.data.pluginId}" }
+              - { label: 版本号, children: "${data.plugin.data.version}" }
+              - { label: 来源类型, children: "${data.plugin.data.sourceType}" }
+              - { label: 安装日期, children: "${data.plugin.data.installedAt}" }
+              - { label: 最近发现, children: "${data.plugin.data.lastDiscoveredAt}" }
+    - type: Card
+      when: ${data.plugin.data.lastError != null && data.plugin.data.lastError != ''}
+      props:
+        className: mt-4
+      children:
+        - type: Alert
+          props:
+            variant: error
+            message: ${data.plugin.data.lastError}
