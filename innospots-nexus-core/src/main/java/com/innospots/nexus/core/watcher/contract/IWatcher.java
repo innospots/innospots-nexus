@@ -21,6 +21,13 @@ public interface IWatcher extends Runnable {
     boolean isRunning();
 
     /**
+     * 当前是否满足注册与调度所需的运行条件。
+     *
+     * @return 为 {@code false} 时不应注册或启动该 Watcher
+     */
+    boolean canBeRun();
+
+    /**
      * 执行前检查；返回 {@code false} 时跳过本轮。
      * 默认实现始终返回 {@code true}。
      *

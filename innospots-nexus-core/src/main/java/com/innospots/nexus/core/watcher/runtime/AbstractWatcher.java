@@ -49,6 +49,16 @@ public abstract class AbstractWatcher implements IWatcher {
     }
 
     /**
+     * 当前是否满足构造时传入的运行条件。
+     *
+     * @return {@code runningCondition} 的当前值
+     */
+    @Override
+    public boolean canBeRun() {
+        return runningCondition.get();
+    }
+
+    /**
      * 主执行循环：检查 → 执行 → 休眠，重复直至停止或运行条件为 {@code false}。
      */
     @Override
