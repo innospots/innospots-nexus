@@ -49,6 +49,12 @@ public class WatcherSupervisor implements AutoCloseable {
      * @param watcher 待注册的 Watcher
      */
     public void register(IWatcher watcher) {
+        if (!watcher.canBeRun()) {
+            logger.warn(
+                    "Skip registering watcher {}: running condition is false",
+                    watcher.name());
+            return;
+        }
         logger.info("Register watcher: {}", watcher.getClass().getSimpleName());
         if (executor == null) {
             executor = ThreadPoolBuilder.build(maxSize, maxSize, 0, name);

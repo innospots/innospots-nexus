@@ -54,4 +54,21 @@ class WatcherContractsTest {
         supervisor.register(watcher);
         assertThat(supervisor.activeCount()).isEqualTo(1);
     }
+
+    @Test
+    void supervisorSkipsWatcherWhenRunningConditionIsFalse() {
+        WatcherSupervisor supervisor = new WatcherSupervisor(2, "skip-supervisor");
+
+        IWatcher watcher = new AbstractWatcher("skipped-watcher", 50, () -> false) {
+            @Override
+            public int execute() {
+                return 50;
+            }
+        };
+
+        supervisor.register(watcher);
+
+        assertThat(supervisor.activeCount()).isEqualTo(0);
+        assertThat(watcher.isRunning()).isFalse();
+    }
 }
