@@ -1,5 +1,9 @@
 package com.innospots.nexus.console.catalog.bootstrap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.innospots.nexus.console.catalog.domain.model.CatalogSyncResult;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogSyncService;
 import com.innospots.nexus.core.bootstrap.NexusStartupContext;
 import com.innospots.nexus.core.bootstrap.NexusStartupTask;
@@ -11,6 +15,8 @@ import com.innospots.nexus.core.bootstrap.NexusStartupTask;
  * @date 2026/09/13
  */
 public final class ConsoleCatalogSyncStartupTask implements NexusStartupTask {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConsoleCatalogSyncStartupTask.class);
 
     private static final int ORDER = 200;
 
@@ -53,6 +59,12 @@ public final class ConsoleCatalogSyncStartupTask implements NexusStartupTask {
     
     @Override
     public void run(NexusStartupContext context) {
-        syncService.sync();
+        LOGGER.info("Console catalog sync startup task beginning (order={})", ORDER);
+        CatalogSyncResult result = syncService.sync();
+        LOGGER.info(
+                "Console catalog sync startup task finished created={} updated={} disabled={}",
+                result.createdResources(),
+                result.updatedResources(),
+                result.disabledResources());
     }
 }

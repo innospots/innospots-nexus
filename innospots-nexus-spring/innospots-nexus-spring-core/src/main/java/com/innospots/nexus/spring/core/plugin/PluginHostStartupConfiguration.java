@@ -3,6 +3,8 @@ package com.innospots.nexus.spring.core.plugin;
 import java.util.List;
 
 import org.springframework.beans.factory.ObjectProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -27,6 +29,8 @@ import com.innospots.nexus.core.plugin.runtime.PluginRuntimeConfig;
 @Configuration
 public class PluginHostStartupConfiguration {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(PluginHostStartupConfiguration.class);
+
     /**
      * 内置插件宿主启动任务。
      */
@@ -39,6 +43,7 @@ public class PluginHostStartupConfiguration {
             List<PluginContributionHandler<?>> contributionHandlers,
             ObjectProvider<PluginContributionSnapshotterRegistry> contributionSnapshotters,
             PluginInstallationManagerHolder managerHolder) {
+        LOGGER.info("Registering plugin host startup task bean (Nexus startup order=100)");
         return new PluginHostStartupTask(
                 () -> new PluginHostBootstrapRequest(
                         installationDao.getObject(),

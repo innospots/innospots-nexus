@@ -27,7 +27,6 @@ import com.innospots.nexus.console.role.dao.RoleDao;
 import com.innospots.nexus.console.permission.dao.PermissionGrantDao;
 import com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao;
 import com.innospots.nexus.console.permission.service.PermissionVisibilityService;
-import com.innospots.nexus.core.bootstrap.NexusStartupTask;
 import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributionCatalog;
 
 /**
@@ -120,15 +119,6 @@ public class ConsoleCatalogBeans {
     ConsoleCatalogSyncStartupTask consoleCatalogSyncStartupTask(
             ConsoleCatalogSyncService syncService) {
         return new ConsoleCatalogSyncStartupTask(syncService);
-    }
-
-    /**
-     * 将目录同步任务注册进启动编排。
-     */
-    @Produces
-    @Singleton
-    NexusStartupTask catalogSyncStartupTask(ConsoleCatalogSyncStartupTask task) {
-        return task;
     }
 
     /**

@@ -5,6 +5,9 @@ import java.util.function.Supplier;
 
 import com.innospots.nexus.core.bootstrap.NexusStartupContext;
 import com.innospots.nexus.core.bootstrap.NexusStartupTask;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.innospots.nexus.core.plugin.installation.bootstrap.PluginHostBootstrap;
 import com.innospots.nexus.core.plugin.installation.bootstrap.PluginHostBootstrapRequest;
 import com.innospots.nexus.core.plugin.installation.service.PluginInstallationManager;
@@ -15,6 +18,8 @@ import com.innospots.nexus.core.plugin.installation.service.PluginInstallationMa
  * @date 2026/09/13
  */
 public final class PluginHostStartupTask implements NexusStartupTask {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PluginHostStartupTask.class);
 
     private static final int ORDER = 100;
 
@@ -50,7 +55,9 @@ public final class PluginHostStartupTask implements NexusStartupTask {
 
     @Override
     public void run(NexusStartupContext context) {
+        LOGGER.info("Plugin host startup task beginning (order={})", ORDER);
         PluginInstallationManager manager = PluginHostBootstrap.enable(requestSupplier.get());
+        LOGGER.info("Plugin host startup task finished; installation manager ready");
         context.putAttribute(PluginStartupAttributes.INSTALLATION_MANAGER, manager);
         if (installationManagerConsumer != null) {
             installationManagerConsumer.accept(manager);

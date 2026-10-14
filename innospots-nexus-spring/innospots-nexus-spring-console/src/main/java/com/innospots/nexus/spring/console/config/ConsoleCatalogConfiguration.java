@@ -19,7 +19,6 @@ import com.innospots.nexus.console.sitemap.service.SitemapService;
 import com.innospots.nexus.console.sitemap.config.SitemapYamlConfig;
 import com.innospots.nexus.console.ui.endpoint.DefaultPageDslEndpoint;
 import com.innospots.nexus.console.ui.spec.filter.PageDslFilterChain;
-import com.innospots.nexus.core.bootstrap.NexusStartupTask;
 import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributionCatalog;
 import com.innospots.nexus.console.ui.spec.config.PageDslConfig;
 import com.innospots.nexus.console.ui.spec.loader.ClasspathPageDslLoader;
@@ -85,11 +84,6 @@ public class ConsoleCatalogConfiguration {
     ConsoleCatalogSyncStartupTask consoleCatalogSyncStartupTask(
             ConsoleCatalogSyncService syncService) {
         return new ConsoleCatalogSyncStartupTask(syncService);
-    }
-
-    @Bean
-    NexusStartupTask catalogSyncStartupTask(ConsoleCatalogSyncStartupTask task) {
-        return task;
     }
 
     @Bean

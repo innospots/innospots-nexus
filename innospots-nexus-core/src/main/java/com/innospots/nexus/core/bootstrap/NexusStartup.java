@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * 启动后初始化编排入口；宿主在配置期组装任务，运行期仅调用 {@link #run()}。
  *
@@ -12,6 +15,8 @@ import java.util.List;
  * @see NexusStartupTask
  */
 public final class NexusStartup {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(NexusStartup.class);
 
     private final List<NexusStartupTask> tasks;
 
@@ -33,9 +38,13 @@ public final class NexusStartup {
                 .sorted(Comparator.comparingInt(NexusStartupTask::order)
                         .thenComparing(NexusStartupTask::name))
                 .toList();
+        LOGGER.info("Nexus startup pipeline starting with {} task(s)", ordered.size());
         for (NexusStartupTask task : ordered) {
+            LOGGER.info("Nexus startup running task name={} order={}", task.name(), task.order());
             task.run(context);
+            LOGGER.info("Nexus startup completed task name={}", task.name());
         }
+        LOGGER.info("Nexus startup pipeline finished");
     }
 
     /**
