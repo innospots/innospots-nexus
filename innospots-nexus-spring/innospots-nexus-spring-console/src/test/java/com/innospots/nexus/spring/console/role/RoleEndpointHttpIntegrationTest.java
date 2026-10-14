@@ -67,8 +67,9 @@ class RoleEndpointHttpIntegrationTest extends RoleEndpointH2Support {
                 false,
                 false);
 
-        HttpResponse<String> options = http.get("/api/nexus/roles/options");
-        LOGGER.info("GET /api/nexus/roles/options status={} body={}", options.statusCode(), options.body());
+        String optionsPath = com.innospots.nexus.console.config.ConsoleConstant.apiPath("/roles/options");
+        HttpResponse<String> options = http.get(optionsPath);
+        LOGGER.info("GET {} status={} body={}", optionsPath, options.statusCode(), options.body());
 
         assertThat(options.statusCode()).as(options.body()).isEqualTo(200);
         assertThat(options.body()).contains("\"success\":true");

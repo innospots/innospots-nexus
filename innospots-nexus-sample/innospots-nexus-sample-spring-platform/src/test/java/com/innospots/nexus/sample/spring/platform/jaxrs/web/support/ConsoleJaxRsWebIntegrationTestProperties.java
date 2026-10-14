@@ -12,6 +12,7 @@ import org.springframework.test.context.TestPropertySource;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @TestPropertySource(properties = {
+        "spring.profiles.active=jaxrs-web-it",
         "spring.jersey.type=servlet",
         "spring.datasource.url=jdbc:h2:mem:jaxrs-web-it;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1",
         "spring.datasource.driver-class-name=org.h2.Driver",

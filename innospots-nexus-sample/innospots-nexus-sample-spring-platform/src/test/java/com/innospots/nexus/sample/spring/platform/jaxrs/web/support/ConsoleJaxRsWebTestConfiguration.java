@@ -6,6 +6,7 @@ import java.util.Set;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 
 import com.innospots.nexus.console.auth.service.TokenIssuer;
 import com.innospots.nexus.console.config.AuthConfig;
@@ -19,6 +20,7 @@ import com.innospots.nexus.console.permission.authorization.ConsolePagePermissio
  * Web 过滤器测试用最小 Bean（不含真实 {@link ConsolePagePermissionAuthorizer}）。
  */
 @Configuration
+@Profile("jaxrs-web-it")
 public class ConsoleJaxRsWebTestConfiguration {
 
     @Bean
