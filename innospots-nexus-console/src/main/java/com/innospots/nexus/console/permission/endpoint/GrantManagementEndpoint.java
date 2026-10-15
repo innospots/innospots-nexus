@@ -20,9 +20,9 @@ import com.innospots.nexus.console.permission.service.PermissionGrantService;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 
 /**
- * 角色与组织单元权限全量替换的管理 REST 资源。
+ * 角色权限全量替换的管理 REST 资源。
  */
-@Path(ConsoleConstant.API_PREFIX)
+@Path(ConsoleConstant.API_PREFIX + "/roles/{roleId}/permissions")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Permission", description = "授权与可见资源")
@@ -33,38 +33,18 @@ public class GrantManagementEndpoint {
     private final PermissionGrantService grantService;
 
     @GET
-    @Path("/roles/{roleId}/permissions")
     @Operation(operationId = "permissionGrantListByRole", summary = "查询角色授权")
     public R<PermissionGrantReplaceRequest> getRolePermissions(@PathParam("roleId") String roleId) {
         return R.ok(grantService.list(PermissionSubjectType.ROLE, roleId));
     }
 
     @PUT
-    @Path("/roles/{roleId}/permissions")
     @Operation(operationId = "permissionGrantReplaceByRole", summary = "全量替换角色授权")
     public R<Void> replaceRolePermissions(
             @PathParam("roleId") String roleId,
             PermissionGrantReplaceRequest request
     ) {
         grantService.replace(PermissionSubjectType.ROLE, roleId, request);
-        return R.ok();
-    }
-
-    @GET
-    @Path("/organization-units/{unitId}/permissions")
-    @Operation(operationId = "permissionGrantListByOrgUnit", summary = "查询组织单元授权")
-    public R<PermissionGrantReplaceRequest> getOrganizationUnitPermissions(@PathParam("unitId") String unitId) {
-        return R.ok(grantService.list(PermissionSubjectType.ORG_UNIT, unitId));
-    }
-
-    @PUT
-    @Path("/organization-units/{unitId}/permissions")
-    @Operation(operationId = "permissionGrantReplaceByOrgUnit", summary = "全量替换组织单元授权")
-    public R<Void> replaceOrganizationUnitPermissions(
-            @PathParam("unitId") String unitId,
-            PermissionGrantReplaceRequest request
-    ) {
-        grantService.replace(PermissionSubjectType.ORG_UNIT, unitId, request);
         return R.ok();
     }
 }

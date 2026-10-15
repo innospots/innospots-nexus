@@ -18,23 +18,18 @@ class GrantManagementEndpointContractsTest {
 
     @Test
     void grantManagementUsesRoleAndOrganizationUnitSubjects() throws NoSuchMethodException {
-        assertThat(GrantManagementEndpoint.class.getAnnotation(Path.class).value()).isEqualTo(ConsoleConstant.API_PREFIX);
+        assertThat(GrantManagementEndpoint.class.getAnnotation(Path.class).value())
+                .isEqualTo(ConsoleConstant.API_PREFIX + "/roles/{roleId}/permissions");
         assertHttpMethod(GrantManagementEndpoint.class, "getRolePermissions", GET.class, String.class);
         assertHttpMethod(GrantManagementEndpoint.class, "replaceRolePermissions",
                 PUT.class, String.class, PermissionGrantReplaceRequest.class);
-        assertHttpMethod(GrantManagementEndpoint.class, "getOrganizationUnitPermissions",
-                GET.class, String.class);
-        assertHttpMethod(GrantManagementEndpoint.class, "replaceOrganizationUnitPermissions",
-                PUT.class, String.class, PermissionGrantReplaceRequest.class);
 
-        Method orgGet = GrantManagementEndpoint.class.getMethod(
-                "getOrganizationUnitPermissions", String.class);
-        assertThat(orgGet.getAnnotation(Path.class).value())
-                .isEqualTo("/organization-units/{unitId}/permissions");
-        Method orgPut = GrantManagementEndpoint.class.getMethod(
-                "replaceOrganizationUnitPermissions", String.class, PermissionGrantReplaceRequest.class);
-        assertThat(orgPut.getAnnotation(Path.class).value())
-                .isEqualTo("/organization-units/{unitId}/permissions");
+        assertThat(OrganizationUnitGrantManagementEndpoint.class.getAnnotation(Path.class).value())
+                .isEqualTo(ConsoleConstant.API_PREFIX + "/organization-units/{unitId}/permissions");
+        assertHttpMethod(OrganizationUnitGrantManagementEndpoint.class, "getOrganizationUnitPermissions",
+                GET.class, String.class);
+        assertHttpMethod(OrganizationUnitGrantManagementEndpoint.class, "replaceOrganizationUnitPermissions",
+                PUT.class, String.class, PermissionGrantReplaceRequest.class);
 
         assertThat(Arrays.stream(GrantManagementEndpoint.class.getMethods()).map(Method::getName))
                 .doesNotContain("getGroupPermissions", "replaceGroupPermissions");

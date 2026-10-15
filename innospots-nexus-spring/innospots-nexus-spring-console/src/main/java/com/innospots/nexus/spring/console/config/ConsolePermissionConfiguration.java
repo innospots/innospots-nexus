@@ -13,6 +13,7 @@ import com.innospots.nexus.console.permission.authorization.SessionAuthorization
 import com.innospots.nexus.console.permission.dao.PermissionGrantDao;
 import com.innospots.nexus.console.permission.endpoint.CurrentAuthorizationEndpoint;
 import com.innospots.nexus.console.permission.endpoint.GrantManagementEndpoint;
+import com.innospots.nexus.console.permission.endpoint.OrganizationUnitGrantManagementEndpoint;
 import com.innospots.nexus.console.permission.service.GrantSubjectAccess;
 import com.innospots.nexus.console.permission.service.PermissionGrantService;
 import com.innospots.nexus.console.permission.service.PermissionVisibilityService;
@@ -71,6 +72,13 @@ public class ConsolePermissionConfiguration {
     @Lazy
     GrantManagementEndpoint grantManagementEndpoint(PermissionGrantService permissionGrantService) {
         return new GrantManagementEndpoint(permissionGrantService);
+    }
+
+    @Bean
+    @Lazy
+    OrganizationUnitGrantManagementEndpoint organizationUnitGrantManagementEndpoint(
+            PermissionGrantService permissionGrantService) {
+        return new OrganizationUnitGrantManagementEndpoint(permissionGrantService);
     }
 
     @Bean
