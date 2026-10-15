@@ -64,13 +64,33 @@ public final class GrantSubjectAccess {
     }
 
     private void ensureOrganizationUnitInTenant(String unitId, ConsoleOwnership ownership, String tenantId) {
-        if (organizationUnitDirectory == null) {
+        Checks.notBlank(unitId, "unitId");
+        if (ownership.ownerType() == RoleOwnerType.PLATFORM) {
+            ensureOrganizationUnitForPlatform(unitId, tenantId);
             return;
         }
         if (ownership.ownerType() != RoleOwnerType.WORKSPACE) {
             throw ConsoleExceptions.build(NexusStatusCode.NO_PERMISSION);
         }
+        if (organizationUnitDirectory == null) {
+            return;
+        }
         if (tenantId == null || !organizationUnitDirectory.existsInTenant(tenantId, unitId)) {
+            throw ConsoleExceptions.build(NexusStatusCode.NO_PERMISSION);
+        }
+    }
+
+    /**
+     * 运营平台管理组织单元授权：归属为 PLATFORM；目录未装配时仅校验 unitId 非空。
+     */
+    private void ensureOrganizationUnitForPlatform(String unitId, String tenantId) {
+        if (organizationUnitDirectory == null) {
+            return;
+        }
+        if (tenantId == null || tenantId.isBlank()) {
+            throw ConsoleExceptions.build(NexusStatusCode.INVALID_PARAMETER);
+        }
+        if (!organizationUnitDirectory.existsInTenant(tenantId, unitId)) {
             throw ConsoleExceptions.build(NexusStatusCode.NO_PERMISSION);
         }
     }

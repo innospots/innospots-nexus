@@ -348,4 +348,4 @@ body:
       props:
         className: mt-4
         variant: warning
-        message: "菜单 CRUD 与树排序 REST 尚未在 OpenAPI 中发布；当前页面已按 PRD 线框接线至 /api/d/nexus/console-menus/*，后端就绪后无需改 DSL 路径。只读导航可参考 GET /api/d/nexus/navigation/menus。"
+        message: "菜单 CRUD 与树排序 REST 尚未在 OpenAPI 中发布；当前页面已按 PRD 线框接线至 /api/d/nexus/console-menus/*，后端就绪后无需改 DSL 路径。只读导航可参考 GET /api/d/platform/navigation/menus。"

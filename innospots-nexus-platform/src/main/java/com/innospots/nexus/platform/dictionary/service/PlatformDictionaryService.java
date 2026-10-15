@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 
 import com.innospots.nexus.base.domain.enums.BasicStatus;
 import com.innospots.nexus.base.domain.response.PageResult;
-import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.base.util.Checks;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryItemCreateRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryItemPageRequest;
@@ -22,13 +21,8 @@ import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeOptionVo;
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeVo;
 import com.innospots.nexus.console.dictionary.operator.DictionaryItemOperator;
 import com.innospots.nexus.console.dictionary.operator.DictionaryTypeOperator;
-import com.innospots.nexus.console.role.domain.enums.RoleOwnerType;
 import com.innospots.nexus.console.scope.ConsoleOwnership;
-import com.innospots.nexus.console.scope.ConsoleOwnershipLevel;
-import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
-import com.innospots.nexus.console.scope.ConsoleSessionContext;
-import com.innospots.nexus.console.scope.ConsoleSessionScope;
-import com.innospots.nexus.console.support.ConsoleExceptions;
+import com.innospots.nexus.platform.scope.PlatformConsoleSession;
 
 /**
  * 运营平台字典服务：PLATFORM 会话与归属固化，委托 operator 做基础持久化。
@@ -40,58 +34,51 @@ public class PlatformDictionaryService {
     private final DictionaryItemOperator itemOperator;
 
     public PageResult<DictionaryTypeVo> pageDictionaryTypes(DictionaryTypePageRequest request) {
-        return typeOperator.pageTypes(request, requirePlatformOwnership());
+        return typeOperator.pageTypes(request, platformOwnership());
     }
 
     public DictionaryTypeVo getDictionaryType(String dictionaryTypeId) {
         Checks.notBlank(dictionaryTypeId, "dictionaryTypeId");
-        return typeOperator.getType(dictionaryTypeId, requirePlatformOwnership());
+        return typeOperator.getType(dictionaryTypeId, platformOwnership());
     }
 
     public DictionaryTypeVo createDictionaryType(DictionaryTypeCreateRequest request) {
         Objects.requireNonNull(request, "request");
-        requirePlatformSession();
         Checks.notBlank(request.typeCode(), "typeCode");
         Checks.notBlank(request.typeName(), "typeName");
-        return typeOperator.createType(request, requirePlatformOwnership());
+        return typeOperator.createType(request, platformOwnership());
     }
 
     public DictionaryTypeVo updateDictionaryType(String dictionaryTypeId, DictionaryTypeUpdateRequest request) {
         Checks.notBlank(dictionaryTypeId, "dictionaryTypeId");
         Objects.requireNonNull(request, "request");
-        requirePlatformSession();
-        return typeOperator.updateType(dictionaryTypeId, request, requirePlatformOwnership());
+        return typeOperator.updateType(dictionaryTypeId, request, platformOwnership());
     }
 
     public void updateDictionaryTypeStatus(String dictionaryTypeId, DictionaryTypeStatusUpdateRequest request) {
         Checks.notBlank(dictionaryTypeId, "dictionaryTypeId");
         Objects.requireNonNull(request, "request");
-        requirePlatformSession();
-        typeOperator.updateTypeStatus(dictionaryTypeId, request, requirePlatformOwnership());
+        typeOperator.updateTypeStatus(dictionaryTypeId, request, platformOwnership());
     }
 
     public void deleteDictionaryType(String dictionaryTypeId) {
         Checks.notBlank(dictionaryTypeId, "dictionaryTypeId");
-        requirePlatformSession();
-        typeOperator.deleteType(dictionaryTypeId, requirePlatformOwnership());
+        typeOperator.deleteType(dictionaryTypeId, platformOwnership());
     }
 
     public List<DictionaryTypeOptionVo> listDictionaryTypeOptions(BasicStatus status) {
-        requirePlatformSession();
-        return typeOperator.listTypeOptions(status, requirePlatformOwnership());
+        return typeOperator.listTypeOptions(status, platformOwnership());
     }
 
     public PageResult<DictionaryItemVo> pageDictionaryItems(String typeCode, DictionaryItemPageRequest request) {
         Checks.notBlank(typeCode, "typeCode");
-        requirePlatformSession();
-        return itemOperator.pageItems(typeCode, request, requirePlatformOwnership());
+        return itemOperator.pageItems(typeCode, request, platformOwnership());
     }
 
     public DictionaryItemVo createDictionaryItem(String typeCode, DictionaryItemCreateRequest request) {
         Checks.notBlank(typeCode, "typeCode");
         Objects.requireNonNull(request, "request");
-        requirePlatformSession();
-        return itemOperator.createItem(typeCode, request, requirePlatformOwnership());
+        return itemOperator.createItem(typeCode, request, platformOwnership());
     }
 
     public DictionaryItemVo updateDictionaryItem(
@@ -102,8 +89,7 @@ public class PlatformDictionaryService {
         Checks.notBlank(typeCode, "typeCode");
         Checks.notBlank(dictionaryItemId, "dictionaryItemId");
         Objects.requireNonNull(request, "request");
-        requirePlatformSession();
-        return itemOperator.updateItem(typeCode, dictionaryItemId, request, requirePlatformOwnership());
+        return itemOperator.updateItem(typeCode, dictionaryItemId, request, platformOwnership());
     }
 
     public void updateDictionaryItemStatus(
@@ -114,29 +100,16 @@ public class PlatformDictionaryService {
         Checks.notBlank(typeCode, "typeCode");
         Checks.notBlank(dictionaryItemId, "dictionaryItemId");
         Objects.requireNonNull(request, "request");
-        requirePlatformSession();
-        itemOperator.updateItemStatus(typeCode, dictionaryItemId, request, requirePlatformOwnership());
+        itemOperator.updateItemStatus(typeCode, dictionaryItemId, request, platformOwnership());
     }
 
     public void deleteDictionaryItem(String typeCode, String dictionaryItemId) {
         Checks.notBlank(typeCode, "typeCode");
         Checks.notBlank(dictionaryItemId, "dictionaryItemId");
-        requirePlatformSession();
-        itemOperator.deleteItem(typeCode, dictionaryItemId, requirePlatformOwnership());
+        itemOperator.deleteItem(typeCode, dictionaryItemId, platformOwnership());
     }
 
-    private void requirePlatformSession() {
-        if (ConsoleSessionContext.scope() != ConsoleSessionScope.PLATFORM) {
-            throw ConsoleExceptions.build(NexusStatusCode.NO_PERMISSION);
-        }
-    }
-
-    private ConsoleOwnership requirePlatformOwnership() {
-        requirePlatformSession();
-        ConsoleOwnership ownership = ConsoleOwnershipScope.requireOwnership(ConsoleOwnershipLevel.PLATFORM);
-        if (ownership.ownerType() != RoleOwnerType.PLATFORM) {
-            throw ConsoleExceptions.build(NexusStatusCode.NO_PERMISSION);
-        }
-        return ownership;
+    private static ConsoleOwnership platformOwnership() {
+        return PlatformConsoleSession.requireOwnership();
     }
 }

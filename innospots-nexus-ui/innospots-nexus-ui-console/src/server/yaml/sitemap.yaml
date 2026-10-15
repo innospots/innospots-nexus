@@ -1,4 +1,4 @@
-# Nexus 管理控制台 Sitemap（PRD prd-diagram + OpenAPI /api/d/nexus/*）
+# Nexus 管理控制台 Sitemap（PRD prd-diagram；业务 API 多为 /api/d/platform/*，插件与目录仍为 /api/d/nexus/*）
 id: site
 resourceType: sitemap
 version: 1

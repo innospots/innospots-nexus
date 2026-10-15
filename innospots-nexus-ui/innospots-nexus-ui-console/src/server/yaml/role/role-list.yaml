@@ -57,10 +57,10 @@ body:
             onClick:
               - action: overlay.open
                 params:
-                  overlay: &roleFormDrawer
-                    type: drawer
+                  overlay: &roleFormDialog
+                    type: dialog
                     title: 新建角色
-                    width: 640
+                    width: 520
                     content:
                       type: Form
                       props:
@@ -75,7 +75,6 @@ body:
                               body:
                                 roleName: ${event.roleName}
                                 roleCode: ${event.roleCode}
-                                ownerType: ${event.ownerType}
                                 description: ${event.description}
                           - action: message
                             params:
@@ -110,22 +109,6 @@ body:
                                 rules:
                                   - required: true
                                     message: 请输入角色编码
-                        - type: Field
-                          props:
-                            label: 归属层级
-                            required: true
-                          children:
-                            - type: Select
-                              props:
-                                name: ownerType
-                                placeholder: 请选择归属层级
-                                options:
-                                  - { label: 平台, value: PLATFORM }
-                                  - { label: 租户, value: TENANT }
-                                  - { label: 工作空间, value: WORKSPACE }
-                                rules:
-                                  - required: true
-                                    message: 请选择归属层级
                         - type: Field
                           props:
                             label: 描述

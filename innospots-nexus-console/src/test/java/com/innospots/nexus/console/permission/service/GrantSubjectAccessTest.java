@@ -44,6 +44,15 @@ class GrantSubjectAccessTest {
     }
 
     @Test
+    void ensureSubjectInScopeAcceptsOrgUnitUnderPlatformOwnershipWithoutDirectory() {
+        ConsoleOwnership ownership = new ConsoleOwnership(
+                RoleOwnerType.PLATFORM, null, SecurityRealm.PLATFORM.name());
+        GrantSubjectAccess access = new GrantSubjectAccess(mock(RoleDao.class), null);
+
+        access.ensureSubjectInScope(PermissionSubjectType.ORG_UNIT, "unit-1", ownership, null, null);
+    }
+
+    @Test
     void ensureSubjectInScopeAcceptsScopedRole() {
         bindWorkspaceScope("tnt-a", "wks-a");
         ConsoleOwnership ownership = workspaceOwnership("wks-a");

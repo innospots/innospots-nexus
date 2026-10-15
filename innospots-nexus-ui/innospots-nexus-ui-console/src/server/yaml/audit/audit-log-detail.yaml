@@ -13,7 +13,7 @@ dataSources:
     autoLoad: true
     request:
       method: GET
-      url: /api/d/nexus/audit-logs/${state.logId}
+      url: /api/d/platform/audit-logs/${state.logId}
 
 body:
   type: Page
