@@ -25,6 +25,24 @@ public final class GrantSubjectAccess {
         this.organizationUnitDirectory = organizationUnitDirectory;
     }
 
+    /**
+     * 在已解析的 {@link ConsoleOwnership} 下校验授权主体；PLATFORM 归属不依赖租户/工作区快照。
+     */
+    public void ensureSubjectInScope(
+            PermissionSubjectType subjectType,
+            String subjectId,
+            ConsoleOwnership ownership
+    ) {
+        Checks.notNull(ownership, "ownership");
+        if (ownership.ownerType() == RoleOwnerType.PLATFORM) {
+            ensureSubjectInScope(subjectType, subjectId, ownership, null, null);
+            return;
+        }
+        String tenantId = resolveTenantId(ownership);
+        String workspaceId = ownership.ownerType() == RoleOwnerType.WORKSPACE ? ownership.ownerId() : null;
+        ensureSubjectInScope(subjectType, subjectId, ownership, tenantId, workspaceId);
+    }
+
     public void ensureSubjectInScope(
             PermissionSubjectType subjectType,
             String subjectId,
@@ -93,5 +111,12 @@ public final class GrantSubjectAccess {
         if (!organizationUnitDirectory.existsInTenant(tenantId, unitId)) {
             throw ConsoleExceptions.build(NexusStatusCode.NO_PERMISSION);
         }
+    }
+
+    private static String resolveTenantId(ConsoleOwnership ownership) {
+        if (ownership.ownerType() == RoleOwnerType.TENANT) {
+            return ownership.ownerId();
+        }
+        return com.innospots.nexus.base.thread.SessionContext.tenantId();
     }
 }

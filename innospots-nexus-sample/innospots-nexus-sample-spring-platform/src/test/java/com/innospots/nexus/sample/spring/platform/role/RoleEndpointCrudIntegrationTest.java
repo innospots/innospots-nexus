@@ -18,6 +18,7 @@ import com.innospots.nexus.platform.role.endpoint.PlatformRoleEndpoint;
 import com.innospots.nexus.sample.spring.platform.SamplePlatformConsoleServer;
 import com.innospots.nexus.sample.spring.platform.role.support.RoleDatabaseJsonSnapshot;
 import com.innospots.nexus.sample.spring.platform.role.support.RoleEndpointHttpClient;
+import com.innospots.nexus.sample.spring.platform.support.PlatformIntegrationTestSupport;
 
 import java.net.URLEncoder;
 import java.net.http.HttpResponse;
@@ -35,8 +36,8 @@ import static org.assertj.core.api.Assertions.assertThat;
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @TestPropertySource(properties = {
-        "spring.datasource.url=jdbc:h2:mem:nexus-sample-platform-role-it;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1",
-        "spring.config.import=optional:classpath:nexus/console-auth.yaml,optional:classpath:nexus/console-credential.yaml,optional:classpath:nexus/console-web.yaml,optional:classpath:nexus/console-openapi.yaml,optional:classpath:nexus/console-plugins.yaml"
+        "spring.datasource.url=" + PlatformIntegrationTestSupport.H2_URL_ROLE_IT,
+        "spring.config.import=" + PlatformIntegrationTestSupport.SPRING_CONFIG_IMPORT
 })
 class RoleEndpointCrudIntegrationTest {
 

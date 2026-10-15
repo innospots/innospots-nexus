@@ -19,6 +19,7 @@ import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
 import com.innospots.nexus.console.permission.dao.PermissionGrantDao;
 import com.innospots.nexus.console.permission.domain.entity.PermissionGrantEntity;
 import com.innospots.nexus.console.permission.domain.enums.PermissionSubjectType;
+import com.innospots.nexus.console.role.domain.enums.RoleOwnerType;
 import com.innospots.nexus.console.permission.domain.request.PermissionGrantItemRequest;
 import com.innospots.nexus.console.permission.domain.request.PermissionGrantReplaceRequest;
 import com.innospots.nexus.console.scope.ConsoleOwnership;
@@ -38,6 +39,22 @@ class PermissionGrantServiceTest {
     @AfterEach
     void tearDown() {
         TLC.clear();
+    }
+
+    @Test
+    void listWithOwnershipOnlySkipsTenantAndWorkspaceParameters() {
+        ConsoleOwnership ownership = new ConsoleOwnership(
+                RoleOwnerType.PLATFORM, null, SecurityRealm.PLATFORM.name());
+        PermissionGrantDao grantDao = mock(PermissionGrantDao.class);
+        when(grantDao.selectList(any())).thenReturn(List.of(grantRow("menu-res", null)));
+        GrantSubjectAccess grantSubjectAccess = mock(GrantSubjectAccess.class);
+        PermissionGrantService service = new PermissionGrantService(
+                grantDao, mock(ConsoleCatalogResourceDao.class), grantSubjectAccess);
+
+        PermissionGrantReplaceRequest result = service.list(PermissionSubjectType.ROLE, "rol-1", ownership);
+
+        assertThat(result.grants()).hasSize(1);
+        verify(grantSubjectAccess).ensureSubjectInScope(PermissionSubjectType.ROLE, "rol-1", ownership);
     }
 
     @Test

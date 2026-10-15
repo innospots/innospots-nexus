@@ -53,6 +53,22 @@ class GrantSubjectAccessTest {
     }
 
     @Test
+    void ensureSubjectInScopeOwnershipOnlyDelegatesPlatformRoleWithoutTenantContext() {
+        ConsoleOwnership ownership = new ConsoleOwnership(
+                RoleOwnerType.PLATFORM, null, SecurityRealm.PLATFORM.name());
+        RoleEntity role = new RoleEntity();
+        role.setRoleId("rol-1");
+        role.setOwnerType(RoleOwnerType.PLATFORM.name());
+        role.setOwnerId(null);
+        role.setSecurityRealm(SecurityRealm.PLATFORM.name());
+        RoleDao roleDao = mock(RoleDao.class);
+        when(roleDao.selectOne(any())).thenReturn(role);
+        GrantSubjectAccess access = new GrantSubjectAccess(roleDao, null);
+
+        access.ensureSubjectInScope(PermissionSubjectType.ROLE, "rol-1", ownership);
+    }
+
+    @Test
     void ensureSubjectInScopeAcceptsScopedRole() {
         bindWorkspaceScope("tnt-a", "wks-a");
         ConsoleOwnership ownership = workspaceOwnership("wks-a");

@@ -17,8 +17,8 @@ import com.innospots.nexus.console.role.domain.request.RoleUpdateRequest;
 import com.innospots.nexus.console.role.domain.vo.RoleOptionVo;
 import com.innospots.nexus.console.role.domain.vo.RoleVo;
 import com.innospots.nexus.console.role.operator.RoleOperator;
+import com.innospots.nexus.console.scope.ConsoleOwnership;
 import com.innospots.nexus.platform.scope.PlatformConsoleSession;
-import com.innospots.nexus.platform.scope.PlatformConsoleSession.Context;
 
 /**
  * 运营平台角色服务：参数校验、PLATFORM 归属固化与会话边界，委托 {@link RoleOperator} 做基础持久化。
@@ -30,21 +30,19 @@ public class PlatformRoleService {
     private final RoleOperator roleOperator;
 
     public PageResult<RoleVo> pageRoles(RolePageRequest request) {
-        Context session = PlatformConsoleSession.requireContext();
-        return roleOperator.pageRoles(
-                request, session.ownership(), session.tenantId(), session.workspaceId());
+        ConsoleOwnership ownership = PlatformConsoleSession.requireOwnership();
+        return roleOperator.pageRoles(request, ownership);
     }
 
     public RoleVo getRole(String roleId) {
         Checks.notBlank(roleId, "roleId");
-        Context session = PlatformConsoleSession.requireContext();
-        return roleOperator.getRole(
-                roleId, session.ownership(), session.tenantId(), session.workspaceId());
+        ConsoleOwnership ownership = PlatformConsoleSession.requireOwnership();
+        return roleOperator.getRole(roleId, ownership);
     }
 
     public RoleVo createRole(RoleCreateRequest request) {
         Objects.requireNonNull(request, "request");
-        PlatformConsoleSession.requireContext();
+        PlatformConsoleSession.requireOwnership();
         String roleName = Checks.notBlank(request.roleName(), "roleName");
         String roleCode = Checks.notBlank(request.roleCode(), "roleCode");
         if (log.isDebugEnabled()) {
@@ -61,29 +59,25 @@ public class PlatformRoleService {
     public RoleVo updateRole(String roleId, RoleUpdateRequest request) {
         Checks.notBlank(roleId, "roleId");
         Objects.requireNonNull(request, "request");
-        Context session = PlatformConsoleSession.requireContext();
-        return roleOperator.updateRole(
-                roleId, request, session.ownership(), session.tenantId(), session.workspaceId());
+        ConsoleOwnership ownership = PlatformConsoleSession.requireOwnership();
+        return roleOperator.updateRole(roleId, request, ownership);
     }
 
     public void updateRoleStatus(String roleId, RoleStatusUpdateRequest request) {
         Checks.notBlank(roleId, "roleId");
         Objects.requireNonNull(request, "request");
-        Context session = PlatformConsoleSession.requireContext();
-        roleOperator.updateRoleStatus(
-                roleId, request, session.ownership(), session.tenantId(), session.workspaceId());
+        ConsoleOwnership ownership = PlatformConsoleSession.requireOwnership();
+        roleOperator.updateRoleStatus(roleId, request, ownership);
     }
 
     public void deleteRole(String roleId) {
         Checks.notBlank(roleId, "roleId");
-        Context session = PlatformConsoleSession.requireContext();
-        roleOperator.deleteRole(
-                roleId, session.ownership(), session.tenantId(), session.workspaceId());
+        ConsoleOwnership ownership = PlatformConsoleSession.requireOwnership();
+        roleOperator.deleteRole(roleId, ownership);
     }
 
     public List<RoleOptionVo> listRoleOptions(BasicStatus status) {
-        Context session = PlatformConsoleSession.requireContext();
-        return roleOperator.listRoleOptions(
-                status, session.ownership(), session.tenantId(), session.workspaceId());
+        ConsoleOwnership ownership = PlatformConsoleSession.requireOwnership();
+        return roleOperator.listRoleOptions(status, ownership);
     }
 }

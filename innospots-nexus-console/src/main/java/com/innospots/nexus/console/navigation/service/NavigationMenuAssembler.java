@@ -2,9 +2,11 @@ package com.innospots.nexus.console.navigation.service;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -66,6 +68,10 @@ public final class NavigationMenuAssembler {
                         Function.identity(),
                         (left, right) -> left,
                         LinkedHashMap::new));
+        Set<String> visibleMenuIds = visible.stream()
+                .filter(resource -> CatalogResourceType.MENU.name().equals(resource.getResourceType()))
+                .map(ConsoleCatalogResourceEntity::getResourceId)
+                .collect(Collectors.toCollection(HashSet::new));
         Map<String, List<ConsoleCatalogResourceEntity>> menusByParent = new LinkedHashMap<>();
         List<ConsoleCatalogResourceEntity> roots = new ArrayList<>();
         for (ConsoleCatalogResourceEntity resource : visible) {
@@ -73,7 +79,9 @@ public final class NavigationMenuAssembler {
                 continue;
             }
             String parentId = resource.getParentResourceId();
-            if (parentId == null || parentId.isBlank()) {
+            if (parentId == null
+                    || parentId.isBlank()
+                    || !visibleMenuIds.contains(parentId)) {
                 roots.add(resource);
             } else {
                 menusByParent.computeIfAbsent(parentId, ignored -> new ArrayList<>()).add(resource);

@@ -15,6 +15,8 @@ import com.innospots.nexus.console.auth.service.LoginCaptchaGate;
 import com.innospots.nexus.console.auth.service.TokenIssuer;
 import com.innospots.nexus.console.config.AuthConfig;
 import com.innospots.nexus.console.credential.otp.service.CaptchaChallengeService;
+import com.innospots.nexus.console.credential.otp.service.OtpChallengeService;
+import com.innospots.nexus.console.credential.otp.service.OtpPasswordVerificationOperator;
 import com.innospots.nexus.console.credential.password.PasswordDecryptor;
 import com.innospots.nexus.console.credential.password.PasswordVerificationOperator;
 import com.innospots.nexus.console.credential.password.service.CredentialService;
@@ -112,13 +114,15 @@ public class PlatformAuthConfiguration {
             PlatformUserOperator platformUserOperator,
             PlatformUserIdentityResolver platformUserIdentityResolver,
             CredentialService credentialService,
-            PasswordVerificationOperator passwordVerificationOperator,
+            OtpChallengeService otpChallengeService,
             PasswordDecryptor passwordDecryptor) {
+        PasswordVerificationOperator platformPasswordVerificationOperator =
+                new OtpPasswordVerificationOperator(otpChallengeService, SecurityRealm.PLATFORM);
         return new PlatformPasswordService(
                 platformUserOperator,
                 platformUserIdentityResolver,
                 credentialService,
-                passwordVerificationOperator,
+                platformPasswordVerificationOperator,
                 passwordDecryptor);
     }
 

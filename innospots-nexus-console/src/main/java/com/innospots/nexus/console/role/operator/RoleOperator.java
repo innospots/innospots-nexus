@@ -44,6 +44,11 @@ public class RoleOperator {
     private final RoleBindingDao roleBindingDao;
     private final RoleConverter roleConverter;
 
+    public PageResult<RoleVo> pageRoles(RolePageRequest request, ConsoleOwnership ownership) {
+        Objects.requireNonNull(ownership, "ownership");
+        return pageRoles(request, ownership, roleVisibilityTenantId(ownership), roleVisibilityWorkspaceId(ownership));
+    }
+
     public PageResult<RoleVo> pageRoles(
             RolePageRequest request,
             ConsoleOwnership ownership,
@@ -60,6 +65,11 @@ public class RoleOperator {
                 .map(entity -> roleConverter.toVo(entity, countMembers(entity.getRoleId(), ownership)))
                 .toList();
         return PageResult.of(records, pageRequest.pageNo(), pageRequest.pageSize(), selectedPage.getTotal());
+    }
+
+    public RoleVo getRole(String roleId, ConsoleOwnership ownership) {
+        Objects.requireNonNull(ownership, "ownership");
+        return getRole(roleId, ownership, roleVisibilityTenantId(ownership), roleVisibilityWorkspaceId(ownership));
     }
 
     public RoleVo getRole(String roleId, ConsoleOwnership ownership, String tenantId, String workspaceId) {
@@ -106,6 +116,17 @@ public class RoleOperator {
     }
 
     @Transactional
+    public RoleVo updateRole(String roleId, RoleUpdateRequest request, ConsoleOwnership ownership) {
+        Objects.requireNonNull(ownership, "ownership");
+        return updateRole(
+                roleId,
+                request,
+                ownership,
+                roleVisibilityTenantId(ownership),
+                roleVisibilityWorkspaceId(ownership));
+    }
+
+    @Transactional
     public RoleVo updateRole(
             String roleId,
             RoleUpdateRequest request,
@@ -131,6 +152,17 @@ public class RoleOperator {
     }
 
     @Transactional
+    public void updateRoleStatus(String roleId, RoleStatusUpdateRequest request, ConsoleOwnership ownership) {
+        Objects.requireNonNull(ownership, "ownership");
+        updateRoleStatus(
+                roleId,
+                request,
+                ownership,
+                roleVisibilityTenantId(ownership),
+                roleVisibilityWorkspaceId(ownership));
+    }
+
+    @Transactional
     public void updateRoleStatus(
             String roleId,
             RoleStatusUpdateRequest request,
@@ -150,6 +182,12 @@ public class RoleOperator {
     }
 
     @Transactional
+    public void deleteRole(String roleId, ConsoleOwnership ownership) {
+        Objects.requireNonNull(ownership, "ownership");
+        deleteRole(roleId, ownership, roleVisibilityTenantId(ownership), roleVisibilityWorkspaceId(ownership));
+    }
+
+    @Transactional
     public void deleteRole(String roleId, ConsoleOwnership ownership, String tenantId, String workspaceId) {
         Objects.requireNonNull(ownership, "ownership");
         RoleEntity entity = requireWritableEntity(roleId, ownership, tenantId, workspaceId);
@@ -161,6 +199,15 @@ public class RoleOperator {
                 ownership));
         roleDao.deleteById(roleId);
         log.info("Deleted role {}", roleId);
+    }
+
+    public List<RoleOptionVo> listRoleOptions(BasicStatus status, ConsoleOwnership ownership) {
+        Objects.requireNonNull(ownership, "ownership");
+        return listRoleOptions(
+                status,
+                ownership,
+                roleVisibilityTenantId(ownership),
+                roleVisibilityWorkspaceId(ownership));
     }
 
     public List<RoleOptionVo> listRoleOptions(
@@ -317,6 +364,10 @@ public class RoleOperator {
     }
 
     private static String resolveTenantId(ConsoleOwnership ownership) {
+        return roleVisibilityTenantId(ownership);
+    }
+
+    private static String roleVisibilityTenantId(ConsoleOwnership ownership) {
         if (ownership.ownerType() == RoleOwnerType.PLATFORM) {
             return null;
         }
@@ -324,6 +375,13 @@ public class RoleOperator {
             return ownership.ownerId();
         }
         return SessionContext.tenantId();
+    }
+
+    private static String roleVisibilityWorkspaceId(ConsoleOwnership ownership) {
+        if (ownership.ownerType() == RoleOwnerType.WORKSPACE) {
+            return ownership.ownerId();
+        }
+        return null;
     }
 
     public static boolean hasText(String value) {

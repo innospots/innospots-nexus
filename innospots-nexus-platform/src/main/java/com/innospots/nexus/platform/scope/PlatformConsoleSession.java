@@ -1,7 +1,6 @@
 package com.innospots.nexus.platform.scope;
 
 import com.innospots.nexus.base.status.NexusStatusCode;
-import com.innospots.nexus.base.thread.SessionContext;
 import com.innospots.nexus.console.role.domain.enums.RoleOwnerType;
 import com.innospots.nexus.console.scope.ConsoleOwnership;
 import com.innospots.nexus.console.scope.ConsoleOwnershipLevel;
@@ -30,23 +29,9 @@ public final class PlatformConsoleSession {
         return ownership;
     }
 
-    /**
-     * 会话归属与可选租户上下文（组织单元管理等跨租户场景使用 {@link #tenantId()}）。
-     */
-    public static Context requireContext() {
-        ConsoleOwnership ownership = requireOwnership();
-        return new Context(ownership, SessionContext.tenantId(), null);
-    }
-
     private static void requirePlatformScope() {
         if (ConsoleSessionContext.scope() != ConsoleSessionScope.PLATFORM) {
             throw ConsoleExceptions.build(NexusStatusCode.NO_PERMISSION);
         }
-    }
-
-    /**
-     * PLATFORM 会话下的归属与目录校验用租户 ID（可为 null）。
-     */
-    public record Context(ConsoleOwnership ownership, String tenantId, String workspaceId) {
     }
 }

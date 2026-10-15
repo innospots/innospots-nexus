@@ -26,9 +26,23 @@ public final class PermissionGrantDatabaseJsonSnapshot {
     }
 
     public static void logAndPersist(JdbcTemplate jdbcTemplate, String stepLabel) {
+        logAndPersist(jdbcTemplate, stepLabel, null, null);
+    }
+
+    public static void logAndPersist(
+            JdbcTemplate jdbcTemplate,
+            String stepLabel,
+            String subjectType,
+            String subjectId) {
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("step", stepLabel);
-        payload.put("nx_permission_grant", queryGrantsWithResourceKeys(jdbcTemplate));
+        if (subjectType != null) {
+            payload.put("subjectType", subjectType);
+        }
+        if (subjectId != null) {
+            payload.put("subjectId", subjectId);
+        }
+        payload.put("nx_permission_grant", queryGrantsWithResourceKeys(jdbcTemplate, subjectType, subjectId));
 
         String json = Jsons.toJson(payload);
         LOGGER.info("sample platform permission grant DB snapshot [{}]: {}", stepLabel, json);
@@ -42,13 +56,27 @@ public final class PermissionGrantDatabaseJsonSnapshot {
         }
     }
 
-    private static List<Map<String, Object>> queryGrantsWithResourceKeys(JdbcTemplate jdbcTemplate) {
-        return jdbcTemplate.queryForList(
+    private static List<Map<String, Object>> queryGrantsWithResourceKeys(
+            JdbcTemplate jdbcTemplate,
+            String subjectType,
+            String subjectId) {
+        StringBuilder sql = new StringBuilder(
                 """
                 SELECT g.*, r.resource_key, r.resource_type
                 FROM nx_permission_grant g
                 LEFT JOIN nx_console_catalog_resource r ON g.resource_id = r.resource_id
-                ORDER BY g.subject_id, r.resource_key
+                WHERE 1=1
                 """);
+        List<Object> args = new java.util.ArrayList<>();
+        if (subjectType != null && !subjectType.isBlank()) {
+            sql.append(" AND g.subject_type = ?");
+            args.add(subjectType);
+        }
+        if (subjectId != null && !subjectId.isBlank()) {
+            sql.append(" AND g.subject_id = ?");
+            args.add(subjectId);
+        }
+        sql.append(" ORDER BY g.subject_type, g.subject_id, r.resource_key");
+        return jdbcTemplate.queryForList(sql.toString(), args.toArray());
     }
 }

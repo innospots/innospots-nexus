@@ -17,8 +17,10 @@ import com.innospots.nexus.console.scope.ConsoleSessionScope;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import com.innospots.nexus.console.scope.ConsoleOwnership;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -57,6 +59,17 @@ class PlatformRoleServiceTest {
 
         assertThat(created.ownerType()).isEqualTo(RoleOwnerType.PLATFORM);
         verify(operator).createRole("Ops", "ops", "d", RoleOwnerType.PLATFORM, null);
+    }
+
+    @Test
+    void getRoleDelegatesWithOwnershipOnlyOperatorApi() {
+        bindPlatformSession();
+        RoleOperator operator = mock(RoleOperator.class);
+        PlatformRoleService service = new PlatformRoleService(operator);
+
+        service.getRole("rol-1");
+
+        verify(operator).getRole(eq("rol-1"), any(ConsoleOwnership.class));
     }
 
     @Test

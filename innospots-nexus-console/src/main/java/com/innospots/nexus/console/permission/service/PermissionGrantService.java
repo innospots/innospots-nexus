@@ -61,6 +61,23 @@ public class PermissionGrantService {
      * @param subjectId 角色或组织单元 ID
      * @param request 主体最终应拥有的完整授权集合
      */
+    /**
+     * 全量替换授权；归属由 {@link ConsoleOwnership} 表达，不额外传入租户/工作区 ID。
+     */
+    @Transactional
+    public void replace(
+            PermissionSubjectType subjectType,
+            String subjectId,
+            PermissionGrantReplaceRequest request,
+            ConsoleOwnership ownership
+    ) {
+        Checks.notNull(ownership, "ownership");
+        Checks.notNull(request, "request");
+        validateSubject(subjectType, subjectId, request);
+        grantSubjectAccess.ensureSubjectInScope(subjectType, subjectId, ownership);
+        replaceGrants(subjectType, subjectId, request, ownership);
+    }
+
     @Transactional
     public void replace(
             PermissionSubjectType subjectType,
@@ -74,6 +91,15 @@ public class PermissionGrantService {
         Checks.notNull(request, "request");
         validateSubject(subjectType, subjectId, request);
         grantSubjectAccess.ensureSubjectInScope(subjectType, subjectId, ownership, tenantId, workspaceId);
+        replaceGrants(subjectType, subjectId, request, ownership);
+    }
+
+    private void replaceGrants(
+            PermissionSubjectType subjectType,
+            String subjectId,
+            PermissionGrantReplaceRequest request,
+            ConsoleOwnership ownership
+    ) {
         String securityRealm = ownership.securityRealm();
         List<ConsoleCatalogResourceEntity> resources = resources(request.grants(), securityRealm);
         validateParents(resources, securityRealm);
@@ -94,6 +120,20 @@ public class PermissionGrantService {
     }
 
     /**
+     * 查询授权集合；归属由 {@link ConsoleOwnership} 表达，不额外传入租户/工作区 ID。
+     */
+    public PermissionGrantReplaceRequest list(
+            PermissionSubjectType subjectType,
+            String subjectId,
+            ConsoleOwnership ownership
+    ) {
+        Checks.notNull(ownership, "ownership");
+        validateSubject(subjectType, subjectId, null);
+        grantSubjectAccess.ensureSubjectInScope(subjectType, subjectId, ownership);
+        return listGrants(subjectType, subjectId, ownership);
+    }
+
+    /**
      * 查询指定角色或组织单元当前的完整授权集合。
      *
      * @param subjectType 授权主体类型
@@ -110,6 +150,14 @@ public class PermissionGrantService {
         Checks.notNull(ownership, "ownership");
         validateSubject(subjectType, subjectId, null);
         grantSubjectAccess.ensureSubjectInScope(subjectType, subjectId, ownership, tenantId, workspaceId);
+        return listGrants(subjectType, subjectId, ownership);
+    }
+
+    private PermissionGrantReplaceRequest listGrants(
+            PermissionSubjectType subjectType,
+            String subjectId,
+            ConsoleOwnership ownership
+    ) {
         List<PermissionGrantItemRequest> grants = grantDao.selectList(grantScopeQuery(subjectType, subjectId, ownership))
                 .stream()
                 .map(grant -> new PermissionGrantItemRequest(
