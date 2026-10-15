@@ -39,7 +39,15 @@ class PlatformConsoleEntryPluginTest {
                 .orElseThrow();
 
         assertThat(contribution.modules()).extracting(ConsoleModuleDeclaration::moduleKey)
-                .containsExactly("organization", "user", "settings");
+                .containsExactly(
+                        "organization",
+                        "menu",
+                        "user",
+                        "dictionary",
+                        "role",
+                        "permission",
+                        "logger",
+                        "settings");
         assertThat(definition.capabilities()).isEmpty();
     }
 
@@ -106,6 +114,11 @@ class PlatformConsoleEntryPluginTest {
                 Arguments.of("user", ConsoleModuleDescriptor.compositePageKey(DOMAIN, "user", "access")),
                 Arguments.of(
                         "settings",
-                        ConsoleModuleDescriptor.compositePageKey(DOMAIN, "settings", "registration-mode")));
+                        ConsoleModuleDescriptor.compositePageKey(DOMAIN, "settings", "registration-mode")),
+                Arguments.of("menu", ConsoleModuleDescriptor.compositePageKey(DOMAIN, "menu", "main")),
+                Arguments.of("dictionary", ConsoleModuleDescriptor.compositePageKey(DOMAIN, "dictionary", "main")),
+                Arguments.of("role", ConsoleModuleDescriptor.compositePageKey(DOMAIN, "role", "main")),
+                Arguments.of("permission", ConsoleModuleDescriptor.compositePageKey(DOMAIN, "permission", "main")),
+                Arguments.of("logger", ConsoleModuleDescriptor.compositePageKey(DOMAIN, "logger", "main")));
     }
 }

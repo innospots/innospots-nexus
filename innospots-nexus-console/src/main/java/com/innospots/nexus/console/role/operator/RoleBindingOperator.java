@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import com.innospots.nexus.base.domain.response.PageResult;
-import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.console.role.dao.RoleBindingDao;
 import com.innospots.nexus.console.role.domain.entity.RoleBindingEntity;
@@ -22,11 +21,10 @@ import com.innospots.nexus.console.role.domain.vo.RoleBindingVo;
 import com.innospots.nexus.console.role.converter.RoleConverter;
 import com.innospots.nexus.console.role.status.RoleStatusCode;
 import com.innospots.nexus.console.scope.ConsoleOwnership;
-import com.innospots.nexus.console.scope.ConsoleOwnershipGuard;
 import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
 
 /**
- * 角色与主体绑定关系维护，可供子类扩展校验或同步逻辑。
+ * 角色绑定基础持久化；会话归属由上层 service 解析后传入。
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -36,8 +34,12 @@ public class RoleBindingOperator {
     private final RoleBindingDao roleBindingDao;
     private final RoleConverter roleConverter;
 
-    public PageResult<RoleBindingVo> pageRoleBindings(String roleId, RoleBindingPageRequest request) {
-        ConsoleOwnership ownership = ConsoleOwnershipGuard.requireWorkspaceScope();
+    public PageResult<RoleBindingVo> pageRoleBindings(
+            String roleId,
+            RoleBindingPageRequest request,
+            ConsoleOwnership ownership
+    ) {
+        Objects.requireNonNull(ownership, "ownership");
         roleOperator.requireEntity(roleId, ownership);
         RoleBindingPageRequest pageRequest = request == null ? new RoleBindingPageRequest() : request;
         LambdaQueryWrapper<RoleBindingEntity> query = ConsoleOwnershipScope.apply(
@@ -60,8 +62,8 @@ public class RoleBindingOperator {
     }
 
     @Transactional
-    public void addRoleBindings(String roleId, RoleBindingAddRequest request) {
-        ConsoleOwnership ownership = ConsoleOwnershipGuard.requireWorkspaceScope();
+    public void addRoleBindings(String roleId, RoleBindingAddRequest request, ConsoleOwnership ownership) {
+        Objects.requireNonNull(ownership, "ownership");
         Objects.requireNonNull(request, "request");
         roleOperator.requireEntity(roleId, ownership);
         if (request.subjectType() == null || request.subjectIds().isEmpty()) {
@@ -93,8 +95,8 @@ public class RoleBindingOperator {
     }
 
     @Transactional
-    public void removeRoleBinding(String roleId, String bindingId) {
-        ConsoleOwnership ownership = ConsoleOwnershipGuard.requireWorkspaceScope();
+    public void removeRoleBinding(String roleId, String bindingId, ConsoleOwnership ownership) {
+        Objects.requireNonNull(ownership, "ownership");
         roleOperator.requireEntity(roleId, ownership);
         RoleBindingEntity binding = roleBindingDao.selectOne(ConsoleOwnershipScope.apply(
                 new LambdaQueryWrapper<RoleBindingEntity>()

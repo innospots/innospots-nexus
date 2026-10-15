@@ -13,7 +13,6 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
-import lombok.RequiredArgsConstructor;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
@@ -21,81 +20,61 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import com.innospots.nexus.base.domain.enums.BasicStatus;
 import com.innospots.nexus.base.domain.response.PageResult;
 import com.innospots.nexus.base.domain.response.R;
-import com.innospots.nexus.console.config.ConsoleConstant;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeCreateRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypePageRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeStatusUpdateRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeUpdateRequest;
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeOptionVo;
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeVo;
-import com.innospots.nexus.console.dictionary.service.DictionaryService;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 
 /**
- * 字典类型管理 REST 资源。
+ * 字典类型管理 REST 契约。
+ *
+ * <p>类级 {@code @Path} 由业务域实现（如 platform）绑定。</p>
  */
-@Path(ConsoleConstant.API_PREFIX + "/dictionary-types")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-@Tag(name = "Dictionary", description = "租户级字典")
+@Tag(name = "Dictionary", description = "字典类型与字典项")
 @NexusAuthenticatedApi
-@RequiredArgsConstructor
-public class DictionaryTypeEndpoint {
-
-    private final DictionaryService dictionaryService;
+public interface DictionaryTypeEndpoint {
 
     @GET
     @Operation(operationId = "dictionaryTypePage", summary = "分页查询字典类型")
-    public R<PageResult<DictionaryTypeVo>> pageDictionaryTypes(@BeanParam DictionaryTypePageRequest request) {
-        return R.ok(dictionaryService.pageDictionaryTypes(request));
-    }
+    R<PageResult<DictionaryTypeVo>> pageDictionaryTypes(@BeanParam DictionaryTypePageRequest request);
 
     @GET
     @Path("/{dictionaryTypeId}")
     @Operation(operationId = "dictionaryTypeGet", summary = "查询字典类型")
-    public R<DictionaryTypeVo> getDictionaryType(@PathParam("dictionaryTypeId") String dictionaryTypeId) {
-        return R.ok(dictionaryService.getDictionaryType(dictionaryTypeId));
-    }
+    R<DictionaryTypeVo> getDictionaryType(@PathParam("dictionaryTypeId") String dictionaryTypeId);
 
     @POST
     @Operation(operationId = "dictionaryTypeCreate", summary = "创建字典类型")
-    public R<DictionaryTypeVo> createDictionaryType(DictionaryTypeCreateRequest request) {
-        return R.ok(dictionaryService.createDictionaryType(request));
-    }
+    R<DictionaryTypeVo> createDictionaryType(DictionaryTypeCreateRequest request);
 
     @PUT
     @Path("/{dictionaryTypeId}")
     @Operation(operationId = "dictionaryTypeUpdate", summary = "更新字典类型")
-    public R<DictionaryTypeVo> updateDictionaryType(
+    R<DictionaryTypeVo> updateDictionaryType(
             @PathParam("dictionaryTypeId") String dictionaryTypeId,
             DictionaryTypeUpdateRequest request
-    ) {
-        return R.ok(dictionaryService.updateDictionaryType(dictionaryTypeId, request));
-    }
+    );
 
     @PUT
     @Path("/{dictionaryTypeId}/status")
     @Operation(operationId = "dictionaryTypeUpdateStatus", summary = "更新字典类型状态")
-    public R<Void> updateDictionaryTypeStatus(
+    R<Void> updateDictionaryTypeStatus(
             @PathParam("dictionaryTypeId") String dictionaryTypeId,
             DictionaryTypeStatusUpdateRequest request
-    ) {
-        dictionaryService.updateDictionaryTypeStatus(dictionaryTypeId, request);
-        return R.ok();
-    }
+    );
 
     @DELETE
     @Path("/{dictionaryTypeId}")
     @Operation(operationId = "dictionaryTypeDelete", summary = "删除字典类型")
-    public R<Void> deleteDictionaryType(@PathParam("dictionaryTypeId") String dictionaryTypeId) {
-        dictionaryService.deleteDictionaryType(dictionaryTypeId);
-        return R.ok();
-    }
+    R<Void> deleteDictionaryType(@PathParam("dictionaryTypeId") String dictionaryTypeId);
 
     @GET
     @Path("/options")
     @Operation(operationId = "dictionaryTypeListOptions", summary = "字典类型下拉选项")
-    public R<List<DictionaryTypeOptionVo>> listDictionaryTypeOptions(@QueryParam("status") BasicStatus status) {
-        return R.ok(dictionaryService.listDictionaryTypeOptions(status));
-    }
+    R<List<DictionaryTypeOptionVo>> listDictionaryTypeOptions(@QueryParam("status") BasicStatus status);
 }

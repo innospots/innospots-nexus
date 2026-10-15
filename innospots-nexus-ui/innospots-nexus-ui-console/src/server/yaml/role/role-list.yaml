@@ -16,7 +16,7 @@ dataSources:
     autoLoad: true
     request:
       method: GET
-      url: /api/d/nexus/roles
+      url: /api/d/platform/roles
       params:
         input: ${state.input}
         status: ${state.status}
@@ -71,7 +71,7 @@ body:
                           - action: request
                             params:
                               method: POST
-                              url: /api/d/nexus/roles
+                              url: /api/d/platform/roles
                               body:
                                 roleName: ${event.roleName}
                                 roleCode: ${event.roleCode}
@@ -282,7 +282,7 @@ body:
                           - action: request
                             params:
                               method: PUT
-                              url: /api/d/nexus/roles/${row.roleId}/status
+                              url: /api/d/platform/roles/${row.roleId}/status
                               body:
                                 status: "${row.status == 'ENABLED' ? 'DISABLED' : 'ENABLED'}"
                           - action: message
@@ -307,7 +307,7 @@ body:
                           - action: request
                             params:
                               method: DELETE
-                              url: /api/d/nexus/roles/${row.roleId}
+                              url: /api/d/platform/roles/${row.roleId}
                           - action: message
                             params:
                               messageType: success

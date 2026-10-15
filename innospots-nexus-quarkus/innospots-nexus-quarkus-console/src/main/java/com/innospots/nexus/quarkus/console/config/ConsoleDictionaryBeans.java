@@ -9,7 +9,6 @@ import com.innospots.nexus.console.dictionary.dao.DictionaryItemDao;
 import com.innospots.nexus.console.dictionary.dao.DictionaryTypeDao;
 import com.innospots.nexus.console.dictionary.operator.DictionaryItemOperator;
 import com.innospots.nexus.console.dictionary.operator.DictionaryTypeOperator;
-import com.innospots.nexus.console.dictionary.service.DictionaryService;
 
 /**
  * {@code console.dictionary} 域 Quarkus CDI 装配。
@@ -39,13 +38,5 @@ public class ConsoleDictionaryBeans {
             DictionaryItemDao itemDao,
             DictionaryConverter dictionaryConverter) {
         return new DictionaryItemOperator(dictionaryTypeOperator, itemDao, dictionaryConverter);
-    }
-
-    @Produces
-    @Singleton
-    DictionaryService dictionaryService(
-            DictionaryTypeOperator dictionaryTypeOperator,
-            DictionaryItemOperator dictionaryItemOperator) {
-        return new DictionaryService(dictionaryTypeOperator, dictionaryItemOperator);
     }
 }

@@ -12,9 +12,8 @@ import lombok.RequiredArgsConstructor;
 
 import com.innospots.nexus.base.domain.enums.BasicStatus;
 import com.innospots.nexus.base.domain.response.PageResult;
-import com.innospots.nexus.base.exception.NexusException;
-import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.base.status.NexusStatusCode;
+import com.innospots.nexus.base.util.Checks;
 import com.innospots.nexus.console.dictionary.converter.DictionaryConverter;
 import com.innospots.nexus.console.dictionary.dao.DictionaryItemDao;
 import com.innospots.nexus.console.dictionary.domain.entity.DictionaryItemEntity;
@@ -26,11 +25,11 @@ import com.innospots.nexus.console.dictionary.domain.request.DictionaryItemUpdat
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryItemVo;
 import com.innospots.nexus.console.dictionary.status.DictionaryStatusCode;
 import com.innospots.nexus.console.scope.ConsoleOwnership;
-import com.innospots.nexus.console.scope.ConsoleOwnershipGuard;
 import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
+import com.innospots.nexus.console.support.ConsoleExceptions;
 
 /**
- * 租户级字典项持久化与查询。
+ * 字典项持久化与查询（不含会话边界；由上层 service 传入 {@link ConsoleOwnership}）。
  */
 @RequiredArgsConstructor
 public class DictionaryItemOperator {
@@ -39,8 +38,12 @@ public class DictionaryItemOperator {
     private final DictionaryItemDao itemDao;
     private final DictionaryConverter converter;
 
-    public PageResult<DictionaryItemVo> pageItems(String typeCode, DictionaryItemPageRequest request) {
-        ConsoleOwnership ownership = ConsoleOwnershipGuard.requireTenantScope();
+    public PageResult<DictionaryItemVo> pageItems(
+            String typeCode,
+            DictionaryItemPageRequest request,
+            ConsoleOwnership ownership
+    ) {
+        Checks.notNull(ownership, "ownership");
         requireParentType(typeCode, ownership);
         DictionaryItemPageRequest pageRequest = request == null ? new DictionaryItemPageRequest() : request;
         LambdaQueryWrapper<DictionaryItemEntity> query = ConsoleOwnershipScope.apply(
@@ -69,8 +72,12 @@ public class DictionaryItemOperator {
     }
 
     @Transactional
-    public DictionaryItemVo createItem(String typeCode, DictionaryItemCreateRequest request) {
-        ConsoleOwnership ownership = ConsoleOwnershipGuard.requireTenantScope();
+    public DictionaryItemVo createItem(
+            String typeCode,
+            DictionaryItemCreateRequest request,
+            ConsoleOwnership ownership
+    ) {
+        Checks.notNull(ownership, "ownership");
         DictionaryTypeEntity parent = requireParentType(typeCode, ownership);
         Objects.requireNonNull(request, "request");
         if (existsItemValue(typeCode, request.itemValue(), parent.getSecurityRealm(), ownership)) {
@@ -93,9 +100,10 @@ public class DictionaryItemOperator {
     public DictionaryItemVo updateItem(
             String typeCode,
             String dictionaryItemId,
-            DictionaryItemUpdateRequest request
+            DictionaryItemUpdateRequest request,
+            ConsoleOwnership ownership
     ) {
-        ConsoleOwnership ownership = ConsoleOwnershipGuard.requireTenantScope();
+        Checks.notNull(ownership, "ownership");
         requireParentType(typeCode, ownership);
         Objects.requireNonNull(request, "request");
         DictionaryItemEntity entity = requireItem(typeCode, dictionaryItemId, ownership)
@@ -114,9 +122,10 @@ public class DictionaryItemOperator {
     public void updateItemStatus(
             String typeCode,
             String dictionaryItemId,
-            DictionaryItemStatusUpdateRequest request
+            DictionaryItemStatusUpdateRequest request,
+            ConsoleOwnership ownership
     ) {
-        ConsoleOwnership ownership = ConsoleOwnershipGuard.requireTenantScope();
+        Checks.notNull(ownership, "ownership");
         requireParentType(typeCode, ownership);
         Objects.requireNonNull(request, "request");
         if (request.status() == null) {
@@ -129,8 +138,8 @@ public class DictionaryItemOperator {
     }
 
     @Transactional
-    public void deleteItem(String typeCode, String dictionaryItemId) {
-        ConsoleOwnership ownership = ConsoleOwnershipGuard.requireTenantScope();
+    public void deleteItem(String typeCode, String dictionaryItemId, ConsoleOwnership ownership) {
+        Checks.notNull(ownership, "ownership");
         requireParentType(typeCode, ownership);
         DictionaryItemEntity entity = requireItem(typeCode, dictionaryItemId, ownership)
                 .orElseThrow(() -> ConsoleExceptions.build(DictionaryStatusCode.ITEM_NOT_FOUND));

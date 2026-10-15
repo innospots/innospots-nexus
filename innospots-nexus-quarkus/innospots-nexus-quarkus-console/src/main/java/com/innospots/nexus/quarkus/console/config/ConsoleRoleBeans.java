@@ -9,10 +9,9 @@ import com.innospots.nexus.console.role.dao.RoleBindingDao;
 import com.innospots.nexus.console.role.dao.RoleDao;
 import com.innospots.nexus.console.role.operator.RoleBindingOperator;
 import com.innospots.nexus.console.role.operator.RoleOperator;
-import com.innospots.nexus.console.role.service.RoleService;
 
 /**
- * {@code console.role} 域 Quarkus CDI 装配。
+ * {@code console.role} 域 Quarkus CDI 装配（operator；生命周期端点由业务域实现）。
  */
 @ApplicationScoped
 public class ConsoleRoleBeans {
@@ -36,11 +35,5 @@ public class ConsoleRoleBeans {
             RoleBindingDao roleBindingDao,
             RoleConverter roleConverter) {
         return new RoleBindingOperator(roleOperator, roleBindingDao, roleConverter);
-    }
-
-    @Produces
-    @Singleton
-    RoleService roleService(RoleOperator roleOperator, RoleBindingOperator roleBindingOperator) {
-        return new RoleService(roleOperator, roleBindingOperator);
     }
 }

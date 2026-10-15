@@ -12,7 +12,6 @@ import jakarta.ws.rs.Path;
 import org.junit.jupiter.api.Test;
 
 import com.innospots.nexus.base.domain.enums.BasicStatus;
-import com.innospots.nexus.console.config.ConsoleConstant;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryItemCreateRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryItemPageRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryItemStatusUpdateRequest;
@@ -25,13 +24,13 @@ import com.innospots.nexus.console.dictionary.domain.vo.DictionaryItemVo;
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeOptionVo;
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeVo;
 import static org.assertj.core.api.Assertions.assertThat;
+
 class DictionaryEndpointContractsTest {
 
     @Test
-    void dictionaryTypeEndpointOwnsCatalogOperations() throws NoSuchMethodException {
-        assertThat(DictionaryTypeEndpoint.class.isInterface()).isFalse();
-        assertThat(DictionaryTypeEndpoint.class.getAnnotation(Path.class).value())
-                .isEqualTo(ConsoleConstant.apiPath("/dictionary-types"));
+    void dictionaryTypeEndpointIsContractWithoutClassPath() throws NoSuchMethodException {
+        assertThat(DictionaryTypeEndpoint.class.isInterface()).isTrue();
+        assertThat(DictionaryTypeEndpoint.class.getAnnotation(Path.class)).isNull();
         assertHttpMethod(DictionaryTypeEndpoint.class, "pageDictionaryTypes",
                 GET.class, DictionaryTypePageRequest.class);
         assertHttpMethod(DictionaryTypeEndpoint.class, "getDictionaryType", GET.class, String.class);
@@ -46,10 +45,9 @@ class DictionaryEndpointContractsTest {
     }
 
     @Test
-    void dictionaryItemEndpointIsNestedUnderTypeCode() throws NoSuchMethodException {
-        assertThat(DictionaryItemEndpoint.class.isInterface()).isFalse();
-        assertThat(DictionaryItemEndpoint.class.getAnnotation(Path.class).value())
-                .isEqualTo(ConsoleConstant.apiPath("/dictionary-types/{typeCode}/items"));
+    void dictionaryItemEndpointIsContractWithoutClassPath() throws NoSuchMethodException {
+        assertThat(DictionaryItemEndpoint.class.isInterface()).isTrue();
+        assertThat(DictionaryItemEndpoint.class.getAnnotation(Path.class)).isNull();
         assertHttpMethod(DictionaryItemEndpoint.class, "pageDictionaryItems",
                 GET.class, String.class, DictionaryItemPageRequest.class);
         assertHttpMethod(DictionaryItemEndpoint.class, "createDictionaryItem",
@@ -64,8 +62,7 @@ class DictionaryEndpointContractsTest {
 
     @Test
     void requestsAndViewsExposeStableDictionaryData() {
-        assertRecordComponents(DictionaryTypeCreateRequest.class,
-                "typeCode", "typeName", "securityRealm", "sortOrder");
+        assertRecordComponents(DictionaryTypeCreateRequest.class, "typeCode", "typeName", "sortOrder");
         assertRecordComponents(DictionaryTypeUpdateRequest.class, "typeName", "sortOrder");
         assertRecordComponents(DictionaryTypeStatusUpdateRequest.class, "status");
         assertThat(DictionaryTypePageRequest.class.isRecord()).isFalse();

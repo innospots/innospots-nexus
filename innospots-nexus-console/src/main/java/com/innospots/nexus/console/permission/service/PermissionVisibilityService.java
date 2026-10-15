@@ -62,13 +62,27 @@ public final class PermissionVisibilityService {
         if (workspaceId == null || subject == null) {
             return List.of();
         }
+        String realm = TLC.securityRealm();
+        if (realm == null || realm.isBlank()) {
+            realm = "TENANT";
+        }
+        return visible(ConsoleOwnershipScope.workspaceOwnership(workspaceId, realm), subject);
+    }
+
+    public List<ConsoleCatalogResourceEntity> visible(
+            ConsoleOwnership ownership,
+            AuthorizationSubject subject
+    ) {
+        if (ownership == null || subject == null) {
+            return List.of();
+        }
         List<ConsoleCatalogResourceEntity> resources = resourceDao.selectList(
                 Wrappers.<ConsoleCatalogResourceEntity>lambdaQuery()
                         .eq(ConsoleCatalogResourceEntity::getStatus, BasicStatus.ENABLED.name()));
         if (subject.administrator()) {
             return List.copyOf(resources);
         }
-        Set<String> grantedIds = grantedResourceIds(workspaceId, subject);
+        Set<String> grantedIds = grantedResourceIds(ownership, subject);
         Map<String, ConsoleCatalogResourceEntity> byId = resources.stream()
                 .filter(value -> value.getResourceId() != null)
                 .collect(Collectors.toMap(
@@ -104,15 +118,15 @@ public final class PermissionVisibilityService {
         return List.copyOf(visible);
     }
 
-    private Set<String> grantedResourceIds(String workspaceId, AuthorizationSubject subject) {
+    private Set<String> grantedResourceIds(ConsoleOwnership ownership, AuthorizationSubject subject) {
         List<PermissionGrantEntity> grants = new ArrayList<>();
         if (!subject.roleIds().isEmpty()) {
-            grants.addAll(grantDao.selectList(scopeGrantQuery(workspaceId)
+            grants.addAll(grantDao.selectList(scopeGrantQuery(ownership)
                     .eq(PermissionGrantEntity::getSubjectType, PermissionSubjectType.ROLE.name())
                     .in(PermissionGrantEntity::getSubjectId, subject.roleIds())));
         }
         if (!subject.orgUnitIds().isEmpty()) {
-            grants.addAll(grantDao.selectList(scopeGrantQuery(workspaceId)
+            grants.addAll(grantDao.selectList(scopeGrantQuery(ownership)
                     .eq(PermissionGrantEntity::getSubjectType, PermissionSubjectType.ORG_UNIT.name())
                     .in(PermissionGrantEntity::getSubjectId, subject.orgUnitIds())));
         }
@@ -122,12 +136,7 @@ public final class PermissionVisibilityService {
                 .collect(Collectors.toSet());
     }
 
-    private static LambdaQueryWrapper<PermissionGrantEntity> scopeGrantQuery(String workspaceId) {
-        String realm = TLC.securityRealm();
-        if (realm == null || realm.isBlank()) {
-            realm = "TENANT";
-        }
-        ConsoleOwnership ownership = ConsoleOwnershipScope.workspaceOwnership(workspaceId, realm);
+    private static LambdaQueryWrapper<PermissionGrantEntity> scopeGrantQuery(ConsoleOwnership ownership) {
         return ConsoleOwnershipScope.apply(Wrappers.<PermissionGrantEntity>lambdaQuery(), ownership);
     }
 

@@ -3,7 +3,7 @@ package com.innospots.nexus.console.entry;
 import org.junit.jupiter.api.Test;
 
 import com.innospots.nexus.base.i18n.I18nObject;
-import com.innospots.nexus.console.menu.entry.MenuEntryPlugin;
+import com.innospots.nexus.console.plugin.entry.PluginManagementEntryPlugin;
 import com.innospots.nexus.core.plugin.declaration.PluginDefinition;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -17,7 +17,7 @@ class BuiltinConsoleEntryPluginsTest {
 
     @Test
     void entryPluginDefinitionUsesPlatformVersionAndModuleTags() {
-        PluginDefinition definition = new MenuEntryPlugin().definition();
+        PluginDefinition definition = new PluginManagementEntryPlugin().definition();
 
         assertThat(definition.version()).isEqualTo(BuiltinConsoleEntryPlugins.pluginVersion());
         assertThat(definition.tags().get(BuiltinConsoleEntryPlugins.TAG_KIND))
@@ -25,7 +25,7 @@ class BuiltinConsoleEntryPluginsTest {
         assertThat(definition.tags().get(BuiltinConsoleEntryPlugins.TAG_DOMAIN))
                 .contains(ConsoleModuleDescriptor.BUILTIN_DOMAIN_KEY);
         assertThat(definition.tags().get(BuiltinConsoleEntryPlugins.TAG_MODULE))
-                .contains("menu");
+                .contains("plugin");
         assertThat(definition.tags().get("scope")).isEmpty();
     }
 

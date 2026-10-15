@@ -92,11 +92,21 @@ class ConsoleCatalogStartupSyncIntegrationTest {
                 CatalogTreeJsonSupport.extractResourceKeys(treeResponse.body(), PLATFORM_CONSOLE_PLUGIN);
         List<String> apiModuleKeys =
                 CatalogTreeJsonSupport.extractModuleKeys(treeResponse.body(), PLATFORM_CONSOLE_PLUGIN);
-        assertThat(apiModuleKeys).containsExactlyInAnyOrder("organization", "user", "settings");
+        assertThat(apiModuleKeys).containsExactlyInAnyOrder(
+                "organization",
+                "menu",
+                "user",
+                "dictionary",
+                "role",
+                "permission",
+                "logger",
+                "settings");
         assertThat(apiResourceKeys).contains(
                 "module:organization",
                 "module:user",
-                "module:settings");
+                "module:settings",
+                "module:role",
+                "module:dictionary");
 
         List<String> dbResourceKeyList = jdbcTemplate.queryForList(
                 """
@@ -127,8 +137,8 @@ class ConsoleCatalogStartupSyncIntegrationTest {
                 .as("GET /catalog/tree keys should be indexed in nx_console_catalog_resource")
                 .containsAll(apiResourceKeys);
         assertThat(countResourcesByType("MENU")).isGreaterThan(0L);
-        assertThat(countResourcesByType("PAGE")).isGreaterThanOrEqualTo(3L);
-        assertThat(countResourcesByType("MODULE")).isEqualTo(3L);
+        assertThat(countResourcesByType("PAGE")).isGreaterThanOrEqualTo(8L);
+        assertThat(countResourcesByType("MODULE")).isEqualTo(8L);
     }
 
     private Long countResourcesByType(String resourceType) {

@@ -8,16 +8,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import com.innospots.nexus.console.plugin.entry.PluginManagementEntryPlugin;
 import com.innospots.nexus.console.ui.spec.PageDsl;
 import com.innospots.nexus.console.ui.spec.config.PageDslConfig;
 import com.innospots.nexus.console.ui.spec.loader.ClasspathPageDslLoader;
 import com.innospots.nexus.console.ui.spec.parser.JacksonPageDslParser;
-import com.innospots.nexus.console.dictionary.entry.DictionaryEntryPlugin;
-import com.innospots.nexus.console.logger.entry.LoggerEntryPlugin;
-import com.innospots.nexus.console.menu.entry.MenuEntryPlugin;
-import com.innospots.nexus.console.permission.entry.PermissionEntryPlugin;
-import com.innospots.nexus.console.plugin.entry.PluginManagementEntryPlugin;
-import com.innospots.nexus.console.role.entry.RoleEntryPlugin;
 import com.innospots.nexus.core.plugin.contribution.console.ConsoleModuleDeclaration;
 import com.innospots.nexus.core.plugin.contribution.console.ConsolePluginContribution;
 import com.innospots.nexus.core.plugin.contract.Plugin;
@@ -76,32 +71,16 @@ class ConsoleModuleEntryPluginsTest {
                 .toList();
 
         assertThat(pluginClasses).containsExactly(
-                "com.innospots.nexus.console.menu.entry.MenuEntryPlugin",
-                "com.innospots.nexus.console.dictionary.entry.DictionaryEntryPlugin",
-                "com.innospots.nexus.console.logger.entry.LoggerEntryPlugin",
-                "com.innospots.nexus.console.permission.entry.PermissionEntryPlugin",
-                "com.innospots.nexus.console.role.entry.RoleEntryPlugin",
                 "com.innospots.nexus.console.plugin.entry.PluginManagementEntryPlugin");
     }
 
     private static Stream<Plugin> builtinEntryPlugins() {
-        return Stream.of(
-                new MenuEntryPlugin(),
-                new DictionaryEntryPlugin(),
-                new LoggerEntryPlugin(),
-                new PermissionEntryPlugin(),
-                new RoleEntryPlugin(),
-                new PluginManagementEntryPlugin());
+        return Stream.of(new PluginManagementEntryPlugin());
     }
 
     private static Stream<Arguments> moduleEntryPages() {
         String domain = ConsoleModuleDescriptor.BUILTIN_DOMAIN_KEY;
         return Stream.of(
-                Arguments.of("menu", ConsoleModuleDescriptor.compositePageKey(domain, "menu", "main")),
-                Arguments.of("dictionary", ConsoleModuleDescriptor.compositePageKey(domain, "dictionary", "main")),
-                Arguments.of("logger", ConsoleModuleDescriptor.compositePageKey(domain, "logger", "main")),
-                Arguments.of("permission", ConsoleModuleDescriptor.compositePageKey(domain, "permission", "main")),
-                Arguments.of("plugin", ConsoleModuleDescriptor.compositePageKey(domain, "plugin", "main")),
-                Arguments.of("role", ConsoleModuleDescriptor.compositePageKey(domain, "role", "main")));
+                Arguments.of("plugin", ConsoleModuleDescriptor.compositePageKey(domain, "plugin", "main")));
     }
 }

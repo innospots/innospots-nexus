@@ -71,10 +71,14 @@ public final class BuiltinPlatformEntryPlugins {
                 .distinct()
                 .sorted()
                 .collect(Collectors.joining(",")));
-        values.put(TAG_MODULE, entry.modules().stream()
+        String moduleKeys = entry.modules().stream()
                 .map(PlatformModuleDescriptors::moduleKey)
                 .sorted()
-                .collect(Collectors.joining(",")));
+                .collect(Collectors.joining(","));
+        if (moduleKeys.length() > 64) {
+            moduleKeys = "platform-console";
+        }
+        values.put(TAG_MODULE, moduleKeys);
         return Tags.from(values);
     }
 }

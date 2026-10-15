@@ -27,6 +27,7 @@ import com.innospots.nexus.core.plugin.contribution.console.MenuDeclaration;
 import com.innospots.nexus.core.plugin.contribution.console.UiSpecPageDeclaration;
 import com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao;
 import com.innospots.nexus.console.catalog.domain.entity.ConsoleCatalogResourceEntity;
+import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
 import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
 import com.innospots.nexus.console.catalog.domain.model.CatalogSyncResult;
 
@@ -455,7 +456,14 @@ public final class ConsoleCatalogSyncService {
         entity.setDisplayName(definition.displayName());
         entity.setSortOrder(definition.sortOrder());
         entity.setStatus(BasicStatus.ENABLED.name());
-        entity.setSecurityRealm(currentSecurityRealm());
+        entity.setSecurityRealm(securityRealmForPlugin(definition.ownerPluginId()));
+    }
+
+    private static String securityRealmForPlugin(String ownerPluginId) {
+        if ("com.innospots.nexus.platform.console".equals(ownerPluginId)) {
+            return SecurityRealm.PLATFORM.name();
+        }
+        return currentSecurityRealm();
     }
 
     private boolean changed(

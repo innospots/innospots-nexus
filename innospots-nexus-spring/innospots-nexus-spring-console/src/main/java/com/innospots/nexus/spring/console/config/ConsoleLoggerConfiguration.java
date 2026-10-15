@@ -9,6 +9,7 @@ import com.innospots.nexus.console.logger.InvocationLogHandler;
 import com.innospots.nexus.console.logger.LogExecutor;
 import com.innospots.nexus.console.logger.dao.AuditLogDao;
 import com.innospots.nexus.console.logger.handler.PersistenceInvocationLogHandler;
+import com.innospots.nexus.console.logger.operator.AuditLogOperator;
 import com.innospots.nexus.console.logger.operator.InvocationLogOperator;
 
 /**
@@ -23,6 +24,11 @@ import com.innospots.nexus.console.logger.operator.InvocationLogOperator;
         annotationClass = Mapper.class,
         sqlSessionFactoryRef = "sqlSessionFactory")
 public class ConsoleLoggerConfiguration {
+
+    @Bean
+    AuditLogOperator auditLogOperator(AuditLogDao auditLogDao) {
+        return new AuditLogOperator(auditLogDao);
+    }
 
     @Bean
     InvocationLogOperator invocationLogOperator(AuditLogDao auditLogDao) {

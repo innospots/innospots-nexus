@@ -1,5 +1,6 @@
 /**
- * Jakarta REST 角色生命周期契约与角色绑定端点。
+ * 角色生命周期与绑定 REST 契约（{@link RoleEndpoint}、{@link RoleBindingEndpoint}）。
+ *
  * @author Smars
  * @date 2026/09/13
  */

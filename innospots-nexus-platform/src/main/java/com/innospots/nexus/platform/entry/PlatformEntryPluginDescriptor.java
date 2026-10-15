@@ -48,7 +48,12 @@ public record PlatformEntryPluginDescriptor(
                         "组织开通、平台用户、邀请与注册策略。"),
                 List.of(
                         PlatformModuleDescriptors.ORGANIZATION,
+                        PlatformModuleDescriptors.MENU,
                         PlatformModuleDescriptors.USERS,
+                        PlatformModuleDescriptors.DICTIONARY,
+                        PlatformModuleDescriptors.ROLE,
+                        PlatformModuleDescriptors.PERMISSION,
+                        PlatformModuleDescriptors.LOGGER,
                         PlatformModuleDescriptors.SETTINGS));
     }
 }

@@ -17,7 +17,7 @@ dataSources:
     autoLoad: true
     request:
       method: GET
-      url: /api/d/nexus/dictionary-types
+      url: /api/d/platform/dictionary-types
       params:
         input: ${state.input}
         status: ${state.status}
@@ -28,7 +28,7 @@ dataSources:
     autoLoad: false
     request:
       method: GET
-      url: /api/d/nexus/dictionary-types/${state.editingTypeId}
+      url: /api/d/platform/dictionary-types/${state.editingTypeId}
 
 body:
   type: Page
@@ -89,7 +89,7 @@ body:
                                 - action: request
                                   params:
                                     method: POST
-                                    url: /api/d/nexus/dictionary-types
+                                    url: /api/d/platform/dictionary-types
                                     body:
                                       typeCode: ${event.typeCode}
                                       typeName: ${event.typeName}
@@ -99,7 +99,7 @@ body:
                                 - action: request
                                   params:
                                     method: PUT
-                                    url: /api/d/nexus/dictionary-types/${state.editingTypeId}
+                                    url: /api/d/platform/dictionary-types/${state.editingTypeId}
                                     body:
                                       typeName: ${event.typeName}
                                       status: ${event.status}

@@ -15,6 +15,8 @@ import com.innospots.nexus.console.permission.domain.enums.PermissionSubjectType
 import com.innospots.nexus.console.role.dao.RoleDao;
 import com.innospots.nexus.console.role.domain.entity.RoleEntity;
 import com.innospots.nexus.console.role.domain.enums.RoleOwnerType;
+import com.innospots.nexus.console.scope.ConsoleOwnership;
+import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -31,17 +33,20 @@ class GrantSubjectAccessTest {
     @Test
     void ensureSubjectInScopeRejectsRoleOutsideWorkspace() {
         bindWorkspaceScope("tnt-a", "wks-a");
+        ConsoleOwnership ownership = workspaceOwnership("wks-a");
         RoleDao roleDao = mock(RoleDao.class);
         when(roleDao.selectOne(any())).thenReturn(null);
         GrantSubjectAccess access = new GrantSubjectAccess(roleDao, null);
 
-        assertThatThrownBy(() -> access.ensureSubjectInScope(PermissionSubjectType.ROLE, "rol-x"))
+        assertThatThrownBy(() -> access.ensureSubjectInScope(
+                PermissionSubjectType.ROLE, "rol-x", ownership, "tnt-a", "wks-a"))
                 .isInstanceOf(NexusException.class);
     }
 
     @Test
     void ensureSubjectInScopeAcceptsScopedRole() {
         bindWorkspaceScope("tnt-a", "wks-a");
+        ConsoleOwnership ownership = workspaceOwnership("wks-a");
         RoleEntity role = new RoleEntity();
         role.setRoleId("rol-1");
         role.setOwnerType(RoleOwnerType.WORKSPACE.name());
@@ -51,7 +56,11 @@ class GrantSubjectAccessTest {
         when(roleDao.selectOne(any())).thenReturn(role);
         GrantSubjectAccess access = new GrantSubjectAccess(roleDao, null);
 
-        access.ensureSubjectInScope(PermissionSubjectType.ROLE, "rol-1");
+        access.ensureSubjectInScope(PermissionSubjectType.ROLE, "rol-1", ownership, "tnt-a", "wks-a");
+    }
+
+    private static ConsoleOwnership workspaceOwnership(String workspaceId) {
+        return ConsoleOwnershipScope.workspaceOwnership(workspaceId, SecurityRealm.TENANT.name());
     }
 
     private static void bindWorkspaceScope(String tenantId, String workspaceId) {

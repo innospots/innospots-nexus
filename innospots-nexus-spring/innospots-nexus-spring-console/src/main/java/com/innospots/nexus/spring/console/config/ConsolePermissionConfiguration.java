@@ -4,16 +4,12 @@ import org.apache.ibatis.annotations.Mapper;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 
 import com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubjectResolver;
 import com.innospots.nexus.console.permission.authorization.ConsolePagePermissionAuthorizer;
 import com.innospots.nexus.console.permission.authorization.SessionAuthorizationSubjectResolver;
 import com.innospots.nexus.console.permission.dao.PermissionGrantDao;
-import com.innospots.nexus.console.permission.endpoint.CurrentAuthorizationEndpoint;
-import com.innospots.nexus.console.permission.endpoint.GrantManagementEndpoint;
-import com.innospots.nexus.console.permission.endpoint.OrganizationUnitGrantManagementEndpoint;
 import com.innospots.nexus.console.permission.service.GrantSubjectAccess;
 import com.innospots.nexus.console.permission.service.PermissionGrantService;
 import com.innospots.nexus.console.permission.service.PermissionVisibilityService;
@@ -21,11 +17,7 @@ import com.innospots.nexus.console.role.dao.RoleBindingDao;
 import com.innospots.nexus.console.role.dao.RoleDao;
 
 /**
- * {@code console.permission} 域 Spring 装配：授权主体解析、请求鉴权与授权管理 REST。
- *
- * @author Smars
- * @date 2026/09/23
- * @see ConsolePagePermissionAuthorizer
+ * {@code console.permission} 域 Spring 装配：授权主体解析、请求鉴权与授权核心服务（REST 由 platform 实现）。
  */
 @Configuration
 @MapperScan(
@@ -66,26 +58,5 @@ public class ConsolePermissionConfiguration {
             ConsoleCatalogResourceDao resourceDao,
             PermissionGrantDao grantDao) {
         return new ConsolePagePermissionAuthorizer(resourceDao, grantDao);
-    }
-
-    @Bean
-    @Lazy
-    GrantManagementEndpoint grantManagementEndpoint(PermissionGrantService permissionGrantService) {
-        return new GrantManagementEndpoint(permissionGrantService);
-    }
-
-    @Bean
-    @Lazy
-    OrganizationUnitGrantManagementEndpoint organizationUnitGrantManagementEndpoint(
-            PermissionGrantService permissionGrantService) {
-        return new OrganizationUnitGrantManagementEndpoint(permissionGrantService);
-    }
-
-    @Bean
-    @Lazy
-    CurrentAuthorizationEndpoint currentAuthorizationEndpoint(
-            AuthorizationSubjectResolver authorizationSubjectResolver,
-            PermissionVisibilityService permissionVisibilityService) {
-        return new CurrentAuthorizationEndpoint(authorizationSubjectResolver, permissionVisibilityService);
     }
 }

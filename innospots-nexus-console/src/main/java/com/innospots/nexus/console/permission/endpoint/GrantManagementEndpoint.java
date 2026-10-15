@@ -7,44 +7,31 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import lombok.RequiredArgsConstructor;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import com.innospots.nexus.base.domain.response.R;
-import com.innospots.nexus.console.config.ConsoleConstant;
-import com.innospots.nexus.console.permission.domain.enums.PermissionSubjectType;
 import com.innospots.nexus.console.permission.domain.request.PermissionGrantReplaceRequest;
-import com.innospots.nexus.console.permission.service.PermissionGrantService;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 
 /**
- * 角色权限全量替换的管理 REST 资源。
+ * 角色权限全量替换 REST 契约。
  */
-@Path(ConsoleConstant.API_PREFIX + "/roles/{roleId}/permissions")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Permission", description = "授权与可见资源")
 @NexusAuthenticatedApi
-@RequiredArgsConstructor
-public class GrantManagementEndpoint {
-
-    private final PermissionGrantService grantService;
+public interface GrantManagementEndpoint {
 
     @GET
     @Operation(operationId = "permissionGrantListByRole", summary = "查询角色授权")
-    public R<PermissionGrantReplaceRequest> getRolePermissions(@PathParam("roleId") String roleId) {
-        return R.ok(grantService.list(PermissionSubjectType.ROLE, roleId));
-    }
+    R<PermissionGrantReplaceRequest> getRolePermissions(@PathParam("roleId") String roleId);
 
     @PUT
     @Operation(operationId = "permissionGrantReplaceByRole", summary = "全量替换角色授权")
-    public R<Void> replaceRolePermissions(
+    R<Void> replaceRolePermissions(
             @PathParam("roleId") String roleId,
             PermissionGrantReplaceRequest request
-    ) {
-        grantService.replace(PermissionSubjectType.ROLE, roleId, request);
-        return R.ok();
-    }
+    );
 }

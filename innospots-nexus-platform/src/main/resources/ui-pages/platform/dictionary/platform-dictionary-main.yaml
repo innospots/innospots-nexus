@@ -1,0 +1,8 @@
+dsl: '1.0'
+
+page:
+  id: platform-dictionary-main
+  name: dictionaryMain
+  title: Dictionary Management
+  description: Platform console dictionary module.
+  type: general

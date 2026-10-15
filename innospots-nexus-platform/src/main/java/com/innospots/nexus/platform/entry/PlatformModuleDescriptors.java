@@ -69,6 +69,61 @@ public final class PlatformModuleDescriptors {
             I18nObject.of("en", "Platform operational settings.", "zh", "运营平台配置项。"),
             I18nObject.of("en", "Registration mode", "zh", "注册模式"));
 
+    public static final ConsoleModuleDescriptor MENU = ConsoleModuleDescriptor.builtin(
+            PLUGIN_ID,
+            DOMAIN,
+            "menu",
+            pageKey("menu", "main"),
+            "menu",
+            10,
+            I18nObject.of("en", "Menu", "zh", "菜单"),
+            I18nObject.of("en", "Platform navigation menu management.", "zh", "平台导航菜单管理。"),
+            I18nObject.of("en", "Menu Management", "zh", "菜单管理"));
+
+    public static final ConsoleModuleDescriptor DICTIONARY = ConsoleModuleDescriptor.builtin(
+            PLUGIN_ID,
+            DOMAIN,
+            "dictionary",
+            pageKey("dictionary", "main"),
+            "book",
+            20,
+            I18nObject.of("en", "Dictionary", "zh", "字典"),
+            I18nObject.of("en", "Platform dictionary management.", "zh", "平台字典管理。"),
+            I18nObject.of("en", "Dictionary Management", "zh", "字典管理"));
+
+    public static final ConsoleModuleDescriptor ROLE = ConsoleModuleDescriptor.builtin(
+            PLUGIN_ID,
+            DOMAIN,
+            "role",
+            pageKey("role", "main"),
+            "team",
+            30,
+            I18nObject.of("en", "Role", "zh", "角色"),
+            I18nObject.of("en", "Platform role management.", "zh", "平台角色管理。"),
+            I18nObject.of("en", "Role Management", "zh", "角色管理"));
+
+    public static final ConsoleModuleDescriptor PERMISSION = ConsoleModuleDescriptor.builtin(
+            PLUGIN_ID,
+            DOMAIN,
+            "permission",
+            pageKey("permission", "main"),
+            "lock",
+            40,
+            I18nObject.of("en", "Permission", "zh", "权限"),
+            I18nObject.of("en", "Platform permission management.", "zh", "平台权限管理。"),
+            I18nObject.of("en", "Permission Management", "zh", "权限管理"));
+
+    public static final ConsoleModuleDescriptor LOGGER = ConsoleModuleDescriptor.builtin(
+            PLUGIN_ID,
+            DOMAIN,
+            "logger",
+            pageKey("logger", "main"),
+            "file-text",
+            50,
+            I18nObject.of("en", "Logger", "zh", "日志"),
+            I18nObject.of("en", "Platform audit log management.", "zh", "平台审计日志管理。"),
+            I18nObject.of("en", "Audit Logs", "zh", "审计日志"));
+
     private PlatformModuleDescriptors() {
     }
 

@@ -1,0 +1,8 @@
+dsl: '1.0'
+
+page:
+  id: platform-menu-main
+  name: menuMain
+  title: Menu Management
+  description: Platform console menu module.
+  type: general

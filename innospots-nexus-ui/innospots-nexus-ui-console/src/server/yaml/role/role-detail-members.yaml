@@ -17,13 +17,13 @@ dataSources:
     autoLoad: true
     request:
       method: GET
-      url: /api/d/nexus/roles/${state.roleId}
+      url: /api/d/platform/roles/${state.roleId}
   bindings:
     type: http
     autoLoad: true
     request:
       method: GET
-      url: /api/d/nexus/roles/${state.roleId}/bindings
+      url: /api/d/platform/roles/${state.roleId}/bindings
       params:
         subjectType: ${state.subjectType}
         input: ${state.input}
@@ -68,7 +68,7 @@ body:
                     content:
                       type: Text
                       props:
-                        text: 成员目录展示需 UserDirectory 补充；请在后端就绪后对接批量添加接口 POST /api/d/nexus/roles/${state.roleId}/bindings。
+                        text: 成员目录展示需 UserDirectory 补充；请在后端就绪后对接批量添加接口 POST /api/d/platform/roles/${state.roleId}/bindings。
     - type: Tabs
       props:
         activeKey: members
@@ -171,7 +171,7 @@ body:
                       - action: request
                         params:
                           method: DELETE
-                          url: /api/d/nexus/roles/${state.roleId}/bindings/${row.bindingId}
+                          url: /api/d/platform/roles/${state.roleId}/bindings/${row.bindingId}
                       - action: message
                         params:
                           messageType: success

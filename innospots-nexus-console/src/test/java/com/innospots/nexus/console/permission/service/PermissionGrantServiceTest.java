@@ -12,6 +12,7 @@ import com.innospots.nexus.base.domain.workspace.WorkspaceSnapshot;
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.thread.SessionContext;
 import com.innospots.nexus.base.thread.TLC;
+import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
 import com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao;
 import com.innospots.nexus.console.catalog.domain.entity.ConsoleCatalogResourceEntity;
 import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
@@ -20,6 +21,8 @@ import com.innospots.nexus.console.permission.domain.entity.PermissionGrantEntit
 import com.innospots.nexus.console.permission.domain.enums.PermissionSubjectType;
 import com.innospots.nexus.console.permission.domain.request.PermissionGrantItemRequest;
 import com.innospots.nexus.console.permission.domain.request.PermissionGrantReplaceRequest;
+import com.innospots.nexus.console.scope.ConsoleOwnership;
+import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -40,6 +43,7 @@ class PermissionGrantServiceTest {
     @Test
     void listMapsPersistedGrantsToReplaceRequest() {
         bindWorkspaceScope("tnt-1", "wks-1");
+        ConsoleOwnership ownership = workspaceOwnership("wks-1");
         PermissionGrantDao grantDao = mock(PermissionGrantDao.class);
         when(grantDao.selectList(any())).thenReturn(List.of(
                 grantRow("menu-res", null),
@@ -49,24 +53,28 @@ class PermissionGrantServiceTest {
         GrantSubjectAccess grantSubjectAccess = mock(GrantSubjectAccess.class);
 
         PermissionGrantService service = new PermissionGrantService(grantDao, resourceDao, grantSubjectAccess);
-        PermissionGrantReplaceRequest result = service.list(PermissionSubjectType.ROLE, "rol-1");
+        PermissionGrantReplaceRequest result = service.list(
+                PermissionSubjectType.ROLE, "rol-1", ownership, "tnt-1", "wks-1");
 
         assertThat(result.grants()).containsExactly(
                 new PermissionGrantItemRequest("menu-res", null),
                 new PermissionGrantItemRequest("page-res", "{\"filter\":\"x\"}"));
-        verify(grantSubjectAccess).ensureSubjectInScope(PermissionSubjectType.ROLE, "rol-1");
+        verify(grantSubjectAccess).ensureSubjectInScope(
+                PermissionSubjectType.ROLE, "rol-1", ownership, "tnt-1", "wks-1");
     }
 
     @Test
     void replaceRejectsDuplicateResourceIds() {
         bindWorkspaceScope("tnt-1", "wks-1");
+        ConsoleOwnership ownership = workspaceOwnership("wks-1");
         PermissionGrantService service = newService(mock(PermissionGrantDao.class), mock(ConsoleCatalogResourceDao.class));
 
         PermissionGrantReplaceRequest request = new PermissionGrantReplaceRequest(List.of(
                 new PermissionGrantItemRequest("res-a", null),
                 new PermissionGrantItemRequest("res-a", null)));
 
-        assertThatThrownBy(() -> service.replace(PermissionSubjectType.ROLE, "rol-1", request))
+        assertThatThrownBy(() -> service.replace(
+                PermissionSubjectType.ROLE, "rol-1", request, ownership, "tnt-1", "wks-1"))
                 .isInstanceOf(NexusException.class)
                 .hasMessageContaining("unique");
     }
@@ -74,6 +82,7 @@ class PermissionGrantServiceTest {
     @Test
     void replaceRejectsGrantOnModuleResource() {
         bindWorkspaceScope("tnt-1", "wks-1");
+        ConsoleOwnership ownership = workspaceOwnership("wks-1");
         ConsoleCatalogResourceEntity module = catalogResource(
                 "mod-1", CatalogResourceType.MODULE, "module:sales", null);
         PermissionGrantDao grantDao = mock(PermissionGrantDao.class);
@@ -84,7 +93,8 @@ class PermissionGrantServiceTest {
         PermissionGrantReplaceRequest request = new PermissionGrantReplaceRequest(List.of(
                 new PermissionGrantItemRequest("mod-1", null)));
 
-        assertThatThrownBy(() -> service.replace(PermissionSubjectType.ROLE, "rol-1", request))
+        assertThatThrownBy(() -> service.replace(
+                PermissionSubjectType.ROLE, "rol-1", request, ownership, "tnt-1", "wks-1"))
                 .isInstanceOf(NexusException.class)
                 .hasMessageContaining("cannot be granted");
     }
@@ -92,6 +102,7 @@ class PermissionGrantServiceTest {
     @Test
     void replaceRejectsPageWithoutMenuParentGrant() {
         bindWorkspaceScope("tnt-1", "wks-1");
+        ConsoleOwnership ownership = workspaceOwnership("wks-1");
         ConsoleCatalogResourceEntity module = catalogResource(
                 "mod-1", CatalogResourceType.MODULE, "module:sales", null);
         ConsoleCatalogResourceEntity menu = catalogResource(
@@ -106,7 +117,8 @@ class PermissionGrantServiceTest {
         PermissionGrantReplaceRequest request = new PermissionGrantReplaceRequest(List.of(
                 new PermissionGrantItemRequest("page-1", null)));
 
-        assertThatThrownBy(() -> service.replace(PermissionSubjectType.ROLE, "rol-1", request))
+        assertThatThrownBy(() -> service.replace(
+                PermissionSubjectType.ROLE, "rol-1", request, ownership, "tnt-1", "wks-1"))
                 .isInstanceOf(NexusException.class)
                 .hasMessageContaining("parent must also be granted");
     }
@@ -114,6 +126,7 @@ class PermissionGrantServiceTest {
     @Test
     void replaceDeletesPreviousGrantsAndInsertsNewRows() {
         bindWorkspaceScope("tnt-1", "wks-1");
+        ConsoleOwnership ownership = workspaceOwnership("wks-1");
         ConsoleCatalogResourceEntity module = catalogResource(
                 "mod-1", CatalogResourceType.MODULE, "module:sales", null);
         ConsoleCatalogResourceEntity menu = catalogResource(
@@ -135,7 +148,7 @@ class PermissionGrantServiceTest {
         PermissionGrantReplaceRequest request = new PermissionGrantReplaceRequest(List.of(
                 new PermissionGrantItemRequest("menu-1", null)));
 
-        service.replace(PermissionSubjectType.ROLE, "rol-9", request);
+        service.replace(PermissionSubjectType.ROLE, "rol-9", request, ownership, "tnt-1", "wks-1");
 
         verify(grantDao).delete(any());
         assertThat(inserted).hasSize(1);
@@ -143,12 +156,14 @@ class PermissionGrantServiceTest {
         assertThat(inserted.get(0).getSubjectId()).isEqualTo("rol-9");
         assertThat(inserted.get(0).getResourceId()).isEqualTo("menu-1");
         assertThat(inserted.get(0).getOwnerId()).isEqualTo("wks-1");
-        verify(grantSubjectAccess).ensureSubjectInScope(PermissionSubjectType.ROLE, "rol-9");
+        verify(grantSubjectAccess).ensureSubjectInScope(
+                PermissionSubjectType.ROLE, "rol-9", ownership, "tnt-1", "wks-1");
     }
 
     @Test
     void replaceFullReplaceClearsGrantsWhenRequestIsEmpty() {
         bindWorkspaceScope("tnt-1", "wks-1");
+        ConsoleOwnership ownership = workspaceOwnership("wks-1");
         PermissionGrantDao grantDao = mock(PermissionGrantDao.class);
         ConsoleCatalogResourceDao resourceDao = mock(ConsoleCatalogResourceDao.class);
         GrantSubjectAccess grantSubjectAccess = mock(GrantSubjectAccess.class);
@@ -157,7 +172,10 @@ class PermissionGrantServiceTest {
         service.replace(
                 PermissionSubjectType.ROLE,
                 "rol-1",
-                new PermissionGrantReplaceRequest(List.of()));
+                new PermissionGrantReplaceRequest(List.of()),
+                ownership,
+                "tnt-1",
+                "wks-1");
 
         verify(grantDao).delete(any());
         verify(grantDao, never()).insert(any(PermissionGrantEntity.class));
@@ -168,6 +186,10 @@ class PermissionGrantServiceTest {
             ConsoleCatalogResourceDao resourceDao
     ) {
         return new PermissionGrantService(grantDao, resourceDao, mock(GrantSubjectAccess.class));
+    }
+
+    private static ConsoleOwnership workspaceOwnership(String workspaceId) {
+        return ConsoleOwnershipScope.workspaceOwnership(workspaceId, SecurityRealm.TENANT.name());
     }
 
     private static PermissionGrantEntity grantRow(String resourceId, String constraint) {

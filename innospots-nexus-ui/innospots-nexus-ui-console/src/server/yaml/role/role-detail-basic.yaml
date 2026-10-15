@@ -13,7 +13,7 @@ dataSources:
     autoLoad: true
     request:
       method: GET
-      url: /api/d/nexus/roles/${state.roleId}
+      url: /api/d/platform/roles/${state.roleId}
 
 body:
   type: Page
@@ -79,7 +79,7 @@ body:
               - action: request
                 params:
                   method: PUT
-                  url: /api/d/nexus/roles/${state.roleId}
+                  url: /api/d/platform/roles/${state.roleId}
                   body:
                     roleName: ${event.roleName}
                     description: ${event.description}

@@ -12,8 +12,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 import com.innospots.nexus.base.json.Jsons;
-import com.innospots.nexus.console.config.ConsoleConstant;
 import com.innospots.nexus.console.permission.endpoint.GrantManagementEndpoint;
+import com.innospots.nexus.platform.config.PlatformConstant;
 import com.innospots.nexus.sample.spring.platform.SamplePlatformConsoleServer;
 import com.innospots.nexus.sample.spring.platform.permission.support.PermissionGrantDatabaseJsonSnapshot;
 import com.innospots.nexus.sample.spring.platform.permission.support.SyncedCatalogResourceIds;
@@ -41,9 +41,7 @@ class RolePermissionGrantEndpointIntegrationTest {
 
     private static final Logger LOGGER = LogManager.getLogger(RolePermissionGrantEndpointIntegrationTest.class);
 
-    private static final String WORKSPACE_ID = "dev-workspace";
-
-    private static final String ROLES_BASE = ConsoleConstant.apiPath("/roles");
+    private static final String ROLES_BASE = com.innospots.nexus.platform.config.PlatformConstant.ROLES_PATH;
 
     @LocalServerPort
     private int port;
@@ -72,7 +70,7 @@ class RolePermissionGrantEndpointIntegrationTest {
         LOGGER.info("Synced catalog resources for grant test: {}", Jsons.toJson(catalog));
 
         String roleId = createRole("permission-sample", "Permission Sample Role");
-        String permissionsPath = ConsoleConstant.apiPath("/roles/" + roleId + "/permissions");
+        String permissionsPath = PlatformConstant.ROLES_PATH + "/" + roleId + "/permissions";
 
         HttpResponse<String> emptyList = http.get(permissionsPath);
         LOGGER.info("GET {} status={} body={}", permissionsPath, emptyList.statusCode(), emptyList.body());
@@ -167,13 +165,9 @@ class RolePermissionGrantEndpointIntegrationTest {
                 {
                   "roleName": "%s",
                   "roleCode": "%s",
-                  "ownerType": "WORKSPACE",
-                  "ownerId": "%s",
-                  "securityRealm": "TENANT",
-                  "description": "permission grant IT",
-                  "sortOrder": 5
+                  "description": "permission grant IT"
                 }
-                """.formatted(roleName, roleCode, WORKSPACE_ID);
+                """.formatted(roleName, roleCode);
 
         HttpResponse<String> created = http.postJson(ROLES_BASE, createBody);
         assertThat(created.statusCode()).as(created.body()).isEqualTo(200);

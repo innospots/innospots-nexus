@@ -8,26 +8,24 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.innospots.nexus.base.thread.TLC;
+import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
 import com.innospots.nexus.console.menu.domain.enums.MenuOpenMode;
 import com.innospots.nexus.console.menu.domain.vo.NavigationMenuVo;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubject;
 import com.innospots.nexus.console.catalog.domain.entity.ConsoleCatalogResourceEntity;
 import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
 import com.innospots.nexus.console.permission.service.PermissionVisibilityService;
+import com.innospots.nexus.console.scope.ConsoleOwnership;
+import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
 
 /**
  * 从持久化权限目录组装当前用户可见的导航菜单树。
- *
- * @author Smars
- * @date 2026/09/13
  */
 public final class NavigationMenuAssembler {
 
     private final PermissionVisibilityService visibilityService;
 
-    /**
-     * 创建导航菜单组装器。
-     */
     public NavigationMenuAssembler(PermissionVisibilityService visibilityService) {
         if (visibilityService == null) {
             throw new IllegalArgumentException("visibilityService is required");
@@ -36,17 +34,30 @@ public final class NavigationMenuAssembler {
     }
 
     /**
-     * 返回当前主体可见的 MENU 树。
-     *
-     * @param workspaceId 当前 Workspace ID
-     * @param subject     当前鉴权主体
-     * @return 导航树根节点
+     * 按工作区归属返回可见 MENU 树（租户/工作区会话）。
      */
     public List<NavigationMenuVo> navigationMenus(String workspaceId, AuthorizationSubject subject) {
         if (workspaceId == null || workspaceId.isBlank() || subject == null) {
             return List.of();
         }
-        List<ConsoleCatalogResourceEntity> visible = visibilityService.visible(workspaceId, subject);
+        String realm = TLC.securityRealm();
+        if (realm == null || realm.isBlank()) {
+            realm = SecurityRealm.TENANT.name();
+        }
+        return navigationMenus(ConsoleOwnershipScope.workspaceOwnership(workspaceId, realm), subject);
+    }
+
+    /**
+     * 按显式归属返回可见 MENU 树（如 PLATFORM 会话）。
+     */
+    public List<NavigationMenuVo> navigationMenus(ConsoleOwnership ownership, AuthorizationSubject subject) {
+        if (ownership == null || subject == null) {
+            return List.of();
+        }
+        return buildMenus(visibilityService.visible(ownership, subject));
+    }
+
+    private List<NavigationMenuVo> buildMenus(List<ConsoleCatalogResourceEntity> visible) {
         Map<String, ConsoleCatalogResourceEntity> pagesByPageKey = visible.stream()
                 .filter(resource -> CatalogResourceType.PAGE.name().equals(resource.getResourceType()))
                 .filter(resource -> resource.getPageKey() != null && !resource.getPageKey().isBlank())

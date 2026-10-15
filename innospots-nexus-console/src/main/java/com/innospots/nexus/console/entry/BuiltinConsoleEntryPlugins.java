@@ -34,13 +34,7 @@ public final class BuiltinConsoleEntryPlugins {
     /** 未打包 manifest 时的开发态回退版本（与 Maven ${revision} 解耦，仅本地 IDE 运行）。 */
     static final String DEVELOPMENT_PLUGIN_VERSION = "0.0.0-dev";
 
-    public static final java.util.List<String> REQUIRED_PLUGIN_IDS = java.util.List.of(
-            MENU,
-            DICTIONARY,
-            LOGGER,
-            PERMISSION,
-            ROLE,
-            PLUGIN_MANAGEMENT);
+    public static final java.util.List<String> REQUIRED_PLUGIN_IDS = java.util.List.of(PLUGIN_MANAGEMENT);
 
     private BuiltinConsoleEntryPlugins() {
     }

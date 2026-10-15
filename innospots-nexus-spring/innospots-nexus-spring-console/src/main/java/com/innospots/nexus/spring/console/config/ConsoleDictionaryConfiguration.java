@@ -4,22 +4,15 @@ import org.apache.ibatis.annotations.Mapper;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 
 import com.innospots.nexus.console.dictionary.converter.DictionaryConverter;
 import com.innospots.nexus.console.dictionary.dao.DictionaryItemDao;
 import com.innospots.nexus.console.dictionary.dao.DictionaryTypeDao;
-import com.innospots.nexus.console.dictionary.endpoint.DictionaryItemEndpoint;
-import com.innospots.nexus.console.dictionary.endpoint.DictionaryTypeEndpoint;
 import com.innospots.nexus.console.dictionary.operator.DictionaryItemOperator;
 import com.innospots.nexus.console.dictionary.operator.DictionaryTypeOperator;
-import com.innospots.nexus.console.dictionary.service.DictionaryService;
 
 /**
- * {@code console.dictionary} 域 Spring 装配：字典类型与字典项 REST。
- *
- * @author Smars
- * @date 2026/09/23
+ * {@code console.dictionary} 域 Spring 装配：字典 operator 与转换器（REST 由 platform 实现）。
  */
 @Configuration
 @MapperScan(
@@ -47,24 +40,5 @@ public class ConsoleDictionaryConfiguration {
             DictionaryItemDao itemDao,
             DictionaryConverter dictionaryConverter) {
         return new DictionaryItemOperator(dictionaryTypeOperator, itemDao, dictionaryConverter);
-    }
-
-    @Bean
-    DictionaryService dictionaryService(
-            DictionaryTypeOperator dictionaryTypeOperator,
-            DictionaryItemOperator dictionaryItemOperator) {
-        return new DictionaryService(dictionaryTypeOperator, dictionaryItemOperator);
-    }
-
-    @Bean
-    @Lazy
-    DictionaryTypeEndpoint dictionaryTypeEndpoint(DictionaryService dictionaryService) {
-        return new DictionaryTypeEndpoint(dictionaryService);
-    }
-
-    @Bean
-    @Lazy
-    DictionaryItemEndpoint dictionaryItemEndpoint(DictionaryService dictionaryService) {
-        return new DictionaryItemEndpoint(dictionaryService);
     }
 }

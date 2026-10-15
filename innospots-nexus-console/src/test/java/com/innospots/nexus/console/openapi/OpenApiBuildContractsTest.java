@@ -2,7 +2,6 @@ package com.innospots.nexus.console.openapi;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
 
@@ -18,20 +17,14 @@ class OpenApiBuildContractsTest {
         assertThat(spec).exists();
         String yaml = Files.readString(spec);
         assertThat(yaml).contains("Innospots Nexus Console API");
-        assertThat(yaml).contains(ConsoleConstant.apiPath("/roles"));
-        assertThat(yaml).contains("operationId: rolePage");
         assertThat(yaml).contains("bearerAuth");
         assertThat(yaml).contains("AuthLoginRequest:");
-        assertThat(yaml).contains("RoleCreateRequest:");
-        assertThat(yaml).contains("RoleVo:");
         assertThat(yaml).contains("description: 统一 API 响应包装");
         assertThat(yaml).contains("description: 分页结果");
-        boolean rolePageUsesTypedWrapper = yaml.contains("RPageResultRoleVo:")
-                || Pattern.compile(
-                                "operationId: rolePage[\\s\\S]*?\\$ref: [\"']#/components/schemas/R\\d+[\"']")
-                        .matcher(yaml)
-                        .find();
-        assertThat(rolePageUsesTypedWrapper).isTrue();
-        assertThat(yaml).containsPattern("\\$ref: [\"']#/components/schemas/RoleVo[\"']");
+        // 角色 / 字典 / 授权 REST 已下沉至 platform
+        assertThat(yaml).doesNotContain("operationId: rolePage");
+        assertThat(yaml).doesNotContain("operationId: roleBindingPage");
+        assertThat(yaml).doesNotContain("operationId: permissionGrantListByRole");
+        assertThat(yaml).doesNotContain(ConsoleConstant.apiPath("/roles/{roleId}/permissions"));
     }
 }

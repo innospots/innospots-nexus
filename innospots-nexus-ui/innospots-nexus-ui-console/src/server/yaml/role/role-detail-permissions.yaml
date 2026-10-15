@@ -17,7 +17,7 @@ dataSources:
     autoLoad: true
     request:
       method: GET
-      url: /api/d/nexus/roles/${state.roleId}
+      url: /api/d/platform/roles/${state.roleId}
   catalog:
     type: http
     autoLoad: true
@@ -29,7 +29,7 @@ dataSources:
     autoLoad: true
     request:
       method: GET
-      url: /api/d/nexus/roles/${state.roleId}/permissions
+      url: /api/d/platform/roles/${state.roleId}/permissions
 
 body:
   type: Page
@@ -175,7 +175,7 @@ body:
                   - action: request
                     params:
                       method: PUT
-                      url: /api/d/nexus/roles/${state.roleId}/permissions
+                      url: /api/d/platform/roles/${state.roleId}/permissions
                       body:
                         grants: ${data.grants.data}
                   - action: message

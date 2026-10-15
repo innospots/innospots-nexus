@@ -31,7 +31,7 @@ class PlatformAuthSessionEndpointContractsTest {
         assertThat(PlatformAuthSessionEndpoint.class.getMethod("refresh", TokenRefreshRequest.class)
                         .getAnnotation(POST.class))
                 .isNotNull();
-        assertThat(PlatformConstant.AUTH_REFRESH_PATH).isEqualTo("/api/platform/auth/refresh");
+        assertThat(PlatformConstant.AUTH_REFRESH_PATH).isEqualTo("/api/d/platform/auth/refresh");
         assertThat(PlatformAuthSessionEndpoint.class.getMethod("logout").getAnnotation(POST.class))
                 .isNotNull();
         assertThat(PlatformAuthSessionEndpoint.class.getMethod("changePassword", PasswordChangeRequest.class)

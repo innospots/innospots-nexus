@@ -14,7 +14,6 @@ import com.innospots.nexus.base.domain.enums.BasicStatus;
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.base.status.NexusStatusCode;
-import com.innospots.nexus.base.thread.TLC;
 import com.innospots.nexus.base.util.Checks;
 import com.innospots.nexus.console.permission.dao.PermissionGrantDao;
 import com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao;
@@ -25,7 +24,6 @@ import com.innospots.nexus.console.permission.domain.enums.PermissionSubjectType
 import com.innospots.nexus.console.permission.domain.request.PermissionGrantItemRequest;
 import com.innospots.nexus.console.permission.domain.request.PermissionGrantReplaceRequest;
 import com.innospots.nexus.console.scope.ConsoleOwnership;
-import com.innospots.nexus.console.scope.ConsoleOwnershipGuard;
 import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
 
 /**
@@ -67,14 +65,18 @@ public class PermissionGrantService {
     public void replace(
             PermissionSubjectType subjectType,
             String subjectId,
-            PermissionGrantReplaceRequest request
+            PermissionGrantReplaceRequest request,
+            ConsoleOwnership ownership,
+            String tenantId,
+            String workspaceId
     ) {
-        ConsoleOwnership ownership = ConsoleOwnershipGuard.requireWorkspaceScope();
+        Checks.notNull(ownership, "ownership");
         Checks.notNull(request, "request");
         validateSubject(subjectType, subjectId, request);
-        grantSubjectAccess.ensureSubjectInScope(subjectType, subjectId);
-        List<ConsoleCatalogResourceEntity> resources = resources(request.grants());
-        validateParents(resources);
+        grantSubjectAccess.ensureSubjectInScope(subjectType, subjectId, ownership, tenantId, workspaceId);
+        String securityRealm = ownership.securityRealm();
+        List<ConsoleCatalogResourceEntity> resources = resources(request.grants(), securityRealm);
+        validateParents(resources, securityRealm);
         // 全量替换保证撤销的资源不会残留，同时事务保证删除和新增一起提交。
         grantDao.delete(grantScopeQuery(subjectType, subjectId, ownership));
         for (int i = 0; i < request.grants().size(); i++) {
@@ -100,11 +102,14 @@ public class PermissionGrantService {
      */
     public PermissionGrantReplaceRequest list(
             PermissionSubjectType subjectType,
-            String subjectId
+            String subjectId,
+            ConsoleOwnership ownership,
+            String tenantId,
+            String workspaceId
     ) {
-        ConsoleOwnership ownership = ConsoleOwnershipGuard.requireWorkspaceScope();
+        Checks.notNull(ownership, "ownership");
         validateSubject(subjectType, subjectId, null);
-        grantSubjectAccess.ensureSubjectInScope(subjectType, subjectId);
+        grantSubjectAccess.ensureSubjectInScope(subjectType, subjectId, ownership, tenantId, workspaceId);
         List<PermissionGrantItemRequest> grants = grantDao.selectList(grantScopeQuery(subjectType, subjectId, ownership))
                 .stream()
                 .map(grant -> new PermissionGrantItemRequest(
@@ -113,9 +118,9 @@ public class PermissionGrantService {
         return new PermissionGrantReplaceRequest(grants);
     }
 
-    private List<ConsoleCatalogResourceEntity> resources(List<PermissionGrantItemRequest> items) {
+    private List<ConsoleCatalogResourceEntity> resources(List<PermissionGrantItemRequest> items, String securityRealm) {
         List<String> ids = items.stream().map(PermissionGrantItemRequest::resourceId).toList();
-        String realm = currentSecurityRealm();
+        String realm = securityRealm;
         List<ConsoleCatalogResourceEntity> found = ids.isEmpty()
                 ? List.of()
                 : resourceDao.selectList(Wrappers.<ConsoleCatalogResourceEntity>lambdaQuery()
@@ -142,8 +147,8 @@ public class PermissionGrantService {
         return ordered;
     }
 
-    private void validateParents(List<ConsoleCatalogResourceEntity> resources) {
-        String realm = currentSecurityRealm();
+    private void validateParents(List<ConsoleCatalogResourceEntity> resources, String securityRealm) {
+        String realm = securityRealm;
         Set<String> selectedIds = resources.stream()
                 .map(ConsoleCatalogResourceEntity::getResourceId)
                 .collect(Collectors.toSet());
@@ -237,14 +242,6 @@ public class PermissionGrantService {
         return ConsoleOwnershipScope.apply(Wrappers.<PermissionGrantEntity>lambdaQuery()
                 .eq(PermissionGrantEntity::getSubjectType, subjectType.name())
                 .eq(PermissionGrantEntity::getSubjectId, subjectId), ownership);
-    }
-
-    private static String currentSecurityRealm() {
-        String realm = TLC.securityRealm();
-        if (realm == null || realm.isBlank()) {
-            return "TENANT";
-        }
-        return realm;
     }
 
     private static void invalid(String message) {

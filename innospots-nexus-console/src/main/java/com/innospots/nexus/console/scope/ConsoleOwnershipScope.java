@@ -67,6 +67,9 @@ public final class ConsoleOwnershipScope {
 
     /**
      * 将归属条件追加到查询。
+     *
+     * <p>使用 {@code apply} SQL 片段而非 {@code T::getXxx}：父类 {@link OwnershipEntity}
+     * 上的方法引用会使 MyBatis-Plus 按抽象父类建 lambda 缓存并失败。</p>
      */
     public static <T extends OwnershipEntity> LambdaQueryWrapper<T> apply(
             LambdaQueryWrapper<T> query,
@@ -74,8 +77,8 @@ public final class ConsoleOwnershipScope {
     ) {
         Checks.notNull(query, "query");
         Checks.notNull(ownership, "ownership");
-        query.eq(T::getOwnerType, ownership.ownerTypeName())
-                .eq(T::getSecurityRealm, ownership.securityRealm());
+        query.apply("owner_type = {0}", ownership.ownerTypeName())
+                .apply("security_realm = {0}", ownership.securityRealm());
         appendOwnerId(query, ownership);
         return query;
     }
@@ -300,10 +303,10 @@ public final class ConsoleOwnershipScope {
             ConsoleOwnership ownership
     ) {
         if (ownership.ownerType() == RoleOwnerType.PLATFORM) {
-            query.and(wrapper -> wrapper.isNull(T::getOwnerId).or().eq(T::getOwnerId, ""));
+            query.apply("(owner_id IS NULL OR owner_id = {0})", "");
             return;
         }
-        query.eq(T::getOwnerId, ownership.ownerId());
+        query.apply("owner_id = {0}", ownership.ownerId());
     }
 
     private static void appendOwnerIdForRole(

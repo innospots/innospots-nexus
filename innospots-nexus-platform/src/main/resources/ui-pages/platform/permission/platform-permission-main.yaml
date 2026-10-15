@@ -1,0 +1,8 @@
+dsl: '1.0'
+
+page:
+  id: platform-permission-main
+  name: permissionMain
+  title: Permission Management
+  description: Platform console permission module.
+  type: general

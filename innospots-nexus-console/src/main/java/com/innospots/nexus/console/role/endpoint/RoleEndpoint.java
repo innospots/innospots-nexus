@@ -13,7 +13,6 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
-import lombok.RequiredArgsConstructor;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
@@ -22,80 +21,61 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import com.innospots.nexus.base.domain.enums.BasicStatus;
 import com.innospots.nexus.base.domain.response.PageResult;
 import com.innospots.nexus.base.domain.response.R;
-import com.innospots.nexus.console.config.ConsoleConstant;
 import com.innospots.nexus.console.role.domain.request.RoleCreateRequest;
 import com.innospots.nexus.console.role.domain.request.RolePageRequest;
 import com.innospots.nexus.console.role.domain.request.RoleStatusUpdateRequest;
 import com.innospots.nexus.console.role.domain.request.RoleUpdateRequest;
 import com.innospots.nexus.console.role.domain.vo.RoleOptionVo;
 import com.innospots.nexus.console.role.domain.vo.RoleVo;
-import com.innospots.nexus.console.role.service.RoleService;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 
 /**
- * 角色生命周期与查询 REST 资源，可直接继承以扩展路由或响应包装。
+ * 角色生命周期与查询 REST 契约。
+ *
+ * <p>仅定义方法级路由与载荷形状；类级 {@code @Path} 由业务域实现（如 platform）绑定。
+ * 创建请求不含 {@code ownerType}/{@code ownerId}，由实现侧按域固化归属。</p>
  */
-@Path(ConsoleConstant.API_PREFIX + "/roles")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Role", description = "角色与绑定")
 @NexusAuthenticatedApi
-@RequiredArgsConstructor
-public class RoleEndpoint {
-
-    private final RoleService roleService;
+public interface RoleEndpoint {
 
     @GET
     @Operation(operationId = "rolePage", summary = "分页查询角色")
-    public R<PageResult<RoleVo>> pageRoles(@BeanParam RolePageRequest request) {
-        return R.ok(roleService.pageRoles(request));
-    }
+    R<PageResult<RoleVo>> pageRoles(@BeanParam RolePageRequest request);
 
     @GET
     @Path("/{roleId}")
     @Operation(operationId = "roleGet", summary = "查询角色详情")
-    public R<RoleVo> getRole(
-            @Parameter(description = "角色 ID", required = true) @PathParam("roleId") String roleId) {
-        return R.ok(roleService.getRole(roleId));
-    }
+    R<RoleVo> getRole(
+            @Parameter(description = "角色 ID", required = true) @PathParam("roleId") String roleId);
 
     @POST
     @Operation(operationId = "roleCreate", summary = "创建角色")
-    public R<RoleVo> createRole(RoleCreateRequest request) {
-        return R.ok(roleService.createRole(request));
-    }
+    R<RoleVo> createRole(RoleCreateRequest request);
 
     @PUT
     @Path("/{roleId}")
     @Operation(operationId = "roleUpdate", summary = "更新角色")
-    public R<RoleVo> updateRole(
+    R<RoleVo> updateRole(
             @PathParam("roleId") String roleId,
-            RoleUpdateRequest request) {
-        return R.ok(roleService.updateRole(roleId, request));
-    }
+            RoleUpdateRequest request);
 
     @PUT
     @Path("/{roleId}/status")
     @Operation(operationId = "roleUpdateStatus", summary = "更新角色状态")
-    public R<Void> updateRoleStatus(
+    R<Void> updateRoleStatus(
             @PathParam("roleId") String roleId,
-            RoleStatusUpdateRequest request) {
-        roleService.updateRoleStatus(roleId, request);
-        return R.ok();
-    }
+            RoleStatusUpdateRequest request);
 
     @DELETE
     @Path("/{roleId}")
     @Operation(operationId = "roleDelete", summary = "删除角色")
-    public R<Void> deleteRole(@PathParam("roleId") String roleId) {
-        roleService.deleteRole(roleId);
-        return R.ok();
-    }
+    R<Void> deleteRole(@PathParam("roleId") String roleId);
 
     @GET
     @Path("/options")
     @Operation(operationId = "roleListOptions", summary = "角色下拉选项")
-    public R<List<RoleOptionVo>> listRoleOptions(@QueryParam("status") BasicStatus status) {
-        return R.ok(roleService.listRoleOptions(status));
-    }
+    R<List<RoleOptionVo>> listRoleOptions(@QueryParam("status") BasicStatus status);
 }

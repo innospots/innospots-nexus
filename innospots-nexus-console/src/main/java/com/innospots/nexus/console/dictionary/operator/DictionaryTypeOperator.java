@@ -12,9 +12,8 @@ import lombok.RequiredArgsConstructor;
 
 import com.innospots.nexus.base.domain.enums.BasicStatus;
 import com.innospots.nexus.base.domain.response.PageResult;
-import com.innospots.nexus.base.exception.NexusException;
-import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.base.status.NexusStatusCode;
+import com.innospots.nexus.base.util.Checks;
 import com.innospots.nexus.console.dictionary.converter.DictionaryConverter;
 import com.innospots.nexus.console.dictionary.dao.DictionaryItemDao;
 import com.innospots.nexus.console.dictionary.dao.DictionaryTypeDao;
@@ -28,11 +27,11 @@ import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeOptionVo;
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeVo;
 import com.innospots.nexus.console.dictionary.status.DictionaryStatusCode;
 import com.innospots.nexus.console.scope.ConsoleOwnership;
-import com.innospots.nexus.console.scope.ConsoleOwnershipGuard;
 import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
+import com.innospots.nexus.console.support.ConsoleExceptions;
 
 /**
- * 租户级字典类型持久化与查询。
+ * 字典类型持久化与查询（不含会话边界；由上层 service 传入 {@link ConsoleOwnership}）。
  */
 @RequiredArgsConstructor
 public class DictionaryTypeOperator {
@@ -41,8 +40,8 @@ public class DictionaryTypeOperator {
     private final DictionaryItemDao itemDao;
     private final DictionaryConverter converter;
 
-    public PageResult<DictionaryTypeVo> pageTypes(DictionaryTypePageRequest request) {
-        ConsoleOwnership ownership = ConsoleOwnershipGuard.requireTenantScope();
+    public PageResult<DictionaryTypeVo> pageTypes(DictionaryTypePageRequest request, ConsoleOwnership ownership) {
+        Checks.notNull(ownership, "ownership");
         DictionaryTypePageRequest pageRequest = request == null ? new DictionaryTypePageRequest() : request;
         LambdaQueryWrapper<DictionaryTypeEntity> query = ConsoleOwnershipScope.apply(
                 new LambdaQueryWrapper<DictionaryTypeEntity>()
@@ -59,24 +58,25 @@ public class DictionaryTypeOperator {
         return PageResult.of(records, pageRequest.pageNo(), pageRequest.pageSize(), selectedPage.getTotal());
     }
 
-    public DictionaryTypeVo getType(String dictionaryTypeId) {
-        ConsoleOwnership ownership = ConsoleOwnershipGuard.requireTenantScope();
+    public DictionaryTypeVo getType(String dictionaryTypeId, ConsoleOwnership ownership) {
+        Checks.notNull(ownership, "ownership");
         return requireType(dictionaryTypeId, ownership).map(converter::toTypeVo)
                 .orElseThrow(() -> ConsoleExceptions.build(DictionaryStatusCode.TYPE_NOT_FOUND));
     }
 
     @Transactional
-    public DictionaryTypeVo createType(DictionaryTypeCreateRequest request) {
-        ConsoleOwnership ownership = ConsoleOwnershipGuard.requireTenantScope();
+    public DictionaryTypeVo createType(DictionaryTypeCreateRequest request, ConsoleOwnership ownership) {
+        Checks.notNull(ownership, "ownership");
         Objects.requireNonNull(request, "request");
-        if (existsTypeCode(request.typeCode(), request.securityRealm().name(), ownership)) {
+        String securityRealm = ownership.securityRealm();
+        if (existsTypeCode(request.typeCode(), securityRealm, ownership)) {
             throw ConsoleExceptions.build(DictionaryStatusCode.TYPE_CODE_DUPLICATED);
         }
         DictionaryTypeEntity entity = new DictionaryTypeEntity();
         ConsoleOwnershipScope.stamp(entity, ownership);
         entity.setTypeCode(request.typeCode());
         entity.setTypeName(request.typeName());
-        entity.setSecurityRealm(request.securityRealm().name());
+        entity.setSecurityRealm(securityRealm);
         entity.setSortOrder(request.sortOrder() == null ? 0 : request.sortOrder());
         entity.setStatus(BasicStatus.ENABLED.name());
         entity.setBuiltIn(false);
@@ -85,8 +85,12 @@ public class DictionaryTypeOperator {
     }
 
     @Transactional
-    public DictionaryTypeVo updateType(String dictionaryTypeId, DictionaryTypeUpdateRequest request) {
-        ConsoleOwnership ownership = ConsoleOwnershipGuard.requireTenantScope();
+    public DictionaryTypeVo updateType(
+            String dictionaryTypeId,
+            DictionaryTypeUpdateRequest request,
+            ConsoleOwnership ownership
+    ) {
+        Checks.notNull(ownership, "ownership");
         Objects.requireNonNull(request, "request");
         DictionaryTypeEntity entity = requireType(dictionaryTypeId, ownership)
                 .orElseThrow(() -> ConsoleExceptions.build(DictionaryStatusCode.TYPE_NOT_FOUND));
@@ -101,8 +105,12 @@ public class DictionaryTypeOperator {
     }
 
     @Transactional
-    public void updateTypeStatus(String dictionaryTypeId, DictionaryTypeStatusUpdateRequest request) {
-        ConsoleOwnership ownership = ConsoleOwnershipGuard.requireTenantScope();
+    public void updateTypeStatus(
+            String dictionaryTypeId,
+            DictionaryTypeStatusUpdateRequest request,
+            ConsoleOwnership ownership
+    ) {
+        Checks.notNull(ownership, "ownership");
         Objects.requireNonNull(request, "request");
         if (request.status() == null) {
             throw ConsoleExceptions.build(NexusStatusCode.INVALID_PARAMETER);
@@ -114,8 +122,8 @@ public class DictionaryTypeOperator {
     }
 
     @Transactional
-    public void deleteType(String dictionaryTypeId) {
-        ConsoleOwnership ownership = ConsoleOwnershipGuard.requireTenantScope();
+    public void deleteType(String dictionaryTypeId, ConsoleOwnership ownership) {
+        Checks.notNull(ownership, "ownership");
         DictionaryTypeEntity entity = requireType(dictionaryTypeId, ownership)
                 .orElseThrow(() -> ConsoleExceptions.build(DictionaryStatusCode.TYPE_NOT_FOUND));
         if (Boolean.TRUE.equals(entity.getBuiltIn())) {
@@ -128,8 +136,8 @@ public class DictionaryTypeOperator {
         typeDao.deleteById(dictionaryTypeId);
     }
 
-    public List<DictionaryTypeOptionVo> listTypeOptions(BasicStatus status) {
-        ConsoleOwnership ownership = ConsoleOwnershipGuard.requireTenantScope();
+    public List<DictionaryTypeOptionVo> listTypeOptions(BasicStatus status, ConsoleOwnership ownership) {
+        Checks.notNull(ownership, "ownership");
         LambdaQueryWrapper<DictionaryTypeEntity> query = ConsoleOwnershipScope.apply(
                 new LambdaQueryWrapper<DictionaryTypeEntity>()
                         .orderByAsc(DictionaryTypeEntity::getSortOrder)

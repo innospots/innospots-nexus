@@ -2,11 +2,14 @@ package com.innospots.nexus.console.scope;
 
 import org.junit.jupiter.api.Test;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.innospots.nexus.base.domain.enums.BasicStatus;
 import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
+import com.innospots.nexus.console.role.domain.entity.RoleBindingEntity;
 import com.innospots.nexus.console.role.domain.entity.RoleEntity;
 import com.innospots.nexus.console.role.domain.enums.RoleOwnerType;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -14,6 +17,25 @@ import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.status.NexusStatusCode;
 
 class ConsoleOwnershipScopeTest {
+
+    @Test
+    void applyPlatformOwnershipBuildsSqlSegmentWithoutEntityLambdaCache() {
+        ConsoleOwnership platformSession = new ConsoleOwnership(
+                RoleOwnerType.PLATFORM,
+                null,
+                SecurityRealm.PLATFORM.name());
+
+        // 仅走 apply SQL 片段，不附带实体方法引用，避免无 MyBatis 元数据时的 lambda 缓存依赖
+        LambdaQueryWrapper<RoleBindingEntity> query = ConsoleOwnershipScope.apply(
+                new LambdaQueryWrapper<>(),
+                platformSession);
+
+        assertThatCode(query::getCustomSqlSegment).doesNotThrowAnyException();
+        String sql = query.getCustomSqlSegment();
+        assertThat(sql).contains("owner_type");
+        assertThat(sql).contains("owner_id");
+        assertThat(sql).contains("security_realm");
+    }
 
     @Test
     void allowsReadablePlatformRoleInPlatformSession() {

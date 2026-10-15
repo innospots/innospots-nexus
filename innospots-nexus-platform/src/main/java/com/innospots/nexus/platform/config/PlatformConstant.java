@@ -40,6 +40,34 @@ public final class PlatformConstant {
     /** 运营管理平台用户：{@value} */
     public static final String USERS_PATH = API_PREFIX + "/users";
 
+    /** 运营管理平台角色：{@value} */
+    public static final String ROLES_PATH = API_PREFIX + "/roles";
+
+    /** 运营管理平台角色绑定：{@value} */
+    public static final String ROLE_BINDINGS_PATH = ROLES_PATH + "/{roleId}/bindings";
+
+    /** 运营管理平台字典类型：{@value} */
+    public static final String DICTIONARY_TYPES_PATH = API_PREFIX + "/dictionary-types";
+
+    /** 运营管理平台字典项：{@value} */
+    public static final String DICTIONARY_ITEMS_PATH = DICTIONARY_TYPES_PATH + "/{typeCode}/items";
+
+    /** 运营管理平台角色授权：{@value} */
+    public static final String ROLE_PERMISSIONS_PATH = ROLES_PATH + "/{roleId}/permissions";
+
+    /** 运营管理平台组织单元授权：{@value} */
+    public static final String ORGANIZATION_UNIT_PERMISSIONS_PATH =
+            API_PREFIX + "/organization-units/{unitId}/permissions";
+
+    /** 当前平台用户可见权限资源：{@value} */
+    public static final String ME_PERMISSIONS_PATH = API_PREFIX + "/me/permissions";
+
+    /** 运营管理平台审计日志：{@value} */
+    public static final String AUDIT_LOGS_PATH = API_PREFIX + "/audit-logs";
+
+    /** 运营管理平台授权后导航菜单：{@value} */
+    public static final String NAVIGATION_MENUS_PATH = API_PREFIX + "/navigation/menus";
+
     /** 平台用户邀请（管理端）：{@value} */
     public static final String INVITES_PATH = API_PREFIX + "/invites";
 

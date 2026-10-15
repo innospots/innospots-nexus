@@ -13,7 +13,6 @@ import jakarta.ws.rs.Path;
 import org.junit.jupiter.api.Test;
 
 import com.innospots.nexus.base.domain.enums.BasicStatus;
-import com.innospots.nexus.console.config.ConsoleConstant;
 import com.innospots.nexus.console.role.domain.enums.RoleBindingSubjectType;
 import com.innospots.nexus.console.role.domain.request.RoleBindingAddRequest;
 import com.innospots.nexus.console.role.domain.request.RoleBindingPageRequest;
@@ -30,8 +29,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 class RoleEndpointContractsTest {
 
     @Test
-    void roleEndpointKeepsRoleLifecycleOperationsTogether() throws NoSuchMethodException {
-        assertThat(RoleEndpoint.class.getAnnotation(Path.class).value()).isEqualTo(ConsoleConstant.apiPath("/roles"));
+    void roleEndpointIsLifecycleApiContractWithoutClassPath() throws NoSuchMethodException {
+        assertThat(RoleEndpoint.class.isInterface()).isTrue();
+        assertThat(RoleEndpoint.class.getAnnotation(Path.class)).isNull();
         assertHttpMethod(RoleEndpoint.class, "pageRoles", GET.class, RolePageRequest.class);
         assertHttpMethod(RoleEndpoint.class, "getRole", GET.class, String.class);
         assertHttpMethod(RoleEndpoint.class, "createRole", POST.class, RoleCreateRequest.class);
@@ -43,11 +43,9 @@ class RoleEndpointContractsTest {
     }
 
     @Test
-    void roleBindingEndpointRemainsASeparateBoundary() throws NoSuchMethodException {
-        assertThat(RoleBindingEndpoint.class.isInterface()).isFalse();
-        assertThat(RoleEndpoint.class.isInterface()).isFalse();
-        assertThat(RoleBindingEndpoint.class.getAnnotation(Path.class).value())
-                .isEqualTo(ConsoleConstant.apiPath("/roles/{roleId}/bindings"));
+    void roleBindingEndpointIsBindingApiContractWithoutClassPath() throws NoSuchMethodException {
+        assertThat(RoleBindingEndpoint.class.isInterface()).isTrue();
+        assertThat(RoleBindingEndpoint.class.getAnnotation(Path.class)).isNull();
         assertHttpMethod(RoleBindingEndpoint.class, "pageRoleBindings",
                 GET.class, String.class, RoleBindingPageRequest.class);
         assertHttpMethod(RoleBindingEndpoint.class, "addRoleBindings",
@@ -58,8 +56,7 @@ class RoleEndpointContractsTest {
 
     @Test
     void roleRequestsAndViewsAreImmutableRecords() {
-        assertRecordComponents(RoleCreateRequest.class,
-                "roleName", "roleCode", "ownerType", "ownerId", "description");
+        assertRecordComponents(RoleCreateRequest.class, "roleName", "roleCode", "description");
         assertRecordComponents(RoleUpdateRequest.class,
                 "roleName", "description", "sortOrder");
         assertRecordComponents(RoleStatusUpdateRequest.class, "status");

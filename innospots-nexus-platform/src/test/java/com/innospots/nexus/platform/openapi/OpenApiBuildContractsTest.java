@@ -5,6 +5,8 @@ import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
 
+import com.innospots.nexus.platform.config.PlatformConstant;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class OpenApiBuildContractsTest {
@@ -15,22 +17,27 @@ class OpenApiBuildContractsTest {
         assertThat(spec).exists();
         String yaml = Files.readString(spec);
         assertThat(yaml).contains("Innospots Nexus Platform API");
-        assertThat(yaml).contains("/api/platform/public/auth/login");
-        assertThat(yaml).contains("/api/platform/auth/refresh");
-        assertThat(yaml).contains("/api/platform/public/auth/password/reset");
-        assertThat(yaml).contains("/api/platform/auth/logout");
-        assertThat(yaml).contains("/api/platform/tenants");
-        assertThat(yaml).contains("/api/platform/tenants/{tenantId}/enterprise");
-        assertThat(yaml).contains("/api/platform/users");
-        assertThat(yaml).contains("/api/platform/invites");
-        assertThat(yaml).contains("/api/platform/registration/access-requests");
-        assertThat(yaml).contains("/api/platform/public/invites");
-        assertThat(yaml).contains("/api/platform/public/registration/open");
-        assertThat(yaml).contains("/api/platform/settings/registration-mode");
+        assertThat(yaml).contains(PlatformConstant.PUBLIC_AUTH_PATH + "/login");
+        assertThat(yaml).contains(PlatformConstant.AUTH_REFRESH_PATH);
+        assertThat(yaml).contains(PlatformConstant.PUBLIC_AUTH_PASSWORD_PATH + "/reset");
+        assertThat(yaml).contains(PlatformConstant.AUTH_PATH + "/logout");
+        assertThat(yaml).contains(PlatformConstant.TENANTS_PATH);
+        assertThat(yaml).contains(PlatformConstant.TENANT_ENTERPRISE_PATH);
+        assertThat(yaml).contains(PlatformConstant.USERS_PATH);
+        assertThat(yaml).contains(PlatformConstant.INVITES_PATH);
+        assertThat(yaml).contains(PlatformConstant.REGISTRATION_ACCESS_REQUESTS_PATH);
+        assertThat(yaml).contains(PlatformConstant.PUBLIC_INVITES_PATH);
+        assertThat(yaml).contains(PlatformConstant.PUBLIC_OPEN_REGISTRATION_PATH);
+        assertThat(yaml).contains(PlatformConstant.SETTINGS_REGISTRATION_MODE_PATH);
+        assertThat(yaml).contains(PlatformConstant.ROLES_PATH);
+        assertThat(yaml).contains(PlatformConstant.DICTIONARY_TYPES_PATH);
+        assertThat(yaml).contains(PlatformConstant.ROLE_PERMISSIONS_PATH);
+        assertThat(yaml).contains(PlatformConstant.AUDIT_LOGS_PATH);
+        assertThat(yaml).contains(PlatformConstant.NAVIGATION_MENUS_PATH);
         assertThat(yaml).contains("operationId: platformRegistrationSettingsGet");
-        assertThat(yaml).doesNotContain("/api/platform/public/settings/registration-mode");
+        assertThat(yaml).doesNotContain(PlatformConstant.PUBLIC_PREFIX + "/settings/registration-mode");
         assertThat(yaml).doesNotContain("operationId: platformPublicRegistrationSettingsGet");
-        assertThat(yaml).doesNotContain("/api/platform/auth/onboarding");
+        assertThat(yaml).doesNotContain(PlatformConstant.AUTH_PATH + "/onboarding");
         assertThat(yaml).contains("operationId: platformAuthLogin");
         assertThat(yaml).contains("operationId: platformTenantPage");
         assertThat(yaml).contains("operationId: platformTenantCreate");
