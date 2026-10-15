@@ -16,6 +16,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogSyncService;
 import com.innospots.nexus.console.config.ConsoleConstant;
 import com.innospots.nexus.console.plugin.converter.PluginManagementConverter;
@@ -65,7 +66,7 @@ public final class PluginManagementEndpoint {
             PluginManagementConverter converter,
             ConsoleCatalogSyncService syncService) {
         if (managerSupplier == null || converter == null) {
-            throw NexusException.build(PluginStatusCode.PLUGIN_CONFIG_INVALID,
+            throw ConsoleExceptions.build(PluginStatusCode.PLUGIN_CONFIG_INVALID,
                     "plugin manager supplier and converter are required");
         }
         this.managerSupplier = managerSupplier;
@@ -76,7 +77,7 @@ public final class PluginManagementEndpoint {
     private PluginInstallationManager manager() {
         PluginInstallationManager current = managerSupplier.get();
         if (current == null) {
-            throw NexusException.build(PluginStatusCode.PLUGIN_CONFIG_INVALID,
+            throw ConsoleExceptions.build(PluginStatusCode.PLUGIN_CONFIG_INVALID,
                     "plugin subsystem has not started yet");
         }
         return current;
@@ -93,7 +94,7 @@ public final class PluginManagementEndpoint {
     @Operation(operationId = "pluginGet", summary = "查询单个插件")
     public R<PluginManagementVo> get(@PathParam("pluginId") String pluginId) {
         return R.ok(manager().plugin(pluginId).map(converter::toVo).orElseThrow(
-                () -> NexusException.build(PluginStatusCode.PLUGIN_NOT_INSTALLED,
+                () -> ConsoleExceptions.build(PluginStatusCode.PLUGIN_NOT_INSTALLED,
                         "plugin was not found: " + pluginId)));
     }
 

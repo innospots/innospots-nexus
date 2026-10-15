@@ -2,6 +2,7 @@ package com.innospots.nexus.console.permission.service;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.base.util.Checks;
 import com.innospots.nexus.console.permission.api.OrganizationUnitDirectory;
@@ -39,7 +40,7 @@ public final class GrantSubjectAccess {
             ensureOrganizationUnitInTenant(subjectId, ownership);
             return;
         }
-        throw NexusException.build(NexusStatusCode.INVALID_PARAMETER);
+        throw ConsoleExceptions.build(NexusStatusCode.INVALID_PARAMETER);
     }
 
     private void ensureRoleInScope(String roleId, ConsoleOwnership ownership) {
@@ -50,7 +51,7 @@ public final class GrantSubjectAccess {
                 ownership.ownerId(),
                 ownership.securityRealm()));
         if (role == null) {
-            throw NexusException.build(NexusStatusCode.NO_PERMISSION);
+            throw ConsoleExceptions.build(NexusStatusCode.NO_PERMISSION);
         }
         ConsoleOwnershipScope.assertRoleReadable(role, tenantId, ownership);
     }
@@ -60,11 +61,11 @@ public final class GrantSubjectAccess {
             return;
         }
         if (ownership.ownerType() != com.innospots.nexus.console.role.domain.enums.RoleOwnerType.WORKSPACE) {
-            throw NexusException.build(NexusStatusCode.NO_PERMISSION);
+            throw ConsoleExceptions.build(NexusStatusCode.NO_PERMISSION);
         }
         String tenantId = com.innospots.nexus.base.thread.SessionContext.tenantId();
         if (tenantId == null || !organizationUnitDirectory.existsInTenant(tenantId, unitId)) {
-            throw NexusException.build(NexusStatusCode.NO_PERMISSION);
+            throw ConsoleExceptions.build(NexusStatusCode.NO_PERMISSION);
         }
     }
 }

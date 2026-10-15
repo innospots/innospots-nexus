@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.innospots.nexus.base.domain.response.PageResult;
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.console.role.dao.RoleBindingDao;
 import com.innospots.nexus.console.role.domain.entity.RoleBindingEntity;
 import com.innospots.nexus.console.role.domain.enums.RoleBindingSubjectType;
@@ -101,7 +102,7 @@ public class RoleBindingOperator {
                         .eq(RoleBindingEntity::getRoleId, roleId),
                 ownership));
         if (binding == null) {
-            throw NexusException.build(RoleStatusCode.ROLE_BINDING_NOT_FOUND);
+            throw ConsoleExceptions.build(RoleStatusCode.ROLE_BINDING_NOT_FOUND);
         }
         roleBindingDao.deleteById(bindingId);
         log.info("Removed role binding {} from role {}", bindingId, roleId);

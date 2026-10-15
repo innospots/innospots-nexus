@@ -11,7 +11,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexus.base.exception.NexusException;
-import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
 import com.innospots.nexus.console.role.domain.enums.RoleOwnerType;
 import com.innospots.nexus.console.role.domain.request.RoleCreateRequest;
 import com.innospots.nexus.console.role.domain.vo.RoleVo;
@@ -58,9 +57,7 @@ class RoleEndpointDirectIntegrationTest extends RoleEndpointH2Support {
                 "operators",
                 RoleOwnerType.WORKSPACE,
                 RoleEndpointTestSessions.WORKSPACE_ID,
-                SecurityRealm.TENANT,
-                "integration",
-                10);
+                "integration");
 
         R<RoleVo> created = roleEndpoint.createRole(request);
         LOGGER.info("createRole response success={} roleId={} roleCode={}",
@@ -84,9 +81,7 @@ class RoleEndpointDirectIntegrationTest extends RoleEndpointH2Support {
                 "dup-code",
                 RoleOwnerType.WORKSPACE,
                 RoleEndpointTestSessions.WORKSPACE_ID,
-                SecurityRealm.TENANT,
-                null,
-                1);
+                null);
         roleEndpoint.createRole(request);
 
         assertThatThrownBy(() -> roleEndpoint.createRole(request))

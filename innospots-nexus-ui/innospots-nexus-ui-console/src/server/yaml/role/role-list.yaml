@@ -76,9 +76,7 @@ body:
                                 roleName: ${event.roleName}
                                 roleCode: ${event.roleCode}
                                 ownerType: ${event.ownerType}
-                                securityRealm: ${event.securityRealm}
                                 description: ${event.description}
-                                sortOrder: ${event.sortOrder}
                           - action: message
                             params:
                               messageType: success
@@ -130,36 +128,12 @@ body:
                                     message: 请选择归属层级
                         - type: Field
                           props:
-                            label: 安全域
-                            required: true
-                          children:
-                            - type: Select
-                              props:
-                                name: securityRealm
-                                placeholder: 请选择安全域
-                                options:
-                                  - { label: 平台, value: PLATFORM }
-                                  - { label: 租户, value: TENANT }
-                                rules:
-                                  - required: true
-                                    message: 请选择安全域
-                        - type: Field
-                          props:
                             label: 描述
                           children:
                             - type: Textarea
                               props:
                                 name: description
                                 placeholder: 角色用途说明
-                        - type: Field
-                          props:
-                            label: 排序
-                          children:
-                            - type: NumberInput
-                              props:
-                                name: sortOrder
-                                min: 0
-                                precision: 0
                         - type: Flex
                           props:
                             justify: end

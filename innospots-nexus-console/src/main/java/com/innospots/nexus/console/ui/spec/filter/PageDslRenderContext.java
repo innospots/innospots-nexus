@@ -1,6 +1,7 @@
 package com.innospots.nexus.console.ui.spec.filter;
 
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.console.ui.spec.PageDsl;
 
@@ -52,7 +53,7 @@ public final class PageDslRenderContext {
             Map<String, Object> parameters
     ) {
         if (document == null) {
-            throw NexusException.build(
+            throw ConsoleExceptions.build(
                     NexusStatusCode.CONFIG_ERROR.fullCode(),
                     "PageDsl render context requires a document");
         }
@@ -95,7 +96,7 @@ public final class PageDslRenderContext {
      */
     public PageDslRenderContext withDocument(PageDsl document) {
         if (document == null) {
-            throw NexusException.build(
+            throw ConsoleExceptions.build(
                     NexusStatusCode.CONFIG_ERROR.fullCode(),
                     "PageDsl render context requires a document");
         }

@@ -12,6 +12,7 @@ import jakarta.transaction.Transactional;
 
 import com.innospots.nexus.base.domain.enums.BasicStatus;
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.base.thread.TLC;
 import com.innospots.nexus.base.util.Checks;
@@ -247,6 +248,6 @@ public class PermissionGrantService {
     }
 
     private static void invalid(String message) {
-        throw NexusException.build(NexusStatusCode.INVALID_PARAMETER.fullCode(), message);
+        throw ConsoleExceptions.build(NexusStatusCode.INVALID_PARAMETER.fullCode(), message);
     }
 }

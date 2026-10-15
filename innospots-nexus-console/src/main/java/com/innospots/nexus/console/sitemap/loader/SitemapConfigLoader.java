@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.IOUtils;
 
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.console.sitemap.config.SitemapYamlConfig;
 import com.innospots.nexus.console.sitemap.domain.config.SitemapConfig;
@@ -27,7 +28,7 @@ public final class SitemapConfigLoader {
             ClassLoader classLoader
     ) {
         if (config == null || parser == null) {
-            throw NexusException.build(
+            throw ConsoleExceptions.build(
                     NexusStatusCode.CONFIG_ERROR.fullCode(),
                     "Sitemap config and parser are required");
         }
@@ -35,7 +36,7 @@ public final class SitemapConfigLoader {
         this.parser = parser;
         ClassLoader actual = classLoader == null ? Thread.currentThread().getContextClassLoader() : classLoader;
         if (actual == null) {
-            throw NexusException.build(
+            throw ConsoleExceptions.build(
                     NexusStatusCode.CONFIG_ERROR.fullCode(),
                     "Sitemap classLoader is required");
         }
@@ -52,20 +53,20 @@ public final class SitemapConfigLoader {
         String resourcePath = config.resourcePath(domainKey);
         try (InputStream inputStream = classLoader.getResourceAsStream(resourcePath)) {
             if (inputStream == null) {
-                throw NexusException.build(
+                throw ConsoleExceptions.build(
                         NexusStatusCode.CONFIG_ERROR.fullCode(),
                         "Sitemap resource not found: " + resourcePath);
             }
             String content = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
             SitemapConfig document = parser.parse(content);
             if (document.getResourceType() != null && !"sitemap".equals(document.getResourceType())) {
-                throw NexusException.build(
+                throw ConsoleExceptions.build(
                         NexusStatusCode.CONFIG_ERROR.fullCode(),
                         "Sitemap resourceType must be sitemap: " + resourcePath);
             }
             return document;
         } catch (IOException exception) {
-            throw NexusException.build(
+            throw ConsoleExceptions.build(
                     NexusStatusCode.CONFIG_ERROR.fullCode(),
                     "Cannot read sitemap resource: " + resourcePath,
                     exception);

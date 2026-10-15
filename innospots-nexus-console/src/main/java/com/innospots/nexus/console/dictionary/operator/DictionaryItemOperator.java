@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import com.innospots.nexus.base.domain.enums.BasicStatus;
 import com.innospots.nexus.base.domain.response.PageResult;
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.console.dictionary.converter.DictionaryConverter;
 import com.innospots.nexus.console.dictionary.dao.DictionaryItemDao;
@@ -73,7 +74,7 @@ public class DictionaryItemOperator {
         DictionaryTypeEntity parent = requireParentType(typeCode, ownership);
         Objects.requireNonNull(request, "request");
         if (existsItemValue(typeCode, request.itemValue(), parent.getSecurityRealm(), ownership)) {
-            throw NexusException.build(DictionaryStatusCode.ITEM_VALUE_DUPLICATED);
+            throw ConsoleExceptions.build(DictionaryStatusCode.ITEM_VALUE_DUPLICATED);
         }
         DictionaryItemEntity entity = new DictionaryItemEntity();
         ConsoleOwnershipScope.stamp(entity, ownership);
@@ -98,7 +99,7 @@ public class DictionaryItemOperator {
         requireParentType(typeCode, ownership);
         Objects.requireNonNull(request, "request");
         DictionaryItemEntity entity = requireItem(typeCode, dictionaryItemId, ownership)
-                .orElseThrow(() -> NexusException.build(DictionaryStatusCode.ITEM_NOT_FOUND));
+                .orElseThrow(() -> ConsoleExceptions.build(DictionaryStatusCode.ITEM_NOT_FOUND));
         if (request.itemName() != null) {
             entity.setItemName(request.itemName());
         }
@@ -119,10 +120,10 @@ public class DictionaryItemOperator {
         requireParentType(typeCode, ownership);
         Objects.requireNonNull(request, "request");
         if (request.status() == null) {
-            throw NexusException.build(NexusStatusCode.INVALID_PARAMETER);
+            throw ConsoleExceptions.build(NexusStatusCode.INVALID_PARAMETER);
         }
         DictionaryItemEntity entity = requireItem(typeCode, dictionaryItemId, ownership)
-                .orElseThrow(() -> NexusException.build(DictionaryStatusCode.ITEM_NOT_FOUND));
+                .orElseThrow(() -> ConsoleExceptions.build(DictionaryStatusCode.ITEM_NOT_FOUND));
         entity.setStatus(converter.formatStatus(request.status()));
         itemDao.updateById(entity);
     }
@@ -132,16 +133,16 @@ public class DictionaryItemOperator {
         ConsoleOwnership ownership = ConsoleOwnershipGuard.requireTenantScope();
         requireParentType(typeCode, ownership);
         DictionaryItemEntity entity = requireItem(typeCode, dictionaryItemId, ownership)
-                .orElseThrow(() -> NexusException.build(DictionaryStatusCode.ITEM_NOT_FOUND));
+                .orElseThrow(() -> ConsoleExceptions.build(DictionaryStatusCode.ITEM_NOT_FOUND));
         if (Boolean.TRUE.equals(entity.getBuiltIn())) {
-            throw NexusException.build(DictionaryStatusCode.ITEM_PROTECTED);
+            throw ConsoleExceptions.build(DictionaryStatusCode.ITEM_PROTECTED);
         }
         itemDao.deleteById(dictionaryItemId);
     }
 
     private DictionaryTypeEntity requireParentType(String typeCode, ConsoleOwnership ownership) {
         return typeOperator.findTypeByCode(typeCode, ownership)
-                .orElseThrow(() -> NexusException.build(DictionaryStatusCode.TYPE_NOT_FOUND));
+                .orElseThrow(() -> ConsoleExceptions.build(DictionaryStatusCode.TYPE_NOT_FOUND));
     }
 
     private Optional<DictionaryItemEntity> requireItem(

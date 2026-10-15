@@ -3,6 +3,7 @@ package com.innospots.nexus.console.permission.authorization;
 import java.util.Optional;
 
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.base.status.NexusStatusCode;
 
 /**
@@ -31,7 +32,7 @@ public final class AuthorizationScope implements AutoCloseable {
      */
     public static AuthorizationScope open(AuthorizationContext context) {
         if (context == null) {
-            throw NexusException.build(
+            throw ConsoleExceptions.build(
                     NexusStatusCode.INVALID_PARAMETER.fullCode(),
                     "Authorization context is required");
         }

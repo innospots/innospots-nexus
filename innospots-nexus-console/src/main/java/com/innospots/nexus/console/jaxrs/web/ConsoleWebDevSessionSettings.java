@@ -28,6 +28,12 @@ public class ConsoleWebDevSessionSettings {
     /** 可选 {@link com.innospots.nexus.base.thread.TLC#SECURITY_REALM}。 */
     private String realm;
 
+    /**
+     * 会话归属层级：{@code PLATFORM}、{@code TENANT}、{@code WORKSPACE}。
+     * 未设置时按 realm 与是否绑定 workspace-id 推断。
+     */
+    private String sessionScope;
+
     /** 可选租户成员 ID（{@link com.innospots.nexus.base.thread.TLC#tenantMemberId}）。 */
     private String tenantMemberId;
 }

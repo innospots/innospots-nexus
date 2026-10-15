@@ -9,11 +9,14 @@ import com.innospots.nexus.base.domain.project.ProjectSnapshot;
 import com.innospots.nexus.base.domain.tenant.TenantSnapshot;
 import com.innospots.nexus.base.domain.workspace.WorkspaceSnapshot;
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.base.thread.SessionContext;
 import com.innospots.nexus.base.thread.TLC;
 import com.innospots.nexus.console.auth.domain.model.TokenClaims;
 import com.innospots.nexus.console.auth.service.TokenIssuer;
+import com.innospots.nexus.console.scope.ConsoleSessionContext;
+import com.innospots.nexus.console.scope.ConsoleSessionScope;
 
 /**
  * 将访问令牌声明绑定到 {@link SessionContext}。
@@ -25,13 +28,13 @@ public final class ConsoleTokenSessionBinder {
 
     public static void bindAccessToken(TokenClaims claims) {
         if (claims == null) {
-            throw NexusException.build(NexusStatusCode.AUTHENTICATION_FAILED);
+            throw ConsoleExceptions.build(NexusStatusCode.AUTHENTICATION_FAILED);
         }
         if (!TokenIssuer.PURPOSE_ACCESS.equals(claims.purpose())) {
-            throw NexusException.build(NexusStatusCode.AUTHENTICATION_FAILED);
+            throw ConsoleExceptions.build(NexusStatusCode.AUTHENTICATION_FAILED);
         }
         if (claims.expiresAt() <= Instant.now().getEpochSecond()) {
-            throw NexusException.build(NexusStatusCode.AUTHENTICATION_FAILED);
+            throw ConsoleExceptions.build(NexusStatusCode.AUTHENTICATION_FAILED);
         }
         UserSnapshot user = UserSnapshot.simple(resolveUserId(claims.userId()), claims.userId(), null);
         SessionContext.bindUser(user);
@@ -78,6 +81,7 @@ public final class ConsoleTokenSessionBinder {
                     null,
                     BasicStatus.ENABLED));
         }
+        ConsoleSessionContext.bindScope(ConsoleSessionContext.inferFromSession());
     }
 
     public static void clear() {
@@ -90,7 +94,7 @@ public final class ConsoleTokenSessionBinder {
 
     private static Long resolveUserId(String userId) {
         if (userId == null || userId.isBlank()) {
-            throw NexusException.build(NexusStatusCode.AUTHENTICATION_FAILED);
+            throw ConsoleExceptions.build(NexusStatusCode.AUTHENTICATION_FAILED);
         }
         try {
             return Long.parseLong(userId);

@@ -7,6 +7,7 @@ import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.ext.Provider;
 
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.base.thread.SessionContext;
 import com.innospots.nexus.console.permission.authorization.AuthorizationDecision;
@@ -58,7 +59,7 @@ public final class ConsolePagePermissionFilter implements ContainerRequestFilter
         }
         String pageKey = requestContext.getHeaderString(security.getPageKeyHeader());
         if (pageKey == null || pageKey.isBlank()) {
-            throw NexusException.build(NexusStatusCode.NO_PERMISSION);
+            throw ConsoleExceptions.build(NexusStatusCode.NO_PERMISSION);
         }
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(
                 SessionContext.requireWorkspaceId(),
@@ -66,10 +67,10 @@ public final class ConsolePagePermissionFilter implements ContainerRequestFilter
                 path,
                 pageKey,
                 subjectResolver.resolve()
-                        .orElseThrow(() -> NexusException.build(NexusStatusCode.AUTHENTICATION_FAILED)));
+                        .orElseThrow(() -> ConsoleExceptions.build(NexusStatusCode.AUTHENTICATION_FAILED)));
         AuthorizationDecision decision = pagePermissionAuthorizer.authorize(authorizationRequest);
         if (!decision.allowed()) {
-            throw NexusException.build(NexusStatusCode.NO_PERMISSION);
+            throw ConsoleExceptions.build(NexusStatusCode.NO_PERMISSION);
         }
         requestContext.setProperty(RequestProperties.AUTHORIZATION_CONTEXT, decision.context());
     }

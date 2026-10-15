@@ -9,6 +9,8 @@ import com.innospots.nexus.base.domain.workspace.WorkspaceSnapshot;
 import com.innospots.nexus.base.thread.SessionContext;
 import com.innospots.nexus.base.thread.TLC;
 import com.innospots.nexus.console.jaxrs.web.ConsoleWebDevSessionSettings;
+import com.innospots.nexus.console.scope.ConsoleSessionContext;
+import com.innospots.nexus.console.scope.ConsoleSessionScope;
 
 /**
  * 在关闭请求侧安全时，将配置的 dev 身份绑定到 {@link SessionContext}。
@@ -67,6 +69,11 @@ public final class ConsoleDevSessionBinder {
                     null,
                     BasicStatus.ENABLED));
         }
+        ConsoleSessionScope sessionScope = ConsoleSessionScope.parse(devSession.getSessionScope());
+        if (sessionScope == null) {
+            sessionScope = ConsoleSessionContext.inferFromSession();
+        }
+        ConsoleSessionContext.bindScope(sessionScope);
     }
 
     private static Long resolveUserId(String userId) {

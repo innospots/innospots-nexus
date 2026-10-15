@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.base.status.NexusStatusCode;
 
 /**
@@ -49,7 +50,7 @@ public final class CredentialAlgorithmRegistry {
         Objects.requireNonNull(algorithmId, "algorithmId");
         CredentialAlgorithm algorithm = algorithms.get(algorithmId);
         if (algorithm == null) {
-            throw NexusException.build(NexusStatusCode.INVALID_PARAMETER.fullCode(), "Unknown credential algorithm");
+            throw ConsoleExceptions.build(NexusStatusCode.INVALID_PARAMETER.fullCode(), "Unknown credential algorithm");
         }
         return algorithm;
     }

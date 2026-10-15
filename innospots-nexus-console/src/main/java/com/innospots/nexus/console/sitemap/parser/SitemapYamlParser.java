@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.console.sitemap.domain.config.SitemapConfig;
 
@@ -32,14 +33,14 @@ public final class SitemapYamlParser {
      */
     public SitemapConfig parse(String content) {
         if (content == null || content.isBlank()) {
-            throw NexusException.build(
+            throw ConsoleExceptions.build(
                     NexusStatusCode.CONFIG_ERROR.fullCode(),
                     "Sitemap YAML content is required");
         }
         try {
             return yamlMapper.readValue(content, SitemapConfig.class);
         } catch (JsonProcessingException exception) {
-            throw NexusException.build(
+            throw ConsoleExceptions.build(
                     NexusStatusCode.CONFIG_ERROR.fullCode(),
                     "Cannot parse sitemap YAML",
                     exception);

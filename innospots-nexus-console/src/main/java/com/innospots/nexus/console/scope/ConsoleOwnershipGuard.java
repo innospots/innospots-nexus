@@ -8,6 +8,10 @@ public final class ConsoleOwnershipGuard {
     private ConsoleOwnershipGuard() {
     }
 
+    public static ConsoleOwnership requirePlatformScope() {
+        return ConsoleOwnershipScope.requireOwnership(ConsoleOwnershipLevel.PLATFORM);
+    }
+
     public static ConsoleOwnership requireTenantScope() {
         return ConsoleOwnershipScope.requireOwnership(ConsoleOwnershipLevel.TENANT);
     }

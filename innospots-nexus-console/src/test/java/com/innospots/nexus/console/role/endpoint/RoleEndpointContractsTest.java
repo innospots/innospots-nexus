@@ -59,7 +59,7 @@ class RoleEndpointContractsTest {
     @Test
     void roleRequestsAndViewsAreImmutableRecords() {
         assertRecordComponents(RoleCreateRequest.class,
-                "roleName", "roleCode", "ownerType", "ownerId", "securityRealm", "description", "sortOrder");
+                "roleName", "roleCode", "ownerType", "ownerId", "description");
         assertRecordComponents(RoleUpdateRequest.class,
                 "roleName", "description", "sortOrder");
         assertRecordComponents(RoleStatusUpdateRequest.class, "status");

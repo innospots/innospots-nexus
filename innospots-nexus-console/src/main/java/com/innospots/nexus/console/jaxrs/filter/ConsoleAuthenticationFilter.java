@@ -7,6 +7,7 @@ import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.ext.Provider;
 
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.console.auth.service.TokenIssuer;
 import com.innospots.nexus.console.jaxrs.support.ConsoleAntPathMatcher;
@@ -53,7 +54,7 @@ public final class ConsoleAuthenticationFilter implements ContainerRequestFilter
             return;
         }
         if (authorization == null || authorization.isBlank()) {
-            throw NexusException.build(NexusStatusCode.AUTHENTICATION_FAILED);
+            throw ConsoleExceptions.build(NexusStatusCode.AUTHENTICATION_FAILED);
         }
         String token = extractBearerToken(authorization);
         ConsoleTokenSessionBinder.bindAccessToken(tokenIssuer.parse(token));
@@ -62,11 +63,11 @@ public final class ConsoleAuthenticationFilter implements ContainerRequestFilter
     private static String extractBearerToken(String authorization) {
         String prefix = "Bearer ";
         if (!authorization.regionMatches(true, 0, prefix, 0, prefix.length())) {
-            throw NexusException.build(NexusStatusCode.AUTHENTICATION_FAILED);
+            throw ConsoleExceptions.build(NexusStatusCode.AUTHENTICATION_FAILED);
         }
         String token = authorization.substring(prefix.length()).trim();
         if (token.isEmpty()) {
-            throw NexusException.build(NexusStatusCode.AUTHENTICATION_FAILED);
+            throw ConsoleExceptions.build(NexusStatusCode.AUTHENTICATION_FAILED);
         }
         return token;
     }

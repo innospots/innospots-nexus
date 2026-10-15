@@ -38,6 +38,9 @@
 
     <Loggers>
         <Logger name="com.innospots.nexus" level="info"/>
+        <!-- 角色归属调试：默认 info；local 由 application-local.yaml logging.level 升为 debug -->
+        <Logger name="com.innospots.nexus.console.scope.ConsoleOwnershipScope" level="info"/>
+        <Logger name="com.innospots.nexus.console.role.operator.RoleOperator" level="info"/>
         <Logger name="org.springframework" level="info"/>
         <Logger name="org.apache.ibatis" level="info"/>
         <Logger name="com.baomidou.mybatisplus" level="info"/>

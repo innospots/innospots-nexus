@@ -21,14 +21,17 @@ nexus:
         enabled: false
 
         # dev-session：仅当 security.enabled=false 时生效；注入固定 SessionContext（本地调试）。
+        # 本模块为运营平台（platform）示例：realm 须为 PLATFORM，与平台登录令牌域一致。
         # 生产务必保持 dev-session.enabled=false；建议配合 spring.profiles.active 含 dev。
         dev-session:
           enabled: true
           user-id: "1"
           tenant-id: dev-tenant
-          workspace-id: dev-workspace
+          # workspace-id: dev-workspace   # TENANT 会话可不配；WORKSPACE 会话须配置
           project-id: dev-project
-          realm: TENANT
+          realm: PLATFORM
+          # 当前登录会话归属：PLATFORM | TENANT | WORKSPACE（可与 realm、workspace-id 组合调试角色 API）
+          session-scope: PLATFORM
           tenant-member-id: member-1
 
         # permit-all-patterns：ConsoleAuthenticationFilter 使用（security.enabled=true 时）。

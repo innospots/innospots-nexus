@@ -10,7 +10,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
 import com.innospots.nexus.console.role.dao.RoleBindingDao;
 import com.innospots.nexus.console.role.dao.RoleDao;
 import com.innospots.nexus.console.role.domain.entity.RoleBindingEntity;
@@ -73,9 +72,7 @@ class RoleOperatorTransactionIntegrationTest extends RoleEndpointH2Support {
                 "txn-role",
                 RoleOwnerType.WORKSPACE,
                 RoleEndpointTestSessions.WORKSPACE_ID,
-                SecurityRealm.TENANT,
-                null,
-                0));
+                null));
         LOGGER.info("created role roleId={}", role.roleId());
 
         roleBindingOperator.addRoleBindings(

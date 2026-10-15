@@ -23,6 +23,7 @@ import com.innospots.nexus.core.plugin.contract.CapabilityProviderContext;
 import com.innospots.nexus.core.plugin.contract.PluginContext;
 import com.innospots.nexus.core.plugin.contribution.PluginContribution;
 import com.innospots.nexus.core.plugin.contribution.PluginContributionContext;
+import com.innospots.nexus.core.plugin.contribution.PluginContributionInventories;
 import com.innospots.nexus.core.plugin.contribution.PluginContributionHandler;
 import com.innospots.nexus.core.plugin.contribution.PluginContributionType;
 import com.innospots.nexus.core.plugin.contribution.PreparedPluginContribution;
@@ -218,6 +219,12 @@ public final class ManagedPlugin {
                     throw NexusException.build(PluginStatusCode.UNSUPPORTED_CONTRIBUTION_TYPE,
                             "missing contribution handler: " + contribution.type());
                 }
+                log.info(
+                        "Plugin {} loading contribution {}: {} module(s), {} component(s)",
+                        pluginId,
+                        contribution.type(),
+                        PluginContributionInventories.moduleCount(contribution),
+                        PluginContributionInventories.componentCount(contribution));
                 PreparedPluginContribution handle = prepareContribution(handler, contribution);
                 // 先纳入回滚清单，确保后续任意阶段失败时都能调用清理钩子。
                 prepared.add(handle);
@@ -290,8 +297,16 @@ public final class ManagedPlugin {
                     exception);
         }
         if (startedEvent != null) {
-            log.info("Plugin {} started with {} capability provider(s)",
-                    pluginId, created.size());
+            PluginContributionInventories.Summary contributions = PluginContributionInventories.summarize(
+                    discovered.definition().contributions());
+            log.info(
+                    "Plugin {} started with {} capability provider(s), {} contribution(s),"
+                            + " {} extension module(s), {} extension component(s)",
+                    pluginId,
+                    created.size(),
+                    contributions.contributionCount(),
+                    contributions.moduleCount(),
+                    contributions.componentCount());
             eventBus.publish(startedEvent);
         }
     }

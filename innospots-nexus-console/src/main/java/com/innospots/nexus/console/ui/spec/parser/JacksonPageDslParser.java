@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.console.ui.spec.PageDsl;
 import com.innospots.nexus.console.ui.spec.config.PageDslConfig;
@@ -36,7 +37,7 @@ public final class JacksonPageDslParser implements PageDslParser {
      */
     public JacksonPageDslParser(PageDslConfig config) {
         if (config == null) {
-            throw NexusException.build(
+            throw ConsoleExceptions.build(
                     NexusStatusCode.CONFIG_ERROR.fullCode(),
                     "PageDsl config is required");
         }
@@ -48,7 +49,7 @@ public final class JacksonPageDslParser implements PageDslParser {
     @Override
     public PageDsl parse(String content) {
         if (content == null || content.isBlank()) {
-            throw NexusException.build(
+            throw ConsoleExceptions.build(
                     NexusStatusCode.CONFIG_ERROR.fullCode(),
                     "PageDsl YAML content is required");
         }
@@ -57,7 +58,7 @@ public final class JacksonPageDslParser implements PageDslParser {
             validator.validate(document);
             return document;
         } catch (JsonProcessingException exception) {
-            throw NexusException.build(
+            throw ConsoleExceptions.build(
                     NexusStatusCode.CONFIG_ERROR.fullCode(),
                     "Cannot parse PageDsl YAML",
                     exception);
@@ -70,7 +71,7 @@ public final class JacksonPageDslParser implements PageDslParser {
         try {
             return yamlMapper.writeValueAsString(document);
         } catch (JsonProcessingException exception) {
-            throw NexusException.build(
+            throw ConsoleExceptions.build(
                     NexusStatusCode.SERIALIZATION_FAILED.fullCode(),
                     "Cannot serialize PageDsl YAML",
                     exception);

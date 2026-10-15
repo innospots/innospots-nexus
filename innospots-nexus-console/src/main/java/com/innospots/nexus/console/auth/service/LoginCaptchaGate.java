@@ -5,6 +5,7 @@ import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.base.util.Checks;
 import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
@@ -82,7 +83,7 @@ public final class LoginCaptchaGate {
                 request.captchaCode());
         if (!captchaChallengeService.verify(command)) {
             log.debug("Login captcha rejected for realm {}", realm);
-            throw NexusException.build(NexusStatusCode.AUTHENTICATION_FAILED);
+            throw ConsoleExceptions.build(NexusStatusCode.AUTHENTICATION_FAILED);
         }
         captchaChallengeService.invalidate(command);
     }

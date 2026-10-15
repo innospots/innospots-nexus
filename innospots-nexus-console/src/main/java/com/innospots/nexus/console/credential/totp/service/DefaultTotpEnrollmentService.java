@@ -3,6 +3,7 @@ package com.innospots.nexus.console.credential.totp.service;
 import java.util.Optional;
 
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.base.util.Checks;
 import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
 import com.innospots.nexus.console.auth.domain.model.CredentialRecord;
@@ -50,7 +51,7 @@ public final class DefaultTotpEnrollmentService implements TotpEnrollmentService
         Checks.notBlank(accountLabel, "accountLabel");
         Optional<CredentialRecord> existing = credentialOperator.findCredential(realm, CredentialKind.TOTP, subjectId);
         if (existing.isPresent() && !TotpCredentials.isEnrollmentPending(existing.get())) {
-            throw NexusException.build(TotpStatusCode.ALREADY_ENROLLED);
+            throw ConsoleExceptions.build(TotpStatusCode.ALREADY_ENROLLED);
         }
         // 待确认状态通过 verifierParams 标记，激活后由 confirmEnrollment 清除
         String base32Secret = secretProtector.generateBase32Secret();
@@ -69,7 +70,7 @@ public final class DefaultTotpEnrollmentService implements TotpEnrollmentService
     @Override
     public void confirmEnrollment(SecurityRealm realm, String subjectId, String code) {
         CredentialRecord record = credentialOperator.findCredential(realm, CredentialKind.TOTP, subjectId)
-                .orElseThrow(() -> NexusException.build(TotpStatusCode.NOT_ENROLLED));
+                .orElseThrow(() -> ConsoleExceptions.build(TotpStatusCode.NOT_ENROLLED));
         TotpVerificationSupport.requirePendingTotp(record);
         verificationSupport.verifyCode(record, code);
         credentialOperator.clearVerifierParams(realm, CredentialKind.TOTP, subjectId);

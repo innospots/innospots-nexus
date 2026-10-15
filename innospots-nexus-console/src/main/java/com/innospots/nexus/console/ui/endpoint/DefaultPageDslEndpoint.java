@@ -19,6 +19,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.console.config.ConsoleConstant;
 import com.innospots.nexus.console.ui.domain.request.PageDslRenderRequest;
@@ -51,7 +52,7 @@ public final class DefaultPageDslEndpoint implements PageDslEndpoint {
      */
     public DefaultPageDslEndpoint(PageDslLoader loader, PageDslFilterChain filterChain) {
         if (loader == null) {
-            throw NexusException.build(
+            throw ConsoleExceptions.build(
                     NexusStatusCode.CONFIG_ERROR.fullCode(),
                     "PageDsl loader is required");
         }
@@ -73,7 +74,7 @@ public final class DefaultPageDslEndpoint implements PageDslEndpoint {
     @Override
     public PageDsl render(String domainKey, String moduleKey, String pageKey, Map<String, Object> parameters) {
         if (!hasText(domainKey) || !hasText(moduleKey) || !hasText(pageKey)) {
-            throw NexusException.build(
+            throw ConsoleExceptions.build(
                     NexusStatusCode.CONFIG_ERROR.fullCode(),
                     "PageDsl domainKey, moduleKey and pageKey are required");
         }

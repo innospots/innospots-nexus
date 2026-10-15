@@ -10,6 +10,7 @@ import jakarta.transaction.Transactional;
 
 import com.innospots.nexus.base.events.EventBus;
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.base.util.Checks;
 import com.innospots.nexus.base.util.CryptoUtils;
 import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
@@ -115,7 +116,7 @@ public class OtpChallengeService {
         Checks.notBlank(challengeId, "challengeId");
         OtpChallengeEntity entity = challengeDao.selectById(challengeId);
         if (entity == null) {
-            throw NexusException.build(OtpStatusCode.CHALLENGE_NOT_FOUND);
+            throw ConsoleExceptions.build(OtpStatusCode.CHALLENGE_NOT_FOUND);
         }
         return entity.getExpiresAt();
     }
@@ -125,7 +126,7 @@ public class OtpChallengeService {
         String destination = command.channel().normalizeDestination(command.destination());
         OtpChallengeEntity active = findActive(ownership, command.purpose(), command.channel(), destination);
         if (active != null && isWithinCooldown(active)) {
-            throw NexusException.build(OtpStatusCode.RESEND_TOO_FREQUENT);
+            throw ConsoleExceptions.build(OtpStatusCode.RESEND_TOO_FREQUENT);
         }
         if (active != null) {
             markConsumed(active);
@@ -193,7 +194,7 @@ public class OtpChallengeService {
             if (entity.getAttemptCount() >= entity.getMaxAttempts()) {
                 markConsumed(entity);
             }
-            throw NexusException.build(OtpStatusCode.CODE_INVALID);
+            throw ConsoleExceptions.build(OtpStatusCode.CODE_INVALID);
         }
     }
 
@@ -282,17 +283,17 @@ public class OtpChallengeService {
         String destination = command.channel().normalizeDestination(command.destination());
         OtpChallengeEntity entity = findActive(ownership, command.purpose(), command.channel(), destination);
         if (entity == null) {
-            throw NexusException.build(OtpStatusCode.CHALLENGE_NOT_FOUND);
+            throw ConsoleExceptions.build(OtpStatusCode.CHALLENGE_NOT_FOUND);
         }
         if (entity.getConsumedAt() != null) {
-            throw NexusException.build(OtpStatusCode.CHALLENGE_CONSUMED);
+            throw ConsoleExceptions.build(OtpStatusCode.CHALLENGE_CONSUMED);
         }
         if (entity.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw NexusException.build(OtpStatusCode.CHALLENGE_EXPIRED);
+            throw ConsoleExceptions.build(OtpStatusCode.CHALLENGE_EXPIRED);
         }
         // 已达上限的挑战在 findActive 仍可能被查到（刚更新 attempt 后），统一按无效码拒绝
         if (entity.getAttemptCount() >= entity.getMaxAttempts()) {
-            throw NexusException.build(OtpStatusCode.CODE_INVALID);
+            throw ConsoleExceptions.build(OtpStatusCode.CODE_INVALID);
         }
         return entity;
     }

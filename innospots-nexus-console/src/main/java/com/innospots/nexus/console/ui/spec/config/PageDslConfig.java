@@ -1,6 +1,7 @@
 package com.innospots.nexus.console.ui.spec.config;
 
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.base.status.NexusStatusCode;
 /**
  * 定位与解析 Pactor 页面 DSL 文件的不可变配置。
@@ -76,6 +77,6 @@ public record PageDslConfig(
     }
 
     private static void invalid(String message) {
-        throw NexusException.build(NexusStatusCode.CONFIG_ERROR.fullCode(), message);
+        throw ConsoleExceptions.build(NexusStatusCode.CONFIG_ERROR.fullCode(), message);
     }
 }

@@ -3,6 +3,7 @@ package com.innospots.nexus.console.auth.service;
 import lombok.RequiredArgsConstructor;
 
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.base.json.Jsons;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.base.util.CryptoUtils;
@@ -41,13 +42,13 @@ public class TokenIssuer {
      */
     public TokenClaims parse(String token) {
         if (token == null || token.isBlank()) {
-            throw NexusException.build(NexusStatusCode.AUTHENTICATION_FAILED);
+            throw ConsoleExceptions.build(NexusStatusCode.AUTHENTICATION_FAILED);
         }
         try {
             return Jsons.fromJson(
                     CryptoUtils.decryptAesGcm(token, authConfig.getTokenSecret()), TokenClaims.class);
         } catch (NexusException ex) {
-            throw NexusException.build(NexusStatusCode.AUTHENTICATION_FAILED);
+            throw ConsoleExceptions.build(NexusStatusCode.AUTHENTICATION_FAILED);
         }
     }
 

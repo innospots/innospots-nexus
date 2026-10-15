@@ -1,8 +1,13 @@
 # spring.profiles.active=local — 仅数据源差异化（公共项见 application.yaml）
+logging:
+  level:
+    # 角色列表/创建归属调试（见 ConsoleOwnershipScope、RoleOperator）
+    com.innospots.nexus.console.scope.ConsoleOwnershipScope: debug
+    com.innospots.nexus.console.role.operator.RoleOperator: debug
 spring:
   datasource:
     # 嵌入式文件库，落盘至 ./out/db/（相对进程工作目录，通常为模块根目录）
-    url: jdbc:h2:file:./out/db/nexus-platform-console;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;AUTO_SERVER=TRUE
+    url: jdbc:h2:file:./out/db/nexus-platform-console;MODE=MySQL;DATABASE_TO_LOWER=TRUE;AUTO_SERVER=TRUE
     driver-class-name: org.h2.Driver
     username: sa
     password: sa

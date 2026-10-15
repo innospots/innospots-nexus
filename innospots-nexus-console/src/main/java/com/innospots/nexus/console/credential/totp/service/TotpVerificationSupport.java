@@ -3,6 +3,7 @@ package com.innospots.nexus.console.credential.totp.service;
 import java.time.Instant;
 
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.base.util.Checks;
 import com.innospots.nexus.console.auth.domain.model.CredentialRecord;
 import com.innospots.nexus.console.credential.totp.TotpCredentials;
@@ -44,7 +45,7 @@ public final class TotpVerificationSupport {
         String base32 = secretProtector.decryptFromStorage(record.verifier());
         byte[] secret = secretProtector.decodeBase32Secret(base32);
         if (!totpAlgorithm.verify(secret, code, Instant.now())) {
-            throw NexusException.build(TotpStatusCode.CODE_INVALID);
+            throw ConsoleExceptions.build(TotpStatusCode.CODE_INVALID);
         }
     }
 
@@ -58,10 +59,10 @@ public final class TotpVerificationSupport {
      */
     public static CredentialRecord requireActiveTotp(CredentialRecord record) {
         if (record == null) {
-            throw NexusException.build(TotpStatusCode.NOT_ENROLLED);
+            throw ConsoleExceptions.build(TotpStatusCode.NOT_ENROLLED);
         }
         if (TotpCredentials.isEnrollmentPending(record)) {
-            throw NexusException.build(TotpStatusCode.ENROLLMENT_PENDING);
+            throw ConsoleExceptions.build(TotpStatusCode.ENROLLMENT_PENDING);
         }
         return record;
     }
@@ -76,10 +77,10 @@ public final class TotpVerificationSupport {
      */
     public static CredentialRecord requirePendingTotp(CredentialRecord record) {
         if (record == null) {
-            throw NexusException.build(TotpStatusCode.NOT_ENROLLED);
+            throw ConsoleExceptions.build(TotpStatusCode.NOT_ENROLLED);
         }
         if (!TotpCredentials.isEnrollmentPending(record)) {
-            throw NexusException.build(TotpStatusCode.ALREADY_ENROLLED);
+            throw ConsoleExceptions.build(TotpStatusCode.ALREADY_ENROLLED);
         }
         return record;
     }

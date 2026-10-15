@@ -6,6 +6,11 @@ package com.innospots.nexus.console.scope;
 public enum ConsoleOwnershipLevel {
 
     /**
+     * 运营管理平台级数据；会话安全域为 PLATFORM，不依赖租户或工作区。
+     */
+    PLATFORM,
+
+    /**
      * 租户级数据（如字典）；需要已选租户，不要求工作区。
      */
     TENANT,

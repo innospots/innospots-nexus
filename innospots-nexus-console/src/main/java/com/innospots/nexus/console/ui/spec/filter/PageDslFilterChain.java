@@ -1,6 +1,7 @@
 package com.innospots.nexus.console.ui.spec.filter;
 
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.console.ui.spec.PageDsl;
 
@@ -79,20 +80,20 @@ public final class PageDslFilterChain {
      */
     public PageDsl process(PageDslRenderContext context) {
         if (context == null) {
-            throw NexusException.build(
+            throw ConsoleExceptions.build(
                     NexusStatusCode.CONFIG_ERROR.fullCode(),
                     "PageDsl render context is required");
         }
         PageDsl current = context.document();
         if (current == null) {
-            throw NexusException.build(
+            throw ConsoleExceptions.build(
                     NexusStatusCode.CONFIG_ERROR.fullCode(),
                     "PageDsl render context requires a document");
         }
         for (PageDslFilter filter : filters) {
             PageDsl next = filter.filter(context.withDocument(current));
             if (next == null) {
-                throw NexusException.build(
+                throw ConsoleExceptions.build(
                         NexusStatusCode.CONFIG_ERROR.fullCode(),
                         "PageDsl filter returned null: " + filter.filterId());
             }

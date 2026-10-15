@@ -175,6 +175,29 @@ class ConsolePluginContributionHandlerTest {
     }
 
     @Test
+    void reportsModuleAndComponentInventoryForNestedPagesAndMenus() {
+        UiSpecPageDeclaration childPage = new UiSpecPageDeclaration("child", "/ops/child", List.of());
+        UiSpecPageDeclaration rootPage = new UiSpecPageDeclaration("root", "/ops", List.of(childPage));
+        MenuDeclaration childMenu = MenuDeclaration.page(
+                "child", I18nObject.of("en", "Child"), null, 0, "child");
+        MenuDeclaration opsMenu = MenuDeclaration.directory(
+                "ops", I18nObject.of("en", "Ops"), null, 0, List.of(childMenu));
+        ConsoleModuleDeclaration opsModule = new ConsoleModuleDeclaration(
+                "ops",
+                "ops",
+                I18nObject.of("en", "Ops"),
+                I18nObject.of("en", "Ops"),
+                List.of(rootPage),
+                List.of(opsMenu));
+        ConsolePluginContribution contribution = new ConsolePluginContribution(List.of(
+                module("sales", "orders", "/sales/orders"),
+                opsModule));
+
+        assertThat(contribution.moduleCount()).isEqualTo(2);
+        assertThat(contribution.componentCount()).isEqualTo(5);
+    }
+
+    @Test
     void snapshotsDirectoryMenusWithoutNullValues() {
         ConsolePluginContribution contribution = new ConsolePluginContribution(List.of(
                 new ConsoleModuleDeclaration(

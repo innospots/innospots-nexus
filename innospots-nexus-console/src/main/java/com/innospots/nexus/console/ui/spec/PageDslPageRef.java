@@ -1,6 +1,7 @@
 package com.innospots.nexus.console.ui.spec;
 
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.base.status.NexusStatusCode;
 
 /**
@@ -84,6 +85,6 @@ public final class PageDslPageRef {
     }
 
     private static void invalid(String message) {
-        throw NexusException.build(NexusStatusCode.CONFIG_ERROR.fullCode(), message);
+        throw ConsoleExceptions.build(NexusStatusCode.CONFIG_ERROR.fullCode(), message);
     }
 }

@@ -6,6 +6,7 @@ import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.base.util.Checks;
 import com.innospots.nexus.console.auth.api.UserDirectory;
@@ -92,7 +93,7 @@ public class AuthFacade {
         AuthUser user = userDirectory.findByLogin(request.login()).orElse(null);
         if (user == null) {
             log.debug("Login rejected: unknown identity in realm {}", realm);
-            throw NexusException.build(NexusStatusCode.AUTHENTICATION_FAILED);
+            throw ConsoleExceptions.build(NexusStatusCode.AUTHENTICATION_FAILED);
         }
         credentialService.authenticate(realm, user.userId(), rawPassword);
         AuthSessionScope scope = new AuthSessionScope(TOKEN_TYPE_BUSINESS, null, null, null, null);
@@ -114,10 +115,10 @@ public class AuthFacade {
         if (claims.realm() != realm
                 || !TokenIssuer.PURPOSE_REFRESH.equals(claims.purpose())
                 || claims.expiresAt() <= Instant.now().getEpochSecond()) {
-            throw NexusException.build(NexusStatusCode.AUTHENTICATION_FAILED);
+            throw ConsoleExceptions.build(NexusStatusCode.AUTHENTICATION_FAILED);
         }
         AuthUser user = userDirectory.findById(claims.userId())
-                .orElseThrow(() -> NexusException.build(NexusStatusCode.AUTHENTICATION_FAILED));
+                .orElseThrow(() -> ConsoleExceptions.build(NexusStatusCode.AUTHENTICATION_FAILED));
         AuthSessionScope scope = new AuthSessionScope(
                 claims.tokenType(),
                 claims.tenantId(),

@@ -13,6 +13,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.base.thread.SessionContext;
 import com.innospots.nexus.console.config.ConsoleConstant;
@@ -39,7 +40,7 @@ public final class NavigationMenuEndpoint {
             AuthorizationSubjectResolver subjectResolver
     ) {
         if (assembler == null || subjectResolver == null) {
-            throw NexusException.build(NexusStatusCode.CONFIG_ERROR,
+            throw ConsoleExceptions.build(NexusStatusCode.CONFIG_ERROR,
                     "assembler and subjectResolver are required");
         }
         this.assembler = assembler;

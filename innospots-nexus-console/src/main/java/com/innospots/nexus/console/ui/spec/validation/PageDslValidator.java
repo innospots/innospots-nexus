@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.console.ui.spec.HttpRequest;
 import com.innospots.nexus.console.ui.spec.PageDsl;
@@ -290,6 +291,6 @@ public final class PageDslValidator {
     }
 
     private static void invalid(String message) {
-        throw NexusException.build(NexusStatusCode.CONFIG_ERROR.fullCode(), message);
+        throw ConsoleExceptions.build(NexusStatusCode.CONFIG_ERROR.fullCode(), message);
     }
 }

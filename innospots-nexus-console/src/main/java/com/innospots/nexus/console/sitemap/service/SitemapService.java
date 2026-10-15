@@ -1,6 +1,7 @@
 package com.innospots.nexus.console.sitemap.service;
 
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.console.sitemap.domain.config.SitemapConfig;
 import com.innospots.nexus.console.sitemap.domain.vo.SitemapResource;
@@ -16,7 +17,7 @@ public final class SitemapService {
 
     public SitemapService(SitemapConfigLoader configLoader, SitemapMapper mapper) {
         if (configLoader == null || mapper == null) {
-            throw NexusException.build(
+            throw ConsoleExceptions.build(
                     NexusStatusCode.CONFIG_ERROR.fullCode(),
                     "Sitemap configLoader and mapper are required");
         }
@@ -32,7 +33,7 @@ public final class SitemapService {
      */
     public SitemapResource render(String domainKey) {
         if (domainKey == null || domainKey.isBlank()) {
-            throw NexusException.build(
+            throw ConsoleExceptions.build(
                     NexusStatusCode.CONFIG_ERROR.fullCode(),
                     "Sitemap domainKey is required");
         }

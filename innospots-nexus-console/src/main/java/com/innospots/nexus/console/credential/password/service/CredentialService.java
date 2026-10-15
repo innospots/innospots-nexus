@@ -6,6 +6,7 @@ import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
 import com.innospots.nexus.console.auth.domain.model.CredentialRecord;
@@ -58,11 +59,11 @@ public final class CredentialService {
         CredentialRecord credential = credentialOperator.findPassword(realm, subjectId).orElse(null);
         if (credential == null) {
             log.debug("Login password proof rejected: no credential for subject in realm {}", realm);
-            throw NexusException.build(NexusStatusCode.AUTHENTICATION_FAILED);
+            throw ConsoleExceptions.build(NexusStatusCode.AUTHENTICATION_FAILED);
         }
         if (credential.lockedUntil() != null && credential.lockedUntil().isAfter(LocalDateTime.now())) {
             log.debug("Login password proof rejected: subject locked until {}", credential.lockedUntil());
-            throw NexusException.build(NexusStatusCode.AUTHENTICATION_FAILED);
+            throw ConsoleExceptions.build(NexusStatusCode.AUTHENTICATION_FAILED);
         }
         if (!credentialOperator.verify(credential, rawPassword)) {
             int failed = credential.failedAttempts() == null ? 1 : credential.failedAttempts() + 1;
@@ -71,7 +72,7 @@ public final class CredentialService {
                     : credential.lockedUntil();
             credentialOperator.saveState(realm, withAttempts(credential, failed, lockedUntil));
             log.debug("Login password proof rejected: failedAttempts={}", failed);
-            throw NexusException.build(NexusStatusCode.AUTHENTICATION_FAILED);
+            throw ConsoleExceptions.build(NexusStatusCode.AUTHENTICATION_FAILED);
         }
         credentialOperator.saveState(realm, withAttempts(credential, 0, null));
     }
@@ -103,12 +104,12 @@ public final class CredentialService {
         Objects.requireNonNull(oldPassword, "oldPassword");
         validatePassword(newPassword);
         if (oldPassword.equals(newPassword)) {
-            throw NexusException.build(NexusStatusCode.BUSINESS_ERROR);
+            throw ConsoleExceptions.build(NexusStatusCode.BUSINESS_ERROR);
         }
         CredentialRecord current = credentialOperator.findPassword(realm, subjectId)
-                .orElseThrow(() -> NexusException.build(NexusStatusCode.PASSWORD_ERROR));
+                .orElseThrow(() -> ConsoleExceptions.build(NexusStatusCode.PASSWORD_ERROR));
         if (!credentialOperator.verify(current, oldPassword)) {
-            throw NexusException.build(NexusStatusCode.PASSWORD_ERROR);
+            throw ConsoleExceptions.build(NexusStatusCode.PASSWORD_ERROR);
         }
         credentialOperator.enrollPassword(CredentialOwnershipResolver.ownershipForRealm(realm), subjectId, newPassword);
         credentialOperator.saveState(realm, withAttempts(current, 0, null));
@@ -158,7 +159,7 @@ public final class CredentialService {
     private void validatePassword(String rawPassword) {
         Objects.requireNonNull(rawPassword, "rawPassword");
         if (!passwordValidator.isValid(rawPassword)) {
-            throw NexusException.build(NexusStatusCode.BUSINESS_ERROR);
+            throw ConsoleExceptions.build(NexusStatusCode.BUSINESS_ERROR);
         }
     }
 

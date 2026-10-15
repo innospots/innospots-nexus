@@ -10,6 +10,7 @@ import java.util.Set;
 
 import com.innospots.nexus.base.domain.enums.BasicStatus;
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.base.thread.TLC;
 import com.innospots.nexus.console.ui.spec.PageDsl;
@@ -248,7 +249,7 @@ public final class ConsoleCatalogSyncService {
                 }
             }
             if (!progressed) {
-                throw NexusException.build(
+                throw ConsoleExceptions.build(
                         NexusStatusCode.CONFIG_ERROR,
                         "PageDsl parentPageKey graph cannot be ordered");
             }
@@ -583,7 +584,7 @@ public final class ConsoleCatalogSyncService {
     }
 
     private static void invalid(String message) {
-        throw NexusException.build(NexusStatusCode.CONFIG_ERROR.fullCode(), message);
+        throw ConsoleExceptions.build(NexusStatusCode.CONFIG_ERROR.fullCode(), message);
     }
 
     private record ResourceDefinition(

@@ -10,6 +10,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 
 import com.innospots.nexus.base.domain.enums.BasicStatus;
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.console.catalog.domain.vo.CatalogNodeVo;
 import com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao;
@@ -32,7 +33,7 @@ public final class ConsoleCatalogService {
      */
     public ConsoleCatalogService(ConsoleCatalogResourceDao resourceDao) {
         if (resourceDao == null) {
-            throw NexusException.build(NexusStatusCode.CONFIG_ERROR, "resourceDao is required");
+            throw ConsoleExceptions.build(NexusStatusCode.CONFIG_ERROR, "resourceDao is required");
         }
         this.resourceDao = resourceDao;
     }

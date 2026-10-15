@@ -25,8 +25,30 @@ public final class ThrowableExceptionMapper implements ExceptionMapper<Throwable
         if (exception instanceof WebApplicationException webApplicationException) {
             return exceptionSupport.toWebApplicationResponse(webApplicationException);
         }
+        NexusException nexusException = resolveNexusException(exception);
+        if (nexusException != null) {
+            exceptionSupport.logNexusFailure(nexusException);
+            return exceptionSupport.toResponse(nexusException);
+        }
         exceptionSupport.logUnhandledFailure(exception);
-        NexusException nexusException = NexusException.build(NexusStatusCode.SYSTEM_ERROR, exception);
-        return exceptionSupport.toResponse(nexusException);
+        return exceptionSupport.toResponse(NexusException.build(NexusStatusCode.SYSTEM_ERROR, exception));
+    }
+
+    private static NexusException resolveNexusException(Throwable failure) {
+        if (failure instanceof NexusException nexusException) {
+            return nexusException;
+        }
+        Throwable current = failure;
+        while (current != null) {
+            if (current instanceof NexusException nexusException) {
+                return nexusException;
+            }
+            Throwable cause = current.getCause();
+            if (cause == null || cause == current) {
+                break;
+            }
+            current = cause;
+        }
+        return null;
     }
 }
