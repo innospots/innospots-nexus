@@ -57,8 +57,8 @@ body:
             onClick:
               - action: overlay.open
                 params:
-                  overlay: &roleFormDialog
-                    type: dialog
+                  overlay:
+                    type: modal
                     title: 新建角色
                     width: 520
                     content:
@@ -208,7 +208,7 @@ body:
         - type: Table
           props:
             rowKey: roleId
-            dataSource: ${data.roles.data.records}
+            dataSource: ${data.roles.records}
             loading: ${dataStatus.roles.loading}
             className: mt-4
             columns:
@@ -300,6 +300,6 @@ body:
                               dataSource: roles
         - type: Text
           props:
-            text: 共 ${data.roles.data.total} 个角色
+            text: 共 ${data.roles.total} 个角色
             type: secondary
             className: mt-3

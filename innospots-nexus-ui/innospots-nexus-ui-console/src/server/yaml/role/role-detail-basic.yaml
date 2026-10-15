@@ -4,16 +4,28 @@ page:
   title: 角色基本信息
   name: roleDetailBasic
 
-state:
-  roleId: ${route.params.roleId}
-
 dataSources:
   role:
     type: http
     autoLoad: true
     request:
       method: GET
-      url: /api/d/platform/roles/${state.roleId}
+      url: /api/d/platform/roles/${params.roleId}
+
+lifecycle:
+  onLoad:
+    - action: form.setValues
+      params:
+        form: roleBasicForm
+        values: ${data.role}
+  onShow:
+    - action: reload
+      params:
+        dataSource: role
+    - action: form.setValues
+      params:
+        form: roleBasicForm
+        values: ${data.role}
 
 body:
   type: Page
@@ -23,7 +35,7 @@ body:
         items:
           - label: 角色管理
             href: /system/roles
-          - label: ${data.role.data.roleName}
+          - label: "${data.role != null && data.role.roleName != null ? data.role.roleName : params.roleId}"
     - type: Button
       props:
         text: ← 返回角色列表
@@ -41,7 +53,7 @@ body:
         - type: Typography
           props:
             variant: h3
-            text: ${data.role.data.roleCode} · ${data.role.data.roleName}
+            text: "${data.role != null && data.role.roleCode != null ? data.role.roleCode + ' · ' : ''}${data.role != null && data.role.roleName != null ? data.role.roleName : params.roleId}"
     - type: Tabs
       props:
         activeKey: basic
@@ -57,14 +69,14 @@ body:
               then:
                 - action: navigate
                   params:
-                    to: /system/roles/${state.roleId}/permissions
+                    to: /system/roles/${params.roleId}/permissions
           - action: if
             params:
               condition: ${event == 'members'}
               then:
                 - action: navigate
                   params:
-                    to: /system/roles/${state.roleId}/members
+                    to: /system/roles/${params.roleId}/members
     - type: Card
       props:
         className: mt-4
@@ -73,13 +85,13 @@ body:
           props:
             name: roleBasicForm
             layout: vertical
-            initialValues: ${data.role.data}
+            initialValues: ${data.role}
           events:
             onSubmit:
               - action: request
                 params:
                   method: PUT
-                  url: /api/d/platform/roles/${state.roleId}
+                  url: /api/d/platform/roles/${params.roleId}
                   body:
                     roleName: ${event.roleName}
                     description: ${event.description}
@@ -160,11 +172,12 @@ body:
                   props:
                     name: description
             - type: Descriptions
+              when: ${data.role != null}
               props:
                 className: mt-4
                 items:
-                  - { label: 创建时间, children: "${data.role.data.createdAt}" }
-                  - { label: 更新时间, children: "${data.role.data.updatedAt}" }
+                  - { label: 创建时间, value: "${data.role.createdAt}" }
+                  - { label: 更新时间, value: "${data.role.updatedAt}" }
             - type: Flex
               props:
                 justify: end
@@ -179,7 +192,7 @@ body:
                       - action: form.setValues
                         params:
                           form: roleBasicForm
-                          values: ${data.role.data}
+                          values: ${data.role}
                 - type: Button
                   props:
                     text: 保存修改

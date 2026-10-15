@@ -34,6 +34,8 @@ import com.innospots.nexus.console.support.ConsoleExceptions;
 @RequiredArgsConstructor
 public class DictionaryItemOperator {
 
+    private static final int DEFAULT_SORT_ORDER = 1;
+
     private final DictionaryTypeOperator typeOperator;
     private final DictionaryItemDao itemDao;
     private final DictionaryConverter converter;
@@ -89,7 +91,7 @@ public class DictionaryItemOperator {
         entity.setItemValue(request.itemValue());
         entity.setItemName(request.itemName());
         entity.setSecurityRealm(parent.getSecurityRealm());
-        entity.setSortOrder(request.sortOrder() == null ? 0 : request.sortOrder());
+        entity.setSortOrder(request.sortOrder() == null ? DEFAULT_SORT_ORDER : request.sortOrder());
         entity.setStatus(BasicStatus.ENABLED.name());
         entity.setBuiltIn(false);
         itemDao.insert(entity);

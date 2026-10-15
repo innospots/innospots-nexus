@@ -26,6 +26,7 @@ public interface PluginManagementConverter {
      * 转换安装事实、运行快照和诊断字段。
      */
     @Mapping(source = "installation.pluginId", target = "pluginId")
+    @Mapping(target = "pluginName", expression = "java(view.pluginName())")
     @Mapping(source = "installation.pluginVersion", target = "version")
     @Mapping(source = "installation.presence", target = "presence")
     @Mapping(source = "installation.installed", target = "installed")

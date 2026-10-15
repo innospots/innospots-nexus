@@ -1,0 +1,298 @@
+dsl: "1.0"
+page:
+  id: platform-access-request-list
+  title: 注册审批
+  name: platformAccessRequestList
+
+state:
+  status: PENDING_APPROVAL
+  pageNo: 1
+  pageSize: 20
+  approveRequestId: ""
+  rejectRequestId: ""
+
+dataSources:
+  accessRequests:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/platform/registration/access-requests
+      params:
+        status: ${state.status}
+        pageNo: ${state.pageNo}
+        pageSize: ${state.pageSize}
+
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - label: 运营管理
+          - label: 平台用户
+          - label: 注册审批
+    - type: Tabs
+      props:
+        activeKey: access
+        items:
+          - { key: users, label: 用户列表 }
+          - { key: invites, label: 邀请 }
+          - { key: access, label: 注册审批 }
+      events:
+        onChange:
+          - action: if
+            params:
+              condition: ${event == 'users'}
+              then:
+                - action: navigate
+                  params: { to: /ops/platform-users }
+          - action: if
+            params:
+              condition: ${event == 'invites'}
+              then:
+                - action: navigate
+                  params: { to: /ops/platform-users/invites }
+    - type: Flex
+      props:
+        direction: vertical
+        gap: 2
+        className: mt-2
+      children:
+        - type: Typography
+          props:
+            variant: h3
+            text: 注册审批
+        - type: Typography
+          props:
+            variant: muted
+            text: 处理自助注册产生的待审核账号；仅 registration.mode=APPROVAL 时有待办数据。
+    - type: Card
+      children:
+        - type: Form
+          props:
+            name: accessRequestSearch
+            layout: inline
+          events:
+            onSubmit:
+              - action: setState
+                params:
+                  status: ${event.status}
+                  pageNo: 1
+              - action: reload
+                params:
+                  dataSource: accessRequests
+          children:
+            - type: Field
+              props:
+                label: 状态
+              children:
+                - type: Select
+                  props:
+                    name: status
+                    placeholder: 待审批
+                    options:
+                      - { label: 待审批, value: PENDING_APPROVAL }
+                      - { label: 已通过, value: APPROVED }
+                      - { label: 已拒绝, value: REJECTED }
+                      - { label: 全部, value: "" }
+            - type: Field
+              props:
+                label: " "
+              children:
+                - type: Button
+                  props:
+                    text: 查询
+                    submit: true
+                    htmlType: submit
+        - type: Table
+          props:
+            rowKey: accessRequestId
+            dataSource: ${data.accessRequests.records}
+            loading: ${dataStatus.accessRequests.loading}
+            className: mt-4
+            columns:
+              - title: 登录名
+                dataIndex: loginName
+              - title: 申请人
+                dataIndex: applicantName
+              - title: 邮箱/手机
+                cell:
+                  type: Text
+                  props:
+                    text: "${row.email != null && row.email != '' ? row.email : (row.mobile != null ? row.mobile : '—')}"
+              - title: 注册时间
+                dataIndex: createdAt
+              - title: 说明
+                dataIndex: description
+              - title: 状态
+                cell:
+                  type: Text
+                  props:
+                    text: "${row.status == 'PENDING_APPROVAL' ? '待审批' : row.status == 'APPROVED' ? '已通过' : row.status == 'REJECTED' ? '已拒绝' : row.status}"
+              - title: 操作
+                cell:
+                  type: Flex
+                  props:
+                    gap: small
+                  children:
+                    - type: Button
+                      when: ${row.status == 'PENDING_APPROVAL'}
+                      props:
+                        text: 通过
+                        variant: link
+                        size: small
+                      events:
+                        onClick:
+                          - action: setState
+                            params:
+                              approveRequestId: ${row.accessRequestId}
+                          - action: overlay.open
+                            params:
+                              overlay:
+                                type: drawer
+                                title: 通过注册申请
+                                width: 480
+                                content:
+                                  type: Form
+                                  props:
+                                    name: accessApproveForm
+                                    layout: vertical
+                                  events:
+                                    onSubmit:
+                                      - action: request
+                                        params:
+                                          method: POST
+                                          url: /api/d/platform/registration/access-requests/${state.approveRequestId}/approve
+                                          body:
+                                            defaultRoleCodes: ${event.defaultRoleCodes}
+                                      - action: message
+                                        params:
+                                          messageType: success
+                                          text: 已通过，账号已启用
+                                      - action: overlay.close
+                                      - action: reload
+                                        params:
+                                          dataSource: accessRequests
+                                  children:
+                                    - type: Alert
+                                      props:
+                                        variant: info
+                                        message: 用户已在注册时设置密码；通过后 status 变为 ACTIVE，无需再次设密或发邀请。
+                                    - type: Field
+                                      props:
+                                        label: 默认角色（可选）
+                                        labelHint: 逗号分隔角色编码
+                                      children:
+                                        - type: Input
+                                          props:
+                                            name: defaultRoleCodes
+                                            placeholder: 如 PLATFORM_OPERATOR
+                                    - type: Flex
+                                      props:
+                                        justify: end
+                                        gap: small
+                                        className: mt-4
+                                      children:
+                                        - type: Button
+                                          props:
+                                            text: 取消
+                                          events:
+                                            onClick:
+                                              - action: overlay.close
+                                        - type: Button
+                                          props:
+                                            text: 确认通过
+                                            variant: primary
+                                            submit: true
+                                            htmlType: submit
+                    - type: Button
+                      when: ${row.status == 'PENDING_APPROVAL'}
+                      props:
+                        text: 拒绝
+                        variant: link
+                        size: small
+                        danger: true
+                      events:
+                        onClick:
+                          - action: setState
+                            params:
+                              rejectRequestId: ${row.accessRequestId}
+                          - action: overlay.open
+                            params:
+                              overlay:
+                                type: drawer
+                                title: 拒绝注册申请
+                                width: 480
+                                content:
+                                  type: Form
+                                  props:
+                                    name: accessRejectForm
+                                    layout: vertical
+                                  events:
+                                    onSubmit:
+                                      - action: request
+                                        params:
+                                          method: POST
+                                          url: /api/d/platform/registration/access-requests/${state.rejectRequestId}/reject
+                                          body:
+                                            rejectReason: ${event.rejectReason}
+                                      - action: message
+                                        params:
+                                          messageType: success
+                                          text: 已拒绝该申请
+                                      - action: overlay.close
+                                      - action: reload
+                                        params:
+                                          dataSource: accessRequests
+                                  children:
+                                    - type: Field
+                                      props:
+                                        label: 拒绝原因
+                                        labelHint: 可选，将通知申请人
+                                      children:
+                                        - type: Textarea
+                                          props:
+                                            name: rejectReason
+                                            placeholder: 请填写拒绝原因
+                                    - type: Flex
+                                      props:
+                                        justify: end
+                                        gap: small
+                                        className: mt-4
+                                      children:
+                                        - type: Button
+                                          props:
+                                            text: 取消
+                                          events:
+                                            onClick:
+                                              - action: overlay.close
+                                        - type: Button
+                                          props:
+                                            text: 确认拒绝
+                                            variant: primary
+                                            danger: true
+                                            submit: true
+                                            htmlType: submit
+                    - type: Button
+                      when: ${row.platformUserId != null && row.platformUserId != ''}
+                      props:
+                        text: 用户详情
+                        variant: link
+                        size: small
+                      events:
+                        onClick:
+                          - action: navigate
+                            params:
+                              to: /ops/platform-users/${row.platformUserId}
+        - type: Text
+          props:
+            text: 共 ${data.accessRequests.total} 条申请
+            type: secondary
+            className: mt-3
+        - type: Alert
+          when: ${data.accessRequests.total == 0}
+          props:
+            className: mt-4
+            variant: info
+            message: 当前无匹配申请。若注册策略非「待审核」模式，本页通常为空；可在用户列表按 PENDING_APPROVAL 查看只读资料。

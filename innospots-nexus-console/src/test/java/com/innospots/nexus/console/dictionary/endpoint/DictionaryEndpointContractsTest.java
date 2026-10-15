@@ -62,8 +62,8 @@ class DictionaryEndpointContractsTest {
 
     @Test
     void requestsAndViewsExposeStableDictionaryData() {
-        assertRecordComponents(DictionaryTypeCreateRequest.class, "typeCode", "typeName", "sortOrder");
-        assertRecordComponents(DictionaryTypeUpdateRequest.class, "typeName", "sortOrder");
+        assertRecordComponents(DictionaryTypeCreateRequest.class, "typeCode", "typeName", "sortOrder", "items");
+        assertRecordComponents(DictionaryTypeUpdateRequest.class, "typeName", "sortOrder", "items");
         assertRecordComponents(DictionaryTypeStatusUpdateRequest.class, "status");
         assertThat(DictionaryTypePageRequest.class.isRecord()).isFalse();
         assertRecordComponents(DictionaryItemCreateRequest.class, "itemValue", "itemName", "sortOrder");

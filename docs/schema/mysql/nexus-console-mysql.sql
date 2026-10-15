@@ -102,6 +102,7 @@ CREATE TABLE IF NOT EXISTS nx_dictionary_type (
     dictionary_type_id  VARCHAR(32)  NOT NULL,
     type_code           VARCHAR(64)  NOT NULL,
     type_name           VARCHAR(128) NOT NULL,
+    type_name_i18n      TEXT,
     status              VARCHAR(32)  NOT NULL,
     sort_order          INT          NOT NULL,
     built_in            TINYINT(1)   NOT NULL,

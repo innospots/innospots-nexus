@@ -10,6 +10,7 @@ state:
   pageNo: 1
   pageSize: 20
   editingTypeId: ""
+  editingTypeCode: ""
 
 dataSources:
   types:
@@ -29,6 +30,15 @@ dataSources:
     request:
       method: GET
       url: /api/d/platform/dictionary-types/${state.editingTypeId}
+  typeItems:
+    type: http
+    autoLoad: false
+    request:
+      method: GET
+      url: /api/d/platform/dictionary-types/${state.editingTypeCode}/items
+      params:
+        pageNo: 1
+        pageSize: 200
 
 body:
   type: Page
@@ -65,26 +75,26 @@ body:
               - action: setState
                 params:
                   editingTypeId: ""
-              - action: reload
-                params:
-                  dataSource: editing
+                  editingTypeCode: ""
               - action: overlay.open
                 params:
                   overlay: &typeDrawer
                     type: drawer
                     title: "${state.editingTypeId == '' ? '新建字典类型' : '编辑字典类型'}"
-                    width: 720
+                    width: 840
                     content:
-                      type: Form
+                      type: DictionaryTypeSavePanel
                       props:
-                        name: dictionaryTypeForm
-                        layout: vertical
-                        initialValues: ${data.editing.data}
+                        mode: "${state.editingTypeId == '' ? 'create' : 'edit'}"
+                        typeData: ${data.editing}
+                        itemsData: ${data.typeItems.records}
                       events:
-                        onSubmit:
+                        onCancel:
+                          - action: overlay.close
+                        onSave:
                           - action: if
                             params:
-                              condition: ${state.editingTypeId == ''}
+                              condition: ${event.mode == 'create'}
                               then:
                                 - action: request
                                   params:
@@ -93,8 +103,7 @@ body:
                                     body:
                                       typeCode: ${event.typeCode}
                                       typeName: ${event.typeName}
-                                      securityRealm: ${event.securityRealm}
-                                      status: ${event.status}
+                                      items: ${event.items}
                               else:
                                 - action: request
                                   params:
@@ -102,7 +111,7 @@ body:
                                     url: /api/d/platform/dictionary-types/${state.editingTypeId}
                                     body:
                                       typeName: ${event.typeName}
-                                      status: ${event.status}
+                                      items: ${event.items}
                           - action: message
                             params:
                               messageType: success
@@ -111,77 +120,6 @@ body:
                           - action: reload
                             params:
                               dataSource: types
-                      children:
-                        - type: Field
-                          props:
-                            label: 类型编码
-                            required: true
-                          children:
-                            - type: Input
-                              props:
-                                name: typeCode
-                                disabled: ${state.editingTypeId != ''}
-                                rules:
-                                  - required: true
-                                    message: 请输入类型编码
-                        - type: Field
-                          props:
-                            label: 类型名称
-                            required: true
-                          children:
-                            - type: Input
-                              props:
-                                name: typeName
-                                rules:
-                                  - required: true
-                                    message: 请输入类型名称
-                        - type: Field
-                          props:
-                            label: 安全域
-                            required: true
-                          children:
-                            - type: Select
-                              props:
-                                name: securityRealm
-                                disabled: ${state.editingTypeId != ''}
-                                options:
-                                  - { label: 平台, value: PLATFORM }
-                                  - { label: 租户, value: TENANT }
-                                rules:
-                                  - required: true
-                                    message: 请选择安全域
-                        - type: Field
-                          props:
-                            label: 状态
-                          children:
-                            - type: Select
-                              props:
-                                name: status
-                                options:
-                                  - { label: 启用, value: ENABLED }
-                                  - { label: 禁用, value: DISABLED }
-                        - type: Alert
-                          props:
-                            variant: info
-                            message: 多语言名称、值类型、单值/多值及侧滑层内字典项整单保存为 PRD 目标能力；当前契约为 typeName 单字段，字典项请在类型编码就绪后通过 items 接口维护。
-                        - type: Flex
-                          props:
-                            justify: end
-                            gap: small
-                            className: mt-4
-                          children:
-                            - type: Button
-                              props:
-                                text: 取消
-                              events:
-                                onClick:
-                                  - action: overlay.close
-                            - type: Button
-                              props:
-                                text: 保存全部
-                                variant: primary
-                                submit: true
-                                htmlType: submit
     - type: Card
       children:
         - type: Form
@@ -254,7 +192,7 @@ body:
         - type: Table
           props:
             rowKey: dictionaryTypeId
-            dataSource: ${data.types.data.records}
+            dataSource: ${data.types.records}
             loading: ${dataStatus.types.loading}
             className: mt-4
             columns:
@@ -262,17 +200,24 @@ body:
                 cell:
                   type: Button
                   props:
-                    text: ${row.typeName}
                     variant: link
                     size: small
+                  children:
+                    - type: I18nText
+                      props:
+                        value: ${row.typeName}
                   events:
                     onClick: &editType
                       - action: setState
                         params:
                           editingTypeId: ${row.dictionaryTypeId}
+                          editingTypeCode: ${row.typeCode}
                       - action: reload
                         params:
                           dataSource: editing
+                      - action: reload
+                        params:
+                          dataSource: typeItems
                       - action: overlay.open
                         params:
                           overlay: *typeDrawer
@@ -293,6 +238,6 @@ body:
                     onClick: *editType
         - type: Text
           props:
-            text: 共 ${data.types.data.total} 种类型
+            text: 共 ${data.types.total} 种类型
             type: secondary
             className: mt-3

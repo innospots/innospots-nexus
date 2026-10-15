@@ -1,0 +1,422 @@
+dsl: "1.0"
+page:
+  id: tenant-detail
+  title: 租户详情
+  name: tenantDetail
+
+state:
+  editingTenant: false
+  editingEnterprise: false
+
+dataSources:
+  tenant:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/platform/tenants/${params.tenantId}
+  enterprise:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/platform/tenants/${params.tenantId}/enterprise
+
+lifecycle:
+  onShow:
+    - action: reload
+      params:
+        dataSource: tenant
+    - action: reload
+      params:
+        dataSource: enterprise
+    - action: form.setValues
+      params:
+        form: tenantEditForm
+        values: ${data.tenant}
+    - action: form.setValues
+      params:
+        form: enterpriseEditForm
+        values: ${data.enterprise}
+
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - label: 运营管理
+            href: /ops/organization/tenants
+          - label: 租户管理
+            href: /ops/organization/tenants
+          - label: "${data.tenant != null && data.tenant.tenantName != null ? data.tenant.tenantName : params.tenantId}"
+    - type: Button
+      props:
+        text: ← 返回租户列表
+        variant: link
+      events:
+        onClick:
+          - action: navigate
+            params: { to: /ops/organization/tenants }
+    - type: Flex
+      when: ${data.tenant != null}
+      props:
+        justify: space-between
+        align: start
+        className: mt-2
+      children:
+        - type: Flex
+          props:
+            direction: vertical
+            gap: small
+          children:
+            - type: Typography
+              props:
+                variant: h3
+                text: ${data.tenant.tenantName}
+            - type: Typography
+              props:
+                variant: muted
+                text: "编码 ${data.tenant.tenantCode} · 类型 ${data.tenant.tenantType == 'ENTERPRISE' ? '企业' : data.tenant.tenantType == 'TEAM' ? '团队' : data.tenant.tenantType == 'INDIVIDUAL' ? '个人' : data.tenant.tenantType} · 状态 ${data.tenant.status == 'ACTIVE' ? '● 正常' : data.tenant.status == 'SUSPENDED' ? '○ 暂停' : data.tenant.status == 'ARCHIVED' ? '○ 归档' : data.tenant.status}${data.tenant.planCode != null && data.tenant.planCode != '' ? ' · 套餐 ' + data.tenant.planCode : ''}"
+        - type: Flex
+          props:
+            gap: small
+          children:
+            - type: Button
+              when: ${data.tenant.status == 'ACTIVE'}
+              props:
+                text: 暂停
+              events:
+                onClick:
+                  - action: confirm
+                    params:
+                      title: 暂停租户
+                      content: 暂停后租户访问将被阻断，确定继续吗？
+                  - action: request
+                    params:
+                      method: PUT
+                      url: /api/d/platform/tenants/${params.tenantId}/status
+                      body:
+                        status: SUSPENDED
+                  - action: message
+                    params:
+                      messageType: success
+                      text: 租户已暂停
+                  - action: reload
+                    params:
+                      dataSource: tenant
+            - type: Button
+              when: ${data.tenant.status == 'SUSPENDED'}
+              props:
+                text: 恢复
+                variant: primary
+              events:
+                onClick:
+                  - action: confirm
+                    params:
+                      title: 恢复租户
+                      content: 确定恢复为正常运营状态吗？
+                  - action: request
+                    params:
+                      method: PUT
+                      url: /api/d/platform/tenants/${params.tenantId}/status
+                      body:
+                        status: ACTIVE
+                  - action: message
+                    params:
+                      messageType: success
+                      text: 租户已恢复
+                  - action: reload
+                    params:
+                      dataSource: tenant
+            - type: Button
+              when: ${data.tenant.status != 'ARCHIVED'}
+              props:
+                text: 归档
+                danger: true
+              events:
+                onClick:
+                  - action: confirm
+                    params:
+                      title: 归档租户
+                      content: 归档后租户不再活跃，确定继续吗？
+                  - action: request
+                    params:
+                      method: PUT
+                      url: /api/d/platform/tenants/${params.tenantId}/status
+                      body:
+                        status: ARCHIVED
+                  - action: message
+                    params:
+                      messageType: success
+                      text: 租户已归档
+                  - action: reload
+                    params:
+                      dataSource: tenant
+            - type: Button
+              props:
+                text: "${state.editingTenant ? '取消编辑' : '编辑租户'}"
+              events:
+                onClick:
+                  - action: if
+                    params:
+                      condition: ${state.editingTenant}
+                      then:
+                        - action: setState
+                          params:
+                            editingTenant: false
+                        - action: form.setValues
+                          params:
+                            form: tenantEditForm
+                            values: ${data.tenant}
+                      else:
+                        - action: setState
+                          params:
+                            editingTenant: true
+    - type: Card
+      when: ${data.tenant != null}
+      props:
+        className: mt-4
+      children:
+        - type: Text
+          props:
+            text: 租户信息
+            strong: true
+        - type: Descriptions
+          when: ${!state.editingTenant}
+          props:
+            className: mt-3
+            items:
+              - { label: 租户 ID, value: "${data.tenant.tenantId}" }
+              - { label: 租户编码, value: "${data.tenant.tenantCode}" }
+              - { label: 显示名称, value: "${data.tenant.tenantName}" }
+              - { label: 套餐, value: "${data.tenant.planCode != null ? data.tenant.planCode : '—'}" }
+              - label: 初始 Owner
+                value: "${data.tenant.ownerTenantUserId != null && data.tenant.ownerTenantUserId != '' ? data.tenant.ownerTenantUserId : '（未指定）'}"
+        - type: Form
+          when: ${state.editingTenant}
+          props:
+            name: tenantEditForm
+            layout: vertical
+            className: mt-3
+            initialValues: ${data.tenant}
+          events:
+            onSubmit:
+              - action: request
+                params:
+                  method: PUT
+                  url: /api/d/platform/tenants/${params.tenantId}
+                  body:
+                    tenantName: ${event.tenantName}
+                    planCode: ${event.planCode}
+                    ownerTenantUserId: ${event.ownerTenantUserId}
+              - action: message
+                params:
+                  messageType: success
+                  text: 租户资料已保存
+              - action: setState
+                params:
+                  editingTenant: false
+              - action: reload
+                params:
+                  dataSource: tenant
+          children:
+            - type: Field
+              props:
+                label: 显示名称
+                required: true
+              children:
+                - type: Input
+                  props:
+                    name: tenantName
+                    rules:
+                      - required: true
+                        message: 请输入显示名称
+            - type: Grid
+              props:
+                columns: 2
+                gap: 16
+              children:
+                - type: Field
+                  props:
+                    label: 套餐
+                  children:
+                    - type: Input
+                      props:
+                        name: planCode
+                - type: Field
+                  props:
+                    label: 初始 Owner
+                  children:
+                    - type: Input
+                      props:
+                        name: ownerTenantUserId
+            - type: Flex
+              props:
+                justify: end
+                gap: small
+              children:
+                - type: Button
+                  props:
+                    text: 保存修改
+                    variant: primary
+                    submit: true
+                    htmlType: submit
+    - type: Card
+      props:
+        className: mt-4
+      children:
+        - type: Flex
+          props:
+            justify: space-between
+            align: center
+          children:
+            - type: Text
+              props:
+                text: 企业档案
+                strong: true
+            - type: Button
+              props:
+                text: "${state.editingEnterprise ? '取消' : '编辑档案'}"
+                variant: link
+                size: small
+              events:
+                onClick:
+                  - action: if
+                    params:
+                      condition: ${state.editingEnterprise}
+                      then:
+                        - action: setState
+                          params:
+                            editingEnterprise: false
+                        - action: form.setValues
+                          params:
+                            form: enterpriseEditForm
+                            values: ${data.enterprise}
+                      else:
+                        - action: setState
+                          params:
+                            editingEnterprise: true
+        - type: Descriptions
+          when: ${!state.editingEnterprise && data.enterprise != null}
+          props:
+            className: mt-3
+            items:
+              - { label: 企业 ID, value: "${data.enterprise.enterpriseId}" }
+              - { label: 法定名称, value: "${data.enterprise.legalName}" }
+              - { label: 信用代码, value: "${data.enterprise.creditCode != null ? data.enterprise.creditCode : '—'}" }
+              - { label: 行业, value: "${data.enterprise.industry != null ? data.enterprise.industry : '—'}" }
+              - label: 联系人
+                value: "${(data.enterprise.contactName != null ? data.enterprise.contactName : '') + (data.enterprise.contactPhone != null ? ' · ' + data.enterprise.contactPhone : '') + (data.enterprise.contactEmail != null ? ' · ' + data.enterprise.contactEmail : '')}"
+              - { label: 地址, value: "${data.enterprise.address != null ? data.enterprise.address : '—'}" }
+        - type: Alert
+          when: ${!state.editingEnterprise && (data.enterprise == null || data.enterprise.enterpriseId == null)}
+          props:
+            className: mt-3
+            variant: info
+            message: 尚未配置企业法定档案，可点击「编辑档案」补录。
+        - type: Form
+          when: ${state.editingEnterprise}
+          props:
+            name: enterpriseEditForm
+            layout: vertical
+            className: mt-3
+            initialValues: ${data.enterprise}
+          events:
+            onSubmit:
+              - action: request
+                params:
+                  method: PUT
+                  url: /api/d/platform/tenants/${params.tenantId}/enterprise
+                  body:
+                    legalName: ${event.legalName}
+                    creditCode: ${event.creditCode}
+                    industry: ${event.industry}
+                    contactName: ${event.contactName}
+                    contactPhone: ${event.contactPhone}
+                    contactEmail: ${event.contactEmail}
+                    address: ${event.address}
+                    extra: ${event.extra}
+              - action: message
+                params:
+                  messageType: success
+                  text: 企业档案已保存
+              - action: setState
+                params:
+                  editingEnterprise: false
+              - action: reload
+                params:
+                  dataSource: enterprise
+              - action: reload
+                params:
+                  dataSource: tenant
+          children:
+            - type: Field
+              props:
+                label: 法定名称
+                required: true
+              children:
+                - type: Input
+                  props:
+                    name: legalName
+                    rules:
+                      - required: true
+                        message: 请输入法定名称
+            - type: Grid
+              props:
+                columns: 2
+                gap: 16
+              children:
+                - type: Field
+                  props:
+                    label: 信用代码
+                  children:
+                    - type: Input
+                      props:
+                        name: creditCode
+                - type: Field
+                  props:
+                    label: 行业
+                  children:
+                    - type: Input
+                      props:
+                        name: industry
+                - type: Field
+                  props:
+                    label: 联系人
+                  children:
+                    - type: Input
+                      props:
+                        name: contactName
+                - type: Field
+                  props:
+                    label: 电话
+                  children:
+                    - type: Input
+                      props:
+                        name: contactPhone
+                - type: Field
+                  props:
+                    label: 邮箱
+                  children:
+                    - type: Input
+                      props:
+                        name: contactEmail
+            - type: Field
+              props:
+                label: 地址
+              children:
+                - type: Textarea
+                  props:
+                    name: address
+            - type: Flex
+              props:
+                justify: end
+                gap: small
+              children:
+                - type: Button
+                  props:
+                    text: 保存档案
+                    variant: primary
+                    submit: true
+                    htmlType: submit

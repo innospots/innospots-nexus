@@ -1,0 +1,256 @@
+dsl: "1.0"
+page:
+  id: platform-user-detail
+  title: 平台用户详情
+  name: platformUserDetail
+
+state:
+  editing: false
+
+dataSources:
+  user:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/platform/users/${params.platformUserId}
+
+lifecycle:
+  onLoad:
+    - action: form.setValues
+      params:
+        form: platformUserEditForm
+        values: ${data.user}
+  onShow:
+    - action: reload
+      params:
+        dataSource: user
+    - action: form.setValues
+      params:
+        form: platformUserEditForm
+        values: ${data.user}
+
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - label: 运营管理
+            href: /ops/platform-users
+          - label: 平台用户
+            href: /ops/platform-users
+          - label: "${data.user != null && data.user.loginName != null ? data.user.loginName : params.platformUserId}"
+    - type: Button
+      props:
+        text: ← 返回用户列表
+        variant: link
+      events:
+        onClick:
+          - action: navigate
+            params: { to: /ops/platform-users }
+    - type: Flex
+      when: ${data.user != null}
+      props:
+        justify: space-between
+        align: start
+        className: mt-2
+      children:
+        - type: Flex
+          props:
+            direction: vertical
+            gap: small
+          children:
+            - type: Typography
+              props:
+                variant: h3
+                text: "${data.user.displayName != null && data.user.displayName != '' ? data.user.displayName : data.user.loginName}"
+            - type: Typography
+              props:
+                variant: muted
+                text: "登录名 ${data.user.loginName} · 状态 ${data.user.status == 'ACTIVE' ? '● 正常' : data.user.status == 'PENDING_APPROVAL' ? '○ 待审核' : data.user.status == 'DISABLED' ? '○ 禁用' : data.user.status}${data.user.employeeNo != null && data.user.employeeNo != '' ? ' · 员工编号 ' + data.user.employeeNo : ''}"
+            - type: Alert
+              when: ${data.user.status == 'PENDING_APPROVAL'}
+              props:
+                variant: info
+                message: 该用户处于待审核状态，请通过注册审批流程处理后再启用为正常状态。
+        - type: Flex
+          props:
+            gap: small
+          children:
+            - type: Button
+              when: ${data.user.status == 'ACTIVE' || data.user.status == 'DISABLED'}
+              props:
+                text: "${data.user.status == 'ACTIVE' ? '禁用' : '启用'}"
+              events:
+                onClick:
+                  - action: confirm
+                    params:
+                      title: 确认变更状态
+                      content: 确定要变更该用户的启用状态吗？
+                  - action: request
+                    params:
+                      method: PUT
+                      url: /api/d/platform/users/${params.platformUserId}/status
+                      body:
+                        status: "${data.user.status == 'ACTIVE' ? 'DISABLED' : 'ACTIVE'}"
+                  - action: message
+                    params:
+                      messageType: success
+                      text: 状态已更新
+                  - action: reload
+                    params:
+                      dataSource: user
+            - type: Button
+              props:
+                text: 重置密码
+              events:
+                onClick:
+                  - action: message
+                    params:
+                      messageType: info
+                      text: 管理员重置密码 API 待扩展；可引导用户走找回密码流程。
+            - type: Button
+              props:
+                text: "${state.editing ? '取消编辑' : '编辑'}"
+                variant: primary
+              events:
+                onClick:
+                  - action: if
+                    params:
+                      condition: ${state.editing}
+                      then:
+                        - action: setState
+                          params:
+                            editing: false
+                        - action: form.setValues
+                          params:
+                            form: platformUserEditForm
+                            values: ${data.user}
+                      else:
+                        - action: setState
+                          params:
+                            editing: true
+    - type: Card
+      when: ${data.user != null}
+      props:
+        className: mt-4
+      children:
+        - type: Text
+          props:
+            text: 基本信息
+            strong: true
+        - type: Descriptions
+          when: ${!state.editing}
+          props:
+            className: mt-3
+            items:
+              - { label: 用户 ID, value: "${data.user.platformUserId}" }
+              - { label: 登录名, value: "${data.user.loginName}" }
+              - { label: 显示名称, value: "${data.user.displayName != null ? data.user.displayName : '—'}" }
+              - { label: 邮箱, value: "${data.user.email != null ? data.user.email : '—'}" }
+              - { label: 手机, value: "${data.user.mobile != null ? data.user.mobile : '—'}" }
+              - { label: 员工编号, value: "${data.user.employeeNo != null ? data.user.employeeNo : '—'}" }
+        - type: Form
+          when: ${state.editing}
+          props:
+            name: platformUserEditForm
+            layout: vertical
+            className: mt-3
+            initialValues: ${data.user}
+          events:
+            onSubmit:
+              - action: request
+                params:
+                  method: PUT
+                  url: /api/d/platform/users/${params.platformUserId}
+                  body:
+                    displayName: ${event.displayName}
+                    email: ${event.email}
+                    mobile: ${event.mobile}
+                    employeeNo: ${event.employeeNo}
+              - action: message
+                params:
+                  messageType: success
+                  text: 已保存修改
+              - action: setState
+                params:
+                  editing: false
+              - action: reload
+                params:
+                  dataSource: user
+          children:
+            - type: Field
+              props:
+                label: 显示名称
+              children:
+                - type: Input
+                  props:
+                    name: displayName
+            - type: Grid
+              props:
+                columns: 2
+                gap: 16
+              children:
+                - type: Field
+                  props:
+                    label: 邮箱
+                  children:
+                    - type: Input
+                      props:
+                        name: email
+                - type: Field
+                  props:
+                    label: 手机
+                  children:
+                    - type: Input
+                      props:
+                        name: mobile
+            - type: Field
+              props:
+                label: 员工编号
+              children:
+                - type: Input
+                  props:
+                    name: employeeNo
+            - type: Flex
+              props:
+                justify: end
+                gap: small
+              children:
+                - type: Button
+                  props:
+                    text: 保存修改
+                    variant: primary
+                    submit: true
+                    htmlType: submit
+    - type: Card
+      when: ${data.user != null}
+      props:
+        className: mt-4
+      children:
+        - type: Text
+          props:
+            text: 登录信息
+            strong: true
+        - type: Descriptions
+          props:
+            className: mt-3
+            items:
+              - label: 上次登录
+                value: "${data.user.lastLoginTime != null ? data.user.lastLoginTime + (data.user.lastLoginIp != null ? ' · ' + data.user.lastLoginIp : '') : '—'}"
+              - { label: 创建时间, value: "${data.user.createdAt != null ? data.user.createdAt : '—'}" }
+    - type: Card
+      when: ${data.user != null}
+      props:
+        className: mt-4
+      children:
+        - type: Text
+          props:
+            text: 角色（Console）
+            strong: true
+        - type: Typography
+          props:
+            variant: muted
+            text: 已绑定平台域角色请在「角色管理」中配置；本页只读展示待角色绑定 API 对接。
+            className: mt-2

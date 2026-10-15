@@ -5,7 +5,6 @@ page:
   name: roleDetailMembers
 
 state:
-  roleId: ${route.params.roleId}
   subjectType: USER
   input: ""
   pageNo: 1
@@ -17,18 +16,27 @@ dataSources:
     autoLoad: true
     request:
       method: GET
-      url: /api/d/platform/roles/${state.roleId}
+      url: /api/d/platform/roles/${params.roleId}
   bindings:
     type: http
     autoLoad: true
     request:
       method: GET
-      url: /api/d/platform/roles/${state.roleId}/bindings
+      url: /api/d/platform/roles/${params.roleId}/bindings
       params:
         subjectType: ${state.subjectType}
         input: ${state.input}
         pageNo: ${state.pageNo}
         pageSize: ${state.pageSize}
+
+lifecycle:
+  onShow:
+    - action: reload
+      params:
+        dataSource: role
+    - action: reload
+      params:
+        dataSource: bindings
 
 body:
   type: Page
@@ -38,7 +46,7 @@ body:
         items:
           - label: 角色管理
             href: /system/roles
-          - label: ${data.role.data.roleName}
+          - label: "${data.role != null && data.role.roleName != null ? data.role.roleName : params.roleId}"
           - label: 成员列表
     - type: Flex
       props:
@@ -54,6 +62,7 @@ body:
               - action: navigate
                 params: { to: /system/roles }
         - type: Button
+          when: ${data.role != null && data.role.roleName != null}
           props:
             text: + 添加成员
             variant: primary
@@ -62,13 +71,13 @@ body:
               - action: overlay.open
                 params:
                   overlay:
-                    type: dialog
-                    title: 添加到「${data.role.data.roleName}」
+                    type: modal
+                    title: "添加到「${data.role.roleName}」"
                     width: 720
                     content:
                       type: Text
                       props:
-                        text: 成员目录展示需 UserDirectory 补充；请在后端就绪后对接批量添加接口 POST /api/d/platform/roles/${state.roleId}/bindings。
+                        text: 成员目录展示需 UserDirectory 补充；请在后端就绪后对接批量添加接口 POST /api/d/platform/roles/${params.roleId}/bindings。
     - type: Tabs
       props:
         activeKey: members
@@ -84,14 +93,14 @@ body:
               then:
                 - action: navigate
                   params:
-                    to: /system/roles/${state.roleId}
+                    to: /system/roles/${params.roleId}
           - action: if
             params:
               condition: ${event == 'permissions'}
               then:
                 - action: navigate
                   params:
-                    to: /system/roles/${state.roleId}/permissions
+                    to: /system/roles/${params.roleId}/permissions
     - type: ChipFilter
       props:
         mode: single
@@ -146,7 +155,7 @@ body:
         - type: Table
           props:
             rowKey: bindingId
-            dataSource: ${data.bindings.data.records}
+            dataSource: ${data.bindings.records}
             loading: ${dataStatus.bindings.loading}
             className: mt-4
             columns:
@@ -171,7 +180,7 @@ body:
                       - action: request
                         params:
                           method: DELETE
-                          url: /api/d/platform/roles/${state.roleId}/bindings/${row.bindingId}
+                          url: /api/d/platform/roles/${params.roleId}/bindings/${row.bindingId}
                       - action: message
                         params:
                           messageType: success
@@ -181,6 +190,6 @@ body:
                           dataSource: bindings
         - type: Text
           props:
-            text: 共 ${data.bindings.data.total} 条
+            text: 共 ${data.bindings.total} 条
             type: secondary
             className: mt-3

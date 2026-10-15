@@ -7,6 +7,7 @@ import com.innospots.nexus.console.dictionary.domain.entity.DictionaryTypeEntity
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryItemVo;
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeOptionVo;
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeVo;
+import com.innospots.nexus.console.dictionary.support.DictionaryTypeNames;
 
 /**
  * 字典实体与 VO 的转换。
@@ -22,7 +23,7 @@ public final class DictionaryConverter {
         return new DictionaryTypeVo(
                 entity.getDictionaryTypeId(),
                 entity.getTypeCode(),
-                entity.getTypeName(),
+                DictionaryTypeNames.read(entity),
                 SecurityRealm.valueOf(entity.getSecurityRealm()),
                 BasicStatus.valueOf(entity.getStatus()),
                 entity.getSortOrder(),
@@ -35,7 +36,7 @@ public final class DictionaryConverter {
         return new DictionaryTypeOptionVo(
                 entity.getDictionaryTypeId(),
                 entity.getTypeCode(),
-                entity.getTypeName());
+                DictionaryTypeNames.displayLabel(entity));
     }
 
     public DictionaryItemVo toItemVo(DictionaryItemEntity entity) {

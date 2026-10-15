@@ -44,32 +44,53 @@ async function forward(request: Request, parts: string[]): Promise<Response> {
     return emptyData(request); // 上游不可达 → 空数据
   }
   const upstreamType = upstream.headers.get("content-type") ?? "";
-  if (upstream.status === 404 || !upstreamType.includes("json")) {
-    return emptyData(request); // 接口不存在 / 命中前端兜底 HTML → 空数据
-  }
   const body = await upstream.arrayBuffer();
   const resHeaders: Record<string, string> = {
     "cache-control": "no-store",
-    "content-type": upstreamType,
     ...corsHeaders(request),
   };
+  if (upstream.status === 404) {
+    return emptyData(request); // 接口不存在 → 空数据（本地无后端占位）
+  }
+  if (!upstreamType.includes("json")) {
+    if (upstream.status >= 400) {
+      const message =
+        new TextDecoder().decode(body).trim() || upstream.statusText;
+      return Response.json(
+        { code: upstream.status, message },
+        {
+          status: upstream.status,
+          headers: { ...resHeaders, "content-type": "application/json" },
+        },
+      );
+    }
+    return emptyData(request); // 命中前端兜底 HTML 等 → 空数据
+  }
+  resHeaders["content-type"] = upstreamType;
   return new Response(body, { status: upstream.status, headers: resHeaders });
+}
+
+/** 平台匿名自助 API（登录、注册、邀请等），与 {@code PlatformConstant#PUBLIC_PREFIX} 对齐。 */
+function isAnonymousPlatformPublicPath(parts: string[]): boolean {
+  return parts.length >= 2 && parts[0] === "platform" && parts[1] === "public";
 }
 
 async function handle(
   request: Request,
   context: RouteContext<"/api/d/[...parts]">,
 ) {
-  const store = await cookies();
-  const user = findUserBySession(store.get(SESSION_COOKIE)?.value);
-  if (!user) {
-    return Response.json(
-      { error: "未登录" },
-      { status: 401, headers: corsHeaders(request) },
-    );
+  const { parts } = await context.params;
+  if (!isAnonymousPlatformPublicPath(parts)) {
+    const store = await cookies();
+    const user = findUserBySession(store.get(SESSION_COOKIE)?.value);
+    if (!user) {
+      return Response.json(
+        { error: "未登录" },
+        { status: 401, headers: corsHeaders(request) },
+      );
+    }
   }
 
-  const { parts } = await context.params;
   return forward(request, parts);
 }
 

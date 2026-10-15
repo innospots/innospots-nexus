@@ -190,7 +190,7 @@ body:
         - type: Table
           props:
             rowKey: logId
-            dataSource: ${data.logs.data.records}
+            dataSource: ${data.logs.records}
             loading: ${dataStatus.logs.loading}
             className: mt-4
             columns:
@@ -220,6 +220,6 @@ body:
                           to: /system/audit-logs/${row.logId}
         - type: Text
           props:
-            text: 共 ${data.logs.data.total} 条
+            text: 共 ${data.logs.total} 条
             type: secondary
             className: mt-3

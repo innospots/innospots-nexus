@@ -1,0 +1,9 @@
+dsl: "1.0"
+page:
+  id: login
+  title: 登录
+  name: login
+  description: 运营管理平台登录
+
+body:
+  type: PlatformLoginForm

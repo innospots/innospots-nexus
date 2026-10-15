@@ -4,8 +4,11 @@ import java.time.LocalDateTime;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.innospots.nexus.base.domain.enums.BasicStatus;
+import com.innospots.nexus.base.i18n.I18nObject;
 import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
+import com.innospots.nexus.console.dictionary.json.DictionaryTypeI18nSerializer;
 
 /**
  * 管理控制台字典类型视图。
@@ -28,8 +31,9 @@ public record DictionaryTypeVo(
         String dictionaryTypeId,
         @Schema(description = "稳定的类型编码", required = true)
         String typeCode,
-        @Schema(description = "显示名称", required = true)
-        String typeName,
+        @Schema(description = "多语言显示名称", required = true)
+        @JsonSerialize(using = DictionaryTypeI18nSerializer.class)
+        I18nObject typeName,
         @Schema(description = "PLATFORM 或 TENANT", required = true)
         SecurityRealm securityRealm,
         @Schema(description = "生命周期状态", required = true)

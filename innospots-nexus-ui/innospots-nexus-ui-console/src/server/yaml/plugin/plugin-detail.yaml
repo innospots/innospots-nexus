@@ -4,16 +4,19 @@ page:
   title: 插件详情
   name: pluginDetail
 
-state:
-  pluginId: ${route.params.pluginId}
-
 dataSources:
-  plugin:
+  pluginInfo:
     type: http
     autoLoad: true
     request:
       method: GET
-      url: /api/d/nexus/plugins/${state.pluginId}
+      url: /api/d/nexus/plugins/${route.params.pluginId}
+
+lifecycle:
+  onShow:
+    - action: reload
+      params:
+        dataSource: pluginInfo
 
 body:
   type: Page
@@ -23,7 +26,7 @@ body:
         items:
           - label: 插件管理
             href: /system/plugins
-          - label: ${state.pluginId}
+          - label: "${data.pluginInfo != null && data.pluginInfo.pluginName != null ? data.pluginInfo.pluginName : route.params.pluginId}"
     - type: Button
       props:
         text: ← 返回插件列表
@@ -33,6 +36,7 @@ body:
           - action: navigate
             params: { to: /system/plugins }
     - type: Card
+      when: ${data.pluginInfo != null}
       props:
         className: mt-2
       children:
@@ -49,28 +53,32 @@ body:
                 - type: Typography
                   props:
                     variant: h3
-                    text: ${state.pluginId}
+                    text: "${data.pluginInfo.pluginName != null ? data.pluginInfo.pluginName : data.pluginInfo.pluginId}"
                 - type: Typography
                   props:
                     variant: muted
-                    text: 版本 ${data.plugin.data.version}
+                    text: ${route.params.pluginId}
+                - type: Typography
+                  props:
+                    variant: muted
+                    text: 版本 ${data.pluginInfo.version}
                 - type: Flex
                   props:
                     gap: small
                   children:
                     - type: Badge
                       props:
-                        text: "${data.plugin.data.installed ? '已安装' : '未安装'}"
+                        text: "${data.pluginInfo.installed ? '已安装' : '未安装'}"
                     - type: Badge
-                      when: ${data.plugin.data.installed}
+                      when: ${data.pluginInfo.installed}
                       props:
-                        text: ${data.plugin.data.runtimeState}
+                        text: ${data.pluginInfo.runtimeState}
             - type: Flex
               props:
                 gap: small
               children:
                 - type: Button
-                  when: ${!data.plugin.data.installed}
+                  when: ${!data.pluginInfo.installed}
                   props:
                     text: 安装
                     variant: primary
@@ -83,12 +91,12 @@ body:
                       - action: request
                         params:
                           method: POST
-                          url: /api/d/nexus/plugins/${state.pluginId}/install
+                          url: /api/d/nexus/plugins/${route.params.pluginId}/install
                       - action: reload
                         params:
-                          dataSource: plugin
+                          dataSource: pluginInfo
                 - type: Button
-                  when: ${data.plugin.data.installed && data.plugin.data.desiredEnabled}
+                  when: ${data.pluginInfo.installed && data.pluginInfo.desiredEnabled}
                   props:
                     text: 停用
                     variant: primary
@@ -101,12 +109,12 @@ body:
                       - action: request
                         params:
                           method: POST
-                          url: /api/d/nexus/plugins/${state.pluginId}/disable
+                          url: /api/d/nexus/plugins/${route.params.pluginId}/disable
                       - action: reload
                         params:
-                          dataSource: plugin
+                          dataSource: pluginInfo
                 - type: Button
-                  when: ${data.plugin.data.installed && !data.plugin.data.desiredEnabled}
+                  when: ${data.pluginInfo.installed && !data.pluginInfo.desiredEnabled}
                   props:
                     text: 启用
                     variant: primary
@@ -115,12 +123,12 @@ body:
                       - action: request
                         params:
                           method: POST
-                          url: /api/d/nexus/plugins/${state.pluginId}/enable
+                          url: /api/d/nexus/plugins/${route.params.pluginId}/enable
                       - action: reload
                         params:
-                          dataSource: plugin
+                          dataSource: pluginInfo
                 - type: Button
-                  when: ${data.plugin.data.lastError != null && data.plugin.data.lastError != ''}
+                  when: ${data.pluginInfo.lastError != null && data.pluginInfo.lastError != ''}
                   props:
                     text: 重试
                   events:
@@ -128,11 +136,12 @@ body:
                       - action: request
                         params:
                           method: POST
-                          url: /api/d/nexus/plugins/${state.pluginId}/retry
+                          url: /api/d/nexus/plugins/${route.params.pluginId}/retry
                       - action: reload
                         params:
-                          dataSource: plugin
+                          dataSource: pluginInfo
     - type: Card
+      when: ${data.pluginInfo != null}
       props:
         className: mt-4
       children:
@@ -143,18 +152,29 @@ body:
         - type: Descriptions
           props:
             className: mt-2
+            bordered: true
+            column: 2
             items:
-              - { label: 插件 ID, children: "${data.plugin.data.pluginId}" }
-              - { label: 版本号, children: "${data.plugin.data.version}" }
-              - { label: 来源类型, children: "${data.plugin.data.sourceType}" }
-              - { label: 安装日期, children: "${data.plugin.data.installedAt}" }
-              - { label: 最近发现, children: "${data.plugin.data.lastDiscoveredAt}" }
+              - { label: 插件 ID, value: "${data.pluginInfo.pluginId}" }
+              - { label: 展示名称, value: "${data.pluginInfo.pluginName != null ? data.pluginInfo.pluginName : '—'}" }
+              - { label: 版本号, value: "${data.pluginInfo.version}" }
+              - { label: 来源类型, value: "${data.pluginInfo.sourceType != null ? data.pluginInfo.sourceType : '—'}" }
+              - { label: 来源位置, value: "${data.pluginInfo.sourceLocation != null ? data.pluginInfo.sourceLocation : '—'}" }
+              - { label: 运行状态, value: "${data.pluginInfo.runtimeState != null ? data.pluginInfo.runtimeState : '—'}" }
+              - { label: 安装日期, value: "${data.pluginInfo.installedAt != null ? data.pluginInfo.installedAt : '—'}" }
+              - { label: 最近发现, value: "${data.pluginInfo.lastDiscoveredAt != null ? data.pluginInfo.lastDiscoveredAt : '—'}" }
     - type: Card
-      when: ${data.plugin.data.lastError != null && data.plugin.data.lastError != ''}
+      when: ${data.pluginInfo != null && data.pluginInfo.lastError != null && data.pluginInfo.lastError != ''}
       props:
         className: mt-4
       children:
         - type: Alert
           props:
             variant: error
-            message: ${data.plugin.data.lastError}
+            message: ${data.pluginInfo.lastError}
+    - type: Alert
+      when: ${dataStatus.pluginInfo.error != null}
+      props:
+        className: mt-4
+        variant: error
+        message: 加载插件详情失败，请确认插件标识与后端版本是否正确。

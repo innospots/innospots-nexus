@@ -1,0 +1,297 @@
+dsl: "1.0"
+page:
+  id: platform-invite-list
+  title: 邀请列表
+  name: platformInviteList
+
+state:
+  input: ""
+  status: ""
+  pageNo: 1
+  pageSize: 20
+  detailInviteId: ""
+
+dataSources:
+  invites:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/platform/invites
+      params:
+        input: ${state.input}
+        status: ${state.status}
+        pageNo: ${state.pageNo}
+        pageSize: ${state.pageSize}
+  inviteDetail:
+    type: http
+    autoLoad: false
+    request:
+      method: GET
+      url: /api/d/platform/invites/${state.detailInviteId}
+
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - label: 运营管理
+          - label: 平台用户
+          - label: 邀请
+    - type: Tabs
+      props:
+        activeKey: invites
+        items:
+          - { key: users, label: 用户列表 }
+          - { key: invites, label: 邀请 }
+          - { key: access, label: 注册审批 }
+      events:
+        onChange:
+          - action: if
+            params:
+              condition: ${event == 'users'}
+              then:
+                - action: navigate
+                  params: { to: /ops/platform-users }
+          - action: if
+            params:
+              condition: ${event == 'access'}
+              then:
+                - action: navigate
+                  params: { to: /ops/platform-users/access-requests }
+    - type: Flex
+      props:
+        justify: space-between
+        align: center
+        className: mt-2
+      children:
+        - type: Flex
+          props:
+            direction: vertical
+            gap: 2
+          children:
+            - type: Typography
+              props:
+                variant: h3
+                text: 邀请
+            - type: Typography
+              props:
+                variant: muted
+                text: 查看、重发或撤销平台用户邀请；已接受的可进入用户详情。
+        - type: Button
+          props:
+            text: + 添加用户
+            variant: primary
+          events:
+            onClick:
+              - action: navigate
+                params:
+                  to: /ops/platform-users/create
+    - type: Card
+      children:
+        - type: Form
+          props:
+            name: platformInviteSearch
+            layout: inline
+          events:
+            onSubmit:
+              - action: setState
+                params:
+                  input: ${event.input}
+                  status: ${event.status}
+                  pageNo: 1
+              - action: reload
+                params:
+                  dataSource: invites
+          children:
+            - type: Field
+              props:
+                label: 邮箱/手机
+              children:
+                - type: Input
+                  props:
+                    name: input
+                    placeholder: 模糊匹配联系方式
+            - type: Field
+              props:
+                label: 状态
+              children:
+                - type: Select
+                  props:
+                    name: status
+                    placeholder: 全部
+                    allowClear: true
+                    options:
+                      - { label: 全部, value: "" }
+                      - { label: 待接受, value: PENDING }
+                      - { label: 已接受, value: ACCEPTED }
+                      - { label: 已撤销, value: REVOKED }
+                      - { label: 已过期, value: EXPIRED }
+            - type: Field
+              props:
+                label: " "
+              children:
+                - type: Flex
+                  props:
+                    gap: small
+                  children:
+                    - type: Button
+                      props:
+                        text: 查询
+                        submit: true
+                        htmlType: submit
+                    - type: Button
+                      props:
+                        text: 重置
+                      events:
+                        onClick:
+                          - action: form.setValues
+                            params:
+                              form: platformInviteSearch
+                              values:
+                                input: ""
+                                status: ""
+                          - action: setState
+                            params:
+                              input: ""
+                              status: ""
+                              pageNo: 1
+                          - action: reload
+                            params:
+                              dataSource: invites
+        - type: Table
+          props:
+            rowKey: inviteId
+            dataSource: ${data.invites.records}
+            loading: ${dataStatus.invites.loading}
+            className: mt-4
+            columns:
+              - title: 目标联系
+                cell:
+                  type: Text
+                  props:
+                    text: "${row.email != null && row.email != '' ? row.email : (row.mobile != null && row.mobile != '' ? row.mobile : '—')}"
+              - title: 登录名
+                dataIndex: loginName
+              - title: 角色模板
+                dataIndex: defaultRoleCodes
+              - title: 状态
+                cell:
+                  type: Text
+                  props:
+                    text: "${row.status == 'PENDING' ? '待接受' : row.status == 'ACCEPTED' ? '已接受' : row.status == 'REVOKED' ? '已撤销' : row.status == 'EXPIRED' ? '已过期' : row.status}"
+              - title: 过期时间
+                dataIndex: expiresAt
+              - title: 操作
+                cell:
+                  type: Flex
+                  props:
+                    gap: small
+                  children:
+                    - type: Button
+                      when: ${row.status == 'PENDING'}
+                      props:
+                        text: 重发
+                        variant: link
+                        size: small
+                      events:
+                        onClick:
+                          - action: request
+                            params:
+                              method: POST
+                              url: /api/d/platform/invites/${row.inviteId}/resend
+                          - action: message
+                            params:
+                              messageType: success
+                              text: 邀请已重发
+                          - action: reload
+                            params:
+                              dataSource: invites
+                    - type: Button
+                      when: ${row.status == 'PENDING'}
+                      props:
+                        text: 撤销
+                        variant: link
+                        size: small
+                        danger: true
+                      events:
+                        onClick:
+                          - action: confirm
+                            params:
+                              title: 撤销邀请
+                              content: 未接受的邀请将立即失效，确定撤销吗？
+                          - action: request
+                            params:
+                              method: POST
+                              url: /api/d/platform/invites/${row.inviteId}/revoke
+                          - action: message
+                            params:
+                              messageType: success
+                              text: 邀请已撤销
+                          - action: reload
+                            params:
+                              dataSource: invites
+                    - type: Button
+                      when: ${row.status == 'ACCEPTED' && row.platformUserId != null && row.platformUserId != ''}
+                      props:
+                        text: 详情
+                        variant: link
+                        size: small
+                      events:
+                        onClick:
+                          - action: navigate
+                            params:
+                              to: /ops/platform-users/${row.platformUserId}
+                    - type: Button
+                      when: ${!(row.status == 'ACCEPTED' && row.platformUserId != null && row.platformUserId != '')}
+                      props:
+                        text: 详情
+                        variant: link
+                        size: small
+                      events:
+                        onClick:
+                          - action: setState
+                            params:
+                              detailInviteId: ${row.inviteId}
+                          - action: reload
+                            params:
+                              dataSource: inviteDetail
+                          - action: overlay.open
+                            params:
+                              overlay:
+                                type: drawer
+                                title: 邀请详情
+                                width: 520
+                                content:
+                                  type: Flex
+                                  props:
+                                    direction: vertical
+                                    gap: 3
+                                  children:
+                                    - type: Descriptions
+                                      when: ${data.inviteDetail != null}
+                                      props:
+                                        items:
+                                          - { label: 邀请 ID, value: "${data.inviteDetail.inviteId}" }
+                                          - label: 联系方式
+                                            value: "${data.inviteDetail.email != null && data.inviteDetail.email != '' ? data.inviteDetail.email : data.inviteDetail.mobile}"
+                                          - { label: 预置登录名, value: "${data.inviteDetail.loginName != null ? data.inviteDetail.loginName : '—'}" }
+                                          - { label: 默认角色, value: "${data.inviteDetail.defaultRoleCodes != null ? data.inviteDetail.defaultRoleCodes : '—'}" }
+                                          - { label: 状态, value: "${data.inviteDetail.status}" }
+                                          - { label: 交付方式, value: "${data.inviteDetail.deliveryMode != null ? data.inviteDetail.deliveryMode : '—'}" }
+                                          - { label: 邀请码, value: "${data.inviteDetail.inviteCode != null ? data.inviteDetail.inviteCode : '—'}" }
+                                          - { label: 邀请链接, value: "${data.inviteDetail.inviteLink != null ? data.inviteDetail.inviteLink : '—'}" }
+                                          - { label: 过期时间, value: "${data.inviteDetail.expiresAt != null ? data.inviteDetail.expiresAt : '—'}" }
+                                          - { label: 创建时间, value: "${data.inviteDetail.createdAt != null ? data.inviteDetail.createdAt : '—'}" }
+                                    - type: Button
+                                      props:
+                                        text: 关闭
+                                      events:
+                                        onClick:
+                                          - action: overlay.close
+        - type: Text
+          props:
+            text: 共 ${data.invites.total} 条邀请
+            type: secondary
+            className: mt-3

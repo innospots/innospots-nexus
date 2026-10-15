@@ -41,10 +41,10 @@ body:
         - type: Typography
           props:
             variant: h3
-            text: ${data.log.data.operationType}
+            text: ${data.log.operationType}
         - type: Badge
           props:
-            text: ${data.log.data.result}
+            text: ${data.log.result}
     - type: Card
       props:
         className: mt-4
@@ -57,13 +57,13 @@ body:
           props:
             className: mt-2
             items:
-              - { label: 操作者, children: "${data.log.data.operatorName}" }
-              - { label: 用户 ID, children: "${data.log.data.operatorId}" }
-              - { label: 安全域, children: "${data.log.data.securityRealm}" }
-              - { label: 操作类型, children: "${data.log.data.operationType}" }
-              - { label: 操作对象, children: "${data.log.data.target}" }
-              - { label: 执行方法, children: "${data.log.data.method}" }
-              - { label: 请求时间, children: "${data.log.data.occurredAt}" }
+              - { label: 操作者, value: "${data.log.operatorName}" }
+              - { label: 用户 ID, value: "${data.log.operatorId}" }
+              - { label: 安全域, value: "${data.log.securityRealm}" }
+              - { label: 操作类型, value: "${data.log.operationType}" }
+              - { label: 操作对象, value: "${data.log.target}" }
+              - { label: 执行方法, value: "${data.log.method}" }
+              - { label: 请求时间, value: "${data.log.occurredAt}" }
     - type: Card
       props:
         className: mt-4
@@ -76,10 +76,10 @@ body:
           props:
             className: mt-2
             items:
-              - { label: 状态, children: "${data.log.data.result}" }
-              - { label: 耗时, children: "${data.log.data.durationMs}" }
-              - { label: 错误码, children: "${data.log.data.errorCode}" }
-              - { label: 结果摘要, children: "${data.log.data.summary}" }
+              - { label: 状态, value: "${data.log.result}" }
+              - { label: 耗时, value: "${data.log.durationMs}" }
+              - { label: 错误码, value: "${data.log.errorCode}" }
+              - { label: 结果摘要, value: "${data.log.summary}" }
     - type: Card
       props:
         className: mt-4
@@ -90,7 +90,7 @@ body:
             strong: true
         - type: Text
           props:
-            text: ${data.log.data.requestPayload}
+            text: ${data.log.requestPayload}
             className: mt-2 font-mono text-sm
     - type: Flex
       props:

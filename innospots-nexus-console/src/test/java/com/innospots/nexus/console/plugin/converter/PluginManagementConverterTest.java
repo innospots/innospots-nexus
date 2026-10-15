@@ -47,6 +47,7 @@ class PluginManagementConverterTest {
                 new PluginManagementView(installation, java.util.Optional.of(runtime)));
 
         assertThat(result.pluginId()).isEqualTo("com.example.sales");
+        assertThat(result.pluginName()).isEqualTo("Sales");
         assertThat(result.presence()).isEqualTo(PluginPresence.PRESENT);
         assertThat(result.installed()).isTrue();
         assertThat(result.desiredEnabled()).isFalse();

@@ -41,6 +41,17 @@ public record PluginManagementView(
     }
 
     /**
+     * 返回面向管理界面的插件展示名称。
+     *
+     * @return 运行时展示名；无运行时时回退为插件标识
+     */
+    public String pluginName() {
+        return runtime.map(PluginRuntimeInfo::displayName)
+                .filter(name -> name != null && !name.isBlank())
+                .orElse(pluginId());
+    }
+
+    /**
      * 返回持久化的最近运行状态；运行时尚未创建时为空。
      *
      * @return 当前或最近持久化的运行状态名称

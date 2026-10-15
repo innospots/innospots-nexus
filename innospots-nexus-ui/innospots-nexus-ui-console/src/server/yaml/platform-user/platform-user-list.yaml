@@ -1,0 +1,222 @@
+dsl: "1.0"
+page:
+  id: platform-user-list
+  title: 平台用户
+  name: platformUserList
+
+state:
+  input: ""
+  status: ""
+  pageNo: 1
+  pageSize: 20
+
+dataSources:
+  users:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/platform/users
+      params:
+        input: ${state.input}
+        status: ${state.status}
+        pageNo: ${state.pageNo}
+        pageSize: ${state.pageSize}
+
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - label: 运营管理
+          - label: 平台用户
+          - label: 用户列表
+    - type: Tabs
+      props:
+        activeKey: users
+        items:
+          - { key: users, label: 用户列表 }
+          - { key: invites, label: 邀请 }
+          - { key: access, label: 注册审批 }
+      events:
+        onChange:
+          - action: if
+            params:
+              condition: ${event == 'invites'}
+              then:
+                - action: navigate
+                  params: { to: /ops/platform-users/invites }
+          - action: if
+            params:
+              condition: ${event == 'access'}
+              then:
+                - action: navigate
+                  params: { to: /ops/platform-users/access-requests }
+    - type: Flex
+      props:
+        className: mt-2
+        justify: space-between
+        align: center
+      children:
+        - type: Flex
+          props:
+            direction: vertical
+            gap: 2
+          children:
+            - type: Typography
+              props:
+                variant: h3
+                text: 平台用户
+            - type: Typography
+              props:
+                variant: muted
+                text: 查询平台域运营账号并进入详情；待审核用户见状态筛选。
+        - type: Button
+          props:
+            text: + 添加用户
+            variant: primary
+          events:
+            onClick:
+              - action: navigate
+                params:
+                  to: /ops/platform-users/create
+    - type: Card
+      children:
+        - type: Form
+          props:
+            name: platformUserSearch
+            layout: inline
+          events:
+            onSubmit:
+              - action: setState
+                params:
+                  input: ${event.input}
+                  status: ${event.status}
+                  pageNo: 1
+              - action: reload
+                params:
+                  dataSource: users
+          children:
+            - type: Field
+              props:
+                label: 登录名/姓名
+              children:
+                - type: Input
+                  props:
+                    name: input
+                    placeholder: 匹配登录名或显示名称
+            - type: Field
+              props:
+                label: 状态
+              children:
+                - type: Select
+                  props:
+                    name: status
+                    placeholder: 全部
+                    allowClear: true
+                    options:
+                      - { label: 全部, value: "" }
+                      - { label: 正常, value: ACTIVE }
+                      - { label: 待审核, value: PENDING_APPROVAL }
+                      - { label: 待激活, value: PENDING_ACTIVATION }
+                      - { label: 禁用, value: DISABLED }
+                      - { label: 锁定, value: LOCKED }
+            - type: Field
+              props:
+                label: " "
+              children:
+                - type: Flex
+                  props:
+                    gap: small
+                  children:
+                    - type: Button
+                      props:
+                        text: 查询
+                        submit: true
+                        htmlType: submit
+                    - type: Button
+                      props:
+                        text: 重置
+                      events:
+                        onClick:
+                          - action: form.setValues
+                            params:
+                              form: platformUserSearch
+                              values:
+                                input: ""
+                                status: ""
+                          - action: setState
+                            params:
+                              input: ""
+                              status: ""
+                              pageNo: 1
+                          - action: reload
+                            params:
+                              dataSource: users
+        - type: Table
+          props:
+            rowKey: platformUserId
+            dataSource: ${data.users.records}
+            loading: ${dataStatus.users.loading}
+            className: mt-4
+            columns:
+              - title: 登录名
+                dataIndex: loginName
+              - title: 显示名称
+                dataIndex: displayName
+              - title: 邮箱
+                dataIndex: email
+              - title: 手机
+                dataIndex: mobile
+              - title: 状态
+                cell:
+                  type: Text
+                  props:
+                    text: "${row.status == 'ACTIVE' ? '● 正常' : row.status == 'PENDING_APPROVAL' ? '○ 待审核' : row.status == 'PENDING_ACTIVATION' ? '○ 待激活' : row.status == 'DISABLED' ? '○ 禁用' : row.status == 'LOCKED' ? '○ 锁定' : row.status}"
+              - title: 操作
+                cell:
+                  type: Flex
+                  props:
+                    gap: small
+                  children:
+                    - type: Button
+                      props:
+                        text: 详情
+                        variant: link
+                        size: small
+                      events:
+                        onClick:
+                          - action: navigate
+                            params:
+                              to: /ops/platform-users/${row.platformUserId}
+                    - type: Button
+                      when: ${row.status == 'ACTIVE' || row.status == 'DISABLED'}
+                      props:
+                        text: "${row.status == 'ACTIVE' ? '禁用' : '启用'}"
+                        variant: link
+                        size: small
+                      events:
+                        onClick:
+                          - action: confirm
+                            params:
+                              title: 确认变更状态
+                              content: 确定要变更该用户的启用状态吗？
+                          - action: request
+                            params:
+                              method: PUT
+                              url: /api/d/platform/users/${row.platformUserId}/status
+                              body:
+                                status: "${row.status == 'ACTIVE' ? 'DISABLED' : 'ACTIVE'}"
+                          - action: message
+                            params:
+                              messageType: success
+                              text: 状态已更新
+                          - action: reload
+                            params:
+                              dataSource: users
+        - type: Text
+          props:
+            text: 共 ${data.users.total} 个用户
+            type: secondary
+            className: mt-3

@@ -45,7 +45,7 @@ public class PlatformDictionaryService {
     public DictionaryTypeVo createDictionaryType(DictionaryTypeCreateRequest request) {
         Objects.requireNonNull(request, "request");
         Checks.notBlank(request.typeCode(), "typeCode");
-        Checks.notBlank(request.typeName(), "typeName");
+        Checks.notNull(request.typeName(), "typeName");
         return typeOperator.createType(request, platformOwnership());
     }
 

@@ -13,6 +13,7 @@ import com.innospots.nexus.core.plugin.installation.domain.enums.PluginPresence;
  * @author Smars
  * @date 2026/09/13
  * @param pluginId             插件标识符
+ * @param pluginName           插件展示名称
  * @param version              插件版本
  * @param presence             安装存在状态
  * @param installed            是否已安装
@@ -36,6 +37,8 @@ import com.innospots.nexus.core.plugin.installation.domain.enums.PluginPresence;
 public record PluginManagementVo(
         @Schema(description = "插件标识符", required = true)
         String pluginId,
+        @Schema(description = "插件展示名称", required = true)
+        String pluginName,
         @Schema(description = "插件版本", required = true)
         String version,
         @Schema(description = "安装存在状态", required = true)

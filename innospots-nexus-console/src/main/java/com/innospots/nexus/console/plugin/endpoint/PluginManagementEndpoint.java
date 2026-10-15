@@ -3,12 +3,12 @@ package com.innospots.nexus.console.plugin.endpoint;
 import java.util.List;
 import java.util.function.Supplier;
 
-import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
@@ -30,7 +30,6 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
  */
 @Path(ConsoleConstant.API_PREFIX + "/plugins")
 @Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Plugin", description = "插件生命周期")
 @NexusAuthenticatedApi
 public final class PluginManagementEndpoint {
@@ -85,8 +84,42 @@ public final class PluginManagementEndpoint {
 
     @GET
     @Operation(operationId = "pluginList", summary = "查询全部插件")
-    public R<List<PluginManagementVo>> list() {
-        return R.ok(manager().plugins().stream().map(converter::toVo).toList());
+    public R<List<PluginManagementVo>> list(
+            @QueryParam("keyword") String keyword,
+            @QueryParam("installed") String installed
+    ) {
+        String normalizedKeyword = keyword == null ? "" : keyword.trim().toLowerCase();
+        String normalizedInstalled = installed == null ? "" : installed.trim();
+        return R.ok(manager().plugins().stream()
+                .map(converter::toVo)
+                .filter(vo -> matchesInstalledFilter(vo, normalizedInstalled))
+                .filter(vo -> matchesKeyword(vo, normalizedKeyword))
+                .toList());
+    }
+
+    private static boolean matchesInstalledFilter(PluginManagementVo vo, String installed) {
+        if (installed.isEmpty() || "all".equalsIgnoreCase(installed)) {
+            return true;
+        }
+        if ("installed".equalsIgnoreCase(installed)) {
+            return vo.installed();
+        }
+        if ("notInstalled".equalsIgnoreCase(installed)) {
+            return !vo.installed();
+        }
+        return true;
+    }
+
+    private static boolean matchesKeyword(PluginManagementVo vo, String keyword) {
+        if (keyword.isEmpty()) {
+            return true;
+        }
+        return containsIgnoreCase(vo.pluginName(), keyword)
+                || containsIgnoreCase(vo.pluginId(), keyword);
+    }
+
+    private static boolean containsIgnoreCase(String value, String keyword) {
+        return value != null && value.toLowerCase().contains(keyword);
     }
 
     @GET

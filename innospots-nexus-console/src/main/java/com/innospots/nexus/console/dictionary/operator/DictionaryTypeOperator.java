@@ -11,6 +11,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import com.innospots.nexus.base.domain.enums.BasicStatus;
+import com.innospots.nexus.base.i18n.I18nObject;
 import com.innospots.nexus.base.domain.response.PageResult;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.base.util.Checks;
@@ -19,6 +20,7 @@ import com.innospots.nexus.console.dictionary.dao.DictionaryItemDao;
 import com.innospots.nexus.console.dictionary.dao.DictionaryTypeDao;
 import com.innospots.nexus.console.dictionary.domain.entity.DictionaryItemEntity;
 import com.innospots.nexus.console.dictionary.domain.entity.DictionaryTypeEntity;
+import com.innospots.nexus.console.dictionary.domain.request.DictionaryItemCreateRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeCreateRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypePageRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeStatusUpdateRequest;
@@ -26,6 +28,7 @@ import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeUpdat
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeOptionVo;
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeVo;
 import com.innospots.nexus.console.dictionary.status.DictionaryStatusCode;
+import com.innospots.nexus.console.dictionary.support.DictionaryTypeNames;
 import com.innospots.nexus.console.scope.ConsoleOwnership;
 import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
 import com.innospots.nexus.console.support.ConsoleExceptions;
@@ -35,6 +38,8 @@ import com.innospots.nexus.console.support.ConsoleExceptions;
  */
 @RequiredArgsConstructor
 public class DictionaryTypeOperator {
+
+    private static final int DEFAULT_SORT_ORDER = 1;
 
     private final DictionaryTypeDao typeDao;
     private final DictionaryItemDao itemDao;
@@ -75,12 +80,13 @@ public class DictionaryTypeOperator {
         DictionaryTypeEntity entity = new DictionaryTypeEntity();
         ConsoleOwnershipScope.stamp(entity, ownership);
         entity.setTypeCode(request.typeCode());
-        entity.setTypeName(request.typeName());
+        DictionaryTypeNames.apply(entity, request.typeName());
         entity.setSecurityRealm(securityRealm);
-        entity.setSortOrder(request.sortOrder() == null ? 0 : request.sortOrder());
+        entity.setSortOrder(request.sortOrder() == null ? DEFAULT_SORT_ORDER : request.sortOrder());
         entity.setStatus(BasicStatus.ENABLED.name());
         entity.setBuiltIn(false);
         typeDao.insert(entity);
+        insertItems(entity, request.items(), ownership);
         return converter.toTypeVo(entity);
     }
 
@@ -95,12 +101,16 @@ public class DictionaryTypeOperator {
         DictionaryTypeEntity entity = requireType(dictionaryTypeId, ownership)
                 .orElseThrow(() -> ConsoleExceptions.build(DictionaryStatusCode.TYPE_NOT_FOUND));
         if (request.typeName() != null) {
-            entity.setTypeName(request.typeName());
+            I18nObject merged = DictionaryTypeNames.merge(DictionaryTypeNames.read(entity), request.typeName());
+            DictionaryTypeNames.apply(entity, merged);
         }
         if (request.sortOrder() != null) {
             entity.setSortOrder(request.sortOrder());
         }
         typeDao.updateById(entity);
+        if (request.items() != null) {
+            replaceItems(entity, request.items(), ownership);
+        }
         return converter.toTypeVo(entity);
     }
 
@@ -189,6 +199,71 @@ public class DictionaryTypeOperator {
                 new LambdaQueryWrapper<DictionaryTypeEntity>()
                         .eq(DictionaryTypeEntity::getTypeCode, typeCode)
                         .eq(DictionaryTypeEntity::getSecurityRealm, securityRealm),
+                ownership)) > 0;
+    }
+
+    private void insertItems(
+            DictionaryTypeEntity parent,
+            List<DictionaryItemCreateRequest> items,
+            ConsoleOwnership ownership
+    ) {
+        if (items == null || items.isEmpty()) {
+            return;
+        }
+        for (DictionaryItemCreateRequest itemRequest : items) {
+            insertItem(parent, itemRequest, ownership);
+        }
+    }
+
+    private void replaceItems(
+            DictionaryTypeEntity parent,
+            List<DictionaryItemCreateRequest> items,
+            ConsoleOwnership ownership
+    ) {
+        itemDao.delete(ConsoleOwnershipScope.apply(
+                new LambdaQueryWrapper<DictionaryItemEntity>()
+                        .eq(DictionaryItemEntity::getTypeCode, parent.getTypeCode()),
+                ownership));
+        insertItems(parent, items, ownership);
+    }
+
+    private void insertItem(
+            DictionaryTypeEntity parent,
+            DictionaryItemCreateRequest itemRequest,
+            ConsoleOwnership ownership
+    ) {
+        Objects.requireNonNull(itemRequest, "itemRequest");
+        Checks.notBlank(itemRequest.itemValue(), "itemValue");
+        Checks.notBlank(itemRequest.itemName(), "itemName");
+        if (existsItemValue(parent.getTypeCode(), itemRequest.itemValue(), parent.getSecurityRealm(), ownership)) {
+            throw ConsoleExceptions.build(DictionaryStatusCode.ITEM_VALUE_DUPLICATED);
+        }
+        DictionaryItemEntity itemEntity = new DictionaryItemEntity();
+        ConsoleOwnershipScope.stamp(itemEntity, ownership);
+        itemEntity.setTypeCode(parent.getTypeCode());
+        itemEntity.setItemValue(itemRequest.itemValue().trim());
+        itemEntity.setItemName(itemRequest.itemName().trim());
+        itemEntity.setSecurityRealm(parent.getSecurityRealm());
+        itemEntity.setSortOrder(itemRequest.sortOrder() == null ? DEFAULT_SORT_ORDER : itemRequest.sortOrder());
+        itemEntity.setStatus(BasicStatus.ENABLED.name());
+        itemEntity.setBuiltIn(false);
+        itemDao.insert(itemEntity);
+    }
+
+    private boolean existsItemValue(
+            String typeCode,
+            String itemValue,
+            String securityRealm,
+            ConsoleOwnership ownership
+    ) {
+        if (itemValue == null || itemValue.isBlank()) {
+            return false;
+        }
+        return itemDao.selectCount(ConsoleOwnershipScope.apply(
+                new LambdaQueryWrapper<DictionaryItemEntity>()
+                        .eq(DictionaryItemEntity::getTypeCode, typeCode)
+                        .eq(DictionaryItemEntity::getItemValue, itemValue.trim())
+                        .eq(DictionaryItemEntity::getSecurityRealm, securityRealm),
                 ownership)) > 0;
     }
 

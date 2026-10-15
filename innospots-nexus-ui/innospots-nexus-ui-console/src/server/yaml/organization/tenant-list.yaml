@@ -1,0 +1,202 @@
+dsl: "1.0"
+page:
+  id: tenant-list
+  title: 租户管理
+  name: tenantList
+
+state:
+  input: ""
+  tenantType: ""
+  status: ""
+  pageNo: 1
+  pageSize: 20
+
+dataSources:
+  tenants:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/platform/tenants
+      params:
+        input: ${state.input}
+        tenantType: ${state.tenantType}
+        status: ${state.status}
+        pageNo: ${state.pageNo}
+        pageSize: ${state.pageSize}
+
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - label: 运营管理
+          - label: 租户管理
+    - type: Flex
+      props:
+        justify: space-between
+        align: center
+      children:
+        - type: Flex
+          props:
+            direction: vertical
+            gap: 2
+          children:
+            - type: Typography
+              props:
+                variant: h3
+                text: 租户管理
+            - type: Typography
+              props:
+                variant: muted
+                text: 管理客户租户身份、企业档案与生命周期状态。
+        - type: Button
+          props:
+            text: + 开通租户
+            variant: primary
+          events:
+            onClick:
+              - action: navigate
+                params:
+                  to: /ops/organization/tenants/create
+    - type: Card
+      children:
+        - type: Form
+          props:
+            name: tenantSearch
+            layout: inline
+          events:
+            onSubmit:
+              - action: setState
+                params:
+                  input: ${event.input}
+                  tenantType: ${event.tenantType}
+                  status: ${event.status}
+                  pageNo: 1
+              - action: reload
+                params:
+                  dataSource: tenants
+          children:
+            - type: Field
+              props:
+                label: 名称/编码
+              children:
+                - type: Input
+                  props:
+                    name: input
+                    placeholder: 模糊匹配租户名称或编码
+            - type: Field
+              props:
+                label: 类型
+              children:
+                - type: Select
+                  props:
+                    name: tenantType
+                    placeholder: 全部
+                    allowClear: true
+                    options:
+                      - { label: 全部, value: "" }
+                      - { label: 企业, value: ENTERPRISE }
+                      - { label: 团队, value: TEAM }
+                      - { label: 个人, value: INDIVIDUAL }
+            - type: Field
+              props:
+                label: 状态
+              children:
+                - type: Select
+                  props:
+                    name: status
+                    placeholder: 全部
+                    allowClear: true
+                    options:
+                      - { label: 全部, value: "" }
+                      - { label: 正常, value: ACTIVE }
+                      - { label: 暂停, value: SUSPENDED }
+                      - { label: 归档, value: ARCHIVED }
+            - type: Field
+              props:
+                label: " "
+              children:
+                - type: Flex
+                  props:
+                    gap: small
+                  children:
+                    - type: Button
+                      props:
+                        text: 查询
+                        submit: true
+                        htmlType: submit
+                    - type: Button
+                      props:
+                        text: 重置
+                      events:
+                        onClick:
+                          - action: form.setValues
+                            params:
+                              form: tenantSearch
+                              values:
+                                input: ""
+                                tenantType: ""
+                                status: ""
+                          - action: setState
+                            params:
+                              input: ""
+                              tenantType: ""
+                              status: ""
+                              pageNo: 1
+                          - action: reload
+                            params:
+                              dataSource: tenants
+        - type: Table
+          props:
+            rowKey: tenantId
+            dataSource: ${data.tenants.records}
+            loading: ${dataStatus.tenants.loading}
+            className: mt-4
+            columns:
+              - title: 租户名称
+                cell:
+                  type: Button
+                  props:
+                    text: ${row.tenantName}
+                    variant: link
+                    size: small
+                  events:
+                    onClick:
+                      - action: navigate
+                        params:
+                          to: /ops/organization/tenants/${row.tenantId}
+              - title: 编码
+                dataIndex: tenantCode
+              - title: 类型
+                cell:
+                  type: Text
+                  props:
+                    text: "${row.tenantType == 'ENTERPRISE' ? '企业' : row.tenantType == 'TEAM' ? '团队' : row.tenantType == 'INDIVIDUAL' ? '个人' : row.tenantType}"
+              - title: 状态
+                cell:
+                  type: Text
+                  props:
+                    text: "${row.status == 'ACTIVE' ? '● 正常' : row.status == 'SUSPENDED' ? '○ 暂停' : row.status == 'ARCHIVED' ? '○ 归档' : row.status}"
+              - title: 套餐
+                dataIndex: planCode
+              - title: 法定名称
+                dataIndex: legalName
+              - title: 操作
+                cell:
+                  type: Button
+                  props:
+                    text: 详情
+                    variant: link
+                    size: small
+                  events:
+                    onClick:
+                      - action: navigate
+                        params:
+                          to: /ops/organization/tenants/${row.tenantId}
+        - type: Text
+          props:
+            text: 共 ${data.tenants.total} 个租户
+            type: secondary
+            className: mt-3

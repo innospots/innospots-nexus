@@ -35,6 +35,7 @@ class DictionaryEntityContractsTest {
         assertField(DictionaryTypeEntity.class, "dictionaryTypeId", String.class, 32, false);
         assertField(DictionaryTypeEntity.class, "typeCode", String.class, 64, false);
         assertField(DictionaryTypeEntity.class, "typeName", String.class, 128, false);
+        assertField(DictionaryTypeEntity.class, "typeNameI18n", String.class, 255, true);
         assertField(DictionaryTypeEntity.class, "status", String.class, 32, false);
         assertField(DictionaryTypeEntity.class, "sortOrder", Integer.class, 255, false);
         assertField(DictionaryTypeEntity.class, "builtIn", Boolean.class, 255, false);

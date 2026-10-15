@@ -46,6 +46,9 @@ public class DictionaryTypeEntity extends OwnershipEntity {
     @Column(length = 128, nullable = false)
     private String typeName;
 
+    @Column(columnDefinition = "TEXT")
+    private String typeNameI18n;
+
     @Column(length = 32, nullable = false)
     private String status;
 

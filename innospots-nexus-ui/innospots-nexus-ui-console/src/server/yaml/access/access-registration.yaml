@@ -1,0 +1,8 @@
+dsl: "1.0"
+page:
+  id: access-registration
+  title: 注册（待审核）
+  name: accessRegistration
+
+body:
+  type: PlatformAccessRegistrationForm

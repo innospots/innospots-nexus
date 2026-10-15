@@ -5,7 +5,6 @@ page:
   name: roleDetailPermissions
 
 state:
-  roleId: ${route.params.roleId}
   resourceSearch: ""
   selectedResourceKey: ""
   draftGrantIds: []
@@ -17,7 +16,7 @@ dataSources:
     autoLoad: true
     request:
       method: GET
-      url: /api/d/platform/roles/${state.roleId}
+      url: /api/d/platform/roles/${params.roleId}
   catalog:
     type: http
     autoLoad: true
@@ -29,7 +28,19 @@ dataSources:
     autoLoad: true
     request:
       method: GET
-      url: /api/d/platform/roles/${state.roleId}/permissions
+      url: /api/d/platform/roles/${params.roleId}/permissions
+
+lifecycle:
+  onShow:
+    - action: reload
+      params:
+        dataSource: role
+    - action: reload
+      params:
+        dataSource: catalog
+    - action: reload
+      params:
+        dataSource: grants
 
 body:
   type: Page
@@ -39,7 +50,7 @@ body:
         items:
           - label: 角色管理
             href: /system/roles
-          - label: ${data.role.data.roleName}
+          - label: "${data.role != null && data.role.roleName != null ? data.role.roleName : params.roleId}"
           - label: 权限设置
     - type: Button
       props:
@@ -50,9 +61,10 @@ body:
           - action: navigate
             params: { to: /system/roles }
     - type: Typography
+      when: ${data.role != null}
       props:
         variant: muted
-        text: ${data.role.data.roleName} · ${data.role.data.roleCode}
+        text: "${data.role.roleName} · ${data.role.roleCode}"
     - type: Tabs
       props:
         activeKey: permissions
@@ -68,14 +80,14 @@ body:
               then:
                 - action: navigate
                   params:
-                    to: /system/roles/${state.roleId}
+                    to: /system/roles/${params.roleId}
           - action: if
             params:
               condition: ${event == 'members'}
               then:
                 - action: navigate
                   params:
-                    to: /system/roles/${state.roleId}/members
+                    to: /system/roles/${params.roleId}/members
     - type: Flex
       props:
         justify: space-between
@@ -108,18 +120,22 @@ body:
               props:
                 text: 后台资源目录
                 strong: true
-            - type: Tree
+            - type: CatalogTree
+              when: ${data.catalog != null && data.catalog.length > 0}
               props:
-                treeData: ${data.catalog.data}
-                fieldNames:
-                  title: displayName
-                  key: resourceKey
-                  children: children
+                className: mt-2
+                treeData: ${data.catalog}
               events:
                 onSelect:
                   - action: setState
                     params:
                       selectedResourceKey: ${event.key}
+            - type: Text
+              when: ${data.catalog == null || data.catalog.length == 0}
+              props:
+                text: 暂无目录资源
+                type: secondary
+                className: mt-2
         - type: Card
           props:
             style: { flex: 2 }
@@ -175,9 +191,9 @@ body:
                   - action: request
                     params:
                       method: PUT
-                      url: /api/d/platform/roles/${state.roleId}/permissions
+                      url: /api/d/platform/roles/${params.roleId}/permissions
                       body:
-                        grants: ${data.grants.data}
+                        grants: ${data.grants.grants}
                   - action: message
                     params:
                       messageType: success

@@ -1,0 +1,58 @@
+dsl: "1.0"
+page:
+  id: platform-user-create
+  title: 添加平台用户
+  name: platformUserCreate
+
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - label: 运营管理
+            href: /ops/platform-users
+          - label: 平台用户
+            href: /ops/platform-users
+          - label: 添加用户
+    - type: Button
+      props:
+        text: ← 返回用户列表
+        variant: link
+      events:
+        onClick:
+          - action: navigate
+            params: { to: /ops/platform-users }
+    - type: Typography
+      props:
+        variant: h3
+        text: 添加平台用户
+        className: mt-2
+    - type: Typography
+      props:
+        variant: muted
+        text: 默认邀请开通；实施场景可切换为直接创建并设置初始密码。
+        className: mb-4
+    - type: Card
+      children:
+        - type: PlatformUserCreatePanel
+          events:
+            onCancel:
+              - action: navigate
+                params: { to: /ops/platform-users }
+            onCreated:
+              - action: message
+                params:
+                  messageType: success
+                  text: 用户已创建
+              - action: if
+                params:
+                  condition: ${event.platformUserId != null && event.platformUserId != ''}
+                  then:
+                    - action: navigate
+                      params:
+                        to: /ops/platform-users/${event.platformUserId}
+                  else:
+                    - action: navigate
+                      params:
+                        to: /ops/platform-users

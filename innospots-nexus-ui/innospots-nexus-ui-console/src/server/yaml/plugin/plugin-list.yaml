@@ -5,7 +5,7 @@ page:
   name: pluginList
 
 state:
-  installedFilter: all
+  installed: ""
   keyword: ""
 
 dataSources:
@@ -15,6 +15,9 @@ dataSources:
     request:
       method: GET
       url: /api/d/nexus/plugins
+      params:
+        keyword: ${state.keyword}
+        installed: ${state.installed}
 
 body:
   type: Page
@@ -52,40 +55,76 @@ body:
                   dataSource: plugins
     - type: Card
       children:
-        - type: Flex
+        - type: Form
           props:
-            gap: middle
-            align: center
-            style:
-              flexWrap: wrap
+            name: pluginSearch
+            layout: inline
+          events:
+            onSubmit:
+              - action: setState
+                params:
+                  keyword: ${event.keyword}
+                  installed: ${event.installed}
+              - action: reload
+                params:
+                  dataSource: plugins
           children:
-            - type: ChipFilter
+            - type: Field
               props:
-                mode: single
-                value: ${state.installedFilter}
-                items:
-                  - { label: 全部, value: all }
-                  - { label: 已安装, value: installed }
-                  - { label: 未安装, value: notInstalled }
-              events:
-                onChange:
-                  - action: setState
-                    params:
-                      installedFilter: ${event}
-            - type: Input
+                label: 插件名称
+              children:
+                - type: Input
+                  props:
+                    name: keyword
+                    placeholder: 搜索插件名称或标识
+            - type: Field
               props:
-                value: ${state.keyword}
-                placeholder: 搜索插件名称
-                style: { minWidth: 240 }
-              events:
-                onChange:
-                  - action: setState
-                    params:
-                      keyword: ${event}
+                label: 安装状态
+              children:
+                - type: Select
+                  props:
+                    name: installed
+                    allowClear: true
+                    options:
+                      - { label: 全部, value: "" }
+                      - { label: 已安装, value: installed }
+                      - { label: 未安装, value: notInstalled }
+            - type: Field
+              props:
+                label: " "
+              children:
+                - type: Flex
+                  props:
+                    gap: small
+                    align: center
+                  children:
+                    - type: Button
+                      props:
+                        text: 查询
+                        submit: true
+                        htmlType: submit
+                    - type: Button
+                      props:
+                        text: 重置
+                      events:
+                        onClick:
+                          - action: form.setValues
+                            params:
+                              form: pluginSearch
+                              values:
+                                keyword: ""
+                                installed: ""
+                          - action: setState
+                            params:
+                              keyword: ""
+                              installed: ""
+                          - action: reload
+                            params:
+                              dataSource: plugins
         - type: Table
           props:
             rowKey: pluginId
-            dataSource: ${data.plugins.data}
+            dataSource: ${data.plugins}
             loading: ${dataStatus.plugins.loading}
             className: mt-4
             columns:
@@ -93,7 +132,7 @@ body:
                 cell:
                   type: Button
                   props:
-                    text: ${row.pluginId}
+                    text: ${row.pluginName}
                     variant: link
                     size: small
                   events:
@@ -198,6 +237,6 @@ body:
                               dataSource: plugins
         - type: Text
           props:
-            text: 共 ${data.plugins.data.length} 个插件
+            text: 共 ${data.plugins.length} 个插件
             type: secondary
             className: mt-3

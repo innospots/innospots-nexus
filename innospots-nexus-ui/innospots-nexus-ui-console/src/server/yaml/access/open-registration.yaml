@@ -1,0 +1,8 @@
+dsl: "1.0"
+page:
+  id: open-registration
+  title: 开放注册
+  name: openRegistration
+
+body:
+  type: PlatformOpenRegistrationForm

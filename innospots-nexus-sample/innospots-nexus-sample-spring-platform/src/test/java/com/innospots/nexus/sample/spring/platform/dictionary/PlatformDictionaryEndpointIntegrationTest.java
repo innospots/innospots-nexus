@@ -63,14 +63,27 @@ class PlatformDictionaryEndpointIntegrationTest {
         String createTypeBody = """
                 {
                   "typeCode": "it_region",
-                  "typeName": "IT Region",
-                  "sortOrder": 10
+                  "typeName": {
+                    "zh-CN": "IT 区域",
+                    "en": "IT Region"
+                  },
+                  "items": [
+                    {
+                      "itemValue": "east",
+                      "itemName": "East"
+                    }
+                  ]
                 }
                 """;
         HttpResponse<String> createdType = http.postJson(PlatformConstant.DICTIONARY_TYPES_PATH, createTypeBody);
         assertThat(createdType.statusCode()).as(createdType.body()).isEqualTo(200);
         assertThat(createdType.body()).contains("it_region");
         assertThat(createdType.body()).contains("\"securityRealm\":\"PLATFORM\"");
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM nx_dictionary_item WHERE type_code = ? AND item_value = ?",
+                Integer.class,
+                TYPE_CODE,
+                "east")).isEqualTo(1);
         PlatformDatabaseJsonSnapshot.logAndPersist(
                 jdbcTemplate,
                 OUTPUT_DIR,
@@ -84,7 +97,8 @@ class PlatformDictionaryEndpointIntegrationTest {
 
         HttpResponse<String> gotType = http.get(PlatformConstant.DICTIONARY_TYPES_PATH + "/" + typeId);
         assertThat(gotType.statusCode()).isEqualTo(200);
-        assertThat(gotType.body()).contains("IT Region");
+        assertThat(gotType.body()).contains("\"zh-CN\":\"IT 区域\"");
+        assertThat(gotType.body()).contains("\"en\":\"IT Region\"");
 
         String typePagePath = PlatformConstant.DICTIONARY_TYPES_PATH
                 + "?pageNo=1&pageSize=20&status=ENABLED&input="
@@ -100,8 +114,9 @@ class PlatformDictionaryEndpointIntegrationTest {
 
         String updateTypeBody = """
                 {
-                  "typeName": "IT Region Updated",
-                  "sortOrder": 20
+                  "typeName": {
+                    "en": "IT Region Updated"
+                  }
                 }
                 """;
         HttpResponse<String> updatedType = http.putJson(
@@ -110,20 +125,19 @@ class PlatformDictionaryEndpointIntegrationTest {
         assertThat(updatedType.statusCode()).as(updatedType.body()).isEqualTo(200);
 
         String itemsPath = PlatformConstant.DICTIONARY_ITEMS_PATH.replace("{typeCode}", TYPE_CODE);
-        String createItemBody = """
-                {
-                  "itemValue": "east",
-                  "itemName": "East",
-                  "sortOrder": 1
-                }
-                """;
-        HttpResponse<String> createdItem = http.postJson(itemsPath, createItemBody);
-        assertThat(createdItem.statusCode()).as(createdItem.body()).isEqualTo(200);
         String itemId = jdbcTemplate.queryForObject(
                 "SELECT dictionary_item_id FROM nx_dictionary_item WHERE type_code = ? AND item_value = ?",
                 String.class,
                 TYPE_CODE,
                 "east");
+        String createItemBody = """
+                {
+                  "itemValue": "west",
+                  "itemName": "West"
+                }
+                """;
+        HttpResponse<String> createdItem = http.postJson(itemsPath, createItemBody);
+        assertThat(createdItem.statusCode()).as(createdItem.body()).isEqualTo(200);
 
         HttpResponse<String> pagedItems = http.get(itemsPath + "?pageNo=1&pageSize=20");
         assertThat(pagedItems.statusCode()).isEqualTo(200);
@@ -131,8 +145,7 @@ class PlatformDictionaryEndpointIntegrationTest {
 
         String updateItemBody = """
                 {
-                  "itemName": "East Updated",
-                  "sortOrder": 2
+                  "itemName": "East Updated"
                 }
                 """;
         HttpResponse<String> updatedItem = http.putJson(itemsPath + "/" + itemId, updateItemBody);

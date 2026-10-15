@@ -1,0 +1,10 @@
+dsl: "1.0"
+page:
+  id: invite-accept
+  title: 接受邀请
+  name: inviteAccept
+
+body:
+  type: PlatformInviteAcceptForm
+  props:
+    token: ${params.token}

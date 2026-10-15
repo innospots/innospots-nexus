@@ -7,7 +7,14 @@ app: { name: Nexus Console }
 auth: { loginPath: /login }
 
 pages:
-  - { id: login, path: /login, title: 登录, version: 1, public: true }
+  - { id: login, path: /login, title: 登录, version: 1, public: true, lazy: true }
+  - { id: password-reset, path: /password/reset, title: 找回密码, version: 1, public: true, lazy: true }
+  - { id: pending-approval, path: /pending-approval, title: 注册待审核, version: 1, public: true, lazy: true }
+  - { id: password-change, path: /account/password, title: 修改密码, version: 1, lazy: true }
+  - { id: invite-accept, path: /invite/:token, title: 接受邀请, version: 1, public: true, lazy: true }
+  - { id: invite-activate, path: /register/invite, title: 邀请码注册, version: 1, public: true, lazy: true }
+  - { id: open-registration, path: /register/open, title: 开放注册, version: 1, public: true, lazy: true }
+  - { id: access-registration, path: /register/approval, title: 注册待审核, version: 1, public: true, lazy: true }
   - { id: dashboard, path: /, title: 工作台, version: 1, lazy: true }
   - { id: menu-config, path: /system/menus, title: 自定义导航, version: 1, lazy: true }
   - { id: role-list, path: /system/roles, title: 角色管理, version: 1, lazy: true }
@@ -19,15 +26,44 @@ pages:
   - { id: audit-log-detail, path: /system/audit-logs/:logId, title: 审计日志详情, version: 1, lazy: true }
   - { id: plugin-list, path: /system/plugins, title: 插件管理, version: 1, lazy: true }
   - { id: plugin-detail, path: /system/plugins/:pluginId, title: 插件详情, version: 1, lazy: true }
+  - { id: platform-user-list, path: /ops/platform-users, title: 平台用户, version: 1, lazy: true }
+  - { id: platform-user-create, path: /ops/platform-users/create, title: 添加平台用户, version: 1, lazy: true }
+  - { id: platform-user-detail, path: /ops/platform-users/:platformUserId, title: 平台用户详情, version: 1, lazy: true }
+  - { id: platform-invite-list, path: /ops/platform-users/invites, title: 邀请列表, version: 1, lazy: true }
+  - { id: platform-access-request-list, path: /ops/platform-users/access-requests, title: 注册审批, version: 1, lazy: true }
+  - { id: tenant-list, path: /ops/organization/tenants, title: 租户管理, version: 1, lazy: true }
+  - { id: tenant-create, path: /ops/organization/tenants/create, title: 开通租户, version: 1, lazy: true }
+  - { id: tenant-detail, path: /ops/organization/tenants/:tenantId, title: 租户详情, version: 1, lazy: true }
 
 menus:
   - { id: login, type: page, pageId: login, title: 登录, layout: login, public: true, hidden: true }
+  - { id: password-reset, type: page, pageId: password-reset, layout: login, public: true, hidden: true }
+  - { id: pending-approval, type: page, pageId: pending-approval, layout: login, public: true, hidden: true }
+  - { id: invite-accept, type: page, pageId: invite-accept, layout: login, public: true, hidden: true }
+  - { id: invite-activate, type: page, pageId: invite-activate, layout: login, public: true, hidden: true }
+  - { id: open-registration, type: page, pageId: open-registration, layout: login, public: true, hidden: true }
+  - { id: access-registration, type: page, pageId: access-registration, layout: login, public: true, hidden: true }
+  - { id: password-change, type: page, pageId: password-change, layout: admin, hidden: true }
   - { id: home, type: page, pageId: dashboard, title: 工作台, icon: home, layout: admin, order: 1 }
+  - id: operations
+    type: group
+    title: 运营管理
+    icon: users
+    order: 2
+    children:
+      - { id: nav-organization-tenants, type: page, pageId: tenant-list, title: 租户管理, layout: admin }
+      - id: nav-platform-users-group
+        type: group
+        title: 平台用户
+        children:
+          - { id: nav-platform-users, type: page, pageId: platform-user-list, title: 用户列表, layout: admin }
+          - { id: nav-platform-invites, type: page, pageId: platform-invite-list, title: 邀请, layout: admin }
+          - { id: nav-platform-access-requests, type: page, pageId: platform-access-request-list, title: 注册审批, layout: admin }
   - id: system
     type: group
     title: 系统管理
     icon: settings
-    order: 2
+    order: 3
     children:
       - { id: nav-menus, type: page, pageId: menu-config, title: 菜单管理, layout: admin }
       - { id: nav-dictionaries, type: page, pageId: dictionary-type-list, title: 数据字典, layout: admin }
@@ -39,6 +75,10 @@ menus:
   - { id: role-detail-members, type: page, pageId: role-detail-members, layout: admin, hidden: true, activeMenu: nav-roles }
   - { id: audit-log-detail, type: page, pageId: audit-log-detail, layout: admin, hidden: true, activeMenu: nav-audit }
   - { id: plugin-detail, type: page, pageId: plugin-detail, layout: admin, hidden: true, activeMenu: nav-plugins }
+  - { id: platform-user-create, type: page, pageId: platform-user-create, layout: admin, hidden: true, activeMenu: nav-platform-users }
+  - { id: platform-user-detail, type: page, pageId: platform-user-detail, layout: admin, hidden: true, activeMenu: nav-platform-users }
+  - { id: tenant-create, type: page, pageId: tenant-create, layout: admin, hidden: true, activeMenu: nav-organization-tenants }
+  - { id: tenant-detail, type: page, pageId: tenant-detail, layout: admin, hidden: true, activeMenu: nav-organization-tenants }
 
 layouts:
   admin:
@@ -71,10 +111,18 @@ layouts:
                   - { label: English, value: en-US }
                 user:
                   name: ${data.session.user.name}
+                  username: ${data.session.user.username}
                   items:
+                    - { label: 修改密码, value: password, icon: key }
                     - { label: 退出登录, value: logout, icon: log-out }
               events:
                 onUserSelect:
+                  - action: if
+                    params:
+                      condition: ${event == 'password'}
+                      then:
+                        - action: navigate
+                          params: { to: /account/password }
                   - action: if
                     params:
                       condition: ${event == 'logout'}

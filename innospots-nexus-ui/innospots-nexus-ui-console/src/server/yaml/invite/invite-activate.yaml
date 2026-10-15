@@ -1,0 +1,8 @@
+dsl: "1.0"
+page:
+  id: invite-activate
+  title: 邀请码注册
+  name: inviteActivate
+
+body:
+  type: PlatformInviteActivateForm
