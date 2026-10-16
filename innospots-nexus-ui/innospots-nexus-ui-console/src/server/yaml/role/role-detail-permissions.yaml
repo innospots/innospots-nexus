@@ -121,7 +121,7 @@ body:
                 text: 后台资源目录
                 strong: true
             - type: CatalogTree
-              when: ${data.catalog != null && data.catalog.length > 0}
+              when: ${Array.isArray(data.catalog) && data.catalog.length > 0}
               props:
                 className: mt-2
                 treeData: ${data.catalog}
@@ -129,9 +129,9 @@ body:
                 onSelect:
                   - action: setState
                     params:
-                      selectedResourceKey: ${event.key}
+                      selectedResourceKey: ${event[0]}
             - type: Text
-              when: ${data.catalog == null || data.catalog.length == 0}
+              when: ${!Array.isArray(data.catalog) || data.catalog.length == 0}
               props:
                 text: 暂无目录资源
                 type: secondary
@@ -144,14 +144,9 @@ body:
               props:
                 text: 当前资源授权
                 strong: true
-            - type: Alert
-              props:
-                message: 目录树当前主要提供模块/页面层级；操作与数据源授权项需目录能力补齐后在此展示复选框。
-                variant: info
-                className: mt-2
             - type: Empty
               props:
-                description: 该页面暂无可配置权限或请从左侧选择页面资源
+                description: 请从左侧选择页面资源
     - type: Flex
       props:
         justify: space-between

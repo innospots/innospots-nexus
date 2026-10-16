@@ -61,15 +61,6 @@ body:
           children:
             - type: Button
               props:
-                text: 预览
-              events:
-                onClick:
-                  - action: message
-                    params:
-                      messageType: info
-                      text: 预览当前导航树层级与可见状态（演示）
-            - type: Button
-              props:
                 text: + 新建菜单
                 variant: primary
               events:
@@ -112,19 +103,15 @@ body:
                   - action: setState
                     params:
                       treeSearch: ${event}
-            - type: Tree
+            - type: ConsoleMenuTree
               props:
                 className: mt-2
                 treeData: ${data.menuTree}
-                fieldNames:
-                  title: menuName
-                  key: menuId
-                  children: children
               events:
                 onSelect:
                   - action: setState
                     params:
-                      selectedMenuId: ${event.key}
+                      selectedMenuId: ${event[0]}
                   - action: reload
                     params:
                       dataSource: selectedMenu
@@ -344,8 +331,3 @@ body:
                   - action: setState
                     params:
                       structureDirty: false
-    - type: Alert
-      props:
-        className: mt-4
-        variant: warning
-        message: "菜单 CRUD 与树排序 REST 尚未在 OpenAPI 中发布；当前页面已按 PRD 线框接线至 /api/d/nexus/console-menus/*，后端就绪后无需改 DSL 路径。只读导航可参考 GET /api/d/platform/navigation/menus。"

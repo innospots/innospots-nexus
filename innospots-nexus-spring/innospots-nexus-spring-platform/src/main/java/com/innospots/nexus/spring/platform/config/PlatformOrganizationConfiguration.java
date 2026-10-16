@@ -6,13 +6,20 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.innospots.nexus.console.tenant.api.TenantUserResolver;
 import com.innospots.nexus.platform.organization.dao.EnterpriseDao;
 import com.innospots.nexus.platform.organization.dao.TenantDao;
+import com.innospots.nexus.platform.organization.dao.TenantAdminDao;
 import com.innospots.nexus.platform.organization.endpoint.TenantEndpoint;
 import com.innospots.nexus.platform.organization.endpoint.EnterpriseProfileEndpoint;
+import com.innospots.nexus.platform.organization.endpoint.TenantAdminEndpoint;
 import com.innospots.nexus.platform.organization.operator.EnterpriseOperator;
 import com.innospots.nexus.platform.organization.operator.TenantOperator;
+import com.innospots.nexus.platform.organization.operator.TenantAdminOperator;
 import com.innospots.nexus.platform.organization.service.PlatformEnterpriseProfileService;
+import com.innospots.nexus.platform.organization.service.PlatformTenantAdminService;
 import com.innospots.nexus.platform.organization.service.PlatformTenantService;
 
 /**
@@ -33,6 +40,19 @@ public class PlatformOrganizationConfiguration {
     @Bean
     EnterpriseOperator enterpriseOperator(EnterpriseDao enterpriseDao) {
         return new EnterpriseOperator(enterpriseDao);
+    }
+
+    @Bean
+    TenantAdminOperator tenantAdminOperator(TenantAdminDao tenantAdminDao) {
+        return new TenantAdminOperator(tenantAdminDao);
+    }
+
+    @Bean
+    PlatformTenantAdminService platformTenantAdminService(
+            TenantOperator tenantOperator,
+            TenantAdminOperator tenantAdminOperator,
+            @Autowired(required = false) TenantUserResolver tenantUserResolver) {
+        return new PlatformTenantAdminService(tenantOperator, tenantAdminOperator, tenantUserResolver);
     }
 
     @Bean
@@ -60,5 +80,11 @@ public class PlatformOrganizationConfiguration {
     EnterpriseProfileEndpoint enterpriseProfileEndpoint(
             PlatformEnterpriseProfileService platformEnterpriseProfileService) {
         return new EnterpriseProfileEndpoint(platformEnterpriseProfileService);
+    }
+
+    @Bean
+    @Lazy
+    TenantAdminEndpoint tenantAdminEndpoint(PlatformTenantAdminService platformTenantAdminService) {
+        return new TenantAdminEndpoint(platformTenantAdminService);
     }
 }

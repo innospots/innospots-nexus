@@ -6,6 +6,7 @@ import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
 import com.innospots.nexus.console.auth.domain.request.AuthLoginRequest;
 import com.innospots.nexus.console.auth.domain.vo.AuthTokenVo;
 import com.innospots.nexus.console.auth.service.AuthFacade;
+import com.innospots.nexus.console.auth.service.AuthRsaKeyService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -17,7 +18,7 @@ class PlatformAuthServiceTest {
     @Test
     void loginDelegatesToAuthFacade() {
         AuthFacade authFacade = mock(AuthFacade.class);
-        PlatformAuthService service = new PlatformAuthService(authFacade);
+        PlatformAuthService service = new PlatformAuthService(authFacade, mock(AuthRsaKeyService.class));
 
         AuthLoginRequest request = new AuthLoginRequest("admin", "enc", null, null);
         AuthTokenVo token = new AuthTokenVo(

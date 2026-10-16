@@ -59,12 +59,15 @@ body:
           props:
             name: pluginSearch
             layout: inline
+            initialValues:
+              keyword: ${state.keyword}
+              installed: "${state.installed == '' ? '__ALL__' : state.installed}"
           events:
             onSubmit:
               - action: setState
                 params:
                   keyword: ${event.keyword}
-                  installed: ${event.installed}
+                  installed: "${event.installed == '__ALL__' ? '' : event.installed}"
               - action: reload
                 params:
                   dataSource: plugins
@@ -81,10 +84,10 @@ body:
               props:
                 label: 安装状态
               children:
-                - type: Select
+                - type: FilterSelect
                   props:
                     name: installed
-                    allowClear: true
+                    placeholder: 全部
                     options:
                       - { label: 全部, value: "" }
                       - { label: 已安装, value: installed }
@@ -113,7 +116,7 @@ body:
                               form: pluginSearch
                               values:
                                 keyword: ""
-                                installed: ""
+                                installed: __ALL__
                           - action: setState
                             params:
                               keyword: ""

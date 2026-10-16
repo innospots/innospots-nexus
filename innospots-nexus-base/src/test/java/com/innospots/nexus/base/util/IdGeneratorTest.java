@@ -46,6 +46,36 @@ class IdGeneratorTest {
     }
 
     @Test
+    void generatesSnowflakeBase62WithOptionalPrefix() {
+        IdGenerator generator = IdGenerator.of(3, 4);
+
+        String withPrefix = generator.nextIdBase62("tnt");
+        String withoutPrefix = generator.nextIdBase62(null);
+        String globalId = IdGenerator.nextBase62("pus");
+
+        assertThat(withPrefix).startsWith("tnt").matches("tnt[0-9A-Za-z]{11}");
+        assertThat(withoutPrefix).matches("[0-9A-Za-z]{11}");
+        assertThat(globalId).startsWith("pus").hasSize(3 + 11);
+        assertThat(IdGenerator.snowflakeBase62()).matches("[0-9A-Za-z]{11}");
+        assertThat(IdGenerator.encodeBase62(0L)).isEqualTo("00000000000");
+        assertThat(IdGenerator.encodeBase62(62L)).isEqualTo("00000000010");
+    }
+
+    @Test
+    void snowflakeBase62IdsAreUniqueAndMonotonicInSnowflakeSpace() {
+        IdGenerator generator = IdGenerator.of(1, 1);
+        long first = generator.nextId();
+        String firstEncoded = IdGenerator.encodeBase62(first);
+        long second = generator.nextId();
+        String secondEncoded = IdGenerator.encodeBase62(second);
+
+        assertThat(second).isGreaterThan(first);
+        assertThat(firstEncoded).isNotEqualTo(secondEncoded);
+        assertThat(generator.nextIdBase62("x"))
+                .isNotEqualTo(generator.nextIdBase62("x"));
+    }
+
+    @Test
     void generatesUlidIdsWithOptionalPrefix() {
         String id = IdGenerator.ulid("usr");
         String monotonicId = IdGenerator.monotonicUlid("msg");

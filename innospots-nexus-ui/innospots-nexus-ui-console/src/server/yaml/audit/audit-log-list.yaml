@@ -61,15 +61,6 @@ body:
           children:
             - type: Button
               props:
-                text: 导出
-              events:
-                onClick:
-                  - action: message
-                    params:
-                      messageType: info
-                      text: 导出需后端审计查询接口就绪后对接
-            - type: Button
-              props:
                 text: 刷新
               events:
                 onClick:
@@ -82,14 +73,20 @@ body:
           props:
             name: auditSearch
             layout: inline
+            initialValues:
+              timeRange: ${state.timeRange}
+              operator: ${state.operator}
+              operationType: "${state.operationType == '' ? '__ALL__' : state.operationType}"
+              result: "${state.result == '' ? '__ALL__' : state.result}"
+              keyword: ${state.keyword}
           events:
             onSubmit:
               - action: setState
                 params:
                   timeRange: ${event.timeRange}
                   operator: ${event.operator}
-                  operationType: ${event.operationType}
-                  result: ${event.result}
+                  operationType: "${event.operationType == '__ALL__' ? '' : event.operationType}"
+                  result: "${event.result == '__ALL__' ? '' : event.result}"
                   keyword: ${event.keyword}
                   pageNo: 1
               - action: reload
@@ -103,6 +100,7 @@ body:
                 - type: Select
                   props:
                     name: timeRange
+                    placeholder: 最近 7 天
                     options:
                       - { label: 最近 7 天, value: last7d }
                       - { label: 最近 24 小时, value: last24h }
@@ -118,10 +116,10 @@ body:
               props:
                 label: 操作类型
               children:
-                - type: Select
+                - type: FilterSelect
                   props:
                     name: operationType
-                    allowClear: true
+                    placeholder: 全部
                     options:
                       - { label: 全部, value: "" }
                       - { label: 创建, value: CREATE }
@@ -132,10 +130,10 @@ body:
               props:
                 label: 结果
               children:
-                - type: Select
+                - type: FilterSelect
                   props:
                     name: result
-                    allowClear: true
+                    placeholder: 全部
                     options:
                       - { label: 全部, value: "" }
                       - { label: 成功, value: SUCCESS }
@@ -173,8 +171,8 @@ body:
                               values:
                                 timeRange: last7d
                                 operator: ""
-                                operationType: ""
-                                result: ""
+                                operationType: __ALL__
+                                result: __ALL__
                                 keyword: ""
                           - action: setState
                             params:

@@ -7,6 +7,7 @@ import jakarta.inject.Singleton;
 
 import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
 import com.innospots.nexus.console.auth.service.AuthFacade;
+import com.innospots.nexus.console.auth.service.AuthRsaKeyService;
 import com.innospots.nexus.console.auth.service.AuthTokenPairIssuer;
 import com.innospots.nexus.console.auth.service.LoginCaptchaGate;
 import com.innospots.nexus.console.auth.service.TokenIssuer;
@@ -92,8 +93,10 @@ public class PlatformAuthBeans {
 
     @Produces
     @Singleton
-    PlatformAuthService platformAuthService(@Named("platformAuthFacade") AuthFacade authFacade) {
-        return new PlatformAuthService(authFacade);
+    PlatformAuthService platformAuthService(
+            @Named("platformAuthFacade") AuthFacade authFacade,
+            AuthRsaKeyService authRsaKeyService) {
+        return new PlatformAuthService(authFacade, authRsaKeyService);
     }
 
     @Produces

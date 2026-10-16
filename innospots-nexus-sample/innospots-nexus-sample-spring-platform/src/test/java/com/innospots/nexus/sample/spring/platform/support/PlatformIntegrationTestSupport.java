@@ -85,6 +85,7 @@ public final class PlatformIntegrationTestSupport {
 
     public static void cleanOrganization(JdbcTemplate jdbcTemplate) {
         jdbcTemplate.execute("DELETE FROM nx_pl_enterprise");
+        jdbcTemplate.execute("DELETE FROM nx_pl_tenant_admin");
         jdbcTemplate.execute("DELETE FROM nx_pl_tenant");
     }
 

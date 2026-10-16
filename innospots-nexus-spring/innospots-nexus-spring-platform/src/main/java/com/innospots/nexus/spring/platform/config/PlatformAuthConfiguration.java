@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Lazy;
 
 import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
 import com.innospots.nexus.console.auth.service.AuthFacade;
+import com.innospots.nexus.console.auth.service.AuthRsaKeyService;
 import com.innospots.nexus.console.auth.service.AuthTokenPairIssuer;
 import com.innospots.nexus.console.auth.service.LoginCaptchaGate;
 import com.innospots.nexus.console.auth.service.TokenIssuer;
@@ -105,8 +106,10 @@ public class PlatformAuthConfiguration {
     }
 
     @Bean
-    PlatformAuthService platformAuthService(@Qualifier("platformAuthFacade") AuthFacade authFacade) {
-        return new PlatformAuthService(authFacade);
+    PlatformAuthService platformAuthService(
+            @Qualifier("platformAuthFacade") AuthFacade authFacade,
+            AuthRsaKeyService authRsaKeyService) {
+        return new PlatformAuthService(authFacade, authRsaKeyService);
     }
 
     @Bean

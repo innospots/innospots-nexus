@@ -11,8 +11,7 @@ body:
       props:
         items:
           - label: 运营管理
-            href: /ops/platform-users
-          - label: 平台用户
+          - label: 用户列表
             href: /ops/platform-users
           - label: 添加用户
     - type: Button

@@ -26,13 +26,12 @@ pages:
   - { id: audit-log-detail, path: /system/audit-logs/:logId, title: 审计日志详情, version: 1, lazy: true }
   - { id: plugin-list, path: /system/plugins, title: 插件管理, version: 1, lazy: true }
   - { id: plugin-detail, path: /system/plugins/:pluginId, title: 插件详情, version: 1, lazy: true }
-  - { id: platform-user-list, path: /ops/platform-users, title: 平台用户, version: 1, lazy: true }
+  - { id: platform-user-list, path: /ops/platform-users, title: 用户列表, version: 1, lazy: true }
   - { id: platform-user-create, path: /ops/platform-users/create, title: 添加平台用户, version: 1, lazy: true }
   - { id: platform-user-detail, path: /ops/platform-users/:platformUserId, title: 平台用户详情, version: 1, lazy: true }
   - { id: platform-invite-list, path: /ops/platform-users/invites, title: 邀请列表, version: 1, lazy: true }
   - { id: platform-access-request-list, path: /ops/platform-users/access-requests, title: 注册审批, version: 1, lazy: true }
   - { id: tenant-list, path: /ops/organization/tenants, title: 租户管理, version: 1, lazy: true }
-  - { id: tenant-create, path: /ops/organization/tenants/create, title: 开通租户, version: 1, lazy: true }
   - { id: tenant-detail, path: /ops/organization/tenants/:tenantId, title: 租户详情, version: 1, lazy: true }
 
 menus:
@@ -52,13 +51,9 @@ menus:
     order: 2
     children:
       - { id: nav-organization-tenants, type: page, pageId: tenant-list, title: 租户管理, layout: admin }
-      - id: nav-platform-users-group
-        type: group
-        title: 平台用户
-        children:
-          - { id: nav-platform-users, type: page, pageId: platform-user-list, title: 用户列表, layout: admin }
-          - { id: nav-platform-invites, type: page, pageId: platform-invite-list, title: 邀请, layout: admin }
-          - { id: nav-platform-access-requests, type: page, pageId: platform-access-request-list, title: 注册审批, layout: admin }
+      - { id: nav-platform-users, type: page, pageId: platform-user-list, title: 用户列表, layout: admin }
+      - { id: nav-platform-invites, type: page, pageId: platform-invite-list, title: 邀请, layout: admin }
+      - { id: nav-platform-access-requests, type: page, pageId: platform-access-request-list, title: 注册审批, layout: admin }
   - id: system
     type: group
     title: 系统管理
@@ -77,7 +72,6 @@ menus:
   - { id: plugin-detail, type: page, pageId: plugin-detail, layout: admin, hidden: true, activeMenu: nav-plugins }
   - { id: platform-user-create, type: page, pageId: platform-user-create, layout: admin, hidden: true, activeMenu: nav-platform-users }
   - { id: platform-user-detail, type: page, pageId: platform-user-detail, layout: admin, hidden: true, activeMenu: nav-platform-users }
-  - { id: tenant-create, type: page, pageId: tenant-create, layout: admin, hidden: true, activeMenu: nav-organization-tenants }
   - { id: tenant-detail, type: page, pageId: tenant-detail, layout: admin, hidden: true, activeMenu: nav-organization-tenants }
 
 layouts:
@@ -138,11 +132,6 @@ layouts:
                           params:
                             messageType: info
                             text: 个人中心暂未开放
-                onLocaleChange:
-                  - action: message
-                    params:
-                      messageType: info
-                      text: 语言切换为 ${event}（演示）
               children:
                 - type: ThemeSwitcher
             - type: Content

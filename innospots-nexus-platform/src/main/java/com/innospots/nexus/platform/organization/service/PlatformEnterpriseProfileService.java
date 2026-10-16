@@ -41,7 +41,9 @@ public class PlatformEnterpriseProfileService {
     public EnterpriseProfileVo getEnterpriseProfile(String tenantId) {
         TenantEntity tenant = tenantOperator.requireById(tenantId);
         requireEnterpriseTenantType(tenant);
-        return toVo(enterpriseOperator.requireByTenantId(tenantId));
+        return enterpriseOperator.findByTenantId(tenantId)
+                .map(PlatformEnterpriseProfileService::toVo)
+                .orElse(null);
     }
 
     /**

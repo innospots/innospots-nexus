@@ -19,6 +19,7 @@ import com.innospots.nexus.platform.organization.domain.request.TenantPageReques
 import com.innospots.nexus.platform.organization.domain.request.TenantStatusUpdateRequest;
 import com.innospots.nexus.platform.organization.domain.request.TenantUpdateRequest;
 import com.innospots.nexus.platform.organization.domain.vo.TenantVo;
+import com.innospots.nexus.platform.organization.endpoint.TenantAdminEndpoint;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -52,6 +53,11 @@ class TenantEndpointContractsTest {
                 TenantStatusUpdateRequest.class);
         assertThat(Arrays.stream(TenantEndpoint.class.getMethods()).map(Method::getName))
                 .contains("pageTenants", "createTenant", "getTenant", "updateTenant", "updateTenantStatus");
+        assertThat(TenantAdminEndpoint.class.getAnnotation(Path.class).value())
+                .isEqualTo(com.innospots.nexus.platform.config.PlatformConstant.TENANT_ADMINS_PATH);
+        assertHttpMethod(TenantAdminEndpoint.class, "listAdmins", GET.class, String.class);
+        assertHttpMethod(TenantAdminEndpoint.class, "addAdmin", POST.class, String.class,
+                com.innospots.nexus.platform.organization.domain.request.TenantAdminAddRequest.class);
     }
 
     @Test
@@ -62,9 +68,11 @@ class TenantEndpointContractsTest {
                 .containsExactly(
                         "tenantName",
                         "tenantCode",
-                        "tenantType",
-                        "planCode",
-                        "ownerTenantUserId");
+                        "tenantType");
+        assertThat(TenantUpdateRequest.class.isRecord()).isTrue();
+        assertThat(Arrays.stream(TenantUpdateRequest.class.getRecordComponents())
+                .map(RecordComponent::getName))
+                .containsExactly("tenantName", "planCode");
         assertThat(TenantVo.class.isRecord()).isTrue();
         assertThat(Arrays.stream(TenantVo.class.getRecordComponents())
                 .map(RecordComponent::getName))

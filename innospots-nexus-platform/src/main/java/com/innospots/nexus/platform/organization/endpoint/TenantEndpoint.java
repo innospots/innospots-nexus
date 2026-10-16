@@ -53,7 +53,10 @@ public class TenantEndpoint {
     }
 
     @POST
-    @Operation(operationId = "platformTenantCreate", summary = "开通租户")
+    @Operation(
+            operationId = "platformTenantCreate",
+            summary = "开通租户",
+            description = "仅创建租户身份（名称、类型、唯一编码）；企业档案见 EnterpriseProfileEndpoint，管理员见 TenantAdminEndpoint。")
     public R<TenantVo> createTenant(TenantCreateRequest request) {
         return R.ok(platformTenantService.createTenant(request));
     }

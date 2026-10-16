@@ -15,6 +15,7 @@ import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexus.console.auth.domain.request.PasswordChangeRequest;
 import com.innospots.nexus.console.auth.domain.request.TokenRefreshRequest;
 import com.innospots.nexus.console.auth.domain.vo.AuthTokenVo;
+import com.innospots.nexus.console.auth.endpoint.AuthSessionEndpoint;
 import com.innospots.nexus.core.openapi.NexusOpenApiSecurityNames;
 import com.innospots.nexus.platform.auth.service.PlatformAuthService;
 import com.innospots.nexus.platform.auth.service.PlatformPasswordService;
@@ -36,11 +37,12 @@ import com.innospots.nexus.platform.config.PlatformConstant;
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "PlatformAuthSession", description = "运营管理平台会话")
 @RequiredArgsConstructor
-public class PlatformAuthSessionEndpoint {
+public class PlatformAuthSessionEndpoint implements AuthSessionEndpoint {
 
     private final PlatformAuthService platformAuthService;
     private final PlatformPasswordService platformPasswordService;
 
+    @Override
     @POST
     @Path("/refresh")
     @Operation(operationId = "platformAuthRefresh", summary = "刷新访问令牌")
@@ -48,6 +50,7 @@ public class PlatformAuthSessionEndpoint {
         return R.ok(platformAuthService.refresh(request));
     }
 
+    @Override
     @POST
     @Path("/logout")
     @Operation(operationId = "platformAuthLogout", summary = "登出当前会话")
@@ -57,6 +60,7 @@ public class PlatformAuthSessionEndpoint {
         return R.ok();
     }
 
+    @Override
     @POST
     @Path("/password/change")
     @Operation(operationId = "platformAuthPasswordChange", summary = "修改当前用户密码")

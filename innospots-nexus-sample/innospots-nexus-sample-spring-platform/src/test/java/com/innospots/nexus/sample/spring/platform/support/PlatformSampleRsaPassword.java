@@ -30,7 +30,10 @@ public final class PlatformSampleRsaPassword {
         return CryptoUtils.encryptRsa(plaintext, samplePublicKeyBase64());
     }
 
-    private static String samplePublicKeyBase64() {
+    /**
+     * 与 {@code nexus/console-auth.yaml} 私钥配对的 SPKI 公钥（Base64）。
+     */
+    public static String samplePublicKeyBase64() {
         if (cachedPublicKeyBase64 == null) {
             cachedPublicKeyBase64 = derivePublicKeyBase64(SAMPLE_PRIVATE_KEY_BASE64);
         }

@@ -31,11 +31,8 @@ public class ConsoleAuthProperties {
     /** 刷新令牌有效期（秒）。 */
     private long refreshTokenTtlSeconds = 604_800L;
 
-    /** 租户域登录是否要求图形验证码。 */
-    private boolean tenantLoginCaptchaEnabled = true;
-
-    /** 平台域登录是否要求图形验证码。 */
-    private boolean platformLoginCaptchaEnabled = true;
+    /** 登录是否要求图形验证码。 */
+    private boolean loginCaptchaEnabled = true;
 
     /** 连续登录失败多少次后锁定账号。 */
     private int loginMaxFailedAttempts = 5;
@@ -58,7 +55,7 @@ public class ConsoleAuthProperties {
     /**
      * {@code nexus.console.auth.rsa.*} 登录密码 RSA 解密。
      *
-     * <p>映射示例：{@code nexus.console.auth.rsa.private-key}。</p>
+     * <p>映射示例：{@code nexus.console.auth.rsa.public-key}、{@code nexus.console.auth.rsa.private-key}。</p>
      *
      * @author Smars
      * @date 2026/09/23
@@ -66,6 +63,9 @@ public class ConsoleAuthProperties {
     @Getter
     @Setter
     public static class Rsa {
+
+        /** PEM 或 Base64 编码的 X.509 SPKI 公钥（供前端 RSA-OAEP 加密）。 */
+        private String publicKey;
 
         /** PEM 或 Base64 编码的 RSA 私钥。 */
         private String privateKey;

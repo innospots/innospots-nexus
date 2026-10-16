@@ -37,8 +37,7 @@ body:
       props:
         items:
           - label: 运营管理
-            href: /ops/platform-users
-          - label: 平台用户
+          - label: 用户列表
             href: /ops/platform-users
           - label: "${data.user != null && data.user.loginName != null ? data.user.loginName : params.platformUserId}"
     - type: Button
@@ -109,7 +108,7 @@ body:
                   - action: message
                     params:
                       messageType: info
-                      text: 管理员重置密码 API 待扩展；可引导用户走找回密码流程。
+                      text: 请引导用户使用「找回密码」流程。
             - type: Button
               props:
                 text: "${state.editing ? '取消编辑' : '编辑'}"
@@ -249,8 +248,3 @@ body:
           props:
             text: 角色（Console）
             strong: true
-        - type: Typography
-          props:
-            variant: muted
-            text: 已绑定平台域角色请在「角色管理」中配置；本页只读展示待角色绑定 API 对接。
-            className: mt-2

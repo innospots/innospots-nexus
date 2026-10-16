@@ -77,7 +77,7 @@ body:
                     content:
                       type: Text
                       props:
-                        text: 成员目录展示需 UserDirectory 补充；请在后端就绪后对接批量添加接口 POST /api/d/platform/roles/${params.roleId}/bindings。
+                        text: 暂无可添加的成员。
     - type: Tabs
       props:
         activeKey: members

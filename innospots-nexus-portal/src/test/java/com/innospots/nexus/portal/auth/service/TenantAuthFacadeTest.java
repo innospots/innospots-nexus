@@ -116,7 +116,7 @@ class TenantAuthFacadeTest {
 
         private static AuthHarness harness(InMemoryDirectory directory) {
             AuthConfig authConfig = new AuthConfig();
-            authConfig.setTenantLoginCaptchaEnabled(false);
+            authConfig.setLoginCaptchaEnabled(false);
             LoginCaptchaGate captchaGate = new LoginCaptchaGate(authConfig, mock(CaptchaChallengeService.class));
             CredentialService credentialService = mock(CredentialService.class);
             stubAuthenticate(credentialService, directory);

@@ -1,6 +1,7 @@
 package com.innospots.nexus.platform.organization.operator;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -32,6 +33,8 @@ import com.innospots.nexus.platform.organization.status.PlatformOrganizationStat
 @Slf4j
 @RequiredArgsConstructor
 public class TenantOperator {
+
+    private static final Pattern TENANT_CODE_PATTERN = Pattern.compile("^[A-Za-z0-9_]+$");
 
     private final TenantDao tenantDao;
 
@@ -113,10 +116,24 @@ public class TenantOperator {
      */
     public void ensureTenantCodeAvailable(String tenantCode) {
         Checks.notBlank(tenantCode, "tenantCode");
+        requireTenantCodeFormat(tenantCode);
         LambdaQueryWrapper<TenantEntity> query = new LambdaQueryWrapper<>();
         query.eq(TenantEntity::getTenantCode, tenantCode.trim());
         if (tenantDao.selectCount(query) > 0) {
             throw NexusException.build(PlatformOrganizationStatusCode.TENANT_CODE_DUPLICATED);
+        }
+    }
+
+    /**
+     * 校验租户编码格式：仅字母、数字与下划线。
+     *
+     * @param tenantCode 待校验编码
+     */
+    public static void requireTenantCodeFormat(String tenantCode) {
+        requireText(tenantCode, "tenantCode");
+        String normalized = tenantCode.trim();
+        if (!TENANT_CODE_PATTERN.matcher(normalized).matches()) {
+            throw NexusException.build(PlatformOrganizationStatusCode.TENANT_CODE_INVALID_FORMAT);
         }
     }
 
@@ -133,6 +150,7 @@ public class TenantOperator {
         tenant.setTenantType(TenantType.valueOf(tenant.getTenantType().trim().toUpperCase()).name());
         tenant.setTenantCode(tenant.getTenantCode().trim());
         tenant.setTenantName(tenant.getTenantName().trim());
+        requireTenantCodeFormat(tenant.getTenantCode());
     }
 
     /**

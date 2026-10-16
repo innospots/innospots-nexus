@@ -5,7 +5,9 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.innospots.nexus.console.auth.service.AuthRsaKeyService;
 import com.innospots.nexus.console.config.AuthConfig;
+import com.innospots.nexus.console.config.AuthConfigRsaMapper;
 import com.innospots.nexus.console.credential.password.PasswordDecryptor;
 import com.innospots.nexus.console.credential.password.RsaPasswordDecryptor;
 
@@ -30,8 +32,14 @@ public class ConsoleAuthConfiguration {
     /** 配置 RSA 私钥时启用登录密码解密。 */
     @Bean
     @ConditionalOnProperty(prefix = "nexus.console.auth.rsa", name = "private-key")
-    PasswordDecryptor passwordDecryptor(ConsoleAuthProperties authProperties) {
-        return new RsaPasswordDecryptor(authProperties.getRsa().getPrivateKey());
+    PasswordDecryptor passwordDecryptor(AuthConfig authConfig) {
+        String privateKey = authConfig.getRsa().getPrivateKey();
+        return new RsaPasswordDecryptor(privateKey);
+    }
+
+    @Bean
+    AuthRsaKeyService authRsaKeyService(AuthConfig authConfig) {
+        return new AuthRsaKeyService(authConfig);
     }
 
     private static AuthConfig toAuthConfig(ConsoleAuthProperties properties) {
@@ -42,8 +50,14 @@ public class ConsoleAuthConfiguration {
         }
         config.setAccessTokenTtlSeconds(properties.getAccessTokenTtlSeconds());
         config.setRefreshTokenTtlSeconds(properties.getRefreshTokenTtlSeconds());
-        config.setTenantLoginCaptchaEnabled(properties.isTenantLoginCaptchaEnabled());
-        config.setPlatformLoginCaptchaEnabled(properties.isPlatformLoginCaptchaEnabled());
+        config.setLoginCaptchaEnabled(properties.isLoginCaptchaEnabled());
+        ConsoleAuthProperties.Rsa rsaProperties = properties.getRsa();
+        if (rsaProperties == null) {
+            config.setRsa(new AuthConfig.Rsa());
+        } else {
+            config.setRsa(AuthConfigRsaMapper.map(
+                    rsaProperties.getPublicKey(), rsaProperties.getPrivateKey()));
+        }
         return config;
     }
 }

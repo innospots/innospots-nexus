@@ -39,7 +39,42 @@ public enum PlatformOrganizationStatusCode implements StatusCode {
             "0005",
             StatusCategory.DATA_CONSISTENCY,
             "Tenant code already exists",
-            409);
+            409),
+
+    /** 租户编码格式非法（仅允许字母、数字、下划线）。 */
+    TENANT_CODE_INVALID_FORMAT(
+            "0006",
+            StatusCategory.BUSINESS_RULE,
+            "Tenant code must contain only letters, digits, and underscores",
+            400),
+
+    /** 同一租户下该邮箱已登记为管理员。 */
+    TENANT_ADMIN_EMAIL_DUPLICATED(
+            "0007",
+            StatusCategory.DATA_CONSISTENCY,
+            "Tenant admin email already exists for tenant",
+            409),
+
+    /** 管理员邮箱格式非法。 */
+    TENANT_ADMIN_EMAIL_INVALID(
+            "0008",
+            StatusCategory.BUSINESS_RULE,
+            "Tenant admin email format is invalid",
+            400),
+
+    /** 邮箱在租户用户域中不存在（需用户先注册或邀请）。 */
+    TENANT_USER_EMAIL_NOT_FOUND(
+            "0009",
+            StatusCategory.RESOURCE_DATA,
+            "No tenant user found for email",
+            404),
+
+    /** 管理员角色非法（仅 OWNER、ADMINISTRATOR）。 */
+    TENANT_ADMIN_ROLE_INVALID(
+            "0010",
+            StatusCategory.BUSINESS_RULE,
+            "Tenant admin role must be OWNER or ADMINISTRATOR",
+            400);
 
     private static final String MODULE = "PLO";
 

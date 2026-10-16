@@ -9,11 +9,12 @@ import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
- * ID 生成工具，提供 Snowflake 分布式 ID、可配置字符集的随机 ID、
- * 时间戳前缀 ID 以及批量生成能力。
+ * ID 生成工具，提供 Snowflake 分布式 ID、Snowflake + 定长（11 位）Base62 字符串 ID、
+ * 可配置字符集的随机 ID、时间戳前缀 ID 以及批量生成能力。
  *
  * @author Smars
  * @date 2026/09/13
@@ -25,6 +26,10 @@ public final class IdGenerator {
     private static final String ALPHANUMERIC_UPPER_CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private static final String ALPHANUMERIC_LOWER_CHARS = "0123456789abcdefghijklmnopqrstuvwxyz";
     private static final String HEXADECIMAL_CHARS = "0123456789ABCDEF";
+    private static final String BASE62 =
+            "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    /** Snowflake 数值 Base62 编码的固定宽度（左补 {@code 0}）。 */
+    private static final int BASE62_SNOWFLAKE_ENCODED_LENGTH = 11;
     private static final int MAX_NODE_VALUE = 32;
     private static final int DEFAULT_RANDOM_LENGTH = 8;
     private static final SecureRandom RANDOM = new SecureRandom();
@@ -98,6 +103,44 @@ public final class IdGenerator {
     }
 
     /**
+     * 从全局生成器获取下一个 Snowflake ID 的 Base62 字符串（可带前缀）。
+     *
+     * @param prefix 可选前缀，如实体 {@code idPrefix()}
+     * @return {@code [prefix] + base62(snowflakeId)}
+     */
+    public static String nextBase62(String prefix) {
+        return global.nextIdBase62(prefix);
+    }
+
+    /**
+     * 生成 Snowflake ID 的 Base62 字符串（使用全局生成器，无前缀）。
+     *
+     * @return Base62 编码的 Snowflake ID
+     */
+    public static String nextBase62() {
+        return nextBase62(null);
+    }
+
+    /**
+     * 生成 Snowflake ID 的 Base62 字符串（可带前缀）。
+     *
+     * @param prefix 可选前缀
+     * @return {@code [prefix] + base62(snowflakeId)}
+     */
+    public static String snowflakeBase62(String prefix) {
+        return nextBase62(prefix);
+    }
+
+    /**
+     * 生成 Snowflake ID 的 Base62 字符串（使用全局生成器，无前缀）。
+     *
+     * @return Base62 编码的 Snowflake ID
+     */
+    public static String snowflakeBase62() {
+        return nextBase62(null);
+    }
+
+    /**
      * 生成下一个 Snowflake ID（线程安全）。
      *
      * @return Snowflake ID
@@ -113,6 +156,16 @@ public final class IdGenerator {
      */
     public String nextIdString() {
         return String.valueOf(nextId());
+    }
+
+    /**
+     * 生成下一个 Snowflake ID 的 Base62 字符串（可带前缀）。
+     *
+     * @param prefix 可选前缀
+     * @return {@code [prefix] + base62(snowflakeId)}
+     */
+    public String nextIdBase62(String prefix) {
+        return prepend(prefix, encodeBase62(nextId()));
     }
 
     /**
@@ -204,6 +257,25 @@ public final class IdGenerator {
             ids.add(random(prefix, type, length));
         }
         return ids;
+    }
+
+    /**
+     * 将非负 Snowflake 数值编码为定长 Base62 字符串（11 位，左侧补 {@code 0}）。
+     */
+    static String encodeBase62(long value) {
+        if (value < 0) {
+            throw new IllegalArgumentException("Snowflake ID must be non-negative");
+        }
+
+        char[] result = new char[BASE62_SNOWFLAKE_ENCODED_LENGTH];
+        Arrays.fill(result, '0');
+
+        for (int i = BASE62_SNOWFLAKE_ENCODED_LENGTH - 1; i >= 0 && value != 0; i--) {
+            result[i] = BASE62.charAt((int) (value % 62));
+            value /= 62;
+        }
+
+        return new String(result);
     }
 
     private static String randomPart(String charset, int length) {

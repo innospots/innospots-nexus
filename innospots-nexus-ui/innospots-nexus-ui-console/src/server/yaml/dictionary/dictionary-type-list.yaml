@@ -126,12 +126,15 @@ body:
           props:
             name: dictSearch
             layout: inline
+            initialValues:
+              input: ${state.input}
+              status: "${state.status == '' ? '__ALL__' : state.status}"
           events:
             onSubmit:
               - action: setState
                 params:
                   input: ${event.input}
-                  status: ${event.status}
+                  status: "${event.status == '__ALL__' ? '' : event.status}"
                   pageNo: 1
               - action: reload
                 params:
@@ -148,10 +151,10 @@ body:
               props:
                 label: 状态
               children:
-                - type: Select
+                - type: FilterSelect
                   props:
                     name: status
-                    allowClear: true
+                    placeholder: 全部
                     options:
                       - { label: 全部, value: "" }
                       - { label: 启用, value: ENABLED }
@@ -180,7 +183,7 @@ body:
                               form: dictSearch
                               values:
                                 input: ""
-                                status: ""
+                                status: __ALL__
                           - action: setState
                             params:
                               input: ""

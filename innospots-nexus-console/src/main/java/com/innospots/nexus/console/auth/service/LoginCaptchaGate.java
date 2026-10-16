@@ -37,13 +37,7 @@ public final class LoginCaptchaGate {
      */
     public boolean isRequired(SecurityRealm realm) {
         Checks.notNull(realm, "realm");
-        if (realm == SecurityRealm.PLATFORM) {
-            return authConfig.isPlatformLoginCaptchaEnabled();
-        }
-        if (realm == SecurityRealm.TENANT) {
-            return authConfig.isTenantLoginCaptchaEnabled();
-        }
-        return false;
+        return authConfig.isLoginCaptchaEnabled();
     }
 
     /**

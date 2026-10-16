@@ -1,7 +1,7 @@
 dsl: "1.0"
 page:
   id: platform-user-list
-  title: 平台用户
+  title: 用户列表
   name: platformUserList
 
 state:
@@ -30,29 +30,7 @@ body:
       props:
         items:
           - label: 运营管理
-          - label: 平台用户
           - label: 用户列表
-    - type: Tabs
-      props:
-        activeKey: users
-        items:
-          - { key: users, label: 用户列表 }
-          - { key: invites, label: 邀请 }
-          - { key: access, label: 注册审批 }
-      events:
-        onChange:
-          - action: if
-            params:
-              condition: ${event == 'invites'}
-              then:
-                - action: navigate
-                  params: { to: /ops/platform-users/invites }
-          - action: if
-            params:
-              condition: ${event == 'access'}
-              then:
-                - action: navigate
-                  params: { to: /ops/platform-users/access-requests }
     - type: Flex
       props:
         className: mt-2
@@ -67,7 +45,7 @@ body:
             - type: Typography
               props:
                 variant: h3
-                text: 平台用户
+                text: 用户列表
             - type: Typography
               props:
                 variant: muted
@@ -87,12 +65,15 @@ body:
           props:
             name: platformUserSearch
             layout: inline
+            initialValues:
+              input: ${state.input}
+              status: "${state.status == '' ? '__ALL__' : state.status}"
           events:
             onSubmit:
               - action: setState
                 params:
                   input: ${event.input}
-                  status: ${event.status}
+                  status: "${event.status == '__ALL__' ? '' : event.status}"
                   pageNo: 1
               - action: reload
                 params:
@@ -110,11 +91,10 @@ body:
               props:
                 label: 状态
               children:
-                - type: Select
+                - type: FilterSelect
                   props:
                     name: status
                     placeholder: 全部
-                    allowClear: true
                     options:
                       - { label: 全部, value: "" }
                       - { label: 正常, value: ACTIVE }
@@ -145,7 +125,7 @@ body:
                               form: platformUserSearch
                               values:
                                 input: ""
-                                status: ""
+                                status: __ALL__
                           - action: setState
                             params:
                               input: ""

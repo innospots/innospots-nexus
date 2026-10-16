@@ -12,6 +12,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexus.console.auth.domain.request.PasswordResetRequest;
+import com.innospots.nexus.console.auth.endpoint.PublicPasswordResetEndpoint;
 import com.innospots.nexus.platform.auth.service.PlatformPasswordService;
 import com.innospots.nexus.platform.config.PlatformConstant;
 
@@ -28,10 +29,11 @@ import com.innospots.nexus.platform.config.PlatformConstant;
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "PlatformPublicPasswordReset", description = "运营管理平台密码重置")
 @RequiredArgsConstructor
-public class PlatformPublicPasswordResetEndpoint {
+public class PlatformPublicPasswordResetEndpoint implements PublicPasswordResetEndpoint {
 
     private final PlatformPasswordService platformPasswordService;
 
+    @Override
     @POST
     @Path("/reset")
     @Operation(operationId = "platformAuthPasswordReset", summary = "凭验证码重置密码")

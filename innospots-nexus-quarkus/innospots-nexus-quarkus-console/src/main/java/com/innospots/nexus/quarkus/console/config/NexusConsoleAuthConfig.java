@@ -20,11 +20,9 @@ public interface NexusConsoleAuthConfig {
     @WithDefault("604800")
     long refreshTokenTtlSeconds();
 
+    @WithName("login-captcha-enabled")
     @WithDefault("true")
-    boolean tenantLoginCaptchaEnabled();
-
-    @WithDefault("true")
-    boolean platformLoginCaptchaEnabled();
+    boolean loginCaptchaEnabled();
 
     @WithDefault("5")
     int loginMaxFailedAttempts();
@@ -38,6 +36,9 @@ public interface NexusConsoleAuthConfig {
      * {@code nexus.console.auth.rsa.*}。
      */
     interface Rsa {
+
+        @WithName("public-key")
+        Optional<String> publicKey();
 
         @WithName("private-key")
         Optional<String> privateKey();

@@ -10,11 +10,19 @@ import org.junit.jupiter.api.Test;
 
 import com.innospots.nexus.console.auth.domain.request.PasswordChangeRequest;
 import com.innospots.nexus.console.auth.domain.request.TokenRefreshRequest;
+import com.innospots.nexus.console.auth.endpoint.AuthSessionEndpoint;
 import com.innospots.nexus.platform.config.PlatformConstant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class PlatformAuthSessionEndpointContractsTest {
+
+    @Test
+    void implementsConsoleAuthSessionEndpointOnPlatformPath() {
+        assertThat(AuthSessionEndpoint.class.isAssignableFrom(PlatformAuthSessionEndpoint.class)).isTrue();
+        assertThat(PlatformAuthSessionEndpoint.class.getAnnotation(Path.class).value())
+                .isEqualTo(PlatformConstant.AUTH_PATH);
+    }
 
     @Test
     void sessionEndpointUsesAuthenticatedAuthPathAndHasNoRegister() {

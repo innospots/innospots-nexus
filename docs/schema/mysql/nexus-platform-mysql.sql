@@ -36,6 +36,22 @@ CREATE TABLE IF NOT EXISTS nx_pl_tenant (
     CONSTRAINT uk_nx_pl_tenant_code UNIQUE (tenant_code)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS nx_pl_tenant_admin (
+    tenant_admin_id  VARCHAR(32)   NOT NULL,
+    tenant_id        VARCHAR(32)   NOT NULL,
+    email            VARCHAR(128)  NOT NULL,
+    admin_role       VARCHAR(32)   NOT NULL,
+    tenant_user_id   VARCHAR(32),
+    display_name     VARCHAR(128),
+    created_at       DATETIME(6),
+    updated_at       DATETIME(6),
+    created_by       VARCHAR(64),
+    updated_by       VARCHAR(64),
+    PRIMARY KEY (tenant_admin_id),
+    CONSTRAINT uk_nx_pl_tenant_admin_email UNIQUE (tenant_id, email),
+    KEY idx_nx_pl_tenant_admin_tenant (tenant_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS nx_pl_user (
     platform_user_id  VARCHAR(32)  NOT NULL,
     login_name        VARCHAR(64)  NOT NULL,

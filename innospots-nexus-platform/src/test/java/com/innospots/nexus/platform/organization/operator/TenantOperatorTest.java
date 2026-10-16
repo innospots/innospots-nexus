@@ -43,6 +43,18 @@ class TenantOperatorTest {
     }
 
     @Test
+    void insertRejectsInvalidTenantCodeFormat() {
+        TenantOperator operator = new TenantOperator(mock(TenantDao.class));
+        TenantEntity tenant = new TenantEntity();
+        tenant.setTenantName("Acme");
+        tenant.setTenantCode("acme-corp");
+        tenant.setTenantType(TenantType.TEAM.name());
+
+        assertThatThrownBy(() -> operator.insert(tenant))
+                .isInstanceOf(NexusException.class);
+    }
+
+    @Test
     void insertRejectsInvalidTenantType() {
         TenantOperator operator = new TenantOperator(mock(TenantDao.class));
         TenantEntity tenant = new TenantEntity();

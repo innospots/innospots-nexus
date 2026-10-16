@@ -12,9 +12,12 @@ import { CardLink, StatusToggleIcon, TextLink } from "./card-links";
 import { ThemeSwitcher } from "./theme-switcher";
 import { SafeHeader } from "./safe-header";
 import { CatalogTree } from "./catalog-tree";
+import { ConsoleMenuTree } from "./console-menu-tree";
+import { FilterSelect } from "./filter-select";
 import { DictionaryTypeSavePanel } from "./dictionary-type-save-panel";
 import { I18nText } from "./i18n-text";
 import { PlatformUserCreatePanel } from "./platform-user-create-panel";
+import { ShellSitemapMenu } from "./shell-sitemap-menu";
 import {
   PlatformAccessRegistrationForm,
   PlatformInviteAcceptForm,
@@ -27,8 +30,11 @@ import {
 } from "./auth/platform-auth-forms";
 
 export const pactorComponents: Record<string, unknown> = {
+  SitemapMenu: ShellSitemapMenu,
   Header: SafeHeader,
   CatalogTree,
+  ConsoleMenuTree,
+  FilterSelect,
   DictionaryTypeSavePanel,
   PlatformUserCreatePanel,
   PlatformLoginForm,

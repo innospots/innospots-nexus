@@ -1,13 +1,13 @@
 package com.innospots.nexus.platform.auth.service;
 
-import lombok.RequiredArgsConstructor;
-
 import com.innospots.nexus.console.auth.domain.request.AuthCaptchaIssueRequest;
 import com.innospots.nexus.console.auth.domain.request.AuthLoginRequest;
 import com.innospots.nexus.console.auth.domain.request.TokenRefreshRequest;
 import com.innospots.nexus.console.auth.domain.vo.AuthCaptchaVo;
+import com.innospots.nexus.console.auth.domain.vo.AuthRsaPublicKeyVo;
 import com.innospots.nexus.console.auth.domain.vo.AuthTokenVo;
 import com.innospots.nexus.console.auth.service.AuthFacade;
+import com.innospots.nexus.console.auth.service.AuthRsaKeyService;
 
 /**
  * 运营管理平台登录与会话令牌编排。
@@ -20,10 +20,15 @@ import com.innospots.nexus.console.auth.service.AuthFacade;
  * @see com.innospots.nexus.platform.auth.endpoint.PlatformPublicAuthEndpoint
  * @see com.innospots.nexus.platform.auth.endpoint.PlatformAuthSessionEndpoint
  */
-@RequiredArgsConstructor
 public class PlatformAuthService {
 
     private final AuthFacade authFacade;
+    private final AuthRsaKeyService authRsaKeyService;
+
+    public PlatformAuthService(AuthFacade authFacade, AuthRsaKeyService authRsaKeyService) {
+        this.authFacade = authFacade;
+        this.authRsaKeyService = authRsaKeyService;
+    }
 
     /**
      * 签发登录图形验证码。
@@ -34,6 +39,15 @@ public class PlatformAuthService {
     public AuthCaptchaVo issueLoginCaptcha(AuthCaptchaIssueRequest request) {
         String clientKey = request == null ? null : request.clientKey();
         return authFacade.issueLoginCaptcha(clientKey);
+    }
+
+    /**
+     * 返回登录密码 RSA 加密公钥。
+     *
+     * @return SPKI 公钥 Base64
+     */
+    public AuthRsaPublicKeyVo getPasswordEncryptionPublicKey() {
+        return authRsaKeyService.getPasswordEncryptionPublicKey();
     }
 
     /**

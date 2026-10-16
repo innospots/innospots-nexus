@@ -48,8 +48,6 @@ public class PlatformTenantService {
         tenant.setTenantName(request.tenantName());
         tenant.setTenantCode(request.tenantCode());
         tenant.setTenantType(request.tenantType());
-        tenant.setPlanCode(request.planCode());
-        tenant.setOwnerTenantUserId(request.ownerTenantUserId());
         tenantOperator.insert(tenant);
         EventBus.publish(new TenantCreatedEvent(
                 tenant.getTenantId(),
@@ -84,7 +82,7 @@ public class PlatformTenantService {
     }
 
     /**
-     * 更新租户显示名称、套餐与 owner 等可编辑字段。
+     * 更新租户显示名称、套餐等可编辑字段（管理员见 {@link PlatformTenantAdminService}）。
      *
      * @param tenantId 租户标识
      * @param request  非空字段参与更新
@@ -99,9 +97,6 @@ public class PlatformTenantService {
         }
         if (request.planCode() != null) {
             tenant.setPlanCode(request.planCode());
-        }
-        if (request.ownerTenantUserId() != null) {
-            tenant.setOwnerTenantUserId(request.ownerTenantUserId());
         }
         tenantOperator.update(tenant);
         return toVo(tenant);

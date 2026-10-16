@@ -15,9 +15,15 @@ dataSources:
     request:
       method: GET
       url: /api/d/platform/tenants/${params.tenantId}
-  enterprise:
+  admins:
     type: http
     autoLoad: true
+    request:
+      method: GET
+      url: /api/d/platform/tenants/${params.tenantId}/admins
+  enterprise:
+    type: http
+    autoLoad: false
     request:
       method: GET
       url: /api/d/platform/tenants/${params.tenantId}/enterprise
@@ -29,15 +35,22 @@ lifecycle:
         dataSource: tenant
     - action: reload
       params:
-        dataSource: enterprise
+        dataSource: admins
     - action: form.setValues
       params:
         form: tenantEditForm
         values: ${data.tenant}
-    - action: form.setValues
+    - action: if
       params:
-        form: enterpriseEditForm
-        values: ${data.enterprise}
+        condition: ${data.tenant != null && data.tenant.tenantType == 'ENTERPRISE'}
+        then:
+          - action: reload
+            params:
+              dataSource: enterprise
+          - action: form.setValues
+            params:
+              form: enterpriseEditForm
+              values: ${data.enterprise}
 
 body:
   type: Page
@@ -65,19 +78,10 @@ body:
         align: start
         className: mt-2
       children:
-        - type: Flex
+        - type: Typography
           props:
-            direction: vertical
-            gap: small
-          children:
-            - type: Typography
-              props:
-                variant: h3
-                text: ${data.tenant.tenantName}
-            - type: Typography
-              props:
-                variant: muted
-                text: "编码 ${data.tenant.tenantCode} · 类型 ${data.tenant.tenantType == 'ENTERPRISE' ? '企业' : data.tenant.tenantType == 'TEAM' ? '团队' : data.tenant.tenantType == 'INDIVIDUAL' ? '个人' : data.tenant.tenantType} · 状态 ${data.tenant.status == 'ACTIVE' ? '● 正常' : data.tenant.status == 'SUSPENDED' ? '○ 暂停' : data.tenant.status == 'ARCHIVED' ? '○ 归档' : data.tenant.status}${data.tenant.planCode != null && data.tenant.planCode != '' ? ' · 套餐 ' + data.tenant.planCode : ''}"
+            variant: h3
+            text: ${data.tenant.tenantName}
         - type: Flex
           props:
             gap: small
@@ -190,9 +194,11 @@ body:
               - { label: 租户 ID, value: "${data.tenant.tenantId}" }
               - { label: 租户编码, value: "${data.tenant.tenantCode}" }
               - { label: 显示名称, value: "${data.tenant.tenantName}" }
-              - { label: 套餐, value: "${data.tenant.planCode != null ? data.tenant.planCode : '—'}" }
-              - label: 初始 Owner
-                value: "${data.tenant.ownerTenantUserId != null && data.tenant.ownerTenantUserId != '' ? data.tenant.ownerTenantUserId : '（未指定）'}"
+              - label: 租户类型
+                value: "${data.tenant.tenantType == 'ENTERPRISE' ? '企业' : data.tenant.tenantType == 'TEAM' ? '团队' : data.tenant.tenantType == 'INDIVIDUAL' ? '个人' : data.tenant.tenantType}"
+              - label: 状态
+                value: "${data.tenant.status == 'ACTIVE' ? '正常' : data.tenant.status == 'SUSPENDED' ? '暂停' : data.tenant.status == 'ARCHIVED' ? '归档' : data.tenant.status}"
+              - { label: 套餐, value: "${data.tenant.planCode != null && data.tenant.planCode != '' ? data.tenant.planCode : '—'}" }
         - type: Form
           when: ${state.editingTenant}
           props:
@@ -209,7 +215,6 @@ body:
                   body:
                     tenantName: ${event.tenantName}
                     planCode: ${event.planCode}
-                    ownerTenantUserId: ${event.ownerTenantUserId}
               - action: message
                 params:
                   messageType: success
@@ -232,25 +237,13 @@ body:
                     rules:
                       - required: true
                         message: 请输入显示名称
-            - type: Grid
+            - type: Field
               props:
-                columns: 2
-                gap: 16
+                label: 套餐
               children:
-                - type: Field
+                - type: Input
                   props:
-                    label: 套餐
-                  children:
-                    - type: Input
-                      props:
-                        name: planCode
-                - type: Field
-                  props:
-                    label: 初始 Owner
-                  children:
-                    - type: Input
-                      props:
-                        name: ownerTenantUserId
+                    name: planCode
             - type: Flex
               props:
                 justify: end
@@ -263,6 +256,126 @@ body:
                     submit: true
                     htmlType: submit
     - type: Card
+      when: ${data.tenant != null}
+      props:
+        className: mt-4
+      children:
+        - type: Flex
+          props:
+            justify: space-between
+            align: center
+          children:
+            - type: Text
+              props:
+                text: 租户管理员
+                strong: true
+            - type: Button
+              props:
+                text: + 添加管理员
+                variant: primary
+                size: small
+              events:
+                onClick:
+                  - action: overlay.open
+                    params:
+                      overlay:
+                        type: modal
+                        title: 添加租户管理员
+                        width: 480
+                        content:
+                          type: Form
+                          props:
+                            name: tenantAdminAddForm
+                            layout: vertical
+                          events:
+                            onSubmit:
+                              - action: request
+                                params:
+                                  method: POST
+                                  url: /api/d/platform/tenants/${params.tenantId}/admins
+                                  body:
+                                    email: ${event.email}
+                                    adminRole: ${event.adminRole}
+                              - action: message
+                                params:
+                                  messageType: success
+                                  text: 已添加
+                              - action: overlay.close
+                              - action: reload
+                                params:
+                                  dataSource: admins
+                          children:
+                            - type: Field
+                              props:
+                                label: 角色
+                                required: true
+                              children:
+                                - type: Select
+                                  props:
+                                    name: adminRole
+                                    placeholder: 请选择
+                                    options:
+                                      - { label: 所有者, value: OWNER }
+                                      - { label: 管理员, value: ADMINISTRATOR }
+                                    rules:
+                                      - required: true
+                                        message: 请选择角色
+                            - type: Field
+                              props:
+                                label: 邮箱
+                                required: true
+                              children:
+                                - type: Input
+                                  props:
+                                    name: email
+                                    placeholder: admin@example.com
+                                    rules:
+                                      - required: true
+                                        message: 请输入邮箱
+                            - type: Flex
+                              props:
+                                justify: end
+                                gap: small
+                                className: mt-4
+                              children:
+                                - type: Button
+                                  props:
+                                    text: 取消
+                                  events:
+                                    onClick:
+                                      - action: overlay.close
+                                - type: Button
+                                  props:
+                                    text: 确认
+                                    variant: primary
+                                    submit: true
+                                    htmlType: submit
+        - type: Table
+          props:
+            className: mt-3
+            rowKey: tenantAdminId
+            pagination: false
+            dataSource: "${data.admins != null ? data.admins : []}"
+            columns:
+              - title: 角色
+                cell:
+                  type: Text
+                  props:
+                    text: "${row.adminRole == 'OWNER' ? '所有者' : row.adminRole == 'ADMINISTRATOR' ? '管理员' : row.adminRole}"
+              - title: 邮箱
+                cell:
+                  type: Text
+                  props:
+                    text: "${row.email != null && row.email != '' ? row.email : '—'}"
+              - title: 展示名
+                cell:
+                  type: Text
+                  props:
+                    text: "${row.displayName != null && row.displayName != '' ? row.displayName : '—'}"
+              - title: 租户用户 ID
+                dataIndex: tenantUserId
+    - type: Card
+      when: ${data.tenant != null && data.tenant.tenantType == 'ENTERPRISE'}
       props:
         className: mt-4
       children:
@@ -298,7 +411,7 @@ body:
                           params:
                             editingEnterprise: true
         - type: Descriptions
-          when: ${!state.editingEnterprise && data.enterprise != null}
+          when: ${!state.editingEnterprise && data.enterprise != null && data.enterprise.enterpriseId != null}
           props:
             className: mt-3
             items:
@@ -309,12 +422,6 @@ body:
               - label: 联系人
                 value: "${(data.enterprise.contactName != null ? data.enterprise.contactName : '') + (data.enterprise.contactPhone != null ? ' · ' + data.enterprise.contactPhone : '') + (data.enterprise.contactEmail != null ? ' · ' + data.enterprise.contactEmail : '')}"
               - { label: 地址, value: "${data.enterprise.address != null ? data.enterprise.address : '—'}" }
-        - type: Alert
-          when: ${!state.editingEnterprise && (data.enterprise == null || data.enterprise.enterpriseId == null)}
-          props:
-            className: mt-3
-            variant: info
-            message: 尚未配置企业法定档案，可点击「编辑档案」补录。
         - type: Form
           when: ${state.editingEnterprise}
           props:

@@ -9,4 +9,24 @@
 
 import type { ActionHandler } from "@pactor-app/runtime";
 
-export const pactorActions: Record<string, ActionHandler> = {};
+const TENANT_CODE_PATTERN = /^[a-zA-Z0-9_]+$/;
+
+export const pactorActions: Record<string, ActionHandler> = {
+    "validate.tenantCode": (action) => {
+        const value = action.params?.["value"];
+        const code = typeof value === "string" ? value.trim() : "";
+        if (code.length === 0) {
+            return {
+                ok: false,
+                error: new Error("请输入租户编码"),
+            };
+        }
+        if (!TENANT_CODE_PATTERN.test(code)) {
+            return {
+                ok: false,
+                error: new Error("租户编码仅支持字母、数字和下划线"),
+            };
+        }
+        return { ok: true };
+    },
+};

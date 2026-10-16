@@ -30,29 +30,7 @@ body:
       props:
         items:
           - label: 运营管理
-          - label: 平台用户
           - label: 注册审批
-    - type: Tabs
-      props:
-        activeKey: access
-        items:
-          - { key: users, label: 用户列表 }
-          - { key: invites, label: 邀请 }
-          - { key: access, label: 注册审批 }
-      events:
-        onChange:
-          - action: if
-            params:
-              condition: ${event == 'users'}
-              then:
-                - action: navigate
-                  params: { to: /ops/platform-users }
-          - action: if
-            params:
-              condition: ${event == 'invites'}
-              then:
-                - action: navigate
-                  params: { to: /ops/platform-users/invites }
     - type: Flex
       props:
         direction: vertical
@@ -73,11 +51,13 @@ body:
           props:
             name: accessRequestSearch
             layout: inline
+            initialValues:
+              status: "${state.status == '' ? '__ALL__' : state.status}"
           events:
             onSubmit:
               - action: setState
                 params:
-                  status: ${event.status}
+                  status: "${event.status == '__ALL__' ? '' : event.status}"
                   pageNo: 1
               - action: reload
                 params:
@@ -87,7 +67,7 @@ body:
               props:
                 label: 状态
               children:
-                - type: Select
+                - type: FilterSelect
                   props:
                     name: status
                     placeholder: 待审批
@@ -175,10 +155,6 @@ body:
                                         params:
                                           dataSource: accessRequests
                                   children:
-                                    - type: Alert
-                                      props:
-                                        variant: info
-                                        message: 用户已在注册时设置密码；通过后 status 变为 ACTIVE，无需再次设密或发邀请。
                                     - type: Field
                                       props:
                                         label: 默认角色（可选）
@@ -290,9 +266,3 @@ body:
             text: 共 ${data.accessRequests.total} 条申请
             type: secondary
             className: mt-3
-        - type: Alert
-          when: ${data.accessRequests.total == 0}
-          props:
-            className: mt-4
-            variant: info
-            message: 当前无匹配申请。若注册策略非「待审核」模式，本页通常为空；可在用户列表按 PENDING_APPROVAL 查看只读资料。

@@ -43,9 +43,7 @@ class PlatformTenantServiceTest {
         TenantCreateRequest request = new TenantCreateRequest(
                 "Acme",
                 "acme",
-                TenantType.TEAM.name(),
-                null,
-                null);
+                TenantType.TEAM.name());
 
         new PlatformTenantService(tenantOperator, mock(EnterpriseOperator.class)).createTenant(request);
 
