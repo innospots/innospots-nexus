@@ -82,7 +82,7 @@ public class PlatformTenantService {
     }
 
     /**
-     * 更新租户显示名称、套餐等可编辑字段（管理员见 {@link PlatformTenantAdminService}）。
+     * 更新租户显示名称（管理员见 {@link PlatformTenantAdminService}）。
      *
      * @param tenantId 租户标识
      * @param request  非空字段参与更新
@@ -94,9 +94,6 @@ public class PlatformTenantService {
         TenantEntity tenant = tenantOperator.requireById(tenantId);
         if (request.tenantName() != null && !request.tenantName().isBlank()) {
             tenant.setTenantName(request.tenantName().trim());
-        }
-        if (request.planCode() != null) {
-            tenant.setPlanCode(request.planCode());
         }
         tenantOperator.update(tenant);
         return toVo(tenant);

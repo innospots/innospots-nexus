@@ -10,6 +10,7 @@ import com.innospots.nexus.platform.organization.domain.enums.TenantAdminRole;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class TenantAdminOperatorTest {
@@ -37,5 +38,20 @@ class TenantAdminOperatorTest {
     void requireAdminRoleRejectsUnknownValue() {
         assertThatThrownBy(() -> TenantAdminOperator.requireAdminRole("SUPERUSER"))
                 .isInstanceOf(NexusException.class);
+    }
+
+    @Test
+    void deleteByTenantIdAndAdminIdRemovesRow() {
+        TenantAdminDao dao = mock(TenantAdminDao.class);
+        TenantAdminOperator operator = new TenantAdminOperator(dao);
+
+        TenantAdminEntity existing = new TenantAdminEntity();
+        existing.setTenantAdminId("tad01");
+        existing.setTenantId("tnt01");
+        when(dao.selectOne(any())).thenReturn(existing);
+
+        operator.deleteByTenantIdAndAdminId("tnt01", "tad01");
+
+        verify(dao).deleteById("tad01");
     }
 }

@@ -87,6 +87,28 @@ public class PlatformTenantAdminService {
         return toVo(admin);
     }
 
+    /**
+     * 移除租户管理员登记记录；若与租户 {@code owner_tenant_user_id} 一致则清空 owner 引用。
+     */
+    @Transactional
+    public void removeAdmin(String tenantId, String tenantAdminId) {
+        Checks.notBlank(tenantId, "tenantId");
+        Checks.notBlank(tenantAdminId, "tenantAdminId");
+        TenantEntity tenant = tenantOperator.requireById(tenantId);
+        TenantAdminEntity admin = tenantAdminOperator.requireByTenantIdAndAdminId(tenantId, tenantAdminId);
+        tenantAdminOperator.deleteByTenantIdAndAdminId(tenantId, tenantAdminId);
+        String ownerId = tenant.getOwnerTenantUserId();
+        String removedUserId = admin.getTenantUserId();
+        if (ownerId != null
+                && !ownerId.isBlank()
+                && removedUserId != null
+                && !removedUserId.isBlank()
+                && ownerId.equals(removedUserId)) {
+            tenant.setOwnerTenantUserId(null);
+            tenantOperator.update(tenant);
+        }
+    }
+
     private TenantAdminVo toVo(TenantAdminEntity admin) {
         Checks.notNull(admin, "admin");
         return new TenantAdminVo(

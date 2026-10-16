@@ -72,7 +72,7 @@ class TenantEndpointContractsTest {
         assertThat(TenantUpdateRequest.class.isRecord()).isTrue();
         assertThat(Arrays.stream(TenantUpdateRequest.class.getRecordComponents())
                 .map(RecordComponent::getName))
-                .containsExactly("tenantName", "planCode");
+                .containsExactly("tenantName");
         assertThat(TenantVo.class.isRecord()).isTrue();
         assertThat(Arrays.stream(TenantVo.class.getRecordComponents())
                 .map(RecordComponent::getName))

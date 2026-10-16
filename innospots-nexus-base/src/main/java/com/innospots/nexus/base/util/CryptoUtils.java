@@ -18,9 +18,13 @@ import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.interfaces.RSAKey;
+import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
+
+import javax.crypto.spec.OAEPParameterSpec;
+import javax.crypto.spec.PSource;
 
 /**
  * 密码学工具类：密码哈希（BCrypt）、对称加密（AES-GCM）与不对称加密（RSA/OAEP）。
@@ -34,7 +38,15 @@ import java.util.Arrays;
 public final class CryptoUtils {
 
     private static final String RSA_ALGORITHM = "RSA";
-    private static final String RSA_TRANSFORMATION = "RSA/ECB/OAEPWithSHA-256AndMGF1Padding";
+    /**
+     * 与 Web Crypto {@code RSA-OAEP} + {@code SHA-256} 对齐（MGF1 亦为 SHA-256）。
+     */
+    private static final String RSA_OAEP_TRANSFORMATION = "RSA/ECB/OAEPPadding";
+    private static final OAEPParameterSpec RSA_OAEP_SHA256 = new OAEPParameterSpec(
+            "SHA-256",
+            "MGF1",
+            new MGF1ParameterSpec("SHA-256"),
+            PSource.PSpecified.DEFAULT);
     private static final int DEFAULT_RSA_KEY_SIZE = 2048;
     private static final int SHA256_OAEP_PADDING_BYTES = 66;
     private static final int GCM_TAG_BITS = 128;
@@ -201,8 +213,8 @@ public final class CryptoUtils {
     public static String encryptRsa(String plaintext, String publicKey) {
         try {
             PublicKey key = publicKey(publicKey);
-            Cipher cipher = Cipher.getInstance(RSA_TRANSFORMATION);
-            cipher.init(Cipher.ENCRYPT_MODE, key);
+            Cipher cipher = Cipher.getInstance(RSA_OAEP_TRANSFORMATION);
+            cipher.init(Cipher.ENCRYPT_MODE, key, RSA_OAEP_SHA256);
             int blockSize = rsaKeyBytes(key) - SHA256_OAEP_PADDING_BYTES;
             byte[] encrypted = cipherBlocks(cipher, plaintext.getBytes(StandardCharsets.UTF_8), blockSize);
             return Base64.encode(encrypted);
@@ -221,8 +233,8 @@ public final class CryptoUtils {
     public static String decryptRsa(String encrypted, String privateKey) {
         try {
             PrivateKey key = privateKey(privateKey);
-            Cipher cipher = Cipher.getInstance(RSA_TRANSFORMATION);
-            cipher.init(Cipher.DECRYPT_MODE, key);
+            Cipher cipher = Cipher.getInstance(RSA_OAEP_TRANSFORMATION);
+            cipher.init(Cipher.DECRYPT_MODE, key, RSA_OAEP_SHA256);
             byte[] cipherText = Base64.decode(encrypted);
             byte[] plaintext = cipherBlocks(cipher, cipherText, rsaKeyBytes(key));
             return new String(plaintext, StandardCharsets.UTF_8);

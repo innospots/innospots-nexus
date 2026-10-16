@@ -242,10 +242,6 @@ export function PlatformUserCreatePanel({ onCancel, onCreated }: PlatformUserCre
                             placeholder="如 PLATFORM_OPERATOR"
                         />
                     </label>
-                    <p className="mt-2 text-xs text-muted-foreground">
-                        密码经 RSA 加密后提交；本地示例后端需与 sample console-auth RSA 密钥对一致，或通过
-                        NEXT_PUBLIC_NEXUS_RSA_PUBLIC_KEY 配置公钥。
-                    </p>
                 </div>
             )}
 

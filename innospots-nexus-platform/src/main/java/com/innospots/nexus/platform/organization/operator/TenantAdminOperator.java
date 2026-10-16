@@ -34,6 +34,25 @@ public class TenantAdminOperator {
         return tenantAdminDao.selectList(query);
     }
 
+    public TenantAdminEntity requireByTenantIdAndAdminId(String tenantId, String tenantAdminId) {
+        Checks.notBlank(tenantId, "tenantId");
+        Checks.notBlank(tenantAdminId, "tenantAdminId");
+        LambdaQueryWrapper<TenantAdminEntity> query = new LambdaQueryWrapper<>();
+        query.eq(TenantAdminEntity::getTenantId, tenantId)
+                .eq(TenantAdminEntity::getTenantAdminId, tenantAdminId);
+        TenantAdminEntity admin = tenantAdminDao.selectOne(query);
+        if (admin == null) {
+            throw NexusException.build(PlatformOrganizationStatusCode.TENANT_ADMIN_NOT_FOUND);
+        }
+        return admin;
+    }
+
+    @Transactional
+    public void deleteByTenantIdAndAdminId(String tenantId, String tenantAdminId) {
+        TenantAdminEntity admin = requireByTenantIdAndAdminId(tenantId, tenantAdminId);
+        tenantAdminDao.deleteById(admin.getTenantAdminId());
+    }
+
     public Optional<TenantAdminEntity> findByTenantIdAndEmail(String tenantId, String email) {
         if (tenantId == null || tenantId.isBlank() || email == null || email.isBlank()) {
             return Optional.empty();

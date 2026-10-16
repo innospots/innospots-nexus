@@ -74,7 +74,14 @@ public enum PlatformOrganizationStatusCode implements StatusCode {
             "0010",
             StatusCategory.BUSINESS_RULE,
             "Tenant admin role must be OWNER or ADMINISTRATOR",
-            400);
+            400),
+
+    /** 租户管理员记录不存在或不属于该租户。 */
+    TENANT_ADMIN_NOT_FOUND(
+            "0011",
+            StatusCategory.RESOURCE_DATA,
+            "Tenant admin was not found",
+            404);
 
     private static final String MODULE = "PLO";
 

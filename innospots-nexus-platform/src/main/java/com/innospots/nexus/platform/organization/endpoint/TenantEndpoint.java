@@ -80,7 +80,10 @@ public class TenantEndpoint {
 
     @PUT
     @Path("/{tenantId}/status")
-    @Operation(operationId = "platformTenantUpdateStatus", summary = "更新租户状态")
+    @Operation(
+            operationId = "platformTenantUpdateStatus",
+            summary = "更新租户状态",
+            description = "目标状态为 ACTIVE、SUSPENDED 或 ARCHIVED；归档后可传 ACTIVE 恢复为正常。")
     public R<TenantVo> updateTenantStatus(
             @Parameter(description = "租户 ID", required = true) @PathParam("tenantId") String tenantId,
             TenantStatusUpdateRequest request) {

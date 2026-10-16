@@ -134,6 +134,30 @@ body:
                     params:
                       dataSource: tenant
             - type: Button
+              when: ${data.tenant.status == 'ARCHIVED'}
+              props:
+                text: 恢复
+                variant: primary
+              events:
+                onClick:
+                  - action: confirm
+                    params:
+                      title: 恢复租户
+                      content: 确定将归档租户恢复为正常运营状态吗？
+                  - action: request
+                    params:
+                      method: PUT
+                      url: /api/d/platform/tenants/${data.tenant.tenantId}/status
+                      body:
+                        status: ACTIVE
+                  - action: message
+                    params:
+                      messageType: success
+                      text: 租户已恢复为正常
+                  - action: reload
+                    params:
+                      dataSource: tenant
+            - type: Button
               when: ${data.tenant.status != 'ARCHIVED'}
               props:
                 text: 归档
@@ -198,7 +222,6 @@ body:
                 value: "${data.tenant.tenantType == 'ENTERPRISE' ? '企业' : data.tenant.tenantType == 'TEAM' ? '团队' : data.tenant.tenantType == 'INDIVIDUAL' ? '个人' : data.tenant.tenantType}"
               - label: 状态
                 value: "${data.tenant.status == 'ACTIVE' ? '正常' : data.tenant.status == 'SUSPENDED' ? '暂停' : data.tenant.status == 'ARCHIVED' ? '归档' : data.tenant.status}"
-              - { label: 套餐, value: "${data.tenant.planCode != null && data.tenant.planCode != '' ? data.tenant.planCode : '—'}" }
         - type: Form
           when: ${state.editingTenant}
           props:
@@ -214,7 +237,6 @@ body:
                   url: /api/d/platform/tenants/${params.tenantId}
                   body:
                     tenantName: ${event.tenantName}
-                    planCode: ${event.planCode}
               - action: message
                 params:
                   messageType: success
@@ -237,13 +259,6 @@ body:
                     rules:
                       - required: true
                         message: 请输入显示名称
-            - type: Field
-              props:
-                label: 套餐
-              children:
-                - type: Input
-                  props:
-                    name: planCode
             - type: Flex
               props:
                 justify: end
@@ -292,7 +307,7 @@ body:
                               - action: request
                                 params:
                                   method: POST
-                                  url: /api/d/platform/tenants/${params.tenantId}/admins
+                                  url: /api/d/platform/tenants/${data.tenant.tenantId}/admins
                                   body:
                                     email: ${event.email}
                                     adminRole: ${event.adminRole}
@@ -355,25 +370,49 @@ body:
             className: mt-3
             rowKey: tenantAdminId
             pagination: false
-            dataSource: "${data.admins != null ? data.admins : []}"
+            dataSource: ${data.admins}
             columns:
               - title: 角色
                 cell:
                   type: Text
                   props:
                     text: "${row.adminRole == 'OWNER' ? '所有者' : row.adminRole == 'ADMINISTRATOR' ? '管理员' : row.adminRole}"
-              - title: 邮箱
-                cell:
-                  type: Text
-                  props:
-                    text: "${row.email != null && row.email != '' ? row.email : '—'}"
-              - title: 展示名
+              - title: 用户名
                 cell:
                   type: Text
                   props:
                     text: "${row.displayName != null && row.displayName != '' ? row.displayName : '—'}"
-              - title: 租户用户 ID
-                dataIndex: tenantUserId
+              - title: 用户邮箱
+                cell:
+                  type: Text
+                  props:
+                    text: "${row.email != null && row.email != '' ? row.email : '—'}"
+              - title: 操作
+                cell:
+                  type: Button
+                  when: ${row.email != null && row.email != ''}
+                  props:
+                    text: 删除
+                    variant: link
+                    size: small
+                    danger: true
+                  events:
+                    onClick:
+                      - action: confirm
+                        params:
+                          title: 删除管理员
+                          content: 确定从该租户移除该管理员吗？不会删除租户用户账号。
+                      - action: request
+                        params:
+                          method: DELETE
+                          url: /api/d/platform/tenants/${data.tenant.tenantId}/admins/${row.tenantAdminId}
+                      - action: message
+                        params:
+                          messageType: success
+                          text: 已删除
+                      - action: reload
+                        params:
+                          dataSource: admins
     - type: Card
       when: ${data.tenant != null && data.tenant.tenantType == 'ENTERPRISE'}
       props:

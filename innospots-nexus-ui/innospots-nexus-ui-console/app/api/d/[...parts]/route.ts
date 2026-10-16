@@ -96,6 +96,9 @@ async function handle(
 
 export const GET = handle;
 export const POST = handle;
+export const PUT = handle;
+export const PATCH = handle;
+export const DELETE = handle;
 
 /** 预检（跨源带凭据 / 自定义头时） */
 export const OPTIONS = corsPreflight;

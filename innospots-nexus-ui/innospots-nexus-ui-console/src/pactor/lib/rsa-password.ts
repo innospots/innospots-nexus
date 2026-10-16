@@ -1,12 +1,18 @@
 /**
  * 与后端 {@code CryptoUtils.encryptRsa}（RSA/ECB/OAEPWithSHA-256AndMGF1Padding）对齐的前端加密。
- * 公钥为 X.509 SPKI Base64；默认与 sample {@code console-auth.yaml} 密钥对一致，便于本地联调。
+ * 公钥通过 {@link PublicAuthEndpoint#getPasswordEncryptionPublicKey} 获取（X.509 SPKI Base64）。
  */
-const DEFAULT_SAMPLE_PUBLIC_KEY_BASE64 =
-    "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArcIMBPC5VmzPAorOMK/RwOhf7OzmDf5oxiBhrq74i0180BKCcz7t1Phul3jMM1s0QV/NgIs3+XkCoOiNsrT+FbaZDLXKusI87ZLNaagaQQsH3Sq646dPA6boE5VfG0o4DaMiOw87uHJmr0aLWN7usB79q1CppzhKForEOB9suBYyqt2Qhxh1b99UqFEiPNrxZm90/ljlf9Z7Jokv0BQPz21rVyEFMW5pnwaFzq/9NTIQm+UJinEBaG40OPR9mu0tsmsHVCAm9wUbbqt5/oRK7KCnz3jKo5XqQW6K38tHNjGh8NbV68TMNTL7k0vwlsIk3315/myEQPgIUSaZtzuz7wIDAQAB";
+import { platformPublicFetch } from "./platform-public-api";
 
 const OAEP_SHA256_OVERHEAD_BYTES = 66;
 const RSA_2048_MODULUS_BYTES = 256;
+
+type AuthRsaPublicKeyPayload = {
+    publicKeyBase64?: string;
+};
+
+let cachedPublicKeyBase64: string | null = null;
+let inflightPublicKey: Promise<string> | null = null;
 
 function base64ToBytes(base64: string): Uint8Array {
     const binary = atob(base64);
@@ -25,17 +31,6 @@ function bytesToBase64(bytes: Uint8Array): string {
     return btoa(binary);
 }
 
-function resolvePublicKeyBase64(override?: string): string {
-    const fromEnv = process.env.NEXT_PUBLIC_NEXUS_RSA_PUBLIC_KEY;
-    if (override && override.trim().length > 0) {
-        return override.trim();
-    }
-    if (fromEnv && fromEnv.trim().length > 0) {
-        return fromEnv.trim();
-    }
-    return DEFAULT_SAMPLE_PUBLIC_KEY_BASE64;
-}
-
 async function importRsaPublicKey(spkiBase64: string): Promise<CryptoKey> {
     const spki = base64ToBytes(spkiBase64);
     const spkiBuffer = spki.buffer.slice(
@@ -52,13 +47,44 @@ async function importRsaPublicKey(spkiBase64: string): Promise<CryptoKey> {
 }
 
 /**
+ * 从平台匿名认证接口加载密码加密公钥（带内存缓存）。
+ */
+export async function fetchPasswordEncryptionPublicKey(): Promise<string> {
+    if (cachedPublicKeyBase64) {
+        return cachedPublicKeyBase64;
+    }
+    if (!inflightPublicKey) {
+        inflightPublicKey = platformPublicFetch<AuthRsaPublicKeyPayload>(
+            "/public/auth/rsa-public-key",
+            { method: "GET" },
+        )
+            .then((payload) => {
+                const key = payload.publicKeyBase64?.trim();
+                if (!key) {
+                    throw new Error("RSA 公钥不可用");
+                }
+                cachedPublicKeyBase64 = key;
+                return key;
+            })
+            .finally(() => {
+                inflightPublicKey = null;
+            });
+    }
+    return inflightPublicKey;
+}
+
+/**
  * 分块 RSA-OAEP 加密，输出 Base64 密文。
  */
 export async function encryptPasswordForApi(
     plaintext: string,
     publicKeyBase64?: string,
 ): Promise<string> {
-    const key = await importRsaPublicKey(resolvePublicKeyBase64(publicKeyBase64));
+    const keyMaterial =
+        publicKeyBase64 && publicKeyBase64.trim().length > 0
+            ? publicKeyBase64.trim()
+            : await fetchPasswordEncryptionPublicKey();
+    const key = await importRsaPublicKey(keyMaterial);
     const data = new TextEncoder().encode(plaintext);
     const blockSize = RSA_2048_MODULUS_BYTES - OAEP_SHA256_OVERHEAD_BYTES;
     const parts: Uint8Array[] = [];
