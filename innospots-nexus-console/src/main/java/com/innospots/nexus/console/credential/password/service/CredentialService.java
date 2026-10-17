@@ -5,7 +5,10 @@ import java.util.Objects;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
+
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.base.i18n.I18nObject;
 import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
@@ -86,7 +89,7 @@ public final class CredentialService {
      * @param rawPassword 明文新密码
      */
     public void enrollPassword(SecurityRealm realm, String subjectId, String rawPassword) {
-        validatePassword(rawPassword);
+        validatePassword("enrollPassword", realm, subjectId, rawPassword);
         credentialOperator.enrollPassword(CredentialOwnershipResolver.ownershipForRealm(realm), subjectId, rawPassword);
     }
 
@@ -102,9 +105,12 @@ public final class CredentialService {
      */
     public void changePassword(SecurityRealm realm, String subjectId, String oldPassword, String newPassword) {
         Objects.requireNonNull(oldPassword, "oldPassword");
-        validatePassword(newPassword);
+        validatePassword("changePassword", realm, subjectId, newPassword);
         if (oldPassword.equals(newPassword)) {
-            throw ConsoleExceptions.build(NexusStatusCode.BUSINESS_ERROR);
+            throw ConsoleExceptions.build(
+                    NexusStatusCode.INVALID_PARAMETER,
+                    I18nObject.of("en", "New password must differ from the current password", "zh", "新密码不能与当前密码相同")
+                            .defaultValue());
         }
         CredentialRecord current = credentialOperator.findPassword(realm, subjectId)
                 .orElseThrow(() -> ConsoleExceptions.build(NexusStatusCode.PASSWORD_ERROR));
@@ -125,7 +131,7 @@ public final class CredentialService {
      * @param newPassword 新明文密码
      */
     public void resetPassword(SecurityRealm realm, String subjectId, String newPassword) {
-        validatePassword(newPassword);
+        validatePassword("resetPassword", realm, subjectId, newPassword);
         CredentialRecord current = credentialOperator.findPassword(realm, subjectId)
                 .orElseThrow(() -> new IllegalStateException("No password credential for subject: " + subjectId));
         credentialOperator.enrollPassword(CredentialOwnershipResolver.ownershipForRealm(realm), subjectId, newPassword);
@@ -152,15 +158,40 @@ public final class CredentialService {
      * @param rawPassword 明文密码
      */
     public void enrollPassword(ConsoleOwnership ownership, String subjectId, String rawPassword) {
-        validatePassword(rawPassword);
+        validatePassword("enrollPassword", ownership, subjectId, rawPassword);
         credentialOperator.enrollPassword(ownership, subjectId, rawPassword);
     }
 
-    private void validatePassword(String rawPassword) {
-        Objects.requireNonNull(rawPassword, "rawPassword");
-        if (!passwordValidator.isValid(rawPassword)) {
-            throw ConsoleExceptions.build(NexusStatusCode.BUSINESS_ERROR);
+    private void validatePassword(String operation, SecurityRealm realm, String subjectId, String rawPassword) {
+        rejectIfPolicyViolated(operation, "realm", realm, subjectId, rawPassword);
+    }
+
+    private void validatePassword(String operation, ConsoleOwnership ownership, String subjectId, String rawPassword) {
+        rejectIfPolicyViolated(operation, "ownership", ownership, subjectId, rawPassword);
+    }
+
+    private void rejectIfPolicyViolated(
+            String operation,
+            String scopeKey,
+            Object scopeValue,
+            String subjectId,
+            String rawPassword
+    ) {
+        List<String> violations = passwordValidator.policyViolationCodes(rawPassword);
+        if (violations.isEmpty()) {
+            return;
         }
+        I18nObject display = passwordValidator.policyViolationDisplay(violations);
+        int length = rawPassword == null ? 0 : rawPassword.length();
+        log.warn(
+                "Password policy rejected: operation={}, {}={}, subjectId={}, length={}, violations={}",
+                operation,
+                scopeKey,
+                scopeValue,
+                subjectId,
+                length,
+                violations);
+        throw ConsoleExceptions.build(NexusStatusCode.INVALID_PARAMETER, display.defaultValue());
     }
 
     private static CredentialRecord withAttempts(CredentialRecord record, int failed, LocalDateTime lockedUntil) {

@@ -22,6 +22,9 @@ public final class PlatformIntegrationTestSupport {
     public static final String H2_URL_DICTIONARY_IT =
             "jdbc:h2:mem:nexus-sample-platform-dictionary-it" + H2_SUFFIX;
 
+    public static final String H2_URL_DICTIONARY_AUDIT_IT =
+            "jdbc:h2:mem:nexus-sample-platform-dictionary-audit-it" + H2_SUFFIX;
+
     public static final String H2_URL_ORGANIZATION_IT =
             "jdbc:h2:mem:nexus-sample-platform-organization-it" + H2_SUFFIX;
 

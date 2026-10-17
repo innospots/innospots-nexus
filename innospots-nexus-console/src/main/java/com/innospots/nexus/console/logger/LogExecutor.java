@@ -58,16 +58,22 @@ public final class LogExecutor {
             exception = t;
             throw t;
         } finally {
+            String action = auditLog.action();
+            if (action == null || action.isBlank()) {
+                action = methodName;
+            }
             InvocationLogContext context = new InvocationLogContext(
                     className,
                     methodName,
-                    auditLog.action(),
+                    action,
                     auditLog.recordArgs() ? arguments : null,
                     auditLog.recordResult() ? result : null,
                     auditLog.recordException() ? exception : null,
                     startTime,
                     System.currentTimeMillis(),
-                    actor);
+                    actor,
+                    AuditLogMessages.resolveOperationMessage(auditLog),
+                    "");
             handler.handle(context);
         }
     }

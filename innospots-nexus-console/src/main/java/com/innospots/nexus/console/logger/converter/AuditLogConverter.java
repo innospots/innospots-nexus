@@ -32,7 +32,7 @@ public final class AuditLogConverter {
                 entity.getPath(),
                 entity.getPath(),
                 entity.getExecutionResult(),
-                null,
+                entity.getDurationMs(),
                 entity.getStatusCode(),
                 entity.getMessage(),
                 entity.getKeyParameters());

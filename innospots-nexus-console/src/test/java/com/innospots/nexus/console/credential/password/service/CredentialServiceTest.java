@@ -1,11 +1,14 @@
 package com.innospots.nexus.console.credential.password.service;
 
 import java.time.LocalDateTime;
+import java.util.Locale;
 import java.util.Optional;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.base.i18n.I18nConverter;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.base.util.CryptoUtils;
 import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
@@ -16,6 +19,7 @@ import com.innospots.nexus.console.credential.password.algorithm.CredentialAlgor
 import com.innospots.nexus.console.credential.password.operator.UserCredentialOperator;
 import com.innospots.nexus.console.credential.password.policy.LoginLockPolicy;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -24,6 +28,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class CredentialServiceTest {
+
+    @AfterEach
+    void clearLocale() {
+        I18nConverter.clear();
+    }
 
     @Test
     void authenticateRejectsWrongPasswordAndIncrementsFailures() {
@@ -39,6 +48,22 @@ class CredentialServiceTest {
                 .isEqualTo(NexusStatusCode.AUTHENTICATION_FAILED.fullCode());
 
         verify(operator).saveState(eq(SecurityRealm.TENANT), any(CredentialRecord.class));
+    }
+
+    @Test
+    void enrollPasswordRejectsWeakPasswordWithDetailedMessage() {
+        I18nConverter.setLocale(Locale.SIMPLIFIED_CHINESE);
+        UserCredentialOperator operator = mock(UserCredentialOperator.class);
+        CredentialService service = new CredentialService(operator, new PasswordValidator(), LoginLockPolicy.DEFAULT);
+
+        assertThatThrownBy(() -> service.enrollPassword(
+                SecurityRealm.PLATFORM,
+                "user-1",
+                "abcdefgh"))
+                .isInstanceOfSatisfying(NexusException.class, error -> {
+                    assertThat(error.code()).isEqualTo(NexusStatusCode.INVALID_PARAMETER.fullCode());
+                    assertThat(error.getMessage()).contains("大写");
+                });
     }
 
     @Test

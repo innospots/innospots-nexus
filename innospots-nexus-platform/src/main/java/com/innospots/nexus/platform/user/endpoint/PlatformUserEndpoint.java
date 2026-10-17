@@ -21,6 +21,7 @@ import com.innospots.nexus.platform.config.PlatformConstant;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 import com.innospots.nexus.platform.user.domain.request.PlatformUserCreateRequest;
 import com.innospots.nexus.platform.user.domain.request.PlatformUserPageRequest;
+import com.innospots.nexus.platform.user.domain.request.PlatformUserPasswordResetRequest;
 import com.innospots.nexus.platform.user.domain.request.PlatformUserStatusUpdateRequest;
 import com.innospots.nexus.platform.user.domain.request.PlatformUserUpdateRequest;
 import com.innospots.nexus.platform.user.domain.vo.PlatformUserVo;
@@ -79,6 +80,16 @@ public class PlatformUserEndpoint {
             @Parameter(description = "平台用户 ID", required = true) @PathParam("platformUserId") String platformUserId,
             PlatformUserStatusUpdateRequest request) {
         platformUserService.updateUserStatus(platformUserId, request);
+        return R.ok();
+    }
+
+    @PUT
+    @Path("/{platformUserId}/password")
+    @Operation(operationId = "platformUserResetPassword", summary = "管理员重置平台用户密码")
+    public R<Void> resetUserPassword(
+            @Parameter(description = "平台用户 ID", required = true) @PathParam("platformUserId") String platformUserId,
+            PlatformUserPasswordResetRequest request) {
+        platformUserService.resetUserPassword(platformUserId, request);
         return R.ok();
     }
 }

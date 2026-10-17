@@ -22,8 +22,6 @@ public record PlatformUserVo(
         String email,
         @Schema(description = "手机号")
         String mobile,
-        @Schema(description = "员工编号")
-        String employeeNo,
         @Schema(description = "状态", examples = {"ACTIVE"})
         String status,
         @Schema(description = "上次成功登录时间")

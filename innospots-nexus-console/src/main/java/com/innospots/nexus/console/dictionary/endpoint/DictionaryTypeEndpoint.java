@@ -20,12 +20,16 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import com.innospots.nexus.base.domain.enums.BasicStatus;
 import com.innospots.nexus.base.domain.response.PageResult;
 import com.innospots.nexus.base.domain.response.R;
+import com.innospots.nexus.console.dictionary.domain.request.DictionaryItemPageRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeCreateRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypePageRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeStatusUpdateRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeUpdateRequest;
+import com.innospots.nexus.console.dictionary.domain.vo.DictionaryItemVo;
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeOptionVo;
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeVo;
+import com.innospots.nexus.console.logger.AuditLog;
+import com.innospots.nexus.console.logger.I18nLiteral;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 
 /**
@@ -50,11 +54,19 @@ public interface DictionaryTypeEndpoint {
 
     @POST
     @Operation(operationId = "dictionaryTypeCreate", summary = "创建字典类型")
+    @AuditLog(
+            value = @I18nLiteral(pairs = {"zh-CN", "创建字典类型", "en", "Create dictionary type"}),
+            action = "dictionary.type.create",
+            recordArgs = false)
     R<DictionaryTypeVo> createDictionaryType(DictionaryTypeCreateRequest request);
 
     @PUT
     @Path("/{dictionaryTypeId}")
     @Operation(operationId = "dictionaryTypeUpdate", summary = "更新字典类型")
+    @AuditLog(
+            value = @I18nLiteral(pairs = {"zh-CN", "更新字典类型", "en", "Update dictionary type"}),
+            action = "dictionary.type.update",
+            recordArgs = false)
     R<DictionaryTypeVo> updateDictionaryType(
             @PathParam("dictionaryTypeId") String dictionaryTypeId,
             DictionaryTypeUpdateRequest request
@@ -63,6 +75,10 @@ public interface DictionaryTypeEndpoint {
     @PUT
     @Path("/{dictionaryTypeId}/status")
     @Operation(operationId = "dictionaryTypeUpdateStatus", summary = "更新字典类型状态")
+    @AuditLog(
+            value = @I18nLiteral(pairs = {"zh-CN", "更新字典类型状态", "en", "Update dictionary type status"}),
+            action = "dictionary.type.status.update",
+            recordArgs = false)
     R<Void> updateDictionaryTypeStatus(
             @PathParam("dictionaryTypeId") String dictionaryTypeId,
             DictionaryTypeStatusUpdateRequest request
@@ -71,10 +87,22 @@ public interface DictionaryTypeEndpoint {
     @DELETE
     @Path("/{dictionaryTypeId}")
     @Operation(operationId = "dictionaryTypeDelete", summary = "删除字典类型")
+    @AuditLog(
+            value = @I18nLiteral(pairs = {"zh-CN", "删除字典类型", "en", "Delete dictionary type"}),
+            action = "dictionary.type.delete",
+            recordArgs = false)
     R<Void> deleteDictionaryType(@PathParam("dictionaryTypeId") String dictionaryTypeId);
 
     @GET
     @Path("/options")
     @Operation(operationId = "dictionaryTypeListOptions", summary = "字典类型下拉选项")
     R<List<DictionaryTypeOptionVo>> listDictionaryTypeOptions(@QueryParam("status") BasicStatus status);
+
+    @GET
+    @Path("/{typeCode}/items")
+    @Operation(operationId = "dictionaryItemPage", summary = "分页查询字典项")
+    R<PageResult<DictionaryItemVo>> pageDictionaryItems(
+            @PathParam("typeCode") String typeCode,
+            @BeanParam DictionaryItemPageRequest request
+    );
 }

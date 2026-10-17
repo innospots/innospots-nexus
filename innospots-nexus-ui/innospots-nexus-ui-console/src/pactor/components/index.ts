@@ -15,8 +15,10 @@ import { CatalogTree } from "./catalog-tree";
 import { ConsoleMenuTree } from "./console-menu-tree";
 import { FilterSelect } from "./filter-select";
 import { DictionaryTypeSavePanel } from "./dictionary-type-save-panel";
+import { DictionaryTypeViewPanel } from "./dictionary-type-view-panel";
 import { I18nText } from "./i18n-text";
 import { PlatformUserCreatePanel } from "./platform-user-create-panel";
+import { PlatformUserPasswordResetPanel } from "./platform-user-password-reset-panel";
 import { ShellSitemapMenu } from "./shell-sitemap-menu";
 import {
   PlatformAccessRegistrationForm,
@@ -36,7 +38,9 @@ export const pactorComponents: Record<string, unknown> = {
   ConsoleMenuTree,
   FilterSelect,
   DictionaryTypeSavePanel,
+  DictionaryTypeViewPanel,
   PlatformUserCreatePanel,
+  PlatformUserPasswordResetPanel,
   PlatformLoginForm,
   PlatformPasswordResetForm,
   PlatformPasswordChangeForm,

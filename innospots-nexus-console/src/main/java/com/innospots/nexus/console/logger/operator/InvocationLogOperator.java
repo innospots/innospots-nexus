@@ -56,11 +56,23 @@ public class InvocationLogOperator {
         entity.setExecutionResult(context.success() ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
         entity.setMessage(buildMessage(context));
         entity.setKeyParameters(serializeArguments(context.arguments()));
+        entity.setDurationMs(resolveDurationMs(context));
         auditLogDao.insert(entity);
     }
 
+    private Long resolveDurationMs(InvocationLogContext context) {
+        long elapsed = context.elapsedMillis();
+        if (elapsed < 0) {
+            return null;
+        }
+        return elapsed;
+    }
+
     private String buildPath(InvocationLogContext context) {
-        return context.className() + "#" + context.methodName();
+        if (context.httpPath() != null && !context.httpPath().isBlank()) {
+            return truncate(context.httpPath());
+        }
+        return truncate(context.className() + "#" + context.methodName());
     }
 
     private LocalDateTime toLocalDateTime(long epochMillis) {
@@ -70,6 +82,20 @@ public class InvocationLogOperator {
     }
 
     private String buildMessage(InvocationLogContext context) {
+        String operationMessage = context.operationMessage();
+        if (operationMessage != null && !operationMessage.isBlank()) {
+            if (context.success()) {
+                return truncate(operationMessage);
+            }
+            Throwable exception = context.exception();
+            if (exception != null) {
+                String detail = exception.getMessage();
+                String suffix = exception.getClass().getName()
+                        + (detail != null ? ": " + detail : "");
+                return truncate(operationMessage + " — " + suffix);
+            }
+            return truncate(operationMessage);
+        }
         Throwable exception = context.exception();
         if (exception != null) {
             String detail = exception.getMessage();

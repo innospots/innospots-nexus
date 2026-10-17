@@ -11,6 +11,7 @@ import com.innospots.nexus.platform.user.dao.PlatformUserDao;
 import com.innospots.nexus.platform.user.domain.entity.PlatformUserEntity;
 import com.innospots.nexus.platform.user.domain.enums.PlatformUserStatus;
 import com.innospots.nexus.platform.user.domain.request.PlatformUserCreateRequest;
+import com.innospots.nexus.platform.user.domain.request.PlatformUserPasswordResetRequest;
 import com.innospots.nexus.platform.user.domain.request.PlatformUserStatusUpdateRequest;
 import com.innospots.nexus.platform.user.domain.vo.PlatformUserVo;
 import com.innospots.nexus.platform.user.operator.PlatformUserOperator;
@@ -54,7 +55,6 @@ class PlatformUserServiceTest {
                 "Alice",
                 "alice@innospots.com",
                 "13800000001",
-                "E001",
                 "ops,viewer",
                 "front-encrypted-password"));
 
@@ -74,7 +74,7 @@ class PlatformUserServiceTest {
         PlatformUserService service = serviceWithMocks(mock(PlatformUserDao.class));
 
         assertThatThrownBy(() -> service.createUser(new PlatformUserCreateRequest(
-                " ", "Alice", null, null, null, null, "encrypted")))
+                " ", "Alice", null, null, null, "encrypted")))
                 .isInstanceOf(NexusException.class);
     }
 
@@ -90,11 +90,32 @@ class PlatformUserServiceTest {
                 null,
                 null,
                 null,
-                null,
                 "encrypted")))
                 .isInstanceOf(NexusException.class)
                 .extracting(ex -> ((NexusException) ex).code())
                 .isEqualTo(PlatformUserStatusCode.LOGIN_NAME_DUPLICATED.fullCode());
+    }
+
+    @Test
+    void resetUserPasswordDecryptsAndResetsCredential() {
+        PlatformUserDao userDao = mock(PlatformUserDao.class);
+        CredentialService credentialService = mock(CredentialService.class);
+        PasswordDecryptor decryptor = mock(PasswordDecryptor.class);
+        PlatformUserEntity entity = new PlatformUserEntity();
+        entity.setPlatformUserId("pus-1");
+        when(userDao.selectById("pus-1")).thenReturn(entity);
+        when(decryptor.decrypt("cipher")).thenReturn("NewPass1");
+
+        PlatformUserService service = new PlatformUserService(
+                new PlatformUserOperator(userDao),
+                credentialService,
+                decryptor,
+                mock(PlatformUserRoleProvisioner.class));
+
+        service.resetUserPassword("pus-1", new PlatformUserPasswordResetRequest("cipher"));
+
+        verify(decryptor).decrypt("cipher");
+        verify(credentialService).resetPassword(SecurityRealm.PLATFORM, "pus-1", "NewPass1");
     }
 
     @Test

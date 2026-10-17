@@ -21,10 +21,12 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import com.innospots.nexus.base.domain.enums.BasicStatus;
 import com.innospots.nexus.base.domain.response.PageResult;
 import com.innospots.nexus.base.domain.response.R;
+import com.innospots.nexus.console.dictionary.domain.request.DictionaryItemPageRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeCreateRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypePageRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeStatusUpdateRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeUpdateRequest;
+import com.innospots.nexus.console.dictionary.domain.vo.DictionaryItemVo;
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeOptionVo;
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeVo;
 import com.innospots.nexus.console.dictionary.endpoint.DictionaryTypeEndpoint;
@@ -100,5 +102,15 @@ public class PlatformDictionaryTypeEndpoint implements DictionaryTypeEndpoint {
     @Operation(operationId = "platformDictionaryTypeListOptions", summary = "平台字典类型下拉选项")
     public R<List<DictionaryTypeOptionVo>> listDictionaryTypeOptions(@QueryParam("status") BasicStatus status) {
         return R.ok(platformDictionaryService.listDictionaryTypeOptions(status));
+    }
+
+    @Override
+    @GET
+    @Path("/{typeCode}/items")
+    @Operation(operationId = "platformDictionaryItemPage", summary = "分页查询平台字典项")
+    public R<PageResult<DictionaryItemVo>> pageDictionaryItems(
+            @PathParam("typeCode") String typeCode,
+            @BeanParam DictionaryItemPageRequest request) {
+        return R.ok(platformDictionaryService.pageDictionaryItems(typeCode, request));
     }
 }

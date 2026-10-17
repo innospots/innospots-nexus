@@ -17,6 +17,7 @@ import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 
 import com.innospots.nexus.platform.user.domain.request.PlatformUserCreateRequest;
 import com.innospots.nexus.platform.user.domain.request.PlatformUserPageRequest;
+import com.innospots.nexus.platform.user.domain.request.PlatformUserPasswordResetRequest;
 import com.innospots.nexus.platform.user.domain.request.PlatformUserStatusUpdateRequest;
 import com.innospots.nexus.platform.user.domain.request.PlatformUserUpdateRequest;
 import com.innospots.nexus.platform.user.domain.vo.PlatformUserVo;
@@ -48,6 +49,12 @@ class PlatformUserEndpointContractsTest {
                 PUT.class,
                 String.class,
                 PlatformUserStatusUpdateRequest.class);
+        assertHttpMethod(
+                PlatformUserEndpoint.class,
+                "resetUserPassword",
+                PUT.class,
+                String.class,
+                PlatformUserPasswordResetRequest.class);
         assertThat(Arrays.stream(PlatformUserEndpoint.class.getMethods()).map(Method::getName))
                 .doesNotContain("register");
         assertThat(PlatformUserEndpoint.class.isInterface()).isFalse();
@@ -63,7 +70,6 @@ class PlatformUserEndpointContractsTest {
                         "displayName",
                         "email",
                         "mobile",
-                        "employeeNo",
                         "roleCodes",
                         "encryptedPassword");
         assertThat(PlatformUserVo.class.isRecord()).isTrue();
@@ -75,7 +81,6 @@ class PlatformUserEndpointContractsTest {
                         "displayName",
                         "email",
                         "mobile",
-                        "employeeNo",
                         "status",
                         "lastLoginTime",
                         "lastLoginIp",

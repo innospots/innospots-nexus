@@ -12,8 +12,6 @@ public record PlatformUserUpdateRequest(
         @Schema(description = "邮箱地址", format = "email")
         String email,
         @Schema(description = "手机号")
-        String mobile,
-        @Schema(description = "内部员工编号")
-        String employeeNo
+        String mobile
 ) {
 }

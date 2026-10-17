@@ -10,6 +10,8 @@ import org.springframework.context.annotation.Primary;
 import org.mockito.Mockito;
 
 import com.innospots.nexus.console.config.AuthConfig;
+import com.innospots.nexus.console.logger.InvocationLogHandler;
+import com.innospots.nexus.console.logger.support.AuditLogRecorder;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubject;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubjectResolver;
 import com.innospots.nexus.console.permission.authorization.ConsolePagePermissionAuthorizer;
@@ -19,6 +21,12 @@ import com.innospots.nexus.console.permission.authorization.ConsolePagePermissio
  */
 @TestConfiguration
 public class RoleEndpointIntegrationTestConfiguration {
+
+    /** 角色切片仅装配 Web 依赖，审计持久化由平台审计集成测试覆盖。 */
+    @Bean
+    AuditLogRecorder roleEndpointIntegrationAuditLogRecorder() {
+        return new AuditLogRecorder(Mockito.mock(InvocationLogHandler.class));
+    }
 
     @Bean
     AuthConfig roleEndpointIntegrationAuthConfig() {

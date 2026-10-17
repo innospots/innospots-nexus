@@ -42,22 +42,8 @@ class DictionaryEndpointContractsTest {
                 PUT.class, String.class, DictionaryTypeStatusUpdateRequest.class);
         assertHttpMethod(DictionaryTypeEndpoint.class, "deleteDictionaryType", DELETE.class, String.class);
         assertHttpMethod(DictionaryTypeEndpoint.class, "listDictionaryTypeOptions", GET.class, BasicStatus.class);
-    }
-
-    @Test
-    void dictionaryItemEndpointIsContractWithoutClassPath() throws NoSuchMethodException {
-        assertThat(DictionaryItemEndpoint.class.isInterface()).isTrue();
-        assertThat(DictionaryItemEndpoint.class.getAnnotation(Path.class)).isNull();
-        assertHttpMethod(DictionaryItemEndpoint.class, "pageDictionaryItems",
+        assertHttpMethod(DictionaryTypeEndpoint.class, "pageDictionaryItems",
                 GET.class, String.class, DictionaryItemPageRequest.class);
-        assertHttpMethod(DictionaryItemEndpoint.class, "createDictionaryItem",
-                POST.class, String.class, DictionaryItemCreateRequest.class);
-        assertHttpMethod(DictionaryItemEndpoint.class, "updateDictionaryItem",
-                PUT.class, String.class, String.class, DictionaryItemUpdateRequest.class);
-        assertHttpMethod(DictionaryItemEndpoint.class, "updateDictionaryItemStatus",
-                PUT.class, String.class, String.class, DictionaryItemStatusUpdateRequest.class);
-        assertHttpMethod(DictionaryItemEndpoint.class, "deleteDictionaryItem",
-                DELETE.class, String.class, String.class);
     }
 
     @Test

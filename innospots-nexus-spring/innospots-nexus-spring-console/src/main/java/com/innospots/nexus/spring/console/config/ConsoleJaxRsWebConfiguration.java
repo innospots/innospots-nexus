@@ -11,13 +11,17 @@ import org.springframework.context.annotation.Configuration;
 import com.innospots.nexus.console.auth.service.TokenIssuer;
 import com.innospots.nexus.console.config.AuthConfig;
 import com.innospots.nexus.console.endpoint.MainRootEndpoint;
+import com.innospots.nexus.console.jaxrs.filter.ConsoleAuditLogFilter;
 import com.innospots.nexus.console.jaxrs.filter.ConsoleAuthenticationFilter;
 import com.innospots.nexus.console.jaxrs.filter.ConsoleCorsFilter;
 import com.innospots.nexus.console.jaxrs.filter.ConsoleDevSessionFilter;
 import com.innospots.nexus.console.jaxrs.filter.ConsolePagePermissionFilter;
 import com.innospots.nexus.console.jaxrs.filter.ConsoleRequestContextFilter;
+import com.innospots.nexus.console.jaxrs.support.EndpointMethodResolver;
+import com.innospots.nexus.console.logger.support.AuditLogRecorder;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubjectResolver;
 import com.innospots.nexus.console.permission.authorization.ConsolePagePermissionAuthorizer;
+import com.innospots.nexus.spring.console.jaxrs.JerseyEndpointMethodResolver;
 
 /**
  * 管理控制台 Jersey 横切过滤器的 Spring 装配。
@@ -85,6 +89,20 @@ public class ConsoleJaxRsWebConfiguration {
         return new ConsoleRequestContextFilter();
     }
 
+    /** 提供 Jersey 当前资源方法定位器。 */
+    @Bean
+    @ConditionalOnMissingBean(EndpointMethodResolver.class)
+    EndpointMethodResolver endpointMethodResolver() {
+        return new JerseyEndpointMethodResolver();
+    }
+
+    /** 装配框架无关的审计过滤器。 */
+    @Bean
+    ConsoleAuditLogFilter consoleAuditLogFilter(
+            AuditLogRecorder auditLogRecorder, EndpointMethodResolver endpointMethodResolver) {
+        return new ConsoleAuditLogFilter(auditLogRecorder, endpointMethodResolver);
+    }
+
     /** {@code GET /} 重定向至 {@link com.innospots.nexus.console.jaxrs.web.ConsoleWebJerseySettings#getRootPath()}。 */
     @Bean
     MainRootEndpoint mainRootEndpoint(ConsoleWebProperties webProperties) {
@@ -98,13 +116,15 @@ public class ConsoleJaxRsWebConfiguration {
             ConsoleAuthenticationFilter authenticationFilter,
             ConsoleDevSessionFilter devSessionFilter,
             ConsolePagePermissionFilter pagePermissionFilter,
-            ConsoleRequestContextFilter requestContextFilter) {
+            ConsoleRequestContextFilter requestContextFilter,
+            ConsoleAuditLogFilter auditLogFilter) {
         return resourceConfig -> {
             resourceConfig.register(corsFilter);
             resourceConfig.register(authenticationFilter);
             resourceConfig.register(devSessionFilter);
             resourceConfig.register(pagePermissionFilter);
             resourceConfig.register(requestContextFilter);
+            resourceConfig.register(auditLogFilter);
         };
     }
 }

@@ -30,6 +30,7 @@ public final class JaxRsExceptionSupport {
      * @param exception Web 应用异常
      */
     public void logWebApplicationFailure(WebApplicationException exception) {
+        captureFailure(exception);
         ContainerRequestContext requestContext = RequestScope.current();
         String requestId = resolveRequestId(requestContext);
         String operation = resolveOperation(requestContext);
@@ -74,6 +75,7 @@ public final class JaxRsExceptionSupport {
      * @param failure 原始失败
      */
     public void logUnhandledFailure(Throwable failure) {
+        captureFailure(failure);
         ContainerRequestContext requestContext = RequestScope.current();
         String requestId = resolveRequestId(requestContext);
         String operation = resolveOperation(requestContext);
@@ -91,7 +93,18 @@ public final class JaxRsExceptionSupport {
      *
      * @param exception 平台异常
      */
+    public void captureFailure(Throwable failure) {
+        if (failure == null) {
+            return;
+        }
+        ContainerRequestContext requestContext = RequestScope.current();
+        if (requestContext != null) {
+            requestContext.setProperty(RequestProperties.FAILURE_CAUSE, failure);
+        }
+    }
+
     public void logNexusFailure(NexusException exception) {
+        captureFailure(exception);
         ContainerRequestContext requestContext = RequestScope.current();
         String requestId = resolveRequestId(requestContext);
         String operation = resolveOperation(requestContext);

@@ -11,6 +11,7 @@ import com.innospots.nexus.console.logger.dao.AuditLogDao;
 import com.innospots.nexus.console.logger.handler.PersistenceInvocationLogHandler;
 import com.innospots.nexus.console.logger.operator.AuditLogOperator;
 import com.innospots.nexus.console.logger.operator.InvocationLogOperator;
+import com.innospots.nexus.console.logger.support.AuditLogRecorder;
 
 /**
  * {@code console.logger} 域 Spring 装配：调用审计日志持久化与异步执行器。
@@ -43,5 +44,10 @@ public class ConsoleLoggerConfiguration {
     @Bean
     LogExecutor logExecutor(InvocationLogHandler invocationLogHandler) {
         return new LogExecutor(invocationLogHandler);
+    }
+
+    @Bean
+    AuditLogRecorder auditLogRecorder(InvocationLogHandler invocationLogHandler) {
+        return new AuditLogRecorder(invocationLogHandler);
     }
 }

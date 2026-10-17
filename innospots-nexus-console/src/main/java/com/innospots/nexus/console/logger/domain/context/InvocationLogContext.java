@@ -17,7 +17,9 @@ package com.innospots.nexus.console.logger.domain.context;
  * @param exception  抛出的异常；成功时为 null
  * @param startTime  调用开始时间（epoch 毫秒）
  * @param endTime    调用结束时间（epoch 毫秒）
- * @param actor      操作用户身份；未知时为空字符串
+ * @param actor            操作用户身份；未知时为空字符串
+ * @param operationMessage 注解声明的操作描述（当前语言环境解析后）
+ * @param httpPath         HTTP 方法 + 路径；非 HTTP 拦截时可为空
  */
 public record InvocationLogContext(
         String className,
@@ -28,8 +30,35 @@ public record InvocationLogContext(
         Throwable exception,
         long startTime,
         long endTime,
-        String actor
+        String actor,
+        String operationMessage,
+        String httpPath
 ) {
+
+    public InvocationLogContext(
+            String className,
+            String methodName,
+            String action,
+            Object[] arguments,
+            Object result,
+            Throwable exception,
+            long startTime,
+            long endTime,
+            String actor
+    ) {
+        this(
+                className,
+                methodName,
+                action,
+                arguments,
+                result,
+                exception,
+                startTime,
+                endTime,
+                actor,
+                "",
+                "");
+    }
 
     public InvocationLogContext {
         className = className == null ? "" : className;
@@ -37,6 +66,8 @@ public record InvocationLogContext(
         action = action == null ? "" : action;
         arguments = arguments == null ? new Object[0] : arguments.clone();
         actor = actor == null ? "" : actor;
+        operationMessage = operationMessage == null ? "" : operationMessage;
+        httpPath = httpPath == null ? "" : httpPath;
     }
 
     /**

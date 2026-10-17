@@ -67,4 +67,7 @@ public class AuditLogEntity extends OwnershipEntity {
 
     @Column(length = 2048)
     private String keyParameters;
+
+    @Column
+    private Long durationMs;
 }

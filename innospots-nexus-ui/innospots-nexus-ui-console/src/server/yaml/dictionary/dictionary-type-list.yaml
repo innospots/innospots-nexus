@@ -11,6 +11,8 @@ state:
   pageSize: 20
   editingTypeId: ""
   editingTypeCode: ""
+  viewingTypeId: ""
+  viewingTypeCode: ""
 
 dataSources:
   types:
@@ -36,6 +38,21 @@ dataSources:
     request:
       method: GET
       url: /api/d/platform/dictionary-types/${state.editingTypeCode}/items
+      params:
+        pageNo: 1
+        pageSize: 200
+  viewing:
+    type: http
+    autoLoad: false
+    request:
+      method: GET
+      url: /api/d/platform/dictionary-types/${state.viewingTypeId}
+  viewItems:
+    type: http
+    autoLoad: false
+    request:
+      method: GET
+      url: /api/d/platform/dictionary-types/${state.viewingTypeCode}/items
       params:
         pageNo: 1
         pageSize: 200
@@ -80,7 +97,7 @@ body:
                 params:
                   overlay: &typeDrawer
                     type: drawer
-                    title: "${state.editingTypeId == '' ? '新建字典类型' : '编辑字典类型'}"
+                    title: "${state.editingTypeId == '' ? '新建字典' : '编辑字典'}"
                     width: 840
                     content:
                       type: DictionaryTypeSavePanel
@@ -210,35 +227,69 @@ body:
                       props:
                         value: ${row.typeName}
                   events:
-                    onClick: &editType
+                    onClick: &viewType
                       - action: setState
                         params:
-                          editingTypeId: ${row.dictionaryTypeId}
-                          editingTypeCode: ${row.typeCode}
+                          viewingTypeId: ${row.dictionaryTypeId}
+                          viewingTypeCode: ${row.typeCode}
                       - action: reload
                         params:
-                          dataSource: editing
+                          dataSource: viewing
                       - action: reload
                         params:
-                          dataSource: typeItems
+                          dataSource: viewItems
                       - action: overlay.open
                         params:
-                          overlay: *typeDrawer
+                          overlay: &viewDrawer
+                            type: drawer
+                            title: 查看字典
+                            width: 840
+                            content:
+                              type: DictionaryTypeViewPanel
+                              props:
+                                typeData: ${data.viewing}
+                                itemsData: ${data.viewItems.records}
+                              events:
+                                onClose:
+                                  - action: overlay.close
               - title: 类型编码
                 dataIndex: typeCode
-              - title: 安全域
-                dataIndex: securityRealm
               - title: 状态
                 dataIndex: status
               - title: 操作
                 cell:
-                  type: Button
+                  type: Flex
                   props:
-                    text: 编辑
-                    variant: link
-                    size: small
-                  events:
-                    onClick: *editType
+                    gap: small
+                    align: center
+                  children:
+                    - type: Button
+                      props:
+                        text: 查看
+                        variant: link
+                        size: small
+                      events:
+                        onClick: *viewType
+                    - type: Button
+                      props:
+                        text: 编辑
+                        variant: link
+                        size: small
+                      events:
+                        onClick: &editType
+                          - action: setState
+                            params:
+                              editingTypeId: ${row.dictionaryTypeId}
+                              editingTypeCode: ${row.typeCode}
+                          - action: reload
+                            params:
+                              dataSource: editing
+                          - action: reload
+                            params:
+                              dataSource: typeItems
+                          - action: overlay.open
+                            params:
+                              overlay: *typeDrawer
         - type: Text
           props:
             text: 共 ${data.types.total} 种类型

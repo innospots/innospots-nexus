@@ -67,7 +67,7 @@ body:
             - type: Typography
               props:
                 variant: muted
-                text: "登录名 ${data.user.loginName} · 状态 ${data.user.status == 'ACTIVE' ? '● 正常' : data.user.status == 'PENDING_APPROVAL' ? '○ 待审核' : data.user.status == 'DISABLED' ? '○ 禁用' : data.user.status}${data.user.employeeNo != null && data.user.employeeNo != '' ? ' · 员工编号 ' + data.user.employeeNo : ''}"
+                text: "登录名 ${data.user.loginName} · 状态 ${data.user.status == 'ACTIVE' ? '● 正常' : data.user.status == 'PENDING_APPROVAL' ? '○ 待审核' : data.user.status == 'DISABLED' ? '○ 禁用' : data.user.status}"
             - type: Alert
               when: ${data.user.status == 'PENDING_APPROVAL'}
               props:
@@ -105,10 +105,25 @@ body:
                 text: 重置密码
               events:
                 onClick:
-                  - action: message
+                  - action: overlay.open
                     params:
-                      messageType: info
-                      text: 请引导用户使用「找回密码」流程。
+                      overlay:
+                        type: modal
+                        title: 重置密码
+                        width: 480
+                        content:
+                          type: PlatformUserPasswordResetPanel
+                          props:
+                            platformUserId: ${data.user.platformUserId}
+                          events:
+                            onCancel:
+                              - action: overlay.close
+                            onSuccess:
+                              - action: message
+                                params:
+                                  messageType: success
+                                  text: 密码已重置
+                              - action: overlay.close
             - type: Button
               props:
                 text: "${state.editing ? '取消编辑' : '编辑'}"
@@ -149,7 +164,6 @@ body:
               - { label: 显示名称, value: "${data.user.displayName != null ? data.user.displayName : '—'}" }
               - { label: 邮箱, value: "${data.user.email != null ? data.user.email : '—'}" }
               - { label: 手机, value: "${data.user.mobile != null ? data.user.mobile : '—'}" }
-              - { label: 员工编号, value: "${data.user.employeeNo != null ? data.user.employeeNo : '—'}" }
         - type: Form
           when: ${state.editing}
           props:
@@ -167,7 +181,6 @@ body:
                     displayName: ${event.displayName}
                     email: ${event.email}
                     mobile: ${event.mobile}
-                    employeeNo: ${event.employeeNo}
               - action: message
                 params:
                   messageType: success
@@ -205,13 +218,6 @@ body:
                     - type: Input
                       props:
                         name: mobile
-            - type: Field
-              props:
-                label: 员工编号
-              children:
-                - type: Input
-                  props:
-                    name: employeeNo
             - type: Flex
               props:
                 justify: end

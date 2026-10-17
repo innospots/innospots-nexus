@@ -50,10 +50,16 @@ public final class ConsoleOwnershipScope {
     }
 
     /**
-     * 为审计等场景捕获当前会话归属；无租户时回退为 PLATFORM。
+     * 为审计等场景捕获当前会话归属；平台安全域固定为 PLATFORM，无租户时回退为 PLATFORM。
+     *
+     * @return 当前审计记录的归属三元组
      */
     public static ConsoleOwnership captureForAudit() {
         String realm = currentSecurityRealm();
+        // 平台会话可能携带开发或支持上下文的快照，但审计仍须进入平台查询范围。
+        if (SecurityRealm.PLATFORM.name().equals(realm)) {
+            return new ConsoleOwnership(RoleOwnerType.PLATFORM, null, realm);
+        }
         String workspaceId = SessionContext.workspaceId();
         if (workspaceId != null && !workspaceId.isBlank()) {
             return new ConsoleOwnership(RoleOwnerType.WORKSPACE, workspaceId, realm);

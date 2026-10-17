@@ -6,6 +6,8 @@ import { Trash2 } from "lucide-react";
 
 import { Button, Input, Select } from "@pactor-app/ui/components";
 
+import { DictionaryTypeSection } from "./dictionary-type-section";
+
 export type DictionaryItemDraft = {
   itemValue: string;
   itemName: string;
@@ -148,6 +150,19 @@ export function DictionaryTypeSavePanel({
   );
 
   useEffect(() => {
+    if (isCreate) {
+      setTypeCode("");
+      setLocaleTags([...DEFAULT_LOCALE_TAGS]);
+      setTypeNameByLocale({
+        [LOCALE_ZH_CN]: "",
+        [LOCALE_EN]: "",
+      });
+      setItems([]);
+      setDraftValue("");
+      setDraftName("");
+      setError(null);
+      return;
+    }
     const parsed = parseTypeNameLocales(typeData?.typeName);
     setTypeCode(typeData?.typeCode ?? "");
     setLocaleTags(parsed.tags);
@@ -156,7 +171,7 @@ export function DictionaryTypeSavePanel({
     setDraftValue("");
     setDraftName("");
     setError(null);
-  }, [typeKey, itemsData]);
+  }, [isCreate, typeKey, itemsData, typeData?.typeCode, typeData?.typeName]);
 
   const addableLocales = useMemo(() => {
     return ALL_KNOWN_LOCALE_TAGS.filter((tag) => !localeTags.includes(tag));
@@ -247,10 +262,9 @@ export function DictionaryTypeSavePanel({
   }, [isCreate, items, localeTags, onSave, typeCode, typeNameByLocale]);
 
   return (
-    <div className="flex max-h-[calc(100vh-8rem)] flex-col gap-4">
+    <div className="flex min-h-[calc(100dvh-8.5rem)] flex-col">
       <div className="min-h-0 flex-1 space-y-4 overflow-y-auto pr-1">
-        <div>
-          <div className="mb-3 text-sm font-semibold text-foreground">基本信息</div>
+        <DictionaryTypeSection title="基本信息">
           <div className="space-y-3">
             <label className="block text-sm">
               <span className="text-destructive">*</span> 类型编码
@@ -324,12 +338,9 @@ export function DictionaryTypeSavePanel({
               </p>
             ) : null}
           </div>
-        </div>
-        <div className="border-t border-border pt-4">
-          <div className="mb-2 flex items-center justify-between">
-            <div className="text-sm font-semibold text-foreground">字典项</div>
-          </div>
-          <div className="mb-3 space-y-2 rounded-md border border-dashed border-border p-3">
+        </DictionaryTypeSection>
+        <DictionaryTypeSection title="字典项">
+          <div className="mb-3 space-y-2 rounded-md border border-dashed border-border bg-background/50 p-3">
             <div className="text-xs font-medium text-muted-foreground">添加字典项</div>
             <div className="grid gap-2 sm:grid-cols-2">
               <Input
@@ -378,16 +389,20 @@ export function DictionaryTypeSavePanel({
               </tbody>
             </table>
           )}
-        </div>
-        {error != null ? <p className="text-sm text-destructive">{error}</p> : null}
+        </DictionaryTypeSection>
       </div>
-      <div className="flex shrink-0 justify-end gap-2 border-t border-border pt-3">
-        <Button variant="default" onClick={onCancel}>
-          取消
-        </Button>
-        <Button variant="primary" onClick={handleSave}>
-          保存全部
-        </Button>
+      <div
+        className="sticky bottom-0 z-10 -mx-6 mt-4 shrink-0 border-t border-border bg-popover px-6 py-3 shadow-[0_-6px_16px_-8px_rgba(0,0,0,0.12)]"
+      >
+        {error != null ? <p className="mb-2 text-sm text-destructive">{error}</p> : null}
+        <div className="flex justify-end gap-2">
+          <Button variant="default" onClick={() => onCancel?.()}>
+            取消
+          </Button>
+          <Button variant="primary" onClick={handleSave}>
+            保存全部
+          </Button>
+        </div>
       </div>
     </div>
   );

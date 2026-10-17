@@ -1,10 +1,14 @@
 package com.innospots.nexus.console.scope;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.innospots.nexus.base.domain.enums.BasicStatus;
+import com.innospots.nexus.base.thread.TLC;
 import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
+import com.innospots.nexus.console.jaxrs.support.ConsoleDevSessionBinder;
+import com.innospots.nexus.console.jaxrs.web.ConsoleWebDevSessionSettings;
 import com.innospots.nexus.console.role.domain.entity.RoleBindingEntity;
 import com.innospots.nexus.console.role.domain.entity.RoleEntity;
 import com.innospots.nexus.console.role.domain.enums.RoleOwnerType;
@@ -17,6 +21,51 @@ import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.status.NexusStatusCode;
 
 class ConsoleOwnershipScopeTest {
+
+    @AfterEach
+    void clearSession() {
+        TLC.clear();
+    }
+
+    @Test
+    void platformAuditIgnoresTenantAndWorkspaceSnapshots() {
+        ConsoleWebDevSessionSettings settings = new ConsoleWebDevSessionSettings();
+        settings.setRealm(SecurityRealm.PLATFORM.name());
+        ConsoleDevSessionBinder.bind(settings);
+
+        ConsoleOwnership ownership = ConsoleOwnershipScope.captureForAudit();
+
+        assertThat(ownership.ownerType()).isEqualTo(RoleOwnerType.PLATFORM);
+        assertThat(ownership.ownerId()).isNull();
+        assertThat(ownership.securityRealm()).isEqualTo(SecurityRealm.PLATFORM.name());
+    }
+
+    @Test
+    void tenantAuditKeepsWorkspaceOwnership() {
+        ConsoleWebDevSessionSettings settings = new ConsoleWebDevSessionSettings();
+        settings.setRealm(SecurityRealm.TENANT.name());
+        ConsoleDevSessionBinder.bind(settings);
+
+        ConsoleOwnership ownership = ConsoleOwnershipScope.captureForAudit();
+
+        assertThat(ownership.ownerType()).isEqualTo(RoleOwnerType.WORKSPACE);
+        assertThat(ownership.ownerId()).isEqualTo(settings.getWorkspaceId());
+        assertThat(ownership.securityRealm()).isEqualTo(SecurityRealm.TENANT.name());
+    }
+
+    @Test
+    void tenantAuditWithoutWorkspaceKeepsTenantOwnership() {
+        ConsoleWebDevSessionSettings settings = new ConsoleWebDevSessionSettings();
+        settings.setRealm(SecurityRealm.TENANT.name());
+        settings.setWorkspaceId(null);
+        ConsoleDevSessionBinder.bind(settings);
+
+        ConsoleOwnership ownership = ConsoleOwnershipScope.captureForAudit();
+
+        assertThat(ownership.ownerType()).isEqualTo(RoleOwnerType.TENANT);
+        assertThat(ownership.ownerId()).isEqualTo(settings.getTenantId());
+        assertThat(ownership.securityRealm()).isEqualTo(SecurityRealm.TENANT.name());
+    }
 
     @Test
     void applyPlatformOwnershipBuildsSqlSegmentWithoutEntityLambdaCache() {

@@ -140,6 +140,7 @@ CREATE TABLE IF NOT EXISTS nx_audit_log (
     status_code      VARCHAR(32),
     execution_result VARCHAR(32)   NOT NULL,
     key_parameters   VARCHAR(2048),
+    duration_ms      BIGINT,
     owner_type       VARCHAR(32)   NOT NULL,
     owner_id         VARCHAR(32),
     security_realm   VARCHAR(32)   NOT NULL,

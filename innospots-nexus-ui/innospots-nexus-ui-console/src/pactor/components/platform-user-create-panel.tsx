@@ -21,7 +21,6 @@ export function PlatformUserCreatePanel({ onCancel, onCreated }: PlatformUserCre
     const [displayName, setDisplayName] = useState("");
     const [email, setEmail] = useState("");
     const [mobile, setMobile] = useState("");
-    const [employeeNo, setEmployeeNo] = useState("");
     const [roleCodes, setRoleCodes] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
@@ -45,7 +44,6 @@ export function PlatformUserCreatePanel({ onCancel, onCreated }: PlatformUserCre
 
     const resetModeFields = useCallback((next: ProvisionMode) => {
         setMode(next);
-        setEmployeeNo("");
         setRoleCodes("");
         setPassword("");
         setConfirmPassword("");
@@ -72,9 +70,6 @@ export function PlatformUserCreatePanel({ onCancel, onCreated }: PlatformUserCre
                 body.email = email.trim();
             } else {
                 body.mobile = mobile.trim();
-            }
-            if (employeeNo.trim()) {
-                body.employeeNo = employeeNo.trim();
             }
             if (roleCodes.trim()) {
                 body.roleCodes = roleCodes.trim();
@@ -104,7 +99,6 @@ export function PlatformUserCreatePanel({ onCancel, onCreated }: PlatformUserCre
         contactType,
         displayName,
         email,
-        employeeNo,
         loginName,
         mobile,
         onCreated,
@@ -192,16 +186,6 @@ export function PlatformUserCreatePanel({ onCancel, onCreated }: PlatformUserCre
                         />
                     )}
                 </div>
-                {mode === "direct" && (
-                    <label className="mt-3 flex flex-col gap-1 text-sm">
-                        员工编号（可选）
-                        <Input
-                            value={employeeNo}
-                            onChange={(value) => setEmployeeNo(String(value))}
-                            placeholder="如 OPS-001"
-                        />
-                    </label>
-                )}
             </div>
 
             {mode === "invite" && (

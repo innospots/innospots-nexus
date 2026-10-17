@@ -23,7 +23,7 @@ import com.innospots.nexus.sample.spring.platform.support.PlatformIntegrationTes
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * 与 {@code dictionary-type-list.yaml} 对齐：类型分页/详情/选项/状态，及 items 接口完整维护字典项。
+ * 与 {@code dictionary-type-list.yaml} 对齐：类型分页/详情/选项/状态，及按类型查询字典项。
  */
 @SpringBootTest(
         classes = SamplePlatformConsoleServer.class,
@@ -125,42 +125,33 @@ class PlatformDictionaryEndpointIntegrationTest {
         assertThat(updatedType.statusCode()).as(updatedType.body()).isEqualTo(200);
 
         String itemsPath = PlatformConstant.DICTIONARY_ITEMS_PATH.replace("{typeCode}", TYPE_CODE);
-        String itemId = jdbcTemplate.queryForObject(
-                "SELECT dictionary_item_id FROM nx_dictionary_item WHERE type_code = ? AND item_value = ?",
-                String.class,
-                TYPE_CODE,
-                "east");
-        String createItemBody = """
-                {
-                  "itemValue": "west",
-                  "itemName": "West"
-                }
-                """;
-        HttpResponse<String> createdItem = http.postJson(itemsPath, createItemBody);
-        assertThat(createdItem.statusCode()).as(createdItem.body()).isEqualTo(200);
-
         HttpResponse<String> pagedItems = http.get(itemsPath + "?pageNo=1&pageSize=20");
         assertThat(pagedItems.statusCode()).isEqualTo(200);
         assertThat(pagedItems.body()).contains("east");
 
-        String updateItemBody = """
+        String replaceItemsBody = """
                 {
-                  "itemName": "East Updated"
+                  "items": [
+                    {
+                      "itemValue": "east",
+                      "itemName": "East Updated"
+                    },
+                    {
+                      "itemValue": "west",
+                      "itemName": "West"
+                    }
+                  ]
                 }
                 """;
-        HttpResponse<String> updatedItem = http.putJson(itemsPath + "/" + itemId, updateItemBody);
-        assertThat(updatedItem.statusCode()).as(updatedItem.body()).isEqualTo(200);
-        assertThat(updatedItem.body()).contains("East Updated");
+        HttpResponse<String> replacedItems = http.putJson(
+                PlatformConstant.DICTIONARY_TYPES_PATH + "/" + typeId,
+                replaceItemsBody);
+        assertThat(replacedItems.statusCode()).as(replacedItems.body()).isEqualTo(200);
 
-        HttpResponse<String> disabledItem = http.putJson(
-                itemsPath + "/" + itemId + "/status",
-                "{\"status\":\"DISABLED\"}");
-        assertThat(disabledItem.statusCode()).as(disabledItem.body()).isEqualTo(200);
-
-        HttpResponse<String> enabledItem = http.putJson(
-                itemsPath + "/" + itemId + "/status",
-                "{\"status\":\"ENABLED\"}");
-        assertThat(enabledItem.statusCode()).as(enabledItem.body()).isEqualTo(200);
+        HttpResponse<String> pagedAfterReplace = http.get(itemsPath + "?pageNo=1&pageSize=20");
+        assertThat(pagedAfterReplace.statusCode()).isEqualTo(200);
+        assertThat(pagedAfterReplace.body()).contains("East Updated");
+        assertThat(pagedAfterReplace.body()).contains("west");
 
         PlatformDatabaseJsonSnapshot.logAndPersist(
                 jdbcTemplate,
@@ -177,9 +168,6 @@ class PlatformDictionaryEndpointIntegrationTest {
         HttpResponse<String> disabledTypePage = http.get(disabledPagePath);
         assertThat(disabledTypePage.statusCode()).isEqualTo(200);
         assertThat(disabledTypePage.body()).contains(typeId);
-
-        HttpResponse<String> deletedItem = http.delete(itemsPath + "/" + itemId);
-        assertThat(deletedItem.statusCode()).as(deletedItem.body()).isEqualTo(200);
 
         HttpResponse<String> deletedType = http.delete(PlatformConstant.DICTIONARY_TYPES_PATH + "/" + typeId);
         assertThat(deletedType.statusCode()).as(deletedType.body()).isEqualTo(200);

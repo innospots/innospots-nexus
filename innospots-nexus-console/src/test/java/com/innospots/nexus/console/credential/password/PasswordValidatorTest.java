@@ -26,4 +26,19 @@ class PasswordValidatorTest {
     void acceptsPasswordWithUpperLowerAndDigit() {
         assertThat(validator.isValid("Abcdefg1")).isTrue();
     }
+
+    @Test
+    void policyViolationCodesDescribeMissingRules() {
+        assertThat(validator.policyViolationCodes("Ab1")).containsExactly("TOO_SHORT");
+        assertThat(validator.policyViolationCodes("abcdefgh"))
+                .containsExactly("MISSING_UPPER", "MISSING_DIGIT");
+        assertThat(validator.policyViolationCodes("Abcdefg1")).isEmpty();
+    }
+
+    @Test
+    void policyViolationDisplayExplainsRequirementsInChinese() {
+        assertThat(validator.policyViolationDisplay(validator.policyViolationCodes("abcdefgh")).cnValue())
+                .contains("大写字母")
+                .contains("数字");
+    }
 }

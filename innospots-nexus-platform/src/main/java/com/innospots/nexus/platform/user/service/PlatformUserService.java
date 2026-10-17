@@ -15,6 +15,7 @@ import com.innospots.nexus.platform.user.domain.entity.PlatformUserEntity;
 import com.innospots.nexus.platform.user.domain.enums.PlatformUserStatus;
 import com.innospots.nexus.platform.user.domain.request.PlatformUserCreateRequest;
 import com.innospots.nexus.platform.user.domain.request.PlatformUserPageRequest;
+import com.innospots.nexus.platform.user.domain.request.PlatformUserPasswordResetRequest;
 import com.innospots.nexus.platform.user.domain.request.PlatformUserStatusUpdateRequest;
 import com.innospots.nexus.platform.user.domain.request.PlatformUserUpdateRequest;
 import com.innospots.nexus.platform.user.domain.vo.PlatformUserVo;
@@ -67,11 +68,11 @@ public class PlatformUserService {
                 request.displayName(),
                 request.email(),
                 normalizeMobileForStorage(request.mobile()),
-                request.employeeNo(),
+                null,
                 PlatformUserStatus.ACTIVE);
         platformUserOperator.insert(user);
 
-        String rawPassword = passwordDecryptor.decrypt(request.encryptedPassword());
+        String rawPassword = decryptEncryptedPassword(request.encryptedPassword(), user.getPlatformUserId());
         enrollPassword(user.getPlatformUserId(), rawPassword);
         platformUserRoleProvisioner.assignDefaultRolesIfPresent(user.getPlatformUserId(), request.roleCodes());
         log.info("Created platform user {}", user.getPlatformUserId());
@@ -146,12 +147,26 @@ public class PlatformUserService {
             platformUserOperator.ensureMobileAvailable(normalizedMobile, platformUserId);
             entity.setMobile(normalizedMobile);
         }
-        if (request.employeeNo() != null) {
-            entity.setEmployeeNo(request.employeeNo());
-        }
         platformUserOperator.update(entity);
         log.info("Updated platform user profile {}", platformUserId);
         return toVo(entity);
+    }
+
+    /**
+     * 管理员重置指定用户的登录密码（无需旧密码）。
+     */
+    @Transactional
+    public void resetUserPassword(String platformUserId, PlatformUserPasswordResetRequest request) {
+        Checks.notNull(request, "request");
+        Checks.notBlank(request.encryptedPassword(), "encryptedPassword");
+        platformUserOperator.requireById(platformUserId);
+        String rawPassword = decryptEncryptedPassword(request.encryptedPassword(), platformUserId);
+        try {
+            credentialService.resetPassword(SecurityRealm.PLATFORM, platformUserId, rawPassword);
+        } catch (IllegalStateException ex) {
+            credentialService.enrollPassword(SecurityRealm.PLATFORM, platformUserId, rawPassword);
+        }
+        log.info("Admin reset platform user password for {}", platformUserId);
     }
 
     @Transactional
@@ -198,6 +213,24 @@ public class PlatformUserService {
         credentialService.enrollPassword(SecurityRealm.PLATFORM, platformUserId, rawPassword);
     }
 
+    private String decryptEncryptedPassword(String encryptedPassword, String platformUserId) {
+        try {
+            String rawPassword = passwordDecryptor.decrypt(encryptedPassword);
+            log.debug(
+                    "Platform user password decrypted: platformUserId={}, plaintextLength={}",
+                    platformUserId,
+                    rawPassword.length());
+            return rawPassword;
+        } catch (NexusException ex) {
+            log.warn(
+                    "Platform user password decrypt failed: platformUserId={}, encryptedLength={}, code={}",
+                    platformUserId,
+                    encryptedPassword.length(),
+                    ex.code());
+            throw ex;
+        }
+    }
+
     private static String normalizeMobileForStorage(String mobile) {
         if (mobile == null || mobile.isBlank()) {
             return mobile;
@@ -212,7 +245,6 @@ public class PlatformUserService {
                 entity.getDisplayName(),
                 entity.getEmail(),
                 entity.getMobile(),
-                entity.getEmployeeNo(),
                 entity.getStatus(),
                 entity.getLastLoginTime(),
                 entity.getLastLoginIp(),

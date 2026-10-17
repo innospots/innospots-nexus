@@ -8,10 +8,7 @@ import lombok.RequiredArgsConstructor;
 import com.innospots.nexus.base.domain.enums.BasicStatus;
 import com.innospots.nexus.base.domain.response.PageResult;
 import com.innospots.nexus.base.util.Checks;
-import com.innospots.nexus.console.dictionary.domain.request.DictionaryItemCreateRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryItemPageRequest;
-import com.innospots.nexus.console.dictionary.domain.request.DictionaryItemStatusUpdateRequest;
-import com.innospots.nexus.console.dictionary.domain.request.DictionaryItemUpdateRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeCreateRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypePageRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeStatusUpdateRequest;
@@ -73,40 +70,6 @@ public class PlatformDictionaryService {
     public PageResult<DictionaryItemVo> pageDictionaryItems(String typeCode, DictionaryItemPageRequest request) {
         Checks.notBlank(typeCode, "typeCode");
         return itemOperator.pageItems(typeCode, request, platformOwnership());
-    }
-
-    public DictionaryItemVo createDictionaryItem(String typeCode, DictionaryItemCreateRequest request) {
-        Checks.notBlank(typeCode, "typeCode");
-        Objects.requireNonNull(request, "request");
-        return itemOperator.createItem(typeCode, request, platformOwnership());
-    }
-
-    public DictionaryItemVo updateDictionaryItem(
-            String typeCode,
-            String dictionaryItemId,
-            DictionaryItemUpdateRequest request
-    ) {
-        Checks.notBlank(typeCode, "typeCode");
-        Checks.notBlank(dictionaryItemId, "dictionaryItemId");
-        Objects.requireNonNull(request, "request");
-        return itemOperator.updateItem(typeCode, dictionaryItemId, request, platformOwnership());
-    }
-
-    public void updateDictionaryItemStatus(
-            String typeCode,
-            String dictionaryItemId,
-            DictionaryItemStatusUpdateRequest request
-    ) {
-        Checks.notBlank(typeCode, "typeCode");
-        Checks.notBlank(dictionaryItemId, "dictionaryItemId");
-        Objects.requireNonNull(request, "request");
-        itemOperator.updateItemStatus(typeCode, dictionaryItemId, request, platformOwnership());
-    }
-
-    public void deleteDictionaryItem(String typeCode, String dictionaryItemId) {
-        Checks.notBlank(typeCode, "typeCode");
-        Checks.notBlank(dictionaryItemId, "dictionaryItemId");
-        itemOperator.deleteItem(typeCode, dictionaryItemId, platformOwnership());
     }
 
     private static ConsoleOwnership platformOwnership() {
