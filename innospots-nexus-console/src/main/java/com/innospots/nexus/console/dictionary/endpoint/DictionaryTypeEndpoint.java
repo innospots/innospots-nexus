@@ -20,12 +20,10 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import com.innospots.nexus.base.domain.enums.BasicStatus;
 import com.innospots.nexus.base.domain.response.PageResult;
 import com.innospots.nexus.base.domain.response.R;
-import com.innospots.nexus.console.dictionary.domain.request.DictionaryItemPageRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeCreateRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypePageRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeStatusUpdateRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeUpdateRequest;
-import com.innospots.nexus.console.dictionary.domain.vo.DictionaryItemVo;
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeOptionVo;
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeVo;
 import com.innospots.nexus.console.logger.AuditLog;
@@ -33,7 +31,7 @@ import com.innospots.nexus.console.logger.I18nLiteral;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 
 /**
- * 字典类型管理 REST 契约。
+ * 字典类型管理 REST 契约（字典项随类型详情与创建/更新请求体维护，无独立字典项资源）。
  *
  * <p>类级 {@code @Path} 由业务域实现（如 platform）绑定。</p>
  */
@@ -97,12 +95,4 @@ public interface DictionaryTypeEndpoint {
     @Path("/options")
     @Operation(operationId = "dictionaryTypeListOptions", summary = "字典类型下拉选项")
     R<List<DictionaryTypeOptionVo>> listDictionaryTypeOptions(@QueryParam("status") BasicStatus status);
-
-    @GET
-    @Path("/{typeCode}/items")
-    @Operation(operationId = "dictionaryItemPage", summary = "分页查询字典项")
-    R<PageResult<DictionaryItemVo>> pageDictionaryItems(
-            @PathParam("typeCode") String typeCode,
-            @BeanParam DictionaryItemPageRequest request
-    );
 }

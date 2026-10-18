@@ -16,7 +16,7 @@ nexus:
       # EMAIL | MOBILE | NONE（NONE 时开放注册仅需登录名+密码，不发送验证码）
       otp-verification: ${NEXUS_CONSOLE_REGISTRATION_OTP_VERIFICATION:NONE}
       otp:
-        # 联调：DEBUG 日志输出 challengeId、投递地址与明文验证码
+        # 联调：INFO 日志输出 challengeId、投递地址与明文验证码（仅 EMAIL/MOBILE 注册会发 OTP）
         debug-log-enabled: ${NEXUS_CONSOLE_REGISTRATION_OTP_DEBUG_LOG_ENABLED:true}
         email:
           host: ${NEXUS_CONSOLE_REGISTRATION_OTP_EMAIL_HOST:smtp.example.com}

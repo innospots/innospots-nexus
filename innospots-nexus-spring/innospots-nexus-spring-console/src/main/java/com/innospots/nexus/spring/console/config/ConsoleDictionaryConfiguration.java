@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Configuration;
 import com.innospots.nexus.console.dictionary.converter.DictionaryConverter;
 import com.innospots.nexus.console.dictionary.dao.DictionaryItemDao;
 import com.innospots.nexus.console.dictionary.dao.DictionaryTypeDao;
-import com.innospots.nexus.console.dictionary.operator.DictionaryItemOperator;
 import com.innospots.nexus.console.dictionary.operator.DictionaryTypeOperator;
 
 /**
@@ -32,13 +31,5 @@ public class ConsoleDictionaryConfiguration {
             DictionaryItemDao itemDao,
             DictionaryConverter dictionaryConverter) {
         return new DictionaryTypeOperator(typeDao, itemDao, dictionaryConverter);
-    }
-
-    @Bean
-    DictionaryItemOperator dictionaryItemOperator(
-            DictionaryTypeOperator dictionaryTypeOperator,
-            DictionaryItemDao itemDao,
-            DictionaryConverter dictionaryConverter) {
-        return new DictionaryItemOperator(dictionaryTypeOperator, itemDao, dictionaryConverter);
     }
 }

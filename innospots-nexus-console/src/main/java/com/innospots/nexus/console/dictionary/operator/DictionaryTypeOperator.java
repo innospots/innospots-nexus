@@ -25,6 +25,7 @@ import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeCreat
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypePageRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeStatusUpdateRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeUpdateRequest;
+import com.innospots.nexus.console.dictionary.domain.vo.DictionaryItemVo;
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeOptionVo;
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeVo;
 import com.innospots.nexus.console.dictionary.status.DictionaryStatusCode;
@@ -65,8 +66,9 @@ public class DictionaryTypeOperator {
 
     public DictionaryTypeVo getType(String dictionaryTypeId, ConsoleOwnership ownership) {
         Checks.notNull(ownership, "ownership");
-        return requireType(dictionaryTypeId, ownership).map(converter::toTypeVo)
+        DictionaryTypeEntity entity = requireType(dictionaryTypeId, ownership)
                 .orElseThrow(() -> ConsoleExceptions.build(DictionaryStatusCode.TYPE_NOT_FOUND));
+        return toTypeVoWithItems(entity, ownership);
     }
 
     @Transactional
@@ -87,7 +89,7 @@ public class DictionaryTypeOperator {
         entity.setBuiltIn(false);
         typeDao.insert(entity);
         insertItems(entity, request.items(), ownership);
-        return converter.toTypeVo(entity);
+        return toTypeVoWithItems(entity, ownership);
     }
 
     @Transactional
@@ -111,7 +113,7 @@ public class DictionaryTypeOperator {
         if (request.items() != null) {
             replaceItems(entity, request.items(), ownership);
         }
-        return converter.toTypeVo(entity);
+        return toTypeVoWithItems(entity, ownership);
     }
 
     @Transactional
@@ -200,6 +202,20 @@ public class DictionaryTypeOperator {
                         .eq(DictionaryTypeEntity::getTypeCode, typeCode)
                         .eq(DictionaryTypeEntity::getSecurityRealm, securityRealm),
                 ownership)) > 0;
+    }
+
+    private DictionaryTypeVo toTypeVoWithItems(DictionaryTypeEntity entity, ConsoleOwnership ownership) {
+        return converter.toTypeVo(entity, listItemVos(entity.getTypeCode(), ownership));
+    }
+
+    private List<DictionaryItemVo> listItemVos(String typeCode, ConsoleOwnership ownership) {
+        List<DictionaryItemEntity> entities = itemDao.selectList(ConsoleOwnershipScope.apply(
+                new LambdaQueryWrapper<DictionaryItemEntity>()
+                        .eq(DictionaryItemEntity::getTypeCode, typeCode)
+                        .orderByAsc(DictionaryItemEntity::getSortOrder)
+                        .orderByAsc(DictionaryItemEntity::getItemName),
+                ownership));
+        return entities.stream().map(converter::toItemVo).toList();
     }
 
     private void insertItems(

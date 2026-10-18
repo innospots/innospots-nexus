@@ -13,19 +13,10 @@ dataSources:
       url: /api/d/platform/roles/${params.roleId}
 
 lifecycle:
-  onLoad:
-    - action: form.setValues
-      params:
-        form: roleBasicForm
-        values: ${data.role}
   onShow:
     - action: reload
       params:
         dataSource: role
-    - action: form.setValues
-      params:
-        form: roleBasicForm
-        values: ${data.role}
 
 body:
   type: Page
@@ -45,15 +36,117 @@ body:
           - action: navigate
             params: { to: /system/roles }
     - type: Flex
+      when: ${data.role != null}
       props:
-        direction: vertical
-        gap: 2
+        justify: space-between
+        align: start
         className: mt-2
       children:
         - type: Typography
           props:
             variant: h3
-            text: "${data.role != null && data.role.roleCode != null ? data.role.roleCode + ' · ' : ''}${data.role != null && data.role.roleName != null ? data.role.roleName : params.roleId}"
+            text: "${data.role.roleCode != null ? data.role.roleCode + ' · ' : ''}${data.role.roleName != null ? data.role.roleName : params.roleId}"
+        - type: Flex
+          props:
+            gap: small
+          children:
+            - type: Button
+              when: ${data.role.status == 'ENABLED' || data.role.status == 'DISABLED'}
+              props:
+                text: "${data.role.status == 'ENABLED' ? '停用' : '启用'}"
+              events:
+                onClick:
+                  - action: confirm
+                    params:
+                      title: 确认变更状态
+                      content: 确定要变更该角色的启用状态吗？
+                  - action: request
+                    params:
+                      method: PUT
+                      url: /api/d/platform/roles/${params.roleId}/status
+                      body:
+                        status: "${data.role.status == 'ENABLED' ? 'DISABLED' : 'ENABLED'}"
+                  - action: message
+                    params:
+                      messageType: success
+                      text: 状态已更新
+                  - action: reload
+                    params:
+                      dataSource: role
+            - type: Button
+              props:
+                text: 修改
+                variant: primary
+              events:
+                onClick:
+                  - action: overlay.open
+                    params:
+                      overlay:
+                        type: modal
+                        title: 修改角色
+                        width: 520
+                        content:
+                          type: Form
+                          props:
+                            name: roleEditForm
+                            layout: vertical
+                            initialValues: ${data.role}
+                          events:
+                            onSubmit:
+                              - action: request
+                                params:
+                                  method: PUT
+                                  url: /api/d/platform/roles/${params.roleId}
+                                  body:
+                                    roleName: ${event.roleName}
+                                    description: ${event.description}
+                              - action: message
+                                params:
+                                  messageType: success
+                                  text: 已保存修改
+                              - action: overlay.close
+                              - action: reload
+                                params:
+                                  dataSource: role
+                          children:
+                            - type: Field
+                              props:
+                                label: 角色名称
+                                required: true
+                              children:
+                                - type: Input
+                                  props:
+                                    name: roleName
+                                    placeholder: 请输入角色名称
+                                    rules:
+                                      - required: true
+                                        message: 请输入角色名称
+                            - type: Field
+                              props:
+                                label: 描述
+                              children:
+                                - type: Textarea
+                                  props:
+                                    name: description
+                                    placeholder: 角色用途说明
+                            - type: Flex
+                              props:
+                                justify: end
+                                gap: small
+                                className: mt-4
+                              children:
+                                - type: Button
+                                  props:
+                                    text: 取消
+                                  events:
+                                    onClick:
+                                      - action: overlay.close
+                                - type: Button
+                                  props:
+                                    text: 保存
+                                    variant: primary
+                                    submit: true
+                                    htmlType: submit
     - type: Tabs
       props:
         activeKey: basic
@@ -78,124 +171,24 @@ body:
                   params:
                     to: /system/roles/${params.roleId}/members
     - type: Card
+      when: ${data.role != null}
       props:
         className: mt-4
       children:
-        - type: Form
+        - type: Text
           props:
-            name: roleBasicForm
-            layout: vertical
-            initialValues: ${data.role}
-          events:
-            onSubmit:
-              - action: request
-                params:
-                  method: PUT
-                  url: /api/d/platform/roles/${params.roleId}
-                  body:
-                    roleName: ${event.roleName}
-                    description: ${event.description}
-                    sortOrder: ${event.sortOrder}
-              - action: message
-                params:
-                  messageType: success
-                  text: 已保存修改
-              - action: reload
-                params:
-                  dataSource: role
-          children:
-            - type: Text
-              props:
-                text: 基本信息
-                strong: true
-            - type: Separator
-            - type: Field
-              props:
-                label: 角色名称
-                required: true
-              children:
-                - type: Input
-                  props:
-                    name: roleName
-                    rules:
-                      - required: true
-                        message: 请输入角色名称
-            - type: Grid
-              props:
-                columns: 2
-                gap: 16
-              children:
-                - type: Field
-                  props:
-                    label: 角色编码
-                    labelHint: 创建后不可修改
-                  children:
-                    - type: Input
-                      props:
-                        name: roleCode
-                        disabled: true
-                - type: Field
-                  props:
-                    label: 归属层级
-                  children:
-                    - type: Input
-                      props:
-                        name: ownerType
-                        disabled: true
-            - type: Grid
-              props:
-                columns: 2
-                gap: 16
-              children:
-                - type: Field
-                  props:
-                    label: 安全域
-                  children:
-                    - type: Input
-                      props:
-                        name: securityRealm
-                        disabled: true
-                - type: Field
-                  props:
-                    label: 排序
-                  children:
-                    - type: NumberInput
-                      props:
-                        name: sortOrder
-                        min: 0
-                        precision: 0
-            - type: Field
-              props:
-                label: 描述
-              children:
-                - type: Textarea
-                  props:
-                    name: description
-            - type: Descriptions
-              when: ${data.role != null}
-              props:
-                className: mt-4
-                items:
-                  - { label: 创建时间, value: "${data.role.createdAt}" }
-                  - { label: 更新时间, value: "${data.role.updatedAt}" }
-            - type: Flex
-              props:
-                justify: end
-                gap: small
-                className: mt-4
-              children:
-                - type: Button
-                  props:
-                    text: 取消
-                  events:
-                    onClick:
-                      - action: form.setValues
-                        params:
-                          form: roleBasicForm
-                          values: ${data.role}
-                - type: Button
-                  props:
-                    text: 保存修改
-                    variant: primary
-                    submit: true
-                    htmlType: submit
+            text: 基本信息
+            strong: true
+        - type: Descriptions
+          props:
+            className: mt-3
+            items:
+              - { label: 角色名称, value: "${data.role.roleName != null ? data.role.roleName : '—'}" }
+              - { label: 角色编码, value: "${data.role.roleCode != null ? data.role.roleCode : '—'}" }
+              - label: 归属层级
+                value: "${data.role.ownerType != null ? data.role.ownerType : '—'}"
+              - label: 状态
+                value: "${data.role.status == 'ENABLED' ? '启用' : data.role.status == 'DISABLED' ? '停用' : data.role.status}"
+              - { label: 成员数量, value: "${data.role.memberCount != null ? data.role.memberCount : 0}" }
+              - label: 描述
+                value: "${data.role.description != null && data.role.description != '' ? data.role.description : '—'}"

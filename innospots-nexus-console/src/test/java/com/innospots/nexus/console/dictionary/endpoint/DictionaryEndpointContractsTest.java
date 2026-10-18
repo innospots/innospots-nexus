@@ -13,9 +13,6 @@ import org.junit.jupiter.api.Test;
 
 import com.innospots.nexus.base.domain.enums.BasicStatus;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryItemCreateRequest;
-import com.innospots.nexus.console.dictionary.domain.request.DictionaryItemPageRequest;
-import com.innospots.nexus.console.dictionary.domain.request.DictionaryItemStatusUpdateRequest;
-import com.innospots.nexus.console.dictionary.domain.request.DictionaryItemUpdateRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeCreateRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypePageRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeStatusUpdateRequest;
@@ -42,8 +39,6 @@ class DictionaryEndpointContractsTest {
                 PUT.class, String.class, DictionaryTypeStatusUpdateRequest.class);
         assertHttpMethod(DictionaryTypeEndpoint.class, "deleteDictionaryType", DELETE.class, String.class);
         assertHttpMethod(DictionaryTypeEndpoint.class, "listDictionaryTypeOptions", GET.class, BasicStatus.class);
-        assertHttpMethod(DictionaryTypeEndpoint.class, "pageDictionaryItems",
-                GET.class, String.class, DictionaryItemPageRequest.class);
     }
 
     @Test
@@ -53,9 +48,6 @@ class DictionaryEndpointContractsTest {
         assertRecordComponents(DictionaryTypeStatusUpdateRequest.class, "status");
         assertThat(DictionaryTypePageRequest.class.isRecord()).isFalse();
         assertRecordComponents(DictionaryItemCreateRequest.class, "itemValue", "itemName", "sortOrder");
-        assertRecordComponents(DictionaryItemUpdateRequest.class, "itemName", "sortOrder");
-        assertRecordComponents(DictionaryItemStatusUpdateRequest.class, "status");
-        assertThat(DictionaryItemPageRequest.class.isRecord()).isFalse();
         assertThat(DictionaryTypeVo.class.isRecord()).isTrue();
         assertThat(DictionaryTypeOptionVo.class.isRecord()).isTrue();
         assertThat(DictionaryItemVo.class.isRecord()).isTrue();

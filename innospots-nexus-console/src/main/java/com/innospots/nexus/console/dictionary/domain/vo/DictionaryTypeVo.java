@@ -1,6 +1,7 @@
 package com.innospots.nexus.console.dictionary.domain.vo;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
@@ -24,6 +25,7 @@ import com.innospots.nexus.console.dictionary.json.DictionaryTypeI18nSerializer;
  * @param builtIn          类型是否由系统管理
  * @param createdAt        创建时间
  * @param updatedAt        最后更新时间
+ * @param items            字典项（详情与写入响应时返回；类型分页不填充）
  */
 @Schema(name = "DictionaryTypeVo", description = "字典类型视图")
 public record DictionaryTypeVo(
@@ -45,6 +47,8 @@ public record DictionaryTypeVo(
         @Schema(description = "创建时间", required = true)
         LocalDateTime createdAt,
         @Schema(description = "最后更新时间", required = true)
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+        @Schema(description = "字典项（详情与写入响应时返回）")
+        List<DictionaryItemVo> items
 ) {
 }

@@ -7,7 +7,6 @@ import jakarta.inject.Singleton;
 import com.innospots.nexus.console.dictionary.converter.DictionaryConverter;
 import com.innospots.nexus.console.dictionary.dao.DictionaryItemDao;
 import com.innospots.nexus.console.dictionary.dao.DictionaryTypeDao;
-import com.innospots.nexus.console.dictionary.operator.DictionaryItemOperator;
 import com.innospots.nexus.console.dictionary.operator.DictionaryTypeOperator;
 
 /**
@@ -29,14 +28,5 @@ public class ConsoleDictionaryBeans {
             DictionaryItemDao itemDao,
             DictionaryConverter dictionaryConverter) {
         return new DictionaryTypeOperator(typeDao, itemDao, dictionaryConverter);
-    }
-
-    @Produces
-    @Singleton
-    DictionaryItemOperator dictionaryItemOperator(
-            DictionaryTypeOperator dictionaryTypeOperator,
-            DictionaryItemDao itemDao,
-            DictionaryConverter dictionaryConverter) {
-        return new DictionaryItemOperator(dictionaryTypeOperator, itemDao, dictionaryConverter);
     }
 }

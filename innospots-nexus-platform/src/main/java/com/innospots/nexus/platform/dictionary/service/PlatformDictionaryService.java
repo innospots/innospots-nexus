@@ -9,15 +9,12 @@ import lombok.extern.slf4j.Slf4j;
 import com.innospots.nexus.base.domain.enums.BasicStatus;
 import com.innospots.nexus.base.domain.response.PageResult;
 import com.innospots.nexus.base.util.Checks;
-import com.innospots.nexus.console.dictionary.domain.request.DictionaryItemPageRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeCreateRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypePageRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeStatusUpdateRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeUpdateRequest;
-import com.innospots.nexus.console.dictionary.domain.vo.DictionaryItemVo;
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeOptionVo;
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeVo;
-import com.innospots.nexus.console.dictionary.operator.DictionaryItemOperator;
 import com.innospots.nexus.console.dictionary.operator.DictionaryTypeOperator;
 import com.innospots.nexus.console.scope.ConsoleOwnership;
 import com.innospots.nexus.platform.scope.PlatformConsoleSession;
@@ -31,7 +28,6 @@ import com.innospots.nexus.platform.support.PlatformMutationLog;
 public class PlatformDictionaryService {
 
     private final DictionaryTypeOperator typeOperator;
-    private final DictionaryItemOperator itemOperator;
 
     public PageResult<DictionaryTypeVo> pageDictionaryTypes(DictionaryTypePageRequest request) {
         return typeOperator.pageTypes(request, platformOwnership());
@@ -86,11 +82,6 @@ public class PlatformDictionaryService {
 
     public List<DictionaryTypeOptionVo> listDictionaryTypeOptions(BasicStatus status) {
         return typeOperator.listTypeOptions(status, platformOwnership());
-    }
-
-    public PageResult<DictionaryItemVo> pageDictionaryItems(String typeCode, DictionaryItemPageRequest request) {
-        Checks.notBlank(typeCode, "typeCode");
-        return itemOperator.pageItems(typeCode, request, platformOwnership());
     }
 
     private static ConsoleOwnership platformOwnership() {

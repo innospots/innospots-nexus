@@ -4,6 +4,8 @@ import com.innospots.nexus.base.domain.enums.BasicStatus;
 import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
 import com.innospots.nexus.console.dictionary.domain.entity.DictionaryItemEntity;
 import com.innospots.nexus.console.dictionary.domain.entity.DictionaryTypeEntity;
+import java.util.List;
+
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryItemVo;
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeOptionVo;
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeVo;
@@ -20,6 +22,10 @@ public final class DictionaryConverter {
     }
 
     public DictionaryTypeVo toTypeVo(DictionaryTypeEntity entity) {
+        return toTypeVo(entity, null);
+    }
+
+    public DictionaryTypeVo toTypeVo(DictionaryTypeEntity entity, List<DictionaryItemVo> items) {
         return new DictionaryTypeVo(
                 entity.getDictionaryTypeId(),
                 entity.getTypeCode(),
@@ -29,7 +35,8 @@ public final class DictionaryConverter {
                 entity.getSortOrder(),
                 entity.getBuiltIn(),
                 entity.getCreatedAt(),
-                entity.getUpdatedAt());
+                entity.getUpdatedAt(),
+                items);
     }
 
     public DictionaryTypeOptionVo toTypeOption(DictionaryTypeEntity entity) {

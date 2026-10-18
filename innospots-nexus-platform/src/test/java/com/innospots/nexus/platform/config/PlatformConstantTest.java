@@ -23,8 +23,6 @@ class PlatformConstantTest {
                 .isEqualTo("/api/d/platform/roles/{roleId}/bindings");
         assertThat(PlatformConstant.DICTIONARY_TYPES_PATH)
                 .isEqualTo("/api/d/platform/dictionary-types");
-        assertThat(PlatformConstant.DICTIONARY_ITEMS_PATH)
-                .isEqualTo("/api/d/platform/dictionary-types/{typeCode}/items");
         assertThat(PlatformConstant.ROLE_PERMISSIONS_PATH)
                 .isEqualTo("/api/d/platform/roles/{roleId}/permissions");
         assertThat(PlatformConstant.ME_PERMISSIONS_PATH).isEqualTo("/api/d/platform/me/permissions");

@@ -47,37 +47,20 @@ body:
           - label: 角色管理
             href: /system/roles
           - label: "${data.role != null && data.role.roleName != null ? data.role.roleName : params.roleId}"
-          - label: 成员列表
-    - type: Flex
+    - type: Button
       props:
-        justify: space-between
-        align: center
-      children:
-        - type: Button
-          props:
-            text: ← 返回角色列表
-            variant: link
-          events:
-            onClick:
-              - action: navigate
-                params: { to: /system/roles }
-        - type: Button
-          when: ${data.role != null && data.role.roleName != null}
-          props:
-            text: + 添加成员
-            variant: primary
-          events:
-            onClick:
-              - action: overlay.open
-                params:
-                  overlay:
-                    type: modal
-                    title: "添加到「${data.role.roleName}」"
-                    width: 720
-                    content:
-                      type: Text
-                      props:
-                        text: 暂无可添加的成员。
+        text: ← 返回角色列表
+        variant: link
+      events:
+        onClick:
+          - action: navigate
+            params: { to: /system/roles }
+    - type: Typography
+      when: ${data.role != null}
+      props:
+        variant: h3
+        className: mt-2
+        text: "${data.role.roleCode != null ? data.role.roleCode + ' · ' : ''}${data.role.roleName != null ? data.role.roleName : params.roleId}"
     - type: Tabs
       props:
         activeKey: members
@@ -101,22 +84,6 @@ body:
                 - action: navigate
                   params:
                     to: /system/roles/${params.roleId}/permissions
-    - type: ChipFilter
-      props:
-        mode: single
-        value: ${state.subjectType}
-        items:
-          - { label: 用户, value: USER }
-          - { label: 组织单元, value: ORG_UNIT }
-      events:
-        onChange:
-          - action: setState
-            params:
-              subjectType: ${event}
-              pageNo: 1
-          - action: reload
-            params:
-              dataSource: bindings
     - type: Card
       props:
         className: mt-4
@@ -152,6 +119,28 @@ body:
                     text: 查询
                     submit: true
                     htmlType: submit
+        - type: Flex
+          when: ${data.role != null}
+          props:
+            justify: end
+            className: mt-4
+          children:
+            - type: Button
+              props:
+                text: + 添加成员
+                variant: primary
+              events:
+                onClick:
+                  - action: overlay.open
+                    params:
+                      overlay:
+                        type: modal
+                        title: "添加到「${data.role.roleName}」"
+                        width: 720
+                        content:
+                          type: Text
+                          props:
+                            text: 暂无可添加的成员。
         - type: Table
           props:
             rowKey: bindingId

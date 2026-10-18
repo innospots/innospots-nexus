@@ -73,7 +73,7 @@ public class RegistrationConfig {
 
         /**
          * 为 true 时通过 {@link com.innospots.nexus.console.credential.otp.support.RegistrationOtpDebugLogger}
-         * 在 DEBUG 日志输出 challengeId、投递地址与明文验证码（仅本地/联调，禁止生产长期开启）。
+         * 在 INFO 日志输出 challengeId、投递地址与明文验证码（仅本地/联调，禁止生产长期开启）。
          */
         private boolean debugLogEnabled = false;
 

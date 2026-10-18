@@ -63,16 +63,11 @@ export async function fetchDictionaryTypeBundle(dictionaryTypeId: string): Promi
     if (id.length === 0) {
         throw new Error("缺少字典类型 ID");
     }
-    const type = await platformGet<DictionaryTypeVo>(`/dictionary-types/${encodeURIComponent(id)}`);
-    const typeCode = type.typeCode?.trim() ?? "";
-    if (typeCode.length === 0) {
-        throw new Error("字典类型编码为空");
-    }
-    const page = await platformGet<PageResult<DictionaryItemVo>>(
-        `/dictionary-types/${encodeURIComponent(typeCode)}/items?pageNo=1&pageSize=200`,
+    const type = await platformGet<DictionaryTypeVo & { items?: DictionaryItemVo[] }>(
+        `/dictionary-types/${encodeURIComponent(id)}`,
     );
     return {
         type,
-        items: Array.isArray(page.records) ? page.records : [],
+        items: Array.isArray(type.items) ? type.items : [],
     };
 }

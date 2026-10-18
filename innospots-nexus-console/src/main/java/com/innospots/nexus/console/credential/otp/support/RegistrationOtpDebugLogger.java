@@ -10,7 +10,8 @@ import com.innospots.nexus.console.credential.otp.event.OtpSendRequestedEvent;
 
 /**
  * 在 {@link RegistrationConfig.OtpDelivery#isDebugLogEnabled()} 为 true 时，
- * 将 OTP 明文、challengeId 与投递地址写入 DEBUG 日志（仅联调/本地）。
+ * 将 OTP 明文、challengeId 与投递地址写入 INFO 日志（仅联调/本地；须配置
+ * {@link RegistrationConfig#getOtpVerification()} 为 EMAIL/MOBILE 才会发放 OTP）。
  *
  * @author Smars
  * @date 2026/10/18
@@ -23,16 +24,14 @@ public final class RegistrationOtpDebugLogger {
 
     /** 订阅 {@link OtpSendRequestedEvent} 并输出调试字段。 */
     private final EventHandler<OtpSendRequestedEvent> handler = event -> {
-        if (log.isDebugEnabled()) {
-            log.debug(
-                    "OTP delivery debug challengeId={} purpose={} channel={} destination={} templateId={} code={}",
-                    event.challengeId(),
-                    event.purpose(),
-                    event.channel(),
-                    event.destination(),
-                    event.templateId(),
-                    event.plaintextCode());
-        }
+        log.info(
+                "Registration OTP debug challengeId={} purpose={} channel={} destination={} templateId={} code={}",
+                event.challengeId(),
+                event.purpose(),
+                event.channel(),
+                event.destination(),
+                event.templateId(),
+                event.plaintextCode());
         return null;
     };
 
@@ -49,6 +48,8 @@ public final class RegistrationOtpDebugLogger {
             return;
         }
         EventBus.subscribe(OtpSendRequestedEvent.class, new RegistrationOtpDebugLogger().handler);
-        log.info("Registration OTP debug logging enabled (plaintext codes will appear at DEBUG level)");
+        log.info(
+                "Registration OTP debug logging enabled (plaintext codes log at INFO when OTP is issued; "
+                        + "otp-verification=NONE skips OTP)");
     }
 }

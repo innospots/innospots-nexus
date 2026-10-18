@@ -52,9 +52,6 @@ public final class PlatformConstant {
     /** 运营管理平台字典类型：{@value} */
     public static final String DICTIONARY_TYPES_PATH = API_PREFIX + "/dictionary-types";
 
-    /** 运营管理平台字典项：{@value} */
-    public static final String DICTIONARY_ITEMS_PATH = DICTIONARY_TYPES_PATH + "/{typeCode}/items";
-
     /** 运营管理平台角色授权：{@value} */
     public static final String ROLE_PERMISSIONS_PATH = ROLES_PATH + "/{roleId}/permissions";
 

@@ -23,7 +23,7 @@ import com.innospots.nexus.sample.spring.platform.support.PlatformIntegrationTes
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * 与 {@code dictionary-type-list.yaml} 对齐：类型分页/详情/选项/状态，及按类型查询字典项。
+ * 与 {@code dictionary-type-list.yaml} 对齐：类型分页/详情（含 items）/选项/状态。
  */
 @SpringBootTest(
         classes = SamplePlatformConsoleServer.class,
@@ -124,10 +124,10 @@ class PlatformDictionaryEndpointIntegrationTest {
                 updateTypeBody);
         assertThat(updatedType.statusCode()).as(updatedType.body()).isEqualTo(200);
 
-        String itemsPath = PlatformConstant.DICTIONARY_ITEMS_PATH.replace("{typeCode}", TYPE_CODE);
-        HttpResponse<String> pagedItems = http.get(itemsPath + "?pageNo=1&pageSize=20");
-        assertThat(pagedItems.statusCode()).isEqualTo(200);
-        assertThat(pagedItems.body()).contains("east");
+        HttpResponse<String> gotTypeWithItems = http.get(PlatformConstant.DICTIONARY_TYPES_PATH + "/" + typeId);
+        assertThat(gotTypeWithItems.statusCode()).isEqualTo(200);
+        assertThat(gotTypeWithItems.body()).contains("\"items\"");
+        assertThat(gotTypeWithItems.body()).contains("east");
 
         String replaceItemsBody = """
                 {
@@ -148,10 +148,10 @@ class PlatformDictionaryEndpointIntegrationTest {
                 replaceItemsBody);
         assertThat(replacedItems.statusCode()).as(replacedItems.body()).isEqualTo(200);
 
-        HttpResponse<String> pagedAfterReplace = http.get(itemsPath + "?pageNo=1&pageSize=20");
-        assertThat(pagedAfterReplace.statusCode()).isEqualTo(200);
-        assertThat(pagedAfterReplace.body()).contains("East Updated");
-        assertThat(pagedAfterReplace.body()).contains("west");
+        HttpResponse<String> gotAfterReplace = http.get(PlatformConstant.DICTIONARY_TYPES_PATH + "/" + typeId);
+        assertThat(gotAfterReplace.statusCode()).isEqualTo(200);
+        assertThat(gotAfterReplace.body()).contains("East Updated");
+        assertThat(gotAfterReplace.body()).contains("west");
 
         PlatformDatabaseJsonSnapshot.logAndPersist(
                 jdbcTemplate,

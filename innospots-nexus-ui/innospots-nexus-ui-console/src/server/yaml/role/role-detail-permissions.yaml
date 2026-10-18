@@ -51,7 +51,6 @@ body:
           - label: 角色管理
             href: /system/roles
           - label: "${data.role != null && data.role.roleName != null ? data.role.roleName : params.roleId}"
-          - label: 权限设置
     - type: Button
       props:
         text: ← 返回角色列表
@@ -60,11 +59,118 @@ body:
         onClick:
           - action: navigate
             params: { to: /system/roles }
-    - type: Typography
+    - type: Flex
       when: ${data.role != null}
       props:
-        variant: muted
-        text: "${data.role.roleName} · ${data.role.roleCode}"
+        justify: space-between
+        align: start
+        className: mt-2
+      children:
+        - type: Typography
+          props:
+            variant: h3
+            text: "${data.role.roleCode != null ? data.role.roleCode + ' · ' : ''}${data.role.roleName != null ? data.role.roleName : params.roleId}"
+        - type: Flex
+          props:
+            gap: small
+          children:
+            - type: Button
+              when: ${data.role.status == 'ENABLED' || data.role.status == 'DISABLED'}
+              props:
+                text: "${data.role.status == 'ENABLED' ? '停用' : '启用'}"
+              events:
+                onClick:
+                  - action: confirm
+                    params:
+                      title: 确认变更状态
+                      content: 确定要变更该角色的启用状态吗？
+                  - action: request
+                    params:
+                      method: PUT
+                      url: /api/d/platform/roles/${params.roleId}/status
+                      body:
+                        status: "${data.role.status == 'ENABLED' ? 'DISABLED' : 'ENABLED'}"
+                  - action: message
+                    params:
+                      messageType: success
+                      text: 状态已更新
+                  - action: reload
+                    params:
+                      dataSource: role
+            - type: Button
+              props:
+                text: 修改
+                variant: primary
+              events:
+                onClick:
+                  - action: overlay.open
+                    params:
+                      overlay:
+                        type: modal
+                        title: 修改角色
+                        width: 520
+                        content:
+                          type: Form
+                          props:
+                            name: roleEditForm
+                            layout: vertical
+                            initialValues: ${data.role}
+                          events:
+                            onSubmit:
+                              - action: request
+                                params:
+                                  method: PUT
+                                  url: /api/d/platform/roles/${params.roleId}
+                                  body:
+                                    roleName: ${event.roleName}
+                                    description: ${event.description}
+                              - action: message
+                                params:
+                                  messageType: success
+                                  text: 已保存修改
+                              - action: overlay.close
+                              - action: reload
+                                params:
+                                  dataSource: role
+                          children:
+                            - type: Field
+                              props:
+                                label: 角色名称
+                                required: true
+                              children:
+                                - type: Input
+                                  props:
+                                    name: roleName
+                                    placeholder: 请输入角色名称
+                                    rules:
+                                      - required: true
+                                        message: 请输入角色名称
+                            - type: Field
+                              props:
+                                label: 描述
+                              children:
+                                - type: Textarea
+                                  props:
+                                    name: description
+                                    placeholder: 角色用途说明
+                            - type: Flex
+                              props:
+                                justify: end
+                                gap: small
+                                className: mt-4
+                              children:
+                                - type: Button
+                                  props:
+                                    text: 取消
+                                  events:
+                                    onClick:
+                                      - action: overlay.close
+                                - type: Button
+                                  props:
+                                    text: 保存
+                                    variant: primary
+                                    submit: true
+                                    htmlType: submit
     - type: Tabs
       props:
         activeKey: permissions
@@ -116,26 +222,49 @@ body:
           props:
             style: { flex: 1, minWidth: 280 }
           children:
-            - type: Text
+            - type: Flex
               props:
-                text: 后台资源目录
-                strong: true
+                justify: space-between
+                align: center
+              children:
+                - type: Text
+                  props:
+                    text: 后台资源目录
+                    strong: true
+                - type: Button
+                  props:
+                    text: 同步目录
+                    size: small
+                  events:
+                    onClick:
+                      - action: request
+                        params:
+                          method: POST
+                          url: /api/d/nexus/catalog/sync
+                      - action: message
+                        params:
+                          messageType: success
+                          text: 目录已同步
+                      - action: reload
+                        params:
+                          dataSource: catalog
+            - type: Text
+              when: ${dataStatus.catalog.loading}
+              props:
+                text: 加载目录中…
+                type: secondary
+                className: mt-2
             - type: CatalogTree
-              when: ${Array.isArray(data.catalog) && data.catalog.length > 0}
+              when: ${!dataStatus.catalog.loading}
               props:
                 className: mt-2
                 treeData: ${data.catalog}
+                search: ${state.resourceSearch}
               events:
                 onSelect:
                   - action: setState
                     params:
                       selectedResourceKey: ${event[0]}
-            - type: Text
-              when: ${!Array.isArray(data.catalog) || data.catalog.length == 0}
-              props:
-                text: 暂无目录资源
-                type: secondary
-                className: mt-2
         - type: Card
           props:
             style: { flex: 2 }
