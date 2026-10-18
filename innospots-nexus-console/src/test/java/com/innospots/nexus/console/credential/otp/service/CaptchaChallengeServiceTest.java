@@ -1,6 +1,7 @@
 package com.innospots.nexus.console.credential.otp.service;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -24,7 +25,14 @@ import com.innospots.nexus.console.credential.otp.policy.OtpPolicy;
 import com.innospots.nexus.console.role.domain.enums.RoleOwnerType;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.mockito.ArgumentMatchers;
+
+import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.console.credential.otp.domain.OtpIssueCommand;
+import com.innospots.nexus.console.credential.otp.domain.OtpVerifyCommand;
+import com.innospots.nexus.console.credential.otp.domain.enums.OtpChannel;
+import com.innospots.nexus.console.credential.otp.status.OtpStatusCode;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -87,13 +95,73 @@ class CaptchaChallengeServiceTest {
         assertThat(ok).isTrue();
     }
 
-    private OtpChallengeService newService() {
+    @Test
+    void issueAllowsImmediateResendForSameClientKey() {
+        OtpChallengeService otp = newServiceWithCooldown();
+        CaptchaChallengeService captcha = new CaptchaChallengeService(otp);
+        String clientKey = "login-txn-resend";
+        captcha.issue(new CaptchaIssueCommand(
+                SecurityRealm.PLATFORM,
+                OtpPurpose.LOGIN_STEP_UP,
+                clientKey,
+                CaptchaPolicy.DEFAULT));
+        CaptchaIssueResult second = captcha.issue(new CaptchaIssueCommand(
+                SecurityRealm.PLATFORM,
+                OtpPurpose.LOGIN_STEP_UP,
+                clientKey,
+                CaptchaPolicy.DEFAULT));
+        assertThat(second.challengeId()).isNotBlank();
+    }
+
+    @Test
+    void verifyDoesNotExhaustAttemptsOnWrongCode() {
+        OtpChallengeService otp = newServiceWithCooldown();
+        CaptchaChallengeService captcha = new CaptchaChallengeService(otp);
+        String clientKey = "login-txn-attempts";
+        HutoolCaptchaFactory.GeneratedCaptcha generated = HutoolCaptchaFactory.generate(CaptchaPolicy.DEFAULT);
+        otp.issueCaptchaCode(
+                new OtpIssueCommand(
+                        SecurityRealm.PLATFORM,
+                        OtpPurpose.LOGIN_STEP_UP,
+                        OtpChannel.CAPTCHA,
+                        clientKey,
+                        null),
+                generated.code());
+        OtpVerifyCommand wrong = new OtpVerifyCommand(
+                SecurityRealm.PLATFORM,
+                OtpPurpose.LOGIN_STEP_UP,
+                OtpChannel.CAPTCHA,
+                clientKey,
+                "WRONG");
+        for (int i = 0; i < 10; i++) {
+            assertThatThrownBy(() -> otp.verifyOrThrow(wrong))
+                    .isInstanceOf(NexusException.class)
+                    .extracting(ex -> ((NexusException) ex).code())
+                    .isEqualTo(OtpStatusCode.CODE_INVALID.fullCode());
+        }
+        boolean ok = captcha.verify(new CaptchaVerifyCommand(
+                SecurityRealm.PLATFORM,
+                OtpPurpose.LOGIN_STEP_UP,
+                clientKey,
+                generated.code()));
+        assertThat(ok).isTrue();
+    }
+
+    private OtpChallengeService newServiceWithCooldown() {
+        OtpPolicy policy = new OtpPolicy(6, Duration.ofMinutes(5), Duration.ofSeconds(60), 3);
+        return new OtpChallengeService(mockDao(), policy);
+    }
+
+    private OtpChallengeDao mockDao() {
         OtpChallengeDao dao = mock(OtpChallengeDao.class);
+        AtomicReference<Integer> idSeq = new AtomicReference<>(0);
         when(dao.insert(ArgumentMatchers.<OtpChallengeEntity>any())).thenAnswer(invocation -> {
             OtpChallengeEntity entity = invocation.getArgument(0);
             if (entity.getChallengeId() == null) {
-                entity.setChallengeId("och-test-1");
+                int next = idSeq.getAndSet(idSeq.get() + 1) + 1;
+                entity.setChallengeId("och-test-" + next);
             }
+            entity.setCreatedAt(LocalDateTime.now());
             entity.setOwnerType(RoleOwnerType.PLATFORM.name());
             entity.setOwnerId("own-1");
             entity.setSecurityRealm(SecurityRealm.TENANT.name());
@@ -115,5 +183,9 @@ class CaptchaChallengeServiceTest {
         });
         OtpPolicy policy = new OtpPolicy(6, Duration.ofMinutes(5), Duration.ZERO, 5);
         return new OtpChallengeService(dao, policy);
+    }
+
+    private OtpChallengeService newService() {
+        return new OtpChallengeService(mockDao(), new OtpPolicy(6, Duration.ofMinutes(5), Duration.ZERO, 5));
     }
 }

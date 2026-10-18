@@ -1,5 +1,7 @@
 package com.innospots.nexus.platform.auth.service;
 
+import lombok.extern.slf4j.Slf4j;
+
 import com.innospots.nexus.console.auth.domain.request.AuthCaptchaIssueRequest;
 import com.innospots.nexus.console.auth.domain.request.AuthLoginRequest;
 import com.innospots.nexus.console.auth.domain.request.TokenRefreshRequest;
@@ -8,6 +10,7 @@ import com.innospots.nexus.console.auth.domain.vo.AuthRsaPublicKeyVo;
 import com.innospots.nexus.console.auth.domain.vo.AuthTokenVo;
 import com.innospots.nexus.console.auth.service.AuthFacade;
 import com.innospots.nexus.console.auth.service.AuthRsaKeyService;
+import com.innospots.nexus.platform.support.PlatformRequestTrace;
 
 /**
  * 运营管理平台登录与会话令牌编排。
@@ -20,6 +23,7 @@ import com.innospots.nexus.console.auth.service.AuthRsaKeyService;
  * @see com.innospots.nexus.platform.auth.endpoint.PlatformPublicAuthEndpoint
  * @see com.innospots.nexus.platform.auth.endpoint.PlatformAuthSessionEndpoint
  */
+@Slf4j
 public class PlatformAuthService {
 
     private final AuthFacade authFacade;
@@ -38,6 +42,10 @@ public class PlatformAuthService {
      */
     public AuthCaptchaVo issueLoginCaptcha(AuthCaptchaIssueRequest request) {
         String clientKey = request == null ? null : request.clientKey();
+        log.info(
+                "traceId={} platform auth captcha issue clientKeyPresent={}",
+                PlatformRequestTrace.currentTraceId(),
+                clientKey != null && !clientKey.isBlank());
         return authFacade.issueLoginCaptcha(clientKey);
     }
 
@@ -47,6 +55,7 @@ public class PlatformAuthService {
      * @return SPKI 公钥 Base64
      */
     public AuthRsaPublicKeyVo getPasswordEncryptionPublicKey() {
+        log.debug("traceId={} platform auth RSA public key requested", PlatformRequestTrace.currentTraceId());
         return authRsaKeyService.getPasswordEncryptionPublicKey();
     }
 
@@ -57,7 +66,25 @@ public class PlatformAuthService {
      * @return 访问与刷新令牌
      */
     public AuthTokenVo login(AuthLoginRequest request) {
-        return authFacade.login(request);
+        String login = request == null ? null : request.login();
+        String traceId = PlatformRequestTrace.currentTraceId();
+        log.info("traceId={} platform auth login attempt login={}", traceId, PlatformRequestTrace.safeLogin(login));
+        try {
+            AuthTokenVo token = authFacade.login(request);
+            log.info(
+                    "traceId={} platform auth login succeeded login={} tokenType={}",
+                    traceId,
+                    PlatformRequestTrace.safeLogin(login),
+                    token.tokenType());
+            return token;
+        } catch (RuntimeException ex) {
+            log.warn(
+                    "traceId={} platform auth login failed login={} reason={}",
+                    traceId,
+                    PlatformRequestTrace.safeLogin(login),
+                    ex.getMessage());
+            throw ex;
+        }
     }
 
     /**
@@ -67,13 +94,23 @@ public class PlatformAuthService {
      * @return 新令牌对
      */
     public AuthTokenVo refresh(TokenRefreshRequest request) {
-        return authFacade.refresh(request);
+        String traceId = PlatformRequestTrace.currentTraceId();
+        log.info("traceId={} platform auth token refresh attempt", traceId);
+        try {
+            AuthTokenVo token = authFacade.refresh(request);
+            log.info("traceId={} platform auth token refresh succeeded tokenType={}", traceId, token.tokenType());
+            return token;
+        } catch (RuntimeException ex) {
+            log.warn("traceId={} platform auth token refresh failed reason={}", traceId, ex.getMessage());
+            throw ex;
+        }
     }
 
     /**
      * 登出当前会话（MVP：清理服务端会话上下文，不吊销 refresh token）。
      */
     public void logout() {
+        log.info("traceId={} platform auth logout", PlatformRequestTrace.currentTraceId());
         authFacade.logout();
     }
 }

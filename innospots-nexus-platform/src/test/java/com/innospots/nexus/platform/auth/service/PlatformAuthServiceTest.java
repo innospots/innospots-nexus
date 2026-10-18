@@ -1,7 +1,9 @@
 package com.innospots.nexus.platform.auth.service;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
+import com.innospots.nexus.base.thread.TLC;
 import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
 import com.innospots.nexus.console.auth.domain.request.AuthLoginRequest;
 import com.innospots.nexus.console.auth.domain.vo.AuthTokenVo;
@@ -14,6 +16,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class PlatformAuthServiceTest {
+
+    @AfterEach
+    void tearDown() {
+        TLC.clear();
+    }
 
     @Test
     void loginDelegatesToAuthFacade() {

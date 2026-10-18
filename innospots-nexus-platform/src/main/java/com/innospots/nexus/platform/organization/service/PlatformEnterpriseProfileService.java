@@ -4,6 +4,7 @@ import java.util.Objects;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.util.Checks;
@@ -15,6 +16,7 @@ import com.innospots.nexus.platform.organization.domain.request.EnterpriseProfil
 import com.innospots.nexus.platform.organization.domain.vo.EnterpriseProfileVo;
 import com.innospots.nexus.platform.organization.operator.EnterpriseOperator;
 import com.innospots.nexus.platform.organization.operator.TenantOperator;
+import com.innospots.nexus.platform.support.PlatformMutationLog;
 
 /**
  * 租户下企业法定档案（{@code nx_pl_enterprise}）的查询与 upsert 编排。
@@ -26,6 +28,7 @@ import com.innospots.nexus.platform.organization.operator.TenantOperator;
  * @see com.innospots.nexus.platform.organization.endpoint.EnterpriseProfileEndpoint
  * @see com.innospots.nexus.platform.organization.operator.EnterpriseOperator
  */
+@Slf4j
 @RequiredArgsConstructor
 public class PlatformEnterpriseProfileService {
 
@@ -69,12 +72,22 @@ public class PlatformEnterpriseProfileService {
         enterprise.setTenantId(tenantId);
         applyProfileFields(enterprise, request);
         enterpriseOperator.insert(enterprise);
+        PlatformMutationLog.info(
+                log,
+                "enterprise profile created tenantId={} enterpriseId={}",
+                tenantId,
+                enterprise.getEnterpriseId());
         return toVo(enterprise);
     }
 
     private EnterpriseProfileVo updateExisting(EnterpriseEntity existing, EnterpriseProfileUpsertRequest request) {
         applyProfileFields(existing, request);
         enterpriseOperator.update(existing);
+        PlatformMutationLog.info(
+                log,
+                "enterprise profile updated tenantId={} enterpriseId={}",
+                existing.getTenantId(),
+                existing.getEnterpriseId());
         return toVo(existing);
     }
 

@@ -6,6 +6,7 @@ import java.util.Objects;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.util.Checks;
@@ -18,10 +19,12 @@ import com.innospots.nexus.platform.organization.domain.vo.TenantAdminVo;
 import com.innospots.nexus.platform.organization.operator.TenantAdminOperator;
 import com.innospots.nexus.platform.organization.operator.TenantOperator;
 import com.innospots.nexus.platform.organization.status.PlatformOrganizationStatusCode;
+import com.innospots.nexus.platform.support.PlatformMutationLog;
 
 /**
  * 租户管理员列表与按邮箱添加。
  */
+@Slf4j
 @RequiredArgsConstructor
 public class PlatformTenantAdminService {
 
@@ -84,6 +87,12 @@ public class PlatformTenantAdminService {
             tenant.setOwnerTenantUserId(admin.getTenantUserId());
             tenantOperator.update(tenant);
         }
+        PlatformMutationLog.info(
+                log,
+                "tenant admin added tenantId={} tenantAdminId={} adminRole={}",
+                tenantId,
+                admin.getTenantAdminId(),
+                adminRole);
         return toVo(admin);
     }
 
@@ -107,6 +116,11 @@ public class PlatformTenantAdminService {
             tenant.setOwnerTenantUserId(null);
             tenantOperator.update(tenant);
         }
+        PlatformMutationLog.info(
+                log,
+                "tenant admin removed tenantId={} tenantAdminId={}",
+                tenantId,
+                tenantAdminId);
     }
 
     private TenantAdminVo toVo(TenantAdminEntity admin) {

@@ -3,6 +3,7 @@ package com.innospots.nexus.platform.role.service;
 import java.util.Objects;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import com.innospots.nexus.base.domain.response.PageResult;
 import com.innospots.nexus.base.util.Checks;
@@ -11,10 +12,12 @@ import com.innospots.nexus.console.role.domain.request.RoleBindingPageRequest;
 import com.innospots.nexus.console.role.domain.vo.RoleBindingVo;
 import com.innospots.nexus.console.role.operator.RoleBindingOperator;
 import com.innospots.nexus.platform.scope.PlatformConsoleSession;
+import com.innospots.nexus.platform.support.PlatformMutationLog;
 
 /**
  * 运营平台角色绑定服务：PLATFORM 会话与归属固化，委托 {@link RoleBindingOperator}。
  */
+@Slf4j
 @RequiredArgsConstructor
 public class PlatformRoleBindingService {
 
@@ -31,6 +34,12 @@ public class PlatformRoleBindingService {
         Objects.requireNonNull(request, "request");
         roleBindingOperator.addRoleBindings(
                 roleId, request, PlatformConsoleSession.requireOwnership());
+        PlatformMutationLog.info(
+                log,
+                "role bindings added roleId={} subjectType={} subjectCount={}",
+                roleId,
+                request.subjectType(),
+                request.subjectIds().size());
     }
 
     public void removeRoleBinding(String roleId, String bindingId) {
@@ -38,5 +47,6 @@ public class PlatformRoleBindingService {
         Checks.notBlank(bindingId, "bindingId");
         roleBindingOperator.removeRoleBinding(
                 roleId, bindingId, PlatformConsoleSession.requireOwnership());
+        PlatformMutationLog.info(log, "role binding removed roleId={} bindingId={}", roleId, bindingId);
     }
 }

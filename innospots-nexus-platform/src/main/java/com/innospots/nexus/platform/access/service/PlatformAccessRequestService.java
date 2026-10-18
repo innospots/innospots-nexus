@@ -27,15 +27,16 @@ import com.innospots.nexus.platform.access.operator.PlatformAccessRequestOperato
 import com.innospots.nexus.platform.access.status.PlatformAccessStatusCode;
 import com.innospots.nexus.platform.access.support.PlatformRegistrationContactSupport;
 import com.innospots.nexus.platform.access.support.PlatformRegistrationOtpSupport;
-import com.innospots.nexus.platform.settings.domain.enums.PlatformRegistrationMode;
-import com.innospots.nexus.platform.settings.service.PlatformRegistrationModeSettingService;
+import com.innospots.nexus.console.auth.service.RegistrationPolicyService;
+import com.innospots.nexus.console.config.RegistrationMode;
+import com.innospots.nexus.platform.support.PlatformRequestTrace;
 import com.innospots.nexus.platform.user.domain.vo.PlatformUserVo;
 import com.innospots.nexus.platform.user.service.PlatformUserService;
 
 /**
  * APPROVAL 模式自助注册与审批编排：OTP、待审用户、审批通过/拒绝。
  *
- * <p>仅在 {@link PlatformRegistrationMode#APPROVAL} 下接受公开提交；审批通过将已有用户
+ * <p>仅在 {@link RegistrationMode#APPROVAL} 下接受公开提交；审批通过将已有用户
  * {@code PENDING_APPROVAL → ACTIVE}，不创建邀请单。</p>
  *
  * @author Smars
@@ -47,11 +48,20 @@ import com.innospots.nexus.platform.user.service.PlatformUserService;
 @RequiredArgsConstructor
 public class PlatformAccessRequestService {
 
+    /** 访问申请单持久化与分页查询。 */
     private final PlatformAccessRequestOperator accessRequestOperator;
+
+    /** 创建待审用户、审批后激活。 */
     private final PlatformUserService platformUserService;
+
+    /** 注册 OTP 签发与校验。 */
     private final OtpChallengeService otpChallengeService;
+
+    /** 解密前端 RSA 加密密码。 */
     private final PasswordDecryptor passwordDecryptor;
-    private final PlatformRegistrationModeSettingService registrationModeSettingService;
+
+    /** {@link RegistrationMode#APPROVAL} 等自助注册门禁。 */
+    private final RegistrationPolicyService registrationPolicyService;
 
     /**
      * 为 APPROVAL 公开注册签发联系方式 OTP（受当前注册模式约束）。
@@ -63,8 +73,12 @@ public class PlatformAccessRequestService {
      * @throws NexusException 冷却未到时 {@link PlatformAccessStatusCode#ACCESS_OTP_RESEND_TOO_FREQUENT}
      */
     public void issueAccessRegistrationOtp(PlatformRegistrationOtpRequest request) {
-        registrationModeSettingService.requireSelfServiceMode(PlatformRegistrationMode.APPROVAL);
+        registrationPolicyService.requireSelfServiceMode(RegistrationMode.APPROVAL);
         Objects.requireNonNull(request, "request");
+        log.info(
+                "traceId={} platform APPROVAL registration OTP issue contact={}",
+                PlatformRequestTrace.currentTraceId(),
+                PlatformRequestTrace.describeContact(request.email(), request.mobile()));
         issueAccessVerificationOtp(request);
     }
 
@@ -93,8 +107,14 @@ public class PlatformAccessRequestService {
      */
     @Transactional
     public PlatformAccessRequestVo submitAccessRegistration(PlatformAccessRegistrationSubmitRequest request) {
-        registrationModeSettingService.requireSelfServiceMode(PlatformRegistrationMode.APPROVAL);
+        registrationPolicyService.requireSelfServiceMode(RegistrationMode.APPROVAL);
         Objects.requireNonNull(request, "request");
+        String traceId = PlatformRequestTrace.currentTraceId();
+        log.info(
+                "traceId={} platform APPROVAL registration submit login={} contact={}",
+                traceId,
+                PlatformRequestTrace.safeLogin(request.loginName()),
+                PlatformRequestTrace.describeContact(request.email(), request.mobile()));
         Checks.notBlank(request.loginName(), "loginName");
         Checks.notBlank(request.encryptedPassword(), "encryptedPassword");
         PlatformRegistrationContactSupport.requireContact(request.email(), request.mobile());
@@ -119,7 +139,11 @@ public class PlatformAccessRequestService {
         entity.setDescription(request.description());
         entity.setStatus(com.innospots.nexus.platform.access.domain.enums.PlatformAccessRequestStatus.PENDING_APPROVAL.name());
         accessRequestOperator.insert(entity);
-        log.info("Submitted platform access registration {} for user {}", entity.getAccessRequestId(), user.platformUserId());
+        log.info(
+                "traceId={} platform APPROVAL registration submitted accessRequestId={} platformUserId={}",
+                traceId,
+                entity.getAccessRequestId(),
+                user.platformUserId());
         return toVo(entity);
     }
 
@@ -160,7 +184,12 @@ public class PlatformAccessRequestService {
         Checks.notBlank(entity.getPlatformUserId(), "platformUserId");
         PlatformUserVo user = platformUserService.activatePendingApprovalUser(entity.getPlatformUserId());
         accessRequestOperator.markApproved(entity, currentReviewer());
-        log.info("Approved access request {} for user {}", accessRequestId, user.platformUserId());
+        log.info(
+                "traceId={} platform APPROVAL registration approved accessRequestId={} platformUserId={} reviewer={}",
+                PlatformRequestTrace.currentTraceId(),
+                accessRequestId,
+                user.platformUserId(),
+                currentReviewer());
         return user;
     }
 
@@ -181,6 +210,12 @@ public class PlatformAccessRequestService {
         accessRequestOperator.markRejected(
                 entity,
                 request == null ? null : request.rejectReason(),
+                currentReviewer());
+        log.info(
+                "traceId={} platform APPROVAL registration rejected accessRequestId={} platformUserId={} reviewer={}",
+                PlatformRequestTrace.currentTraceId(),
+                accessRequestId,
+                entity.getPlatformUserId(),
                 currentReviewer());
     }
 

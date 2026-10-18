@@ -49,6 +49,11 @@ public class OtpChallengeService {
      */
     private static final String CODE_HASH_ALGORITHM = "otp-bcrypt@v1";
 
+    /**
+     * 图形验证码不走短信/邮件 OTP 的重发冷却与错误次数上限（仍受 TTL 约束）。
+     */
+    private static final int CAPTCHA_UNLIMITED_VERIFY_ATTEMPTS = Integer.MAX_VALUE;
+
     private final OtpChallengeDao challengeDao;
     private final OtpPolicy policy;
 
@@ -125,7 +130,7 @@ public class OtpChallengeService {
         ConsoleOwnership ownership = CredentialOwnershipResolver.ownershipForRealm(command.securityRealm());
         String destination = command.channel().normalizeDestination(command.destination());
         OtpChallengeEntity active = findActive(ownership, command.purpose(), command.channel(), destination);
-        if (active != null && isWithinCooldown(active)) {
+        if (active != null && command.channel() != OtpChannel.CAPTCHA && isWithinCooldown(active)) {
             throw ConsoleExceptions.build(OtpStatusCode.RESEND_TOO_FREQUENT);
         }
         if (active != null) {
@@ -140,7 +145,7 @@ public class OtpChallengeService {
         entity.setCodeVerifier(hashCode(rawCode));
         entity.setExpiresAt(LocalDateTime.now().plus(policy.ttl()));
         entity.setAttemptCount(0);
-        entity.setMaxAttempts(policy.maxVerifyAttempts());
+        entity.setMaxAttempts(maxAttemptsForChannel(command.channel()));
         entity.setResendCount(active == null ? 0 : active.getResendCount() + 1);
         challengeDao.insert(entity);
         if (publishSendEvent) {
@@ -189,10 +194,12 @@ public class OtpChallengeService {
                 ? normalizeCaptchaCode(command.code())
                 : command.code();
         if (!matchesCode(entity.getCodeVerifier(), submittedCode)) {
-            entity.setAttemptCount(entity.getAttemptCount() + 1);
-            challengeDao.updateById(entity);
-            if (entity.getAttemptCount() >= entity.getMaxAttempts()) {
-                markConsumed(entity);
+            if (command.channel() != OtpChannel.CAPTCHA) {
+                entity.setAttemptCount(entity.getAttemptCount() + 1);
+                challengeDao.updateById(entity);
+                if (entity.getAttemptCount() >= entity.getMaxAttempts()) {
+                    markConsumed(entity);
+                }
             }
             throw ConsoleExceptions.build(OtpStatusCode.CODE_INVALID);
         }
@@ -291,11 +298,18 @@ public class OtpChallengeService {
         if (entity.getExpiresAt().isBefore(LocalDateTime.now())) {
             throw ConsoleExceptions.build(OtpStatusCode.CHALLENGE_EXPIRED);
         }
-        // 已达上限的挑战在 findActive 仍可能被查到（刚更新 attempt 后），统一按无效码拒绝
-        if (entity.getAttemptCount() >= entity.getMaxAttempts()) {
+        if (command.channel() != OtpChannel.CAPTCHA
+                && entity.getAttemptCount() >= entity.getMaxAttempts()) {
             throw ConsoleExceptions.build(OtpStatusCode.CODE_INVALID);
         }
         return entity;
+    }
+
+    private int maxAttemptsForChannel(OtpChannel channel) {
+        if (channel == OtpChannel.CAPTCHA) {
+            return CAPTCHA_UNLIMITED_VERIFY_ATTEMPTS;
+        }
+        return policy.maxVerifyAttempts();
     }
 
     /**

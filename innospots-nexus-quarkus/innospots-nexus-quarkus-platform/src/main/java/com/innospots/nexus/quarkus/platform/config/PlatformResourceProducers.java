@@ -15,6 +15,8 @@ import com.innospots.nexus.platform.auth.service.PlatformPasswordService;
 import com.innospots.nexus.platform.access.endpoint.PlatformAccessRequestEndpoint;
 import com.innospots.nexus.platform.access.endpoint.PlatformPublicAccessRegistrationEndpoint;
 import com.innospots.nexus.platform.access.endpoint.PlatformPublicOpenRegistrationEndpoint;
+import com.innospots.nexus.platform.access.endpoint.PlatformPublicRegistrationPolicyEndpoint;
+import com.innospots.nexus.console.auth.service.RegistrationPolicyService;
 import com.innospots.nexus.platform.access.service.PlatformAccessRequestService;
 import com.innospots.nexus.platform.access.service.PlatformOpenRegistrationService;
 import com.innospots.nexus.platform.invite.endpoint.PlatformInviteEndpoint;
@@ -44,6 +46,7 @@ public class PlatformResourceProducers {
     private final PlatformAccessRequestService platformAccessRequestService;
     private final PlatformOpenRegistrationService platformOpenRegistrationService;
     private final PlatformRegistrationModeSettingService platformRegistrationModeSettingService;
+    private final RegistrationPolicyService registrationPolicyService;
     private final PlatformTenantService platformTenantService;
     private final PlatformEnterpriseProfileService platformEnterpriseProfileService;
 
@@ -57,6 +60,7 @@ public class PlatformResourceProducers {
             PlatformAccessRequestService platformAccessRequestService,
             PlatformOpenRegistrationService platformOpenRegistrationService,
             PlatformRegistrationModeSettingService platformRegistrationModeSettingService,
+            RegistrationPolicyService registrationPolicyService,
             PlatformTenantService platformTenantService,
             PlatformEnterpriseProfileService platformEnterpriseProfileService) {
         this.platformAuthService = platformAuthService;
@@ -67,6 +71,7 @@ public class PlatformResourceProducers {
         this.platformAccessRequestService = platformAccessRequestService;
         this.platformOpenRegistrationService = platformOpenRegistrationService;
         this.platformRegistrationModeSettingService = platformRegistrationModeSettingService;
+        this.registrationPolicyService = registrationPolicyService;
         this.platformTenantService = platformTenantService;
         this.platformEnterpriseProfileService = platformEnterpriseProfileService;
     }
@@ -146,6 +151,13 @@ public class PlatformResourceProducers {
     @Unremovable
     PlatformPublicOpenRegistrationEndpoint platformPublicOpenRegistrationEndpoint() {
         return new PlatformPublicOpenRegistrationEndpoint(platformOpenRegistrationService);
+    }
+
+    @Produces
+    @Dependent
+    @Unremovable
+    PlatformPublicRegistrationPolicyEndpoint platformPublicRegistrationPolicyEndpoint() {
+        return new PlatformPublicRegistrationPolicyEndpoint(registrationPolicyService);
     }
 
     @Produces

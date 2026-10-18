@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 
-import { findUserBySession, SESSION_COOKIE } from "@/server/accounts";
+import { resolveSessionUser } from "@/server/accounts";
 import { corsPreflight, corsHeaders } from "@/server/cors";
 import { buildSitemap } from "@/server/sitemap";
 
@@ -11,7 +11,7 @@ import { buildSitemap } from "@/server/sitemap";
  */
 export async function GET(request: Request) {
   const store = await cookies();
-  const user = findUserBySession(store.get(SESSION_COOKIE)?.value);
+  const user = resolveSessionUser(store);
   return Response.json(buildSitemap(user), {
     headers: { "cache-control": "no-store", ...corsHeaders(request) },
   });

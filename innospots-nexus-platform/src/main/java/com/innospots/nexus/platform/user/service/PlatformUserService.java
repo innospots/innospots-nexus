@@ -22,6 +22,8 @@ import com.innospots.nexus.platform.user.domain.vo.PlatformUserVo;
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.platform.user.operator.PlatformUserOperator;
 import com.innospots.nexus.platform.user.status.PlatformUserStatusCode;
+import com.innospots.nexus.platform.support.PlatformMutationLog;
+import com.innospots.nexus.platform.support.PlatformRequestTrace;
 import com.innospots.nexus.platform.user.support.PlatformUserRoleProvisioner;
 
 /**
@@ -75,7 +77,11 @@ public class PlatformUserService {
         String rawPassword = decryptEncryptedPassword(request.encryptedPassword(), user.getPlatformUserId());
         enrollPassword(user.getPlatformUserId(), rawPassword);
         platformUserRoleProvisioner.assignDefaultRolesIfPresent(user.getPlatformUserId(), request.roleCodes());
-        log.info("Created platform user {}", user.getPlatformUserId());
+        PlatformMutationLog.info(
+                log,
+                "platform user created platformUserId={} login={}",
+                user.getPlatformUserId(),
+                PlatformRequestTrace.safeLogin(user.getLoginName()));
         return toVo(user);
     }
 
@@ -122,6 +128,7 @@ public class PlatformUserService {
     public PlatformUserVo activatePendingApprovalUser(String platformUserId) {
         PlatformUserEntity entity = platformUserOperator.requireById(platformUserId);
         platformUserOperator.activatePendingApproval(entity);
+        PlatformMutationLog.info(log, "platform user activated platformUserId={}", platformUserId);
         return toVo(entity);
     }
 
@@ -129,6 +136,10 @@ public class PlatformUserService {
     public void disableUserAfterRegistrationRejected(String platformUserId) {
         PlatformUserEntity entity = platformUserOperator.requireById(platformUserId);
         platformUserOperator.markDisabled(entity);
+        PlatformMutationLog.info(
+                log,
+                "platform user disabled after registration rejected platformUserId={}",
+                platformUserId);
     }
 
     @Transactional
@@ -148,7 +159,7 @@ public class PlatformUserService {
             entity.setMobile(normalizedMobile);
         }
         platformUserOperator.update(entity);
-        log.info("Updated platform user profile {}", platformUserId);
+        PlatformMutationLog.info(log, "platform user profile updated platformUserId={}", platformUserId);
         return toVo(entity);
     }
 
@@ -166,7 +177,7 @@ public class PlatformUserService {
         } catch (IllegalStateException ex) {
             credentialService.enrollPassword(SecurityRealm.PLATFORM, platformUserId, rawPassword);
         }
-        log.info("Admin reset platform user password for {}", platformUserId);
+        PlatformMutationLog.info(log, "platform user password reset by admin platformUserId={}", platformUserId);
     }
 
     @Transactional
@@ -178,6 +189,11 @@ public class PlatformUserService {
         }
         PlatformUserEntity entity = platformUserOperator.requireById(platformUserId);
         platformUserOperator.updateStatus(entity, request.status());
+        PlatformMutationLog.info(
+                log,
+                "platform user status updated platformUserId={} status={}",
+                platformUserId,
+                request.status());
     }
 
     private PlatformUserVo createUserWithPassword(
@@ -205,7 +221,12 @@ public class PlatformUserService {
                 status);
         platformUserOperator.insert(user);
         enrollPassword(user.getPlatformUserId(), rawPassword);
-        log.info("Provisioned platform user {} with status {}", user.getPlatformUserId(), status);
+        PlatformMutationLog.info(
+                log,
+                "platform user provisioned platformUserId={} login={} status={}",
+                user.getPlatformUserId(),
+                PlatformRequestTrace.safeLogin(user.getLoginName()),
+                status);
         return toVo(user);
     }
 

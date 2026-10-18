@@ -4,6 +4,7 @@ import java.util.Objects;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.util.Checks;
@@ -13,6 +14,7 @@ import com.innospots.nexus.platform.settings.domain.request.PlatformRegistration
 import com.innospots.nexus.platform.settings.domain.vo.PlatformRegistrationPolicyVo;
 import com.innospots.nexus.platform.settings.status.PlatformRegistrationModeSettingStatusCode;
 import com.innospots.nexus.platform.settings.support.PlatformSettingKeys;
+import com.innospots.nexus.platform.support.PlatformMutationLog;
 
 /**
  * 平台自助注册模式设置：基于 {@link SystemSettingService} 的 {@code platform.registration.mode}。
@@ -21,6 +23,7 @@ import com.innospots.nexus.platform.settings.support.PlatformSettingKeys;
  * @date 2026/10/06
  * @see com.innospots.nexus.platform.settings.endpoint.PlatformRegistrationModeSettingEndpoint
  */
+@Slf4j
 @RequiredArgsConstructor
 public class PlatformRegistrationModeSettingService {
 
@@ -45,6 +48,7 @@ public class PlatformRegistrationModeSettingService {
                 PlatformSettingKeys.REGISTRATION_MODE,
                 null,
                 request.registrationMode());
+        PlatformMutationLog.info(log, "registration mode updated mode={}", updated);
         return new PlatformRegistrationPolicyVo(
                 updated,
                 systemSettingService.getUpdatedAtOrBootstrap(

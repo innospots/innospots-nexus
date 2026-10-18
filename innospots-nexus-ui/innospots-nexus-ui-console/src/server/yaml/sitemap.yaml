@@ -22,6 +22,8 @@ pages:
   - { id: role-detail-permissions, path: /system/roles/:roleId/permissions, title: 角色权限设置, version: 1, lazy: true }
   - { id: role-detail-members, path: /system/roles/:roleId/members, title: 角色成员列表, version: 1, lazy: true }
   - { id: dictionary-type-list, path: /system/dictionaries, title: 数据字典, version: 1, lazy: true }
+  - { id: dictionary-type-create, path: /system/dictionaries/create, title: 新建字典, version: 1, lazy: true }
+  - { id: dictionary-type-detail, path: /system/dictionaries/:dictionaryTypeId, title: 字典详情, version: 1, lazy: true }
   - { id: audit-log-list, path: /system/audit-logs, title: 审计日志, version: 1, lazy: true }
   - { id: audit-log-detail, path: /system/audit-logs/:logId, title: 审计日志详情, version: 1, lazy: true }
   - { id: plugin-list, path: /system/plugins, title: 插件管理, version: 1, lazy: true }
@@ -68,6 +70,8 @@ menus:
   - { id: role-detail-basic, type: page, pageId: role-detail-basic, layout: admin, hidden: true, activeMenu: nav-roles }
   - { id: role-detail-permissions, type: page, pageId: role-detail-permissions, layout: admin, hidden: true, activeMenu: nav-roles }
   - { id: role-detail-members, type: page, pageId: role-detail-members, layout: admin, hidden: true, activeMenu: nav-roles }
+  - { id: dictionary-type-create, type: page, pageId: dictionary-type-create, layout: admin, hidden: true, activeMenu: nav-dictionaries }
+  - { id: dictionary-type-detail, type: page, pageId: dictionary-type-detail, layout: admin, hidden: true, activeMenu: nav-dictionaries }
   - { id: audit-log-detail, type: page, pageId: audit-log-detail, layout: admin, hidden: true, activeMenu: nav-audit }
   - { id: plugin-detail, type: page, pageId: plugin-detail, layout: admin, hidden: true, activeMenu: nav-plugins }
   - { id: platform-user-create, type: page, pageId: platform-user-create, layout: admin, hidden: true, activeMenu: nav-platform-users }

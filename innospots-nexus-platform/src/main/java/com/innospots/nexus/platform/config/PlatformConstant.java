@@ -80,6 +80,9 @@ public final class PlatformConstant {
     /** 用户注册（公开根路径）：{@value} */
     public static final String PUBLIC_REGISTRATION_PATH = PUBLIC_PREFIX + "/registration";
 
+    /** 公开注册策略查询：{@value} */
+    public static final String PUBLIC_REGISTRATION_POLICY_PATH = PUBLIC_REGISTRATION_PATH + "/policy";
+
     /** 完全开放注册（公开）：{@value} */
     public static final String PUBLIC_OPEN_REGISTRATION_PATH = PUBLIC_REGISTRATION_PATH + "/open";
 

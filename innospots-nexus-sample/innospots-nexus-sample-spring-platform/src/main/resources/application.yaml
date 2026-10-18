@@ -10,6 +10,7 @@ spring:
     import:
       # 控制台示例配置（完整分项见 classpath:nexus/console-*.yaml）
       - optional:classpath:nexus/console-auth.yaml
+      - optional:classpath:nexus/console-registration.yaml
       - optional:classpath:nexus/console-credential.yaml
       - optional:classpath:nexus/console-web.yaml
       - optional:classpath:nexus/console-openapi.yaml

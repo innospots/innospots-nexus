@@ -20,6 +20,7 @@ import com.innospots.nexus.platform.auth.support.PlatformAuthSessionSupport;
 import com.innospots.nexus.platform.auth.support.PlatformUserIdentityResolver;
 import com.innospots.nexus.platform.user.domain.entity.PlatformUserEntity;
 import com.innospots.nexus.platform.user.operator.PlatformUserOperator;
+import com.innospots.nexus.platform.support.PlatformMutationLog;
 import com.innospots.nexus.platform.user.status.PlatformUserStatusCode;
 
 /**
@@ -55,7 +56,7 @@ public class PlatformPasswordService {
         String oldPassword = passwordDecryptor.decrypt(request.oldEncryptedPassword());
         String newPassword = passwordDecryptor.decrypt(request.newEncryptedPassword());
         credentialService.changePassword(REALM, platformUserId, oldPassword, newPassword);
-        log.info("Platform password changed for user: {}", platformUserId);
+        PlatformMutationLog.info(log, "platform password changed platformUserId={}", platformUserId);
     }
 
     /**
@@ -81,7 +82,11 @@ public class PlatformPasswordService {
         verifyResetCode(identity, type, verificationCode);
         String newPassword = passwordDecryptor.decrypt(request.newEncryptedPassword());
         credentialService.resetPassword(REALM, user.getPlatformUserId(), newPassword);
-        log.info("Platform password reset for user: {} via {} code", user.getPlatformUserId(), type);
+        PlatformMutationLog.info(
+                log,
+                "platform password reset platformUserId={} verificationType={}",
+                user.getPlatformUserId(),
+                type);
     }
 
     private void verifyResetCode(String identity, VerificationType type, String code) {

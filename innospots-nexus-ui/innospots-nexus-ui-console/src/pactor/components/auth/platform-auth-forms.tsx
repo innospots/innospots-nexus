@@ -6,8 +6,14 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import { Button, Input } from "@pactor-app/ui/components";
 
+import { reloadAfterAuth } from "../../lib/auth-session";
+import { resolveCaptchaImageSrc } from "../../lib/captcha-image-src";
 import { encryptPasswordForApi } from "../../lib/rsa-password";
 import { platformPublicFetch } from "../../lib/platform-public-api";
+import {
+    fetchPublicRegistrationPolicy,
+    type PublicRegistrationPolicy,
+} from "../../lib/registration-policy";
 import { AuthPageShell } from "./auth-page-shell";
 
 type CaptchaVo = {
@@ -32,13 +38,65 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
     });
 }
 
+type NexusEnvelope<T> = {
+    success?: boolean;
+    code?: string | number;
+    message?: string;
+    data?: T;
+};
+
+function isLoginSuccess(envelope: NexusEnvelope<unknown>): boolean {
+    if (envelope.success === false) {
+        return false;
+    }
+    if (envelope.success === true) {
+        return true;
+    }
+    const code = envelope.code;
+    if (code === undefined) {
+        return true;
+    }
+    return code === 0 || code === "0" || code === "OK";
+}
+
+/** 经 Next BFF 登录，写入 httpOnly 会话供 sitemap / 数据转发鉴权。 */
+async function platformLogin(body: {
+    login: string;
+    encryptedPassword: string;
+    captchaClientKey: string;
+    captchaCode: string;
+}): Promise<void> {
+    const response = await fetch("/api/auth/platform-login", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+    });
+    const payload = (await response.json()) as NexusEnvelope<unknown>;
+    if (!response.ok || !isLoginSuccess(payload)) {
+        throw new Error(payload.message ?? `登录失败（HTTP ${response.status}）`);
+    }
+}
+
 function AuthLinks() {
+    const [policy, setPolicy] = useState<PublicRegistrationPolicy | null>(null);
+    useEffect(() => {
+        void fetchPublicRegistrationPolicy()
+            .then(setPolicy)
+            .catch(() => setPolicy(null));
+    }, []);
     return (
         <div className="mt-4 flex flex-wrap justify-center gap-x-3 gap-y-1 text-sm">
             <Link className="text-primary hover:underline" href="/password/reset">忘记密码？</Link>
-            <Link className="text-primary hover:underline" href="/register/open">开放注册</Link>
-            <Link className="text-primary hover:underline" href="/register/approval">注册（待审核）</Link>
-            <Link className="text-primary hover:underline" href="/register/invite">邀请码注册</Link>
+            {policy?.openRegistrationEnabled ? (
+                <Link className="text-primary hover:underline" href="/register/open">开放注册</Link>
+            ) : null}
+            {policy?.approvalRegistrationEnabled ? (
+                <Link className="text-primary hover:underline" href="/register/approval">注册（待审核）</Link>
+            ) : null}
+            {policy?.inviteRegistrationEnabled ? (
+                <Link className="text-primary hover:underline" href="/register/invite">邀请码注册</Link>
+            ) : null}
         </div>
     );
 }
@@ -59,25 +117,40 @@ export function PlatformLoginForm() {
                 clientKey: captcha?.clientKey ?? "",
             });
             setCaptcha(data);
+            setCaptchaCode("");
             setShowCaptcha(true);
         } catch {
             setShowCaptcha(false);
         }
     }, [captcha?.clientKey]);
 
+    useEffect(() => {
+        void (async () => {
+            try {
+                const data = await postJson<CaptchaVo>("/public/auth/captcha/issue", {
+                    clientKey: "",
+                });
+                setCaptcha(data);
+                setShowCaptcha(true);
+            } catch {
+                setShowCaptcha(false);
+            }
+        })();
+    }, []);
+
     const submit = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
             const encryptedPassword = await encryptPasswordForApi(password);
-            await postJson("/public/auth/login", {
+            await platformLogin({
                 login: login.trim(),
                 encryptedPassword,
                 captchaClientKey: captcha?.clientKey ?? "",
                 captchaCode: showCaptcha ? captchaCode : "",
             });
-            router.push("/");
-            router.refresh();
+            reloadAfterAuth("/");
+            return;
         } catch (err) {
             const message = err instanceof Error ? err.message : "登录失败";
             if (message.includes("PENDING_APPROVAL") || message.includes("待审核")) {
@@ -91,13 +164,10 @@ export function PlatformLoginForm() {
         }
     }, [captcha?.clientKey, captchaCode, login, password, refreshCaptcha, router, showCaptcha]);
 
-    const captchaSrc = useMemo(() => {
-        if (!captcha?.imageBase64) {
-            return "";
-        }
-        const mime = captcha.imageMimeType ?? "image/png";
-        return `data:${mime};base64,${captcha.imageBase64}`;
-    }, [captcha]);
+    const captchaSrc = useMemo(
+        () => resolveCaptchaImageSrc(captcha?.imageBase64, captcha?.imageMimeType),
+        [captcha?.imageBase64, captcha?.imageMimeType],
+    );
 
     return (
         <AuthPageShell title="登录到运营管理平台" subtitle="使用平台账号登录">
@@ -122,11 +192,18 @@ export function PlatformLoginForm() {
                             <Input
                                 className="mt-1"
                                 value={captchaCode}
+                                placeholder="请输入验证码"
                                 onChange={(v) => setCaptchaCode(String(v))}
                             />
                         </label>
-                        <img src={captchaSrc} alt="验证码" className="h-10 w-auto rounded border" />
-                        <Button size="small" onClick={() => void refreshCaptcha()}>换一张</Button>
+                        <div className="flex w-fit max-w-full items-center gap-2 self-start">
+                            <img
+                                src={captchaSrc}
+                                alt="验证码"
+                                className="block h-12 w-auto shrink-0 rounded border object-contain"
+                            />
+                            <Button size="small" onClick={() => void refreshCaptcha()}>换一张</Button>
+                        </div>
                     </div>
                 )}
                 {error && <p className="text-sm text-destructive">{error}</p>}
@@ -134,10 +211,6 @@ export function PlatformLoginForm() {
                     {loading ? "登录中…" : "登 录"}
                 </Button>
                 <AuthLinks />
-                <p className="text-xs text-muted-foreground">
-                    本地演示仍可使用 UI 会话账号 admin / pactor123（/api/auth/login）；上表单项对接
-                    POST /api/d/platform/public/auth/login。
-                </p>
             </div>
         </AuthPageShell>
     );
@@ -437,6 +510,15 @@ export function PlatformInviteAcceptForm({ token }: { token?: string }) {
 
 export function PlatformInviteActivateForm() {
     const router = useRouter();
+    useEffect(() => {
+        void fetchPublicRegistrationPolicy()
+            .then((loaded) => {
+                if (!loaded.inviteRegistrationEnabled) {
+                    router.replace("/login");
+                }
+            })
+            .catch(() => router.replace("/login"));
+    }, [router]);
     const [inviteCode, setInviteCode] = useState("");
     const [contact, setContact] = useState("");
     const [loginName, setLoginName] = useState("");
@@ -517,6 +599,7 @@ function ContactRegistrationForm({
     mode: "open" | "approval";
 }) {
     const router = useRouter();
+    const [policy, setPolicy] = useState<PublicRegistrationPolicy | null>(null);
     const [contactType, setContactType] = useState<"email" | "mobile">("email");
     const [loginName, setLoginName] = useState("");
     const [displayName, setDisplayName] = useState("");
@@ -536,13 +619,44 @@ function ContactRegistrationForm({
     const submitPath =
         mode === "open" ? "/public/registration/open" : "/public/registration/access-requests";
 
+    const otpRequired = policy?.otpVerification !== "NONE";
+    const fixedContactType =
+        policy?.otpVerification === "EMAIL"
+            ? "email"
+            : policy?.otpVerification === "MOBILE"
+              ? "mobile"
+              : contactType;
+
+    useEffect(() => {
+        void fetchPublicRegistrationPolicy()
+            .then((loaded) => {
+                setPolicy(loaded);
+                const allowed =
+                    mode === "open"
+                        ? loaded.openRegistrationEnabled
+                        : loaded.approvalRegistrationEnabled;
+                if (!allowed) {
+                    router.replace("/login");
+                }
+                if (loaded.otpVerification === "MOBILE") {
+                    setContactType("mobile");
+                } else if (loaded.otpVerification === "EMAIL") {
+                    setContactType("email");
+                }
+            })
+            .catch(() => router.replace("/login"));
+    }, [mode, router]);
+
     const issueOtp = useCallback(async () => {
+        if (!otpRequired) {
+            return;
+        }
         const body =
-            contactType === "email"
+            fixedContactType === "email"
                 ? { email: email.trim(), locale: "zh-CN" }
                 : { mobile: mobile.trim(), locale: "zh-CN" };
         await postJson(otpPath, body);
-    }, [contactType, email, mobile, otpPath]);
+    }, [email, fixedContactType, mobile, otpPath, otpRequired]);
 
     const submit = useCallback(async () => {
         if (password !== confirm) {
@@ -557,12 +671,14 @@ function ContactRegistrationForm({
                 loginName: loginName.trim(),
                 displayName: displayName.trim(),
                 encryptedPassword,
-                verificationCode: verificationCode.trim(),
                 locale: "zh-CN",
             };
-            if (contactType === "email") {
+            if (otpRequired) {
+                payload.verificationCode = verificationCode.trim();
+            }
+            if (otpRequired && fixedContactType === "email") {
                 payload.email = email.trim();
-            } else {
+            } else if (otpRequired && fixedContactType === "mobile") {
                 payload.mobile = mobile.trim();
             }
             if (mode === "approval" && description.trim()) {
@@ -581,13 +697,14 @@ function ContactRegistrationForm({
         }
     }, [
         confirm,
-        contactType,
         description,
         displayName,
         email,
+        fixedContactType,
         loginName,
         mobile,
         mode,
+        otpRequired,
         password,
         router,
         submitPath,
@@ -611,35 +728,38 @@ function ContactRegistrationForm({
                     显示名称
                     <Input className="mt-1" value={displayName} onChange={(v) => setDisplayName(String(v))} />
                 </label>
-                <div className="flex gap-4 text-sm">
-                    <label className="flex items-center gap-2">
-                        <input
-                            type="radio"
-                            checked={contactType === "email"}
-                            onChange={() => setContactType("email")}
-                        />
-                        邮箱
-                    </label>
-                    <label className="flex items-center gap-2">
-                        <input
-                            type="radio"
-                            checked={contactType === "mobile"}
-                            onChange={() => setContactType("mobile")}
-                        />
-                        手机
-                    </label>
-                </div>
-                {contactType === "email" ? (
+                {otpRequired && policy?.otpVerification !== "EMAIL" && policy?.otpVerification !== "MOBILE" ? (
+                    <div className="flex gap-4 text-sm">
+                        <label className="flex items-center gap-2">
+                            <input
+                                type="radio"
+                                checked={contactType === "email"}
+                                onChange={() => setContactType("email")}
+                            />
+                            邮箱
+                        </label>
+                        <label className="flex items-center gap-2">
+                            <input
+                                type="radio"
+                                checked={contactType === "mobile"}
+                                onChange={() => setContactType("mobile")}
+                            />
+                            手机
+                        </label>
+                    </div>
+                ) : null}
+                {otpRequired && fixedContactType === "email" ? (
                     <label className="text-sm">
                         邮箱 *
                         <Input className="mt-1" value={email} onChange={(v) => setEmail(String(v))} />
                     </label>
-                ) : (
+                ) : null}
+                {otpRequired && fixedContactType === "mobile" ? (
                     <label className="text-sm">
                         手机 *
                         <Input className="mt-1" value={mobile} onChange={(v) => setMobile(String(v))} />
                     </label>
-                )}
+                ) : null}
                 {mode === "approval" && (
                     <label className="text-sm">
                         申请说明
@@ -668,15 +788,19 @@ function ContactRegistrationForm({
                         onChange={(v) => setConfirm(String(v))}
                     />
                 </label>
-                <label className="text-sm">
-                    验证码
-                    <Input
-                        className="mt-1"
-                        value={verificationCode}
-                        onChange={(v) => setVerificationCode(String(v))}
-                    />
-                </label>
-                <Button size="small" onClick={() => void issueOtp()}>获取验证码</Button>
+                {otpRequired ? (
+                    <>
+                        <label className="text-sm">
+                            验证码
+                            <Input
+                                className="mt-1"
+                                value={verificationCode}
+                                onChange={(v) => setVerificationCode(String(v))}
+                            />
+                        </label>
+                        <Button size="small" onClick={() => void issueOtp()}>获取验证码</Button>
+                    </>
+                ) : null}
                 {error && <p className="text-sm text-destructive">{error}</p>}
                 <Button variant="primary" disabled={loading} onClick={() => void submit()}>
                     {mode === "open" ? "完成注册" : "提交注册"}

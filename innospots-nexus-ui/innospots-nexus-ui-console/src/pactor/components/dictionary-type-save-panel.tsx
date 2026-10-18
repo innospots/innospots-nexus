@@ -6,6 +6,7 @@ import { Trash2 } from "lucide-react";
 
 import { Button, Input, Select } from "@pactor-app/ui/components";
 
+import { registerDictionaryTypeSaveSubmit } from "../lib/dictionary-type-save-registry";
 import { DictionaryTypeSection } from "./dictionary-type-section";
 
 export type DictionaryItemDraft = {
@@ -46,6 +47,9 @@ const ALL_KNOWN_LOCALE_TAGS = [LOCALE_ZH_CN, LOCALE_EN, ...ADDABLE_LOCALES];
 
 export interface DictionaryTypeSavePanelProps {
   mode?: "create" | "edit";
+  variant?: "drawer" | "page";
+  /** 为 true 时不渲染底部按钮，由外层 Drawer / overlay 的 okText + onOk 触发保存 */
+  hideFooter?: boolean;
   typeData?: TypeVo | null;
   itemsData?: ItemVo[] | null;
   onSave?: (payload: {
@@ -126,11 +130,14 @@ function localeLabel(tag: string): string {
  */
 export function DictionaryTypeSavePanel({
   mode = "create",
+  variant = "drawer",
+  hideFooter = false,
   typeData,
   itemsData,
   onSave,
   onCancel,
 }: DictionaryTypeSavePanelProps) {
+  const isPage = variant === "page";
   const isCreate = mode === "create";
   const [typeCode, setTypeCode] = useState("");
   const [localeTags, setLocaleTags] = useState<string[]>([...DEFAULT_LOCALE_TAGS]);
@@ -233,16 +240,21 @@ export function DictionaryTypeSavePanel({
     setItems((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
-  const handleSave = useCallback(() => {
+  const buildSavePayload = useCallback((): {
+    mode: "create" | "edit";
+    typeCode: string;
+    typeName: Record<string, string>;
+    items: DictionaryItemDraft[];
+  } | null => {
     const code = typeCode.trim();
     const zhName = typeNameByLocale[LOCALE_ZH_CN]?.trim() ?? "";
     if (code.length === 0 || zhName.length === 0) {
       setError("类型编码与简体中文类型名称不能为空");
-      return;
+      return null;
     }
     if (items.length === 0) {
       setError("请至少配置一个字典项");
-      return;
+      return null;
     }
     const typeName: Record<string, string> = {};
     for (const tag of localeTags) {
@@ -253,17 +265,41 @@ export function DictionaryTypeSavePanel({
     }
     typeName[LOCALE_ZH_CN] = zhName;
     setError(null);
-    onSave?.({
+    return {
       mode: isCreate ? "create" : "edit",
       typeCode: code,
       typeName,
       items,
-    });
-  }, [isCreate, items, localeTags, onSave, typeCode, typeNameByLocale]);
+    };
+  }, [isCreate, items, localeTags, typeCode, typeNameByLocale]);
+
+  useEffect(() => {
+    if (!hideFooter) {
+      registerDictionaryTypeSaveSubmit(null);
+      return;
+    }
+    registerDictionaryTypeSaveSubmit(buildSavePayload);
+    return () => {
+      registerDictionaryTypeSaveSubmit(null);
+    };
+  }, [buildSavePayload, hideFooter]);
+
+  const handleSave = useCallback(() => {
+    const payload = buildSavePayload();
+    if (payload == null) {
+      return;
+    }
+    onSave?.(payload);
+  }, [buildSavePayload, onSave]);
+
+  const rootClass = isPage ? "flex flex-col" : "flex min-h-[calc(100dvh-8.5rem)] flex-col";
+  const footerClass = isPage
+      ? "mt-6 flex justify-end gap-2 border-t border-border pt-4"
+      : "sticky bottom-0 z-10 -mx-6 mt-4 shrink-0 border-t border-border bg-popover px-6 py-3 shadow-[0_-6px_16px_-8px_rgba(0,0,0,0.12)]";
 
   return (
-    <div className="flex min-h-[calc(100dvh-8.5rem)] flex-col">
-      <div className="min-h-0 flex-1 space-y-4 overflow-y-auto pr-1">
+    <div className={rootClass}>
+      <div className={`min-h-0 flex-1 space-y-4 ${isPage ? "" : "overflow-y-auto pr-1"}`}>
         <DictionaryTypeSection title="基本信息">
           <div className="space-y-3">
             <label className="block text-sm">
@@ -391,19 +427,21 @@ export function DictionaryTypeSavePanel({
           )}
         </DictionaryTypeSection>
       </div>
-      <div
-        className="sticky bottom-0 z-10 -mx-6 mt-4 shrink-0 border-t border-border bg-popover px-6 py-3 shadow-[0_-6px_16px_-8px_rgba(0,0,0,0.12)]"
-      >
-        {error != null ? <p className="mb-2 text-sm text-destructive">{error}</p> : null}
-        <div className="flex justify-end gap-2">
-          <Button variant="default" onClick={() => onCancel?.()}>
-            取消
-          </Button>
-          <Button variant="primary" onClick={handleSave}>
-            保存全部
-          </Button>
+      {hideFooter ? (
+        error != null ? <p className="mt-2 text-sm text-destructive">{error}</p> : null
+      ) : (
+        <div className={footerClass}>
+          {error != null ? <p className="mb-2 text-sm text-destructive">{error}</p> : null}
+          <div className="flex justify-end gap-2">
+            <Button variant="default" onClick={() => onCancel?.()}>
+              取消
+            </Button>
+            <Button variant="primary" onClick={handleSave}>
+              保存全部
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

@@ -20,6 +20,11 @@ public enum PlatformAccessStatusCode implements StatusCode {
             StatusCategory.BUSINESS_RULE,
             "Verification code resend is too frequent",
             429),
+    ACCESS_OTP_NOT_REQUIRED(
+            "0006",
+            StatusCategory.BUSINESS_RULE,
+            "OTP verification is disabled for registration",
+            400),
     ACCESS_LOGIN_NAME_REQUIRED(
             "0005",
             StatusCategory.INPUT_VALIDATION,

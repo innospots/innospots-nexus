@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 
-import { findUserBySession, SESSION_COOKIE } from "@/server/accounts";
+import { resolveSessionUser } from "@/server/accounts";
 import { corsHeaders, corsPreflight } from "@/server/cors";
 import { getLazyPage } from "@/server/sitemap";
 
@@ -15,7 +15,7 @@ export async function GET(
 ) {
   const { id } = await context.params;
   const store = await cookies();
-  const user = findUserBySession(store.get(SESSION_COOKIE)?.value);
+  const user = resolveSessionUser(store);
   const entry = getLazyPage(id, user);
   if (!entry) {
     return Response.json(

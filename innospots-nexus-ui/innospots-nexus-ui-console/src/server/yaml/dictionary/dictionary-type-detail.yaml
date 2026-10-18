@@ -1,0 +1,73 @@
+dsl: "1.0"
+page:
+  id: dictionary-type-detail
+  title: 字典类型详情
+  name: dictionaryTypeDetail
+
+state:
+  previewOpen: true
+
+dataSources:
+  typeDetail:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/platform/dictionary-types/${params.dictionaryTypeId}
+  typeDetailItems:
+    type: http
+    autoLoad: false
+    request:
+      method: GET
+      url: /api/d/platform/dictionary-types/${data.typeDetail.typeCode}/items
+      params:
+        pageNo: 1
+        pageSize: 200
+
+lifecycle:
+  onShow:
+    - action: reload
+      params:
+        dataSource: typeDetail
+    - action: if
+      params:
+        condition: ${data.typeDetail != null && data.typeDetail.typeCode != null}
+        then:
+          - action: reload
+            params:
+              dataSource: typeDetailItems
+
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - label: 系统管理
+          - label: 数据字典
+            href: /system/dictionaries
+          - label: 字典预览
+    - type: DrawerBackdrop
+      props:
+        open: ${state.previewOpen}
+      events:
+        onClose:
+          - action: navigate
+            params: { to: /system/dictionaries }
+    - type: Drawer
+      props:
+        open: ${state.previewOpen}
+        placement: right
+        title: 查看字典
+        footer: false
+        style: { width: "840px", maxWidth: "840px" }
+      events:
+        onClose:
+          - action: navigate
+            params: { to: /system/dictionaries }
+      children:
+        - type: DictionaryTypeViewPanel
+          props:
+            loading: ${dataStatus.typeDetail.loading || dataStatus.typeDetailItems.loading}
+            typeData: ${data.typeDetail}
+            itemsData: ${data.typeDetailItems.records}

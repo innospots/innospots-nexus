@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 
-import { SESSION_COOKIE } from "@/server/accounts";
+import {
+  ACCESS_TOKEN_COOKIE,
+  LEGACY_DEMO_SESSION_COOKIE,
+  PLATFORM_LOGIN_COOKIE,
+} from "@/server/accounts";
 import { corsHeaders, corsPreflight } from "@/server/cors";
 
 /** 演示登出：清会话 cookie */
@@ -9,12 +13,15 @@ export async function POST(request: Request) {
     { ok: true },
     { headers: corsHeaders(request) },
   );
-  response.cookies.set(SESSION_COOKIE, "", {
+  const clear = {
     httpOnly: true,
-    sameSite: "lax",
+    sameSite: "lax" as const,
     path: "/",
     maxAge: 0,
-  });
+  };
+  response.cookies.set(LEGACY_DEMO_SESSION_COOKIE, "", clear);
+  response.cookies.set(ACCESS_TOKEN_COOKIE, "", clear);
+  response.cookies.set(PLATFORM_LOGIN_COOKIE, "", clear);
   return response;
 }
 

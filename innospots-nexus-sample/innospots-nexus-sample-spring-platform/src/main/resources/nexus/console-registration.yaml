@@ -1,0 +1,31 @@
+# ---------------------------------------------------------------------------
+# 平台自助注册（示例）
+#
+# 绑定: com.innospots.nexus.spring.console.config.ConsoleRegistrationProperties
+# 装配: ConsoleRegistrationConfiguration → RegistrationConfig / RegistrationPolicyService
+#
+# 公开策略: GET /api/d/platform/public/registration/policy
+#
+# 占位符为环境变量 + 默认值（${NAME:default}），可在部署时覆盖。
+# ---------------------------------------------------------------------------
+nexus:
+  console:
+    registration:
+      # OPEN | INVITE | APPROVAL | CLOSED
+      mode: ${NEXUS_CONSOLE_REGISTRATION_MODE:OPEN}
+      # EMAIL | MOBILE | NONE（NONE 时开放注册仅需登录名+密码，不发送验证码）
+      otp-verification: ${NEXUS_CONSOLE_REGISTRATION_OTP_VERIFICATION:NONE}
+      otp:
+        # 联调：DEBUG 日志输出 challengeId、投递地址与明文验证码
+        debug-log-enabled: ${NEXUS_CONSOLE_REGISTRATION_OTP_DEBUG_LOG_ENABLED:true}
+        email:
+          host: ${NEXUS_CONSOLE_REGISTRATION_OTP_EMAIL_HOST:smtp.example.com}
+          port: ${NEXUS_CONSOLE_REGISTRATION_OTP_EMAIL_PORT:587}
+          username: ${NEXUS_CONSOLE_REGISTRATION_OTP_EMAIL_USERNAME:noreply@example.com}
+          password: ${NEXUS_CONSOLE_REGISTRATION_OTP_EMAIL_PASSWORD:change-me}
+          from: ${NEXUS_CONSOLE_REGISTRATION_OTP_EMAIL_FROM:noreply@example.com}
+          from-name: ${NEXUS_CONSOLE_REGISTRATION_OTP_EMAIL_FROM_NAME:Nexus Platform}
+          tls: ${NEXUS_CONSOLE_REGISTRATION_OTP_EMAIL_TLS:true}
+        mobile:
+          api-url: ${NEXUS_CONSOLE_REGISTRATION_OTP_MOBILE_API_URL:https://sms.example.com/api/send}
+          api-key: ${NEXUS_CONSOLE_REGISTRATION_OTP_MOBILE_API_KEY:change-me}

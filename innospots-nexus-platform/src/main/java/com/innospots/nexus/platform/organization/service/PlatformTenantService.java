@@ -4,6 +4,7 @@ import java.util.Objects;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import com.innospots.nexus.base.domain.response.PageResult;
 import com.innospots.nexus.base.events.EventBus;
@@ -18,6 +19,7 @@ import com.innospots.nexus.platform.organization.domain.vo.TenantVo;
 import com.innospots.nexus.platform.organization.operator.EnterpriseOperator;
 import com.innospots.nexus.platform.organization.operator.TenantOperator;
 import com.innospots.nexus.platform.organization.domain.entity.EnterpriseEntity;
+import com.innospots.nexus.platform.support.PlatformMutationLog;
 
 /**
  * 平台租户开通、分页查询与生命周期编排。
@@ -29,6 +31,7 @@ import com.innospots.nexus.platform.organization.domain.entity.EnterpriseEntity;
  * @see PlatformEnterpriseProfileService
  * @see com.innospots.nexus.platform.organization.operator.TenantOperator
  */
+@Slf4j
 @RequiredArgsConstructor
 public class PlatformTenantService {
 
@@ -53,6 +56,11 @@ public class PlatformTenantService {
                 tenant.getTenantId(),
                 tenant.getTenantCode(),
                 tenant.getOwnerTenantUserId()));
+        PlatformMutationLog.info(
+                log,
+                "tenant created tenantId={} tenantCode={}",
+                tenant.getTenantId(),
+                tenant.getTenantCode());
         return toVo(tenant);
     }
 
@@ -96,6 +104,7 @@ public class PlatformTenantService {
             tenant.setTenantName(request.tenantName().trim());
         }
         tenantOperator.update(tenant);
+        PlatformMutationLog.info(log, "tenant updated tenantId={}", tenantId);
         return toVo(tenant);
     }
 
@@ -113,6 +122,11 @@ public class PlatformTenantService {
         TenantEntity tenant = tenantOperator.requireById(tenantId);
         tenant.setStatus(request.status().trim().toUpperCase());
         tenantOperator.update(tenant);
+        PlatformMutationLog.info(
+                log,
+                "tenant status updated tenantId={} status={}",
+                tenantId,
+                tenant.getStatus());
         return toVo(tenant);
     }
 

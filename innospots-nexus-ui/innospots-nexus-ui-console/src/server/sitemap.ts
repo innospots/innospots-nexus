@@ -201,7 +201,12 @@ export function buildSitemap(user: DemoUser | null): SitemapResource {
   return {
     ...site,
     updatedAt: new Date().toISOString(),
-    ...(user ? { user: sitemapUser(user), permissions: user.permissions } : {}),
+    ...(user
+      ? {
+          user: sitemapUser(user) as unknown as Record<string, unknown>,
+          permissions: user.permissions,
+        }
+      : {}),
     pages,
     menus: filterMenus(site.menus, user),
   };

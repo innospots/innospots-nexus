@@ -37,6 +37,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {/*
          * PactorApp 挂在 Next layout 而非 page：App Router 导航时 page 会
          * 重挂载、layout 常驻——sitemap 只拉取一次，切换导航只刷新内容区。
+         * 登录 / 登出后须 window.location 整页跳转以按新会话重拉 sitemap。
          * children（page）恒为 null，路由由 PactorApp 内部按 sitemap 解析。
          */}
         <PactorApp />

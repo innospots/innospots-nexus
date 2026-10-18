@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Objects;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import com.innospots.nexus.base.domain.enums.BasicStatus;
 import com.innospots.nexus.base.domain.response.PageResult;
@@ -20,10 +21,12 @@ import com.innospots.nexus.console.dictionary.operator.DictionaryItemOperator;
 import com.innospots.nexus.console.dictionary.operator.DictionaryTypeOperator;
 import com.innospots.nexus.console.scope.ConsoleOwnership;
 import com.innospots.nexus.platform.scope.PlatformConsoleSession;
+import com.innospots.nexus.platform.support.PlatformMutationLog;
 
 /**
  * 运营平台字典服务：PLATFORM 会话与归属固化，委托 operator 做基础持久化。
  */
+@Slf4j
 @RequiredArgsConstructor
 public class PlatformDictionaryService {
 
@@ -43,24 +46,42 @@ public class PlatformDictionaryService {
         Objects.requireNonNull(request, "request");
         Checks.notBlank(request.typeCode(), "typeCode");
         Checks.notNull(request.typeName(), "typeName");
-        return typeOperator.createType(request, platformOwnership());
+        DictionaryTypeVo created = typeOperator.createType(request, platformOwnership());
+        PlatformMutationLog.info(
+                log,
+                "dictionary type created dictionaryTypeId={} typeCode={}",
+                created.dictionaryTypeId(),
+                created.typeCode());
+        return created;
     }
 
     public DictionaryTypeVo updateDictionaryType(String dictionaryTypeId, DictionaryTypeUpdateRequest request) {
         Checks.notBlank(dictionaryTypeId, "dictionaryTypeId");
         Objects.requireNonNull(request, "request");
-        return typeOperator.updateType(dictionaryTypeId, request, platformOwnership());
+        DictionaryTypeVo updated = typeOperator.updateType(dictionaryTypeId, request, platformOwnership());
+        PlatformMutationLog.info(
+                log,
+                "dictionary type updated dictionaryTypeId={} typeCode={}",
+                updated.dictionaryTypeId(),
+                updated.typeCode());
+        return updated;
     }
 
     public void updateDictionaryTypeStatus(String dictionaryTypeId, DictionaryTypeStatusUpdateRequest request) {
         Checks.notBlank(dictionaryTypeId, "dictionaryTypeId");
         Objects.requireNonNull(request, "request");
         typeOperator.updateTypeStatus(dictionaryTypeId, request, platformOwnership());
+        PlatformMutationLog.info(
+                log,
+                "dictionary type status updated dictionaryTypeId={} status={}",
+                dictionaryTypeId,
+                request.status());
     }
 
     public void deleteDictionaryType(String dictionaryTypeId) {
         Checks.notBlank(dictionaryTypeId, "dictionaryTypeId");
         typeOperator.deleteType(dictionaryTypeId, platformOwnership());
+        PlatformMutationLog.info(log, "dictionary type deleted dictionaryTypeId={}", dictionaryTypeId);
     }
 
     public List<DictionaryTypeOptionVo> listDictionaryTypeOptions(BasicStatus status) {

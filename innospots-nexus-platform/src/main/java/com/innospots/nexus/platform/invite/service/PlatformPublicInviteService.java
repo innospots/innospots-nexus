@@ -4,6 +4,7 @@ import java.util.Objects;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.status.NexusStatusCode;
@@ -23,8 +24,9 @@ import com.innospots.nexus.platform.invite.domain.request.PlatformInviteOtpReque
 import com.innospots.nexus.platform.invite.domain.vo.PlatformInvitePreviewVo;
 import com.innospots.nexus.platform.invite.operator.PlatformInviteOperator;
 import com.innospots.nexus.platform.invite.status.PlatformInviteStatusCode;
-import com.innospots.nexus.platform.settings.domain.enums.PlatformRegistrationMode;
-import com.innospots.nexus.platform.settings.service.PlatformRegistrationModeSettingService;
+import com.innospots.nexus.console.auth.service.RegistrationPolicyService;
+import com.innospots.nexus.console.config.RegistrationMode;
+import com.innospots.nexus.platform.support.PlatformRequestTrace;
 import com.innospots.nexus.platform.user.domain.vo.PlatformUserVo;
 import com.innospots.nexus.platform.user.service.PlatformUserService;
 import com.innospots.nexus.platform.user.support.PlatformUserRoleProvisioner;
@@ -36,14 +38,26 @@ import com.innospots.nexus.platform.user.support.PlatformUserRoleProvisioner;
  * @date 2026/10/06
  * @see com.innospots.nexus.platform.invite.endpoint.PlatformPublicInviteEndpoint
  */
+@Slf4j
 @RequiredArgsConstructor
 public class PlatformPublicInviteService {
 
+    /** 邀请单加载、状态流转与 token 解析。 */
     private final PlatformInviteOperator inviteOperator;
+
+    /** 接受邀请后创建平台用户。 */
     private final PlatformUserService platformUserService;
+
+    /** 邀请注册 OTP 签发与校验。 */
     private final OtpChallengeService otpChallengeService;
+
+    /** 解密前端 RSA 加密密码。 */
     private final PasswordDecryptor passwordDecryptor;
-    private final PlatformRegistrationModeSettingService registrationModeSettingService;
+
+    /** 邀请码路径的 {@link RegistrationMode#INVITE} 门禁。 */
+    private final RegistrationPolicyService registrationPolicyService;
+
+    /** 新用户默认角色绑定。 */
     private final PlatformUserRoleProvisioner platformUserRoleProvisioner;
 
     /**
@@ -70,6 +84,11 @@ public class PlatformPublicInviteService {
      */
     public void issueInviteAcceptOtp(String token, PlatformInviteOtpRequest request) {
         PlatformInviteEntity invite = inviteOperator.requirePendingByToken(token);
+        log.info(
+                "traceId={} platform invite accept OTP issue inviteId={} contact={}",
+                PlatformRequestTrace.currentTraceId(),
+                invite.getInviteId(),
+                PlatformRequestTrace.describeContact(invite.getEmail(), invite.getMobile()));
         OtpChannel channel = resolveChannel(invite.getEmail(), invite.getMobile());
         String destination = channel == OtpChannel.EMAIL ? invite.getEmail() : invite.getMobile();
         String locale = request == null ? null : request.locale();
@@ -92,11 +111,23 @@ public class PlatformPublicInviteService {
     public String acceptInvite(String token, PlatformInviteAcceptRequest request) {
         Objects.requireNonNull(request, "request");
         Checks.notBlank(request.encryptedPassword(), "encryptedPassword");
+        String traceId = PlatformRequestTrace.currentTraceId();
         PlatformInviteEntity invite = inviteOperator.requirePendingByToken(token);
+        log.info(
+                "traceId={} platform invite accept submit inviteId={} login={}",
+                traceId,
+                invite.getInviteId(),
+                PlatformRequestTrace.safeLogin(request.loginName()));
         if (invite.deliveryModeEnum() == PlatformInviteDeliveryMode.ONLINE) {
             verifyInviteAcceptCode(invite, request.verificationCode());
         }
-        return completeInviteActivation(invite, request.loginName(), request.encryptedPassword());
+        String platformUserId = completeInviteActivation(invite, request.loginName(), request.encryptedPassword());
+        log.info(
+                "traceId={} platform invite accept completed inviteId={} platformUserId={}",
+                traceId,
+                invite.getInviteId(),
+                platformUserId);
+        return platformUserId;
     }
 
     /**
@@ -107,14 +138,27 @@ public class PlatformPublicInviteService {
      */
     @Transactional
     public String activateByInviteCode(PlatformInviteActivateByCodeRequest request) {
-        registrationModeSettingService.requireSelfServiceMode(PlatformRegistrationMode.INVITE);
+        registrationPolicyService.requireSelfServiceMode(RegistrationMode.INVITE);
         Objects.requireNonNull(request, "request");
         Checks.notBlank(request.inviteCode(), "inviteCode");
         Checks.notBlank(request.contact(), "contact");
         Checks.notBlank(request.encryptedPassword(), "encryptedPassword");
+        String traceId = PlatformRequestTrace.currentTraceId();
         PlatformInviteEntity invite = inviteOperator.requirePendingByCode(request.inviteCode());
+        log.info(
+                "traceId={} platform invite code activate submit inviteId={} login={} contact={}",
+                traceId,
+                invite.getInviteId(),
+                PlatformRequestTrace.safeLogin(request.loginName()),
+                PlatformRequestTrace.describeContactValue(request.contact()));
         assertContactMatches(invite, request.contact());
-        return completeInviteActivation(invite, request.loginName(), request.encryptedPassword());
+        String platformUserId = completeInviteActivation(invite, request.loginName(), request.encryptedPassword());
+        log.info(
+                "traceId={} platform invite code activate completed inviteId={} platformUserId={}",
+                traceId,
+                invite.getInviteId(),
+                platformUserId);
+        return platformUserId;
     }
 
     /**

@@ -18,7 +18,7 @@ import com.innospots.nexus.platform.invite.service.PlatformInviteService;
 import com.innospots.nexus.platform.invite.service.PlatformPublicInviteService;
 import com.innospots.nexus.platform.invite.support.PlatformInviteLinkBuilder;
 import com.innospots.nexus.platform.invite.support.PlatformInviteOtpNotifier;
-import com.innospots.nexus.platform.settings.service.PlatformRegistrationModeSettingService;
+import com.innospots.nexus.console.auth.service.RegistrationPolicyService;
 import com.innospots.nexus.platform.user.service.PlatformUserService;
 import com.innospots.nexus.platform.user.support.PlatformUserRoleProvisioner;
 
@@ -60,14 +60,14 @@ public class PlatformProvisioningBeans {
             PlatformUserService platformUserService,
             OtpChallengeService otpChallengeService,
             PasswordDecryptor passwordDecryptor,
-            PlatformRegistrationModeSettingService registrationModeSettingService,
+            RegistrationPolicyService registrationPolicyService,
             PlatformUserRoleProvisioner platformUserRoleProvisioner) {
         return new PlatformPublicInviteService(
                 platformInviteOperator,
                 platformUserService,
                 otpChallengeService,
                 passwordDecryptor,
-                registrationModeSettingService,
+                registrationPolicyService,
                 platformUserRoleProvisioner);
     }
 
@@ -84,13 +84,13 @@ public class PlatformProvisioningBeans {
             PlatformUserService platformUserService,
             OtpChallengeService otpChallengeService,
             PasswordDecryptor passwordDecryptor,
-            PlatformRegistrationModeSettingService registrationModeSettingService) {
+            RegistrationPolicyService registrationPolicyService) {
         return new PlatformAccessRequestService(
                 platformAccessRequestOperator,
                 platformUserService,
                 otpChallengeService,
                 passwordDecryptor,
-                registrationModeSettingService);
+                registrationPolicyService);
     }
 
     @Produces
@@ -99,11 +99,11 @@ public class PlatformProvisioningBeans {
             PlatformUserService platformUserService,
             OtpChallengeService otpChallengeService,
             PasswordDecryptor passwordDecryptor,
-            PlatformRegistrationModeSettingService registrationModeSettingService) {
+            RegistrationPolicyService registrationPolicyService) {
         return new PlatformOpenRegistrationService(
                 platformUserService,
                 otpChallengeService,
                 passwordDecryptor,
-                registrationModeSettingService);
+                registrationPolicyService);
     }
 }

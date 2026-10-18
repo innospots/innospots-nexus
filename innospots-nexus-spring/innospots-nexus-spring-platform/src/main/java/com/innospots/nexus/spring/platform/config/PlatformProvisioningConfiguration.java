@@ -5,12 +5,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
+import com.innospots.nexus.console.auth.service.RegistrationPolicyService;
 import com.innospots.nexus.console.credential.otp.service.OtpChallengeService;
 import com.innospots.nexus.console.credential.password.PasswordDecryptor;
 import com.innospots.nexus.platform.access.dao.PlatformAccessRequestDao;
 import com.innospots.nexus.platform.access.endpoint.PlatformAccessRequestEndpoint;
 import com.innospots.nexus.platform.access.endpoint.PlatformPublicAccessRegistrationEndpoint;
 import com.innospots.nexus.platform.access.endpoint.PlatformPublicOpenRegistrationEndpoint;
+import com.innospots.nexus.platform.access.endpoint.PlatformPublicRegistrationPolicyEndpoint;
 import com.innospots.nexus.platform.access.operator.PlatformAccessRequestOperator;
 import com.innospots.nexus.platform.access.service.PlatformAccessRequestService;
 import com.innospots.nexus.platform.access.service.PlatformOpenRegistrationService;
@@ -59,14 +61,14 @@ public class PlatformProvisioningConfiguration {
             PlatformUserService platformUserService,
             OtpChallengeService otpChallengeService,
             PasswordDecryptor passwordDecryptor,
-            PlatformRegistrationModeSettingService registrationModeSettingService,
+            RegistrationPolicyService registrationPolicyService,
             PlatformUserRoleProvisioner platformUserRoleProvisioner) {
         return new PlatformPublicInviteService(
                 platformInviteOperator,
                 platformUserService,
                 otpChallengeService,
                 passwordDecryptor,
-                registrationModeSettingService,
+                registrationPolicyService,
                 platformUserRoleProvisioner);
     }
 
@@ -81,13 +83,13 @@ public class PlatformProvisioningConfiguration {
             PlatformUserService platformUserService,
             OtpChallengeService otpChallengeService,
             PasswordDecryptor passwordDecryptor,
-            PlatformRegistrationModeSettingService registrationModeSettingService) {
+            RegistrationPolicyService registrationPolicyService) {
         return new PlatformAccessRequestService(
                 platformAccessRequestOperator,
                 platformUserService,
                 otpChallengeService,
                 passwordDecryptor,
-                registrationModeSettingService);
+                registrationPolicyService);
     }
 
     @Bean
@@ -95,12 +97,12 @@ public class PlatformProvisioningConfiguration {
             PlatformUserService platformUserService,
             OtpChallengeService otpChallengeService,
             PasswordDecryptor passwordDecryptor,
-            PlatformRegistrationModeSettingService registrationModeSettingService) {
+            RegistrationPolicyService registrationPolicyService) {
         return new PlatformOpenRegistrationService(
                 platformUserService,
                 otpChallengeService,
                 passwordDecryptor,
-                registrationModeSettingService);
+                registrationPolicyService);
     }
 
     @Bean
@@ -134,5 +136,12 @@ public class PlatformProvisioningConfiguration {
     PlatformPublicOpenRegistrationEndpoint platformPublicOpenRegistrationEndpoint(
             PlatformOpenRegistrationService openRegistrationService) {
         return new PlatformPublicOpenRegistrationEndpoint(openRegistrationService);
+    }
+
+    @Bean
+    @Lazy
+    PlatformPublicRegistrationPolicyEndpoint platformPublicRegistrationPolicyEndpoint(
+            RegistrationPolicyService registrationPolicyService) {
+        return new PlatformPublicRegistrationPolicyEndpoint(registrationPolicyService);
     }
 }

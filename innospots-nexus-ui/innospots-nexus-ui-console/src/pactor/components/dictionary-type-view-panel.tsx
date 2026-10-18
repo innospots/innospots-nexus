@@ -92,6 +92,8 @@ function formatDateTime(value: string | undefined): string {
 }
 
 export interface DictionaryTypeViewPanelProps {
+    variant?: "drawer" | "page";
+    loading?: boolean;
     typeData?: TypeVo | null;
     itemsData?: ItemVo[] | null;
     onClose?: () => void;
@@ -100,7 +102,14 @@ export interface DictionaryTypeViewPanelProps {
 /**
  * 字典类型只读侧滑：基本信息、字典项、扩展信息分区展示。
  */
-export function DictionaryTypeViewPanel({ typeData, itemsData, onClose }: DictionaryTypeViewPanelProps) {
+export function DictionaryTypeViewPanel({
+    variant = "drawer",
+    loading = false,
+    typeData,
+    itemsData,
+    onClose,
+}: DictionaryTypeViewPanelProps) {
+    const isPage = variant === "page";
     const typeNameEntries = useMemo(() => formatTypeNameEntries(typeData?.typeName), [typeData?.typeName]);
     const items = useMemo(() => {
         if (!Array.isArray(itemsData)) {
@@ -111,9 +120,18 @@ export function DictionaryTypeViewPanel({ typeData, itemsData, onClose }: Dictio
 
     const displayTitle = resolveI18nText(typeData?.typeName) || typeData?.typeCode || "—";
 
+    if (loading) {
+        return <p className="text-sm text-muted-foreground">加载中…</p>;
+    }
+
+    const rootClass = isPage ? "flex flex-col" : "flex min-h-[calc(100dvh-8.5rem)] flex-col";
+    const footerClass = isPage
+        ? "mt-6 flex justify-end gap-2 border-t border-border pt-4"
+        : "sticky bottom-0 z-10 -mx-6 mt-4 shrink-0 border-t border-border bg-popover px-6 py-3 shadow-[0_-6px_16px_-8px_rgba(0,0,0,0.12)]";
+
     return (
-        <div className="flex min-h-[calc(100dvh-8.5rem)] flex-col">
-            <div className="min-h-0 flex-1 space-y-4 overflow-y-auto pr-1">
+        <div className={rootClass}>
+            <div className={`min-h-0 flex-1 space-y-4 ${isPage ? "" : "overflow-y-auto pr-1"}`}>
                 <DictionaryTypeSection title="基本信息">
                     <dl className="grid gap-3 text-sm sm:grid-cols-[7rem_1fr]">
                         <dt className="text-muted-foreground">类型名称</dt>
@@ -182,15 +200,15 @@ export function DictionaryTypeViewPanel({ typeData, itemsData, onClose }: Dictio
                     </dl>
                 </DictionaryTypeSection>
             </div>
-            <div
-                className="sticky bottom-0 z-10 -mx-6 mt-4 shrink-0 border-t border-border bg-popover px-6 py-3 shadow-[0_-6px_16px_-8px_rgba(0,0,0,0.12)]"
-            >
-                <div className="flex justify-end gap-2">
-                    <Button variant="primary" onClick={() => onClose?.()}>
-                        关闭
-                    </Button>
+            {onClose != null ? (
+                <div className={footerClass}>
+                    <div className="flex justify-end gap-2">
+                        <Button variant="primary" onClick={() => onClose()}>
+                            关闭
+                        </Button>
+                    </div>
                 </div>
-            </div>
+            ) : null}
         </div>
     );
 }

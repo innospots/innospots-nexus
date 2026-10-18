@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 
-import { findUserBySession, SESSION_COOKIE } from "@/server/accounts";
+import { resolveSessionUser } from "@/server/accounts";
 import { corsHeaders, corsPreflight } from "@/server/cors";
 
 /** 演示用户数据（mock）：真实项目由后端用户体系提供 */
@@ -22,7 +22,7 @@ const MOCK_USERS = [
  */
 export async function GET(request: Request) {
   const store = await cookies();
-  const user = findUserBySession(store.get(SESSION_COOKIE)?.value);
+  const user = resolveSessionUser(store);
   if (!user || !user.permissions.includes("user:view")) {
     return Response.json(
       { error: "未登录或无权限" },

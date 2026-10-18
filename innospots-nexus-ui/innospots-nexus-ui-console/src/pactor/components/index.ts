@@ -14,6 +14,7 @@ import { SafeHeader } from "./safe-header";
 import { CatalogTree } from "./catalog-tree";
 import { ConsoleMenuTree } from "./console-menu-tree";
 import { FilterSelect } from "./filter-select";
+import { DrawerBackdrop } from "./drawer-backdrop";
 import { DictionaryTypeSavePanel } from "./dictionary-type-save-panel";
 import { DictionaryTypeViewPanel } from "./dictionary-type-view-panel";
 import { I18nText } from "./i18n-text";
@@ -37,6 +38,7 @@ export const pactorComponents: Record<string, unknown> = {
   CatalogTree,
   ConsoleMenuTree,
   FilterSelect,
+  DrawerBackdrop,
   DictionaryTypeSavePanel,
   DictionaryTypeViewPanel,
   PlatformUserCreatePanel,

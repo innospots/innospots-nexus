@@ -9,6 +9,7 @@ import java.lang.annotation.Target;
 import org.springframework.context.annotation.Import;
 
 import com.innospots.nexus.spring.console.config.ConsoleAuthConfiguration;
+import com.innospots.nexus.spring.console.config.ConsoleRegistrationConfiguration;
 import com.innospots.nexus.spring.console.config.ConsoleCredentialConfiguration;
 import com.innospots.nexus.spring.console.config.ConsoleJaxRsWebConfiguration;
 import com.innospots.nexus.spring.console.config.ConsoleLoggerConfiguration;
@@ -31,6 +32,7 @@ import com.innospots.nexus.spring.core.bootstrap.EnableNexusHostBootstrap;
 @EnableNexusHostBootstrap
 @Import({
         ConsoleAuthConfiguration.class,
+        ConsoleRegistrationConfiguration.class,
         ConsoleCredentialConfiguration.class,
         ConsolePermissionConfiguration.class,
         ConsoleNavigationConfiguration.class,

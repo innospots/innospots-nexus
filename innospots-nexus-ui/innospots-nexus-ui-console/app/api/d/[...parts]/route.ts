@@ -1,7 +1,10 @@
 import { cookies } from "next/headers";
 
 import { serverBaseUrl } from "@/pactor/config";
-import { findUserBySession, SESSION_COOKIE } from "@/server/accounts";
+import {
+  readPlatformAccessToken,
+  resolveSessionUser,
+} from "@/server/accounts";
 import { corsHeaders, corsPreflight } from "@/server/cors";
 
 /**
@@ -25,12 +28,19 @@ function emptyData(request: Request): Response {
 }
 
 /** 原样转发：同路径、同方法、同查询、同请求体，携带会话 cookie */
-async function forward(request: Request, parts: string[]): Promise<Response> {
+async function forward(
+  request: Request,
+  parts: string[],
+  accessToken?: string,
+): Promise<Response> {
   const url = new URL(request.url);
   const target = `${serverBaseUrl}/api/d/${parts.join("/")}${url.search}`;
   const headers = new Headers();
   const cookie = request.headers.get("cookie");
   if (cookie) headers.set("cookie", cookie);
+  if (accessToken) {
+    headers.set("authorization", `Bearer ${accessToken}`);
+  }
   const contentType = request.headers.get("content-type");
   if (contentType) headers.set("content-type", contentType);
   const init: RequestInit = { method: request.method, headers };
@@ -80,9 +90,10 @@ async function handle(
   context: RouteContext<"/api/d/[...parts]">,
 ) {
   const { parts } = await context.params;
+  const store = await cookies();
+  const accessToken = readPlatformAccessToken(store);
   if (!isAnonymousPlatformPublicPath(parts)) {
-    const store = await cookies();
-    const user = findUserBySession(store.get(SESSION_COOKIE)?.value);
+    const user = resolveSessionUser(store);
     if (!user) {
       return Response.json(
         { error: "未登录" },
@@ -91,7 +102,7 @@ async function handle(
     }
   }
 
-  return forward(request, parts);
+  return forward(request, parts, accessToken);
 }
 
 export const GET = handle;

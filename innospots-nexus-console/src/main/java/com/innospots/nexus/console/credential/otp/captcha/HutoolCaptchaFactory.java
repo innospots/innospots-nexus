@@ -53,19 +53,37 @@ public final class HutoolCaptchaFactory {
     }
 
     private static GeneratedCaptcha fromLine(LineCaptcha captcha) {
-        return new GeneratedCaptcha(readCode(captcha), captcha.getImageBase64Data());
+        return new GeneratedCaptcha(readCode(captcha), normalizeImageBase64(captcha.getImageBase64Data()));
     }
 
     private static GeneratedCaptcha fromCircle(CircleCaptcha captcha) {
-        return new GeneratedCaptcha(readCode(captcha), captcha.getImageBase64Data());
+        return new GeneratedCaptcha(readCode(captcha), normalizeImageBase64(captcha.getImageBase64Data()));
     }
 
     private static GeneratedCaptcha fromShear(ShearCaptcha captcha) {
-        return new GeneratedCaptcha(readCode(captcha), captcha.getImageBase64Data());
+        return new GeneratedCaptcha(readCode(captcha), normalizeImageBase64(captcha.getImageBase64Data()));
     }
 
     private static GeneratedCaptcha fromGif(GifCaptcha captcha) {
-        return new GeneratedCaptcha(readCode(captcha), captcha.getImageBase64Data());
+        return new GeneratedCaptcha(readCode(captcha), normalizeImageBase64(captcha.getImageBase64Data()));
+    }
+
+    /**
+     * Hutool 部分版本 {@code getImageBase64Data()} 带 {@code data:image/...;base64,} 前缀；
+     * API 契约要求仅返回纯 Base64 载荷。
+     */
+    private static String normalizeImageBase64(String imageBase64) {
+        if (imageBase64 == null) {
+            return "";
+        }
+        String trimmed = imageBase64.trim();
+        if (trimmed.startsWith("data:")) {
+            int comma = trimmed.indexOf(',');
+            if (comma >= 0 && comma + 1 < trimmed.length()) {
+                return trimmed.substring(comma + 1);
+            }
+        }
+        return trimmed;
     }
 
     private static String readCode(cn.hutool.captcha.AbstractCaptcha captcha) {

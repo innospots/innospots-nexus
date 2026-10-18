@@ -1,0 +1,15 @@
+dsl: "1.0"
+page:
+  id: dictionary-type-create
+  title: 新建字典
+  name: dictionaryTypeCreate
+
+# 新建已在列表页侧滑完成；旧链接重定向回列表（请在列表点「+ 新建类型」）。
+lifecycle:
+  onLoad:
+    - action: navigate
+      params: { to: /system/dictionaries }
+
+body:
+  type: Page
+  children: []

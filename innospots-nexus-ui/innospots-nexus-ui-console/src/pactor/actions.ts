@@ -9,9 +9,65 @@
 
 import type { ActionHandler } from "@pactor-app/runtime";
 
+import { collectDictionaryTypeSavePayload } from "./lib/dictionary-type-save-registry";
+
 const TENANT_CODE_PATTERN = /^[a-zA-Z0-9_]+$/;
 
 export const pactorActions: Record<string, ActionHandler> = {
+    /**
+     * 从当前挂载的 DictionaryTypeSavePanel（hideFooter）收集校验后的保存载荷，
+     * 供 Drawer / overlay 的 onOk 动作链使用（结果写入 event）。
+     */
+    "dictionaryType.collectSave": () => {
+        const payload = collectDictionaryTypeSavePayload();
+        if (payload == null) {
+            return {
+                ok: false,
+                error: new Error("请完善字典表单后再保存"),
+            };
+        }
+        return { ok: true, data: payload };
+    },
+    "dictionaryType.persist": async (_action, ctx) => {
+        const payload = collectDictionaryTypeSavePayload();
+        if (payload == null) {
+            return {
+                ok: false,
+                error: new Error("请完善字典表单后再保存"),
+            };
+        }
+        const editingTypeId = ctx.context.state.get("editingTypeId");
+        const dictionaryTypeId =
+            typeof editingTypeId === "string" ? editingTypeId.trim() : "";
+        if (payload.mode === "edit" && dictionaryTypeId.length === 0) {
+            return {
+                ok: false,
+                error: new Error("缺少字典类型 ID"),
+            };
+        }
+        const http = ctx.context.http;
+        if (payload.mode === "create") {
+            await http.request({
+                method: "POST",
+                url: "/api/d/platform/dictionary-types",
+                body: {
+                    typeCode: payload.typeCode,
+                    typeName: payload.typeName,
+                    items: payload.items,
+                },
+            });
+        } else {
+            await http.request({
+                method: "PUT",
+                url: `/api/d/platform/dictionary-types/${encodeURIComponent(dictionaryTypeId)}`,
+                body: {
+                    typeName: payload.typeName,
+                    items: payload.items,
+                },
+            });
+        }
+        return { ok: true, data: payload };
+    },
     "validate.tenantCode": (action) => {
         const value = action.params?.["value"];
         const code = typeof value === "string" ? value.trim() : "";

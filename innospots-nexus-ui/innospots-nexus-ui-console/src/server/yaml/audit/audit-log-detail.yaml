@@ -4,16 +4,13 @@ page:
   title: 审计日志详情
   name: auditLogDetail
 
-state:
-  logId: ${route.params.logId}
-
 dataSources:
   log:
     type: http
     autoLoad: true
     request:
       method: GET
-      url: /api/d/platform/audit-logs/${state.logId}
+      url: /api/d/platform/audit-logs/${params.logId}
 
 body:
   type: Page
@@ -42,9 +39,15 @@ body:
           props:
             variant: h3
             text: ${data.log.operationType}
-        - type: Badge
+        - type: Button
           props:
-            text: ${data.log.result}
+            text: 复制日志 ID
+          events:
+            onClick:
+              - action: message
+                params:
+                  messageType: success
+                  text: 已复制 ${params.logId}
     - type: Card
       props:
         className: mt-4
@@ -81,6 +84,7 @@ body:
               - { label: 错误码, value: "${data.log.errorCode}" }
               - { label: 结果摘要, value: "${data.log.summary}" }
     - type: Card
+      when: ${data.log.requestPayload != null && data.log.requestPayload != ''}
       props:
         className: mt-4
       children:
@@ -92,25 +96,3 @@ body:
           props:
             text: ${data.log.requestPayload}
             className: mt-2 font-mono text-sm
-    - type: Flex
-      props:
-        justify: end
-        gap: small
-        className: mt-4
-      children:
-        - type: Button
-          props:
-            text: 复制日志 ID
-          events:
-            onClick:
-              - action: message
-                params:
-                  messageType: success
-                  text: 已复制 ${state.logId}
-        - type: Button
-          props:
-            text: 返回
-          events:
-            onClick:
-              - action: navigate
-                params: { to: /system/audit-logs }
