@@ -18,9 +18,9 @@ import com.innospots.nexus.platform.invite.domain.request.PlatformInviteAcceptRe
 import com.innospots.nexus.platform.invite.domain.request.PlatformInviteActivateByCodeRequest;
 import com.innospots.nexus.platform.invite.operator.PlatformInviteOperator;
 import com.innospots.nexus.platform.invite.status.PlatformInviteStatusCode;
-import com.innospots.nexus.platform.settings.domain.enums.PlatformRegistrationMode;
-import com.innospots.nexus.platform.settings.service.PlatformRegistrationModeSettingService;
-import com.innospots.nexus.platform.settings.status.PlatformRegistrationModeSettingStatusCode;
+import com.innospots.nexus.console.auth.service.RegistrationPolicyService;
+import com.innospots.nexus.console.auth.status.RegistrationPolicyStatusCode;
+import com.innospots.nexus.console.config.RegistrationMode;
 import com.innospots.nexus.platform.user.domain.enums.PlatformUserStatus;
 import com.innospots.nexus.platform.user.domain.vo.PlatformUserVo;
 import com.innospots.nexus.platform.user.service.PlatformUserService;
@@ -43,7 +43,7 @@ class PlatformPublicInviteServiceTest {
         PlatformUserService userService = mock(PlatformUserService.class);
         OtpChallengeService otpChallengeService = mock(OtpChallengeService.class);
         PasswordDecryptor passwordDecryptor = mock(PasswordDecryptor.class);
-        PlatformRegistrationModeSettingService modeService = mock(PlatformRegistrationModeSettingService.class);
+        RegistrationPolicyService registrationPolicyService = mock(RegistrationPolicyService.class);
         PlatformUserRoleProvisioner roleProvisioner = mock(PlatformUserRoleProvisioner.class);
 
         PlatformInviteEntity invite = pendingInvite(PlatformInviteDeliveryMode.OFFLINE, "ops,viewer");
@@ -70,7 +70,7 @@ class PlatformPublicInviteServiceTest {
                 userService,
                 otpChallengeService,
                 passwordDecryptor,
-                modeService,
+                registrationPolicyService,
                 roleProvisioner);
 
         String userId = service.acceptInvite("tok", new PlatformInviteAcceptRequest(null, "enc", null, null));
@@ -87,7 +87,7 @@ class PlatformPublicInviteServiceTest {
         PlatformUserService userService = mock(PlatformUserService.class);
         OtpChallengeService otpChallengeService = mock(OtpChallengeService.class);
         PasswordDecryptor passwordDecryptor = mock(PasswordDecryptor.class);
-        PlatformRegistrationModeSettingService modeService = mock(PlatformRegistrationModeSettingService.class);
+        RegistrationPolicyService registrationPolicyService = mock(RegistrationPolicyService.class);
         PlatformUserRoleProvisioner roleProvisioner = mock(PlatformUserRoleProvisioner.class);
 
         PlatformInviteEntity invite = pendingInvite(PlatformInviteDeliveryMode.ONLINE, null);
@@ -111,7 +111,7 @@ class PlatformPublicInviteServiceTest {
                 userService,
                 otpChallengeService,
                 passwordDecryptor,
-                modeService,
+                registrationPolicyService,
                 roleProvisioner);
 
         service.acceptInvite("tok", new PlatformInviteAcceptRequest(null, "enc", "123456", null));
@@ -129,20 +129,20 @@ class PlatformPublicInviteServiceTest {
         PlatformUserService userService = mock(PlatformUserService.class);
         OtpChallengeService otpChallengeService = mock(OtpChallengeService.class);
         PasswordDecryptor passwordDecryptor = mock(PasswordDecryptor.class);
-        PlatformRegistrationModeSettingService modeService = mock(PlatformRegistrationModeSettingService.class);
+        RegistrationPolicyService registrationPolicyService = mock(RegistrationPolicyService.class);
         PlatformUserRoleProvisioner roleProvisioner = mock(PlatformUserRoleProvisioner.class);
 
         org.mockito.Mockito.doThrow(NexusException.build(
-                        PlatformRegistrationModeSettingStatusCode.REGISTRATION_MODE_DISABLED))
-                .when(modeService)
-                .requireSelfServiceMode(PlatformRegistrationMode.INVITE);
+                        RegistrationPolicyStatusCode.REGISTRATION_MODE_DISABLED))
+                .when(registrationPolicyService)
+                .requireSelfServiceMode(RegistrationMode.INVITE);
 
         PlatformPublicInviteService service = new PlatformPublicInviteService(
                 inviteOperator,
                 userService,
                 otpChallengeService,
                 passwordDecryptor,
-                modeService,
+                registrationPolicyService,
                 roleProvisioner);
 
         assertThatThrownBy(() -> service.activateByInviteCode(new PlatformInviteActivateByCodeRequest(
@@ -160,7 +160,7 @@ class PlatformPublicInviteServiceTest {
         PlatformUserService userService = mock(PlatformUserService.class);
         OtpChallengeService otpChallengeService = mock(OtpChallengeService.class);
         PasswordDecryptor passwordDecryptor = mock(PasswordDecryptor.class);
-        PlatformRegistrationModeSettingService modeService = mock(PlatformRegistrationModeSettingService.class);
+        RegistrationPolicyService registrationPolicyService = mock(RegistrationPolicyService.class);
         PlatformUserRoleProvisioner roleProvisioner = mock(PlatformUserRoleProvisioner.class);
 
         PlatformInviteEntity invite = pendingInvite(PlatformInviteDeliveryMode.OFFLINE, null);
@@ -173,7 +173,7 @@ class PlatformPublicInviteServiceTest {
                 userService,
                 otpChallengeService,
                 passwordDecryptor,
-                modeService,
+                registrationPolicyService,
                 roleProvisioner);
 
         assertThatThrownBy(() -> service.activateByInviteCode(new PlatformInviteActivateByCodeRequest(

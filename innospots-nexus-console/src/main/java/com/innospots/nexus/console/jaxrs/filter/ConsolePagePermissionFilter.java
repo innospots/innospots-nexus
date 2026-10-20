@@ -15,8 +15,10 @@ import com.innospots.nexus.console.permission.authorization.AuthorizationRequest
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubjectResolver;
 import com.innospots.nexus.console.permission.authorization.ConsolePagePermissionAuthorizer;
 import com.innospots.nexus.console.jaxrs.support.ConsoleAntPathMatcher;
+import com.innospots.nexus.console.jaxrs.support.ConsoleRequestGrants;
 import com.innospots.nexus.console.jaxrs.web.ConsoleWebSecuritySettings;
 import com.innospots.nexus.console.jaxrs.support.ConsolePublicApiPaths;
+import com.innospots.nexus.console.endpoint.grant.support.ResolvedEndpointGrant;
 import com.innospots.nexus.core.jaxrs.support.RequestProperties;
 
 /**
@@ -48,6 +50,10 @@ public final class ConsolePagePermissionFilter implements ContainerRequestFilter
     @Override
     public void filter(ContainerRequestContext requestContext) {
         if (!security.isEnabled()) {
+            return;
+        }
+        ResolvedEndpointGrant grant = ConsoleRequestGrants.resolvedGrant(requestContext);
+        if (grant != null && grant.ignorePermission()) {
             return;
         }
         String path = normalizedPath(requestContext);

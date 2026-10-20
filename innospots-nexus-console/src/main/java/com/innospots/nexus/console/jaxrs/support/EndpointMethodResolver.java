@@ -9,7 +9,7 @@ import jakarta.ws.rs.container.ResourceInfo;
  * @author Smars
  * @date 2026/10/17
  * @see ResourceInfo
- * @see com.innospots.nexus.console.jaxrs.filter.ConsoleAuditLogFilter
+ * @see com.innospots.nexus.console.jaxrs.filter.ConsoleResolvedEndpointGrantFilter
  */
 @FunctionalInterface
 public interface EndpointMethodResolver {

@@ -22,6 +22,7 @@ import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.base.thread.SessionContext;
 import com.innospots.nexus.base.thread.TLC;
 import com.innospots.nexus.console.jaxrs.filter.ConsoleAuditLogFilter;
+import com.innospots.nexus.console.jaxrs.filter.ConsoleResolvedEndpointGrantFilter;
 import com.innospots.nexus.console.endpoint.grant.EndpointGrant;
 import com.innospots.nexus.console.endpoint.grant.EndpointGrantAction;
 import com.innospots.nexus.console.logger.domain.context.InvocationLogContext;
@@ -38,8 +39,10 @@ import static org.mockito.Mockito.when;
 class JerseyEndpointMethodResolverTest {
 
     private final AtomicReference<InvocationLogContext> recorded = new AtomicReference<>();
-    private final ConsoleAuditLogFilter filter = new ConsoleAuditLogFilter(
-            new AuditLogRecorder(recorded::set), new JerseyEndpointMethodResolver());
+    private final JerseyEndpointMethodResolver endpointMethodResolver = new JerseyEndpointMethodResolver();
+    private final ConsoleResolvedEndpointGrantFilter grantFilter =
+            new ConsoleResolvedEndpointGrantFilter(endpointMethodResolver);
+    private final ConsoleAuditLogFilter filter = new ConsoleAuditLogFilter(new AuditLogRecorder(recorded::set));
 
     @AfterEach
     void clearSession() {
@@ -59,6 +62,7 @@ class JerseyEndpointMethodResolverTest {
         ContainerRequest request = request("create");
         SessionContext.bindUser(UserSnapshot.simple(1L, "alice", null));
 
+        grantFilter.filter(request);
         filter.filter(request);
         filter.filter(request, response(200));
 
@@ -78,6 +82,7 @@ class JerseyEndpointMethodResolverTest {
     void recordsMappedFailure() {
         ContainerRequest request = request("create");
         NexusException failure = NexusException.build(NexusStatusCode.INVALID_PARAMETER);
+        grantFilter.filter(request);
         filter.filter(request);
         request.setProperty(RequestProperties.FAILURE_CAUSE, failure);
 
@@ -91,6 +96,7 @@ class JerseyEndpointMethodResolverTest {
     void skipsUnannotatedMethodAndClearsRequestState() {
         ContainerRequest request = request("read");
 
+        grantFilter.filter(request);
         filter.filter(request);
         filter.filter(request, response(200));
 
@@ -102,6 +108,7 @@ class JerseyEndpointMethodResolverTest {
     void skipsUnmatchedRequestAndClearsRequestState() {
         ContainerRequest request = request(null);
 
+        grantFilter.filter(request);
         filter.filter(request);
         filter.filter(request, response(404));
 

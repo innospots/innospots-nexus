@@ -19,6 +19,7 @@ import com.innospots.nexus.console.ui.spec.parser.JacksonPageDslParser;
 import com.innospots.nexus.console.catalog.bootstrap.ConsoleCatalogSyncStartupTask;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogService;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogSyncService;
+import com.innospots.nexus.console.endpoint.grant.EndpointGrantManager;
 import com.innospots.nexus.console.navigation.service.NavigationMenuAssembler;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubjectResolver;
 import com.innospots.nexus.console.permission.authorization.SessionAuthorizationSubjectResolver;
@@ -103,12 +104,23 @@ public class ConsoleCatalogBeans {
     }
 
     /**
+     * Endpoint grant 目录（Quarkus 宿主需另行注册 JAX-RS 资源后填充）。
+     */
+    @Produces
+    @Singleton
+    EndpointGrantManager endpointGrantManager() {
+        return new EndpointGrantManager();
+    }
+
+    /**
      * 权限设置目录树服务 Bean。
      */
     @Produces
     @Singleton
-    ConsoleCatalogService consoleCatalogService(ConsoleCatalogResourceDao resourceDao) {
-        return new ConsoleCatalogService(resourceDao);
+    ConsoleCatalogService consoleCatalogService(
+            ConsoleCatalogResourceDao resourceDao,
+            EndpointGrantManager endpointGrantManager) {
+        return new ConsoleCatalogService(resourceDao, endpointGrantManager);
     }
 
     /**

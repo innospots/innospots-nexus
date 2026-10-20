@@ -11,6 +11,7 @@ import com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao;
 import com.innospots.nexus.console.catalog.endpoint.ConsoleCatalogEndpoint;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogService;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogSyncService;
+import com.innospots.nexus.console.endpoint.grant.EndpointGrantManager;
 import com.innospots.nexus.console.sitemap.endpoint.NexusSitemapEndpoint;
 import com.innospots.nexus.console.sitemap.loader.SitemapConfigLoader;
 import com.innospots.nexus.console.sitemap.parser.SitemapYamlParser;
@@ -76,8 +77,10 @@ public class ConsoleCatalogConfiguration {
     }
 
     @Bean
-    ConsoleCatalogService consoleCatalogService(ConsoleCatalogResourceDao resourceDao) {
-        return new ConsoleCatalogService(resourceDao);
+    ConsoleCatalogService consoleCatalogService(
+            ConsoleCatalogResourceDao resourceDao,
+            EndpointGrantManager endpointGrantManager) {
+        return new ConsoleCatalogService(resourceDao, endpointGrantManager);
     }
 
     @Bean

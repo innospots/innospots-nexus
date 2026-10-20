@@ -60,6 +60,6 @@ class PlatformAccessRequestServiceTest {
                 mock(PlatformUserService.class),
                 otpChallengeService,
                 mock(PasswordDecryptor.class),
-                mock(PlatformRegistrationModeSettingService.class));
+                mock(com.innospots.nexus.console.auth.service.RegistrationPolicyService.class));
     }
 }

@@ -24,6 +24,7 @@ import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
  * @param routePath     页面路由 {@code /{domainKey}/{moduleKey}/{pageKey}}
  * @param displayName   展示名称
  * @param sortOrder     同级排序
+ * @param operations    模块下已注册的 REST grant 操作
  * @param children      子节点
  */
 @Schema(name = "CatalogNodeVo", description = "目录树节点")
@@ -48,11 +49,14 @@ public record CatalogNodeVo(
         String displayName,
         @Schema(description = "同级排序")
         Integer sortOrder,
+        @Schema(description = "节点可配置的 API 操作", required = true)
+        List<CatalogNodeOperationVo> operations,
         @Schema(description = "子节点", required = true)
         List<CatalogNodeVo> children
 ) {
 
     public CatalogNodeVo {
+        operations = operations == null ? List.of() : List.copyOf(operations);
         children = children == null ? List.of() : List.copyOf(children);
     }
 }

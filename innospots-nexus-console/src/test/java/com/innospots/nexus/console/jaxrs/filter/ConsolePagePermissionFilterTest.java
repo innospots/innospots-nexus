@@ -9,7 +9,11 @@ import jakarta.ws.rs.container.ContainerRequestContext;
 
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.status.NexusStatusCode;
+import com.innospots.nexus.console.endpoint.grant.support.ResolvedEndpointGrant;
+import com.innospots.nexus.console.jaxrs.support.ConsoleRequestProperties;
+import com.innospots.nexus.console.jaxrs.support.ResolvedEndpointBinding;
 import com.innospots.nexus.console.jaxrs.web.ConsoleWebSecuritySettings;
+import com.innospots.nexus.console.logger.EndpointGrantFixtures;
 import com.innospots.nexus.core.jaxrs.support.RequestProperties;
 import com.innospots.nexus.console.permission.authorization.AuthorizationContext;
 import com.innospots.nexus.console.permission.authorization.AuthorizationDecision;
@@ -72,6 +76,19 @@ class ConsolePagePermissionFilterTest {
         ConsolePagePermissionFilter filter = newFilter(new ConsoleWebSecuritySettings());
 
         filter.filter(JaxRsFilterTestSupport.mockRequest("/api/d/nexus/status"));
+
+        verify(pagePermissionAuthorizer, never()).authorize(any());
+    }
+
+    @Test
+    void skipsWhenEndpointGrantIgnoresPermission() {
+        ConsolePagePermissionFilter filter = newFilter(new ConsoleWebSecuritySettings());
+        ContainerRequestContext request = datasourceRequest(null);
+        request.setProperty(
+                ConsoleRequestProperties.RESOLVED_ENDPOINT_BINDING,
+                new ResolvedEndpointBinding(grantIgnoringPermission(), "Test", "test"));
+
+        filter.filter(request);
 
         verify(pagePermissionAuthorizer, never()).authorize(any());
     }
@@ -153,5 +170,18 @@ class ConsolePagePermissionFilterTest {
 
     private static AuthorizationSubject subject() {
         return new AuthorizationSubject("42", Set.of("role-1"), Set.of(), false);
+    }
+
+    private static ResolvedEndpointGrant grantIgnoringPermission() {
+        ResolvedEndpointGrant base = EndpointGrantFixtures.dictionaryTypeCreateGrant();
+        return new ResolvedEndpointGrant(
+                base.moduleKey(),
+                base.action(),
+                base.name(),
+                base.label(),
+                base.recordArgs(),
+                base.auditLog(),
+                true,
+                false);
     }
 }

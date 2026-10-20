@@ -3,9 +3,18 @@ package com.innospots.nexus.console.catalog.service;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import com.innospots.nexus.console.catalog.domain.vo.CatalogNodeVo;
+
+import com.innospots.nexus.base.i18n.I18nObject;
 import com.innospots.nexus.console.catalog.domain.entity.ConsoleCatalogResourceEntity;
 import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
+import com.innospots.nexus.console.catalog.domain.vo.CatalogNodeOperationVo;
+import com.innospots.nexus.console.catalog.domain.vo.CatalogNodeVo;
+import com.innospots.nexus.console.endpoint.grant.EndpointGrantAction;
+import com.innospots.nexus.console.endpoint.grant.EndpointGrantDescriptorVo;
+import com.innospots.nexus.console.endpoint.grant.EndpointGrantManager;
+import com.innospots.nexus.console.endpoint.grant.EndpointModuleGrantCatalogVo;
+
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -23,18 +32,26 @@ class ConsoleCatalogServiceTest {
         ConsoleCatalogResourceEntity page = resource("page-1", "module-1", CatalogResourceType.PAGE,
                 "page:sales.orders", 2, "orders", "/page/nexus/sales/orders");
         ConsoleCatalogService service = new ConsoleCatalogService(
-                permissionResourceDao(List.of(module, menu, page)));
+                permissionResourceDao(List.of(module, menu, page)),
+                grantManagerWithSalesOperations());
 
         List<CatalogNodeVo> tree = service.tree();
 
         assertThat(tree).hasSize(1);
         assertThat(tree.getFirst().resourceType()).isEqualTo(CatalogResourceType.MODULE);
         assertThat(tree.getFirst().domainKey()).isEqualTo("nexus");
+        assertThat(tree.getFirst().operations()).singleElement()
+                .satisfies(op -> {
+                    assertThat(op.name()).isEqualTo("sales.order.create");
+                    assertThat(op.action()).isEqualTo(EndpointGrantAction.CREATE);
+                    assertThat(op.path()).isEqualTo("/api/d/nexus/sales/orders");
+                });
         assertThat(tree.getFirst().children()).singleElement()
                 .satisfies(child -> {
                     assertThat(child.resourceType()).isEqualTo(CatalogResourceType.PAGE);
                     assertThat(child.pageKey()).isEqualTo("orders");
                     assertThat(child.routePath()).isEqualTo("/page/nexus/sales/orders");
+                    assertThat(child.operations()).hasSize(1);
                     assertThat(child.children()).isEmpty();
                 });
     }
@@ -48,7 +65,8 @@ class ConsoleCatalogServiceTest {
         ConsoleCatalogResourceEntity childPage = resource("page-2", "page-1", CatalogResourceType.PAGE,
                 "page:sales.order-detail", 1, "order-detail", "/page/nexus/sales/order-detail");
         ConsoleCatalogService service = new ConsoleCatalogService(
-                permissionResourceDao(List.of(module, parentPage, childPage)));
+                permissionResourceDao(List.of(module, parentPage, childPage)),
+                grantManagerWithSalesOperations());
 
         List<CatalogNodeVo> tree = service.tree();
 
@@ -64,6 +82,33 @@ class ConsoleCatalogServiceTest {
     @Test
     void parsesDomainKeyFromRoutePath() {
         assertThat(ConsoleCatalogService.domainKeyFromRoute("/page/nexus/menu/menu-main")).isEqualTo("nexus");
+    }
+
+    private static EndpointGrantManager grantManagerWithSalesOperations() {
+        EndpointGrantManager manager = mock(EndpointGrantManager.class);
+        I18nObject label = new I18nObject();
+        label.put("zh-CN", "分页");
+        EndpointGrantDescriptorVo descriptor = new EndpointGrantDescriptorVo(
+                "sales",
+                "POST",
+                "/api/d/nexus/sales/orders",
+                "sales.order.create",
+                label,
+                EndpointGrantAction.CREATE,
+                false,
+                true,
+                false,
+                false,
+                "com.example.SalesEndpoint",
+                "createOrder");
+        EndpointModuleGrantCatalogVo catalog = new EndpointModuleGrantCatalogVo(
+                "sales",
+                List.of(),
+                List.of(descriptor),
+                List.of(),
+                List.of());
+        when(manager.allModuleCatalogs()).thenReturn(Map.of("sales", catalog));
+        return manager;
     }
 
     private static com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao permissionResourceDao(

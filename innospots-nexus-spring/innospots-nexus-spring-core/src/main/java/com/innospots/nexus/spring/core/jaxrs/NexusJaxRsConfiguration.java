@@ -132,7 +132,7 @@ public class NexusJaxRsConfiguration {
      * 解析端点实现类。{@code getType(name, false)} 对 {@code @Configuration} 内 {@code @Bean}（尤其 {@code @Lazy}）
      * 常返回 {@code null}，需从工厂方法返回类型读取。
      */
-    private static Class<?> resolveEndpointClass(ConfigurableListableBeanFactory beanFactory, String beanName) {
+    public static Class<?> resolveEndpointClass(ConfigurableListableBeanFactory beanFactory, String beanName) {
         if (!beanFactory.containsBeanDefinition(beanName)) {
             return null;
         }

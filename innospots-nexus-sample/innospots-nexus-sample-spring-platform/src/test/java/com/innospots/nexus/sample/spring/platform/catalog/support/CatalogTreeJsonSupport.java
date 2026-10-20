@@ -66,7 +66,12 @@ public final class CatalogTreeJsonSupport {
         return keys;
     }
 
-    private static JsonNode parseRoot(String responseBody) {
+    public static JsonNode parseDataArray(String responseBody) {
+        JsonNode root = parseRoot(responseBody);
+        return root == null ? null : root.get("data");
+    }
+
+    static JsonNode parseRoot(String responseBody) {
         try {
             return Jsons.mapper().readTree(responseBody);
         } catch (JsonProcessingException ex) {

@@ -17,6 +17,7 @@ import com.innospots.nexus.console.jaxrs.filter.ConsoleCorsFilter;
 import com.innospots.nexus.console.jaxrs.filter.ConsoleDevSessionFilter;
 import com.innospots.nexus.console.jaxrs.filter.ConsolePagePermissionFilter;
 import com.innospots.nexus.console.jaxrs.filter.ConsoleRequestContextFilter;
+import com.innospots.nexus.console.jaxrs.filter.ConsoleResolvedEndpointGrantFilter;
 import com.innospots.nexus.console.jaxrs.support.EndpointMethodResolver;
 import com.innospots.nexus.console.logger.support.AuditLogRecorder;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubjectResolver;
@@ -59,6 +60,13 @@ public class ConsoleJaxRsWebConfiguration {
         return new ConsoleCorsFilter(webProperties.getCors());
     }
 
+    /** 在认证前解析 {@link com.innospots.nexus.console.endpoint.grant.support.ResolvedEndpointGrant} 并写入请求上下文。 */
+    @Bean
+    ConsoleResolvedEndpointGrantFilter consoleResolvedEndpointGrantFilter(
+            EndpointMethodResolver endpointMethodResolver) {
+        return new ConsoleResolvedEndpointGrantFilter(endpointMethodResolver);
+    }
+
     /** 解析 Bearer 令牌并填充 {@link com.innospots.nexus.base.thread.SessionContext}。 */
     @Bean
     ConsoleAuthenticationFilter consoleAuthenticationFilter(
@@ -98,9 +106,8 @@ public class ConsoleJaxRsWebConfiguration {
 
     /** 装配框架无关的审计过滤器。 */
     @Bean
-    ConsoleAuditLogFilter consoleAuditLogFilter(
-            AuditLogRecorder auditLogRecorder, EndpointMethodResolver endpointMethodResolver) {
-        return new ConsoleAuditLogFilter(auditLogRecorder, endpointMethodResolver);
+    ConsoleAuditLogFilter consoleAuditLogFilter(AuditLogRecorder auditLogRecorder) {
+        return new ConsoleAuditLogFilter(auditLogRecorder);
     }
 
     /** {@code GET /} 重定向至 {@link com.innospots.nexus.console.jaxrs.web.ConsoleWebJerseySettings#getRootPath()}。 */
@@ -113,6 +120,7 @@ public class ConsoleJaxRsWebConfiguration {
     @Bean
     ResourceConfigCustomizer consoleJaxRsWebResourceConfigCustomizer(
             ConsoleCorsFilter corsFilter,
+            ConsoleResolvedEndpointGrantFilter resolvedEndpointGrantFilter,
             ConsoleAuthenticationFilter authenticationFilter,
             ConsoleDevSessionFilter devSessionFilter,
             ConsolePagePermissionFilter pagePermissionFilter,
@@ -120,6 +128,7 @@ public class ConsoleJaxRsWebConfiguration {
             ConsoleAuditLogFilter auditLogFilter) {
         return resourceConfig -> {
             resourceConfig.register(corsFilter);
+            resourceConfig.register(resolvedEndpointGrantFilter);
             resourceConfig.register(authenticationFilter);
             resourceConfig.register(devSessionFilter);
             resourceConfig.register(pagePermissionFilter);

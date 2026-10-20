@@ -11,9 +11,11 @@ import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.console.auth.service.TokenIssuer;
 import com.innospots.nexus.console.jaxrs.support.ConsoleAntPathMatcher;
+import com.innospots.nexus.console.jaxrs.support.ConsoleRequestGrants;
 import com.innospots.nexus.console.jaxrs.web.ConsoleWebSecuritySettings;
 import com.innospots.nexus.console.jaxrs.support.ConsolePublicApiPaths;
 import com.innospots.nexus.console.jaxrs.support.ConsoleTokenSessionBinder;
+import com.innospots.nexus.console.endpoint.grant.support.ResolvedEndpointGrant;
 import com.innospots.nexus.core.jaxrs.support.HttpHeaderNames;
 
 /**
@@ -38,6 +40,10 @@ public final class ConsoleAuthenticationFilter implements ContainerRequestFilter
     @Override
     public void filter(ContainerRequestContext requestContext) {
         if (!security.isEnabled()) {
+            return;
+        }
+        ResolvedEndpointGrant grant = ConsoleRequestGrants.resolvedGrant(requestContext);
+        if (grant != null && grant.ignoreAuth()) {
             return;
         }
         String path = normalizedPath(requestContext);

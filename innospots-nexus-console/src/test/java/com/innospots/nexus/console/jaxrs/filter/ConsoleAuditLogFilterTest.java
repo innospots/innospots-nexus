@@ -29,17 +29,16 @@ class ConsoleAuditLogFilterTest {
         ResourceInfo resourceInfo = mock(ResourceInfo.class);
         when(resourceInfo.getResourceMethod()).thenReturn(method);
         doReturn(DictionaryTypeEndpoint.class).when(resourceInfo).getResourceClass();
-        ContainerRequestContext request = mock(ContainerRequestContext.class);
-        UriInfo uriInfo = mock(UriInfo.class);
-        when(request.getUriInfo()).thenReturn(uriInfo);
-        when(uriInfo.getPath()).thenReturn("dictionary-types");
-        when(request.getMethod()).thenReturn("POST");
+        ContainerRequestContext request =
+                JaxRsFilterTestSupport.mockRequest("dictionary-types", "POST", null);
         ContainerResponseContext response = mock(ContainerResponseContext.class);
         when(response.getStatus()).thenReturn(200);
         AtomicReference<InvocationLogContext> recorded = new AtomicReference<>();
-        ConsoleAuditLogFilter filter = new ConsoleAuditLogFilter(
-                new AuditLogRecorder(recorded::set), context -> resourceInfo);
+        ConsoleResolvedEndpointGrantFilter grantFilter =
+                new ConsoleResolvedEndpointGrantFilter(context -> resourceInfo);
+        ConsoleAuditLogFilter filter = new ConsoleAuditLogFilter(new AuditLogRecorder(recorded::set));
 
+        grantFilter.filter(request);
         filter.filter(request);
         filter.filter(request, response);
 

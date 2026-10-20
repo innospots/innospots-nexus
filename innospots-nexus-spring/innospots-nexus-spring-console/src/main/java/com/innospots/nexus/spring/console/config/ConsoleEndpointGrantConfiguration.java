@@ -1,14 +1,16 @@
 package com.innospots.nexus.spring.console.config;
 
-import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
+
 import com.innospots.nexus.console.endpoint.grant.EndpointGrantManager;
 import com.innospots.nexus.console.endpoint.grant.support.EndpointGrantAnnotations;
+import com.innospots.nexus.spring.core.jaxrs.NexusJaxRsConfiguration;
 
 /**
  * 启动时扫描 Spring 容器中声明了 {@link com.innospots.nexus.console.endpoint.grant.EndpointModule}
@@ -30,13 +32,13 @@ public class ConsoleEndpointGrantConfiguration {
     @Bean
     ApplicationListener<ContextRefreshedEvent> endpointGrantResourceRegistration(EndpointGrantManager manager) {
         return event -> {
-            var context = event.getApplicationContext();
-            for (String beanName : context.getBeanDefinitionNames()) {
-                Class<?> type = context.getType(beanName);
-                if (type == null) {
+            ConfigurableListableBeanFactory beanFactory =
+                    (ConfigurableListableBeanFactory) event.getApplicationContext().getAutowireCapableBeanFactory();
+            for (String beanName : beanFactory.getBeanDefinitionNames()) {
+                Class<?> resourceClass = NexusJaxRsConfiguration.resolveEndpointClass(beanFactory, beanName);
+                if (resourceClass == null) {
                     continue;
                 }
-                Class<?> resourceClass = AopUtils.getTargetClass(type);
                 if (EndpointGrantAnnotations.isGrantResourceType(resourceClass)) {
                     manager.registerResource(resourceClass);
                 }

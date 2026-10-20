@@ -72,6 +72,12 @@ public final class PlatformIntegrationTestSupport {
     public static final String H2_URL_ACCESS_APPROVAL_E2E_IT =
             "jdbc:h2:mem:nexus-sample-platform-access-approval-e2e-it" + H2_SUFFIX;
 
+    public static final String H2_URL_ENDPOINT_GRANT_IT =
+            "jdbc:h2:mem:nexus-sample-platform-endpoint-grant-it" + H2_SUFFIX;
+
+    public static final String H2_URL_CATALOG_TREE_OPS_IT =
+            "jdbc:h2:mem:nexus-sample-platform-catalog-tree-ops-it" + H2_SUFFIX;
+
     private PlatformIntegrationTestSupport() {
     }
 

@@ -10,7 +10,12 @@ import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.base.thread.SessionContext;
 import com.innospots.nexus.console.auth.domain.model.TokenClaims;
 import com.innospots.nexus.console.auth.service.TokenIssuer;
+import com.innospots.nexus.console.endpoint.grant.EndpointGrantAction;
+import com.innospots.nexus.console.endpoint.grant.support.ResolvedEndpointGrant;
+import com.innospots.nexus.console.jaxrs.support.ConsoleRequestProperties;
+import com.innospots.nexus.console.jaxrs.support.ResolvedEndpointBinding;
 import com.innospots.nexus.console.jaxrs.web.ConsoleWebSecuritySettings;
+import com.innospots.nexus.console.logger.EndpointGrantFixtures;
 import com.innospots.nexus.core.jaxrs.support.HttpHeaderNames;
 
 import org.junit.jupiter.api.AfterEach;
@@ -56,6 +61,21 @@ class ConsoleAuthenticationFilterTest {
         ConsoleWebSecuritySettings security = new ConsoleWebSecuritySettings();
         ConsoleAuthenticationFilter filter = new ConsoleAuthenticationFilter(security, tokenIssuer);
         ContainerRequestContext request = JaxRsFilterTestSupport.mockRequest("/openapi/specs");
+
+        filter.filter(request);
+
+        verify(tokenIssuer, never()).parse(anyString());
+    }
+
+    @Test
+    void skipsSecuredPathWhenEndpointGrantIgnoresAuth() {
+        ConsoleWebSecuritySettings security = new ConsoleWebSecuritySettings();
+        security.setPermitAllPatterns(List.of("/openapi/**"));
+        ConsoleAuthenticationFilter filter = new ConsoleAuthenticationFilter(security, tokenIssuer);
+        ContainerRequestContext request = JaxRsFilterTestSupport.mockRequest("/api/d/nexus/status");
+        request.setProperty(
+                ConsoleRequestProperties.RESOLVED_ENDPOINT_BINDING,
+                new ResolvedEndpointBinding(grantIgnoringAuth(), "Test", "test"));
 
         filter.filter(request);
 
@@ -140,5 +160,18 @@ class ConsoleAuthenticationFilterTest {
 
         assertThat(SessionContext.user()).isPresent();
         verify(tokenIssuer).parse("public-token");
+    }
+
+    private static ResolvedEndpointGrant grantIgnoringAuth() {
+        ResolvedEndpointGrant base = EndpointGrantFixtures.dictionaryTypeCreateGrant();
+        return new ResolvedEndpointGrant(
+                base.moduleKey(),
+                EndpointGrantAction.READ,
+                base.name(),
+                base.label(),
+                base.recordArgs(),
+                base.auditLog(),
+                false,
+                true);
     }
 }
