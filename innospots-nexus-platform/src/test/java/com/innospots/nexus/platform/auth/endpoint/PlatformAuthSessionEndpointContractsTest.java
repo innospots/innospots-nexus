@@ -35,14 +35,14 @@ class PlatformAuthSessionEndpointContractsTest {
     }
 
     @Test
-    void sessionEndpointExposesRefreshLogoutAndChangePassword() throws NoSuchMethodException {
-        assertThat(PlatformAuthSessionEndpoint.class.getMethod("refresh", TokenRefreshRequest.class)
+    void sessionContractExposesRefreshLogoutAndChangePassword() throws NoSuchMethodException {
+        assertThat(AuthSessionEndpoint.class.getMethod("refresh", TokenRefreshRequest.class)
                         .getAnnotation(POST.class))
                 .isNotNull();
         assertThat(PlatformConstant.AUTH_REFRESH_PATH).isEqualTo("/api/d/platform/auth/refresh");
-        assertThat(PlatformAuthSessionEndpoint.class.getMethod("logout").getAnnotation(POST.class))
+        assertThat(AuthSessionEndpoint.class.getMethod("logout").getAnnotation(POST.class))
                 .isNotNull();
-        assertThat(PlatformAuthSessionEndpoint.class.getMethod("changePassword", PasswordChangeRequest.class)
+        assertThat(AuthSessionEndpoint.class.getMethod("changePassword", PasswordChangeRequest.class)
                         .getAnnotation(POST.class))
                 .isNotNull();
     }

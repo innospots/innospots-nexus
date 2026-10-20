@@ -11,6 +11,10 @@ import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import com.innospots.nexus.base.domain.response.R;
+import com.innospots.nexus.console.endpoint.grant.EndpointGrant;
+import com.innospots.nexus.console.endpoint.grant.EndpointGrantAction;
+import com.innospots.nexus.console.endpoint.grant.EndpointModule;
+import com.innospots.nexus.console.logger.I18nLiteral;
 import com.innospots.nexus.platform.access.domain.request.PlatformAccessRegistrationSubmitRequest;
 import com.innospots.nexus.platform.access.domain.request.PlatformRegistrationOtpRequest;
 import com.innospots.nexus.platform.access.domain.vo.PlatformAccessRequestVo;
@@ -24,6 +28,7 @@ import com.innospots.nexus.platform.config.PlatformConstant;
  * @date 2026/10/06
  * @see com.innospots.nexus.platform.access.service.PlatformAccessRequestService#submitAccessRegistration
  */
+@EndpointModule(value = "user", ignoreAuth = true)
 @Path(PlatformConstant.PUBLIC_ACCESS_REGISTRATION_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -35,6 +40,12 @@ public class PlatformPublicAccessRegistrationEndpoint {
 
     @POST
     @Path("/otp")
+    @EndpointGrant(
+            action = EndpointGrantAction.EXECUTE,
+            name = "platform.registration.access.otp",
+            label = @I18nLiteral(pairs = {"zh-CN", "主动注册获取验证码", "en", "Issue access registration OTP"}),
+            recordArgs = false,
+            ignorePermission = true)
     @Operation(operationId = "platformPublicAccessRegistrationOtp", summary = "主动注册获取验证码")
     public R<Void> issueVerificationOtp(PlatformRegistrationOtpRequest request) {
         accessRequestService.issueAccessRegistrationOtp(request);
@@ -42,6 +53,13 @@ public class PlatformPublicAccessRegistrationEndpoint {
     }
 
     @POST
+    @EndpointGrant(
+            action = EndpointGrantAction.EXECUTE,
+            name = "platform.registration.access.submit",
+            label = @I18nLiteral(pairs = {"zh-CN", "提交主动注册申请", "en", "Submit access registration"}),
+            recordArgs = false,
+            auditLog = true,
+            ignorePermission = true)
     @Operation(operationId = "platformPublicAccessRegistrationSubmit", summary = "提交主动注册申请")
     public R<PlatformAccessRequestVo> submitRegistration(PlatformAccessRegistrationSubmitRequest request) {
         return R.ok(accessRequestService.submitAccessRegistration(request));

@@ -16,6 +16,10 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import com.innospots.nexus.base.domain.response.PageResult;
 import com.innospots.nexus.base.domain.response.R;
+import com.innospots.nexus.console.endpoint.grant.EndpointGrant;
+import com.innospots.nexus.console.endpoint.grant.EndpointGrantAction;
+import com.innospots.nexus.console.endpoint.grant.EndpointModule;
+import com.innospots.nexus.console.logger.I18nLiteral;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 import com.innospots.nexus.platform.access.domain.request.PlatformAccessRequestApproveRequest;
 import com.innospots.nexus.platform.access.domain.request.PlatformAccessRequestPageRequest;
@@ -32,6 +36,7 @@ import com.innospots.nexus.platform.user.domain.vo.PlatformUserVo;
  * @date 2026/10/06
  * @see com.innospots.nexus.platform.access.service.PlatformAccessRequestService
  */
+@EndpointModule("user")
 @Path(PlatformConstant.REGISTRATION_ACCESS_REQUESTS_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -43,6 +48,10 @@ public class PlatformAccessRequestEndpoint {
     private final PlatformAccessRequestService accessRequestService;
 
     @GET
+    @EndpointGrant(
+            action = EndpointGrantAction.READ,
+            name = "platform.access-request.page",
+            label = @I18nLiteral(pairs = {"zh-CN", "分页查询访问申请", "en", "Page access requests"}))
     @Operation(operationId = "platformAccessRequestPage", summary = "分页查询访问申请")
     public R<PageResult<PlatformAccessRequestVo>> pageAccessRequests(
             @BeanParam PlatformAccessRequestPageRequest request) {
@@ -51,6 +60,10 @@ public class PlatformAccessRequestEndpoint {
 
     @GET
     @Path("/{accessRequestId}")
+    @EndpointGrant(
+            action = EndpointGrantAction.READ,
+            name = "platform.access-request.get",
+            label = @I18nLiteral(pairs = {"zh-CN", "查询访问申请", "en", "Get access request"}))
     @Operation(operationId = "platformAccessRequestGet", summary = "查询访问申请")
     public R<PlatformAccessRequestVo> getAccessRequest(
             @Parameter(description = "申请 ID", required = true) @PathParam("accessRequestId") String accessRequestId) {
@@ -59,6 +72,12 @@ public class PlatformAccessRequestEndpoint {
 
     @POST
     @Path("/{accessRequestId}/approve")
+    @EndpointGrant(
+            action = EndpointGrantAction.EXECUTE,
+            name = "platform.access-request.approve",
+            label = @I18nLiteral(pairs = {"zh-CN", "通过注册待审核申请", "en", "Approve access request"}),
+            recordArgs = false,
+            auditLog = true)
     @Operation(operationId = "platformAccessRequestApprove", summary = "通过注册待审核申请")
     public R<PlatformUserVo> approveAccessRequest(
             @PathParam("accessRequestId") String accessRequestId,
@@ -68,6 +87,12 @@ public class PlatformAccessRequestEndpoint {
 
     @POST
     @Path("/{accessRequestId}/reject")
+    @EndpointGrant(
+            action = EndpointGrantAction.EXECUTE,
+            name = "platform.access-request.reject",
+            label = @I18nLiteral(pairs = {"zh-CN", "拒绝访问申请", "en", "Reject access request"}),
+            recordArgs = false,
+            auditLog = true)
     @Operation(operationId = "platformAccessRequestReject", summary = "拒绝访问申请")
     public R<Void> rejectAccessRequest(
             @PathParam("accessRequestId") String accessRequestId,

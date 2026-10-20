@@ -23,11 +23,11 @@ class PlatformPublicPasswordResetEndpointContractsTest {
                 .isEqualTo(PlatformConstant.PUBLIC_AUTH_PASSWORD_PATH);
         assertThat(PlatformPublicPasswordResetEndpoint.class.getAnnotation(Tag.class).name())
                 .isEqualTo("PlatformPublicPasswordReset");
-        assertThat(PlatformPublicPasswordResetEndpoint.class.getMethod("resetPassword", PasswordResetRequest.class)
+        assertThat(PublicPasswordResetEndpoint.class.getMethod("resetPassword", PasswordResetRequest.class)
                         .getAnnotation(Operation.class)
                         .operationId())
-                .isEqualTo("platformAuthPasswordReset");
-        assertThat(PlatformPublicPasswordResetEndpoint.class.getMethod("resetPassword", PasswordResetRequest.class)
+                .isEqualTo("authPasswordReset");
+        assertThat(PublicPasswordResetEndpoint.class.getMethod("resetPassword", PasswordResetRequest.class)
                         .getAnnotation(POST.class))
                 .isNotNull();
     }

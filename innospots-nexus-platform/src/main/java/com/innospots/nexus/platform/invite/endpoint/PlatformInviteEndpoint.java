@@ -17,6 +17,10 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import com.innospots.nexus.base.domain.response.PageResult;
 import com.innospots.nexus.base.domain.response.R;
+import com.innospots.nexus.console.endpoint.grant.EndpointGrant;
+import com.innospots.nexus.console.endpoint.grant.EndpointGrantAction;
+import com.innospots.nexus.console.endpoint.grant.EndpointModule;
+import com.innospots.nexus.console.logger.I18nLiteral;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 import com.innospots.nexus.platform.config.PlatformConstant;
 import com.innospots.nexus.platform.invite.domain.request.PlatformInviteCreateRequest;
@@ -31,6 +35,7 @@ import com.innospots.nexus.platform.invite.service.PlatformInviteService;
  * @date 2026/10/06
  * @see com.innospots.nexus.platform.invite.service.PlatformInviteService
  */
+@EndpointModule("user")
 @Path(PlatformConstant.INVITES_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -42,12 +47,22 @@ public class PlatformInviteEndpoint {
     private final PlatformInviteService inviteService;
 
     @GET
+    @EndpointGrant(
+            action = EndpointGrantAction.READ,
+            name = "platform.invite.page",
+            label = @I18nLiteral(pairs = {"zh-CN", "分页查询邀请", "en", "Page invites"}))
     @Operation(operationId = "platformInvitePage", summary = "分页查询邀请")
     public R<PageResult<PlatformInviteVo>> pageInvites(@BeanParam PlatformInvitePageRequest request) {
         return R.ok(inviteService.pageInvites(request));
     }
 
     @POST
+    @EndpointGrant(
+            action = EndpointGrantAction.CREATE,
+            name = "platform.invite.create",
+            label = @I18nLiteral(pairs = {"zh-CN", "新建邀请", "en", "Create invite"}),
+            recordArgs = false,
+            auditLog = true)
     @Operation(operationId = "platformInviteCreate", summary = "新建邀请")
     public R<PlatformInviteVo> createInvite(PlatformInviteCreateRequest request) {
         return R.ok(inviteService.createInvite(request));
@@ -55,6 +70,10 @@ public class PlatformInviteEndpoint {
 
     @GET
     @Path("/{inviteId}")
+    @EndpointGrant(
+            action = EndpointGrantAction.READ,
+            name = "platform.invite.get",
+            label = @I18nLiteral(pairs = {"zh-CN", "查询邀请详情", "en", "Get invite"}))
     @Operation(operationId = "platformInviteGet", summary = "查询邀请详情")
     public R<PlatformInviteVo> getInvite(
             @Parameter(description = "邀请 ID", required = true) @PathParam("inviteId") String inviteId) {
@@ -63,6 +82,12 @@ public class PlatformInviteEndpoint {
 
     @POST
     @Path("/{inviteId}/resend")
+    @EndpointGrant(
+            action = EndpointGrantAction.EXECUTE,
+            name = "platform.invite.resend",
+            label = @I18nLiteral(pairs = {"zh-CN", "重发邀请", "en", "Resend invite"}),
+            recordArgs = false,
+            auditLog = true)
     @Operation(operationId = "platformInviteResend", summary = "重发邀请")
     public R<PlatformInviteVo> resendInvite(
             @Parameter(description = "邀请 ID", required = true) @PathParam("inviteId") String inviteId,
@@ -72,6 +97,12 @@ public class PlatformInviteEndpoint {
 
     @POST
     @Path("/{inviteId}/revoke")
+    @EndpointGrant(
+            action = EndpointGrantAction.DELETE,
+            name = "platform.invite.revoke",
+            label = @I18nLiteral(pairs = {"zh-CN", "撤销邀请", "en", "Revoke invite"}),
+            recordArgs = false,
+            auditLog = true)
     @Operation(operationId = "platformInviteRevoke", summary = "撤销邀请")
     public R<Void> revokeInvite(
             @Parameter(description = "邀请 ID", required = true) @PathParam("inviteId") String inviteId) {

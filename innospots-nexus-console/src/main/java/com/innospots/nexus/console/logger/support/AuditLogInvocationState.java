@@ -1,13 +1,13 @@
 package com.innospots.nexus.console.logger.support;
 
-import com.innospots.nexus.console.logger.AuditLog;
+import com.innospots.nexus.console.endpoint.grant.support.ResolvedEndpointGrant;
 
 /**
  * 宿主在响应阶段组装的不可变审计调用元数据。
  *
  * @author Smars
  * @date 2026/10/17
- * @param auditLog 审计注解
+ * @param grant 已解析的 endpoint grant
  * @param className 资源实现类名
  * @param methodName 被审计方法名
  * @param httpMethod HTTP 方法
@@ -16,7 +16,7 @@ import com.innospots.nexus.console.logger.AuditLog;
  * @see AuditLogRecorder
  */
 public record AuditLogInvocationState(
-        AuditLog auditLog,
+        ResolvedEndpointGrant grant,
         String className,
         String methodName,
         String httpMethod,

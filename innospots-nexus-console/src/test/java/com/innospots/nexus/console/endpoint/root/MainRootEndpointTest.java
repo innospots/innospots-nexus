@@ -1,4 +1,4 @@
-package com.innospots.nexus.console.endpoint;
+package com.innospots.nexus.console.endpoint.root;
 
 import java.net.URI;
 

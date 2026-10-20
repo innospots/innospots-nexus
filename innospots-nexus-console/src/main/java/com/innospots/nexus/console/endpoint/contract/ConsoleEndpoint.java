@@ -1,4 +1,4 @@
-package com.innospots.nexus.console.endpoint;
+package com.innospots.nexus.console.endpoint.contract;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -10,6 +10,10 @@ import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import com.innospots.nexus.console.config.ConsoleConstant;
+import com.innospots.nexus.console.endpoint.grant.EndpointGrant;
+import com.innospots.nexus.console.endpoint.grant.EndpointGrantAction;
+import com.innospots.nexus.console.endpoint.grant.EndpointModule;
+import com.innospots.nexus.console.logger.I18nLiteral;
 
 /**
  * 根管理控制台端点契约。
@@ -22,6 +26,7 @@ import com.innospots.nexus.console.config.ConsoleConstant;
  * @author Smars
  * @date 2026/09/13
  */
+@EndpointModule(value = "console", ignoreAuth = true, ignorePermission = true)
 @Path(ConsoleConstant.API_PREFIX)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -34,6 +39,10 @@ public interface ConsoleEndpoint {
      */
     @GET
     @Path("/status")
+    @EndpointGrant(
+            action = EndpointGrantAction.READ,
+            name = "console.status",
+            label = @I18nLiteral(pairs = {"zh-CN", "控制台可用性探测", "en", "Console availability probe"}))
     @Operation(operationId = "consoleStatus", summary = "控制台可用性探测")
     String status();
 }

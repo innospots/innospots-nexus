@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Import;
 import com.innospots.nexus.spring.console.config.ConsoleAuthConfiguration;
 import com.innospots.nexus.spring.console.config.ConsoleRegistrationConfiguration;
 import com.innospots.nexus.spring.console.config.ConsoleCredentialConfiguration;
+import com.innospots.nexus.spring.console.config.ConsoleEndpointGrantConfiguration;
 import com.innospots.nexus.spring.console.config.ConsoleJaxRsWebConfiguration;
 import com.innospots.nexus.spring.console.config.ConsoleLoggerConfiguration;
 import com.innospots.nexus.spring.console.config.ConsoleNavigationConfiguration;
@@ -38,7 +39,8 @@ import com.innospots.nexus.spring.core.bootstrap.EnableNexusHostBootstrap;
         ConsoleNavigationConfiguration.class,
         ConsoleRoleConfiguration.class,
         ConsoleLoggerConfiguration.class,
-        ConsoleJaxRsWebConfiguration.class
+        ConsoleJaxRsWebConfiguration.class,
+        ConsoleEndpointGrantConfiguration.class
 })
 public @interface EnableNexusSimpleConsole {
 }

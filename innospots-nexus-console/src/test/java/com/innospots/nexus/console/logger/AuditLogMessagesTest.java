@@ -20,25 +20,27 @@ class AuditLogMessagesTest {
     @Test
     void resolvesOperationMessageForCurrentLocale() {
         I18nConverter.setLocale(Locale.SIMPLIFIED_CHINESE);
-        AuditLog auditLog = AuditLogAnnotationFixtures.dictionaryTypeCreate();
 
-        assertThat(AuditLogMessages.resolveOperationMessage(auditLog)).isEqualTo("创建字典类型");
+        assertThat(AuditLogMessages.resolveOperationMessage(
+                EndpointGrantFixtures.dictionaryTypeCreateGrant().label()))
+                .isEqualTo("创建字典类型");
     }
 
     @Test
     void resolvesOperationMessageForEnglishLocale() {
         I18nConverter.setLocale(Locale.US);
-        AuditLog auditLog = AuditLogAnnotationFixtures.dictionaryTypeCreate();
 
-        assertThat(AuditLogMessages.resolveOperationMessage(auditLog)).isEqualTo("Create dictionary type");
+        assertThat(AuditLogMessages.resolveOperationMessage(
+                EndpointGrantFixtures.dictionaryTypeCreateGrant().label()))
+                .isEqualTo("Create dictionary type");
     }
 
     @Test
     void convertsLiteralPairsToI18nObject() {
-        I18nObject object = AuditLogMessages.toI18nObject(AuditLogAnnotationFixtures.dictionaryTypeCreate().value());
+        I18nObject object = AuditLogMessages.toI18nObject(
+                EndpointGrantFixtures.dictionaryTypeCreateGrant().label());
 
         assertThat(object.cnValue()).isEqualTo("创建字典类型");
         assertThat(object.enValue()).isEqualTo("Create dictionary type");
     }
-
 }

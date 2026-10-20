@@ -10,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.util.Checks;
-import com.innospots.nexus.console.tenant.api.TenantUserResolver;
+import com.innospots.nexus.platform.organization.port.TenantUserResolver;
 import com.innospots.nexus.platform.organization.domain.entity.TenantAdminEntity;
 import com.innospots.nexus.platform.organization.domain.entity.TenantEntity;
 import com.innospots.nexus.platform.organization.domain.enums.TenantAdminRole;

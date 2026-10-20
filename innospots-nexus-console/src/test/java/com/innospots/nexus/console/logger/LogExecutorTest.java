@@ -25,7 +25,7 @@ class LogExecutorTest {
         LogExecutor executor = new LogExecutor(captured::set);
 
         Object result = executor.execute(
-                AuditLogAnnotationFixtures.dictionaryTypeCreate(),
+                EndpointGrantFixtures.dictionaryTypeCreateGrant(),
                 "com.example.DictionaryEndpoint",
                 "createType",
                 "alice",

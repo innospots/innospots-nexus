@@ -14,8 +14,8 @@ import jakarta.ws.rs.ext.Provider;
 import com.innospots.nexus.base.domain.identity.UserSnapshot;
 import com.innospots.nexus.base.thread.SessionContext;
 import com.innospots.nexus.console.jaxrs.support.EndpointMethodResolver;
-import com.innospots.nexus.console.logger.AuditLog;
-import com.innospots.nexus.console.logger.support.AuditLogAnnotations;
+import com.innospots.nexus.console.endpoint.grant.support.EndpointGrantAnnotations;
+import com.innospots.nexus.console.endpoint.grant.support.ResolvedEndpointGrant;
 import com.innospots.nexus.console.logger.support.AuditLogInvocationState;
 import com.innospots.nexus.console.logger.support.AuditLogRecorder;
 import com.innospots.nexus.core.jaxrs.support.RequestProperties;
@@ -27,7 +27,7 @@ import com.innospots.nexus.core.jaxrs.support.RequestProperties;
  *
  * @author Smars
  * @date 2026/10/17
- * @see AuditLogAnnotations
+ * @see EndpointGrantAnnotations
  * @see AuditLogRecorder
  */
 @Provider
@@ -65,13 +65,13 @@ public final class ConsoleAuditLogFilter implements ContainerRequestFilter, Cont
         }
         Method method = resourceInfo.getResourceMethod();
         Class<?> resourceClass = resourceInfo.getResourceClass();
-        AuditLog auditLog = AuditLogAnnotations.resolve(method, resourceClass);
-        if (auditLog == null) {
+        ResolvedEndpointGrant grant = EndpointGrantAnnotations.resolve(method, resourceClass);
+        if (grant == null || !grant.auditLog()) {
             return;
         }
         String path = requestContext.getUriInfo().getPath();
         AuditLogInvocationState state = new AuditLogInvocationState(
-                auditLog,
+                grant,
                 resourceClass.getName(),
                 method.getName(),
                 requestContext.getMethod(),

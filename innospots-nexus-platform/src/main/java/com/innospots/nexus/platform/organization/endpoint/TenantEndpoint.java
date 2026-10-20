@@ -17,6 +17,10 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import com.innospots.nexus.base.domain.response.PageResult;
 import com.innospots.nexus.base.domain.response.R;
+import com.innospots.nexus.console.endpoint.grant.EndpointGrant;
+import com.innospots.nexus.console.endpoint.grant.EndpointGrantAction;
+import com.innospots.nexus.console.endpoint.grant.EndpointModule;
+import com.innospots.nexus.console.logger.I18nLiteral;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 import com.innospots.nexus.platform.config.PlatformConstant;
 import com.innospots.nexus.platform.organization.domain.request.TenantCreateRequest;
@@ -36,6 +40,7 @@ import com.innospots.nexus.platform.organization.service.PlatformTenantService;
  * @see com.innospots.nexus.platform.organization.service.PlatformTenantService
  * @see EnterpriseProfileEndpoint
  */
+@EndpointModule("organization")
 @Path(PlatformConstant.TENANTS_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -47,12 +52,22 @@ public class TenantEndpoint {
     private final PlatformTenantService platformTenantService;
 
     @GET
+    @EndpointGrant(
+            action = EndpointGrantAction.READ,
+            name = "platform.tenant.page",
+            label = @I18nLiteral(pairs = {"zh-CN", "分页查询租户", "en", "Page tenants"}))
     @Operation(operationId = "platformTenantPage", summary = "分页查询租户")
     public R<PageResult<TenantVo>> pageTenants(@BeanParam TenantPageRequest request) {
         return R.ok(platformTenantService.pageTenants(request));
     }
 
     @POST
+    @EndpointGrant(
+            action = EndpointGrantAction.CREATE,
+            name = "platform.tenant.create",
+            label = @I18nLiteral(pairs = {"zh-CN", "开通租户", "en", "Create tenant"}),
+            recordArgs = false,
+            auditLog = true)
     @Operation(
             operationId = "platformTenantCreate",
             summary = "开通租户",
@@ -63,6 +78,10 @@ public class TenantEndpoint {
 
     @GET
     @Path("/{tenantId}")
+    @EndpointGrant(
+            action = EndpointGrantAction.READ,
+            name = "platform.tenant.get",
+            label = @I18nLiteral(pairs = {"zh-CN", "查询租户概要", "en", "Get tenant"}))
     @Operation(operationId = "platformTenantGet", summary = "查询租户概要")
     public R<TenantVo> getTenant(
             @Parameter(description = "租户 ID", required = true) @PathParam("tenantId") String tenantId) {
@@ -71,6 +90,12 @@ public class TenantEndpoint {
 
     @PUT
     @Path("/{tenantId}")
+    @EndpointGrant(
+            action = EndpointGrantAction.UPDATE,
+            name = "platform.tenant.update",
+            label = @I18nLiteral(pairs = {"zh-CN", "更新租户资料", "en", "Update tenant"}),
+            recordArgs = false,
+            auditLog = true)
     @Operation(operationId = "platformTenantUpdate", summary = "更新租户资料")
     public R<TenantVo> updateTenant(
             @Parameter(description = "租户 ID", required = true) @PathParam("tenantId") String tenantId,
@@ -80,6 +105,12 @@ public class TenantEndpoint {
 
     @PUT
     @Path("/{tenantId}/status")
+    @EndpointGrant(
+            action = EndpointGrantAction.STATUS,
+            name = "platform.tenant.status",
+            label = @I18nLiteral(pairs = {"zh-CN", "更新租户状态", "en", "Update tenant status"}),
+            recordArgs = false,
+            auditLog = true)
     @Operation(
             operationId = "platformTenantUpdateStatus",
             summary = "更新租户状态",

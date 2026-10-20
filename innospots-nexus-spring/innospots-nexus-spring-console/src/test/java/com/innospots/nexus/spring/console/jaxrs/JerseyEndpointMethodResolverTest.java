@@ -22,7 +22,8 @@ import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.base.thread.SessionContext;
 import com.innospots.nexus.base.thread.TLC;
 import com.innospots.nexus.console.jaxrs.filter.ConsoleAuditLogFilter;
-import com.innospots.nexus.console.logger.AuditLog;
+import com.innospots.nexus.console.endpoint.grant.EndpointGrant;
+import com.innospots.nexus.console.endpoint.grant.EndpointGrantAction;
 import com.innospots.nexus.console.logger.domain.context.InvocationLogContext;
 import com.innospots.nexus.console.logger.support.AuditLogRecorder;
 import com.innospots.nexus.core.jaxrs.support.RequestProperties;
@@ -132,7 +133,7 @@ class JerseyEndpointMethodResolverTest {
 
     private interface AuditedContract {
 
-        @AuditLog(action = "audit.create", recordArgs = false)
+        @EndpointGrant(action = EndpointGrantAction.CREATE, name = "audit.create", recordArgs = false, auditLog = true)
         String create();
     }
 

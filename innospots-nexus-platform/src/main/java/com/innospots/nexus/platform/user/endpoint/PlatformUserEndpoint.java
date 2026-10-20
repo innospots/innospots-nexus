@@ -17,8 +17,12 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import com.innospots.nexus.base.domain.response.PageResult;
 import com.innospots.nexus.base.domain.response.R;
-import com.innospots.nexus.platform.config.PlatformConstant;
+import com.innospots.nexus.console.endpoint.grant.EndpointGrant;
+import com.innospots.nexus.console.endpoint.grant.EndpointGrantAction;
+import com.innospots.nexus.console.endpoint.grant.EndpointModule;
+import com.innospots.nexus.console.logger.I18nLiteral;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
+import com.innospots.nexus.platform.config.PlatformConstant;
 import com.innospots.nexus.platform.user.domain.request.PlatformUserCreateRequest;
 import com.innospots.nexus.platform.user.domain.request.PlatformUserPageRequest;
 import com.innospots.nexus.platform.user.domain.request.PlatformUserPasswordResetRequest;
@@ -34,6 +38,7 @@ import com.innospots.nexus.platform.user.service.PlatformUserService;
  * @author Smars
  * @date 2026/09/13
  */
+@EndpointModule("user")
 @Path(PlatformConstant.USERS_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -45,12 +50,22 @@ public class PlatformUserEndpoint {
     private final PlatformUserService platformUserService;
 
     @GET
+    @EndpointGrant(
+            action = EndpointGrantAction.READ,
+            name = "platform.user.page",
+            label = @I18nLiteral(pairs = {"zh-CN", "分页查询平台用户", "en", "Page platform users"}))
     @Operation(operationId = "platformUserPage", summary = "分页查询平台用户")
     public R<PageResult<PlatformUserVo>> pageUsers(@BeanParam PlatformUserPageRequest request) {
         return R.ok(platformUserService.pageUsers(request));
     }
 
     @POST
+    @EndpointGrant(
+            action = EndpointGrantAction.CREATE,
+            name = "platform.user.create",
+            label = @I18nLiteral(pairs = {"zh-CN", "创建平台用户", "en", "Create platform user"}),
+            recordArgs = false,
+            auditLog = true)
     @Operation(operationId = "platformUserCreate", summary = "创建平台用户")
     public R<PlatformUserVo> createUser(PlatformUserCreateRequest request) {
         return R.ok(platformUserService.createUser(request));
@@ -58,6 +73,10 @@ public class PlatformUserEndpoint {
 
     @GET
     @Path("/{platformUserId}")
+    @EndpointGrant(
+            action = EndpointGrantAction.READ,
+            name = "platform.user.get",
+            label = @I18nLiteral(pairs = {"zh-CN", "查询平台用户", "en", "Get platform user"}))
     @Operation(operationId = "platformUserGet", summary = "查询平台用户")
     public R<PlatformUserVo> getUser(
             @Parameter(description = "平台用户 ID", required = true) @PathParam("platformUserId") String platformUserId) {
@@ -66,6 +85,12 @@ public class PlatformUserEndpoint {
 
     @PUT
     @Path("/{platformUserId}")
+    @EndpointGrant(
+            action = EndpointGrantAction.UPDATE,
+            name = "platform.user.update",
+            label = @I18nLiteral(pairs = {"zh-CN", "更新平台用户资料", "en", "Update platform user"}),
+            recordArgs = false,
+            auditLog = true)
     @Operation(operationId = "platformUserUpdate", summary = "更新平台用户资料")
     public R<PlatformUserVo> updateUser(
             @Parameter(description = "平台用户 ID", required = true) @PathParam("platformUserId") String platformUserId,
@@ -75,6 +100,12 @@ public class PlatformUserEndpoint {
 
     @PUT
     @Path("/{platformUserId}/status")
+    @EndpointGrant(
+            action = EndpointGrantAction.STATUS,
+            name = "platform.user.status",
+            label = @I18nLiteral(pairs = {"zh-CN", "更新平台用户状态", "en", "Update platform user status"}),
+            recordArgs = false,
+            auditLog = true)
     @Operation(operationId = "platformUserUpdateStatus", summary = "更新平台用户状态（仅 ACTIVE 或 DISABLED）")
     public R<Void> updateUserStatus(
             @Parameter(description = "平台用户 ID", required = true) @PathParam("platformUserId") String platformUserId,
@@ -85,6 +116,12 @@ public class PlatformUserEndpoint {
 
     @PUT
     @Path("/{platformUserId}/password")
+    @EndpointGrant(
+            action = EndpointGrantAction.EXECUTE,
+            name = "platform.user.password.reset",
+            label = @I18nLiteral(pairs = {"zh-CN", "管理员重置平台用户密码", "en", "Admin reset platform user password"}),
+            recordArgs = false,
+            auditLog = true)
     @Operation(operationId = "platformUserResetPassword", summary = "管理员重置平台用户密码")
     public R<Void> resetUserPassword(
             @Parameter(description = "平台用户 ID", required = true) @PathParam("platformUserId") String platformUserId,

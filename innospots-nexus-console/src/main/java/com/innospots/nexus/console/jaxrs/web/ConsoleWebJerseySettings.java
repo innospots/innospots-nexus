@@ -13,7 +13,7 @@ import lombok.Setter;
 public class ConsoleWebJerseySettings {
 
     /**
-     * {@code GET /} 重定向目标路径（{@link com.innospots.nexus.console.endpoint.MainRootEndpoint}）。
+     * {@code GET /} 重定向目标路径（{@link com.innospots.nexus.console.endpoint.root.MainRootEndpoint}）。
      *
      * <p>绑定 {@code nexus.console.web.jersey.root-path}；默认 Scalar 文档页。</p>
      */

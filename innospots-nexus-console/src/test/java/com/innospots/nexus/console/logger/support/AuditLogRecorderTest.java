@@ -9,7 +9,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import com.innospots.nexus.base.i18n.I18nConverter;
-import com.innospots.nexus.console.logger.AuditLogAnnotationFixtures;
+import com.innospots.nexus.console.logger.EndpointGrantFixtures;
 import com.innospots.nexus.console.logger.domain.context.InvocationLogContext;
 
 class AuditLogRecorderTest {
@@ -25,7 +25,7 @@ class AuditLogRecorderTest {
         AtomicReference<InvocationLogContext> captured = new AtomicReference<>();
         AuditLogRecorder recorder = new AuditLogRecorder(captured::set);
         AuditLogInvocationState state = new AuditLogInvocationState(
-                AuditLogAnnotationFixtures.dictionaryTypeCreate(),
+                EndpointGrantFixtures.dictionaryTypeCreateGrant(),
                 "com.example.DictionaryEndpoint",
                 "createType",
                 "POST",

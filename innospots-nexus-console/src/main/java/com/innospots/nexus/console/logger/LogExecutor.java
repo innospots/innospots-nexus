@@ -2,6 +2,7 @@ package com.innospots.nexus.console.logger;
 
 import java.util.Objects;
 
+import com.innospots.nexus.console.endpoint.grant.support.ResolvedEndpointGrant;
 import com.innospots.nexus.console.logger.domain.context.InvocationLogContext;
 
 /**
@@ -28,11 +29,9 @@ public final class LogExecutor {
     }
 
     /**
-     * 执行回调并为调用记录审计上下文。
-     * <p>回调结果原样重抛；审计记录
-     * 即使失败也通过配置的处理器产生。</p>
+     * 执行回调并为调用记录审计上下文（仅当 grant.auditLog 为 true）。
      *
-     * @param auditLog   声明捕获内容的注解
+     * @param grant      已解析的 endpoint grant
      * @param className  被拦截方法的声明类名
      * @param methodName 被拦截的方法名
      * @param actor      操作用户身份；未知时为 null
@@ -42,7 +41,7 @@ public final class LogExecutor {
      * @throws Throwable 原样重抛回调结果
      */
     public Object execute(
-            AuditLog auditLog,
+            ResolvedEndpointGrant grant,
             String className,
             String methodName,
             String actor,
@@ -58,23 +57,25 @@ public final class LogExecutor {
             exception = t;
             throw t;
         } finally {
-            String action = auditLog.action();
-            if (action == null || action.isBlank()) {
-                action = methodName;
+            if (grant != null && grant.auditLog()) {
+                String action = grant.name();
+                if (action == null || action.isBlank()) {
+                    action = methodName;
+                }
+                InvocationLogContext context = new InvocationLogContext(
+                        className,
+                        methodName,
+                        action,
+                        grant.recordArgs() ? arguments : null,
+                        null,
+                        exception,
+                        startTime,
+                        System.currentTimeMillis(),
+                        actor,
+                        AuditLogMessages.resolveOperationMessage(grant.label()),
+                        "");
+                handler.handle(context);
             }
-            InvocationLogContext context = new InvocationLogContext(
-                    className,
-                    methodName,
-                    action,
-                    auditLog.recordArgs() ? arguments : null,
-                    auditLog.recordResult() ? result : null,
-                    auditLog.recordException() ? exception : null,
-                    startTime,
-                    System.currentTimeMillis(),
-                    actor,
-                    AuditLogMessages.resolveOperationMessage(auditLog),
-                    "");
-            handler.handle(context);
         }
     }
 

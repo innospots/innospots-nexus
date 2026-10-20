@@ -1,6 +1,6 @@
 package com.innospots.nexus.console.logger.support;
 
-import com.innospots.nexus.console.logger.AuditLog;
+import com.innospots.nexus.console.endpoint.grant.support.ResolvedEndpointGrant;
 import com.innospots.nexus.console.logger.AuditLogMessages;
 import com.innospots.nexus.console.logger.InvocationLogHandler;
 import com.innospots.nexus.console.logger.domain.context.InvocationLogContext;
@@ -23,23 +23,20 @@ public final class AuditLogRecorder {
             Object responseEntity,
             Throwable failure
     ) {
-        if (state == null || state.auditLog() == null) {
+        if (state == null || state.grant() == null || !state.grant().auditLog()) {
             return;
         }
-        AuditLog auditLog = state.auditLog();
+        ResolvedEndpointGrant grant = state.grant();
         long endTime = System.currentTimeMillis();
         boolean success = failure == null && httpStatus > 0 && httpStatus < 400;
-        Throwable capturedException = auditLog.recordException() ? failure : null;
+        Throwable capturedException = failure;
         Object capturedResult = null;
-        if (auditLog.recordResult() && success) {
-            capturedResult = responseEntity;
-        }
-        Object[] arguments = auditLog.recordArgs() ? new Object[0] : null;
-        String action = auditLog.action();
-        if (action == null || action.isBlank()) {
+        Object[] arguments = grant.recordArgs() ? new Object[0] : null;
+        String action = grant.name();
+        if (action.isBlank()) {
             action = state.methodName();
         }
-        String operationMessage = AuditLogMessages.resolveOperationMessage(auditLog);
+        String operationMessage = AuditLogMessages.resolveOperationMessage(grant.label());
         String httpPath = state.httpMethod().isEmpty()
                 ? state.httpPath()
                 : state.httpMethod() + " " + state.httpPath();

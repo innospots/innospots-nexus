@@ -14,6 +14,10 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexus.console.config.ConsoleConstant;
+import com.innospots.nexus.console.endpoint.grant.EndpointGrant;
+import com.innospots.nexus.console.endpoint.grant.EndpointGrantAction;
+import com.innospots.nexus.console.endpoint.grant.EndpointModule;
+import com.innospots.nexus.console.logger.I18nLiteral;
 import com.innospots.nexus.console.catalog.domain.model.CatalogSyncResult;
 import com.innospots.nexus.console.catalog.domain.vo.CatalogNodeVo;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogService;
@@ -24,6 +28,7 @@ import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 /**
  * 权限设置页目录树与显式同步接口。
  */
+@EndpointModule("catalog")
 @Path(ConsoleConstant.API_PREFIX + "/catalog")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -44,6 +49,10 @@ public final class ConsoleCatalogEndpoint {
 
     @GET
     @Path("/tree")
+    @EndpointGrant(
+            action = EndpointGrantAction.READ,
+            name = "catalog.tree",
+            label = @I18nLiteral(pairs = {"zh-CN", "目录资源树", "en", "Catalog resource tree"}))
     @Operation(operationId = "catalogTree", summary = "目录资源树")
     public R<List<CatalogNodeVo>> tree() {
         return R.ok(catalogService.tree());
@@ -51,6 +60,12 @@ public final class ConsoleCatalogEndpoint {
 
     @POST
     @Path("/sync")
+    @EndpointGrant(
+            action = EndpointGrantAction.EXECUTE,
+            name = "catalog.sync",
+            label = @I18nLiteral(pairs = {"zh-CN", "同步插件贡献到目录索引", "en", "Sync plugin contributions to catalog"}),
+            recordArgs = false,
+            auditLog = true)
     @Operation(operationId = "catalogSync", summary = "同步插件贡献到目录索引")
     public R<PermissionResourceSyncVo> sync() {
         CatalogSyncResult result = syncService.sync();

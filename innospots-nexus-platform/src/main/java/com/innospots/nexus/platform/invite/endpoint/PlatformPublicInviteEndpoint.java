@@ -14,6 +14,10 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import com.innospots.nexus.base.domain.response.R;
+import com.innospots.nexus.console.endpoint.grant.EndpointGrant;
+import com.innospots.nexus.console.endpoint.grant.EndpointGrantAction;
+import com.innospots.nexus.console.endpoint.grant.EndpointModule;
+import com.innospots.nexus.console.logger.I18nLiteral;
 import com.innospots.nexus.platform.config.PlatformConstant;
 import com.innospots.nexus.platform.invite.domain.request.PlatformInviteAcceptRequest;
 import com.innospots.nexus.platform.invite.domain.request.PlatformInviteActivateByCodeRequest;
@@ -28,6 +32,7 @@ import com.innospots.nexus.platform.invite.service.PlatformPublicInviteService;
  * @date 2026/10/06
  * @see com.innospots.nexus.platform.invite.service.PlatformPublicInviteService
  */
+@EndpointModule(value = "user", ignoreAuth = true)
 @Path(PlatformConstant.PUBLIC_INVITES_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -39,6 +44,11 @@ public class PlatformPublicInviteEndpoint {
 
     @GET
     @Path("/{token}")
+    @EndpointGrant(
+            action = EndpointGrantAction.READ,
+            name = "platform.invite.public.preview",
+            label = @I18nLiteral(pairs = {"zh-CN", "预览邀请令牌", "en", "Preview invite token"}),
+            ignorePermission = true)
     @Operation(operationId = "platformPublicInvitePreview", summary = "预览邀请令牌")
     public R<PlatformInvitePreviewVo> previewInvite(
             @Parameter(description = "邀请令牌", required = true) @PathParam("token") String token) {
@@ -47,6 +57,12 @@ public class PlatformPublicInviteEndpoint {
 
     @POST
     @Path("/{token}/otp")
+    @EndpointGrant(
+            action = EndpointGrantAction.EXECUTE,
+            name = "platform.invite.public.otp",
+            label = @I18nLiteral(pairs = {"zh-CN", "邀请注册页获取验证码", "en", "Issue invite accept OTP"}),
+            recordArgs = false,
+            ignorePermission = true)
     @Operation(operationId = "platformPublicInviteAcceptOtp", summary = "邀请注册页获取验证码")
     public R<Void> issueInviteAcceptOtp(
             @PathParam("token") String token,
@@ -57,6 +73,13 @@ public class PlatformPublicInviteEndpoint {
 
     @POST
     @Path("/{token}/accept")
+    @EndpointGrant(
+            action = EndpointGrantAction.EXECUTE,
+            name = "platform.invite.public.accept",
+            label = @I18nLiteral(pairs = {"zh-CN", "通过邀请链接注册", "en", "Accept invite"}),
+            recordArgs = false,
+            auditLog = true,
+            ignorePermission = true)
     @Operation(operationId = "platformPublicInviteAccept", summary = "通过邀请链接注册")
     public R<String> acceptInvite(
             @PathParam("token") String token,
@@ -66,6 +89,13 @@ public class PlatformPublicInviteEndpoint {
 
     @POST
     @Path("/activate-by-code")
+    @EndpointGrant(
+            action = EndpointGrantAction.EXECUTE,
+            name = "platform.invite.public.activate-by-code",
+            label = @I18nLiteral(pairs = {"zh-CN", "凭邀请码注册", "en", "Activate by invite code"}),
+            recordArgs = false,
+            auditLog = true,
+            ignorePermission = true)
     @Operation(operationId = "platformPublicInviteActivateByCode", summary = "凭邀请码注册")
     public R<String> activateByInviteCode(PlatformInviteActivateByCodeRequest request) {
         return R.ok(publicInviteService.activateByInviteCode(request));

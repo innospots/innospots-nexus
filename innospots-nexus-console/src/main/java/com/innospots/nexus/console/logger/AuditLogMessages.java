@@ -4,8 +4,7 @@ import com.innospots.nexus.base.i18n.I18nConverter;
 import com.innospots.nexus.base.i18n.I18nObject;
 
 /**
- * 将 {@link AuditLog} 上的 {@link I18nLiteral} 转为 {@link I18nObject}，
- * 并按当前线程语言环境解析落库文案。
+ * 将 {@link I18nLiteral} 转为 {@link I18nObject}，并按当前线程语言环境解析审计文案。
  */
 public final class AuditLogMessages {
 
@@ -43,14 +42,14 @@ public final class AuditLogMessages {
     /**
      * 按 {@link I18nConverter#locale()} 解析操作描述。
      *
-     * @param auditLog 审计注解
+     * @param literal {@link com.innospots.nexus.console.endpoint.grant.EndpointGrant#label()}
      * @return 当前语言下的描述；无文案时为空字符串
      */
-    public static String resolveOperationMessage(AuditLog auditLog) {
-        if (auditLog == null) {
+    public static String resolveOperationMessage(I18nLiteral literal) {
+        if (literal == null) {
             return "";
         }
-        I18nObject object = toI18nObject(auditLog.value());
+        I18nObject object = toI18nObject(literal);
         if (object.isEmpty()) {
             return "";
         }

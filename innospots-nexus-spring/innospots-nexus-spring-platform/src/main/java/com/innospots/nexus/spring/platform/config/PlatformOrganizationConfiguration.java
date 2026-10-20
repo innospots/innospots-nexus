@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Lazy;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.innospots.nexus.console.tenant.api.TenantUserResolver;
+import com.innospots.nexus.platform.organization.port.TenantUserResolver;
 import com.innospots.nexus.platform.organization.dao.EnterpriseDao;
 import com.innospots.nexus.platform.organization.dao.TenantDao;
 import com.innospots.nexus.platform.organization.dao.TenantAdminDao;

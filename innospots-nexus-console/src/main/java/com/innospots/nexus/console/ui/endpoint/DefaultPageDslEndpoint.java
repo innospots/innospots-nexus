@@ -22,6 +22,10 @@ import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.console.config.ConsoleConstant;
+import com.innospots.nexus.console.endpoint.grant.EndpointGrant;
+import com.innospots.nexus.console.endpoint.grant.EndpointGrantAction;
+import com.innospots.nexus.console.endpoint.grant.EndpointModule;
+import com.innospots.nexus.console.logger.I18nLiteral;
 import com.innospots.nexus.console.ui.domain.request.PageDslRenderRequest;
 import com.innospots.nexus.console.ui.spec.PageDsl;
 import com.innospots.nexus.console.ui.spec.PageDslPageRef;
@@ -36,6 +40,7 @@ import com.innospots.nexus.console.ui.spec.loader.PageDslLoader;
  * @author Smars
  * @date 2026/09/13
  */
+@EndpointModule(value = "ui", ignoreAuth = true)
 @Path(ConsoleConstant.PUBLIC_API_PREFIX + "/pages/{pageKey}")
 @Produces(MediaType.APPLICATION_JSON)
 @Tag(name = "UiPage", description = "Pactor 页面 DSL 加载与渲染")
@@ -61,6 +66,11 @@ public final class DefaultPageDslEndpoint implements PageDslEndpoint {
     }
 
     @GET
+    @EndpointGrant(
+            action = EndpointGrantAction.READ,
+            name = "ui.page.render",
+            label = @I18nLiteral(pairs = {"zh-CN", "加载并渲染页面 DSL", "en", "Load and render page DSL"}),
+            ignorePermission = true)
     @Operation(
             operationId = "uiPageDslRender",
             summary = "加载并渲染页面 DSL",

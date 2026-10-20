@@ -1,12 +1,9 @@
-package com.innospots.nexus.console.tenant.api;
+package com.innospots.nexus.platform.organization.port;
 
 import java.util.Optional;
 
 /**
  * 按邮箱解析租户域用户（{@code nx_tenant_user}）。由 portal 装配实现；platform 登记租户管理员时可选注入。
- *
- * @author Smars
- * @date 2026/10/16
  */
 public interface TenantUserResolver {
 

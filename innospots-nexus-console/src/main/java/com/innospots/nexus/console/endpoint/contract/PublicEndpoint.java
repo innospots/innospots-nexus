@@ -1,4 +1,4 @@
-package com.innospots.nexus.console.endpoint;
+package com.innospots.nexus.console.endpoint.contract;
 
 import jakarta.ws.rs.Path;
 

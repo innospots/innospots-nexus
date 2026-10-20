@@ -26,15 +26,19 @@ import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeStatu
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeUpdateRequest;
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeOptionVo;
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeVo;
-import com.innospots.nexus.console.logger.AuditLog;
+import com.innospots.nexus.console.endpoint.grant.EndpointGrant;
+import com.innospots.nexus.console.endpoint.grant.EndpointGrantAction;
+import com.innospots.nexus.console.endpoint.grant.EndpointModule;
 import com.innospots.nexus.console.logger.I18nLiteral;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 
 /**
  * 字典类型管理 REST 契约（字典项随类型详情与创建/更新请求体维护，无独立字典项资源）。
  *
- * <p>类级 {@code @Path} 由业务域实现（如 platform）绑定。</p>
+ * <p>类级 {@code @Path} 由业务域实现（如 platform）绑定；实现类不必重复方法级
+ * JAX-RS / OpenAPI 注解。</p>
  */
+@EndpointModule("dictionary")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Dictionary", description = "字典类型与字典项")
@@ -42,29 +46,41 @@ import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 public interface DictionaryTypeEndpoint {
 
     @GET
+    @EndpointGrant(
+            action = EndpointGrantAction.READ,
+            name = "dictionary.type.page",
+            label = @I18nLiteral(pairs = {"zh-CN", "分页查询字典类型", "en", "Page dictionary types"}))
     @Operation(operationId = "dictionaryTypePage", summary = "分页查询字典类型")
     R<PageResult<DictionaryTypeVo>> pageDictionaryTypes(@BeanParam DictionaryTypePageRequest request);
 
     @GET
     @Path("/{dictionaryTypeId}")
+    @EndpointGrant(
+            action = EndpointGrantAction.READ,
+            name = "dictionary.type.get",
+            label = @I18nLiteral(pairs = {"zh-CN", "查询字典类型", "en", "Get dictionary type"}))
     @Operation(operationId = "dictionaryTypeGet", summary = "查询字典类型")
     R<DictionaryTypeVo> getDictionaryType(@PathParam("dictionaryTypeId") String dictionaryTypeId);
 
     @POST
+    @EndpointGrant(
+            action = EndpointGrantAction.CREATE,
+            name = "dictionary.type.create",
+            label = @I18nLiteral(pairs = {"zh-CN", "创建字典类型", "en", "Create dictionary type"}),
+            recordArgs = false,
+            auditLog = true)
     @Operation(operationId = "dictionaryTypeCreate", summary = "创建字典类型")
-    @AuditLog(
-            value = @I18nLiteral(pairs = {"zh-CN", "创建字典类型", "en", "Create dictionary type"}),
-            action = "dictionary.type.create",
-            recordArgs = false)
     R<DictionaryTypeVo> createDictionaryType(DictionaryTypeCreateRequest request);
 
     @PUT
     @Path("/{dictionaryTypeId}")
+    @EndpointGrant(
+            action = EndpointGrantAction.UPDATE,
+            name = "dictionary.type.update",
+            label = @I18nLiteral(pairs = {"zh-CN", "更新字典类型", "en", "Update dictionary type"}),
+            recordArgs = false,
+            auditLog = true)
     @Operation(operationId = "dictionaryTypeUpdate", summary = "更新字典类型")
-    @AuditLog(
-            value = @I18nLiteral(pairs = {"zh-CN", "更新字典类型", "en", "Update dictionary type"}),
-            action = "dictionary.type.update",
-            recordArgs = false)
     R<DictionaryTypeVo> updateDictionaryType(
             @PathParam("dictionaryTypeId") String dictionaryTypeId,
             DictionaryTypeUpdateRequest request
@@ -72,11 +88,13 @@ public interface DictionaryTypeEndpoint {
 
     @PUT
     @Path("/{dictionaryTypeId}/status")
+    @EndpointGrant(
+            action = EndpointGrantAction.STATUS,
+            name = "dictionary.type.status.update",
+            label = @I18nLiteral(pairs = {"zh-CN", "更新字典类型状态", "en", "Update dictionary type status"}),
+            recordArgs = false,
+            auditLog = true)
     @Operation(operationId = "dictionaryTypeUpdateStatus", summary = "更新字典类型状态")
-    @AuditLog(
-            value = @I18nLiteral(pairs = {"zh-CN", "更新字典类型状态", "en", "Update dictionary type status"}),
-            action = "dictionary.type.status.update",
-            recordArgs = false)
     R<Void> updateDictionaryTypeStatus(
             @PathParam("dictionaryTypeId") String dictionaryTypeId,
             DictionaryTypeStatusUpdateRequest request
@@ -84,15 +102,22 @@ public interface DictionaryTypeEndpoint {
 
     @DELETE
     @Path("/{dictionaryTypeId}")
+    @EndpointGrant(
+            action = EndpointGrantAction.DELETE,
+            name = "dictionary.type.delete",
+            label = @I18nLiteral(pairs = {"zh-CN", "删除字典类型", "en", "Delete dictionary type"}),
+            recordArgs = false,
+            auditLog = true)
     @Operation(operationId = "dictionaryTypeDelete", summary = "删除字典类型")
-    @AuditLog(
-            value = @I18nLiteral(pairs = {"zh-CN", "删除字典类型", "en", "Delete dictionary type"}),
-            action = "dictionary.type.delete",
-            recordArgs = false)
     R<Void> deleteDictionaryType(@PathParam("dictionaryTypeId") String dictionaryTypeId);
 
     @GET
     @Path("/options")
+    @EndpointGrant(
+            action = EndpointGrantAction.READ,
+            name = "dictionary.type.options",
+            label = @I18nLiteral(pairs = {"zh-CN", "字典类型下拉选项", "en", "List dictionary type options"}),
+            ignorePermission = true)
     @Operation(operationId = "dictionaryTypeListOptions", summary = "字典类型下拉选项")
     R<List<DictionaryTypeOptionVo>> listDictionaryTypeOptions(@QueryParam("status") BasicStatus status);
 }

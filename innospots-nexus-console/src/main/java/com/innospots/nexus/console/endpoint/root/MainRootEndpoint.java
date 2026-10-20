@@ -1,4 +1,4 @@
-package com.innospots.nexus.console.endpoint;
+package com.innospots.nexus.console.endpoint.root;
 
 import java.net.URI;
 
@@ -6,11 +6,16 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
 
+import com.innospots.nexus.console.endpoint.grant.EndpointGrant;
+import com.innospots.nexus.console.endpoint.grant.EndpointGrantAction;
+import com.innospots.nexus.console.endpoint.grant.EndpointModule;
+import com.innospots.nexus.console.logger.I18nLiteral;
 import com.innospots.nexus.core.openapi.OpenApiCatalogPaths;
 
 /**
  * 站点根路径 {@code GET /}：重定向至配置的文档入口（见 {@code nexus.console.web.jersey.root-path}）。
  */
+@EndpointModule(value = "console", ignoreAuth = true, ignorePermission = true)
 @Path("/")
 public final class MainRootEndpoint {
 
@@ -21,6 +26,10 @@ public final class MainRootEndpoint {
     }
 
     @GET
+    @EndpointGrant(
+            action = EndpointGrantAction.READ,
+            name = "console.root.redirect",
+            label = @I18nLiteral(pairs = {"zh-CN", "站点根路径重定向", "en", "Root path redirect"}))
     public Response redirectRoot() {
         String location = rootRedirectPath;
         if (location == null || location.isBlank()) {

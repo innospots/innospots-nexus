@@ -12,6 +12,10 @@ import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import com.innospots.nexus.base.domain.response.R;
+import com.innospots.nexus.console.endpoint.grant.EndpointGrant;
+import com.innospots.nexus.console.endpoint.grant.EndpointGrantAction;
+import com.innospots.nexus.console.endpoint.grant.EndpointModule;
+import com.innospots.nexus.console.logger.I18nLiteral;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 import com.innospots.nexus.platform.config.PlatformConstant;
 import com.innospots.nexus.platform.settings.domain.request.PlatformRegistrationPolicyUpdateRequest;
@@ -24,6 +28,7 @@ import com.innospots.nexus.platform.settings.service.PlatformRegistrationModeSet
  * @author Smars
  * @date 2026/10/06
  */
+@EndpointModule("settings")
 @Path(PlatformConstant.SETTINGS_REGISTRATION_MODE_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -35,12 +40,22 @@ public class PlatformRegistrationModeSettingEndpoint {
     private final PlatformRegistrationModeSettingService registrationModeSettingService;
 
     @GET
+    @EndpointGrant(
+            action = EndpointGrantAction.READ,
+            name = "platform.settings.registration-mode.get",
+            label = @I18nLiteral(pairs = {"zh-CN", "查询自助注册模式设置", "en", "Get registration mode setting"}))
     @Operation(operationId = "platformRegistrationSettingsGet", summary = "查询自助注册模式设置")
     public R<PlatformRegistrationPolicyVo> getRegistrationModeSetting() {
         return R.ok(registrationModeSettingService.getRegistrationModeSetting());
     }
 
     @PUT
+    @EndpointGrant(
+            action = EndpointGrantAction.UPDATE,
+            name = "platform.settings.registration-mode.update",
+            label = @I18nLiteral(pairs = {"zh-CN", "更新自助注册模式设置", "en", "Update registration mode setting"}),
+            recordArgs = false,
+            auditLog = true)
     @Operation(operationId = "platformRegistrationSettingsUpdate", summary = "更新自助注册模式设置")
     public R<PlatformRegistrationPolicyVo> updateRegistrationModeSetting(
             PlatformRegistrationPolicyUpdateRequest request) {

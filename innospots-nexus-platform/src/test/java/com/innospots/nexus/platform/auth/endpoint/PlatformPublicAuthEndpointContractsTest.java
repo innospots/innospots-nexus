@@ -24,23 +24,23 @@ class PlatformPublicAuthEndpointContractsTest {
     }
 
     @Test
-    void publicAuthEndpointUsesPublicPathAndHasLoginCaptcha() throws NoSuchMethodException {
+    void publicAuthContractUsesConsoleOpenApiAndHttpVerbs() throws NoSuchMethodException {
         assertThat(PlatformPublicAuthEndpoint.class.getAnnotation(Path.class).value())
                 .isEqualTo(PlatformConstant.PUBLIC_AUTH_PATH);
         assertThat(PlatformPublicAuthEndpoint.class.getAnnotation(Tag.class).name())
                 .isEqualTo("PlatformPublicAuth");
-        assertThat(PlatformPublicAuthEndpoint.class.getMethod("login", AuthLoginRequest.class)
+        assertThat(PublicAuthEndpoint.class.getMethod("login", AuthLoginRequest.class)
                         .getAnnotation(Operation.class)
                         .operationId())
-                .isEqualTo("platformAuthLogin");
-        assertThat(PlatformPublicAuthEndpoint.class.getMethod("login", AuthLoginRequest.class)
+                .isEqualTo("authLogin");
+        assertThat(PublicAuthEndpoint.class.getMethod("login", AuthLoginRequest.class)
                         .getAnnotation(POST.class))
                 .isNotNull();
-        assertThat(PlatformPublicAuthEndpoint.class.getMethod("getPasswordEncryptionPublicKey")
+        assertThat(PublicAuthEndpoint.class.getMethod("getPasswordEncryptionPublicKey")
                         .getAnnotation(Operation.class)
                         .operationId())
-                .isEqualTo("platformAuthRsaPublicKey");
-        assertThat(PlatformPublicAuthEndpoint.class.getMethod("getPasswordEncryptionPublicKey")
+                .isEqualTo("authRsaPublicKey");
+        assertThat(PublicAuthEndpoint.class.getMethod("getPasswordEncryptionPublicKey")
                         .getAnnotation(GET.class))
                 .isNotNull();
     }

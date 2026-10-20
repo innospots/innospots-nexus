@@ -2,7 +2,7 @@ package com.innospots.nexus.console.logger.domain.context;
 
 /**
  * 单次被拦截调用的框架无关描述。
- * <p>由拦截器适配器在 {@code @AuditLog} 标注方法周围组装，并交给
+ * <p>由拦截器适配器在 {@code @EndpointGrant(auditLog = true)} 方法周围组装，并交给
  * {@link com.innospots.nexus.console.logger.InvocationLogHandler} 用于持久化。
  * 不含框架类型，任意 Java 运行时均可产生并消费。本记录是从拦截器边界传入
  * 审计日志操作器的标准领域上下文。</p>
@@ -11,7 +11,7 @@ package com.innospots.nexus.console.logger.domain.context;
  * @date 2026/09/13
  * @param className  被拦截方法的声明类名
  * @param methodName 被拦截的方法名
- * @param action     由 {@link com.innospots.nexus.console.logger.AuditLog} 注解声明的业务动作编码
+ * @param action     由 {@link com.innospots.nexus.console.endpoint.grant.EndpointGrant#name()} 声明的业务动作编码
  * @param arguments  捕获的方法参数；未记录时为空数组
  * @param result     捕获的返回值；未记录或失败时为 null
  * @param exception  抛出的异常；成功时为 null

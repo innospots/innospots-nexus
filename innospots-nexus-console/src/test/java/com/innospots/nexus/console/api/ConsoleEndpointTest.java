@@ -1,7 +1,7 @@
 package com.innospots.nexus.console.api;
 
 import com.innospots.nexus.console.config.ConsoleConstant;
-import com.innospots.nexus.console.endpoint.ConsoleEndpoint;
+import com.innospots.nexus.console.endpoint.contract.ConsoleEndpoint;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;

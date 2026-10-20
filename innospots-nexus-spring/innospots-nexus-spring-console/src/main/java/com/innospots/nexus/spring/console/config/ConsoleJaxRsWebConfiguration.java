@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 
 import com.innospots.nexus.console.auth.service.TokenIssuer;
 import com.innospots.nexus.console.config.AuthConfig;
-import com.innospots.nexus.console.endpoint.MainRootEndpoint;
+import com.innospots.nexus.console.endpoint.root.MainRootEndpoint;
 import com.innospots.nexus.console.jaxrs.filter.ConsoleAuditLogFilter;
 import com.innospots.nexus.console.jaxrs.filter.ConsoleAuthenticationFilter;
 import com.innospots.nexus.console.jaxrs.filter.ConsoleCorsFilter;

@@ -11,6 +11,10 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexus.console.auth.domain.vo.PublicRegistrationPolicyVo;
+import com.innospots.nexus.console.endpoint.grant.EndpointGrant;
+import com.innospots.nexus.console.endpoint.grant.EndpointGrantAction;
+import com.innospots.nexus.console.endpoint.grant.EndpointModule;
+import com.innospots.nexus.console.logger.I18nLiteral;
 import com.innospots.nexus.console.auth.service.RegistrationPolicyService;
 import com.innospots.nexus.platform.config.PlatformConstant;
 
@@ -23,6 +27,7 @@ import com.innospots.nexus.platform.config.PlatformConstant;
  * @see PlatformConstant#PUBLIC_REGISTRATION_POLICY_PATH
  * @see RegistrationPolicyService#getPublicPolicy()
  */
+@EndpointModule(value = "settings", ignoreAuth = true)
 @Path(PlatformConstant.PUBLIC_REGISTRATION_POLICY_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Tag(name = "PlatformPublicRegistrationPolicy", description = "公开注册策略")
@@ -33,6 +38,11 @@ public class PlatformPublicRegistrationPolicyEndpoint {
     private final RegistrationPolicyService registrationPolicyService;
 
     @GET
+    @EndpointGrant(
+            action = EndpointGrantAction.READ,
+            name = "platform.registration.policy.public",
+            label = @I18nLiteral(pairs = {"zh-CN", "查询当前注册策略", "en", "Get public registration policy"}),
+            ignorePermission = true)
     @Operation(operationId = "platformPublicRegistrationPolicyGet", summary = "查询当前注册策略")
     public R<PublicRegistrationPolicyVo> getPolicy() {
         return R.ok(registrationPolicyService.getPublicPolicy());

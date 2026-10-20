@@ -14,6 +14,10 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import com.innospots.nexus.base.domain.response.R;
+import com.innospots.nexus.console.endpoint.grant.EndpointGrant;
+import com.innospots.nexus.console.endpoint.grant.EndpointGrantAction;
+import com.innospots.nexus.console.endpoint.grant.EndpointModule;
+import com.innospots.nexus.console.logger.I18nLiteral;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 import com.innospots.nexus.platform.config.PlatformConstant;
 import com.innospots.nexus.platform.organization.domain.request.EnterpriseProfileUpsertRequest;
@@ -30,6 +34,7 @@ import com.innospots.nexus.platform.organization.service.PlatformEnterpriseProfi
  * @see com.innospots.nexus.platform.organization.service.PlatformEnterpriseProfileService
  * @see TenantEndpoint
  */
+@EndpointModule("organization")
 @Path(PlatformConstant.TENANT_ENTERPRISE_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -41,6 +46,10 @@ public class EnterpriseProfileEndpoint {
     private final PlatformEnterpriseProfileService enterpriseProfileService;
 
     @GET
+    @EndpointGrant(
+            action = EndpointGrantAction.READ,
+            name = "platform.tenant.enterprise.get",
+            label = @I18nLiteral(pairs = {"zh-CN", "查询企业法定档案", "en", "Get enterprise profile"}))
     @Operation(operationId = "platformTenantEnterpriseGet", summary = "查询企业法定档案")
     public R<EnterpriseProfileVo> getEnterpriseProfile(
             @Parameter(description = "租户 ID", required = true) @PathParam("tenantId") String tenantId) {
@@ -48,6 +57,12 @@ public class EnterpriseProfileEndpoint {
     }
 
     @PUT
+    @EndpointGrant(
+            action = EndpointGrantAction.UPDATE,
+            name = "platform.tenant.enterprise.upsert",
+            label = @I18nLiteral(pairs = {"zh-CN", "创建或更新企业法定档案", "en", "Upsert enterprise profile"}),
+            recordArgs = false,
+            auditLog = true)
     @Operation(operationId = "platformTenantEnterpriseUpsert", summary = "创建或更新企业法定档案")
     public R<EnterpriseProfileVo> upsertEnterpriseProfile(
             @Parameter(description = "租户 ID", required = true) @PathParam("tenantId") String tenantId,
