@@ -181,8 +181,7 @@ class CaptchaChallengeServiceTest {
             store.add(updated);
             return 1;
         });
-        OtpPolicy policy = new OtpPolicy(6, Duration.ofMinutes(5), Duration.ZERO, 5);
-        return new OtpChallengeService(dao, policy);
+        return dao;
     }
 
     private OtpChallengeService newService() {
