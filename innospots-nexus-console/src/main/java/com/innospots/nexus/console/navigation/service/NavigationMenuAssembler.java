@@ -18,6 +18,7 @@ import com.innospots.nexus.console.permission.authorization.AuthorizationSubject
 import com.innospots.nexus.console.catalog.domain.entity.ConsoleCatalogResourceEntity;
 import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
 import com.innospots.nexus.console.permission.service.PermissionVisibilityService;
+import com.innospots.nexus.console.entry.ConsoleModuleDescriptor;
 import com.innospots.nexus.console.scope.ConsoleOwnership;
 import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
 
@@ -60,14 +61,6 @@ public final class NavigationMenuAssembler {
     }
 
     private List<NavigationMenuVo> buildMenus(List<ConsoleCatalogResourceEntity> visible) {
-        Map<String, ConsoleCatalogResourceEntity> pagesByPageKey = visible.stream()
-                .filter(resource -> CatalogResourceType.PAGE.name().equals(resource.getResourceType()))
-                .filter(resource -> resource.getPageKey() != null && !resource.getPageKey().isBlank())
-                .collect(Collectors.toMap(
-                        ConsoleCatalogResourceEntity::getPageKey,
-                        Function.identity(),
-                        (left, right) -> left,
-                        LinkedHashMap::new));
         Set<String> visibleMenuIds = visible.stream()
                 .filter(resource -> CatalogResourceType.MENU.name().equals(resource.getResourceType()))
                 .map(ConsoleCatalogResourceEntity::getResourceId)
@@ -91,15 +84,14 @@ public final class NavigationMenuAssembler {
                 Comparator.nullsLast(Integer::compareTo)));
         List<NavigationMenuVo> menus = new ArrayList<>();
         for (ConsoleCatalogResourceEntity root : roots) {
-            menus.add(toMenu(root, menusByParent, pagesByPageKey));
+            menus.add(toMenu(root, menusByParent));
         }
         return List.copyOf(menus);
     }
 
     private static NavigationMenuVo toMenu(
             ConsoleCatalogResourceEntity menu,
-            Map<String, List<ConsoleCatalogResourceEntity>> menusByParent,
-            Map<String, ConsoleCatalogResourceEntity> pagesByPageKey
+            Map<String, List<ConsoleCatalogResourceEntity>> menusByParent
     ) {
         List<ConsoleCatalogResourceEntity> children = menusByParent.getOrDefault(
                 menu.getResourceId(), List.of());
@@ -108,12 +100,12 @@ public final class NavigationMenuAssembler {
                 Comparator.nullsLast(Integer::compareTo)));
         List<NavigationMenuVo> childMenus = new ArrayList<>();
         for (ConsoleCatalogResourceEntity child : children) {
-            childMenus.add(toMenu(child, menusByParent, pagesByPageKey));
+            childMenus.add(toMenu(child, menusByParent));
         }
         return new NavigationMenuVo(
                 menuKey(menu.getResourceKey()),
                 menu.getDisplayName(),
-                routePath(menu, pagesByPageKey),
+                routePath(menu),
                 null,
                 null,
                 null,
@@ -121,22 +113,16 @@ public final class NavigationMenuAssembler {
                 menu.getResourceId(),
                 menu.getOwnerPluginId(),
                 menu.getModuleKey(),
-                menu.getPageKey(),
+                menu.getEntryPageKey(),
                 childMenus);
     }
 
-    private static String routePath(
-            ConsoleCatalogResourceEntity menu,
-            Map<String, ConsoleCatalogResourceEntity> pagesByPageKey
-    ) {
-        if (menu.getPageKey() == null || menu.getPageKey().isBlank()) {
+    private static String routePath(ConsoleCatalogResourceEntity menu) {
+        if (menu.getEntryPageKey() == null || menu.getEntryPageKey().isBlank()) {
             return null;
         }
-        ConsoleCatalogResourceEntity page = pagesByPageKey.get(menu.getPageKey());
-        if (page == null) {
-            return null;
-        }
-        return page.getRoutePath();
+        return ConsoleModuleDescriptor.pagePath(
+                menu.getDomainKey(), menu.getModuleKey(), menu.getEntryPageKey());
     }
 
     private static String menuKey(String resourceKey) {

@@ -3,69 +3,72 @@ package com.innospots.nexus.core.plugin.contribution.console;
 import java.util.List;
 
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.base.i18n.I18nObject;
 import com.innospots.nexus.core.plugin.contribution.PluginContribution;
 import com.innospots.nexus.core.plugin.contribution.PluginContributionInventory;
 import com.innospots.nexus.core.plugin.contribution.PluginContributionType;
 import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
 /**
- * console@1 管理模块、页面和菜单的静态资源贡献。
- * @author Smars
- * @date 2026/09/13
+ * console@2 管理模块与菜单树的静态资源贡献。
  */
-public record ConsolePluginContribution(List<ConsoleModuleDeclaration> modules)
-        implements PluginContribution, PluginContributionInventory {
+public record ConsolePluginContribution(
+        String domainKey,
+        I18nObject displayName,
+        I18nObject description,
+        int orderIndex,
+        List<ConsoleContributeNode> modules
+) implements PluginContribution, PluginContributionInventory {
 
     /** Console Contribution 的稳定类型。 */
     public static final PluginContributionType<ConsolePluginContribution> TYPE =
-            new PluginContributionType<>("console", 1);
+            new PluginContributionType<>("console", 2);
 
-    /** 防御性复制模块列表。 */
     public ConsolePluginContribution {
+        domainKey = ConsoleContributeNode.requireKey(domainKey, "domainKey");
+        displayName = ConsoleI18n.copy(
+                displayName, false, "displayName", PluginStatusCode.RESOURCE_CONFLICT);
+        description = ConsoleI18n.copy(
+                description, false, "description", PluginStatusCode.RESOURCE_CONFLICT);
         modules = modules == null ? List.of() : List.copyOf(modules);
         if (modules.isEmpty()) {
             throw NexusException.build(PluginStatusCode.RESOURCE_CONFLICT,
-                    "console contribution must declare at least one module");
+                    "console contribution must declare at least one module in modules[]");
+        }
+        for (ConsoleContributeNode module : modules) {
+            if (!module.isModule()) {
+                throw NexusException.build(PluginStatusCode.RESOURCE_CONFLICT,
+                        "console contribution modules[] must contain MODULE nodes only");
+            }
         }
     }
 
-    /** 返回 console@1 类型。 */
     @Override
     public PluginContributionType<ConsolePluginContribution> type() {
         return TYPE;
     }
 
-    /** 返回声明的管理模块数量。 */
     @Override
     public int moduleCount() {
         return modules.size();
     }
 
-    /** 返回全部模块内页面节点与菜单节点数量之和。 */
     @Override
     public int componentCount() {
         int total = 0;
-        for (ConsoleModuleDeclaration module : modules) {
-            total += countPages(module.pages());
-            total += countMenus(module.menuTree());
+        for (ConsoleContributeNode module : modules) {
+            total += countNodes(module.children());
         }
         return total;
     }
 
-    private static int countPages(List<UiSpecPageDeclaration> pages) {
+    private static int countNodes(List<ConsoleContributeNode> nodes) {
         int total = 0;
-        for (UiSpecPageDeclaration page : pages) {
+        for (ConsoleContributeNode node : nodes) {
             total += 1;
-            total += countPages(page.children());
-        }
-        return total;
-    }
-
-    private static int countMenus(List<MenuDeclaration> menus) {
-        int total = 0;
-        for (MenuDeclaration menu : menus) {
-            total += 1;
-            total += countMenus(menu.children());
+            if (node.isModule()) {
+                total += countNodes(node.children());
+            }
         }
         return total;
     }

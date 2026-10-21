@@ -53,4 +53,9 @@ public @interface EndpointGrant {
      * 跳过登录鉴权（与 {@link EndpointModule#ignoreAuth()} 为 OR 关系）。
      */
     boolean ignoreAuth() default false;
+
+    /**
+     * READ/EXPORT：目标 {@code grantName}；可变更类：{@code operationGroups.group}（缺省 {@code default}）。
+     */
+    String group() default "";
 }

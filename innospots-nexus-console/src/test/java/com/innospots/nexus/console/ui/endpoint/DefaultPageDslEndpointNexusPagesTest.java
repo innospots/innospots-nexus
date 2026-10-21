@@ -65,13 +65,7 @@ class DefaultPageDslEndpointNexusPagesTest {
     }
 
     private static Stream<Arguments> nexusBuiltinPages() {
-        return Stream.of(
-                Arguments.of("menu", composite("menu")),
-                Arguments.of("dictionary", composite("dictionary")),
-                Arguments.of("logger", composite("logger")),
-                Arguments.of("permission", composite("permission")),
-                Arguments.of("plugin", composite("plugin")),
-                Arguments.of("role", composite("role")));
+        return Stream.of(Arguments.of("plugin", composite("plugin")));
     }
 
     private static String composite(String moduleKey) {

@@ -42,10 +42,10 @@ class SitemapYamlLoadTest {
         SitemapResource resource = service.render("nexus");
 
         assertThat(resource.getId()).isEqualTo("site");
-        assertThat(resource.getPages()).hasSize(6);
-        assertThat(resource.getMenus()).hasSize(6);
-        assertThat(resource.getPages().getFirst().getId()).isEqualTo("nexus-menu-main");
-        assertThat(resource.getPages().getFirst().getPath()).isEqualTo("/page/nexus/menu/nexus-menu-main");
+        assertThat(resource.getPages()).hasSize(1);
+        assertThat(resource.getMenus()).hasSize(1);
+        assertThat(resource.getPages().getFirst().getId()).isEqualTo("nexus-plugin-main");
+        assertThat(resource.getPages().getFirst().getPath()).isEqualTo("/page/nexus/plugin/nexus-plugin-main");
         assertThat(resource.getLayouts().get("login").getBody().getType()).isEqualTo("Flex");
     }
 }

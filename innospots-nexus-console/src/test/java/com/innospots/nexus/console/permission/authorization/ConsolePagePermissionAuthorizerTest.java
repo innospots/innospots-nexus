@@ -1,101 +1,47 @@
 package com.innospots.nexus.console.permission.authorization;
 
-import java.util.List;
-import java.util.Set;
-
-import org.junit.jupiter.api.Test;
-
-import com.innospots.nexus.console.permission.dao.PermissionGrantDao;
-import com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao;
-import com.innospots.nexus.console.permission.domain.entity.PermissionGrantEntity;
-import com.innospots.nexus.console.catalog.domain.entity.ConsoleCatalogResourceEntity;
-import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+
+import com.innospots.nexus.base.domain.enums.BasicStatus;
+import com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao;
+import com.innospots.nexus.console.catalog.domain.entity.ConsoleCatalogResourceEntity;
+import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
+import com.innospots.nexus.console.permission.dao.PermissionGrantDao;
+
 class ConsolePagePermissionAuthorizerTest {
 
     @Test
-    void checksPageThenDatasourceAndMergesRoleAndOrgUnitConstraints() {
-        ConsoleCatalogResourceEntity page = resource(
-                "page-1", CatalogResourceType.PAGE, "page:sales.orders");
-        page.setPageKey("sales.orders");
-        ConsoleCatalogResourceEntity datasource = resource(
-                "datasource-1", CatalogResourceType.DATASOURCE,
-                "datasource:sales.orders.approve");
-        datasource.setPageKey("sales.orders");
-        datasource.setDatasourceKey("approve");
-        datasource.setRequestMethod("POST");
-        datasource.setRequestUrl("/api/orders/{orderId}/approve");
-        PermissionGrantEntity pageGrant = grant("page-1", null);
-        PermissionGrantEntity roleGrant = grant("datasource-1", "region = EAST");
-        PermissionGrantEntity orgUnitGrant = grant("datasource-1", "tenant = NORTH");
-
+    void allowsAdministrator() {
+        ConsoleCatalogResourceEntity menu = menuRow();
         ConsoleCatalogResourceDao resourceDao = mock(ConsoleCatalogResourceDao.class);
-        when(resourceDao.selectList(any())).thenReturn(List.of(page), List.of(datasource));
-        PermissionGrantDao grantDao = mock(PermissionGrantDao.class);
-        when(grantDao.selectList(any())).thenReturn(
-                List.of(pageGrant),
-                List.of(),
-                List.of(roleGrant),
-                List.of(orgUnitGrant));
+        when(resourceDao.selectList(any())).thenReturn(List.of(menu));
 
-        ConsolePagePermissionAuthorizer authorizer = new ConsolePagePermissionAuthorizer(resourceDao, grantDao);
+        ConsolePagePermissionAuthorizer authorizer = new ConsolePagePermissionAuthorizer(
+                resourceDao, mock(PermissionGrantDao.class));
+
         AuthorizationDecision decision = authorizer.authorize(new AuthorizationRequest(
-                "1",
-                "post",
-                "/api/orders/ORD-1001/approve?trace=true",
-                "sales.orders",
-                new AuthorizationSubject(
-                        "user-1", Set.of("role-1"), Set.of("org-1"), false)));
+                "ws-1",
+                "GET",
+                "/api/example",
+                "demo-main",
+                new AuthorizationSubject("u1", java.util.Set.of(), java.util.Set.of(), true)));
 
         assertThat(decision.allowed()).isTrue();
-        assertThat(decision.context().datasourceKey()).isEqualTo("approve");
-        assertThat(decision.context().constraintDefinitions())
-                .containsExactly("region = EAST", "tenant = NORTH");
     }
 
-    @Test
-    void deniesBeforeDatasourceLookupWhenPageGrantIsMissing() {
-        ConsoleCatalogResourceEntity page = resource(
-                "page-1", CatalogResourceType.PAGE, "page:sales.orders");
-        ConsoleCatalogResourceDao resourceDao = mock(ConsoleCatalogResourceDao.class);
-        when(resourceDao.selectList(any())).thenReturn(List.of(page));
-        PermissionGrantDao grantDao = mock(PermissionGrantDao.class);
-        when(grantDao.selectList(any())).thenReturn(List.of());
-
-        AuthorizationDecision decision = new ConsolePagePermissionAuthorizer(
-                resourceDao, grantDao).authorize(new AuthorizationRequest(
-                "1",
-                "GET",
-                "/api/orders",
-                "sales.orders",
-                new AuthorizationSubject("user-1", Set.of("role-1"), Set.of(), false)));
-
-        assertThat(decision.allowed()).isFalse();
-        assertThat(decision.denyReason()).isEqualTo("Page permission is required");
-    }
-
-    private static ConsoleCatalogResourceEntity resource(
-            String resourceId,
-            CatalogResourceType type,
-            String resourceKey
-    ) {
-        ConsoleCatalogResourceEntity resource = new ConsoleCatalogResourceEntity();
-        resource.setResourceId(resourceId);
-        resource.setResourceType(type.name());
-        resource.setResourceKey(resourceKey);
-        resource.setStatus("ENABLED");
-        return resource;
-    }
-
-    private static PermissionGrantEntity grant(String resourceId, String constraint) {
-        PermissionGrantEntity grant = new PermissionGrantEntity();
-        grant.setResourceId(resourceId);
-        grant.setConstraintDefinition(constraint);
-        return grant;
+    private static ConsoleCatalogResourceEntity menuRow() {
+        ConsoleCatalogResourceEntity menu = new ConsoleCatalogResourceEntity();
+        menu.setResourceId("menu-1");
+        menu.setResourceType(CatalogResourceType.MENU.name());
+        menu.setEntryPageKey("demo-main");
+        menu.setStatus(BasicStatus.ENABLED.name());
+        return menu;
     }
 }

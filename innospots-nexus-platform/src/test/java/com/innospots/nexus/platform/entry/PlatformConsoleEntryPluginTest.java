@@ -13,7 +13,7 @@ import com.innospots.nexus.console.ui.spec.PageDsl;
 import com.innospots.nexus.console.ui.spec.config.PageDslConfig;
 import com.innospots.nexus.console.ui.spec.loader.ClasspathPageDslLoader;
 import com.innospots.nexus.console.ui.spec.parser.JacksonPageDslParser;
-import com.innospots.nexus.core.plugin.contribution.console.ConsoleModuleDeclaration;
+import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributeNode;
 import com.innospots.nexus.core.plugin.contribution.console.ConsolePluginContribution;
 import com.innospots.nexus.core.plugin.declaration.PluginDefinition;
 
@@ -38,7 +38,7 @@ class PlatformConsoleEntryPluginTest {
                 .findFirst()
                 .orElseThrow();
 
-        assertThat(contribution.modules()).extracting(ConsoleModuleDeclaration::moduleKey)
+        assertThat(contribution.modules()).extracting(ConsoleContributeNode::moduleKey)
                 .containsExactly(
                         "organization",
                         "menu",
@@ -52,20 +52,20 @@ class PlatformConsoleEntryPluginTest {
     }
 
     @Test
-    void userModuleDeclaresMultipleMenusAndPages() {
+    void userModuleDeclaresMultipleMenus() {
         ConsolePluginContribution contribution = consoleContribution();
-        ConsoleModuleDeclaration userModule = contribution.modules().stream()
+        ConsoleContributeNode userModule = contribution.modules().stream()
                 .filter(module -> "user".equals(module.moduleKey()))
                 .findFirst()
                 .orElseThrow();
 
-        assertThat(userModule.pages()).extracting(page -> page.pageKey())
+        assertThat(userModule.children()).extracting(ConsoleContributeNode::entryPageKey)
                 .contains(
                         PlatformModuleDescriptors.pageKey("user", "main"),
                         PlatformModuleDescriptors.pageKey("user", "invite"),
                         PlatformModuleDescriptors.pageKey("user", "access"),
                         PlatformModuleDescriptors.pageKey("user", "add"));
-        assertThat(userModule.menuTree()).hasSize(4);
+        assertThat(userModule.children()).hasSize(4);
     }
 
     @Test

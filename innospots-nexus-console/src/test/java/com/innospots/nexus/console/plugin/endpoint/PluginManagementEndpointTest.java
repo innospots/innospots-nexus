@@ -23,7 +23,8 @@ class PluginManagementEndpointTest {
     void exposesOnlyThePlannedPluginManagementOperations() throws NoSuchMethodException {
         assertThat(PluginManagementEndpoint.class.getAnnotation(Path.class).value())
                 .isEqualTo(ConsoleConstant.apiPath("/plugins"));
-        assertThat(PluginManagementEndpoint.class.getDeclaredMethod("list")
+        assertThat(PluginManagementEndpoint.class.getDeclaredMethod(
+                        "list", String.class, String.class)
                 .getAnnotation(GET.class)).isNotNull();
         assertThat(PluginManagementEndpoint.class.getDeclaredMethod("get", String.class)
                 .getAnnotation(Path.class).value()).isEqualTo("/{pluginId}");

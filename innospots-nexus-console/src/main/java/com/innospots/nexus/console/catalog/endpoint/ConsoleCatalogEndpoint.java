@@ -48,14 +48,26 @@ public final class ConsoleCatalogEndpoint {
     }
 
     @GET
+    @Path("/permission-catalog")
+    @EndpointGrant(
+            action = EndpointGrantAction.READ,
+            name = "catalog.permission-catalog",
+            label = @I18nLiteral(pairs = {"zh-CN", "权限目录", "en", "Permission catalog"}))
+    @Operation(operationId = "catalogPermissionCatalog", summary = "权限配置目录")
+    public R<List<CatalogNodeVo>> permissionCatalog() {
+        return R.ok(catalogService.permissionCatalog());
+    }
+
+    @GET
     @Path("/tree")
+    @Deprecated
     @EndpointGrant(
             action = EndpointGrantAction.READ,
             name = "catalog.tree",
             label = @I18nLiteral(pairs = {"zh-CN", "目录资源树", "en", "Catalog resource tree"}))
-    @Operation(operationId = "catalogTree", summary = "目录资源树")
+    @Operation(operationId = "catalogTree", summary = "目录资源树（已废弃，请用 permission-catalog）")
     public R<List<CatalogNodeVo>> tree() {
-        return R.ok(catalogService.tree());
+        return R.ok(catalogService.permissionCatalog());
     }
 
     @POST

@@ -49,7 +49,7 @@ class EndpointGrantManagerTest {
 
         assertThat(manager.match("GET", "/api/test/dictionary/types")).isPresent();
         assertThat(manager.match("GET", "/api/test/dictionary/types/dt-1")).isPresent();
-        assertThat(manager.match("POST", "/api/test/dictionary/types")).isEmpty();
+        assertThat(manager.match("POST", "/api/test/dictionary/types/dt-1")).isEmpty();
     }
 
     @Test

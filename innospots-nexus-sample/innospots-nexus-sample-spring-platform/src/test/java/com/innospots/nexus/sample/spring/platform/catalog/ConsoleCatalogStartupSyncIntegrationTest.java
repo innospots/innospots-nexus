@@ -127,8 +127,6 @@ class ConsoleCatalogStartupSyncIntegrationTest {
         verification.put("dbResourceKeys", dbResourceKeys);
         verification.put("apiKeysSubsetOfDb", dbResourceKeys.containsAll(apiResourceKeys));
         verification.put("dbMenuResourceCount", countResourcesByType("MENU"));
-        verification.put("dbActionResourceCount", countResourcesByType("ACTION"));
-        verification.put("dbDatasourceResourceCount", countResourcesByType("DATASOURCE"));
 
         String verificationJson = Jsons.toJson(verification);
         LOGGER.info("catalog startup sync verification: {}", verificationJson);
@@ -136,8 +134,7 @@ class ConsoleCatalogStartupSyncIntegrationTest {
         assertThat(dbResourceKeys)
                 .as("GET /catalog/tree keys should be indexed in nx_console_catalog_resource")
                 .containsAll(apiResourceKeys);
-        assertThat(countResourcesByType("MENU")).isGreaterThan(0L);
-        assertThat(countResourcesByType("PAGE")).isGreaterThanOrEqualTo(8L);
+        assertThat(countResourcesByType("MENU")).isGreaterThanOrEqualTo(8L);
         assertThat(countResourcesByType("MODULE")).isEqualTo(8L);
     }
 

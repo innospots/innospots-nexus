@@ -5,7 +5,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import com.innospots.nexus.base.i18n.I18nObject;
-import com.innospots.nexus.core.plugin.contribution.console.ConsoleModuleDeclaration;
+import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributeNode;
 import com.innospots.nexus.core.plugin.contribution.console.ConsolePluginContribution;
 import com.innospots.nexus.core.plugin.declaration.PluginDefinition;
 
@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class ConsoleModuleEntrySupportTest {
 
     @Test
-    void buildsMultiplePagesForSingleModule() {
+    void buildsSingleMenuForModuleWithAdditionalPages() {
         ConsoleModuleDescriptor module = ConsoleModuleDescriptor.builtin(
                 "com.example.multi-page",
                 "sales",
@@ -29,12 +29,11 @@ class ConsoleModuleEntrySupportTest {
                 List.of("reports-detail"),
                 List.of());
 
-        PluginDefinition definition = ConsoleModuleEntrySupport.definition(module);
-        ConsoleModuleDeclaration declared = soleModule(definition);
+        ConsoleContributeNode declared = soleModule(ConsoleModuleEntrySupport.definition(module));
 
-        assertThat(declared.pages()).extracting("pageKey")
-                .containsExactly("reports-home", "reports-detail");
-        assertThat(declared.menuTree()).hasSize(1);
+        assertThat(module.allPageKeys()).containsExactly("reports-home", "reports-detail");
+        assertThat(declared.children()).hasSize(1);
+        assertThat(declared.children().getFirst().entryPageKey()).isEqualTo("reports-home");
     }
 
     @Test
@@ -52,7 +51,7 @@ class ConsoleModuleEntrySupportTest {
                 List.of("settings-advanced"),
                 List.of(
                         new ConsoleMenuItemDescriptor(
-                                "settings-home",
+                                "settings-main",
                                 I18nObject.of("en", "General"),
                                 "setting",
                                 10,
@@ -64,11 +63,11 @@ class ConsoleModuleEntrySupportTest {
                                 20,
                                 "settings-advanced")));
 
-        ConsoleModuleDeclaration declared = soleModule(ConsoleModuleEntrySupport.definition(module));
+        ConsoleContributeNode declared = soleModule(ConsoleModuleEntrySupport.definition(module));
 
-        assertThat(declared.menuTree()).hasSize(2);
-        assertThat(declared.menuTree().get(0).pageKey()).isEqualTo("settings-main");
-        assertThat(declared.menuTree().get(1).pageKey()).isEqualTo("settings-advanced");
+        assertThat(declared.children()).hasSize(2);
+        assertThat(declared.children().get(0).entryPageKey()).isEqualTo("settings-main");
+        assertThat(declared.children().get(1).entryPageKey()).isEqualTo("settings-advanced");
     }
 
     @Test
@@ -113,7 +112,7 @@ class ConsoleModuleEntrySupportTest {
     }
 
     @Test
-    void buildsPagePathForCustomDomain() {
+    void contributionUsesCustomDomainKey() {
         ConsoleModuleDescriptor module = ConsoleModuleDescriptor.builtin(
                 "com.example.custom-domain",
                 "sales",
@@ -125,10 +124,13 @@ class ConsoleModuleEntrySupportTest {
                 I18nObject.of("en", "Orders"),
                 I18nObject.of("en", "Orders"));
 
-        ConsoleModuleDeclaration declared = soleModule(ConsoleModuleEntrySupport.definition(module));
+        ConsolePluginContribution contribution = definitionContribution(
+                ConsoleModuleEntrySupport.definition(module));
 
-        assertThat(declared.domainKey()).isEqualTo("sales");
-        assertThat(declared.pages().getFirst().pagePath()).isEqualTo("/page/sales/orders/order-list");
+        assertThat(contribution.domainKey()).isEqualTo("sales");
+        assertThat(contribution.modules().getFirst().children().getFirst().entryPageKey()).isEqualTo("order-list");
+        assertThat(ConsoleModuleDescriptor.pagePath("sales", "orders", "order-list"))
+                .isEqualTo("/page/sales/orders/order-list");
     }
 
     @Test
@@ -153,7 +155,7 @@ class ConsoleModuleEntrySupportTest {
                 .hasMessageContaining("pluginId");
     }
 
-    private static ConsoleModuleDeclaration soleModule(PluginDefinition definition) {
+    private static ConsoleContributeNode soleModule(PluginDefinition definition) {
         return definitionContribution(definition).modules().getFirst();
     }
 

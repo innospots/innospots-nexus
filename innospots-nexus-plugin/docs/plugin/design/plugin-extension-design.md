@@ -12,7 +12,8 @@ Console 资源和跨系统协议。
 
 | 文档 | 责任 | 规范性 |
 |------|------|--------|
-| [plugin-extension-design.md](plugin-extension-design.md) | 总体架构、术语、边界和决策 | 规范 |
+| [2026-10-20-plugin-extensions-v2-and-catalog-permission-design.md](2026-10-20-plugin-extensions-v2-and-catalog-permission-design.md) | **apiVersion 2**：`extensions`、函数调用、console@2、catalog 权限资源（**取代下文 Capability/console@1 页面树模型**） | 规范（待实现） |
+| [plugin-extension-design.md](plugin-extension-design.md) | 总体架构、术语、边界和决策（**v1**；Capability 章节见 v2 文档） | 规范 |
 | [plugin-runtime-design.md](plugin-runtime-design.md) | Plugin、Capability、Contribution、生命周期和并发 | 规范 |
 | [plugin-installation-design.md](plugin-installation-design.md) | Core 安装存储、对账、启停意图和 MISSING | 规范 |
 | [plugin-console-contribution-design.md](plugin-console-contribution-design.md) | Console 模块、页面、菜单和权限资源 | 规范 |

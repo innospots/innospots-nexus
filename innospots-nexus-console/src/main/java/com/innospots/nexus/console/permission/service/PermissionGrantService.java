@@ -230,14 +230,6 @@ public class PermissionGrantService {
                     && !Set.of("MODULE", "MENU").contains(parent.getResourceType())) {
                 invalid("Menu parent must be a module or menu");
             }
-            if ("PAGE".equals(resource.getResourceType())
-                    && !Set.of("MODULE", "PAGE").contains(parent.getResourceType())) {
-                invalid("Page parent must be a module or page");
-            }
-            if (Set.of("ACTION", "DATASOURCE").contains(resource.getResourceType())
-                    && !"PAGE".equals(parent.getResourceType())) {
-                invalid("Action and datasource parent must be a page");
-            }
         }
     }
 
@@ -245,21 +237,15 @@ public class PermissionGrantService {
             String value,
             ConsoleCatalogResourceEntity resource
     ) {
-        if (value == null || value.isBlank()) {
-            return null;
+        if (value != null && !value.isBlank()) {
+            invalid("Constraint grants are not supported in catalog v2");
         }
-        if (!CatalogResourceType.DATASOURCE.name().equals(resource.getResourceType())) {
-            invalid("Only datasource grants may contain constraints");
-        }
-        if (value.length() > 10000) {
-            invalid("Datasource constraint is too long");
-        }
-        return value;
+        return null;
     }
 
     private boolean isGrantable(ConsoleCatalogResourceEntity resource) {
         return resource != null
-                && !CatalogResourceType.MODULE.name().equals(resource.getResourceType())
+                && CatalogResourceType.MENU.name().equals(resource.getResourceType())
                 && BasicStatus.ENABLED.name().equals(resource.getStatus());
     }
 

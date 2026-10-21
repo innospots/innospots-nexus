@@ -83,10 +83,14 @@ public final class BuiltinConsoleEntryPlugins {
                 .distinct()
                 .sorted()
                 .collect(Collectors.joining(",")));
-        values.put(TAG_MODULE, entry.modules().stream()
+        String moduleKeys = entry.modules().stream()
                 .map(ConsoleModuleDescriptor::moduleKey)
                 .sorted()
-                .collect(Collectors.joining(",")));
+                .collect(Collectors.joining(","));
+        if (moduleKeys.length() > 64) {
+            moduleKeys = entry.pluginId().substring(entry.pluginId().lastIndexOf('.') + 1);
+        }
+        values.put(TAG_MODULE, moduleKeys);
         return Tags.from(values);
     }
 }

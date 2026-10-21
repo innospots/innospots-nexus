@@ -54,6 +54,12 @@ public class PageMeta {
     @Schema(description = "父页面 page.id；空表示一级页面")
     private String parentPageKey;
 
+    /**
+     * 访问分组 key，对应 MODULE contribute {@code viewGroups[].group}；缺省 {@code default}。
+     */
+    @Schema(description = "访问分组，对应 catalog viewGroups")
+    private String grantGroup;
+
     /** 创建空页面元数据。 */
     public PageMeta() {
     }

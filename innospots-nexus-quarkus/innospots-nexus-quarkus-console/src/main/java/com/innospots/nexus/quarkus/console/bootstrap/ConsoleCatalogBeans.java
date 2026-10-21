@@ -100,7 +100,7 @@ public class ConsoleCatalogBeans {
             ConsoleCatalogResourceDao resourceDao,
             ConsoleContributionCatalog contributionCatalog,
             PageDslLoader pageDslLoader) {
-        return new ConsoleCatalogSyncService(resourceDao, contributionCatalog, pageDslLoader);
+        return new ConsoleCatalogSyncService(resourceDao, contributionCatalog);
     }
 
     /**
@@ -120,7 +120,7 @@ public class ConsoleCatalogBeans {
     ConsoleCatalogService consoleCatalogService(
             ConsoleCatalogResourceDao resourceDao,
             EndpointGrantManager endpointGrantManager) {
-        return new ConsoleCatalogService(resourceDao, endpointGrantManager);
+        return new ConsoleCatalogService(resourceDao, contributionCatalog, endpointGrantManager);
     }
 
     /**

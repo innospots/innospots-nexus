@@ -14,85 +14,139 @@ import com.innospots.nexus.core.plugin.contribution.PluginContributionDecoder;
 import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
 /**
- * 将 YAML 的通用 map 严格解码为不可变 console@1 声明。
- * @author Smars
- * @date 2026/09/13
+ * 将 YAML map 严格解码为不可变 console@2 声明。
  */
 public final class ConsolePluginContributionDecoder
         implements PluginContributionDecoder<ConsolePluginContribution> {
 
-    private static final Set<String> CONTRIBUTION_FIELDS = Set.of("type", "majorVersion", "modules");
+    private static final Set<String> ROOT_FIELDS = Set.of(
+            "type", "majorVersion", "domainKey", "displayName", "description",
+            "orderIndex", "entryPageKey", "modules");
     private static final Set<String> MODULE_FIELDS = Set.of(
-            "domainKey", "moduleKey", "displayName", "description", "pages", "menuTree");
-    private static final Set<String> PAGE_FIELDS = Set.of("pageKey", "pagePath", "children");
+            "moduleKey", "displayName", "description", "orderIndex", "entryPageKey",
+            "icon", "viewGroup", "grantName", "viewGroups", "operationGroups", "children");
     private static final Set<String> MENU_FIELDS = Set.of(
-            "menuKey", "title", "icon", "orderIndex", "pageKey", "children");
+            "displayName", "description", "orderIndex", "entryPageKey",
+            "icon", "viewGroup", "grantName", "children");
+    private static final Set<String> GROUP_FIELDS = Set.of("group", "label");
 
-    /** 返回 console@1 类型。 */
     @Override
     public com.innospots.nexus.core.plugin.contribution.PluginContributionType<ConsolePluginContribution> type() {
         return ConsolePluginContribution.TYPE;
     }
 
-    /**
-     * 解码模块、页面与菜单树。
-     *
-     * @param declaration 已完成结构校验的 YAML 字段映射
-     * @return 不可变 console@1 贡献实例
-     * @throws NexusException 字段缺失、类型不匹配或业务规则违反时抛出
-     */
     @Override
     public ConsolePluginContribution decode(Map<String, Object> declaration) {
         if (declaration == null) {
             invalid("console contribution declaration is required");
         }
-        requireFields(declaration, CONTRIBUTION_FIELDS);
+        requireFields(declaration, ROOT_FIELDS);
         if (!(declaration.get("type") instanceof String type) || !"console".equals(type)) {
             invalid("console contribution type must be console");
         }
-        if (integer(declaration.get("majorVersion"), "majorVersion") != 1) {
-            invalid("console contribution majorVersion must be 1");
+        if (integer(declaration.get("majorVersion"), "majorVersion") != 2) {
+            invalid("console contribution majorVersion must be 2");
         }
-        if (!declaration.containsKey("modules")) {
-            invalid("console contribution modules are required");
+        if (declaration.containsKey("moduleKey")) {
+            invalid("console contribution root must not declare moduleKey");
         }
-        return new ConsolePluginContribution(list(declaration.get("modules"), this::module, "modules"));
+        if (declaration.containsKey("children")) {
+            invalid("console contribution root must use modules[], not children");
+        }
+        Object entryPageKey = declaration.get("entryPageKey");
+        if (entryPageKey != null && !((String) entryPageKey).isBlank()) {
+            invalid("console contribution root entryPageKey must be empty");
+        }
+        return new ConsolePluginContribution(
+                text(declaration.get("domainKey"), "domainKey"),
+                optionalI18n(declaration.get("displayName"), "displayName"),
+                optionalI18n(declaration.get("description"), "description"),
+                integer(declaration.getOrDefault("orderIndex", 0), "orderIndex"),
+                requiredList(declaration, "modules", this::moduleNode));
     }
 
-    private ConsoleModuleDeclaration module(Object value) {
+    private ConsoleContributeNode moduleNode(Object value) {
         Map<String, Object> map = object(value, "module");
         requireFields(map, MODULE_FIELDS);
-        return new ConsoleModuleDeclaration(
-                text(map.get("domainKey"), "domainKey"),
+        if (!map.containsKey("moduleKey")) {
+            invalid("MODULE node requires moduleKey");
+        }
+        String entry = optionalText(map.get("entryPageKey"), "entryPageKey");
+        List<ConsoleContributeNode> children = requiredList(map, "children", this::childNode);
+        return new ConsoleContributeNode(
                 text(map.get("moduleKey"), "moduleKey"),
                 i18n(map.get("displayName"), "displayName"),
                 optionalI18n(map.get("description"), "description"),
-                requiredList(map, "pages", this::page),
-                optionalNonEmptyList(map, "menuTree", this::menu));
-    }
-
-    private UiSpecPageDeclaration page(Object value) {
-        Map<String, Object> map = object(value, "page");
-        requireFields(map, PAGE_FIELDS);
-        return new UiSpecPageDeclaration(
-                text(map.get("pageKey"), "pageKey"),
-                text(map.get("pagePath"), "pagePath"),
-                optionalNonEmptyList(map, "children", this::page));
-    }
-
-    private MenuDeclaration menu(Object value) {
-        Map<String, Object> map = object(value, "menu");
-        requireFields(map, MENU_FIELDS);
-        String pageKey = optionalText(map.get("pageKey"), "pageKey");
-        List<MenuDeclaration> children = optionalNonEmptyList(map, "children", this::menu);
-        Object orderValue = map.getOrDefault("orderIndex", 0);
-        return new MenuDeclaration(
-                text(map.get("menuKey"), "menuKey"),
-                i18n(map.get("title"), "title"),
+                integer(map.getOrDefault("orderIndex", 0), "orderIndex"),
+                entry,
                 optionalText(map.get("icon"), "icon"),
-                integer(orderValue, "orderIndex"),
-                pageKey,
+                optionalText(map.get("viewGroup"), "viewGroup"),
+                optionalText(map.get("grantName"), "grantName"),
+                groupsOrDefault(optionalGroups(map.get("viewGroups")), defaultViewGroups()),
+                groupsOrDefault(optionalGroups(map.get("operationGroups")), defaultOperationGroups()),
                 children);
+    }
+
+    private static List<ConsolePermissionGroupDeclaration> defaultViewGroups() {
+        return List.of(new ConsolePermissionGroupDeclaration(
+                "default",
+                I18nObject.of(Map.of("zh-CN", "页面访问", "en", "Page access"))));
+    }
+
+    private static List<ConsolePermissionGroupDeclaration> defaultOperationGroups() {
+        return List.of(new ConsolePermissionGroupDeclaration(
+                "default",
+                I18nObject.of(Map.of("zh-CN", "操作", "en", "Operations"))));
+    }
+
+    private static List<ConsolePermissionGroupDeclaration> groupsOrDefault(
+            List<ConsolePermissionGroupDeclaration> groups,
+            List<ConsolePermissionGroupDeclaration> defaults
+    ) {
+        if (groups == null || groups.isEmpty()) {
+            return defaults;
+        }
+        return groups;
+    }
+
+    private ConsoleContributeNode childNode(Object value) {
+        Map<String, Object> map = object(value, "node");
+        String entry = optionalText(map.get("entryPageKey"), "entryPageKey");
+        if (entry != null) {
+            requireFields(map, MENU_FIELDS);
+            if (map.containsKey("moduleKey")) {
+                invalid("MENU node must not declare moduleKey");
+            }
+            return new ConsoleContributeNode(
+                    null,
+                    i18n(map.get("displayName"), "displayName"),
+                    optionalI18n(map.get("description"), "description"),
+                    integer(map.getOrDefault("orderIndex", 0), "orderIndex"),
+                    entry,
+                    optionalText(map.get("icon"), "icon"),
+                    optionalText(map.get("viewGroup"), "viewGroup"),
+                    optionalText(map.get("grantName"), "grantName"),
+                    List.of(),
+                    List.of(),
+                    List.of());
+        }
+        requireFields(map, MODULE_FIELDS);
+        return moduleNode(value);
+    }
+
+    private List<ConsolePermissionGroupDeclaration> optionalGroups(Object value) {
+        if (value == null) {
+            return List.of();
+        }
+        return list(value, this::group, "groups");
+    }
+
+    private ConsolePermissionGroupDeclaration group(Object value) {
+        Map<String, Object> map = object(value, "group");
+        requireFields(map, GROUP_FIELDS);
+        return new ConsolePermissionGroupDeclaration(
+                text(map.get("group"), "group"),
+                i18n(map.get("label"), "label"));
     }
 
     private static I18nObject i18n(Object value, String field) {
@@ -114,7 +168,7 @@ public final class ConsolePluginContributionDecoder
     private static <T> List<T> requiredList(
             Map<String, Object> map,
             String field,
-            java.util.function.Function<Object, T> mapper
+            Function<Object, T> mapper
     ) {
         if (!map.containsKey(field)) {
             invalid(field + " is required");
@@ -122,21 +176,6 @@ public final class ConsolePluginContributionDecoder
         List<T> values = list(map.get(field), mapper, field);
         if (values.isEmpty()) {
             invalid(field + " must contain at least one item");
-        }
-        return values;
-    }
-
-    private static <T> List<T> optionalNonEmptyList(
-            Map<String, Object> map,
-            String field,
-            java.util.function.Function<Object, T> mapper
-    ) {
-        if (!map.containsKey(field)) {
-            return List.of();
-        }
-        List<T> values = list(map.get(field), mapper, field);
-        if (values.isEmpty()) {
-            invalid(field + " must not be empty when present");
         }
         return values;
     }
@@ -162,7 +201,7 @@ public final class ConsolePluginContributionDecoder
             invalid(field + " must be an object");
         }
         Map<?, ?> map = (Map<?, ?>) value;
-        Map<String, Object> result = new java.util.LinkedHashMap<>();
+        Map<String, Object> result = new LinkedHashMap<>();
         for (Map.Entry<?, ?> entry : map.entrySet()) {
             if (!(entry.getKey() instanceof String)) {
                 invalid(field + " contains a non-text field name");
@@ -176,7 +215,6 @@ public final class ConsolePluginContributionDecoder
         if (map == null) {
             invalid("declaration object is required");
         }
-        // 白名单字段校验在编译期锁定 DSL 形状，避免未知键静默被忽略后留下兼容债务。
         for (String field : map.keySet()) {
             if (!allowed.contains(field)) {
                 invalid("unknown console contribution field: " + field);
@@ -192,7 +230,13 @@ public final class ConsolePluginContributionDecoder
     }
 
     private static String optionalText(Object value, String field) {
-        return value == null ? null : text(value, field);
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof String string && string.isBlank()) {
+            return null;
+        }
+        return text(value, field);
     }
 
     private static int integer(Object value, String field) {
@@ -201,7 +245,6 @@ public final class ConsolePluginContributionDecoder
         }
         Number number = (Number) value;
         try {
-            // 通过 BigDecimal 统一拒绝 1.0、科学计数法等 YAML 数字变体，确保整数字段语义稳定。
             BigDecimal decimal = new BigDecimal(number.toString());
             if (decimal.stripTrailingZeros().scale() > 0
                     || decimal.compareTo(BigDecimal.valueOf(Integer.MIN_VALUE)) < 0

@@ -13,7 +13,7 @@ import com.innospots.nexus.console.ui.spec.PageDsl;
 import com.innospots.nexus.console.ui.spec.config.PageDslConfig;
 import com.innospots.nexus.console.ui.spec.loader.ClasspathPageDslLoader;
 import com.innospots.nexus.console.ui.spec.parser.JacksonPageDslParser;
-import com.innospots.nexus.core.plugin.contribution.console.ConsoleModuleDeclaration;
+import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributeNode;
 import com.innospots.nexus.core.plugin.contribution.console.ConsolePluginContribution;
 import com.innospots.nexus.core.plugin.contract.Plugin;
 import com.innospots.nexus.core.plugin.declaration.PluginDefinition;
@@ -24,7 +24,7 @@ class ConsoleModuleEntryPluginsTest {
 
     @ParameterizedTest
     @MethodSource("builtinEntryPlugins")
-    void declaresConsoleContributionWithMainPage(Plugin plugin) {
+    void declaresConsoleContributionWithMainMenu(Plugin plugin) {
         PluginDefinition definition = plugin.definition();
         ConsolePluginContribution contribution = definition.contributions().stream()
                 .filter(ConsolePluginContribution.class::isInstance)
@@ -32,15 +32,15 @@ class ConsoleModuleEntryPluginsTest {
                 .findFirst()
                 .orElseThrow();
 
-        ConsoleModuleDeclaration module = contribution.modules().getFirst();
-        String entryPageKey = module.pages().getFirst().pageKey();
+        ConsoleContributeNode module = contribution.modules().getFirst();
+        String entryPageKey = module.children().getFirst().entryPageKey();
         assertThat(module.moduleKey()).isNotBlank();
         assertThat(entryPageKey).isNotBlank();
-        assertThat(module.pages()).singleElement()
-                .satisfies(page -> assertThat(page.pagePath()).isEqualTo(ConsoleModuleDescriptor.pagePath(
-                        module.domainKey(), module.moduleKey(), entryPageKey)));
-        assertThat(module.menuTree()).singleElement()
-                .satisfies(menu -> assertThat(menu.pageKey()).isEqualTo(entryPageKey));
+        assertThat(ConsoleModuleDescriptor.pagePath(
+                contribution.domainKey(), module.moduleKey(), entryPageKey))
+                .startsWith(ConsoleModuleDescriptor.PAGE_ROUTE_PREFIX);
+        assertThat(module.children()).singleElement()
+                .satisfies(menu -> assertThat(menu.entryPageKey()).isEqualTo(entryPageKey));
         assertThat(definition.capabilities()).isEmpty();
     }
 

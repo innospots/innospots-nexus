@@ -71,16 +71,16 @@ public class ConsoleCatalogConfiguration {
     @Bean
     ConsoleCatalogSyncService consoleCatalogSyncService(
             ConsoleCatalogResourceDao resourceDao,
-            ConsoleContributionCatalog contributionCatalog,
-            PageDslLoader pageDslLoader) {
-        return new ConsoleCatalogSyncService(resourceDao, contributionCatalog, pageDslLoader);
+            ConsoleContributionCatalog contributionCatalog) {
+        return new ConsoleCatalogSyncService(resourceDao, contributionCatalog);
     }
 
     @Bean
     ConsoleCatalogService consoleCatalogService(
             ConsoleCatalogResourceDao resourceDao,
+            ConsoleContributionCatalog contributionCatalog,
             EndpointGrantManager endpointGrantManager) {
-        return new ConsoleCatalogService(resourceDao, endpointGrantManager);
+        return new ConsoleCatalogService(resourceDao, contributionCatalog, endpointGrantManager);
     }
 
     @Bean

@@ -1,8 +1,4 @@
-# Nexus 内置控制台 Sitemap（与 *EntryPlugin / ui-pages/nexus/{moduleKey}/{pageKey}.yaml 对齐）。
-# 页面路由：/page/nexus/{moduleKey}/{pageKey}（见 ConsoleModuleDescriptor.PAGE_ROUTE_PREFIX）。
-# 页面正文 lazy 加载：GET /api/public/pages/{pageKey}（pageKey=nexus-{moduleKey}-{xxx})
-# 可见性后续按会话裁剪；updatedAt / user / permissions 由渲染层注入。
-
+# Nexus 控制台 Sitemap（nexus 领域当前仅插件管理 entry）。
 id: site
 resourceType: sitemap
 version: 1
@@ -12,20 +8,10 @@ layout: admin
 auth: { loginPath: /login }
 
 pages:
-  - { id: nexus-menu-main, path: /page/nexus/menu/nexus-menu-main, title: 菜单管理, version: 1, lazy: true }
-  - { id: nexus-dictionary-main, path: /page/nexus/dictionary/nexus-dictionary-main, title: 字典管理, version: 1, lazy: true }
-  - { id: nexus-role-main, path: /page/nexus/role/nexus-role-main, title: 角色管理, version: 1, lazy: true }
-  - { id: nexus-permission-main, path: /page/nexus/permission/nexus-permission-main, title: 权限管理, version: 1, lazy: true }
-  - { id: nexus-logger-main, path: /page/nexus/logger/nexus-logger-main, title: 审计日志, version: 1, lazy: true }
   - { id: nexus-plugin-main, path: /page/nexus/plugin/nexus-plugin-main, title: 插件管理, version: 1, lazy: true }
 
 menus:
-  - { id: nexus-menu-main, type: page, pageId: nexus-menu-main, title: 菜单管理, icon: menu, layout: admin, order: 10 }
-  - { id: nexus-dictionary-main, type: page, pageId: nexus-dictionary-main, title: 字典管理, icon: book, layout: admin, order: 20 }
-  - { id: nexus-role-main, type: page, pageId: nexus-role-main, title: 角色管理, icon: team, layout: admin, order: 30 }
-  - { id: nexus-permission-main, type: page, pageId: nexus-permission-main, title: 权限管理, icon: lock, layout: admin, order: 40 }
-  - { id: nexus-logger-main, type: page, pageId: nexus-logger-main, title: 审计日志, icon: file-text, layout: admin, order: 50 }
-  - { id: nexus-plugin-main, type: page, pageId: nexus-plugin-main, title: 插件管理, icon: appstore, layout: admin, order: 60 }
+  - { id: nexus-plugin-main, type: page, pageId: nexus-plugin-main, title: 插件管理, icon: appstore, layout: admin, order: 10 }
 
 layouts:
   admin:

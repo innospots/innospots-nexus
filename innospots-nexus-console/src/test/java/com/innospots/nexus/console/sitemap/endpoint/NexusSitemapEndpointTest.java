@@ -54,26 +54,16 @@ class NexusSitemapEndpointTest {
         assertThat(resource.getDslVersion()).isEqualTo("1.0");
         assertThat(resource.getLayout()).isEqualTo("admin");
         assertThat(resource.getAuth().getLoginPath()).isEqualTo("/login");
-        assertThat(resource.getPages()).hasSize(6);
-        assertThat(resource.getMenus()).hasSize(6);
+        assertThat(resource.getPages()).hasSize(1);
+        assertThat(resource.getMenus()).hasSize(1);
         assertThat(resource.getLayouts()).containsKeys("admin", "login", "blank");
         assertThat(resource.getLayouts().get("admin").getBody().getType()).isEqualTo("Layout");
         assertThat(resource.getLayouts().get("login").getBody().getType()).isEqualTo("Flex");
 
-        List<String> pageIds = resource.getPages().stream()
-                .map(page -> page.getId())
-                .toList();
-        assertThat(pageIds).containsExactly(
-                "nexus-menu-main",
-                "nexus-dictionary-main",
-                "nexus-role-main",
-                "nexus-permission-main",
-                "nexus-logger-main",
-                "nexus-plugin-main");
-
+        assertThat(resource.getPages().getFirst().getId()).isEqualTo("nexus-plugin-main");
         assertThat(resource.getPages().getFirst().getPath())
-                .isEqualTo("/page/nexus/menu/nexus-menu-main");
-        assertThat(resource.getMenus().getFirst().getPageId()).isEqualTo("nexus-menu-main");
+                .isEqualTo("/page/nexus/plugin/nexus-plugin-main");
+        assertThat(resource.getMenus().getFirst().getPageId()).isEqualTo("nexus-plugin-main");
     }
 
     @Test
@@ -83,7 +73,7 @@ class NexusSitemapEndpointTest {
         assertThat(response.success()).isTrue();
         assertThat(response.code()).isEqualTo(R.OK);
         assertThat(response.data().getId()).isEqualTo("site");
-        assertThat(response.data().getPages()).hasSize(6);
-        assertThat(response.data().getMenus().getFirst().getId()).isEqualTo("nexus-menu-main");
+        assertThat(response.data().getPages()).hasSize(1);
+        assertThat(response.data().getMenus().getFirst().getId()).isEqualTo("nexus-plugin-main");
     }
 }

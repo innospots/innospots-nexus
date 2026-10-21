@@ -1,6 +1,5 @@
 package com.innospots.nexus.console.catalog.service;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -9,60 +8,37 @@ import java.util.Objects;
 import java.util.Set;
 
 import com.innospots.nexus.base.domain.enums.BasicStatus;
-import com.innospots.nexus.base.exception.NexusException;
-import com.innospots.nexus.console.support.ConsoleExceptions;
+import com.innospots.nexus.base.i18n.I18nObject;
+import com.innospots.nexus.base.json.Jsons;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.base.thread.TLC;
-import com.innospots.nexus.console.ui.spec.PageDsl;
-import com.innospots.nexus.console.ui.spec.PageMeta;
-import com.innospots.nexus.console.ui.spec.action.ActionConfig;
-import com.innospots.nexus.console.ui.spec.action.ActionOrList;
-import com.innospots.nexus.console.ui.spec.datasource.DataSourceConfig;
-import com.innospots.nexus.console.ui.spec.datasource.HttpDataSource;
-import com.innospots.nexus.console.ui.spec.datasource.ServiceDataSource;
-import com.innospots.nexus.console.ui.spec.loader.PageDslLoader;
-import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributionCatalog;
-import com.innospots.nexus.core.plugin.contribution.console.ConsoleModuleDeclaration;
-import com.innospots.nexus.core.plugin.contribution.console.MenuDeclaration;
-import com.innospots.nexus.core.plugin.contribution.console.UiSpecPageDeclaration;
+import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
 import com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao;
 import com.innospots.nexus.console.catalog.domain.entity.ConsoleCatalogResourceEntity;
-import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
 import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
 import com.innospots.nexus.console.catalog.domain.model.CatalogSyncResult;
+import com.innospots.nexus.console.support.ConsoleExceptions;
+import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributeNode;
+import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributionCatalog;
+import com.innospots.nexus.core.plugin.contribution.console.ConsolePermissionGroupDeclaration;
+import com.innospots.nexus.core.plugin.contribution.console.ConsolePluginContribution;
 
 /**
- * 将已激活 Console Contribution 和 PageDsl 同步为宿主级目录索引。
- *
- * <p>Console Contribution 和 PageDsl 是唯一事实源；同步不会自动授权。</p>
- *
- * @author Smars
- * @date 2026/09/13
+ * 将已激活 console@2 贡献同步为宿主级目录索引（仅 MODULE / MENU）。
  */
 public final class ConsoleCatalogSyncService {
 
     private final ConsoleCatalogResourceDao resourceDao;
     private final ConsoleContributionCatalog contributionCatalog;
-    private final PageDslLoader pageDslLoader;
 
-    /**
-     * 创建 Console 目录同步服务。
-     */
     public ConsoleCatalogSyncService(
             ConsoleCatalogResourceDao resourceDao,
-            ConsoleContributionCatalog contributionCatalog,
-            PageDslLoader pageDslLoader
+            ConsoleContributionCatalog contributionCatalog
     ) {
         this.resourceDao = require(resourceDao, "resourceDao");
         this.contributionCatalog = require(contributionCatalog, "contributionCatalog");
-        this.pageDslLoader = require(pageDslLoader, "pageDslLoader");
     }
 
-    /**
-     * 同步当前宿主全部 ACTIVE 插件贡献的模块、菜单、页面、action 和 datasource。
-     *
-     * @return 本次创建、更新和禁用的资源数量
-     */
     public CatalogSyncResult sync() {
         List<ResourceDefinition> definitions = discover();
         Map<String, ConsoleCatalogResourceEntity> existing = loadExisting();
@@ -70,7 +46,6 @@ public final class ConsoleCatalogSyncService {
         int updated = 0;
         Set<String> activeKeys = new HashSet<>();
 
-        // 先发现完整资源集合，确保任意定义校验失败时不会留下半套目录。
         for (ResourceDefinition definition : definitions) {
             activeKeys.add(definition.resourceKey());
             ConsoleCatalogResourceEntity entity = existing.get(definition.resourceKey());
@@ -99,325 +74,76 @@ public final class ConsoleCatalogSyncService {
         for (ConsoleContributionCatalog.ActiveConsoleContribution active
                 : contributionCatalog.activeContributions()) {
             String ownerPluginId = active.ownerPluginId();
-            for (ConsoleModuleDeclaration module : active.contribution().modules()) {
-                add(definitions, moduleDefinition(ownerPluginId, module));
-                collectMenus(definitions, ownerPluginId, module, module.menuTree(), null);
-                collectModulePages(definitions, ownerPluginId, module);
+            ConsolePluginContribution contribution = active.contribution();
+            String domainKey = contribution.domainKey();
+            for (ConsoleContributeNode module : contribution.modules()) {
+                walkModule(ownerPluginId, domainKey, module, null, definitions, new LinkedHashMap<>());
             }
         }
         return List.copyOf(definitions.values());
     }
 
-    private void collectMenus(
-            Map<String, ResourceDefinition> definitions,
+    private void walkModule(
             String ownerPluginId,
-            ConsoleModuleDeclaration module,
-            List<MenuDeclaration> menus,
-            String parentResourceKey
-    ) {
-        int order = 0;
-        for (MenuDeclaration menu : menus) {
-            String resourceKey = menu.resourceKey(module.moduleKey());
-            String pageKey = menu.pageKey() == null
-                    ? null
-                    : pageIdentity(module.moduleKey(), menu.pageKey());
-            add(definitions, new ResourceDefinition(
-                    ownerPluginId,
-                    module.moduleKey(),
-                    CatalogResourceType.MENU,
-                    resourceKey,
-                    parentResourceKey == null ? module.resourceKey() : parentResourceKey,
-                    pageKey,
-                    null,
-                    null,
-                    null,
-                    null,
-                    display(menu.title(), menu.menuKey()),
-                    order++));
-            collectMenus(definitions, ownerPluginId, module, menu.children(), resourceKey);
-        }
-    }
-
-    private void collectModulePages(
+            String domainKey,
+            ConsoleContributeNode module,
+            String parentResourceKey,
             Map<String, ResourceDefinition> definitions,
-            String ownerPluginId,
-            ConsoleModuleDeclaration module
+            Map<String, String> resourceKeyByPath
     ) {
-        List<UiSpecPageDeclaration> declarations = flattenPageDeclarations(module.pages());
-        Map<String, UiSpecPageDeclaration> declarationByKey = new LinkedHashMap<>();
-        Map<String, PageDsl> documents = new LinkedHashMap<>();
-        for (UiSpecPageDeclaration declaration : declarations) {
-            if (declarationByKey.containsKey(declaration.pageKey())) {
-                invalid("duplicate pageKey in module " + module.moduleKey() + ": " + declaration.pageKey());
-            }
-            declarationByKey.put(declaration.pageKey(), declaration);
-            PageDsl document = pageDslLoader.load(
-                    module.domainKey(), module.moduleKey(), declaration.pageKey());
-            validatePageSpec(module, declaration, document);
-            documents.put(declaration.pageKey(), document);
-        }
-        validatePageParentage(module, documents);
-        int order = 0;
-        for (String pageKey : orderPagesForCatalog(documents)) {
-            UiSpecPageDeclaration page = declarationByKey.get(pageKey);
-            PageDsl document = documents.get(pageKey);
-            String pageIdentity = pageIdentity(module.moduleKey(), page.pageKey());
-            String pageResourceKey = page.resourceKey(module.moduleKey());
-            add(definitions, new ResourceDefinition(
-                    ownerPluginId,
-                    module.moduleKey(),
-                    CatalogResourceType.PAGE,
-                    pageResourceKey,
-                    parentPageResourceKey(module, document),
-                    page.pageKey(),
-                    null,
-                    page.pagePath(),
-                    null,
-                    null,
-                    display(document.getPage() == null ? null : document.getPage().getTitle(), page.pageKey()),
-                    order++));
-            collectActions(definitions, ownerPluginId, module, document, pageIdentity,
-                    pageResourceKey);
-            collectDatasources(definitions, ownerPluginId, module, document, pageIdentity,
-                    pageResourceKey);
-        }
-    }
-
-    private static List<UiSpecPageDeclaration> flattenPageDeclarations(List<UiSpecPageDeclaration> pages) {
-        List<UiSpecPageDeclaration> flattened = new ArrayList<>();
-        flattenPageDeclarations(pages, flattened);
-        return List.copyOf(flattened);
-    }
-
-    private static void flattenPageDeclarations(
-            List<UiSpecPageDeclaration> pages,
-            List<UiSpecPageDeclaration> flattened
-    ) {
-        if (pages == null) {
-            return;
-        }
-        for (UiSpecPageDeclaration page : pages) {
-            flattened.add(page);
-            flattenPageDeclarations(page.children(), flattened);
-        }
-    }
-
-    private void validatePageParentage(ConsoleModuleDeclaration module, Map<String, PageDsl> documents) {
-        for (Map.Entry<String, PageDsl> entry : documents.entrySet()) {
-            String pageKey = entry.getKey();
-            String parentPageKey = readParentPageKey(entry.getValue());
-            if (!hasText(parentPageKey)) {
-                continue;
-            }
-            if (!documents.containsKey(parentPageKey)) {
-                invalid("PageDsl parentPageKey is not declared in module "
-                        + module.moduleKey() + ": " + pageKey + " -> " + parentPageKey);
-            }
-        }
-        for (String pageKey : documents.keySet()) {
-            if (hasParentCycle(pageKey, documents, new HashSet<>())) {
-                invalid("PageDsl parentPageKey cycle detected in module "
-                        + module.moduleKey() + ": " + pageKey);
-            }
-        }
-    }
-
-    private boolean hasParentCycle(String pageKey, Map<String, PageDsl> documents, Set<String> visiting) {
-        if (!visiting.add(pageKey)) {
-            return true;
-        }
-        String parentPageKey = readParentPageKey(documents.get(pageKey));
-        if (!hasText(parentPageKey)) {
-            visiting.remove(pageKey);
-            return false;
-        }
-        boolean cycle = hasParentCycle(parentPageKey, documents, visiting);
-        visiting.remove(pageKey);
-        return cycle;
-    }
-
-    private static List<String> orderPagesForCatalog(Map<String, PageDsl> documents) {
-        List<String> ordered = new ArrayList<>();
-        Set<String> remaining = new HashSet<>(documents.keySet());
-        while (!remaining.isEmpty()) {
-            boolean progressed = false;
-            for (String pageKey : List.copyOf(remaining)) {
-                String parentPageKey = readParentPageKey(documents.get(pageKey));
-                if (!hasText(parentPageKey) || ordered.contains(parentPageKey)) {
-                    ordered.add(pageKey);
-                    remaining.remove(pageKey);
-                    progressed = true;
-                }
-            }
-            if (!progressed) {
-                throw ConsoleExceptions.build(
-                        NexusStatusCode.CONFIG_ERROR,
-                        "PageDsl parentPageKey graph cannot be ordered");
-            }
-        }
-        return ordered;
-    }
-
-    private static String parentPageResourceKey(ConsoleModuleDeclaration module, PageDsl document) {
-        String parentPageKey = readParentPageKey(document);
-        if (!hasText(parentPageKey)) {
-            return module.resourceKey();
-        }
-        return pageResourceKey(module.moduleKey(), parentPageKey);
-    }
-
-    private static String pageResourceKey(String moduleKey, String pageKey) {
-        return "page:" + moduleKey + "." + pageKey;
-    }
-
-    private static String readParentPageKey(PageDsl document) {
-        if (document == null) {
-            return null;
-        }
-        PageMeta page = document.getPage();
-        if (page == null) {
-            return null;
-        }
-        String parentPageKey = page.getParentPageKey();
-        if (parentPageKey == null || parentPageKey.isBlank()) {
-            return null;
-        }
-        return parentPageKey.trim();
-    }
-
-    private void collectActions(
-            Map<String, ResourceDefinition> definitions,
-            String ownerPluginId,
-            ConsoleModuleDeclaration module,
-            PageDsl document,
-            String pageIdentity,
-            String pageResourceKey
-    ) {
-        int order = 0;
-        for (Map.Entry<String, ActionOrList> entry : document.actions().entrySet()) {
-            String actionName = requireText(entry.getKey(), "actionName");
-            for (ActionConfig action : entry.getValue().actions()) {
-                collectAction(definitions, ownerPluginId, module, actionName, action,
-                        document.dataSources(), pageIdentity, pageResourceKey, order++);
-            }
-        }
-    }
-
-    private void collectAction(
-            Map<String, ResourceDefinition> definitions,
-            String ownerPluginId,
-            ConsoleModuleDeclaration module,
-            String actionName,
-            ActionConfig action,
-            Map<String, DataSourceConfig> dataSources,
-            String pageIdentity,
-            String pageResourceKey,
-            int order
-    ) {
-        requireText(actionName, "actionName");
-        if (action == null || !hasText(action.getAction())) {
-            invalid("Action registry name is required: " + actionName);
-        }
-        String datasourceKey = resolveDatasourceKey(action);
-        if (datasourceKey != null && !dataSources.containsKey(datasourceKey)) {
-            invalid("Action references an unknown datasource: " + actionName);
-        }
-        String resourceKey = "action:" + pageIdentity + "." + actionName;
+        String moduleResourceKey = module.moduleResourceKey();
         add(definitions, new ResourceDefinition(
                 ownerPluginId,
-                module.moduleKey(),
-                CatalogResourceType.ACTION,
-                resourceKey,
-                pageResourceKey,
-                pageIdentity,
-                datasourceKey,
-                null,
-                null,
-                null,
-                display(action.getId(), actionName),
-                order));
-    }
-
-    private void collectDatasources(
-            Map<String, ResourceDefinition> definitions,
-            String ownerPluginId,
-            ConsoleModuleDeclaration module,
-            PageDsl document,
-            String pageIdentity,
-            String pageResourceKey
-    ) {
-        Map<String, String> requestIdentities = new LinkedHashMap<>();
-        int order = 0;
-        for (Map.Entry<String, DataSourceConfig> entry : document.dataSources().entrySet()) {
-            String datasourceKey = requireText(entry.getKey(), "datasourceKey");
-            DataSourceConfig dataSource = entry.getValue();
-            if (dataSource == null) {
-                invalid("Datasource definition is required: " + datasourceKey);
-            }
-            String method;
-            String url;
-            if (dataSource instanceof HttpDataSource httpDataSource) {
-                if (httpDataSource.getRequest() == null) {
-                    invalid("HTTP datasource request is required: " + datasourceKey);
-                }
-                method = requireText(httpDataSource.getRequest().getMethod(), "datasource.method")
-                        .toUpperCase();
-                url = normalizePath(requireText(httpDataSource.getRequest().getUrl(), "datasource.url"));
-            } else if (dataSource instanceof ServiceDataSource serviceDataSource) {
-                method = "SERVICE";
-                url = "/" + requireText(serviceDataSource.getService(), "datasource.service");
-            } else {
-                continue;
-            }
-            String requestIdentity = method + " " + url;
-            if (requestIdentities.put(requestIdentity, datasourceKey) != null) {
-                invalid("Multiple datasources match " + requestIdentity + " on " + pageIdentity);
-            }
-            add(definitions, new ResourceDefinition(
-                    ownerPluginId,
-                    module.moduleKey(),
-                    CatalogResourceType.DATASOURCE,
-                    "datasource:" + pageIdentity + "." + datasourceKey,
-                    pageResourceKey,
-                    pageIdentity,
-                    datasourceKey,
-                    null,
-                    method,
-                    url,
-                    datasourceKey,
-                    order++));
-        }
-    }
-
-    private ResourceDefinition moduleDefinition(
-            String ownerPluginId,
-            ConsoleModuleDeclaration module
-    ) {
-        return new ResourceDefinition(
-                ownerPluginId,
+                domainKey,
                 module.moduleKey(),
                 CatalogResourceType.MODULE,
-                module.resourceKey(),
+                moduleResourceKey,
+                parentResourceKey,
                 null,
                 null,
                 null,
                 null,
-                null,
-                null,
-                display(module.displayName(), module.moduleKey()),
-                0);
+                i18nJson(module.displayName()),
+                i18nJson(module.description()),
+                module.orderIndex()));
+        resourceKeyByPath.put(module.moduleKey(), moduleResourceKey);
+
+        String groupsJson = groupsJson(module.viewGroups());
+        String operationGroupsJson = groupsJson(module.operationGroups());
+
+        for (ConsoleContributeNode child : module.children()) {
+            if (child.isMenu()) {
+                add(definitions, new ResourceDefinition(
+                        ownerPluginId,
+                        domainKey,
+                        module.moduleKey(),
+                        CatalogResourceType.MENU,
+                        child.menuResourceKey(module.moduleKey()),
+                        moduleResourceKey,
+                        child.entryPageKey(),
+                        child.icon(),
+                        groupsJson,
+                        operationGroupsJson,
+                        i18nJson(child.displayName()),
+                        i18nJson(child.description()),
+                child.orderIndex()));
+            } else if (child.isModule()) {
+                walkModule(ownerPluginId, domainKey, child, moduleResourceKey, definitions, resourceKeyByPath);
+            } else {
+                invalid("illegal child under module " + module.moduleKey());
+            }
+        }
     }
 
-    private void validatePageSpec(
-            ConsoleModuleDeclaration module,
-            UiSpecPageDeclaration page,
-            PageDsl document
-    ) {
-        if (document == null || document.getPage() == null
-                || !page.pageKey().equals(document.getPage().getId())) {
-            invalid("PageDsl page.id does not match "
-                    + module.moduleKey() + "." + page.pageKey());
+    private static String groupsJson(List<ConsolePermissionGroupDeclaration> groups) {
+        return Jsons.toJson(groups);
+    }
+
+    private static String i18nJson(I18nObject value) {
+        if (value == null) {
+            return null;
         }
+        return Jsons.toJson(value);
     }
 
     private void add(Map<String, ResourceDefinition> definitions, ResourceDefinition definition) {
@@ -444,26 +170,25 @@ public final class ConsoleCatalogSyncService {
                 ? null
                 : resourceId(resources, definition.parentResourceKey());
         entity.setOwnerPluginId(definition.ownerPluginId());
+        entity.setDomainKey(definition.domainKey());
         entity.setModuleKey(definition.moduleKey());
         entity.setResourceType(definition.type().name());
         entity.setResourceKey(definition.resourceKey());
         entity.setParentResourceId(parentId);
-        entity.setPageKey(definition.pageKey());
-        entity.setDatasourceKey(definition.datasourceKey());
-        entity.setRoutePath(definition.routePath());
-        entity.setRequestMethod(definition.requestMethod());
-        entity.setRequestUrl(definition.requestUrl());
+        entity.setEntryPageKey(definition.entryPageKey());
         entity.setDisplayName(definition.displayName());
+        entity.setDescription(definition.description());
         entity.setSortOrder(definition.sortOrder());
+        entity.setIcon(definition.icon());
+        if (definition.type() == CatalogResourceType.MENU) {
+            entity.setViewGroups(definition.viewGroups());
+            entity.setOperationGroups(definition.operationGroups());
+        } else {
+            entity.setViewGroups(null);
+            entity.setOperationGroups(null);
+        }
         entity.setStatus(BasicStatus.ENABLED.name());
         entity.setSecurityRealm(securityRealmForPlugin(definition.ownerPluginId()));
-    }
-
-    private static String securityRealmForPlugin(String ownerPluginId) {
-        if ("com.innospots.nexus.platform.console".equals(ownerPluginId)) {
-            return SecurityRealm.PLATFORM.name();
-        }
-        return currentSecurityRealm();
     }
 
     private boolean changed(
@@ -475,18 +200,18 @@ public final class ConsoleCatalogSyncService {
                 ? null
                 : resourceId(resources, definition.parentResourceKey());
         return !Objects.equals(entity.getOwnerPluginId(), definition.ownerPluginId())
+                || !Objects.equals(entity.getDomainKey(), definition.domainKey())
                 || !Objects.equals(entity.getModuleKey(), definition.moduleKey())
                 || !Objects.equals(entity.getResourceType(), definition.type().name())
                 || !Objects.equals(entity.getParentResourceId(), parentId)
-                || !Objects.equals(entity.getPageKey(), definition.pageKey())
-                || !Objects.equals(entity.getDatasourceKey(), definition.datasourceKey())
-                || !Objects.equals(entity.getRoutePath(), definition.routePath())
-                || !Objects.equals(entity.getRequestMethod(), definition.requestMethod())
-                || !Objects.equals(entity.getRequestUrl(), definition.requestUrl())
+                || !Objects.equals(entity.getEntryPageKey(), definition.entryPageKey())
                 || !Objects.equals(entity.getDisplayName(), definition.displayName())
+                || !Objects.equals(entity.getDescription(), definition.description())
                 || !Objects.equals(entity.getSortOrder(), definition.sortOrder())
-                || !BasicStatus.ENABLED.name().equals(entity.getStatus())
-                || !Objects.equals(entity.getSecurityRealm(), currentSecurityRealm());
+                || !Objects.equals(entity.getIcon(), definition.icon())
+                || !Objects.equals(entity.getViewGroups(), definition.viewGroups())
+                || !Objects.equals(entity.getOperationGroups(), definition.operationGroups())
+                || !BasicStatus.ENABLED.name().equals(entity.getStatus());
     }
 
     private int disableMissing(
@@ -516,64 +241,11 @@ public final class ConsoleCatalogSyncService {
         return parent.getResourceId();
     }
 
-    private static String pageIdentity(String moduleKey, String pageKey) {
-        return moduleKey + "." + pageKey;
-    }
-
-    private static String normalizePath(String value) {
-        int query = value.indexOf('?');
-        int fragment = value.indexOf('#');
-        int end = query < 0 ? value.length() : query;
-        if (fragment >= 0) {
-            end = Math.min(end, fragment);
+    private static String securityRealmForPlugin(String ownerPluginId) {
+        if ("com.innospots.nexus.platform.console".equals(ownerPluginId)) {
+            return SecurityRealm.PLATFORM.name();
         }
-        String path = value.substring(0, end).trim();
-        if (!path.startsWith("/")) {
-            invalid("Datasource URL must be a path: " + value);
-        }
-        return path.length() > 1 && path.endsWith("/")
-                ? path.substring(0, path.length() - 1)
-                : path;
-    }
-
-    private static String display(com.innospots.nexus.base.i18n.I18nObject value, String fallback) {
-        if (value != null && value.defaultValue() != null && !value.defaultValue().isBlank()) {
-            return value.defaultValue();
-        }
-        return fallback;
-    }
-
-    private static String display(String value, String fallback) {
-        if (value != null && !value.isBlank()) {
-            return value;
-        }
-        return fallback;
-    }
-
-    private static String resolveDatasourceKey(ActionConfig action) {
-        if (action.getParams() == null) {
-            return null;
-        }
-        Object dataSource = action.getParams().get("dataSource");
-        if (dataSource == null) {
-            return null;
-        }
-        String key = String.valueOf(dataSource);
-        if (key.isBlank()) {
-            return null;
-        }
-        return key;
-    }
-
-    private static boolean hasText(String value) {
-        return value != null && !value.isBlank();
-    }
-
-    private static String requireText(String value, String field) {
-        if (value == null || value.isBlank()) {
-            invalid(field + " is required");
-        }
-        return value.trim();
+        return currentSecurityRealm();
     }
 
     private static String currentSecurityRealm() {
@@ -597,18 +269,18 @@ public final class ConsoleCatalogSyncService {
 
     private record ResourceDefinition(
             String ownerPluginId,
+            String domainKey,
             String moduleKey,
             CatalogResourceType type,
             String resourceKey,
             String parentResourceKey,
-            String pageKey,
-            String datasourceKey,
-            String routePath,
-            String requestMethod,
-            String requestUrl,
+            String entryPageKey,
+            String icon,
+            String viewGroups,
+            String operationGroups,
             String displayName,
+            String description,
             int sortOrder
     ) {
     }
-
 }

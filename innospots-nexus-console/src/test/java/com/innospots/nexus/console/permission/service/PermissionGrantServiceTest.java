@@ -117,27 +117,24 @@ class PermissionGrantServiceTest {
     }
 
     @Test
-    void replaceRejectsPageWithoutMenuParentGrant() {
+    void replaceRejectsConstraintDefinition() {
         bindWorkspaceScope("tnt-1", "wks-1");
         ConsoleOwnership ownership = workspaceOwnership("wks-1");
         ConsoleCatalogResourceEntity module = catalogResource(
                 "mod-1", CatalogResourceType.MODULE, "module:sales", null);
         ConsoleCatalogResourceEntity menu = catalogResource(
                 "menu-1", CatalogResourceType.MENU, "menu:sales.orders", "mod-1");
-        ConsoleCatalogResourceEntity page = catalogResource(
-                "page-1", CatalogResourceType.PAGE, "page:sales.orders", "menu-1");
-
         ConsoleCatalogResourceDao resourceDao = mock(ConsoleCatalogResourceDao.class);
-        when(resourceDao.selectList(any())).thenReturn(List.of(page), List.of(menu));
+        when(resourceDao.selectList(any())).thenReturn(List.of(menu), List.of(module));
 
         PermissionGrantService service = newService(mock(PermissionGrantDao.class), resourceDao);
         PermissionGrantReplaceRequest request = new PermissionGrantReplaceRequest(List.of(
-                new PermissionGrantItemRequest("page-1", null)));
+                new PermissionGrantItemRequest("menu-1", "{\"filter\":\"x\"}")));
 
         assertThatThrownBy(() -> service.replace(
                 PermissionSubjectType.ROLE, "rol-1", request, ownership, "tnt-1", "wks-1"))
                 .isInstanceOf(NexusException.class)
-                .hasMessageContaining("parent must also be granted");
+                .hasMessageContaining("Constraint");
     }
 
     @Test
