@@ -1,7 +1,7 @@
 package com.innospots.nexus.core.plugin.contribution;
 
 import com.innospots.nexus.base.exception.NexusException;
-import com.innospots.nexus.core.plugin.capability.ProviderRef;
+import com.innospots.nexus.core.plugin.declaration.ProviderRef;
 import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
 /**

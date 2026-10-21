@@ -5,17 +5,16 @@ import java.util.Map;
 
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.json.Jsons;
-import com.innospots.nexus.core.plugin.capability.Tags;
 import com.innospots.nexus.core.plugin.contribution.PluginContribution;
 import com.innospots.nexus.core.plugin.contribution.PluginContributionSnapshotter;
 import com.innospots.nexus.core.plugin.contribution.PluginContributionSnapshotterRegistry;
-import com.innospots.nexus.core.plugin.declaration.CapabilityContribution;
 import com.innospots.nexus.core.plugin.declaration.PluginDefinition;
 import com.innospots.nexus.core.plugin.declaration.PluginSource;
 import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
 /**
  * 在运行时定义与持久化摘要之间执行显式、安全映射。
+ *
  * @author Smars
  * @date 2026/09/13
  */
@@ -54,15 +53,12 @@ public final class PluginDefinitionSnapshotMapper {
             throw NexusException.build(PluginStatusCode.PLUGIN_DEFINITION_INVALID,
                     "definition, source and snapshotters are required");
         }
-        List<PluginDefinitionSnapshot.CapabilitySnapshot> capabilities = definition.capabilities().stream()
-                .map(contribution -> capability(definition, contribution))
-                .toList();
         List<Map<String, Object>> contributions = definition.contributions().stream()
                 .map(contribution -> contributionSnapshot(contribution, snapshotters))
                 .toList();
         return new PluginDefinitionSnapshot(
                 definition.pluginId(), definition.version(), definition.apiVersion(),
-                source.sourceType(), source.location(), capabilities, contributions);
+                source.sourceType(), source.location(), List.of(), contributions);
     }
 
     /**
@@ -93,21 +89,6 @@ public final class PluginDefinitionSnapshotMapper {
                     "plugin definition snapshot JSON is required");
         }
         return Jsons.fromJson(json, PluginDefinitionSnapshot.class);
-    }
-
-    private static PluginDefinitionSnapshot.CapabilitySnapshot capability(
-            PluginDefinition definition,
-            CapabilityContribution<?> contribution
-    ) {
-        List<PluginDefinitionSnapshot.ConfigItemSnapshot> config = contribution.config().items().stream()
-                .map(item -> new PluginDefinitionSnapshot.ConfigItemSnapshot(
-                        item.key(), item.type().name(), item.required(), item.secret()))
-                .toList();
-        return new PluginDefinitionSnapshot.CapabilitySnapshot(
-                contribution.type().key().name(), contribution.type().key().majorVersion(),
-                contribution.providerId(),
-                Tags.merge(definition.tags(), contribution.tags()).asMap(),
-                config);
     }
 
     private static Map<String, Object> contributionSnapshot(

@@ -4,7 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.innospots.nexus.core.plugin.capability.Tags;
+import com.innospots.nexus.core.plugin.declaration.Tags;
 
 /**
  * 运营管理平台内置 entry 插件身份、标签与宿主必选 ID。

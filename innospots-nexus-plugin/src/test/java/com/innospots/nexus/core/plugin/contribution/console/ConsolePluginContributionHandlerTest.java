@@ -7,7 +7,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.innospots.nexus.core.plugin.capability.ProviderRef;
+import com.innospots.nexus.core.plugin.declaration.ProviderRef;
 import com.innospots.nexus.core.plugin.contribution.PluginContributionEntry;
 
 class ConsolePluginContributionHandlerTest {

@@ -10,7 +10,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import com.innospots.nexus.base.exception.NexusException;
-import com.innospots.nexus.core.plugin.capability.Tags;
+import com.innospots.nexus.core.plugin.declaration.Tags;
 import com.innospots.nexus.core.plugin.declaration.PluginDefinition;
 
 import static org.assertj.core.api.Assertions.assertThat;

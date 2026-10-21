@@ -38,7 +38,7 @@ class PluginHostBootstrapTest {
         ClassLoader classLoader = serviceClassLoader(BootstrapPlugin.class.getName());
         PluginInstallationManager manager = PluginHostBootstrap.enable(new PluginHostBootstrapRequest(
                 dao.dao(),
-                new PluginRuntimeConfig(Set.of(), Set.of(), Map.of(), Map.of(), Map.of(), classLoader),
+                new PluginRuntimeConfig(Set.of(), Set.of(), Map.of(), Map.of(), classLoader),
                 new PluginInstallationConfig(true),
                 PluginContributionDecoderRegistry.builder().build(),
                 List.of(),
@@ -50,8 +50,6 @@ class PluginHostBootstrapTest {
         assertThat(view.installation().desiredEnabled()).isTrue();
         assertThat(view.runtime()).get().extracting(runtime -> runtime.state())
                 .isEqualTo(PluginState.ACTIVE);
-        assertThat(manager.capabilities()).isNotNull();
-
         manager.close();
     }
 

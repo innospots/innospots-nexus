@@ -57,7 +57,6 @@ public class PluginRuntimeConfigFactory {
                 PluginHostConfigBinder.flattenPluginConfig(config),
                 configSources.stream().toList(),
                 Map.of(),
-                Map.of(),
                 null);
     }
 }

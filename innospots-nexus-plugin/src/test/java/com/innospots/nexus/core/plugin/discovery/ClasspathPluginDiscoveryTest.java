@@ -9,26 +9,26 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.innospots.nexus.base.exception.NexusException;
-import com.innospots.nexus.core.plugin.capability.CapabilityType;
-import com.innospots.nexus.core.plugin.capability.Tags;
-import com.innospots.nexus.core.plugin.contract.CapabilityProvider;
+import com.innospots.nexus.base.i18n.I18nObject;
+import com.innospots.nexus.core.plugin.declaration.Tags;
 import com.innospots.nexus.core.plugin.contract.Plugin;
+import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributeNode;
+import com.innospots.nexus.core.plugin.contribution.console.ConsolePermissionGroupDeclaration;
+import com.innospots.nexus.core.plugin.contribution.console.ConsolePluginContribution;
 import com.innospots.nexus.core.plugin.declaration.PluginDefinition;
+import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ClasspathPluginDiscoveryTest {
 
-    private static final CapabilityType<SampleProvider> SAMPLE =
-            CapabilityType.of("sample.discovery", 1, SampleProvider.class);
-
     @TempDir
     Path classpathRoot;
 
     @Test
-    void discoversAllVisiblePluginsWithoutCallingProviderFactories() throws Exception {
-        SamplePlugin.factoryCalls = 0;
+    void discoversAllVisiblePluginsFromSpi() throws Exception {
         SamplePlugin.definitionCalls = 0;
         ClassLoader classLoader = serviceClassLoader(SamplePlugin.class.getName());
 
@@ -37,7 +37,6 @@ class ClasspathPluginDiscoveryTest {
         assertThat(plugins).hasSize(1);
         assertThat(plugins.getFirst().definition().pluginId()).isEqualTo("com.example.sample-discovery");
         assertThat(SamplePlugin.definitionCalls).isEqualTo(1);
-        assertThat(SamplePlugin.factoryCalls).isZero();
     }
 
     @Test
@@ -117,7 +116,6 @@ class ClasspathPluginDiscoveryTest {
     public static final class SamplePlugin implements Plugin {
 
         private static int definitionCalls;
-        private static int factoryCalls;
 
         @Override
         public PluginDefinition definition() {
@@ -143,20 +141,42 @@ class ClasspathPluginDiscoveryTest {
     }
 
     private static PluginDefinition fixtureDefinition(String id) {
+        ConsoleContributeNode menu = new ConsoleContributeNode(
+                null,
+                I18nObject.of(Map.of("en", "Menu")),
+                I18nObject.of(Map.of()),
+                0,
+                "discovery-page",
+                null,
+                "default",
+                null,
+                List.of(),
+                List.of(),
+                List.of());
+        ConsoleContributeNode module = new ConsoleContributeNode(
+                "main",
+                I18nObject.of(Map.of("en", "Main")),
+                I18nObject.of(Map.of()),
+                0,
+                null,
+                null,
+                null,
+                null,
+                List.of(new ConsolePermissionGroupDeclaration(
+                        "default", I18nObject.of(Map.of("en", "Views")))),
+                List.of(new ConsolePermissionGroupDeclaration(
+                        "default", I18nObject.of(Map.of("en", "Ops")))),
+                List.of(menu));
         return PluginDefinition.builder(id)
                 .name("Discovery Fixture")
                 .version("1.0.0")
                 .tags(Tags.of("fixture", "discovery"))
-                .provide(SAMPLE, () -> {
-                    SamplePlugin.factoryCalls++;
-                    return new SampleProviderImpl();
-                })
+                .contribute(new ConsolePluginContribution(
+                        "discovery",
+                        I18nObject.of(Map.of("en", "Discovery")),
+                        I18nObject.of(Map.of()),
+                        0,
+                        List.of(module)))
                 .build();
-    }
-
-    private interface SampleProvider extends CapabilityProvider {
-    }
-
-    private static final class SampleProviderImpl implements SampleProvider {
     }
 }

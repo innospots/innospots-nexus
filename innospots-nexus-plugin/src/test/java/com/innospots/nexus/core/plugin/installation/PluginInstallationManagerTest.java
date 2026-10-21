@@ -66,7 +66,7 @@ class PluginInstallationManagerTest {
         return new PluginInstallationManager(
                 new PluginInstallationRepository(dao.dao()),
                 new PluginRuntimeFactory(
-                        new PluginRuntimeConfig(Set.of(), Set.of(), Map.of(), Map.of(), Map.of(), null),
+                        new PluginRuntimeConfig(Set.of(), Set.of(), Map.of(), Map.of(), null),
                         List.of(),
                         PluginContributionSnapshotterRegistry.builder().build()),
                 new PluginInstallationConfig(autoInstall),

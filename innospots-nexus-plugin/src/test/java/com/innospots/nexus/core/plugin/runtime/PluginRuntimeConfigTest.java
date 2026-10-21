@@ -8,8 +8,6 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 import com.innospots.nexus.base.exception.NexusException;
-import com.innospots.nexus.core.plugin.capability.CapabilityKey;
-import com.innospots.nexus.core.plugin.capability.Tags;
 import com.innospots.nexus.core.plugin.support.PluginTestLog;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,7 +24,6 @@ class PluginRuntimeConfigTest {
                 Set.of("sample"),
                 Set.of(),
                 hostConfig,
-                Map.of(),
                 Map.of(),
                 null);
         hostConfig.clear();
@@ -48,24 +45,17 @@ class PluginRuntimeConfigTest {
                 Set.of("sample"),
                 Map.of(),
                 Map.of(),
-                Map.of(),
                 null))
                 .isInstanceOf(NexusException.class)
                 .hasMessageContaining("overlap");
     }
 
     @Test
-    void rejectsBlankPluginIdsAndNullRouteEntries() {
+    void rejectsBlankPluginIds() {
         Set<String> blankIds = new HashSet<>();
         blankIds.add(" ");
         assertThatThrownBy(() -> new PluginRuntimeConfig(
-                blankIds, Set.of(), Map.of(), Map.of(), Map.of(), null))
-                .isInstanceOf(NexusException.class);
-
-        Map<CapabilityKey, Tags> routes = new HashMap<>();
-        routes.put(new CapabilityKey("message.push", 1), null);
-        assertThatThrownBy(() -> new PluginRuntimeConfig(
-                Set.of(), Set.of(), Map.of(), Map.of(), routes, null))
+                blankIds, Set.of(), Map.of(), Map.of(), null))
                 .isInstanceOf(NexusException.class);
     }
 }

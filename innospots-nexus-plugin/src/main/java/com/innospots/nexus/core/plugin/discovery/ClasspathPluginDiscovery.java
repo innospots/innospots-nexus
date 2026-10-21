@@ -11,7 +11,6 @@ import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 
 import com.innospots.nexus.base.exception.NexusException;
-import com.innospots.nexus.core.plugin.capability.CapabilityTypeRegistry;
 import com.innospots.nexus.core.plugin.contract.Plugin;
 import com.innospots.nexus.core.plugin.contribution.PluginContributionDecoderRegistry;
 import com.innospots.nexus.core.plugin.declaration.JacksonPluginManifestParser;
@@ -94,10 +93,8 @@ public final class ClasspathPluginDiscovery {
     public PluginDiscoveryReport discoverReport() {
         List<DiscoveredPlugin> discovered = new ArrayList<>();
         List<RejectedPluginDefinition> rejected = new ArrayList<>();
-        CapabilityTypeRegistry.Builder capabilityTypes = CapabilityTypeRegistry.builder();
-        discoverJava(discovered, rejected, capabilityTypes);
-        PluginDefinitionCompiler compiler = new PluginDefinitionCompiler(
-                capabilityTypes, contributionDecoders, classLoader);
+        discoverJava(discovered, rejected);
+        PluginDefinitionCompiler compiler = new PluginDefinitionCompiler(contributionDecoders, classLoader);
         discoverYaml(discovered, rejected, compiler);
         PluginCatalog catalog = PluginCatalog.of(discovered);
         logger.info("Plugin discovery completed: valid={}, rejected={}",
@@ -118,8 +115,7 @@ public final class ClasspathPluginDiscovery {
 
     private void discoverJava(
             List<DiscoveredPlugin> discovered,
-            List<RejectedPluginDefinition> rejected,
-            CapabilityTypeRegistry.Builder capabilityTypes
+            List<RejectedPluginDefinition> rejected
     ) {
         for (ServiceLoader.Provider<Plugin> provider : ServiceLoader.load(Plugin.class, classLoader).stream().toList()) {
             Instant now = Instant.now();
@@ -130,7 +126,6 @@ public final class ClasspathPluginDiscovery {
                 if (definition == null) {
                     throw invalid("plugin returned null definition: " + provider.type().getName());
                 }
-                capabilityTypes.registerFrom(definition);
                 discovered.add(new DiscoveredPlugin(plugin, definition, now, source));
             } catch (NexusException exception) {
                 rejected.add(new RejectedPluginDefinition(source, null, List.of(exception.getMessage())));
@@ -154,8 +149,6 @@ public final class ClasspathPluginDiscovery {
                 PluginSource source = PluginSource.yaml(resource.toExternalForm(), now);
                 try (InputStream input = resource.openStream()) {
                     PluginManifest manifest = manifestParser.parse(input);
-                    // 第一遍：登记全部 YAML capability 的 api 类型，供跨插件 requirements 解析。
-                    compiler.registerDeclaredTypes(manifest);
                     pending.add(new ParsedYamlManifest(manifest, source, now));
                 } catch (NexusException exception) {
                     rejected.add(new RejectedPluginDefinition(source, null, List.of(exception.getMessage())));
@@ -163,7 +156,6 @@ public final class ClasspathPluginDiscovery {
                     rejected.add(new RejectedPluginDefinition(source, null, List.of(exception.toString())));
                 }
             }
-            // 第二遍：在完整类型表就绪后编译各 manifest，避免 requirements 引用尚未登记的 capability。
             for (ParsedYamlManifest item : pending) {
                 try {
                     PluginDefinition definition = compiler.compile(item.manifest(), item.source());

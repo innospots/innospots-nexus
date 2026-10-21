@@ -1,13 +1,10 @@
 package com.innospots.nexus.core.plugin.runtime;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import java.util.List;
-
 import com.innospots.nexus.base.exception.NexusException;
-import com.innospots.nexus.core.plugin.capability.CapabilityKey;
-import com.innospots.nexus.core.plugin.capability.Tags;
 import com.innospots.nexus.core.plugin.config.ConfigSource;
 import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
@@ -21,7 +18,6 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
  * @param hostConfig 扁平化宿主静态配置
  * @param configSources 宿主动态配置来源；在每次插件启动解析时调用
  * @param runtimeVariables 优先级最高的运行时覆盖值
- * @param defaultRoutes 按 Capability 标识配置的默认标签
  * @param pluginClassLoader ServiceLoader 使用的类加载器；为 null 时使用 Core 类加载器
  * @author Smars
  * @date 2026/09/13
@@ -32,7 +28,6 @@ public record PluginRuntimeConfig(
         Map<String, String> hostConfig,
         List<ConfigSource> configSources,
         Map<String, String> runtimeVariables,
-        Map<CapabilityKey, Tags> defaultRoutes,
         ClassLoader pluginClassLoader
 ) {
 
@@ -44,15 +39,13 @@ public record PluginRuntimeConfig(
             Set<String> disabledPluginIds,
             Map<String, String> hostConfig,
             Map<String, String> runtimeVariables,
-            Map<CapabilityKey, Tags> defaultRoutes,
             ClassLoader pluginClassLoader
     ) {
-        this(requiredPluginIds, disabledPluginIds, hostConfig, List.of(),
-                runtimeVariables, defaultRoutes, pluginClassLoader);
+        this(requiredPluginIds, disabledPluginIds, hostConfig, List.of(), runtimeVariables, pluginClassLoader);
     }
 
     /**
-     * @throws NexusException 插件标识、配置映射或路由条目非法，或必需与禁用集合重叠时抛出
+     * @throws NexusException 插件标识、配置映射非法，或必需与禁用集合重叠时抛出
      */
     public PluginRuntimeConfig {
         requiredPluginIds = immutablePluginIds(requiredPluginIds, "required");
@@ -60,7 +53,6 @@ public record PluginRuntimeConfig(
         hostConfig = immutableStringMap(hostConfig, "host configuration");
         configSources = immutableConfigSources(configSources);
         runtimeVariables = immutableStringMap(runtimeVariables, "runtime variables");
-        defaultRoutes = immutableRoutes(defaultRoutes);
         if (!java.util.Collections.disjoint(requiredPluginIds, disabledPluginIds)) {
             throw NexusException.build(
                     PluginStatusCode.PLUGIN_CONFIG_INVALID,
@@ -118,19 +110,5 @@ public record PluginRuntimeConfig(
             }
         }
         return List.copyOf(source);
-    }
-
-    private static Map<CapabilityKey, Tags> immutableRoutes(Map<CapabilityKey, Tags> source) {
-        if (source == null) {
-            return Map.of();
-        }
-        for (Map.Entry<CapabilityKey, Tags> entry : source.entrySet()) {
-            if (entry.getKey() == null || entry.getValue() == null) {
-                throw NexusException.build(
-                        PluginStatusCode.PLUGIN_CONFIG_INVALID,
-                        "default capability routes must not contain null entries");
-            }
-        }
-        return Map.copyOf(source);
     }
 }

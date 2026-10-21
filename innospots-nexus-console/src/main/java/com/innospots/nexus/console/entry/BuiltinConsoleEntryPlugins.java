@@ -4,7 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.innospots.nexus.core.plugin.capability.Tags;
+import com.innospots.nexus.core.plugin.declaration.Tags;
 
 /**
  * 内置控制台 entry 插件身份与组装元数据常量。

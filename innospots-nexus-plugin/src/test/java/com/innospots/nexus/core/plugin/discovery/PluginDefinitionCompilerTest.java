@@ -1,12 +1,13 @@
 package com.innospots.nexus.core.plugin.discovery;
 
 import java.time.Instant;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
 import com.innospots.nexus.base.exception.NexusException;
-import com.innospots.nexus.core.plugin.capability.CapabilityTypeRegistry;
-import com.innospots.nexus.core.plugin.contract.CapabilityProvider;
+import com.innospots.nexus.core.plugin.contribution.PluginContributionDecoderRegistry;
+import com.innospots.nexus.core.plugin.contribution.console.ConsolePluginContributionDecoder;
 import com.innospots.nexus.core.plugin.declaration.JacksonPluginManifestParser;
 import com.innospots.nexus.core.plugin.declaration.PluginDefinition;
 import com.innospots.nexus.core.plugin.declaration.PluginSource;
@@ -14,11 +15,11 @@ import com.innospots.nexus.core.plugin.declaration.PluginSource;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-/** 验证 YAML Capability Java binding 的编译和延迟实例化语义。 */
+/** 验证 YAML 插件清单编译语义。 */
 class PluginDefinitionCompilerTest {
 
     @Test
-    void compilesExplicitJavaBindingWithoutCreatingProvider() {
+    void compilesConsoleContributionFromYaml() {
         PluginDefinition definition = compiler().compile(new JacksonPluginManifestParser().parse("""
                 apiVersion: nexus.plugin/v1
                 kind: Plugin
@@ -28,112 +29,49 @@ class PluginDefinitionCompilerTest {
                 spec:
                   apiVersion: 1
                   displayName: {en: Compiler}
-                  capabilities:
-                    - type: test.provider
-                      majorVersion: 1
-                      providerId: test
-                      api: com.innospots.nexus.core.plugin.discovery.PluginDefinitionCompilerTest$TestProvider
-                      bind: {kind: java, class: com.innospots.nexus.core.plugin.discovery.PluginDefinitionCompilerTest$Provider}
+                  contributions:
+                    - type: console
+                      majorVersion: 2
+                      domainKey: nexus
+                      modules:
+                        - moduleKey: main
+                          displayName: {en: Main}
+                          orderIndex: 0
+                          viewGroups:
+                            - group: default
+                              label: {en: Views}
+                          operationGroups:
+                            - group: default
+                              label: {en: Ops}
+                          children:
+                            - displayName: {en: Menu}
+                              orderIndex: 0
+                              entryPageKey: compiler-page
+                              children: []
                 """), PluginSource.yaml("memory:test", Instant.now()));
 
         assertThat(definition.pluginId()).isEqualTo("com.example.compiler");
-        assertThat(definition.capabilities()).hasSize(1);
+        assertThat(definition.contributions()).hasSize(1);
     }
 
     @Test
-    void registersCapabilityTypeFromYamlApiField() {
-        CapabilityTypeRegistry.Builder types = CapabilityTypeRegistry.builder();
-        PluginDefinitionCompiler compiler = new PluginDefinitionCompiler(
-                types, PluginDefinitionCompilerTest.class.getClassLoader());
-        compiler.compile(new JacksonPluginManifestParser().parse("""
+    void rejectsLegacyCapabilities() {
+        assertThatThrownBy(() -> compiler().compile(new JacksonPluginManifestParser().parse("""
                 apiVersion: nexus.plugin/v1
                 kind: Plugin
-                metadata: {pluginId: com.example.compiler, version: 1.0.0}
+                metadata: {pluginId: com.example.legacy, version: 1.0.0}
                 spec:
                   apiVersion: 1
-                  displayName: {en: Compiler}
+                  displayName: {en: Legacy}
                   capabilities:
                     - type: test.provider
                       majorVersion: 1
                       providerId: test
-                      api: com.innospots.nexus.core.plugin.discovery.PluginDefinitionCompilerTest$TestProvider
-                      bind: {kind: java, class: com.innospots.nexus.core.plugin.discovery.PluginDefinitionCompilerTest$Provider}
-                """), PluginSource.yaml("memory:test", Instant.now()));
-
-        assertThat(types.find("test.provider", 1)).isPresent();
-    }
-
-    @Test
-    void resolvesRequirementsAfterCapabilityTypesAreRegistered() {
-        CapabilityTypeRegistry.Builder types = CapabilityTypeRegistry.builder();
-        PluginDefinitionCompiler compiler = new PluginDefinitionCompiler(
-                types, PluginDefinitionCompilerTest.class.getClassLoader());
-        var parser = new JacksonPluginManifestParser();
-        var providerManifest = parser.parse("""
-                apiVersion: nexus.plugin/v1
-                kind: Plugin
-                metadata: {pluginId: com.example.provider, version: 1.0.0}
-                spec:
-                  apiVersion: 1
-                  displayName: {en: Provider}
-                  capabilities:
-                    - type: test.provider
-                      majorVersion: 1
-                      providerId: test
-                      api: com.innospots.nexus.core.plugin.discovery.PluginDefinitionCompilerTest$TestProvider
-                      bind: {kind: java, class: com.innospots.nexus.core.plugin.discovery.PluginDefinitionCompilerTest$Provider}
-                """);
-        compiler.registerDeclaredTypes(providerManifest);
-        PluginDefinition consumer = compiler.compile(parser.parse("""
-                apiVersion: nexus.plugin/v1
-                kind: Plugin
-                metadata: {pluginId: com.example.consumer, version: 1.0.0}
-                spec:
-                  apiVersion: 1
-                  displayName: {en: Consumer}
-                  requirements:
-                    - type: test.provider
-                      majorVersion: 1
-                      required: true
-                  capabilities:
-                    - type: test.provider
-                      majorVersion: 1
-                      providerId: consumer
-                      api: com.innospots.nexus.core.plugin.discovery.PluginDefinitionCompilerTest$TestProvider
-                      bind: {kind: java, class: com.innospots.nexus.core.plugin.discovery.PluginDefinitionCompilerTest$Provider}
-                """), PluginSource.yaml("memory:consumer", Instant.now()));
-
-        assertThat(consumer.requirements()).hasSize(1);
-    }
-
-    @Test
-    void rejectsMissingApiAndUnsupportedBind() {
-        String prefix = """
-                apiVersion: nexus.plugin/v1
-                kind: Plugin
-                metadata: {pluginId: com.example.compiler, version: 1.0.0}
-                spec:
-                  apiVersion: 1
-                  displayName: {en: Compiler}
-                  capabilities:
-                    - type: %s
-                      majorVersion: 1
-                      providerId: test
-                      %s
-                      bind: {kind: %s, class: example.Provider}
-                """;
-        assertThatThrownBy(() -> compiler().compile(
-                new JacksonPluginManifestParser().parse(prefix.formatted(
-                        "test.provider", "", "java")),
-                PluginSource.yaml("memory:test", Instant.now())))
-                .isInstanceOf(NexusException.class);
-        assertThatThrownBy(() -> compiler().compile(
-                new JacksonPluginManifestParser().parse(prefix.formatted(
-                        "test.provider",
-                        "api: com.innospots.nexus.core.plugin.discovery.PluginDefinitionCompilerTest$TestProvider",
-                        "http")),
-                PluginSource.yaml("memory:test", Instant.now())))
-                .isInstanceOf(NexusException.class);
+                      api: java.lang.Runnable
+                      bind: {kind: java, class: java.lang.Object}
+                """), PluginSource.yaml("memory:legacy", Instant.now())))
+                .isInstanceOf(NexusException.class)
+                .hasMessageContaining("capabilities are no longer supported");
     }
 
     @Test
@@ -152,12 +90,25 @@ class PluginDefinitionCompilerTest {
                       type: ENUM
                       enumValues: [fast, safe]
                       default: safe
-                  capabilities:
-                    - type: test.provider
-                      majorVersion: 1
-                      providerId: test
-                      api: com.innospots.nexus.core.plugin.discovery.PluginDefinitionCompilerTest$TestProvider
-                      bind: {kind: java, class: com.innospots.nexus.core.plugin.discovery.PluginDefinitionCompilerTest$Provider}
+                  contributions:
+                    - type: console
+                      majorVersion: 2
+                      domainKey: nexus
+                      modules:
+                        - moduleKey: main
+                          displayName: {en: Main}
+                          orderIndex: 0
+                          viewGroups:
+                            - group: default
+                              label: {en: Views}
+                          operationGroups:
+                            - group: default
+                              label: {en: Ops}
+                          children:
+                            - displayName: {en: Menu}
+                              orderIndex: 0
+                              entryPageKey: compiler-page
+                              children: []
                 """), PluginSource.yaml("memory:config-types", Instant.now()));
 
         assertThat(definition.config().items()).hasSize(3);
@@ -165,15 +116,9 @@ class PluginDefinitionCompilerTest {
 
     private static PluginDefinitionCompiler compiler() {
         return new PluginDefinitionCompiler(
-                CapabilityTypeRegistry.builder(),
+                PluginContributionDecoderRegistry.builder()
+                        .register(new ConsolePluginContributionDecoder())
+                        .build(),
                 PluginDefinitionCompilerTest.class.getClassLoader());
-    }
-
-    public interface TestProvider extends CapabilityProvider {
-    }
-
-    public static final class Provider implements TestProvider {
-        public Provider() {
-        }
     }
 }

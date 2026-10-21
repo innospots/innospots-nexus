@@ -51,7 +51,6 @@ public class PluginHostConfiguration {
                 PluginHostConfigBinder.flattenPluginConfig(environment),
                 configSources,
                 Map.of(),
-                Map.of(),
                 null);
     }
 

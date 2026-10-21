@@ -41,7 +41,7 @@ class ConsoleModuleEntryPluginsTest {
                 .startsWith(ConsoleModuleDescriptor.PAGE_ROUTE_PREFIX);
         assertThat(module.children()).singleElement()
                 .satisfies(menu -> assertThat(menu.entryPageKey()).isEqualTo(entryPageKey));
-        assertThat(definition.capabilities()).isEmpty();
+        assertThat(definition.contributions()).isNotEmpty();
     }
 
     @ParameterizedTest

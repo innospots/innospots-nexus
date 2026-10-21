@@ -1,4 +1,4 @@
-package com.innospots.nexus.core.plugin.capability;
+package com.innospots.nexus.core.plugin.declaration;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -10,9 +10,10 @@ import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
 /**
- * 不可变且按名称排序的路由标签。
+ * 不可变且按名称排序的插件标签。
  *
  * <p>实例线程安全，可自由跨线程共享；迭代顺序稳定，便于诊断输出。
+ *
  * @author Smars
  * @date 2026/09/13
  */
@@ -28,12 +29,11 @@ public final class Tags {
             Tag tag = new Tag(name, value);
             sorted.put(tag.name(), tag.value());
         });
-        // Map.copyOf 不保证遍历顺序，因此显式保留排序结果，确保诊断信息稳定。
         this.values = Collections.unmodifiableMap(new LinkedHashMap<>(sorted));
     }
 
     /**
-     * 返回用于无约束查询的空标签集合。
+     * 返回空标签集合。
      *
      * @return 共享的空标签实例
      */
@@ -73,24 +73,6 @@ public final class Tags {
     }
 
     /**
-     * 合并插件级与 Provider 级标签。
-     *
-     * @param pluginTags   插件默认标签
-     * @param providerTags Provider 标签
-     * @return 合并后的不可变标签集合
-     */
-    public static Tags merge(Tags pluginTags, Tags providerTags) {
-        Tags merged = pluginTags == null ? EMPTY : pluginTags;
-        if (providerTags == null) {
-            return merged;
-        }
-        for (Map.Entry<String, String> entry : providerTags.asMap().entrySet()) {
-            merged = merged.and(entry.getKey(), entry.getValue());
-        }
-        return merged;
-    }
-
-    /**
      * 返回新增一个无冲突属性后的标签集合。
      *
      * @param name  标签名
@@ -122,7 +104,7 @@ public final class Tags {
     }
 
     /**
-     * 判断当前 Provider 标签是否包含请求的全部标签。
+     * 判断当前标签是否包含请求的全部标签。
      *
      * @param required 请求侧必需标签
      * @return 全部包含时 {@code true}；{@code required} 为 {@code null} 时 {@code false}

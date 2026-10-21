@@ -8,11 +8,8 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import com.innospots.nexus.console.plugin.domain.vo.PluginManagementVo;
-import com.innospots.nexus.core.plugin.capability.Tags;
-import com.innospots.nexus.core.plugin.declaration.CapabilityRequirement;
+import com.innospots.nexus.core.plugin.declaration.Tags;
 import com.innospots.nexus.core.plugin.declaration.PluginSource;
-import com.innospots.nexus.core.plugin.capability.CapabilityKey;
-import com.innospots.nexus.core.plugin.dependency.DependencyResolution;
 import com.innospots.nexus.core.plugin.installation.domain.enums.PluginPresence;
 import com.innospots.nexus.core.plugin.installation.domain.enums.PluginSourceType;
 import com.innospots.nexus.core.plugin.installation.domain.model.PluginInstallation;
@@ -40,8 +37,7 @@ class PluginManagementConverterTest {
                 discoveredAt, null, null);
         PluginRuntimeInfo runtime = new PluginRuntimeInfo(
                 "com.example.sales", "Sales", "1.2.0", "example.SalesPlugin", PluginState.ACTIVE,
-                "active", Tags.empty(), List.of(), List.<CapabilityRequirement>of(),
-                Map.<CapabilityKey, DependencyResolution>of(), runtimeDiscoveredAt, runtimeStartedAt, null);
+                "active", Tags.empty(), runtimeDiscoveredAt, runtimeStartedAt, null);
 
         PluginManagementVo result = PluginManagementConverter.INSTANCE.toVo(
                 new PluginManagementView(installation, java.util.Optional.of(runtime)));

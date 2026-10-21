@@ -44,16 +44,13 @@ public final class PluginTestLog {
     public void dumpRuntime(PluginManager manager) {
         section("runtime snapshot");
         for (PluginRuntimeInfo info : manager.plugins()) {
-            info("plugin id=%s name=%s version=%s state=%s phase=%s tags=%s provided=%s requirements=%s deps=%s error=%s",
+            info("plugin id=%s name=%s version=%s state=%s phase=%s tags=%s error=%s",
                     info.id(),
                     info.name(),
                     info.version(),
                     info.state(),
                     info.phase(),
                     info.tags(),
-                    info.providedCapabilities(),
-                    info.requirements(),
-                    summarizeDependencies(info.dependencies()),
                     info.lastError());
         }
     }
@@ -84,8 +81,7 @@ public final class PluginTestLog {
                 definition.version(),
                 definition.apiVersion(),
                 definition.tags());
-        info("capabilities=%s", definition.capabilities());
-        info("requirements=%s", definition.requirements());
+        info("contributions=%s", definition.contributions());
         info("config items=%s", definition.config().items());
     }
 
@@ -101,31 +97,4 @@ public final class PluginTestLog {
         }
     }
 
-    private static String summarizeDependencies(
-            Map<?, ? extends com.innospots.nexus.core.plugin.dependency.DependencyResolution> dependencies
-    ) {
-        if (dependencies == null || dependencies.isEmpty()) {
-            return "{}";
-        }
-        StringBuilder builder = new StringBuilder("{");
-        boolean first = true;
-        for (var entry : dependencies.entrySet()) {
-            if (!first) {
-                builder.append(", ");
-            }
-            first = false;
-            var resolution = entry.getValue();
-            builder.append(entry.getKey())
-                    .append("(required=")
-                    .append(resolution.required())
-                    .append(", declared=")
-                    .append(resolution.declared())
-                    .append(", available=")
-                    .append(resolution.available())
-                    .append(", providers=")
-                    .append(resolution.providerPluginIds())
-                    .append(')');
-        }
-        return builder.append('}').toString();
-    }
 }

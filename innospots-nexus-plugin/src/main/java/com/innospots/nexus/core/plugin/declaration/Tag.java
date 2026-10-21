@@ -1,4 +1,4 @@
-package com.innospots.nexus.core.plugin.capability;
+package com.innospots.nexus.core.plugin.declaration;
 
 import java.util.regex.Pattern;
 
@@ -6,7 +6,7 @@ import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
 /**
- * 一个不可变的路由标签属性。
+ * 一个不可变的插件元数据标签属性。
  *
  * @param name 标签名称
  * @param value 标签值

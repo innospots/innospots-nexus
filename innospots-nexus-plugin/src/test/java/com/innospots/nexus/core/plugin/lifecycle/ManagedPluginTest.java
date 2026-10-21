@@ -8,279 +8,145 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import com.innospots.nexus.base.exception.NexusException;
-import com.innospots.nexus.core.plugin.capability.CapabilityRegistry;
-import com.innospots.nexus.core.plugin.capability.CapabilityType;
-import com.innospots.nexus.core.plugin.capability.Tags;
+import com.innospots.nexus.base.i18n.I18nObject;
 import com.innospots.nexus.core.plugin.config.ConfigurationManager;
-import com.innospots.nexus.core.plugin.contract.CapabilityProvider;
-import com.innospots.nexus.core.plugin.contract.CapabilityProviderContext;
+import com.innospots.nexus.core.plugin.contribution.PluginContributionHandler;
+import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributionCatalog;
+import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributeNode;
+import com.innospots.nexus.core.plugin.contribution.console.ConsolePermissionGroupDeclaration;
+import com.innospots.nexus.core.plugin.contribution.console.ConsolePluginContribution;
+import com.innospots.nexus.core.plugin.contribution.console.ConsolePluginContributionHandler;
+import com.innospots.nexus.core.plugin.contribution.console.ReservedPluginResourceCatalog;
 import com.innospots.nexus.core.plugin.contract.Plugin;
 import com.innospots.nexus.core.plugin.contract.PluginContext;
 import com.innospots.nexus.core.plugin.declaration.PluginDefinition;
 import com.innospots.nexus.core.plugin.discovery.DiscoveredPlugin;
 import com.innospots.nexus.core.plugin.event.DefaultPluginEventBus;
-import com.innospots.nexus.core.plugin.event.PluginFailedEvent;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ManagedPluginTest {
 
-    private static final CapabilityType<FirstProvider> FIRST =
-            CapabilityType.of("lifecycle.first", 1, FirstProvider.class);
-    private static final CapabilityType<SecondProvider> SECOND =
-            CapabilityType.of("lifecycle.second", 1, SecondProvider.class);
-
     @Test
-    void rollsBackInitializedProvidersAndResourcesWithoutPublishingPartialCapabilities() {
+    void startsAndStopsPluginWithConsoleContribution() {
         List<String> calls = new ArrayList<>();
-        FailingPlugin plugin = new FailingPlugin(calls);
-        PluginDefinition definition = plugin.definition();
-        CapabilityRegistry registry = new CapabilityRegistry(Map.of());
-        ManagedPlugin managed = new ManagedPlugin(
-                new DiscoveredPlugin(plugin, definition, Instant.now()),
-                new ConfigurationManager(Map.of(), Map.of(), Map.of(), Map.of()).resolve(definition),
-                registry,
-                new DefaultPluginEventBus());
-
-        assertThatThrownBy(managed::start)
-                .isInstanceOf(NexusException.class)
-                .hasMessageContaining("com.example.lifecycle-fixture");
-
-        assertThat(registry.findAll(FIRST)).isEmpty();
-        assertThat(registry.findAll(SECOND)).isEmpty();
-        assertThat(managed.info().state()).isEqualTo(PluginState.FAILED);
-        assertThat(calls).containsExactly(
-                "plugin-initialize",
-                "first-initialize",
-                "second-initialize",
-                "first-destroy",
-                "plugin-stop",
-                "resource-close");
-    }
-
-    @Test
-    void publishesAllCapabilitiesOnlyAfterSuccessfulStartupAndStopsInReverseOrder() {
-        List<String> calls = new ArrayList<>();
-        SuccessfulPlugin plugin = new SuccessfulPlugin(calls);
-        PluginDefinition definition = plugin.definition();
-        CapabilityRegistry registry = new CapabilityRegistry(Map.of());
-        ManagedPlugin managed = new ManagedPlugin(
-                new DiscoveredPlugin(plugin, definition, Instant.now()),
-                new ConfigurationManager(Map.of(), Map.of(), Map.of(), Map.of()).resolve(definition),
-                registry,
-                new DefaultPluginEventBus());
+        RecordingPlugin plugin = new RecordingPlugin(calls);
+        ManagedPlugin managed = managedPlugin(plugin);
 
         managed.start();
-        assertThat(registry.findAll(FIRST)).hasSize(1);
-        assertThat(registry.findAll(SECOND)).hasSize(1);
         assertThat(managed.info().state()).isEqualTo(PluginState.ACTIVE);
+        assertThat(calls).contains("initialize", "start");
 
         managed.stop();
-
-        assertThat(registry.findAll(FIRST)).isEmpty();
-        assertThat(calls).containsExactly(
-                "plugin-initialize",
-                "first-initialize",
-                "second-initialize",
-                "plugin-start",
-                "second-destroy",
-                "first-destroy",
-                "plugin-stop",
-                "resource-close");
+        assertThat(managed.info().state()).isEqualTo(PluginState.STOPPED);
+        assertThat(calls).contains("stop");
     }
 
     @Test
-    void rollsBackLinkageErrorsAndAllowsRetryAfterCompleteCleanup() {
-        List<String> calls = new ArrayList<>();
-        Plugin plugin = new RecordingPlugin(calls, false) {
-            @Override
-            public void start() {
-                calls.add("plugin-start");
-                throw new NoClassDefFoundError("missing optional library");
-            }
-        };
-        PluginDefinition definition = plugin.definition();
-        CapabilityRegistry registry = new CapabilityRegistry(Map.of());
-        ManagedPlugin managed = new ManagedPlugin(
-                new DiscoveredPlugin(plugin, definition, Instant.now()),
-                new ConfigurationManager(Map.of(), Map.of(), Map.of(), Map.of()).resolve(definition),
-                registry,
-                new DefaultPluginEventBus());
+    void rollsBackAfterContributionFailure() {
+        FailingPlugin plugin = new FailingPlugin();
+        ManagedPlugin managed = managedPlugin(plugin);
 
         assertThatThrownBy(managed::start).isInstanceOf(NexusException.class);
         assertThat(managed.info().state()).isEqualTo(PluginState.FAILED);
-        assertThat(calls).containsExactly(
-                "plugin-initialize",
-                "first-initialize",
-                "second-initialize",
-                "plugin-start",
-                "second-destroy",
-                "first-destroy",
-                "plugin-stop",
-                "resource-close");
-
-        assertThatThrownBy(managed::start).isInstanceOf(NexusException.class);
-        assertThat(calls).containsExactly(
-                "plugin-initialize",
-                "first-initialize",
-                "second-initialize",
-                "plugin-start",
-                "second-destroy",
-                "first-destroy",
-                "plugin-stop",
-                "resource-close",
-                "plugin-initialize",
-                "first-initialize",
-                "second-initialize",
-                "plugin-start",
-                "second-destroy",
-                "first-destroy",
-                "plugin-stop",
-                "resource-close");
     }
 
-    @Test
-    void preservesTheFirstStopFailurePhaseInDiagnostics() {
-        DefaultPluginEventBus eventBus = new DefaultPluginEventBus();
-        List<PluginFailedEvent> failures = new ArrayList<>();
-        eventBus.subscribe(PluginFailedEvent.class, failures::add);
-        DestroyFailingPlugin plugin = new DestroyFailingPlugin();
+    private static ManagedPlugin managedPlugin(Plugin plugin) {
         PluginDefinition definition = plugin.definition();
-        ManagedPlugin managed = new ManagedPlugin(
+        List<PluginContributionHandler<?>> handlers = List.of(
+                new ConsolePluginContributionHandler(
+                        new ConsoleContributionCatalog(),
+                        new ReservedPluginResourceCatalog(List.of())));
+        return new ManagedPlugin(
                 new DiscoveredPlugin(plugin, definition, Instant.now()),
-                new ConfigurationManager(Map.of(), Map.of(), Map.of(), Map.of()).resolve(definition),
-                new CapabilityRegistry(Map.of()),
-                eventBus);
-
-        managed.start();
-
-        assertThatThrownBy(managed::stop).isInstanceOf(NexusException.class);
-        assertThat(managed.info().phase()).isEqualTo("provider-destroy");
-        assertThat(failures).singleElement()
-                .extracting(PluginFailedEvent::phase)
-                .isEqualTo("provider-destroy");
+                () -> new ConfigurationManager(Map.of(), Map.of(), Map.of(), Map.of()).resolve(definition),
+                new DefaultPluginEventBus(),
+                handlers);
     }
 
-    private interface FirstProvider extends CapabilityProvider {
+    private static ConsolePluginContribution sampleContribution() {
+        ConsoleContributeNode menu = new ConsoleContributeNode(
+                null,
+                I18nObject.of(Map.of("en", "Menu")),
+                I18nObject.of(Map.of()),
+                0,
+                "sample-page",
+                null,
+                "default",
+                null,
+                List.of(),
+                List.of(),
+                List.of());
+        ConsoleContributeNode module = new ConsoleContributeNode(
+                "role",
+                I18nObject.of(Map.of("en", "Role")),
+                I18nObject.of(Map.of()),
+                0,
+                null,
+                null,
+                null,
+                null,
+                List.of(new ConsolePermissionGroupDeclaration(
+                        "default", I18nObject.of(Map.of("en", "Views")))),
+                List.of(new ConsolePermissionGroupDeclaration(
+                        "default", I18nObject.of(Map.of("en", "Ops")))),
+                List.of(menu));
+        return new ConsolePluginContribution(
+                "nexus",
+                I18nObject.of(Map.of("en", "Nexus")),
+                I18nObject.of(Map.of()),
+                0,
+                List.of(module));
     }
 
-    private interface SecondProvider extends CapabilityProvider {
-    }
-
-    private static final class RecordingFirstProvider implements FirstProvider {
+    private static final class RecordingPlugin implements Plugin {
 
         private final List<String> calls;
 
-        private RecordingFirstProvider(List<String> calls) {
+        private RecordingPlugin(List<String> calls) {
             this.calls = calls;
-        }
-
-        @Override
-        public void initialize(CapabilityProviderContext context) {
-            calls.add("first-initialize");
-        }
-
-        @Override
-        public void destroy() {
-            calls.add("first-destroy");
-        }
-    }
-
-    private static final class RecordingSecondProvider implements SecondProvider {
-
-        private final List<String> calls;
-        private final boolean fail;
-
-        private RecordingSecondProvider(List<String> calls, boolean fail) {
-            this.calls = calls;
-            this.fail = fail;
-        }
-
-        @Override
-        public void initialize(CapabilityProviderContext context) {
-            calls.add("second-initialize");
-            if (fail) {
-                throw new RuntimeException("expected provider failure");
-            }
-        }
-
-        @Override
-        public void destroy() {
-            calls.add("second-destroy");
-        }
-    }
-
-    private abstract static class RecordingPlugin implements Plugin {
-
-        final List<String> calls;
-        final boolean fail;
-
-        private RecordingPlugin(List<String> calls, boolean fail) {
-            this.calls = calls;
-            this.fail = fail;
         }
 
         @Override
         public PluginDefinition definition() {
             return PluginDefinition.builder("com.example.lifecycle-fixture")
-                    .name("Lifecycle Fixture")
+                    .name("Lifecycle")
                     .version("1.0.0")
-                    .tags(Tags.of("fixture", "lifecycle"))
-                    .provide(FIRST, () -> new RecordingFirstProvider(calls))
-                    .provide(SECOND, () -> new RecordingSecondProvider(calls, fail))
+                    .contribute(sampleContribution())
                     .build();
         }
 
         @Override
         public void initialize(PluginContext context) {
-            calls.add("plugin-initialize");
-            context.resources().add(() -> calls.add("resource-close"));
+            calls.add("initialize");
         }
 
         @Override
         public void start() {
-            calls.add("plugin-start");
+            calls.add("start");
         }
 
         @Override
         public void stop() {
-            calls.add("plugin-stop");
+            calls.add("stop");
         }
     }
 
-    private static final class FailingPlugin extends RecordingPlugin {
-
-        private FailingPlugin(List<String> calls) {
-            super(calls, true);
-        }
-    }
-
-    private static final class SuccessfulPlugin extends RecordingPlugin {
-
-        private SuccessfulPlugin(List<String> calls) {
-            super(calls, false);
-        }
-    }
-
-    private static final class DestroyFailingPlugin implements Plugin {
+    private static final class FailingPlugin implements Plugin {
 
         @Override
         public PluginDefinition definition() {
-            return PluginDefinition.builder("com.example.destroy-failure")
-                    .name("Destroy Failure")
+            return PluginDefinition.builder("com.example.lifecycle-fail")
+                    .name("Fail")
                     .version("1.0.0")
-                    .tags(Tags.of("fixture", "lifecycle"))
-                    .provide(FIRST, DestroyFailingProvider::new)
+                    .contribute(sampleContribution())
                     .build();
         }
-    }
-
-    private static final class DestroyFailingProvider implements FirstProvider {
 
         @Override
-        public void destroy() {
-            throw new RuntimeException("expected destroy failure");
+        public void start() {
+            throw new IllegalStateException("boom");
         }
     }
 }

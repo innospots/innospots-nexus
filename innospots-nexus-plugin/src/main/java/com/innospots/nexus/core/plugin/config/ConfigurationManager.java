@@ -14,8 +14,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.innospots.nexus.base.exception.NexusException;
-import com.innospots.nexus.core.plugin.capability.ProviderRef;
-import com.innospots.nexus.core.plugin.declaration.CapabilityContribution;
 import com.innospots.nexus.core.plugin.declaration.PluginDefinition;
 import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
@@ -120,30 +118,6 @@ public final class ConfigurationManager {
     }
 
     /**
-     * 解析某个 Provider 的私有配置。私有配置和插件共享配置使用不同命名空间，避免相互覆盖。
-     *
-     * @param definition 插件定义
-     * @param contribution Provider 声明
-     * @param <T> Provider 类型
-     * @return Provider 私有配置视图
-     */
-    public <T extends com.innospots.nexus.core.plugin.contract.CapabilityProvider> PluginConfig resolveProvider(
-            PluginDefinition definition,
-            CapabilityContribution<T> contribution
-    ) {
-        if (definition == null || contribution == null) {
-            throw invalid("plugin definition and capability contribution are required");
-        }
-        new ProviderRef(definition.pluginId(), contribution.providerId());
-        String providerPath = ".providers." + contribution.providerId();
-        return resolveScope(
-                definition.pluginId(),
-                providerPath,
-                contribution.config().items(),
-                "provider " + contribution.providerId());
-    }
-
-    /**
      * 将一个完整插件配置键映射为确定性的环境变量名。
      *
      * @param pluginId 稳定的插件标识
@@ -179,15 +153,6 @@ public final class ConfigurationManager {
             for (ConfigItemDefinition item : definition.config().items()) {
                 registerEnvironmentName(names, definition.pluginId() + "." + item.key(),
                         environmentName(definition.pluginId(), item.key()));
-            }
-            for (CapabilityContribution<?> contribution : definition.capabilities()) {
-                for (ConfigItemDefinition item : contribution.config().items()) {
-                    String fullKey = definition.pluginId() + ".providers."
-                            + contribution.providerId() + "." + item.key();
-                    registerEnvironmentName(names, fullKey,
-                            environmentName(definition.pluginId()
-                                    + ".providers." + contribution.providerId(), item.key()));
-                }
             }
         }
     }

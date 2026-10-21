@@ -29,7 +29,7 @@ class PluginHostAssemblyTest {
         PluginCatalog catalog = PluginCatalog.of(List.of(
                 new DiscoveredPlugin(plugin, plugin.definition(), Instant.now())));
         PluginRuntimeFactory factory = new PluginRuntimeFactory(
-                new PluginRuntimeConfig(Set.of(), Set.of(), Map.of(), Map.of(), Map.of(), null),
+                new PluginRuntimeConfig(Set.of(), Set.of(), Map.of(), Map.of(), null),
                 List.of(),
                 PluginContributionSnapshotterRegistry.builder().build());
 

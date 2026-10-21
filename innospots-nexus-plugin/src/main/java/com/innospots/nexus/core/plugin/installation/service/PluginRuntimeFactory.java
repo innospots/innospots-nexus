@@ -82,7 +82,6 @@ public final class PluginRuntimeFactory {
                 baseConfig.hostConfig(),
                 baseConfig.configSources(),
                 baseConfig.runtimeVariables(),
-                baseConfig.defaultRoutes(),
                 baseConfig.pluginClassLoader());
         logger.info("Creating plugin runtime: eligible={}, disabled={}, required={}",
                 eligiblePluginIds.size(), disabled.size(), required);

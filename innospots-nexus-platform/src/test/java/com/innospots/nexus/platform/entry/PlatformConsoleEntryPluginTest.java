@@ -48,7 +48,7 @@ class PlatformConsoleEntryPluginTest {
                         "permission",
                         "logger",
                         "settings");
-        assertThat(definition.capabilities()).isEmpty();
+        assertThat(definition.contributions()).isNotEmpty();
     }
 
     @Test

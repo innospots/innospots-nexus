@@ -11,32 +11,24 @@ import java.util.regex.Pattern;
 
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.i18n.I18nObject;
-import com.innospots.nexus.core.plugin.capability.CapabilityKey;
-import com.innospots.nexus.core.plugin.capability.CapabilityType;
-import com.innospots.nexus.core.plugin.capability.ProviderRef;
-import com.innospots.nexus.core.plugin.capability.Tags;
 import com.innospots.nexus.core.plugin.config.ConfigDefinition;
 import com.innospots.nexus.core.plugin.config.ConfigItemDefinition;
-import com.innospots.nexus.core.plugin.contract.CapabilityProvider;
-import com.innospots.nexus.core.plugin.contract.CapabilityProviderFactory;
 import com.innospots.nexus.core.plugin.contribution.PluginContribution;
 import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
 /**
  * 已通过静态校验的不可变插件运行时定义。
  *
- * <p>定义只保存身份、声明和无副作用工厂，不保存 Provider 实例、运行状态或配置值。</p>
+ * <p>定义只保存身份、声明和无副作用工厂，不保存运行状态或配置值。</p>
  *
  * @param pluginId 插件反向域名稳定身份
  * @param version 插件发布版本
  * @param apiVersion 插件协议主版本
  * @param displayName 插件本地化显示名称
  * @param description 插件本地化描述
- * @param tags 插件级路由标签
+ * @param tags 插件级标签
  * @param config 插件共享配置定义
- * @param capabilities 插件提供的 Capability 声明
- * @param requirements 插件依赖的 Capability 声明
- * @param contributions 插件提交给宿主的通用扩展声明
+ * @param contributions 插件提交给宿主的扩展声明
  * @author Smars
  * @date 2026/09/13
  */
@@ -48,8 +40,6 @@ public record PluginDefinition(
         I18nObject description,
         Tags tags,
         ConfigDefinition config,
-        List<CapabilityContribution<?>> capabilities,
-        List<CapabilityRequirement> requirements,
         List<PluginContribution> contributions
 ) {
 
@@ -64,7 +54,7 @@ public record PluginDefinition(
     /**
      * 校验并复制完整插件定义。
      *
-     * @throws NexusException 定义字段非法、Provider 标识重复或集合含有空元素
+     * @throws NexusException 定义字段非法或集合含有空元素
      */
     public PluginDefinition {
         if (pluginId == null || !PLUGIN_ID_PATTERN.matcher(pluginId).matches()) {
@@ -81,11 +71,7 @@ public record PluginDefinition(
         description = immutableI18n(description, false, "description");
         tags = tags == null ? Tags.empty() : tags;
         config = snapshotConfig(config);
-        capabilities = immutableCapabilities(capabilities);
-        requirements = immutableRequirements(requirements);
         contributions = immutableContributions(contributions);
-        requireUniqueProviders(capabilities, pluginId);
-        requireUniqueRequirements(requirements);
     }
 
     /**
@@ -95,9 +81,7 @@ public record PluginDefinition(
      * @param name 单语言显示名称
      * @param version 插件发布版本
      * @param apiVersion 插件协议主版本
-     * @param tags 插件级路由标签
-     * @param capabilities Capability 声明
-     * @param requirements Capability 依赖
+     * @param tags 插件级标签
      * @param config 插件配置定义
      */
     public PluginDefinition(
@@ -106,8 +90,6 @@ public record PluginDefinition(
             String version,
             int apiVersion,
             Tags tags,
-            List<CapabilityContribution<?>> capabilities,
-            List<CapabilityRequirement> requirements,
             ConfigDefinition config
     ) {
         this(
@@ -118,8 +100,6 @@ public record PluginDefinition(
                 I18nObject.of(Map.of()),
                 tags,
                 config,
-                capabilities,
-                requirements,
                 List.of());
     }
 
@@ -187,32 +167,6 @@ public record PluginDefinition(
         return I18nObject.of(new LinkedHashMap<>(source));
     }
 
-    private static List<CapabilityContribution<?>> immutableCapabilities(
-            List<CapabilityContribution<?>> source
-    ) {
-        if (source == null) {
-            return List.of();
-        }
-        for (CapabilityContribution<?> contribution : source) {
-            if (contribution == null) {
-                invalid("plugin capability contribution must not be null");
-            }
-        }
-        return List.copyOf(source);
-    }
-
-    private static List<CapabilityRequirement> immutableRequirements(List<CapabilityRequirement> source) {
-        if (source == null) {
-            return List.of();
-        }
-        for (CapabilityRequirement requirement : source) {
-            if (requirement == null) {
-                invalid("plugin capability requirement must not be null");
-            }
-        }
-        return List.copyOf(source);
-    }
-
     private static List<PluginContribution> immutableContributions(List<PluginContribution> source) {
         if (source == null) {
             return List.of();
@@ -227,31 +181,6 @@ public record PluginDefinition(
             }
         }
         return List.copyOf(source);
-    }
-
-    private static void requireUniqueProviders(
-            List<CapabilityContribution<?>> capabilities,
-            String pluginId
-    ) {
-        Set<String> providerIds = new HashSet<>();
-        for (CapabilityContribution<?> contribution : capabilities) {
-            if (!providerIds.add(contribution.providerId())) {
-                throw NexusException.build(
-                        PluginStatusCode.PROVIDER_DUPLICATE,
-                        "duplicate providerId in plugin " + pluginId + ": " + contribution.providerId());
-            }
-            // 通过统一的 ProviderRef 再校验一遍组合身份，避免各声明来源产生不同格式。
-            new ProviderRef(pluginId, contribution.providerId());
-        }
-    }
-
-    private static void requireUniqueRequirements(List<CapabilityRequirement> requirements) {
-        Set<CapabilityKey> identities = new HashSet<>();
-        for (CapabilityRequirement requirement : requirements) {
-            if (!identities.add(requirement.key())) {
-                invalid("duplicate capability requirement: " + requirement.key());
-            }
-        }
     }
 
     private static ConfigDefinition snapshotConfig(ConfigDefinition source) {
@@ -286,8 +215,6 @@ public record PluginDefinition(
     public static final class Builder {
 
         private final String pluginId;
-        private final List<CapabilityContribution<?>> capabilities = new ArrayList<>();
-        private final List<CapabilityRequirement> requirements = new ArrayList<>();
         private final List<PluginContribution> contributions = new ArrayList<>();
         private I18nObject displayName;
         private I18nObject description = I18nObject.of(Map.of());
@@ -355,124 +282,13 @@ public record PluginDefinition(
         }
 
         /**
-         * 设置由所有 Provider 继承的插件标签。
+         * 设置插件标签。
          *
-         * @param tags 插件路由标签
+         * @param tags 插件标签
          * @return 当前构建器
          */
         public Builder tags(Tags tags) {
             this.tags = tags;
-            return this;
-        }
-
-        /**
-         * 添加一个使用默认 Provider 标识的 Java 工厂。
-         *
-         * @param type Capability API 类型
-         * @param factory Provider 工厂
-         * @param <T> Provider 契约类型
-         * @return 当前构建器
-         */
-        public <T extends CapabilityProvider> Builder provide(
-                CapabilityType<T> type,
-                CapabilityProviderFactory<? extends T> factory
-        ) {
-            capabilities.add(new CapabilityContribution<>(type, factory));
-            return this;
-        }
-
-        /**
-         * 添加一个带完整身份、标签和配置的 Provider 工厂。
-         *
-         * @param type Capability API 类型
-         * @param providerId 插件内唯一 Provider 标识
-         * @param tags Provider 标签
-         * @param config Provider 配置定义
-         * @param factory Provider 工厂
-         * @param <T> Provider 契约类型
-         * @return 当前构建器
-         */
-        public <T extends CapabilityProvider> Builder provide(
-                CapabilityType<T> type,
-                String providerId,
-                Tags tags,
-                ConfigDefinition config,
-                CapabilityProviderFactory<? extends T> factory
-        ) {
-            capabilities.add(new CapabilityContribution<>(type, providerId, tags, config, factory));
-            return this;
-        }
-
-        /**
-         * 添加一个无标签、无 Provider 配置的完整身份工厂。
-         *
-         * @param type Capability API 类型
-         * @param providerId 插件内唯一 Provider 标识
-         * @param factory Provider 工厂
-         * @param <T> Provider 契约类型
-         * @return 当前构建器
-         */
-        public <T extends CapabilityProvider> Builder provide(
-                CapabilityType<T> type,
-                String providerId,
-                CapabilityProviderFactory<? extends T> factory
-        ) {
-            return provide(type, providerId, Tags.empty(), ConfigDefinition.empty(), factory);
-        }
-
-        /**
-         * 添加无标签要求的 Capability 依赖。
-         *
-         * @param name Capability 逻辑名称
-         * @param majorVersion API 主版本
-         * @param required 缺少依赖时是否阻止启动
-         * @return 当前构建器
-         */
-        public Builder require(String name, int majorVersion, boolean required) {
-            return require(name, majorVersion, Tags.empty(), required);
-        }
-
-        /**
-         * 添加带标签要求的 Capability 依赖。
-         *
-         * @param name Capability 逻辑名称
-         * @param majorVersion API 主版本
-         * @param requiredTags Provider 必须包含的标签
-         * @param required 缺少依赖时是否阻止启动
-         * @return 当前构建器
-         */
-        public Builder require(String name, int majorVersion, Tags requiredTags, boolean required) {
-            if (name == null || name.isBlank() || majorVersion < 1) {
-                invalid("requirement capability name and majorVersion are required");
-            }
-            requirements.add(new CapabilityRequirement(new CapabilityKey(name, majorVersion), requiredTags, required));
-            return this;
-        }
-
-        /**
-         * 添加无标签要求的 Capability 依赖。
-         *
-         * @param type 依赖的 Capability 类型
-         * @param required 缺少依赖时是否阻止启动
-         * @return 当前构建器
-         */
-        public Builder require(CapabilityType<?> type, boolean required) {
-            return require(type, Tags.empty(), required);
-        }
-
-        /**
-         * 添加带标签要求的 Capability 依赖。
-         *
-         * @param type 依赖的 Capability 类型
-         * @param requiredTags Provider 必须包含的标签
-         * @param required 缺少依赖时是否阻止启动
-         * @return 当前构建器
-         */
-        public Builder require(CapabilityType<?> type, Tags requiredTags, boolean required) {
-            if (type == null) {
-                invalid("requirement capability type is required");
-            }
-            requirements.add(new CapabilityRequirement(type.key(), requiredTags, required));
             return this;
         }
 
@@ -503,8 +319,6 @@ public record PluginDefinition(
                     description,
                     tags,
                     config,
-                    capabilities,
-                    requirements,
                     contributions);
         }
     }

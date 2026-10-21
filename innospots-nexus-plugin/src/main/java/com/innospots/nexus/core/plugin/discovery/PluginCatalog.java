@@ -2,7 +2,6 @@ package com.innospots.nexus.core.plugin.discovery;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -11,8 +10,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.innospots.nexus.base.exception.NexusException;
-import com.innospots.nexus.core.plugin.capability.CapabilityKey;
-import com.innospots.nexus.core.plugin.declaration.CapabilityContribution;
 import com.innospots.nexus.core.plugin.declaration.PluginDefinition;
 import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
@@ -89,7 +86,6 @@ public final class PluginCatalog {
 
     private static void validateGlobalConstraints(List<DiscoveredPlugin> discovered) {
         Set<String> pluginIds = new HashSet<>();
-        Map<CapabilityKey, Class<?>> capabilityApis = new HashMap<>();
         for (DiscoveredPlugin item : discovered) {
             PluginDefinition definition = item.definition();
             if (!pluginIds.add(definition.pluginId())) {
@@ -99,14 +95,6 @@ public final class PluginCatalog {
             if (definition.apiVersion() != PluginDefinition.CURRENT_API_VERSION) {
                 throw NexusException.build(PluginStatusCode.PLUGIN_API_INCOMPATIBLE,
                         "unsupported plugin apiVersion for " + definition.pluginId() + ": " + definition.apiVersion());
-            }
-            for (CapabilityContribution<?> contribution : definition.capabilities()) {
-                // 同一 CapabilityKey 在全局只能绑定一种 API 接口，保证 require(name, version) 可解析。
-                Class<?> previous = capabilityApis.putIfAbsent(contribution.type().key(), contribution.type().api());
-                if (previous != null && previous != contribution.type().api()) {
-                    throw NexusException.build(PluginStatusCode.CAPABILITY_TYPE_MISMATCH,
-                            "different API classes declared for " + contribution.type().key());
-                }
             }
         }
     }

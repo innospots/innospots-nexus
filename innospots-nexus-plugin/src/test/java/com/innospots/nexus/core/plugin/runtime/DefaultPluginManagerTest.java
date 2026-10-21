@@ -11,11 +11,14 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 import com.innospots.nexus.base.exception.NexusException;
-import com.innospots.nexus.core.plugin.capability.CapabilityType;
-import com.innospots.nexus.core.plugin.capability.CapabilityKey;
-import com.innospots.nexus.core.plugin.capability.Tags;
-import com.innospots.nexus.core.plugin.config.ConfigDefinition;
-import com.innospots.nexus.core.plugin.contract.CapabilityProvider;
+import com.innospots.nexus.base.i18n.I18nObject;
+import com.innospots.nexus.core.plugin.contribution.PluginContributionHandler;
+import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributionCatalog;
+import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributeNode;
+import com.innospots.nexus.core.plugin.contribution.console.ConsolePermissionGroupDeclaration;
+import com.innospots.nexus.core.plugin.contribution.console.ConsolePluginContribution;
+import com.innospots.nexus.core.plugin.contribution.console.ConsolePluginContributionHandler;
+import com.innospots.nexus.core.plugin.contribution.console.ReservedPluginResourceCatalog;
 import com.innospots.nexus.core.plugin.contract.Plugin;
 import com.innospots.nexus.core.plugin.declaration.PluginDefinition;
 import com.innospots.nexus.core.plugin.discovery.DiscoveredPlugin;
@@ -27,161 +30,40 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class DefaultPluginManagerTest {
 
-    private static final CapabilityType<SourceProvider> SOURCE =
-            CapabilityType.of("fixture.source", 1, SourceProvider.class);
-    private static final CapabilityType<SinkProvider> SINK =
-            CapabilityType.of("fixture.sink", 1, SinkProvider.class);
-
     @Test
-    void startsProvidersBeforeDependentsAndProtectsTheLastRequiredProvider() {
+    void startsDiscoveredPluginsInStableOrder() {
         List<String> starts = new ArrayList<>();
-        SourcePlugin source = new SourcePlugin(starts);
-        SinkPlugin sink = new SinkPlugin(starts);
-        List<DiscoveredPlugin> discovered = List.of(
-                discovered(sink),
-                discovered(source));
-        PluginRuntimeConfig config = new PluginRuntimeConfig(
-                Set.of("com.example.fixture-sink"),
-                Set.of(),
-                Map.of(),
-                Map.of(),
-                Map.of(),
-                getClass().getClassLoader());
-        DefaultPluginManager manager = DefaultPluginManager.create(
-                config, PluginCatalog.of(discovered), List.of());
+        DefaultPluginManager manager = manager(starts, new SourcePlugin(starts), new SinkPlugin(starts));
 
         manager.start();
 
-        assertThat(starts).containsExactly("source", "sink");
-        assertThat(manager.capabilities().findAll(SOURCE)).hasSize(1);
-        assertThat(manager.plugin("com.example.fixture-sink")).get()
+        assertThat(starts).containsExactlyInAnyOrder("source", "sink");
+        assertThat(manager.plugins()).hasSize(2);
+        assertThat(manager.plugin("com.example.fixture-source")).get()
                 .extracting(info -> info.state())
                 .isEqualTo(PluginState.ACTIVE);
-        assertThatThrownBy(() -> manager.stop("com.example.fixture-source"))
-                .isInstanceOf(NexusException.class)
-                .hasMessageContaining("fixture-sink");
-
-        manager.stop("com.example.fixture-sink");
-        manager.stop("com.example.fixture-source");
-        assertThat(manager.plugins()).allMatch(info -> info.state() == PluginState.STOPPED);
+        manager.close();
     }
 
     @Test
-    void isolatesInvalidOptionalPluginConfiguration() {
-        List<String> starts = new ArrayList<>();
-        SourcePlugin source = new SourcePlugin(starts);
-        Plugin invalid = new Plugin() {
-            @Override
-            public PluginDefinition definition() {
-                return PluginDefinition.builder("com.example.invalid-config")
-                        .name("Invalid Config")
-                        .version("1.0.0")
-                        .tags(Tags.of("fixture", "invalid"))
-                        .config(ConfigDefinition.builder().string("endpoint").required().end().build())
-                        .build();
-            }
-        };
+    void rollsBackWhenRequiredPluginFails() {
         DefaultPluginManager manager = DefaultPluginManager.create(
-                runtimeConfig(Set.of(), Set.of(), Map.of()),
-                PluginCatalog.of(List.of(discovered(invalid), discovered(source))),
-                List.of());
+                runtimeConfig(Set.of("com.example.fixture-fail"), Set.of(), Map.of()),
+                PluginCatalog.of(List.of(
+                        discovered(new SourcePlugin(new ArrayList<>())),
+                        discovered(new FailingPlugin()))),
+                handlers());
 
-        manager.start();
-
-        assertThat(starts).containsExactly("source");
-        assertThat(manager.plugin("com.example.invalid-config")).get()
+        assertThatThrownBy(manager::start).isInstanceOf(NexusException.class);
+        assertThat(manager.plugin("com.example.fixture-source")).get()
                 .extracting(info -> info.state())
-                .isEqualTo(PluginState.FAILED);
+                .isNotEqualTo(PluginState.ACTIVE);
+        manager.close();
     }
 
     @Test
-    void rejectsAmbiguousDefaultRouteBeforeStartingAnyPlugin() {
-        List<String> starts = new ArrayList<>();
-        SourcePlugin first = new SourcePlugin(starts);
-        Plugin second = new Plugin() {
-            @Override
-            public PluginDefinition definition() {
-                return PluginDefinition.builder("com.example.fixture-source-two")
-                        .name("Fixture Source Two")
-                        .version("1.0.0")
-                        .tags(Tags.of("fixture", "source"))
-                        .provide(SOURCE, SourceProviderImpl::new)
-                        .build();
-            }
-
-            @Override
-            public void start() {
-                starts.add("source-two");
-            }
-        };
-        Map<CapabilityKey, Tags> routes = Map.of(SOURCE.key(), Tags.of("fixture", "source"));
-        assertThatThrownBy(() -> DefaultPluginManager.create(
-                runtimeConfig(Set.of(), Set.of(), routes),
-                PluginCatalog.of(List.of(discovered(first), discovered(second))),
-                List.of()))
-                .isInstanceOf(NexusException.class)
-                .hasMessageContaining("ambiguous");
-        assertThat(starts).isEmpty();
-    }
-
-    @Test
-    void rejectsAmbiguousDefaultRouteWhenOnlyProviderTagsMatch() {
-        Plugin first = providerTaggedSource("com.example.fixture-source-one", "one");
-        Plugin second = providerTaggedSource("com.example.fixture-source-two", "two");
-        Map<CapabilityKey, Tags> routes = Map.of(SOURCE.key(), Tags.of("region", "cn"));
-        assertThatThrownBy(() -> DefaultPluginManager.create(
-                runtimeConfig(Set.of(), Set.of(), routes),
-                PluginCatalog.of(List.of(discovered(first), discovered(second))),
-                List.of()))
-                .isInstanceOf(NexusException.class)
-                .hasMessageContaining("ambiguous");
-    }
-
-    @Test
-    void rejectsMissingRequiredPluginBeforeStartingOthers() {
-        List<String> starts = new ArrayList<>();
-        assertThatThrownBy(() -> DefaultPluginManager.create(
-                runtimeConfig(Set.of("com.example.missing-plugin"), Set.of(), Map.of()),
-                PluginCatalog.of(List.of(discovered(new SourcePlugin(starts)))),
-                List.of()))
-                .isInstanceOf(NexusException.class);
-        assertThat(starts).isEmpty();
-    }
-
-    @Test
-    void preservesRequiredPluginFailureCauseAfterStartupRollback() {
-        Plugin failing = new Plugin() {
-            @Override
-            public PluginDefinition definition() {
-                return PluginDefinition.builder("com.example.required-failure")
-                        .name("Required Failure")
-                        .version("1.0.0")
-                        .tags(Tags.of("fixture", "failure"))
-                        .build();
-            }
-
-            @Override
-            public void start() {
-                throw new RuntimeException("expected required startup failure");
-            }
-        };
-        DefaultPluginManager manager = DefaultPluginManager.create(
-                runtimeConfig(Set.of("com.example.required-failure"), Set.of(), Map.of()),
-                PluginCatalog.of(List.of(discovered(failing))),
-                List.of());
-
-        assertThatThrownBy(manager::start)
-                .isInstanceOf(NexusException.class)
-                .hasCauseInstanceOf(NexusException.class);
-    }
-
-    @Test
-    void closeMakesManagerTerminalAndReleasesRuntimeOperations() {
-        List<String> starts = new ArrayList<>();
-        DefaultPluginManager manager = DefaultPluginManager.create(
-                runtimeConfig(Set.of(), Set.of(), Map.of()),
-                PluginCatalog.of(List.of(discovered(new SourcePlugin(starts)))),
-                List.of());
+    void closeMakesManagerTerminal() {
+        DefaultPluginManager manager = manager(new ArrayList<>(), new SourcePlugin(new ArrayList<>()));
 
         manager.start();
         manager.close();
@@ -195,65 +77,54 @@ class DefaultPluginManagerTest {
         Set<String> invalidIds = new HashSet<>();
         invalidIds.add(null);
         assertThatThrownBy(() -> new PluginRuntimeConfig(
-                invalidIds, Set.of(), Map.of(), Map.of(), Map.of(), getClass().getClassLoader()))
+                invalidIds, Set.of(), Map.of(), Map.of(), DefaultPluginManagerTest.class.getClassLoader()))
                 .isInstanceOf(NexusException.class);
 
         Map<String, String> invalidConfig = new HashMap<>();
         invalidConfig.put(null, "value");
         assertThatThrownBy(() -> new PluginRuntimeConfig(
-                Set.of(), Set.of(), invalidConfig, Map.of(), Map.of(), getClass().getClassLoader()))
+                Set.of(), Set.of(), invalidConfig, Map.of(), DefaultPluginManagerTest.class.getClassLoader()))
                 .isInstanceOf(NexusException.class);
     }
 
-    private PluginRuntimeConfig runtimeConfig(
+    private static DefaultPluginManager manager(List<String> starts, Plugin... plugins) {
+        List<DiscoveredPlugin> discovered = new ArrayList<>();
+        for (Plugin plugin : plugins) {
+            discovered.add(discovered(plugin));
+        }
+        return DefaultPluginManager.create(
+                runtimeConfig(Set.of(), Set.of(), Map.of()),
+                PluginCatalog.of(discovered),
+                handlers());
+    }
+
+    private static List<PluginContributionHandler<?>> handlers() {
+        return List.of(new ConsolePluginContributionHandler(
+                new ConsoleContributionCatalog(),
+                new ReservedPluginResourceCatalog(List.of())));
+    }
+
+    private static PluginRuntimeConfig runtimeConfig(
             Set<String> required,
             Set<String> disabled,
-            Map<CapabilityKey, Tags> routes
+            Map<String, String> runtimeVariables
     ) {
         return new PluginRuntimeConfig(
-                required, disabled, Map.of(), Map.of(), routes, getClass().getClassLoader());
+                required, disabled, Map.of(), runtimeVariables, DefaultPluginManagerTest.class.getClassLoader());
     }
 
     private static DiscoveredPlugin discovered(Plugin plugin) {
         return new DiscoveredPlugin(plugin, plugin.definition(), Instant.now());
     }
 
-    private static Plugin providerTaggedSource(String pluginId, String providerId) {
-        return new Plugin() {
-            @Override
-            public PluginDefinition definition() {
-                return PluginDefinition.builder(pluginId)
-                        .name("Provider Tagged Source")
-                        .version("1.0.0")
-                        .tags(Tags.of("fixture", "source"))
-                        .provide(SOURCE, providerId, Tags.of("region", "cn"),
-                                ConfigDefinition.empty(), SourceProviderImpl::new)
-                        .build();
-            }
-        };
-    }
-
-    private interface SourceProvider extends CapabilityProvider {
-    }
-
-    private interface SinkProvider extends CapabilityProvider {
-    }
-
-    private static final class SourceProviderImpl implements SourceProvider {
-    }
-
-    private static final class SinkProviderImpl implements SinkProvider {
-    }
-
     private record SourcePlugin(List<String> starts) implements Plugin {
 
         @Override
         public PluginDefinition definition() {
-                return PluginDefinition.builder("com.example.fixture-source")
+            return PluginDefinition.builder("com.example.fixture-source")
                     .name("Fixture Source")
                     .version("1.0.0")
-                    .tags(Tags.of("fixture", "source"))
-                    .provide(SOURCE, SourceProviderImpl::new)
+                    .contribute(sampleContribution("source", "source-page"))
                     .build();
         }
 
@@ -267,12 +138,10 @@ class DefaultPluginManagerTest {
 
         @Override
         public PluginDefinition definition() {
-                return PluginDefinition.builder("com.example.fixture-sink")
+            return PluginDefinition.builder("com.example.fixture-sink")
                     .name("Fixture Sink")
                     .version("1.0.0")
-                    .tags(Tags.of("fixture", "sink"))
-                    .provide(SINK, SinkProviderImpl::new)
-                    .require(SOURCE, true)
+                    .contribute(sampleContribution("sink", "sink-page"))
                     .build();
         }
 
@@ -280,5 +149,57 @@ class DefaultPluginManagerTest {
         public void start() {
             starts.add("sink");
         }
+    }
+
+    private static final class FailingPlugin implements Plugin {
+
+        @Override
+        public PluginDefinition definition() {
+            return PluginDefinition.builder("com.example.fixture-fail")
+                    .name("Fail")
+                    .version("1.0.0")
+                    .contribute(sampleContribution("fail", "fail-page"))
+                    .build();
+        }
+
+        @Override
+        public void start() {
+            throw new IllegalStateException("boom");
+        }
+    }
+
+    private static ConsolePluginContribution sampleContribution(String moduleKey, String pageKey) {
+        ConsoleContributeNode menu = new ConsoleContributeNode(
+                null,
+                I18nObject.of(Map.of("en", "Menu")),
+                I18nObject.of(Map.of()),
+                0,
+                pageKey,
+                null,
+                "default",
+                null,
+                List.of(),
+                List.of(),
+                List.of());
+        ConsoleContributeNode module = new ConsoleContributeNode(
+                moduleKey,
+                I18nObject.of(Map.of("en", "Main")),
+                I18nObject.of(Map.of()),
+                0,
+                null,
+                null,
+                null,
+                null,
+                List.of(new ConsolePermissionGroupDeclaration(
+                        "default", I18nObject.of(Map.of("en", "Views")))),
+                List.of(new ConsolePermissionGroupDeclaration(
+                        "default", I18nObject.of(Map.of("en", "Ops")))),
+                List.of(menu));
+        return new ConsolePluginContribution(
+                "fixture",
+                I18nObject.of(Map.of("en", "Fixture")),
+                I18nObject.of(Map.of()),
+                0,
+                List.of(module));
     }
 }

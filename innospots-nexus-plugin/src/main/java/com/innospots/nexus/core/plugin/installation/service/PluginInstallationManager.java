@@ -20,7 +20,6 @@ import com.innospots.nexus.core.plugin.installation.domain.model.PluginDefinitio
 import com.innospots.nexus.core.plugin.installation.domain.model.PluginInstallation;
 import com.innospots.nexus.core.plugin.installation.domain.model.PluginManagementView;
 import com.innospots.nexus.core.plugin.installation.repository.PluginInstallationRepository;
-import com.innospots.nexus.core.plugin.capability.CapabilityManager;
 import com.innospots.nexus.core.plugin.lifecycle.PluginRuntimeInfo;
 import com.innospots.nexus.core.plugin.lifecycle.PluginState;
 import com.innospots.nexus.core.plugin.runtime.PluginManager;
@@ -171,16 +170,6 @@ public final class PluginInstallationManager implements AutoCloseable {
             }
             throw exception;
         }
-    }
-
-    /**
-     * 返回已启动运行时的 Capability 查询边界。
-     *
-     * @return 活动 Capability 管理器
-     * @throws NexusException 运行时尚未创建或管理器已关闭时
-     */
-    public CapabilityManager capabilities() {
-        return runtimeOrThrow().capabilities();
     }
 
     /**
