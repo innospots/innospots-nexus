@@ -88,14 +88,25 @@ class RoleEndpointCrudIntegrationTest {
         RoleDatabaseJsonSnapshot.logAndPersist(jdbcTemplate, "01-after-create");
 
         Map<String, Object> row = jdbcTemplate.queryForMap(
-                "SELECT role_id, role_name, role_code, owner_type, owner_id, security_realm, status"
-                        + " FROM nx_role WHERE role_code = ?",
+                """
+                SELECT role_id, role_name, role_code, owner_type, owner_id, security_realm, status,
+                       sort_order, built_in, administrator, created_at, updated_at
+                FROM nx_role WHERE role_code = ?
+                """,
                 "platform-operators");
         String roleId = String.valueOf(row.get("role_id"));
         assertThat(roleId).isNotBlank();
+        assertThat(row.get("role_name")).isEqualTo("Platform Operators");
         assertThat(row.get("owner_type")).isEqualTo("PLATFORM");
         assertThat(row.get("owner_id")).isNull();
         assertThat(row.get("security_realm")).isEqualTo("PLATFORM");
+        assertThat(row.get("status")).isEqualTo("ENABLED");
+        assertThat(row.get("sort_order")).isEqualTo(1);
+        assertThat(row.get("built_in")).isEqualTo(false);
+        assertThat(row.get("administrator")).isEqualTo(false);
+        assertThat(row.get("created_at")).isNotNull();
+        assertThat(row.get("updated_at")).isNotNull();
+        LOGGER.info("nx_role row after create: {}", Jsons.toJson(row));
 
         HttpResponse<String> detail = http.get(ROLES_BASE + "/" + roleId);
         LOGGER.info("GET detail status={} body={}", detail.statusCode(), detail.body());
@@ -126,6 +137,19 @@ class RoleEndpointCrudIntegrationTest {
                 "PUT", ROLES_BASE + "/" + roleId, Map.of("Content-Type", "application/json"), updateBody);
         assertThat(updated.statusCode()).as(updated.body()).isEqualTo(200);
         assertThat(updated.body()).contains("Platform Operators Updated");
+        Map<String, Object> updatedRow = jdbcTemplate.queryForMap(
+                """
+                SELECT role_name, description, sort_order, status, created_at, updated_at
+                FROM nx_role WHERE role_id = ?
+                """,
+                roleId);
+        assertThat(updatedRow.get("role_name")).isEqualTo("Platform Operators Updated");
+        assertThat(updatedRow.get("description")).isEqualTo("updated in sample IT");
+        assertThat(updatedRow.get("sort_order")).isEqualTo(20);
+        assertThat(updatedRow.get("status")).isEqualTo("ENABLED");
+        assertThat(updatedRow.get("created_at")).isNotNull();
+        assertThat(updatedRow.get("updated_at")).isNotNull();
+        LOGGER.info("nx_role row after update: {}", Jsons.toJson(updatedRow));
         RoleDatabaseJsonSnapshot.logAndPersist(jdbcTemplate, "02-after-update");
 
         HttpResponse<String> disabled = http.exchange(
@@ -134,6 +158,9 @@ class RoleEndpointCrudIntegrationTest {
                 Map.of("Content-Type", "application/json"),
                 "{\"status\":\"DISABLED\"}");
         assertThat(disabled.statusCode()).as(disabled.body()).isEqualTo(200);
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT status FROM nx_role WHERE role_id = ?", String.class, roleId))
+                .isEqualTo("DISABLED");
         RoleDatabaseJsonSnapshot.logAndPersist(jdbcTemplate, "03-after-disable");
 
         HttpResponse<String> pageAfterDisable = http.get(ROLES_BASE + "?pageNo=1&pageSize=20&status=DISABLED");

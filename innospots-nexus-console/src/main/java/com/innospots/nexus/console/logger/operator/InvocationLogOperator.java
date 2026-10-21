@@ -32,6 +32,7 @@ public class InvocationLogOperator {
     private static final String EXECUTION_SUCCESS = "SUCCESS";
     private static final String EXECUTION_FAILURE = "FAILURE";
     private static final int MESSAGE_MAX_LENGTH = 512;
+    private static final int FAILURE_DETAIL_MAX_LENGTH = 1024;
 
     private final AuditLogDao auditLogDao;
 
@@ -50,11 +51,13 @@ public class InvocationLogOperator {
         AuditLogEntity entity = new AuditLogEntity();
         ConsoleOwnershipScope.stamp(entity, ConsoleOwnershipScope.captureForAudit());
         entity.setAction(context.action());
+        entity.setTarget(context.target());
         entity.setPath(buildPath(context));
         entity.setOperatedTime(toLocalDateTime(context.startTime()));
         entity.setActor(context.actor());
         entity.setExecutionResult(context.success() ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
         entity.setMessage(buildMessage(context));
+        entity.setFailureDetail(buildFailureDetail(context));
         entity.setKeyParameters(serializeArguments(context.arguments()));
         entity.setDurationMs(resolveDurationMs(context));
         auditLogDao.insert(entity);
@@ -84,16 +87,6 @@ public class InvocationLogOperator {
     private String buildMessage(InvocationLogContext context) {
         String operationMessage = context.operationMessage();
         if (operationMessage != null && !operationMessage.isBlank()) {
-            if (context.success()) {
-                return truncate(operationMessage);
-            }
-            Throwable exception = context.exception();
-            if (exception != null) {
-                String detail = exception.getMessage();
-                String suffix = exception.getClass().getName()
-                        + (detail != null ? ": " + detail : "");
-                return truncate(operationMessage + " — " + suffix);
-            }
             return truncate(operationMessage);
         }
         Throwable exception = context.exception();
@@ -107,6 +100,17 @@ public class InvocationLogOperator {
             return truncate(result.toString());
         }
         return null;
+    }
+
+    private String buildFailureDetail(InvocationLogContext context) {
+        if (context.success() || context.exception() == null) {
+            return null;
+        }
+        Throwable exception = context.exception();
+        String detail = exception.getMessage();
+        return truncate(
+                exception.getClass().getName() + (detail != null ? ": " + detail : ""),
+                FAILURE_DETAIL_MAX_LENGTH);
     }
 
     private String serializeArguments(Object[] arguments) {
@@ -124,11 +128,15 @@ public class InvocationLogOperator {
     }
 
     private String truncate(String value) {
+        return truncate(value, MESSAGE_MAX_LENGTH);
+    }
+
+    private String truncate(String value, int maxLength) {
         if (value == null) {
             return null;
         }
-        return value.length() <= MESSAGE_MAX_LENGTH
+        return value.length() <= maxLength
                 ? value
-                : value.substring(0, MESSAGE_MAX_LENGTH);
+                : value.substring(0, maxLength);
     }
 }

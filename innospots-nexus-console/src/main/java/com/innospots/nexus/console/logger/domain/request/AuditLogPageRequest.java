@@ -20,7 +20,7 @@ public final class AuditLogPageRequest {
     @QueryParam("operator")
     private String operator;
 
-    @Schema(description = "操作类型，如 CREATE、UPDATE")
+    @Schema(description = "操作类型（EndpointGrantAction 枚举名），如 CREATE、UPDATE")
     @QueryParam("operationType")
     private String operationType;
 

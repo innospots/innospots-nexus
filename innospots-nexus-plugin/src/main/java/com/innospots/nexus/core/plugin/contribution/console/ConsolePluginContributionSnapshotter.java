@@ -31,8 +31,12 @@ public final class ConsolePluginContributionSnapshotter
         if (node.isModule()) {
             value.put("moduleKey", node.moduleKey());
             value.put("resourceKey", node.moduleResourceKey());
-        } else {
+        }
+        if (node.entryPageKey() != null && !node.entryPageKey().isBlank()) {
             value.put("entryPageKey", node.entryPageKey());
+        }
+        if (node.icon() != null && !node.icon().isBlank()) {
+            value.put("icon", node.icon());
         }
         value.put("children", node.children().stream().map(ConsolePluginContributionSnapshotter::node).toList());
         return Map.copyOf(value);

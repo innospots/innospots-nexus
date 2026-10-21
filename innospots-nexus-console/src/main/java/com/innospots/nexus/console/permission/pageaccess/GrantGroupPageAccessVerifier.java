@@ -6,7 +6,7 @@ import com.innospots.nexus.console.permission.authorization.AuthorizationSubject
 import com.innospots.nexus.console.permission.authorization.ConsolePagePermissionAuthorizer;
 
 /**
- * 基于 catalog MENU 授权与 {@code grantGroup} 的默认页面访问校验实现。
+ * 基于 catalog 页面资源授权与 {@code grantGroup} 的默认页面访问校验实现。
  */
 public final class GrantGroupPageAccessVerifier implements PageAccessVerifier {
 

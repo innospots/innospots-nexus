@@ -62,13 +62,13 @@ public final class NavigationMenuAssembler {
 
     private List<NavigationMenuVo> buildMenus(List<ConsoleCatalogResourceEntity> visible) {
         Set<String> visibleMenuIds = visible.stream()
-                .filter(resource -> CatalogResourceType.MENU.name().equals(resource.getResourceType()))
+                .filter(NavigationMenuAssembler::navigable)
                 .map(ConsoleCatalogResourceEntity::getResourceId)
                 .collect(Collectors.toCollection(HashSet::new));
         Map<String, List<ConsoleCatalogResourceEntity>> menusByParent = new LinkedHashMap<>();
         List<ConsoleCatalogResourceEntity> roots = new ArrayList<>();
         for (ConsoleCatalogResourceEntity resource : visible) {
-            if (!CatalogResourceType.MENU.name().equals(resource.getResourceType())) {
+            if (!navigable(resource)) {
                 continue;
             }
             String parentId = resource.getParentResourceId();
@@ -103,7 +103,7 @@ public final class NavigationMenuAssembler {
             childMenus.add(toMenu(child, menusByParent));
         }
         return new NavigationMenuVo(
-                menuKey(menu.getResourceKey()),
+                menuKey(menu),
                 menu.getDisplayName(),
                 routePath(menu),
                 null,
@@ -126,7 +126,10 @@ public final class NavigationMenuAssembler {
     }
 
     private static String menuKey(String resourceKey) {
-        if (resourceKey == null || !resourceKey.startsWith("menu:")) {
+        if (resourceKey == null) {
+            return null;
+        }
+        if (!resourceKey.startsWith("menu:")) {
             return resourceKey;
         }
         String suffix = resourceKey.substring("menu:".length());
@@ -135,5 +138,23 @@ public final class NavigationMenuAssembler {
             return suffix;
         }
         return suffix.substring(separator + 1);
+    }
+
+    private static String menuKey(ConsoleCatalogResourceEntity menu) {
+        return hasText(menu.getEntryPageKey())
+                ? menu.getEntryPageKey()
+                : menuKey(menu.getResourceKey());
+    }
+
+    private static boolean navigable(ConsoleCatalogResourceEntity resource) {
+        if (CatalogResourceType.MENU.name().equals(resource.getResourceType())) {
+            return true;
+        }
+        return CatalogResourceType.MODULE.name().equals(resource.getResourceType())
+                && hasText(resource.getEntryPageKey());
+    }
+
+    private static boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 }

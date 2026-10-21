@@ -9,6 +9,7 @@ import com.innospots.nexus.base.domain.enums.BasicStatus;
 import com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao;
 import com.innospots.nexus.console.catalog.domain.entity.ConsoleCatalogResourceEntity;
 import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
+import com.innospots.nexus.console.catalog.domain.model.CatalogGrantKeys;
 import com.innospots.nexus.console.permission.dao.PermissionGrantDao;
 import com.innospots.nexus.console.permission.domain.entity.PermissionGrantEntity;
 import com.innospots.nexus.console.permission.domain.enums.PermissionSubjectType;
@@ -16,7 +17,7 @@ import com.innospots.nexus.console.scope.ConsoleOwnership;
 import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
 
 /**
- * 控制台页面访问鉴权（catalog v2：MENU 入口 + 授权记录）。
+ * 控制台页面访问鉴权（catalog v2：叶子 MODULE 或 MENU 入口 + 授权记录）。
  */
 public final class ConsolePagePermissionAuthorizer {
 
@@ -37,31 +38,36 @@ public final class ConsolePagePermissionAuthorizer {
             return AuthorizationDecision.deny("Invalid authorization request");
         }
         String pageKey = request.pageKey().trim();
-        ConsoleCatalogResourceEntity menu = menuByEntryPageKey(pageKey);
-        if (menu == null) {
+        ConsoleCatalogResourceEntity pageResource = pageResourceByEntryPageKey(pageKey);
+        if (pageResource == null) {
             return AuthorizationDecision.deny("Page is not available");
         }
+        String grantKey = CatalogGrantKeys.viewKey(pageResource);
+        if (blank(grantKey)) {
+            return AuthorizationDecision.deny("Page is not grantable");
+        }
         if (!request.subject().administrator()
-                && !hasGrant(request.workspaceId(), menu.getResourceId(), request.subject())) {
+                && !hasGrant(request.workspaceId(), grantKey, request.subject())) {
             return AuthorizationDecision.deny("Page permission is required");
         }
         return AuthorizationDecision.allow(new AuthorizationContext(
                 request.workspaceId(), pageKey, null, List.of()));
     }
 
-    private ConsoleCatalogResourceEntity menuByEntryPageKey(String entryPageKey) {
-        List<ConsoleCatalogResourceEntity> menus = resourceDao.selectList(
+    private ConsoleCatalogResourceEntity pageResourceByEntryPageKey(String entryPageKey) {
+        List<ConsoleCatalogResourceEntity> resources = resourceDao.selectList(
                 Wrappers.<ConsoleCatalogResourceEntity>lambdaQuery()
-                        .eq(ConsoleCatalogResourceEntity::getResourceType,
+                        .in(ConsoleCatalogResourceEntity::getResourceType,
+                                CatalogResourceType.MODULE.name(),
                                 CatalogResourceType.MENU.name())
                         .eq(ConsoleCatalogResourceEntity::getEntryPageKey, entryPageKey)
                         .eq(ConsoleCatalogResourceEntity::getStatus, BasicStatus.ENABLED.name()));
-        return menus.size() == 1 ? menus.getFirst() : null;
+        return resources.size() == 1 ? resources.getFirst() : null;
     }
 
     private List<PermissionGrantEntity> grants(
             String workspaceId,
-            String resourceId,
+            String grantKey,
             AuthorizationSubject subject
     ) {
         List<PermissionGrantEntity> result = new ArrayList<>();
@@ -71,7 +77,7 @@ public final class ConsolePagePermissionAuthorizer {
                     Wrappers.<PermissionGrantEntity>lambdaQuery()
                             .eq(PermissionGrantEntity::getSubjectType, PermissionSubjectType.ROLE.name())
                             .in(PermissionGrantEntity::getSubjectId, subject.roleIds())
-                            .eq(PermissionGrantEntity::getResourceId, resourceId),
+                            .eq(PermissionGrantEntity::getGrantKey, grantKey),
                     ownership)));
         }
         if (!subject.orgUnitIds().isEmpty()) {
@@ -79,14 +85,14 @@ public final class ConsolePagePermissionAuthorizer {
                     Wrappers.<PermissionGrantEntity>lambdaQuery()
                             .eq(PermissionGrantEntity::getSubjectType, PermissionSubjectType.ORG_UNIT.name())
                             .in(PermissionGrantEntity::getSubjectId, subject.orgUnitIds())
-                            .eq(PermissionGrantEntity::getResourceId, resourceId),
+                            .eq(PermissionGrantEntity::getGrantKey, grantKey),
                     ownership)));
         }
         return result;
     }
 
-    private boolean hasGrant(String workspaceId, String resourceId, AuthorizationSubject subject) {
-        return !grants(workspaceId, resourceId, subject).isEmpty();
+    private boolean hasGrant(String workspaceId, String grantKey, AuthorizationSubject subject) {
+        return !grants(workspaceId, grantKey, subject).isEmpty();
     }
 
     private static boolean blank(String value) {

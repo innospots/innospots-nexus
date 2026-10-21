@@ -78,6 +78,9 @@ public final class PlatformIntegrationTestSupport {
     public static final String H2_URL_CATALOG_TREE_OPS_IT =
             "jdbc:h2:mem:nexus-sample-platform-catalog-tree-ops-it" + H2_SUFFIX;
 
+    public static final String H2_URL_CATALOG_SYNC_DB_IT =
+            "jdbc:h2:mem:nexus-sample-platform-catalog-sync-db-it" + H2_SUFFIX;
+
     private PlatformIntegrationTestSupport() {
     }
 
@@ -177,10 +180,10 @@ public final class PlatformIntegrationTestSupport {
         jdbcTemplate.update(
                 """
                 INSERT INTO nx_audit_log (
-                    audit_log_id, action, path, operated_time, actor, message, status_code,
+                    audit_log_id, action, target, path, operated_time, actor, message, status_code,
                     execution_result, owner_type, owner_id, security_realm, created_at, updated_at
                 ) VALUES (
-                    ?, 'platform.test', '/api/d/platform/sample', CURRENT_TIMESTAMP, 'dev',
+                    ?, 'READ', 'platform.test', '/api/d/platform/sample', CURRENT_TIMESTAMP, 'dev',
                     'seeded for IT', '200', 'SUCCESS', 'PLATFORM', NULL, 'PLATFORM',
                     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
                 )

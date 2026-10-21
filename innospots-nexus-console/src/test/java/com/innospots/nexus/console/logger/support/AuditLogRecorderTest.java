@@ -37,6 +37,8 @@ class AuditLogRecorderTest {
         InvocationLogContext context = captured.get();
         assertThat(context).isNotNull();
         assertThat(context.httpPath()).isEqualTo("POST /platform/dictionary-types");
+        assertThat(context.action()).isEqualTo("CREATE");
+        assertThat(context.target()).isEqualTo("dictionary.type.create");
         assertThat(context.operationMessage()).isEqualTo("创建字典类型");
         assertThat(context.actor()).isEqualTo("alice");
         assertThat(context.success()).isTrue();

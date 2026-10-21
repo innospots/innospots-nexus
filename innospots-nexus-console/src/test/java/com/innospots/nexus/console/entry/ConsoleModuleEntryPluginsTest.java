@@ -33,14 +33,13 @@ class ConsoleModuleEntryPluginsTest {
                 .orElseThrow();
 
         ConsoleContributeNode module = contribution.modules().getFirst();
-        String entryPageKey = module.children().getFirst().entryPageKey();
+        String entryPageKey = module.entryPageKey();
         assertThat(module.moduleKey()).isNotBlank();
         assertThat(entryPageKey).isNotBlank();
+        assertThat(module.children()).isEmpty();
         assertThat(ConsolePageRoutes.pagePath(
                 contribution.domainKey(), module.moduleKey(), entryPageKey))
                 .startsWith(ConsolePageRoutes.PAGE_ROUTE_PREFIX);
-        assertThat(module.children()).singleElement()
-                .satisfies(menu -> assertThat(menu.entryPageKey()).isEqualTo(entryPageKey));
         assertThat(definition.contributions()).isNotEmpty();
     }
 

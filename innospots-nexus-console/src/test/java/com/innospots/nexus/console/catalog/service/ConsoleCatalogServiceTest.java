@@ -41,6 +41,32 @@ class ConsoleCatalogServiceTest {
         assertThat(roots.getFirst().grants().viewItems()).hasSize(1);
     }
 
+    @Test
+    void permissionCatalogBuildsLeafModuleGrantsWithoutMenuChild() {
+        ConsoleCatalogResourceEntity module = entity(
+                "m1", null, CatalogResourceType.MODULE, "module:demo", "demo", "demo-main");
+        module.setOperationGroups(Jsons.toJson(List.of(Map.of(
+                "group", "default",
+                "label", Map.of("en", "Operations")))));
+
+        ConsoleCatalogResourceDao dao = mock(ConsoleCatalogResourceDao.class);
+        when(dao.selectList(any())).thenReturn(List.of(module));
+
+        ConsoleCatalogService service = new ConsoleCatalogService(
+                dao,
+                new EndpointGrantManager());
+
+        List<CatalogNodeVo> roots = service.permissionCatalog();
+        assertThat(roots).hasSize(1);
+        assertThat(roots.getFirst().resourceType()).isEqualTo(CatalogResourceType.MODULE);
+        assertThat(roots.getFirst().children()).isEmpty();
+        assertThat(roots.getFirst().entryPageKey()).isEqualTo("demo-main");
+        assertThat(roots.getFirst().grants()).isNotNull();
+        assertThat(roots.getFirst().grants().viewItems()).hasSize(1);
+        assertThat(roots.getFirst().grants().viewItems().getFirst().grantName())
+                .isEqualTo("demo-main");
+    }
+
     private static ConsoleCatalogResourceEntity entity(
             String id,
             String parentId,

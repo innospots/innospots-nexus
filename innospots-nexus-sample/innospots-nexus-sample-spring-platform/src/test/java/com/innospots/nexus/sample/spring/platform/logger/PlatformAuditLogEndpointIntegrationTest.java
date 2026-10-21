@@ -66,6 +66,8 @@ class PlatformAuditLogEndpointIntegrationTest {
         assertThat(paged.statusCode()).as(paged.body()).isEqualTo(200);
         assertThat(paged.body()).contains(SEED_AUDIT_LOG_ID);
         assertThat(paged.body()).contains("platform.test");
+        assertThat(paged.body()).contains("\"operationType\":\"READ\"");
+        assertThat(paged.body()).contains("\"target\":\"platform.test\"");
 
         HttpResponse<String> detail = http.get(PlatformConstant.AUDIT_LOGS_PATH + "/" + SEED_AUDIT_LOG_ID);
         assertThat(detail.statusCode()).as(detail.body()).isEqualTo(200);

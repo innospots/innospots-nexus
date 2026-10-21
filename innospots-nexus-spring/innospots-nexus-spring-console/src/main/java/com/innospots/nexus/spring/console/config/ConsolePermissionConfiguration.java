@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao;
+import com.innospots.nexus.console.catalog.service.ConsoleCatalogService;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubjectResolver;
 import com.innospots.nexus.console.permission.authorization.ConsolePagePermissionAuthorizer;
 import com.innospots.nexus.console.permission.authorization.SessionAuthorizationSubjectResolver;
@@ -43,9 +44,9 @@ public class ConsolePermissionConfiguration {
     @Bean
     PermissionGrantService permissionGrantService(
             PermissionGrantDao grantDao,
-            ConsoleCatalogResourceDao resourceDao,
+            ConsoleCatalogService catalogService,
             GrantSubjectAccess grantSubjectAccess) {
-        return new PermissionGrantService(grantDao, resourceDao, grantSubjectAccess);
+        return new PermissionGrantService(grantDao, catalogService, grantSubjectAccess);
     }
 
     @Bean

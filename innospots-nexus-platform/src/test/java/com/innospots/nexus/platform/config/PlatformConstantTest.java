@@ -29,8 +29,6 @@ class PlatformConstantTest {
         assertThat(PlatformConstant.AUDIT_LOGS_PATH).isEqualTo("/api/d/platform/audit-logs");
         assertThat(PlatformConstant.NAVIGATION_MENUS_PATH)
                 .isEqualTo("/api/d/platform/navigation/menus");
-        assertThat(PlatformConstant.PAGE_ACCESS_VERIFY_PATH)
-                .isEqualTo("/api/d/platform/permission/page-access");
         assertThat(PlatformConstant.INVITES_PATH).isEqualTo("/api/d/platform/invites");
         assertThat(PlatformConstant.PUBLIC_INVITES_PATH).isEqualTo("/api/d/platform/public/invites");
         assertThat(PlatformConstant.PUBLIC_OPEN_REGISTRATION_PATH)

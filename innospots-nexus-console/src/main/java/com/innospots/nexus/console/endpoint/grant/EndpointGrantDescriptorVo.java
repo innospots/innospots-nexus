@@ -9,7 +9,7 @@ import com.innospots.nexus.base.i18n.I18nObject;
  * @param httpMethod       HTTP 动词（大写）
  * @param path             合并后的 JAX-RS 路径模板（类 {@link jakarta.ws.rs.Path} + 方法路径）
  * @param name             稳定业务名
- * @param label            多语言操作描述
+ * @param label            多语言操作说明
  * @param action           动作分类
  * @param recordArgs       审计是否记录参数
  * @param auditLog         是否写审计

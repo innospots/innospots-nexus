@@ -11,15 +11,17 @@ package com.innospots.nexus.console.logger.domain.context;
  * @date 2026/09/13
  * @param className  被拦截方法的声明类名
  * @param methodName 被拦截的方法名
- * @param action     由 {@link com.innospots.nexus.console.endpoint.grant.EndpointGrant#name()} 声明的业务动作编码
+ * @param action     由 {@link com.innospots.nexus.console.endpoint.grant.EndpointGrant#action()} 声明的操作类型
  * @param arguments  捕获的方法参数；未记录时为空数组
  * @param result     捕获的返回值；未记录或失败时为 null
  * @param exception  抛出的异常；成功时为 null
  * @param startTime  调用开始时间（epoch 毫秒）
  * @param endTime    调用结束时间（epoch 毫秒）
  * @param actor            操作用户身份；未知时为空字符串
- * @param operationMessage 注解声明的操作描述（当前语言环境解析后）
+ * @param operationMessage 注解声明的操作说明（当前语言环境解析后）
  * @param httpPath         HTTP 方法 + 路径；非 HTTP 拦截时可为空
+ * @param target           由 {@link com.innospots.nexus.console.endpoint.grant.EndpointGrant#name()}
+ *                         声明的操作对象
  */
 public record InvocationLogContext(
         String className,
@@ -32,7 +34,8 @@ public record InvocationLogContext(
         long endTime,
         String actor,
         String operationMessage,
-        String httpPath
+        String httpPath,
+        String target
 ) {
 
     public InvocationLogContext(
@@ -57,6 +60,35 @@ public record InvocationLogContext(
                 endTime,
                 actor,
                 "",
+                "",
+                "");
+    }
+
+    public InvocationLogContext(
+            String className,
+            String methodName,
+            String action,
+            Object[] arguments,
+            Object result,
+            Throwable exception,
+            long startTime,
+            long endTime,
+            String actor,
+            String operationMessage,
+            String httpPath
+    ) {
+        this(
+                className,
+                methodName,
+                action,
+                arguments,
+                result,
+                exception,
+                startTime,
+                endTime,
+                actor,
+                operationMessage,
+                httpPath,
                 "");
     }
 
@@ -68,6 +100,7 @@ public record InvocationLogContext(
         actor = actor == null ? "" : actor;
         operationMessage = operationMessage == null ? "" : operationMessage;
         httpPath = httpPath == null ? "" : httpPath;
+        target = target == null ? "" : target;
     }
 
     /**

@@ -11,9 +11,10 @@ import com.innospots.nexus.base.i18n.I18nObject;
 import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
 /**
- * console@2 递归贡献节点（MODULE 或 MENU，由 {@link #entryPageKey()} 与 {@link #children()} 推导）。
+ * console@2 递归贡献节点（MODULE 或 MENU，由 {@link #moduleKey()} 与 {@link #children()} 推导）。
  *
- * <p>MENU 访问授权名在 catalog 组装时恒为 {@link #entryPageKey()}；页面访问分组由 Page DSL {@code grantGroup}
+ * <p>MODULE 可以是仅承载子节点的分组，也可以直接携带 {@link #entryPageKey()} 成为可访问叶子。
+ * MENU 仅用于显式声明多页面模块下的菜单项；页面访问分组由 Page DSL {@code grantGroup}
  * 与 MODULE {@link #viewGroups()} 对齐（见 plugin-extensions-v2-design §6.8）。</p>
  */
 public record ConsoleContributeNode(
@@ -44,12 +45,17 @@ public record ConsoleContributeNode(
                 displayName, true, "displayName", PluginStatusCode.RESOURCE_CONFLICT);
         description = ConsoleI18n.copy(
                 description, false, "description", PluginStatusCode.RESOURCE_CONFLICT);
-        boolean moduleNode = !hasText(entryPageKey) && !normalizedChildren.isEmpty();
-        boolean menuNode = hasText(entryPageKey) && normalizedChildren.isEmpty();
+        boolean moduleNode = hasText(moduleKey);
+        boolean menuNode = !hasText(moduleKey) && hasText(entryPageKey);
         if (moduleNode) {
             moduleKey = requireKey(moduleKey, "moduleKey");
             if (hasText(entryPageKey)) {
-                invalid("MODULE node must not set entryPageKey");
+                entryPageKey = requireKey(entryPageKey, "entryPageKey");
+                if (!normalizedChildren.isEmpty()) {
+                    invalid("MODULE page node must not set children");
+                }
+            } else if (normalizedChildren.isEmpty()) {
+                invalid("MODULE node requires entryPageKey or children");
             }
             if (viewGroups.isEmpty()) {
                 viewGroups = ConsolePermissionDefaults.defaultViewGroups();
@@ -70,11 +76,11 @@ public record ConsoleContributeNode(
     }
 
     public boolean isModule() {
-        return !hasText(entryPageKey) && children != null && !children.isEmpty();
+        return hasText(moduleKey);
     }
 
     public boolean isMenu() {
-        return hasText(entryPageKey) && (children == null || children.isEmpty());
+        return !hasText(moduleKey) && hasText(entryPageKey);
     }
 
     public String menuResourceKey(String ownerModuleKey) {
@@ -144,14 +150,16 @@ public record ConsoleContributeNode(
             String entryPageKey,
             String icon
     ) {
-        return module(
+        return new ConsoleContributeNode(
                 moduleKey,
-                orderIndex,
                 displayName,
                 description,
+                orderIndex,
+                entryPageKey,
+                icon,
                 ConsolePermissionDefaults.defaultViewGroups(),
                 ConsolePermissionDefaults.defaultOperationGroups(),
-                List.of(menu(displayName, description, 0, entryPageKey, icon)));
+                List.of());
     }
 
     private static List<ConsolePermissionGroupDeclaration> defaultGroups(

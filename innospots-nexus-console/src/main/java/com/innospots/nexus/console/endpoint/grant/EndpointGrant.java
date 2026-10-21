@@ -25,12 +25,12 @@ public @interface EndpointGrant {
     EndpointGrantAction action();
 
     /**
-     * 稳定业务名，用于权限资源后缀与审计 {@code action}（如 {@code dictionary.type.create}）。
+     * 稳定业务名，用于权限资源后缀与审计“操作对象”（如 {@code dictionary.type.create}）。
      */
     String name();
 
     /**
-     * 审计落库时的多语言操作描述；仅 {@link #auditLog()} 为 true 时使用。
+     * 审计落库时的多语言操作说明；仅 {@link #auditLog()} 为 true 时使用。
      */
     I18nLiteral label() default @I18nLiteral;
 

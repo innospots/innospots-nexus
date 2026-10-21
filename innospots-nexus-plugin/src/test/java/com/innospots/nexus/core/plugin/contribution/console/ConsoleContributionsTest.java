@@ -32,14 +32,14 @@ class ConsoleContributionsTest {
 
         ConsoleContributeNode declared = soleModule(definition);
 
-        assertThat(module.children()).hasSize(1);
-        assertThat(module.children().getFirst().entryPageKey()).isEqualTo("reports-home");
+        assertThat(module.children()).isEmpty();
+        assertThat(module.entryPageKey()).isEqualTo("reports-home");
         assertThat(module.viewGroups()).extracting(ConsolePermissionGroupDeclaration::group)
                 .containsExactly(ConsoleContributeNode.DEFAULT_VIEW_GROUP);
         assertThat(module.operationGroups()).extracting(ConsolePermissionGroupDeclaration::group)
                 .containsExactly(ConsoleContributeNode.DEFAULT_VIEW_GROUP);
-        assertThat(declared.children()).hasSize(1);
-        assertThat(declared.children().getFirst().entryPageKey()).isEqualTo("reports-home");
+        assertThat(declared.children()).isEmpty();
+        assertThat(declared.entryPageKey()).isEqualTo("reports-home");
     }
 
     @Test
@@ -107,7 +107,11 @@ class ConsoleContributionsTest {
 
         assertThat(contribution.modules()).hasSize(2);
         assertThat(contribution.modules().get(0).moduleKey()).isEqualTo("alpha");
+        assertThat(contribution.modules().get(0).children()).isEmpty();
+        assertThat(contribution.modules().get(0).entryPageKey()).isEqualTo("alpha-home");
         assertThat(contribution.modules().get(1).moduleKey()).isEqualTo("beta");
+        assertThat(contribution.modules().get(1).children()).isEmpty();
+        assertThat(contribution.modules().get(1).entryPageKey()).isEqualTo("beta-home");
         assertThat(ConsoleContributions.discoveryTags("com.example.bundle", contribution)
                 .get(ConsoleContributions.DISCOVERY_TAG_MODULE))
                 .contains("alpha,beta");

@@ -43,7 +43,8 @@ class ConsoleAuditLogFilterTest {
         filter.filter(request, response);
 
         assertThat(recorded.get()).isNotNull();
-        assertThat(recorded.get().action()).isEqualTo("dictionary.type.create");
+        assertThat(recorded.get().action()).isEqualTo("CREATE");
+        assertThat(recorded.get().target()).isEqualTo("dictionary.type.create");
         assertThat(recorded.get().methodName()).isEqualTo("createDictionaryType");
         assertThat(recorded.get().httpPath()).isEqualTo("POST /dictionary-types");
         assertThat(recorded.get().success()).isTrue();

@@ -4,17 +4,18 @@
 CREATE TABLE IF NOT EXISTS nx_console_catalog_resource (
     resource_id          VARCHAR(32)  NOT NULL,
     owner_plugin_id      VARCHAR(256) NOT NULL,
+    domain_key           VARCHAR(128) NOT NULL,
     module_key           VARCHAR(128) NOT NULL,
     resource_type        VARCHAR(32)  NOT NULL,
     resource_key         VARCHAR(256) NOT NULL,
     parent_resource_id   VARCHAR(32),
-    page_key             VARCHAR(256),
-    datasource_key       VARCHAR(128),
-    route_path           VARCHAR(512),
-    request_method       VARCHAR(16),
-    request_url          VARCHAR(512),
-    display_name         VARCHAR(256),
+    entry_page_key       VARCHAR(256),
+    display_name         TEXT,
+    description          TEXT,
     sort_order           INTEGER          NOT NULL,
+    icon                 VARCHAR(128),
+    view_groups          TEXT,
+    operation_groups     TEXT,
     status               VARCHAR(32)  NOT NULL,
     security_realm       VARCHAR(32)  NOT NULL,
     created_at           TIMESTAMP,
@@ -28,8 +29,6 @@ CREATE TABLE IF NOT EXISTS nx_console_catalog_resource (
 CREATE INDEX IF NOT EXISTS idx_nx_console_catalog_resource_source ON nx_console_catalog_resource (owner_plugin_id, module_key, resource_type, status);
 
 CREATE INDEX IF NOT EXISTS idx_nx_console_catalog_resource_parent ON nx_console_catalog_resource (parent_resource_id, sort_order);
-
-CREATE INDEX IF NOT EXISTS idx_nx_console_catalog_resource_request ON nx_console_catalog_resource (page_key, request_method, request_url);
 
 CREATE INDEX IF NOT EXISTS idx_nx_console_catalog_resource_realm ON nx_console_catalog_resource (security_realm);
 
@@ -133,6 +132,7 @@ CREATE INDEX IF NOT EXISTS idx_nx_dictionary_type_realm ON nx_dictionary_type (s
 CREATE TABLE IF NOT EXISTS nx_audit_log (
     audit_log_id     VARCHAR(32)   NOT NULL,
     action           VARCHAR(64)   NOT NULL,
+    target           VARCHAR(128),
     path             VARCHAR(256)  NOT NULL,
     operated_time    TIMESTAMP   NOT NULL,
     actor            VARCHAR(64),
@@ -140,6 +140,7 @@ CREATE TABLE IF NOT EXISTS nx_audit_log (
     status_code      VARCHAR(32),
     execution_result VARCHAR(32)   NOT NULL,
     key_parameters   VARCHAR(2048),
+    failure_detail   VARCHAR(1024),
     duration_ms      BIGINT,
     owner_type       VARCHAR(32)   NOT NULL,
     owner_id         VARCHAR(32),
@@ -200,7 +201,8 @@ CREATE TABLE IF NOT EXISTS nx_permission_grant (
     grant_id               VARCHAR(32) NOT NULL,
     subject_type           VARCHAR(32) NOT NULL,
     subject_id             VARCHAR(32) NOT NULL,
-    resource_id            VARCHAR(32) NOT NULL,
+    grant_key              VARCHAR(256) NOT NULL,
+    resource_id            VARCHAR(32),
     constraint_definition  TEXT,
     owner_type             VARCHAR(32) NOT NULL,
     owner_id               VARCHAR(32),
@@ -209,13 +211,34 @@ CREATE TABLE IF NOT EXISTS nx_permission_grant (
     updated_at             TIMESTAMP,
     created_by             VARCHAR(64),
     updated_by             VARCHAR(64),
-    PRIMARY KEY (grant_id),
-    CONSTRAINT uk_nx_permission_grant_subject_resource UNIQUE (owner_type, owner_id, security_realm, subject_type, subject_id, resource_id)
+    PRIMARY KEY (grant_id)
 );
+
+ALTER TABLE nx_permission_grant ADD COLUMN IF NOT EXISTS grant_key VARCHAR(256);
+
+UPDATE nx_permission_grant g
+SET grant_key = (
+    SELECT CONCAT(r.entry_page_key, ':', r.domain_key, '.', r.module_key)
+    FROM nx_console_catalog_resource r
+    WHERE r.resource_id = g.resource_id
+)
+WHERE g.grant_key IS NULL AND g.resource_id IS NOT NULL;
+
+DELETE FROM nx_permission_grant WHERE grant_key IS NULL;
+
+ALTER TABLE nx_permission_grant ALTER COLUMN grant_key SET NOT NULL;
+
+ALTER TABLE nx_permission_grant ALTER COLUMN resource_id DROP NOT NULL;
+
+ALTER TABLE nx_permission_grant DROP CONSTRAINT IF EXISTS uk_nx_permission_grant_subject_resource;
+
+DROP INDEX IF EXISTS idx_nx_permission_grant_resource;
 
 CREATE INDEX IF NOT EXISTS idx_nx_permission_grant_subject ON nx_permission_grant (owner_type, owner_id, subject_type, subject_id);
 
-CREATE INDEX IF NOT EXISTS idx_nx_permission_grant_resource ON nx_permission_grant (owner_type, owner_id, resource_id);
+CREATE UNIQUE INDEX IF NOT EXISTS uk_nx_permission_grant_subject_grant ON nx_permission_grant (owner_type, owner_id, security_realm, subject_type, subject_id, grant_key);
+
+CREATE INDEX IF NOT EXISTS idx_nx_permission_grant_key ON nx_permission_grant (owner_type, owner_id, grant_key);
 
 CREATE INDEX IF NOT EXISTS idx_nx_permission_grant_realm ON nx_permission_grant (security_realm);
 

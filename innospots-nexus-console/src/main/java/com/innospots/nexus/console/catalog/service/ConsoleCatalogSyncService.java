@@ -92,6 +92,9 @@ public final class ConsoleCatalogSyncService {
             Map<String, String> resourceKeyByPath
     ) {
         String moduleResourceKey = module.moduleResourceKey();
+        boolean leafModule = module.children().isEmpty();
+        String groupsJson = leafModule ? groupsJson(module.viewGroups()) : null;
+        String operationGroupsJson = leafModule ? groupsJson(module.operationGroups()) : null;
         add(definitions, new ResourceDefinition(
                 ownerPluginId,
                 domainKey,
@@ -99,17 +102,14 @@ public final class ConsoleCatalogSyncService {
                 CatalogResourceType.MODULE,
                 moduleResourceKey,
                 parentResourceKey,
-                null,
-                null,
-                null,
-                null,
+                module.entryPageKey(),
+                module.icon(),
+                groupsJson,
+                operationGroupsJson,
                 i18nJson(module.displayName()),
                 i18nJson(module.description()),
                 module.orderIndex()));
         resourceKeyByPath.put(module.moduleKey(), moduleResourceKey);
-
-        String groupsJson = groupsJson(module.viewGroups());
-        String operationGroupsJson = groupsJson(module.operationGroups());
 
         for (ConsoleContributeNode child : module.children()) {
             if (child.isMenu()) {
@@ -122,8 +122,8 @@ public final class ConsoleCatalogSyncService {
                         moduleResourceKey,
                         child.entryPageKey(),
                         child.icon(),
-                        groupsJson,
-                        operationGroupsJson,
+                        groupsJson(module.viewGroups()),
+                        groupsJson(module.operationGroups()),
                         i18nJson(child.displayName()),
                         i18nJson(child.description()),
                 child.orderIndex()));
@@ -180,13 +180,8 @@ public final class ConsoleCatalogSyncService {
         entity.setDescription(definition.description());
         entity.setSortOrder(definition.sortOrder());
         entity.setIcon(definition.icon());
-        if (definition.type() == CatalogResourceType.MENU) {
-            entity.setViewGroups(definition.viewGroups());
-            entity.setOperationGroups(definition.operationGroups());
-        } else {
-            entity.setViewGroups(null);
-            entity.setOperationGroups(null);
-        }
+        entity.setViewGroups(definition.viewGroups());
+        entity.setOperationGroups(definition.operationGroups());
         entity.setStatus(BasicStatus.ENABLED.name());
         entity.setSecurityRealm(securityRealmForPlugin(definition.ownerPluginId()));
     }

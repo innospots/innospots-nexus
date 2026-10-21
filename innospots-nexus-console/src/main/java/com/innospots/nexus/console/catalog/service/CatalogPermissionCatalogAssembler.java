@@ -11,6 +11,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.innospots.nexus.base.i18n.I18nObject;
 import com.innospots.nexus.base.json.Jsons;
 import com.innospots.nexus.console.catalog.domain.entity.ConsoleCatalogResourceEntity;
+import com.innospots.nexus.console.catalog.domain.model.CatalogGrantKeys;
 import com.innospots.nexus.console.catalog.domain.vo.CatalogModuleGrantVo;
 import com.innospots.nexus.console.catalog.domain.vo.CatalogPermissionGroupVo;
 import com.innospots.nexus.console.catalog.domain.vo.CatalogViewItemVo;
@@ -37,14 +38,13 @@ public final class CatalogPermissionCatalogAssembler {
             List<ConsoleCatalogResourceEntity> directMenus
     ) {
         List<CatalogViewItemVo> viewItems = new ArrayList<>();
+        if (hasText(moduleRow.getEntryPageKey())) {
+            viewItems.add(viewItem(moduleRow, moduleRow.getEntryPageKey()));
+        }
         for (ConsoleCatalogResourceEntity menu : directMenus) {
-            String grantName = menu.getEntryPageKey();
-            viewItems.add(new CatalogViewItemVo(
-                    grantName + ":" + menu.getDomainKey() + "." + menu.getModuleKey(),
-                    grantName,
-                    parseI18n(menu.getDisplayName()),
-                    parseI18n(menu.getDescription()),
-                    menu.getSortOrder()));
+            if (hasText(menu.getEntryPageKey())) {
+                viewItems.add(viewItem(menu, menu.getEntryPageKey()));
+            }
         }
         viewItems.sort(Comparator.comparing(CatalogViewItemVo::orderIndex,
                 Comparator.nullsLast(Integer::compareTo)));
@@ -53,11 +53,25 @@ public final class CatalogPermissionCatalogAssembler {
         return new CatalogModuleGrantVo(List.copyOf(viewItems), operationGroups);
     }
 
+    private static CatalogViewItemVo viewItem(
+            ConsoleCatalogResourceEntity resource,
+            String grantName
+    ) {
+        return new CatalogViewItemVo(
+                CatalogGrantKeys.of(grantName, resource.getDomainKey(), resource.getModuleKey()),
+                grantName,
+                parseI18n(resource.getDisplayName()),
+                parseI18n(resource.getDescription()),
+                resource.getSortOrder());
+    }
+
     private List<CatalogPermissionGroupVo> buildOperationGroups(
             ConsoleCatalogResourceEntity moduleRow,
             List<ConsoleCatalogResourceEntity> directMenus
     ) {
-        String groupsJson = directMenus.isEmpty() ? null : directMenus.getFirst().getOperationGroups();
+        String groupsJson = hasText(moduleRow.getOperationGroups())
+                ? moduleRow.getOperationGroups()
+                : directMenus.isEmpty() ? null : directMenus.getFirst().getOperationGroups();
         List<ConsolePermissionGroupDeclaration> declarations = parseGroups(groupsJson);
         EndpointModuleGrantCatalogVo catalog = endpointGrantManager
                 .moduleCatalog(moduleRow.getModuleKey())
@@ -71,8 +85,10 @@ public final class CatalogPermissionCatalogAssembler {
                 String group = "default";
                 itemsByGroup.computeIfAbsent(group, ignored -> new ArrayList<>())
                         .add(new CatalogViewItemVo(
-                                descriptor.name() + ":" + moduleRow.getDomainKey()
-                                        + "." + moduleRow.getModuleKey(),
+                                CatalogGrantKeys.of(
+                                        descriptor.name(),
+                                        moduleRow.getDomainKey(),
+                                        moduleRow.getModuleKey()),
                                 descriptor.name(),
                                 descriptor.label(),
                                 I18nObject.of(Map.of()),
@@ -105,5 +121,9 @@ public final class CatalogPermissionCatalogAssembler {
             return I18nObject.of(Map.of());
         }
         return Jsons.fromJson(json, I18nObject.class);
+    }
+
+    private static boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 }

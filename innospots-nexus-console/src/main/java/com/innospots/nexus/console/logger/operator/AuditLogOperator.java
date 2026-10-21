@@ -87,9 +87,13 @@ public class AuditLogOperator {
             query.and(wrapper -> wrapper
                     .like(AuditLogEntity::getPath, keyword)
                     .or()
+                    .like(AuditLogEntity::getTarget, keyword)
+                    .or()
                     .like(AuditLogEntity::getAction, keyword)
                     .or()
-                    .like(AuditLogEntity::getMessage, keyword));
+                    .like(AuditLogEntity::getMessage, keyword)
+                    .or()
+                    .like(AuditLogEntity::getFailureDetail, keyword));
         }
     }
 

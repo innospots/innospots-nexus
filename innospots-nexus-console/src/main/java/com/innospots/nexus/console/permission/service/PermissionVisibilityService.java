@@ -20,6 +20,7 @@ import com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao;
 import com.innospots.nexus.console.permission.domain.entity.PermissionGrantEntity;
 import com.innospots.nexus.console.catalog.domain.entity.ConsoleCatalogResourceEntity;
 import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
+import com.innospots.nexus.console.catalog.domain.model.CatalogGrantKeys;
 import com.innospots.nexus.console.permission.domain.enums.PermissionSubjectType;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubject;
 
@@ -82,7 +83,7 @@ public final class PermissionVisibilityService {
         if (subject.administrator()) {
             return List.copyOf(resources);
         }
-        Set<String> grantedIds = grantedResourceIds(ownership, subject);
+        Set<String> grantedKeys = grantedGrantKeys(ownership, subject);
         Map<String, ConsoleCatalogResourceEntity> byId = resources.stream()
                 .filter(value -> value.getResourceId() != null)
                 .collect(Collectors.toMap(
@@ -94,8 +95,8 @@ public final class PermissionVisibilityService {
             previousSize = visibleIds.size();
             // 数据库返回顺序不可靠，循环直到父子可见集合不再变化。
             for (ConsoleCatalogResourceEntity resource : resources) {
-                if (!CatalogResourceType.MODULE.name().equals(resource.getResourceType())
-                        && grantedIds.contains(resource.getResourceId())
+                if (isGrantablePageResource(resource)
+                        && grantKeyGranted(resource, grantedKeys)
                         && parentVisible(resource, byId, visibleIds)) {
                     visibleIds.add(resource.getResourceId());
                 }
@@ -118,7 +119,7 @@ public final class PermissionVisibilityService {
         return List.copyOf(visible);
     }
 
-    private Set<String> grantedResourceIds(ConsoleOwnership ownership, AuthorizationSubject subject) {
+    private Set<String> grantedGrantKeys(ConsoleOwnership ownership, AuthorizationSubject subject) {
         List<PermissionGrantEntity> grants = new ArrayList<>();
         if (!subject.roleIds().isEmpty()) {
             grants.addAll(grantDao.selectList(scopeGrantQuery(ownership)
@@ -131,9 +132,17 @@ public final class PermissionVisibilityService {
                     .in(PermissionGrantEntity::getSubjectId, subject.orgUnitIds())));
         }
         return grants.stream()
-                .map(PermissionGrantEntity::getResourceId)
+                .map(PermissionGrantEntity::getGrantKey)
                 .filter(value -> value != null && !value.isBlank())
                 .collect(Collectors.toSet());
+    }
+
+    private static boolean grantKeyGranted(
+            ConsoleCatalogResourceEntity resource,
+            Set<String> grantedKeys
+    ) {
+        String grantKey = CatalogGrantKeys.viewKey(resource);
+        return grantKey != null && grantedKeys.contains(grantKey);
     }
 
     private static LambdaQueryWrapper<PermissionGrantEntity> scopeGrantQuery(ConsoleOwnership ownership) {
@@ -153,5 +162,14 @@ public final class PermissionVisibilityService {
         return parent != null
                 && (CatalogResourceType.MODULE.name().equals(parent.getResourceType())
                 || visibleIds.contains(parentId));
+    }
+
+    private static boolean isGrantablePageResource(ConsoleCatalogResourceEntity resource) {
+        if (CatalogResourceType.MENU.name().equals(resource.getResourceType())) {
+            return true;
+        }
+        return CatalogResourceType.MODULE.name().equals(resource.getResourceType())
+                && resource.getEntryPageKey() != null
+                && !resource.getEntryPageKey().isBlank();
     }
 }

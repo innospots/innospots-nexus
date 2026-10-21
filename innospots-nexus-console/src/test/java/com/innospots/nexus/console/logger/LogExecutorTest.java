@@ -36,7 +36,8 @@ class LogExecutorTest {
         InvocationLogContext context = captured.get();
         assertThat(context).isNotNull();
         assertThat(context.operationMessage()).isEqualTo("Create dictionary type");
-        assertThat(context.action()).isEqualTo("dictionary.type.create");
+        assertThat(context.action()).isEqualTo("CREATE");
+        assertThat(context.target()).isEqualTo("dictionary.type.create");
         assertThat(context.success()).isTrue();
     }
 }

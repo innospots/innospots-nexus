@@ -30,9 +30,9 @@ public record CatalogNodeVo(
         I18nObject description,
         @Schema(description = "同级排序")
         Integer orderIndex,
-        @Schema(description = "MENU 入口页键")
+        @Schema(description = "叶子 MODULE 或 MENU 入口页键")
         String entryPageKey,
-        @Schema(description = "MENU 图标")
+        @Schema(description = "入口图标")
         String icon,
         @Schema(description = "子节点", required = true)
         List<CatalogNodeVo> children,

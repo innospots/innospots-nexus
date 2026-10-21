@@ -122,6 +122,7 @@ CREATE TABLE IF NOT EXISTS nx_dictionary_type (
 CREATE TABLE IF NOT EXISTS nx_audit_log (
     audit_log_id     VARCHAR(32)   NOT NULL,
     action           VARCHAR(64)   NOT NULL,
+    target           VARCHAR(128),
     path             VARCHAR(256)  NOT NULL,
     operated_time    DATETIME(6)   NOT NULL,
     actor            VARCHAR(64),
@@ -129,6 +130,7 @@ CREATE TABLE IF NOT EXISTS nx_audit_log (
     status_code      VARCHAR(32),
     execution_result VARCHAR(32)   NOT NULL,
     key_parameters   VARCHAR(2048),
+    failure_detail   VARCHAR(1024),
     duration_ms      BIGINT,
     owner_type       VARCHAR(32)   NOT NULL,
     owner_id         VARCHAR(32),
@@ -180,7 +182,7 @@ CREATE TABLE IF NOT EXISTS nx_permission_grant (
     grant_id               VARCHAR(32) NOT NULL,
     subject_type           VARCHAR(32) NOT NULL,
     subject_id             VARCHAR(32) NOT NULL,
-    resource_id            VARCHAR(32) NOT NULL,
+    grant_key              VARCHAR(256) NOT NULL,
     constraint_definition  TEXT,
     owner_type             VARCHAR(32) NOT NULL,
     owner_id               VARCHAR(32),
@@ -190,9 +192,9 @@ CREATE TABLE IF NOT EXISTS nx_permission_grant (
     created_by             VARCHAR(64),
     updated_by             VARCHAR(64),
     PRIMARY KEY (grant_id),
-    CONSTRAINT uk_nx_permission_grant_subject_resource UNIQUE (owner_type, owner_id, security_realm, subject_type, subject_id, resource_id),
+    CONSTRAINT uk_nx_permission_grant_subject_grant UNIQUE (owner_type, owner_id, security_realm, subject_type, subject_id, grant_key),
     KEY idx_nx_permission_grant_subject (owner_type, owner_id, subject_type, subject_id),
-    KEY idx_nx_permission_grant_resource (owner_type, owner_id, resource_id),
+    KEY idx_nx_permission_grant_key (owner_type, owner_id, grant_key),
     KEY idx_nx_permission_grant_realm (security_realm)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

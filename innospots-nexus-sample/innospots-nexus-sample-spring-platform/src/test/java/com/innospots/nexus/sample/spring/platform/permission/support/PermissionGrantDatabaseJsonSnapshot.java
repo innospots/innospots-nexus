@@ -64,7 +64,8 @@ public final class PermissionGrantDatabaseJsonSnapshot {
                 """
                 SELECT g.*, r.resource_key, r.resource_type
                 FROM nx_permission_grant g
-                LEFT JOIN nx_console_catalog_resource r ON g.resource_id = r.resource_id
+                LEFT JOIN nx_console_catalog_resource r
+                    ON g.grant_key = CONCAT(r.entry_page_key, ':', r.domain_key, '.', r.module_key)
                 WHERE 1=1
                 """);
         List<Object> args = new java.util.ArrayList<>();

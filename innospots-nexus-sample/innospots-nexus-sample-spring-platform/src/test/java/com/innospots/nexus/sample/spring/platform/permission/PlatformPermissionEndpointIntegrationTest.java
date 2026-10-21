@@ -12,6 +12,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 import com.innospots.nexus.base.json.Jsons;
+import com.innospots.nexus.console.catalog.domain.vo.CatalogNodeVo;
+import com.innospots.nexus.console.catalog.domain.vo.CatalogViewItemVo;
+import com.innospots.nexus.console.catalog.service.ConsoleCatalogService;
 import com.innospots.nexus.console.permission.endpoint.CurrentAuthorizationEndpoint;
 import com.innospots.nexus.console.permission.endpoint.GrantManagementEndpoint;
 import com.innospots.nexus.console.permission.endpoint.OrganizationUnitGrantManagementEndpoint;
@@ -22,11 +25,12 @@ import com.innospots.nexus.platform.permission.endpoint.PlatformOrganizationUnit
 import com.innospots.nexus.sample.spring.platform.SamplePlatformConsoleServer;
 import com.innospots.nexus.sample.spring.platform.permission.support.PermissionGrantDatabaseJsonSnapshot;
 import com.innospots.nexus.sample.spring.platform.permission.support.SyncedCatalogResourceIds;
-import com.innospots.nexus.sample.spring.platform.permission.support.SyncedCatalogResourceIds.UserMainMenuPageIds;
+import com.innospots.nexus.sample.spring.platform.permission.support.SyncedCatalogResourceIds.UserAndRoleMenus;
 import com.innospots.nexus.sample.spring.platform.role.support.RoleEndpointHttpClient;
 import com.innospots.nexus.sample.spring.platform.support.PlatformIntegrationTestSupport;
 
 import java.net.http.HttpResponse;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -56,6 +60,9 @@ class PlatformPermissionEndpointIntegrationTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private ConsoleCatalogService catalogService;
 
     @Autowired
     private GrantManagementEndpoint grantManagementEndpoint;
@@ -88,8 +95,22 @@ class PlatformPermissionEndpointIntegrationTest {
     }
 
     @Test
+    void rolePermissionReadDoesNotRejectMissingRoleWithPermissionError() throws Exception {
+        String path = PlatformConstant.ROLES_PATH + "/rol-not-visible/permissions";
+
+        HttpResponse<String> response = http.get(path);
+
+        LOGGER.info(
+                "GET role permissions for unavailable role status={} body={}",
+                response.statusCode(),
+                response.body());
+        assertThat(response.statusCode()).isEqualTo(200);
+        assertThat(response.body()).contains("\"grants\":[]");
+    }
+
+    @Test
     void rolePermissionEndpointsListReplaceAndPersistGrants() throws Exception {
-        UserMainMenuPageIds catalog = SyncedCatalogResourceIds.requireUserMainMenuAndPage(jdbcTemplate);
+        UserAndRoleMenus catalog = SyncedCatalogResourceIds.requireUserAndRoleMenus(jdbcTemplate);
         LOGGER.info("catalog resources: {}", Jsons.toJson(catalog));
 
         String roleId = createRole("perm-role", "Permission Role");
@@ -104,11 +125,11 @@ class PlatformPermissionEndpointIntegrationTest {
         String replaceBody = """
                 {
                   "grants": [
-                    { "resourceId": "%s" },
-                    { "resourceId": "%s" }
+                    { "resourceKey": "%s" },
+                    { "resourceKey": "%s" }
                   ]
                 }
-                """.formatted(catalog.menuResourceId(), catalog.pageResourceId());
+                """.formatted(catalog.userMenuViewGrantKey(), catalog.roleMenuViewGrantKey());
 
         HttpResponse<String> replaced = http.exchange(
                 "PUT", path, Map.of("Content-Type", "application/json"), replaceBody);
@@ -116,27 +137,32 @@ class PlatformPermissionEndpointIntegrationTest {
         assertThat(replaced.statusCode()).isEqualTo(200);
         PermissionGrantDatabaseJsonSnapshot.logAndPersist(jdbcTemplate, "role-02-after-replace", "ROLE", roleId);
 
-        assertGrantRows("ROLE", roleId, 2, catalog.menuResourceKey(), catalog.pageResourceKey());
+        assertGrantRows(
+                "ROLE",
+                roleId,
+                2,
+                catalog.userMenuViewGrantKey(),
+                catalog.roleMenuViewGrantKey());
 
         HttpResponse<String> listed = http.get(path);
         LOGGER.info("GET role permissions (filled) status={} body={}", listed.statusCode(), listed.body());
         assertThat(listed.statusCode()).isEqualTo(200);
-        assertThat(listed.body()).contains(catalog.menuResourceId());
-        assertThat(listed.body()).contains(catalog.pageResourceId());
+        assertThat(listed.body()).contains(catalog.userMenuViewGrantKey());
+        assertThat(listed.body()).contains(catalog.roleMenuViewGrantKey());
 
         String menuOnlyBody = """
                 {
                   "grants": [
-                    { "resourceId": "%s" }
+                    { "resourceKey": "%s" }
                   ]
                 }
-                """.formatted(catalog.menuResourceId());
+                """.formatted(catalog.userMenuViewGrantKey());
         HttpResponse<String> menuOnly = http.exchange(
                 "PUT", path, Map.of("Content-Type", "application/json"), menuOnlyBody);
         LOGGER.info("PUT role permissions (menu-only) status={} body={}", menuOnly.statusCode(), menuOnly.body());
         assertThat(menuOnly.statusCode()).isEqualTo(200);
         PermissionGrantDatabaseJsonSnapshot.logAndPersist(jdbcTemplate, "role-03-menu-only", "ROLE", roleId);
-        assertGrantRows("ROLE", roleId, 1, catalog.menuResourceKey());
+        assertGrantRows("ROLE", roleId, 1, catalog.userMenuViewGrantKey());
 
         HttpResponse<String> cleared = http.exchange(
                 "PUT", path, Map.of("Content-Type", "application/json"), "{\"grants\":[]}");
@@ -156,8 +182,39 @@ class PlatformPermissionEndpointIntegrationTest {
     }
 
     @Test
+    void rolePermissionsPersistOperationGrantKey() throws Exception {
+        String operationGrantKey = requireOperationGrantKey("module:user", "platform.user.create");
+        String roleId = createRole("perm-operation-role", "Permission Operation Role");
+        String path = PlatformConstant.ROLES_PATH + "/" + roleId + "/permissions";
+
+        String replaceBody = """
+                {
+                  "grants": [
+                    { "resourceKey": "%s" }
+                  ]
+                }
+                """.formatted(operationGrantKey);
+        HttpResponse<String> replaced = http.exchange(
+                "PUT", path, Map.of("Content-Type", "application/json"), replaceBody);
+        LOGGER.info("PUT operation role permission status={} body={}", replaced.statusCode(), replaced.body());
+        assertThat(replaced.statusCode()).isEqualTo(200);
+
+        HttpResponse<String> listed = http.get(path);
+        LOGGER.info("GET operation role permission status={} body={}", listed.statusCode(), listed.body());
+        assertThat(listed.statusCode()).isEqualTo(200);
+        assertThat(listed.body()).contains(operationGrantKey);
+        assertThat(jdbcTemplate.queryForObject(
+                """
+                SELECT grant_key FROM nx_permission_grant
+                WHERE subject_type = 'ROLE' AND subject_id = ?
+                """,
+                String.class,
+                roleId)).isEqualTo(operationGrantKey);
+    }
+
+    @Test
     void organizationUnitPermissionEndpointsListReplaceAndPersistGrants() throws Exception {
-        UserMainMenuPageIds catalog = SyncedCatalogResourceIds.requireUserMainMenuAndPage(jdbcTemplate);
+        UserAndRoleMenus catalog = SyncedCatalogResourceIds.requireUserAndRoleMenus(jdbcTemplate);
         String path = PlatformConstant.ORGANIZATION_UNIT_PERMISSIONS_PATH.replace("{unitId}", ORG_UNIT_ID);
 
         HttpResponse<String> empty = http.get(path);
@@ -169,10 +226,10 @@ class PlatformPermissionEndpointIntegrationTest {
         String replaceBody = """
                 {
                   "grants": [
-                    { "resourceId": "%s" }
+                    { "resourceKey": "%s" }
                   ]
                 }
-                """.formatted(catalog.menuResourceId());
+                """.formatted(catalog.userMenuViewGrantKey());
 
         HttpResponse<String> replaced = http.exchange(
                 "PUT", path, Map.of("Content-Type", "application/json"), replaceBody);
@@ -180,11 +237,11 @@ class PlatformPermissionEndpointIntegrationTest {
         assertThat(replaced.statusCode()).isEqualTo(200);
         PermissionGrantDatabaseJsonSnapshot.logAndPersist(jdbcTemplate, "org-02-after-replace", "ORG_UNIT", ORG_UNIT_ID);
 
-        assertGrantRows("ORG_UNIT", ORG_UNIT_ID, 1, catalog.menuResourceKey());
+        assertGrantRows("ORG_UNIT", ORG_UNIT_ID, 1, catalog.userMenuViewGrantKey());
 
         HttpResponse<String> listed = http.get(path);
         LOGGER.info("GET org-unit permissions (filled) status={} body={}", listed.statusCode(), listed.body());
-        assertThat(listed.body()).contains(catalog.menuResourceId());
+        assertThat(listed.body()).contains(catalog.userMenuViewGrantKey());
 
         HttpResponse<String> cleared = http.exchange(
                 "PUT", path, Map.of("Content-Type", "application/json"), "{\"grants\":[]}");
@@ -198,18 +255,18 @@ class PlatformPermissionEndpointIntegrationTest {
 
     @Test
     void currentUserPermissionsEndpointReflectsRoleGrantsInDatabase() throws Exception {
-        UserMainMenuPageIds catalog = SyncedCatalogResourceIds.requireUserMainMenuAndPage(jdbcTemplate);
+        UserAndRoleMenus catalog = SyncedCatalogResourceIds.requireUserAndRoleMenus(jdbcTemplate);
         String roleId = createRole("me-visible-role", "Me Visible Role");
         String rolePermissionsPath = PlatformConstant.ROLES_PATH + "/" + roleId + "/permissions";
 
         String replaceBody = """
                 {
                   "grants": [
-                    { "resourceId": "%s" },
-                    { "resourceId": "%s" }
+                    { "resourceKey": "%s" },
+                    { "resourceKey": "%s" }
                   ]
                 }
-                """.formatted(catalog.menuResourceId(), catalog.pageResourceId());
+                """.formatted(catalog.userMenuViewGrantKey(), catalog.roleMenuViewGrantKey());
         HttpResponse<String> replaced = http.exchange(
                 "PUT",
                 rolePermissionsPath,
@@ -221,12 +278,29 @@ class PlatformPermissionEndpointIntegrationTest {
         bindDevUserToRole(roleId);
         PermissionGrantDatabaseJsonSnapshot.logAndPersist(jdbcTemplate, "me-02-user-bound");
 
+        List<Map<String, Object>> bindings = jdbcTemplate.queryForList(
+                """
+                SELECT role_id, subject_type, subject_id, owner_type, owner_id, security_realm, created_at
+                FROM nx_role_binding
+                WHERE subject_type = 'USER' AND subject_id = ?
+                """,
+                DEV_USER_ID);
+        assertThat(bindings).hasSize(1);
+        assertThat(bindings.get(0).get("role_id")).isEqualTo(roleId);
+        assertThat(bindings.get(0).get("subject_type")).isEqualTo("USER");
+        assertThat(bindings.get(0).get("owner_type")).isEqualTo("PLATFORM");
+        assertThat(bindings.get(0).get("owner_id")).isNull();
+        assertThat(bindings.get(0).get("security_realm")).isEqualTo("PLATFORM");
+        assertThat(bindings.get(0).get("created_at")).isNotNull();
+        LOGGER.info("nx_role_binding row for dev user: {}", Jsons.toJson(bindings.get(0)));
+
         HttpResponse<String> emptyMe = http.get(PlatformConstant.ME_PERMISSIONS_PATH);
         LOGGER.info("GET me permissions status={} body={}", emptyMe.statusCode(), emptyMe.body());
         assertThat(emptyMe.statusCode()).isEqualTo(200);
-        assertThat(emptyMe.body()).contains(catalog.menuResourceId());
-        assertThat(emptyMe.body()).contains(catalog.pageResourceId());
-        assertThat(emptyMe.body()).contains(catalog.menuResourceKey());
+        assertThat(emptyMe.body()).contains(catalog.userMenuResourceId());
+        assertThat(emptyMe.body()).contains(catalog.roleMenuResourceId());
+        assertThat(emptyMe.body()).contains(catalog.userMenuResourceKey());
+        assertThat(emptyMe.body()).contains(catalog.roleMenuResourceKey());
 
         LOGGER.info(
                 "nx_permission_grant for role {}: {}",
@@ -234,7 +308,8 @@ class PlatformPermissionEndpointIntegrationTest {
                 Jsons.toJson(jdbcTemplate.queryForList(
                         """
                         SELECT g.*, r.resource_key FROM nx_permission_grant g
-                        LEFT JOIN nx_console_catalog_resource r ON g.resource_id = r.resource_id
+                        LEFT JOIN nx_console_catalog_resource r
+                            ON g.grant_key = CONCAT(r.entry_page_key, ':', r.domain_key, '.', r.module_key)
                         WHERE g.subject_type = 'ROLE' AND g.subject_id = ?
                         ORDER BY r.resource_key
                         """,
@@ -247,7 +322,12 @@ class PlatformPermissionEndpointIntegrationTest {
                         DEV_USER_ID)));
     }
 
-    private void assertGrantRows(String subjectType, String subjectId, long expectedCount, String... resourceKeys) {
+    private void assertGrantRows(
+            String subjectType,
+            String subjectId,
+            long expectedCount,
+            String... viewGrantKeys
+    ) {
         Long count = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM nx_permission_grant WHERE subject_type = ? AND subject_id = ?",
                 Long.class,
@@ -257,31 +337,37 @@ class PlatformPermissionEndpointIntegrationTest {
 
         for (Map<String, Object> row : jdbcTemplate.queryForList(
                 """
-                SELECT g.owner_type, g.owner_id, g.security_realm, r.resource_key
+                SELECT g.grant_id, g.grant_key, g.owner_type, g.owner_id, g.security_realm,
+                       g.constraint_definition, g.created_at, r.resource_key, r.resource_type
                 FROM nx_permission_grant g
-                JOIN nx_console_catalog_resource r ON g.resource_id = r.resource_id
+                LEFT JOIN nx_console_catalog_resource r
+                    ON g.grant_key = CONCAT(r.entry_page_key, ':', r.domain_key, '.', r.module_key)
                 WHERE g.subject_type = ? AND g.subject_id = ?
                 ORDER BY r.resource_key
                 """,
                 subjectType,
                 subjectId)) {
+            assertThat(row.get("grant_id")).as("grant id").isNotNull();
             assertThat(row.get("owner_type")).isEqualTo("PLATFORM");
             assertThat(row.get("owner_id")).isNull();
             assertThat(row.get("security_realm")).isEqualTo("PLATFORM");
+            assertThat(row.get("constraint_definition")).as("catalog v2 has no constraint grants").isNull();
+            assertThat(row.get("created_at")).as("grant audit timestamp").isNotNull();
+            assertThat(row.get("resource_type")).isEqualTo("MODULE");
+            assertThat(row.get("grant_key")).isIn((Object[]) viewGrantKeys);
         }
 
-        if (resourceKeys.length > 0) {
-            java.util.List<String> keys = jdbcTemplate.queryForList(
+        if (viewGrantKeys.length > 0) {
+            List<String> keys = jdbcTemplate.queryForList(
                     """
-                    SELECT r.resource_key FROM nx_permission_grant g
-                    JOIN nx_console_catalog_resource r ON g.resource_id = r.resource_id
+                    SELECT g.grant_key FROM nx_permission_grant g
                     WHERE g.subject_type = ? AND g.subject_id = ?
-                    ORDER BY r.resource_key
+                    ORDER BY g.grant_key
                     """,
                     String.class,
                     subjectType,
                     subjectId);
-            assertThat(keys).containsExactly(resourceKeys);
+            assertThat(keys).containsExactlyInAnyOrder(viewGrantKeys);
         }
     }
 
@@ -299,6 +385,19 @@ class PlatformPermissionEndpointIntegrationTest {
                 "SELECT role_id FROM nx_role WHERE role_code = ?",
                 String.class,
                 roleCode);
+    }
+
+    private String requireOperationGrantKey(String moduleResourceKey, String grantName) {
+        CatalogNodeVo module = catalogService.permissionCatalog().stream()
+                .filter(node -> moduleResourceKey.equals(node.resourceKey()))
+                .findFirst()
+                .orElseThrow();
+        return module.grants().operationGroups().stream()
+                .flatMap(group -> group.items().stream())
+                .filter(item -> grantName.equals(item.grantName()))
+                .map(CatalogViewItemVo::resourceKey)
+                .findFirst()
+                .orElseThrow();
     }
 
     private void bindDevUserToRole(String roleId) throws Exception {

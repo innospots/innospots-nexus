@@ -27,10 +27,11 @@ public final class CatalogDatabaseJsonSnapshot {
 
     public static void logAndPersist(JdbcTemplate jdbcTemplate, String stepLabel) {
         List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
-                SELECT resource_id, owner_plugin_id, module_key, resource_type, resource_key,
-                       parent_resource_id, page_key, route_path, display_name, sort_order, status, security_realm
+                SELECT resource_id, owner_plugin_id, domain_key, module_key, resource_type, resource_key,
+                       parent_resource_id, entry_page_key, display_name, description, sort_order, icon,
+                       view_groups, operation_groups, status, security_realm, created_at, updated_at
                 FROM nx_console_catalog_resource
-                ORDER BY resource_key
+                ORDER BY resource_type, module_key, sort_order, resource_key
                 """);
 
         Map<String, Object> payload = new LinkedHashMap<>();

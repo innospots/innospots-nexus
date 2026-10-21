@@ -32,7 +32,7 @@ public final class AuditLogRecorder {
         Throwable capturedException = failure;
         Object capturedResult = null;
         Object[] arguments = grant.recordArgs() ? new Object[0] : null;
-        String action = grant.name();
+        String action = grant.action() == null ? "" : grant.action().name();
         if (action.isBlank()) {
             action = state.methodName();
         }
@@ -51,7 +51,8 @@ public final class AuditLogRecorder {
                 endTime,
                 actor,
                 operationMessage,
-                httpPath);
+                httpPath,
+                grant.name());
         handler.handle(context);
     }
 }

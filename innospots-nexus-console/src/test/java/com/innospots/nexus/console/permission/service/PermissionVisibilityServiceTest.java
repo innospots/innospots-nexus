@@ -15,6 +15,7 @@ import com.innospots.nexus.console.catalog.domain.entity.ConsoleCatalogResourceE
 import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubject;
 import com.innospots.nexus.console.permission.dao.PermissionGrantDao;
+import com.innospots.nexus.console.permission.domain.entity.PermissionGrantEntity;
 import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
 
 class PermissionVisibilityServiceTest {
@@ -40,6 +41,53 @@ class PermissionVisibilityServiceTest {
 
         assertThat(visible).extracting(ConsoleCatalogResourceEntity::getResourceId)
                 .contains("module-1", "menu-1");
+    }
+
+    @Test
+    void visibleIncludesGrantedLeafModule() {
+        ConsoleCatalogResourceEntity leafModule = resource(
+                "module", CatalogResourceType.MODULE, "module-1", null);
+        leafModule.setEntryPageKey("demo-main");
+
+        ConsoleCatalogResourceDao resourceDao = mock(ConsoleCatalogResourceDao.class);
+        when(resourceDao.selectList(any())).thenReturn(List.of(leafModule));
+
+        PermissionGrantEntity grant = new PermissionGrantEntity();
+        grant.setGrantKey("demo-main:nexus.demo");
+        PermissionGrantDao grantDao = mock(PermissionGrantDao.class);
+        when(grantDao.selectList(any())).thenReturn(List.of(grant));
+
+        AuthorizationSubject subject = new AuthorizationSubject(
+                "user-1", java.util.Set.of("role-1"), java.util.Set.of(), false);
+        List<ConsoleCatalogResourceEntity> visible = new PermissionVisibilityService(
+                resourceDao, grantDao)
+                .visible(ConsoleOwnershipScope.workspaceOwnership("ws-1", "TENANT"), subject);
+
+        assertThat(visible).extracting(ConsoleCatalogResourceEntity::getResourceId)
+                .containsExactly("module-1");
+    }
+
+    @Test
+    void operationGrantDoesNotRevealNavigationMenu() {
+        ConsoleCatalogResourceEntity leafModule = resource(
+                "module", CatalogResourceType.MODULE, "module-1", null);
+        leafModule.setEntryPageKey("demo-main");
+
+        ConsoleCatalogResourceDao resourceDao = mock(ConsoleCatalogResourceDao.class);
+        when(resourceDao.selectList(any())).thenReturn(List.of(leafModule));
+
+        PermissionGrantEntity grant = new PermissionGrantEntity();
+        grant.setGrantKey("demo.create:nexus.demo");
+        PermissionGrantDao grantDao = mock(PermissionGrantDao.class);
+        when(grantDao.selectList(any())).thenReturn(List.of(grant));
+
+        AuthorizationSubject subject = new AuthorizationSubject(
+                "user-1", java.util.Set.of("role-1"), java.util.Set.of(), false);
+        List<ConsoleCatalogResourceEntity> visible = new PermissionVisibilityService(
+                resourceDao, grantDao)
+                .visible(ConsoleOwnershipScope.workspaceOwnership("ws-1", "TENANT"), subject);
+
+        assertThat(visible).isEmpty();
     }
 
     private static ConsoleCatalogResourceEntity resource(

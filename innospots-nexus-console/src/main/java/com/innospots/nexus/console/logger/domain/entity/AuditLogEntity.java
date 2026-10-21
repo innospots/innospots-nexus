@@ -47,6 +47,9 @@ public class AuditLogEntity extends OwnershipEntity {
     @Column(length = 64, nullable = false)
     private String action;
 
+    @Column(length = 128)
+    private String target;
+
     @Column(length = 256, nullable = false)
     private String path;
 
@@ -67,6 +70,9 @@ public class AuditLogEntity extends OwnershipEntity {
 
     @Column(length = 2048)
     private String keyParameters;
+
+    @Column(length = 1024)
+    private String failureDetail;
 
     @Column
     private Long durationMs;

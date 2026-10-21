@@ -40,4 +40,28 @@ class ConsolePluginContributionDecoderTest {
         assertThat(contribution.modules().getFirst().children().getFirst().entryPageKey())
                 .isEqualTo("nexus-role-main");
     }
+
+    @Test
+    void decodesLeafModuleWithoutMenuChild() {
+        Map<String, Object> declaration = new LinkedHashMap<>();
+        declaration.put("type", "console");
+        declaration.put("majorVersion", 2);
+        declaration.put("domainKey", "nexus");
+        declaration.put("orderIndex", 0);
+        Map<String, Object> module = new LinkedHashMap<>();
+        module.put("moduleKey", "role");
+        module.put("displayName", Map.of("en", "Role"));
+        module.put("orderIndex", 0);
+        module.put("entryPageKey", "nexus-role-main");
+        module.put("children", List.of());
+        declaration.put("modules", List.of(module));
+
+        ConsolePluginContribution contribution = decoder.decode(declaration);
+
+        assertThat(contribution.modules()).singleElement().satisfies(decoded -> {
+            assertThat(decoded.moduleKey()).isEqualTo("role");
+            assertThat(decoded.entryPageKey()).isEqualTo("nexus-role-main");
+            assertThat(decoded.children()).isEmpty();
+        });
+    }
 }

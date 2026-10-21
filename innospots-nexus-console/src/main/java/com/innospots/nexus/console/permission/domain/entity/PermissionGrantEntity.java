@@ -14,18 +14,18 @@ import lombok.Setter;
 import com.innospots.nexus.core.persistence.entity.OwnershipEntity;
 
 /**
- * 角色或组织单元对单个权限资源的授权记录；归属列表示授权生效的工作区（或租户）上下文。
+ * 角色或组织单元对单个 catalog 授权项的授权记录；归属列表示授权生效的工作区（或租户）上下文。
  */
 @Getter
 @Setter
 @Entity
 @Table(name = PermissionGrantEntity.TABLE_NAME, indexes = {
-        @Index(name = "uk_nx_permission_grant_subject_resource",
-                columnList = "owner_type,owner_id,security_realm,subject_type,subject_id,resource_id", unique = true),
+        @Index(name = "uk_nx_permission_grant_subject_grant",
+                columnList = "owner_type,owner_id,security_realm,subject_type,subject_id,grant_key", unique = true),
         @Index(name = "idx_nx_permission_grant_subject",
                 columnList = "owner_type,owner_id,subject_type,subject_id"),
-        @Index(name = "idx_nx_permission_grant_resource",
-                columnList = "owner_type,owner_id,resource_id"),
+        @Index(name = "idx_nx_permission_grant_key",
+                columnList = "owner_type,owner_id,grant_key"),
         @Index(name = "idx_nx_permission_grant_realm", columnList = "security_realm")
 })
 @TableName(PermissionGrantEntity.TABLE_NAME)
@@ -44,8 +44,8 @@ public class PermissionGrantEntity extends OwnershipEntity {
     @Column(length = 32, nullable = false)
     private String subjectId;
 
-    @Column(length = 32, nullable = false)
-    private String resourceId;
+    @Column(name = "grant_key", length = 256, nullable = false)
+    private String grantKey;
 
     @Column(columnDefinition = "text")
     private String constraintDefinition;

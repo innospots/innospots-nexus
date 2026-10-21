@@ -101,17 +101,20 @@ class RoleBindingEndpointIntegrationTest {
 
         List<Map<String, Object>> dbRows = jdbcTemplate.queryForList(
                 """
-                SELECT binding_id, role_id, subject_type, subject_id, owner_type, owner_id, security_realm
+                SELECT binding_id, role_id, subject_type, subject_id, owner_type, owner_id,
+                       security_realm, created_at
                 FROM nx_role_binding WHERE role_id = ? ORDER BY subject_id
                 """,
                 roleId);
         LOGGER.info("nx_role_binding rows after add: {}", Jsons.toJson(dbRows));
         assertThat(dbRows).hasSize(2);
         for (Map<String, Object> row : dbRows) {
+            assertThat(row.get("binding_id")).as("binding id").isNotNull();
             assertThat(row.get("subject_type")).isEqualTo("USER");
             assertThat(row.get("owner_type")).isEqualTo("PLATFORM");
             assertThat(row.get("owner_id")).isNull();
             assertThat(row.get("security_realm")).isEqualTo("PLATFORM");
+            assertThat(row.get("created_at")).as("binding audit timestamp").isNotNull();
         }
         assertThat(dbRows.stream().map(r -> r.get("subject_id")).map(String::valueOf).toList())
                 .containsExactly(USER_ALPHA, USER_BETA);

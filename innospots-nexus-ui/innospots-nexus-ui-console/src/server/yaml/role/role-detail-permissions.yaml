@@ -7,7 +7,7 @@ page:
 state:
   resourceSearch: ""
   selectedResourceKey: ""
-  draftGrantIds: []
+  draftGrants: null
   dirty: false
 
 dataSources:
@@ -41,6 +41,10 @@ lifecycle:
     - action: reload
       params:
         dataSource: grants
+    - action: setState
+      params:
+        draftGrants: ${data.grants.grants}
+        dirty: false
 
 body:
   type: Page
@@ -273,9 +277,26 @@ body:
               props:
                 text: 当前资源授权
                 strong: true
-            - type: Empty
+            - type: Text
+              when: ${dataStatus.grants.loading}
               props:
-                description: 请从左侧选择页面资源
+                text: 加载授权中…
+                type: secondary
+                className: mt-2
+            - type: PermissionGrantPanel
+              when: ${!dataStatus.grants.loading}
+              props:
+                className: mt-3
+                catalog: ${data.catalog}
+                selectedResourceKey: ${state.selectedResourceKey}
+                grants: ${data.grants.grants}
+                draftGrants: ${state.draftGrants}
+              events:
+                onChange:
+                  - action: setState
+                    params:
+                      draftGrants: ${event.grants}
+                      dirty: true
     - type: Flex
       props:
         justify: space-between
@@ -300,6 +321,7 @@ body:
                       dataSource: grants
                   - action: setState
                     params:
+                      draftGrants: ${data.grants.grants}
                       dirty: false
             - type: Button
               props:
@@ -317,7 +339,7 @@ body:
                       method: PUT
                       url: /api/d/platform/roles/${params.roleId}/permissions
                       body:
-                        grants: ${data.grants.grants}
+                        grants: "${state.draftGrants != null ? state.draftGrants : data.grants.grants}"
                   - action: message
                     params:
                       messageType: success
@@ -328,3 +350,7 @@ body:
                   - action: reload
                     params:
                       dataSource: grants
+                  - action: setState
+                    params:
+                      draftGrants: ${data.grants.grants}
+                      dirty: false

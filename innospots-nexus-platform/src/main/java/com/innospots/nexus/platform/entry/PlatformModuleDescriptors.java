@@ -7,7 +7,7 @@ import com.innospots.nexus.console.ui.spec.PageDslPageRef;
 import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributeNode;
 
 /**
- * Platform 控制台 MODULE 常量（console@2：每模块一条 MENU {@code children}）。
+ * Platform 控制台 MODULE 常量（console@2：单页模块直接使用叶子 MODULE，不再复制 MENU）。
  */
 public final class PlatformModuleDescriptors {
 

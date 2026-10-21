@@ -13,6 +13,7 @@ import { ThemeSwitcher } from "./theme-switcher";
 import { SafeHeader } from "./safe-header";
 import { CatalogTree } from "./catalog-tree";
 import { ConsoleMenuTree } from "./console-menu-tree";
+import { PermissionGrantPanel } from "./permission-grant-panel";
 import { FilterSelect } from "./filter-select";
 import { DrawerBackdrop } from "./drawer-backdrop";
 import { DictionaryTypeSavePanel } from "./dictionary-type-save-panel";
@@ -37,6 +38,7 @@ export const pactorComponents: Record<string, unknown> = {
   Header: SafeHeader,
   CatalogTree,
   ConsoleMenuTree,
+  PermissionGrantPanel,
   FilterSelect,
   DrawerBackdrop,
   DictionaryTypeSavePanel,

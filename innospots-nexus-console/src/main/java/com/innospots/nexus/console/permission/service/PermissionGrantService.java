@@ -2,24 +2,19 @@ package com.innospots.nexus.console.permission.service;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import jakarta.transaction.Transactional;
 
-import com.innospots.nexus.base.domain.enums.BasicStatus;
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.base.util.Checks;
+import com.innospots.nexus.console.catalog.service.ConsoleCatalogService;
 import com.innospots.nexus.console.permission.dao.PermissionGrantDao;
-import com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao;
 import com.innospots.nexus.console.permission.domain.entity.PermissionGrantEntity;
-import com.innospots.nexus.console.catalog.domain.entity.ConsoleCatalogResourceEntity;
-import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
 import com.innospots.nexus.console.permission.domain.enums.PermissionSubjectType;
 import com.innospots.nexus.console.permission.domain.request.PermissionGrantItemRequest;
 import com.innospots.nexus.console.permission.domain.request.PermissionGrantReplaceRequest;
@@ -35,7 +30,7 @@ import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
 public class PermissionGrantService {
 
     private final PermissionGrantDao grantDao;
-    private final ConsoleCatalogResourceDao resourceDao;
+    private final ConsoleCatalogService catalogService;
     private final GrantSubjectAccess grantSubjectAccess;
 
     /**
@@ -43,18 +38,18 @@ public class PermissionGrantService {
      */
     public PermissionGrantService(
             PermissionGrantDao grantDao,
-            ConsoleCatalogResourceDao resourceDao,
+            ConsoleCatalogService catalogService,
             GrantSubjectAccess grantSubjectAccess
     ) {
         this.grantDao = Checks.notNull(grantDao, "grantDao");
-        this.resourceDao = Checks.notNull(resourceDao, "resourceDao");
+        this.catalogService = Checks.notNull(catalogService, "catalogService");
         this.grantSubjectAccess = Checks.notNull(grantSubjectAccess, "grantSubjectAccess");
     }
 
     /**
      * 在一个事务中全量替换指定角色或组织单元的授权。
      *
-     * <p>方法先完成主体、资源、父子关系和 datasource 条件校验，再删除旧授权并写入新授权，
+     * <p>方法先完成主体与 catalog 授权项校验，再删除旧授权并写入新授权，
      * 从而避免部分校验失败时留下不完整的授权集合。</p>
      *
      * @param subjectType 授权主体类型
@@ -100,27 +95,24 @@ public class PermissionGrantService {
             PermissionGrantReplaceRequest request,
             ConsoleOwnership ownership
     ) {
-        String securityRealm = ownership.securityRealm();
-        List<ConsoleCatalogResourceEntity> resources = resources(request.grants(), securityRealm);
-        validateParents(resources, securityRealm);
         // 全量替换保证撤销的资源不会残留，同时事务保证删除和新增一起提交。
         grantDao.delete(grantScopeQuery(subjectType, subjectId, ownership));
-        for (int i = 0; i < request.grants().size(); i++) {
-            PermissionGrantItemRequest item = request.grants().get(i);
-            ConsoleCatalogResourceEntity resource = resources.get(i);
+        for (PermissionGrantItemRequest item : request.grants()) {
             PermissionGrantEntity grant = new PermissionGrantEntity();
             ConsoleOwnershipScope.stamp(grant, ownership);
             grant.setSubjectType(subjectType.name());
             grant.setSubjectId(subjectId);
-            grant.setResourceId(resource.getResourceId());
-            grant.setConstraintDefinition(normalizeConstraint(
-                    item.constraintDefinition(), resource));
+            grant.setGrantKey(item.resourceKey());
+            grant.setConstraintDefinition(normalizeConstraint(item.constraintDefinition()));
             grantDao.insert(grant);
         }
     }
 
     /**
-     * 查询授权集合；归属由 {@link ConsoleOwnership} 表达，不额外传入租户/工作区 ID。
+     * 查询当前归属下的授权集合；读取仅用于回显设置，不校验主体可见性。
+     *
+     * <p>授权行查询本身受 {@link ConsoleOwnership} 隔离，写入时仍由
+     * {@link GrantSubjectAccess} 校验主体归属。</p>
      */
     public PermissionGrantReplaceRequest list(
             PermissionSubjectType subjectType,
@@ -129,12 +121,14 @@ public class PermissionGrantService {
     ) {
         Checks.notNull(ownership, "ownership");
         validateSubject(subjectType, subjectId, null);
-        grantSubjectAccess.ensureSubjectInScope(subjectType, subjectId, ownership);
         return listGrants(subjectType, subjectId, ownership);
     }
 
     /**
-     * 查询指定角色或组织单元当前的完整授权集合。
+     * 查询指定角色或组织单元在当前归属下的完整授权集合。
+     *
+     * <p>读取不要求主体仍在会话可见范围内，避免角色删除或归属变化后设置页无法回显。
+     * 实际授权行仍按归属过滤。</p>
      *
      * @param subjectType 授权主体类型
      * @param subjectId 角色或组织单元 ID
@@ -149,7 +143,6 @@ public class PermissionGrantService {
     ) {
         Checks.notNull(ownership, "ownership");
         validateSubject(subjectType, subjectId, null);
-        grantSubjectAccess.ensureSubjectInScope(subjectType, subjectId, ownership, tenantId, workspaceId);
         return listGrants(subjectType, subjectId, ownership);
     }
 
@@ -161,92 +154,16 @@ public class PermissionGrantService {
         List<PermissionGrantItemRequest> grants = grantDao.selectList(grantScopeQuery(subjectType, subjectId, ownership))
                 .stream()
                 .map(grant -> new PermissionGrantItemRequest(
-                        grant.getResourceId(), grant.getConstraintDefinition()))
+                        grant.getGrantKey(), grant.getConstraintDefinition()))
                 .toList();
         return new PermissionGrantReplaceRequest(grants);
     }
 
-    private List<ConsoleCatalogResourceEntity> resources(List<PermissionGrantItemRequest> items, String securityRealm) {
-        List<String> ids = items.stream().map(PermissionGrantItemRequest::resourceId).toList();
-        String realm = securityRealm;
-        List<ConsoleCatalogResourceEntity> found = ids.isEmpty()
-                ? List.of()
-                : resourceDao.selectList(Wrappers.<ConsoleCatalogResourceEntity>lambdaQuery()
-                        .in(ConsoleCatalogResourceEntity::getResourceId, ids)
-                        .eq(ConsoleCatalogResourceEntity::getSecurityRealm, realm));
-        if (found.size() != ids.size()) {
-            invalid("Unknown permission resource");
-        }
-        Map<String, ConsoleCatalogResourceEntity> byId = found.stream()
-                .collect(Collectors.toMap(
-                        ConsoleCatalogResourceEntity::getResourceId,
-                        value -> value));
-        List<ConsoleCatalogResourceEntity> ordered = ids.stream()
-                .map(byId::get)
-                .toList();
-        for (ConsoleCatalogResourceEntity resource : ordered) {
-            if (!realm.equals(resource.getSecurityRealm())) {
-                invalid("Unknown permission resource");
-            }
-            if (!isGrantable(resource)) {
-                invalid("Resource cannot be granted: " + resource.getResourceKey());
-            }
-        }
-        return ordered;
-    }
-
-    private void validateParents(List<ConsoleCatalogResourceEntity> resources, String securityRealm) {
-        String realm = securityRealm;
-        Set<String> selectedIds = resources.stream()
-                .map(ConsoleCatalogResourceEntity::getResourceId)
-                .collect(Collectors.toSet());
-        Set<String> parentIds = resources.stream()
-                .map(ConsoleCatalogResourceEntity::getParentResourceId)
-                .filter(value -> value != null && !value.isBlank())
-                .collect(Collectors.toSet());
-        if (parentIds.isEmpty()) {
-            return;
-        }
-        Map<String, ConsoleCatalogResourceEntity> parents = resourceDao.selectList(
-                        Wrappers.<ConsoleCatalogResourceEntity>lambdaQuery()
-                                .in(ConsoleCatalogResourceEntity::getResourceId, parentIds)
-                                .eq(ConsoleCatalogResourceEntity::getSecurityRealm, realm))
-                .stream()
-                .collect(Collectors.toMap(ConsoleCatalogResourceEntity::getResourceId, value -> value));
-        for (ConsoleCatalogResourceEntity resource : resources) {
-            String parentId = resource.getParentResourceId();
-            if (parentId == null || parentId.isBlank()) {
-                continue;
-            }
-            ConsoleCatalogResourceEntity parent = parents.get(parentId);
-            if (parent == null || !BasicStatus.ENABLED.name().equals(parent.getStatus())) {
-                invalid("Unknown permission resource parent");
-            }
-            if (!"MODULE".equals(parent.getResourceType()) && !selectedIds.contains(parentId)) {
-                invalid("Permission resource parent must also be granted: "
-                        + resource.getResourceKey());
-            }
-            if ("MENU".equals(resource.getResourceType())
-                    && !Set.of("MODULE", "MENU").contains(parent.getResourceType())) {
-                invalid("Menu parent must be a module or menu");
-            }
-        }
-    }
-
-    private String normalizeConstraint(
-            String value,
-            ConsoleCatalogResourceEntity resource
-    ) {
+    private String normalizeConstraint(String value) {
         if (value != null && !value.isBlank()) {
             invalid("Constraint grants are not supported in catalog v2");
         }
         return null;
-    }
-
-    private boolean isGrantable(ConsoleCatalogResourceEntity resource) {
-        return resource != null
-                && CatalogResourceType.MENU.name().equals(resource.getResourceType())
-                && BasicStatus.ENABLED.name().equals(resource.getStatus());
     }
 
     private void validateSubject(
@@ -259,11 +176,16 @@ public class PermissionGrantService {
         if (request == null) {
             return;
         }
-        Set<String> resourceIds = new HashSet<>();
+        Set<String> grantKeys = catalogService.grantResourceKeys();
+        Set<String> requestKeys = new HashSet<>();
         for (PermissionGrantItemRequest item : request.grants()) {
-            if (item == null || item.resourceId() == null || item.resourceId().isBlank()
-                    || !resourceIds.add(item.resourceId())) {
-                invalid("Grant resourceId must be non-blank and unique");
+            if (item == null || item.resourceKey() == null || item.resourceKey().isBlank()
+                    || item.resourceKey().length() > 256
+                    || !requestKeys.add(item.resourceKey())) {
+                invalid("Grant resourceKey must be non-blank, unique, and at most 256 characters");
+            }
+            if (!grantKeys.contains(item.resourceKey())) {
+                invalid("Unknown permission resource: " + item.resourceKey());
             }
         }
     }

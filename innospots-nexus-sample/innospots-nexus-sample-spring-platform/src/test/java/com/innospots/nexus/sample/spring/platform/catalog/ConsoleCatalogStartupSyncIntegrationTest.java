@@ -134,7 +134,7 @@ class ConsoleCatalogStartupSyncIntegrationTest {
         assertThat(dbResourceKeys)
                 .as("GET /catalog/tree keys should be indexed in nx_console_catalog_resource")
                 .containsAll(apiResourceKeys);
-        assertThat(countResourcesByType("MENU")).isGreaterThanOrEqualTo(8L);
+        assertThat(countResourcesByType("MENU")).isZero();
         assertThat(countResourcesByType("MODULE")).isEqualTo(8L);
     }
 

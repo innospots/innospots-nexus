@@ -2,9 +2,11 @@ package com.innospots.nexus.console.catalog.service;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -16,7 +18,10 @@ import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao;
 import com.innospots.nexus.console.catalog.domain.entity.ConsoleCatalogResourceEntity;
 import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
+import com.innospots.nexus.console.catalog.domain.vo.CatalogModuleGrantVo;
 import com.innospots.nexus.console.catalog.domain.vo.CatalogNodeVo;
+import com.innospots.nexus.console.catalog.domain.vo.CatalogPermissionGroupVo;
+import com.innospots.nexus.console.catalog.domain.vo.CatalogViewItemVo;
 import com.innospots.nexus.console.support.ConsoleExceptions;
 /**
  * 从宿主级目录索引组装权限目录树。
@@ -61,6 +66,19 @@ public final class ConsoleCatalogService {
         return List.copyOf(nodes);
     }
 
+    /**
+     * 返回当前启用目录中可持久化的全部授权项键。
+     *
+     * @return 页面访问项与操作项的稳定键
+     */
+    public Set<String> grantResourceKeys() {
+        Set<String> keys = new HashSet<>();
+        for (CatalogNodeVo node : permissionCatalog()) {
+            collectGrantKeys(node, keys);
+        }
+        return Set.copyOf(keys);
+    }
+
     private CatalogNodeVo toNode(
             ConsoleCatalogResourceEntity row,
             Map<String, List<ConsoleCatalogResourceEntity>> childrenByParent
@@ -72,7 +90,7 @@ public final class ConsoleCatalogService {
             childNodes.add(toNode(child, childrenByParent));
         }
         CatalogResourceType type = CatalogResourceType.valueOf(row.getResourceType());
-        com.innospots.nexus.console.catalog.domain.vo.CatalogModuleGrantVo grants = null;
+        CatalogModuleGrantVo grants = null;
         if (type == CatalogResourceType.MODULE) {
             List<ConsoleCatalogResourceEntity> directMenus = children.stream()
                     .filter(child -> CatalogResourceType.MENU.name().equals(child.getResourceType()))
@@ -93,6 +111,29 @@ public final class ConsoleCatalogService {
                 row.getIcon(),
                 List.copyOf(childNodes),
                 grants);
+    }
+
+    private static void collectGrantKeys(CatalogNodeVo node, Set<String> keys) {
+        CatalogModuleGrantVo grants = node.grants();
+        if (grants != null) {
+            for (CatalogViewItemVo item : grants.viewItems()) {
+                addGrantKey(item, keys);
+            }
+            for (CatalogPermissionGroupVo group : grants.operationGroups()) {
+                for (CatalogViewItemVo item : group.items()) {
+                    addGrantKey(item, keys);
+                }
+            }
+        }
+        for (CatalogNodeVo child : node.children()) {
+            collectGrantKeys(child, keys);
+        }
+    }
+
+    private static void addGrantKey(CatalogViewItemVo item, Set<String> keys) {
+        if (item != null && item.resourceKey() != null && !item.resourceKey().isBlank()) {
+            keys.add(item.resourceKey());
+        }
     }
 
     private List<ConsoleCatalogResourceEntity> enabledResources() {

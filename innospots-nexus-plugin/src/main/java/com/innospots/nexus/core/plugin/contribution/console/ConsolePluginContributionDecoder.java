@@ -71,7 +71,15 @@ public final class ConsolePluginContributionDecoder
             invalid("MODULE node requires moduleKey");
         }
         String entry = optionalText(map.get("entryPageKey"), "entryPageKey");
-        List<ConsoleContributeNode> children = requiredList(map, "children", this::childNode);
+        List<ConsoleContributeNode> children = map.containsKey("children")
+                ? list(map.get("children"), this::childNode, "children")
+                : List.of();
+        if (entry == null && children.isEmpty()) {
+            invalid("MODULE node requires entryPageKey or children");
+        }
+        if (entry != null && !children.isEmpty()) {
+            invalid("MODULE page node must not set children");
+        }
         return new ConsoleContributeNode(
                 text(map.get("moduleKey"), "moduleKey"),
                 i18n(map.get("displayName"), "displayName"),
@@ -108,12 +116,12 @@ public final class ConsolePluginContributionDecoder
 
     private ConsoleContributeNode childNode(Object value) {
         Map<String, Object> map = object(value, "node");
+        if (map.containsKey("moduleKey")) {
+            return moduleNode(value);
+        }
         String entry = optionalText(map.get("entryPageKey"), "entryPageKey");
         if (entry != null) {
             requireFields(map, MENU_FIELDS);
-            if (map.containsKey("moduleKey")) {
-                invalid("MENU node must not declare moduleKey");
-            }
             return new ConsoleContributeNode(
                     null,
                     i18n(map.get("displayName"), "displayName"),
@@ -125,8 +133,8 @@ public final class ConsolePluginContributionDecoder
                     List.of(),
                     List.of());
         }
-        requireFields(map, MODULE_FIELDS);
-        return moduleNode(value);
+        invalid("MODULE node requires moduleKey");
+        return null;
     }
 
     private List<ConsolePermissionGroupDeclaration> optionalGroups(Object value) {

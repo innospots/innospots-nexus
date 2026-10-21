@@ -4,7 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Singleton;
 
-import com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao;
+import com.innospots.nexus.console.catalog.service.ConsoleCatalogService;
 import com.innospots.nexus.console.permission.dao.PermissionGrantDao;
 import com.innospots.nexus.console.permission.service.GrantSubjectAccess;
 import com.innospots.nexus.console.permission.service.PermissionGrantService;
@@ -27,8 +27,8 @@ public class ConsolePermissionBeans {
     @Singleton
     PermissionGrantService permissionGrantService(
             PermissionGrantDao grantDao,
-            ConsoleCatalogResourceDao resourceDao,
+            ConsoleCatalogService catalogService,
             GrantSubjectAccess grantSubjectAccess) {
-        return new PermissionGrantService(grantDao, resourceDao, grantSubjectAccess);
+        return new PermissionGrantService(grantDao, catalogService, grantSubjectAccess);
     }
 }

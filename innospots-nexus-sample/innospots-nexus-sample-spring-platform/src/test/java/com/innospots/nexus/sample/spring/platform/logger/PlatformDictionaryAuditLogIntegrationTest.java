@@ -42,6 +42,12 @@ class PlatformDictionaryAuditLogIntegrationTest {
 
     private static final String TYPE_CODE = "audit_log_region";
 
+    private static final Map<String, String> EXPECTED_OPERATION_TYPES = Map.of(
+            "dictionary.type.create", "CREATE",
+            "dictionary.type.update", "UPDATE",
+            "dictionary.type.status.update", "STATUS",
+            "dictionary.type.delete", "DELETE");
+
     private static final Map<String, Set<String>> EXPECTED_MESSAGES = Map.of(
             "dictionary.type.create", Set.of("创建字典类型", "Create dictionary type"),
             "dictionary.type.update", Set.of("更新字典类型", "Update dictionary type"),
@@ -94,7 +100,12 @@ class PlatformDictionaryAuditLogIntegrationTest {
         HttpResponse<String> readOnly = http.get(PlatformConstant.DICTIONARY_TYPES_PATH + "/" + typeId);
         assertThat(readOnly.statusCode()).as(readOnly.body()).isEqualTo(200);
         assertThat(countDictionaryAuditRows()).isEqualTo(1L);
-        assertAuditRow("dictionary.type.create", "POST", "dictionary-types", null);
+        assertAuditRow(
+                "CREATE",
+                "dictionary.type.create",
+                "POST",
+                "dictionary-types",
+                null);
 
         String updateBody = """
                 {
@@ -108,19 +119,34 @@ class PlatformDictionaryAuditLogIntegrationTest {
                 updateBody);
         assertThat(updated.statusCode()).as(updated.body()).isEqualTo(200);
         assertThat(countDictionaryAuditRows()).isEqualTo(2L);
-        assertAuditRow("dictionary.type.update", "PUT", "dictionary-types", typeId);
+        assertAuditRow(
+                "UPDATE",
+                "dictionary.type.update",
+                "PUT",
+                "dictionary-types",
+                typeId);
 
         HttpResponse<String> disabled = http.putJson(
                 PlatformConstant.DICTIONARY_TYPES_PATH + "/" + typeId + "/status",
                 "{\"status\":\"DISABLED\"}");
         assertThat(disabled.statusCode()).as(disabled.body()).isEqualTo(200);
         assertThat(countDictionaryAuditRows()).isEqualTo(3L);
-        assertAuditRow("dictionary.type.status.update", "PUT", "dictionary-types", typeId);
+        assertAuditRow(
+                "STATUS",
+                "dictionary.type.status.update",
+                "PUT",
+                "dictionary-types",
+                typeId);
 
         HttpResponse<String> deleted = http.delete(PlatformConstant.DICTIONARY_TYPES_PATH + "/" + typeId);
         assertThat(deleted.statusCode()).as(deleted.body()).isEqualTo(200);
         assertThat(countDictionaryAuditRows()).isEqualTo(4L);
-        assertAuditRow("dictionary.type.delete", "DELETE", "dictionary-types", typeId);
+        assertAuditRow(
+                "DELETE",
+                "dictionary.type.delete",
+                "DELETE",
+                "dictionary-types",
+                typeId);
 
         String auditLogJson = dumpAuditLogTableJson();
         PlatformDatabaseJsonSnapshot.logAndPersist(
@@ -135,6 +161,10 @@ class PlatformDictionaryAuditLogIntegrationTest {
         assertThat(auditPage.body()).contains("dictionary.type.update");
         assertThat(auditPage.body()).contains("dictionary.type.delete");
         assertThat(auditPage.body()).contains("dictionary.type.status.update");
+        assertThat(auditPage.body()).contains("\"operationType\":\"CREATE\"");
+        assertThat(auditPage.body()).contains("\"operationType\":\"UPDATE\"");
+        assertThat(auditPage.body()).contains("\"operationType\":\"STATUS\"");
+        assertThat(auditPage.body()).contains("\"operationType\":\"DELETE\"");
         assertThat(Jsons.mapper().readTree(auditPage.body()).path("data").path("records").size()).isEqualTo(4);
         assertThat(countDictionaryAuditRows()).isEqualTo(4L);
 
@@ -159,21 +189,23 @@ class PlatformDictionaryAuditLogIntegrationTest {
         assertThat(failed.headers().firstValue("X-Request-Id")).isPresent();
         assertThat(countDictionaryAuditRows()).isEqualTo(1L);
         Map<String, Object> row = jdbcTemplate.queryForMap("SELECT * FROM nx_audit_log");
-        assertThat(row.get("action")).isEqualTo("dictionary.type.delete");
+        assertThat(row.get("action")).isEqualTo("DELETE");
+        assertThat(row.get("target")).isEqualTo("dictionary.type.delete");
         assertThat(row.get("execution_result")).isEqualTo("FAILURE");
         assertThat(row.get("owner_type")).isEqualTo("PLATFORM");
         assertThat(row.get("owner_id")).isNull();
         assertThat(row.get("security_realm")).isEqualTo("PLATFORM");
         assertThat(row.get("actor")).isEqualTo(PlatformIntegrationTestSupport.DEV_PLATFORM_USER_ID);
         assertThat(row.get("path")).isEqualTo("DELETE " + PlatformConstant.DICTIONARY_TYPES_PATH + "/missing-type");
-        assertThat(row.get("message").toString()).contains("NexusException");
+        assertThat(row.get("message")).isEqualTo("删除字典类型");
+        assertThat(row.get("failure_detail").toString()).contains("NexusException");
         assertThat(((Number) row.get("duration_ms")).longValue()).isGreaterThanOrEqualTo(0L);
         assertThat(row.get("key_parameters")).isNull();
         assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM nx_dictionary_type", Long.class)).isZero();
 
         HttpResponse<String> auditPage = http.get(PlatformConstant.AUDIT_LOGS_PATH + "?pageNo=1&pageSize=20");
         assertThat(auditPage.statusCode()).as(auditPage.body()).isEqualTo(200);
-        assertThat(auditPage.body()).contains("dictionary.type.delete", "FAILURE");
+        assertThat(auditPage.body()).contains("dictionary.type.delete", "DELETE", "FAILURE");
         assertThat(countDictionaryAuditRows()).isEqualTo(1L);
         PlatformDatabaseJsonSnapshot.logAndPersist(
                 jdbcTemplate, OUTPUT_DIR, "04-failed-mutation", Map.of("nx_audit_log", "operated_time"));
@@ -189,30 +221,33 @@ class PlatformDictionaryAuditLogIntegrationTest {
         Long count = jdbcTemplate.queryForObject(
                 """
                 SELECT COUNT(*) FROM nx_audit_log
-                WHERE action LIKE 'dictionary.type.%'
+                WHERE target LIKE 'dictionary.type.%'
                 """,
                 Long.class);
         return count == null ? 0L : count;
     }
 
     private void assertAuditRow(
-            String action,
+            String operationType,
+            String target,
             String httpMethod,
             String pathSegment,
             String typeIdInPath
     ) {
         List<AuditLogRow> rows = jdbcTemplate.query(
                 """
-                SELECT audit_log_id, action, path, message, execution_result, actor,
+                SELECT audit_log_id, action, target, path, message, failure_detail, execution_result, actor,
                        owner_type, owner_id, security_realm, duration_ms, key_parameters, operated_time
                 FROM nx_audit_log
-                WHERE action = ?
+                WHERE action = ? AND target = ?
                 """,
                 (rs, rowNum) -> new AuditLogRow(
                         rs.getString("audit_log_id"),
                         rs.getString("action"),
+                        rs.getString("target"),
                         rs.getString("path"),
                         rs.getString("message"),
+                        rs.getString("failure_detail"),
                         rs.getString("execution_result"),
                         rs.getString("actor"),
                         rs.getString("owner_type"),
@@ -221,13 +256,17 @@ class PlatformDictionaryAuditLogIntegrationTest {
                         rs.getObject("duration_ms") == null ? null : rs.getLong("duration_ms"),
                         rs.getString("key_parameters"),
                         rs.getTimestamp("operated_time")),
-                action);
+                operationType,
+                target);
         assertThat(rows).hasSize(1);
         AuditLogRow row = rows.get(0);
 
         assertThat(row.auditLogId()).isNotBlank();
-        assertThat(row.action()).isEqualTo(action);
-        assertThat(EXPECTED_MESSAGES.get(action)).contains(row.message());
+        assertThat(row.action()).isEqualTo(operationType);
+        assertThat(row.target()).isEqualTo(target);
+        assertThat(EXPECTED_OPERATION_TYPES.get(target)).isEqualTo(row.action());
+        assertThat(EXPECTED_MESSAGES.get(target)).contains(row.message());
+        assertThat(row.failureDetail()).isNull();
         assertThat(row.executionResult()).isEqualTo("SUCCESS");
         assertThat(row.actor()).isEqualTo(PlatformIntegrationTestSupport.DEV_PLATFORM_USER_ID);
         assertThat(row.securityRealm()).isEqualTo("PLATFORM");
@@ -248,8 +287,10 @@ class PlatformDictionaryAuditLogIntegrationTest {
     private record AuditLogRow(
             String auditLogId,
             String action,
+            String target,
             String path,
             String message,
+            String failureDetail,
             String executionResult,
             String actor,
             String ownerType,

@@ -40,7 +40,7 @@ public final class AuditLogMessages {
     }
 
     /**
-     * 按 {@link I18nConverter#locale()} 解析操作描述。
+     * 按 {@link I18nConverter#locale()} 解析操作说明。
      *
      * @param literal {@link com.innospots.nexus.console.endpoint.grant.EndpointGrant#label()}
      * @return 当前语言下的描述；无文案时为空字符串

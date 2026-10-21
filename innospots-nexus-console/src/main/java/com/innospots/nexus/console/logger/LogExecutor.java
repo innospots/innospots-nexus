@@ -58,7 +58,7 @@ public final class LogExecutor {
             throw t;
         } finally {
             if (grant != null && grant.auditLog()) {
-                String action = grant.name();
+                String action = grant.action() == null ? "" : grant.action().name();
                 if (action == null || action.isBlank()) {
                     action = methodName;
                 }
@@ -73,7 +73,8 @@ public final class LogExecutor {
                         System.currentTimeMillis(),
                         actor,
                         AuditLogMessages.resolveOperationMessage(grant.label()),
-                        "");
+                        "",
+                        grant.name());
                 handler.handle(context);
             }
         }
