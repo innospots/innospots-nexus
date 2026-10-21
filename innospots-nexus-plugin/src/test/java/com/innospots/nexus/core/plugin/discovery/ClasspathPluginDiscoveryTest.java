@@ -148,8 +148,6 @@ class ClasspathPluginDiscoveryTest {
                 0,
                 "discovery-page",
                 null,
-                "default",
-                null,
                 List.of(),
                 List.of(),
                 List.of());
@@ -158,8 +156,6 @@ class ClasspathPluginDiscoveryTest {
                 I18nObject.of(Map.of("en", "Main")),
                 I18nObject.of(Map.of()),
                 0,
-                null,
-                null,
                 null,
                 null,
                 List.of(new ConsolePermissionGroupDeclaration(

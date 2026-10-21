@@ -49,7 +49,7 @@ Console 传输契约 interface 模式见 [api-contract.md](api-contract.md)「Co
 
 插件运行时设计文档：`innospots-nexus-plugin/docs/plugin/design/`（Page DSL、安装、贡献解码）。
 
-内置控制台 **entry 插件**（`ConsoleModuleEntrySupport`、`pageKey`、classpath `ui-pages/nexus/...`）技能索引：
+内置控制台 **entry 插件**（`ConsoleContributions` / `ConsoleContributeNode`、`pageKey`、classpath `ui-pages/...`）技能索引：
 [console-entry-and-pages.md](console-entry-and-pages.md)。
 
 ---

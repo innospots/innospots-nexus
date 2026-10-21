@@ -18,8 +18,6 @@ final class ConsoleContributionTestSupport {
                 0,
                 entryPageKey,
                 null,
-                "default",
-                null,
                 List.of(),
                 List.of(),
                 List.of());
@@ -28,8 +26,6 @@ final class ConsoleContributionTestSupport {
                 I18nObject.of(Map.of("en", "Module")),
                 I18nObject.of(Map.of()),
                 0,
-                null,
-                null,
                 null,
                 null,
                 defaultViewGroups(),

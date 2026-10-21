@@ -8,8 +8,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import com.innospots.nexus.console.entry.ConsoleModuleDescriptor;
 import com.innospots.nexus.console.ui.spec.PageDsl;
+import com.innospots.nexus.console.ui.spec.PageDslPageRef;
 import com.innospots.nexus.console.ui.spec.config.PageDslConfig;
 import com.innospots.nexus.console.ui.spec.loader.ClasspathPageDslLoader;
 import com.innospots.nexus.console.ui.spec.parser.JacksonPageDslParser;
@@ -52,20 +52,26 @@ class PlatformConsoleEntryPluginTest {
     }
 
     @Test
-    void userModuleDeclaresMultipleMenus() {
+    void eachModuleDeclaresSingleMenuWithEntryPageKey() {
         ConsolePluginContribution contribution = consoleContribution();
         ConsoleContributeNode userModule = contribution.modules().stream()
                 .filter(module -> "user".equals(module.moduleKey()))
                 .findFirst()
                 .orElseThrow();
 
-        assertThat(userModule.children()).extracting(ConsoleContributeNode::entryPageKey)
-                .contains(
-                        PlatformModuleDescriptors.pageKey("user", "main"),
-                        PlatformModuleDescriptors.pageKey("user", "invite"),
-                        PlatformModuleDescriptors.pageKey("user", "access"),
-                        PlatformModuleDescriptors.pageKey("user", "add"));
-        assertThat(userModule.children()).hasSize(4);
+        assertThat(PlatformModuleDescriptors.USERS.children()).hasSize(1);
+        assertThat(PlatformModuleDescriptors.USERS.children().getFirst().isMenu()).isTrue();
+        assertThat(userModule.children()).hasSize(1);
+        assertThat(userModule.children().getFirst().entryPageKey())
+                .isEqualTo(PlatformModuleDescriptors.USERS.children().getFirst().entryPageKey());
+
+        ConsoleContributeNode organization = contribution.modules().stream()
+                .filter(module -> "organization".equals(module.moduleKey()))
+                .findFirst()
+                .orElseThrow();
+        assertThat(organization.children()).hasSize(1);
+        assertThat(organization.operationGroups()).extracting(group -> group.group())
+                .containsExactly(ConsoleContributeNode.DEFAULT_VIEW_GROUP);
     }
 
     @Test
@@ -107,18 +113,18 @@ class PlatformConsoleEntryPluginTest {
         return Stream.of(
                 Arguments.of(
                         "organization",
-                        ConsoleModuleDescriptor.compositePageKey(DOMAIN, "organization", "main")),
-                Arguments.of("user", ConsoleModuleDescriptor.compositePageKey(DOMAIN, "user", "main")),
-                Arguments.of("user", ConsoleModuleDescriptor.compositePageKey(DOMAIN, "user", "add")),
-                Arguments.of("user", ConsoleModuleDescriptor.compositePageKey(DOMAIN, "user", "invite")),
-                Arguments.of("user", ConsoleModuleDescriptor.compositePageKey(DOMAIN, "user", "access")),
+                        PageDslPageRef.encode(DOMAIN, "organization", "main")),
+                Arguments.of("user", PageDslPageRef.encode(DOMAIN, "user", "main")),
+                Arguments.of("user", PageDslPageRef.encode(DOMAIN, "user", "add")),
+                Arguments.of("user", PageDslPageRef.encode(DOMAIN, "user", "invite")),
+                Arguments.of("user", PageDslPageRef.encode(DOMAIN, "user", "access")),
                 Arguments.of(
                         "settings",
-                        ConsoleModuleDescriptor.compositePageKey(DOMAIN, "settings", "registration-mode")),
-                Arguments.of("menu", ConsoleModuleDescriptor.compositePageKey(DOMAIN, "menu", "main")),
-                Arguments.of("dictionary", ConsoleModuleDescriptor.compositePageKey(DOMAIN, "dictionary", "main")),
-                Arguments.of("role", ConsoleModuleDescriptor.compositePageKey(DOMAIN, "role", "main")),
-                Arguments.of("permission", ConsoleModuleDescriptor.compositePageKey(DOMAIN, "permission", "main")),
-                Arguments.of("logger", ConsoleModuleDescriptor.compositePageKey(DOMAIN, "logger", "main")));
+                        PageDslPageRef.encode(DOMAIN, "settings", "registration-mode")),
+                Arguments.of("menu", PageDslPageRef.encode(DOMAIN, "menu", "main")),
+                Arguments.of("dictionary", PageDslPageRef.encode(DOMAIN, "dictionary", "main")),
+                Arguments.of("role", PageDslPageRef.encode(DOMAIN, "role", "main")),
+                Arguments.of("permission", PageDslPageRef.encode(DOMAIN, "permission", "main")),
+                Arguments.of("logger", PageDslPageRef.encode(DOMAIN, "logger", "main")));
     }
 }

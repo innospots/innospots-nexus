@@ -1,43 +1,30 @@
 package com.innospots.nexus.console.sitemap.service;
 
-import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.console.sitemap.domain.config.SitemapConfig;
-import com.innospots.nexus.console.sitemap.domain.vo.SitemapResource;
 import com.innospots.nexus.console.sitemap.loader.SitemapConfigLoader;
 
 /**
- * 加载并渲染 sitemap（当前按固定 YAML 全量返回，后续按会话与权限裁剪）。
+ * 加载 classpath meta-sitemap（不做权限裁剪；裁剪在 navigation 模块）。
  */
 public final class SitemapService {
 
     private final SitemapConfigLoader configLoader;
-    private final SitemapMapper mapper;
 
-    public SitemapService(SitemapConfigLoader configLoader, SitemapMapper mapper) {
-        if (configLoader == null || mapper == null) {
+    public SitemapService(SitemapConfigLoader configLoader) {
+        if (configLoader == null) {
             throw ConsoleExceptions.build(
                     NexusStatusCode.CONFIG_ERROR.fullCode(),
-                    "Sitemap configLoader and mapper are required");
+                    "Meta-sitemap configLoader is required");
         }
         this.configLoader = configLoader;
-        this.mapper = mapper;
     }
 
     /**
-     * 渲染指定领域的 sitemap 资源。
-     *
-     * @param domainKey {@code ui-pages} 领域键
-     * @return 对外 sitemap
+     * @return 解析后的 meta-sitemap 文档
      */
-    public SitemapResource render(String domainKey) {
-        if (domainKey == null || domainKey.isBlank()) {
-            throw ConsoleExceptions.build(
-                    NexusStatusCode.CONFIG_ERROR.fullCode(),
-                    "Sitemap domainKey is required");
-        }
-        SitemapConfig config = configLoader.load(domainKey);
-        return mapper.toResource(config);
+    public SitemapConfig load() {
+        return configLoader.load();
     }
 }

@@ -33,7 +33,6 @@ public final class ConsolePluginContributionSnapshotter
             value.put("resourceKey", node.moduleResourceKey());
         } else {
             value.put("entryPageKey", node.entryPageKey());
-            value.put("grantName", node.resolvedGrantName());
         }
         value.put("children", node.children().stream().map(ConsolePluginContributionSnapshotter::node).toList());
         return Map.copyOf(value);

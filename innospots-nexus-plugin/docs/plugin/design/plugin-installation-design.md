@@ -26,7 +26,6 @@ PluginInstallationManager
 ├── PluginRuntimeFactory
 └── PluginManager
         ├── runtimeState
-        ├── Capability Registry
         └── Contribution Handlers
 ```
 
@@ -133,7 +132,7 @@ com.innospots.nexus.core.plugin.installation
 - Repository：实体转换、幂等 upsert、MISSING 对账和意图写入；
 - Manager：安装策略、命令串行化、PluginManager 协调和组合查询；
 - RuntimeFactory：创建纯 PluginManager；
-- Snapshot：只保存可序列化静态摘要。
+- Snapshot：只保存可序列化静态摘要；**contributions** 由各 Snapshotter 写入，历史 JSON 中的 **capabilities** 恒为空数组。
 
 ## 7. 系统配置
 

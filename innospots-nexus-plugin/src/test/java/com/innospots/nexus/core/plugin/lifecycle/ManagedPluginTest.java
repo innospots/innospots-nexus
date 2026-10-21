@@ -73,8 +73,6 @@ class ManagedPluginTest {
                 0,
                 "sample-page",
                 null,
-                "default",
-                null,
                 List.of(),
                 List.of(),
                 List.of());
@@ -83,8 +81,6 @@ class ManagedPluginTest {
                 I18nObject.of(Map.of("en", "Role")),
                 I18nObject.of(Map.of()),
                 0,
-                null,
-                null,
                 null,
                 null,
                 List.of(new ConsolePermissionGroupDeclaration(

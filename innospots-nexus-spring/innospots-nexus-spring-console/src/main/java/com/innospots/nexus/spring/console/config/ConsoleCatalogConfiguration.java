@@ -12,10 +12,8 @@ import com.innospots.nexus.console.catalog.endpoint.ConsoleCatalogEndpoint;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogService;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogSyncService;
 import com.innospots.nexus.console.endpoint.grant.EndpointGrantManager;
-import com.innospots.nexus.console.sitemap.endpoint.NexusSitemapEndpoint;
 import com.innospots.nexus.console.sitemap.loader.SitemapConfigLoader;
 import com.innospots.nexus.console.sitemap.parser.SitemapYamlParser;
-import com.innospots.nexus.console.sitemap.service.SitemapMapper;
 import com.innospots.nexus.console.sitemap.service.SitemapService;
 import com.innospots.nexus.console.sitemap.config.SitemapYamlConfig;
 import com.innospots.nexus.console.ui.endpoint.DefaultPageDslEndpoint;
@@ -53,19 +51,14 @@ public class ConsoleCatalogConfiguration {
     @Bean
     SitemapConfigLoader sitemapConfigLoader() {
         return new SitemapConfigLoader(
-                SitemapYamlConfig.defaults(),
+                SitemapYamlConfig.metaSitemapDefaults(),
                 new SitemapYamlParser(),
                 null);
     }
 
     @Bean
     SitemapService sitemapService(SitemapConfigLoader sitemapConfigLoader) {
-        return new SitemapService(sitemapConfigLoader, new SitemapMapper());
-    }
-
-    @Bean
-    NexusSitemapEndpoint nexusSitemapEndpoint(SitemapService sitemapService) {
-        return new NexusSitemapEndpoint(sitemapService);
+        return new SitemapService(sitemapConfigLoader);
     }
 
     @Bean
@@ -78,9 +71,8 @@ public class ConsoleCatalogConfiguration {
     @Bean
     ConsoleCatalogService consoleCatalogService(
             ConsoleCatalogResourceDao resourceDao,
-            ConsoleContributionCatalog contributionCatalog,
             EndpointGrantManager endpointGrantManager) {
-        return new ConsoleCatalogService(resourceDao, contributionCatalog, endpointGrantManager);
+        return new ConsoleCatalogService(resourceDao, endpointGrantManager);
     }
 
     @Bean

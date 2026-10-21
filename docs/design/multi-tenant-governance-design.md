@@ -1709,7 +1709,7 @@ gantt
 | 文档 | 路径 | 关系 |
 |------|------|------|
 | Console UI 权限设计 | `innospots-nexus-portal/docs/permission-design.md` | 权限目录 + 授权唯一模型（resource = permission） |
-| 插件扩展系统设计 | `innospots-nexus-plugin/docs/plugin/design/plugin-extension-design.md` | 插件、扩展模块与权限目录来源 |
+| 插件扩展系统设计 | `innospots-nexus-plugin/docs/plugin/design/plugin-extensions-v2-design.md` | 插件、console@2 与权限 catalog 来源 |
 | 领域模块初始化规范 | `skills/java/java-reference/standards/domain-module-initialization.md` | 新 domain 包开发流程 |
 | 模块职责指南 | `AGENTS.md` | 模块边界与依赖规则 |
 

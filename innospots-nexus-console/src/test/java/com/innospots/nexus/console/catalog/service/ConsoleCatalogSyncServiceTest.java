@@ -31,8 +31,6 @@ class ConsoleCatalogSyncServiceTest {
                 0,
                 "demo-main",
                 null,
-                "default",
-                null,
                 List.of(),
                 List.of(),
                 List.of());
@@ -41,8 +39,6 @@ class ConsoleCatalogSyncServiceTest {
                 I18nObject.of(Map.of("en", "Demo")),
                 I18nObject.of(Map.of()),
                 0,
-                null,
-                null,
                 null,
                 null,
                 List.of(new ConsolePermissionGroupDeclaration(

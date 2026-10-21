@@ -18,8 +18,6 @@ import com.innospots.nexus.console.catalog.domain.entity.ConsoleCatalogResourceE
 import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
 import com.innospots.nexus.console.catalog.domain.vo.CatalogNodeVo;
 import com.innospots.nexus.console.endpoint.grant.EndpointGrantManager;
-import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributionCatalog;
-
 class ConsoleCatalogServiceTest {
 
     @Test
@@ -34,7 +32,6 @@ class ConsoleCatalogServiceTest {
 
         ConsoleCatalogService service = new ConsoleCatalogService(
                 dao,
-                mock(ConsoleContributionCatalog.class),
                 new EndpointGrantManager());
 
         List<CatalogNodeVo> roots = service.permissionCatalog();

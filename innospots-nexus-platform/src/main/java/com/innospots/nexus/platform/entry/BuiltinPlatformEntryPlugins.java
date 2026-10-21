@@ -1,49 +1,34 @@
 package com.innospots.nexus.platform.entry;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
+import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributeNode;
+import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributions;
 import com.innospots.nexus.core.plugin.declaration.Tags;
 
 /**
- * 运营管理平台内置 entry 插件身份、标签与宿主必选 ID。
- *
- * <p>单个聚合插件 {@link #PLATFORM_CONSOLE} 贡献 {@link #DOMAIN_KEY} 领域下全部 PageDsl 模块；
- * 版本取自 JAR {@code Implementation-Version}。</p>
- *
- * @author Smars
- * @date 2026/10/06
- * @see com.innospots.nexus.platform.entry.PlatformConsoleEntryPlugin
- * @see com.innospots.nexus.console.entry.BuiltinConsoleEntryPlugins
+ * {@code innospots-nexus-platform} 内置 entry 插件 ID、领域键、版本与发现标签。
  */
 public final class BuiltinPlatformEntryPlugins {
 
-    /** 聚合 platform 管理能力的单 entry 插件 ID。 */
     public static final String PLATFORM_CONSOLE = "com.innospots.nexus.platform.console";
 
-    /** PageDsl / console 贡献领域目录：{@code ui-pages/platform/...}。 */
+    /** PageDsl / console 贡献领域：{@code ui-pages/platform/...}。 */
     public static final String DOMAIN_KEY = "platform";
 
-    public static final String TAG_KIND = "kind";
-    public static final String TAG_KIND_ENTRY = "entry";
-    public static final String TAG_DOMAIN = "domain";
-    public static final String TAG_MODULE = "module";
+    /** platform 宿主在通用 entry 标签之上追加的 realm 键。 */
     public static final String TAG_REALM = "realm";
     public static final String TAG_REALM_PLATFORM = "platform";
 
-    static final String DEVELOPMENT_PLUGIN_VERSION = "0.0.0-dev";
+    public static final List<String> REQUIRED_PLUGIN_IDS = List.of(PLATFORM_CONSOLE);
 
-    public static final java.util.List<String> REQUIRED_PLUGIN_IDS = java.util.List.of(PLATFORM_CONSOLE);
+    static final String DEVELOPMENT_PLUGIN_VERSION = "0.0.0-dev";
 
     private BuiltinPlatformEntryPlugins() {
     }
 
-    /**
-     * 返回 platform 构件版本，供 {@code PluginDefinition.version} 使用。
-     *
-     * @return 非空版本字符串；缺失 manifest 时返回开发态占位版本
-     */
     public static String pluginVersion() {
         Package pkg = BuiltinPlatformEntryPlugins.class.getPackage();
         if (pkg == null) {
@@ -57,28 +42,16 @@ public final class BuiltinPlatformEntryPlugins {
     }
 
     /**
-     * 为插件发现与路由生成 entry 标签（kind、realm、domain/module 键列表）。
-     *
-     * @param entry 聚合 entry 描述
-     * @return 插件标签
+     * platform 聚合 entry 的发现标签：{@link ConsoleContributions} 通用键 + {@link #TAG_REALM}。
      */
-    public static Tags tagsFor(PlatformEntryPluginDescriptor entry) {
-        Map<String, String> values = new LinkedHashMap<>();
-        values.put(TAG_KIND, TAG_KIND_ENTRY);
-        values.put(TAG_REALM, TAG_REALM_PLATFORM);
-        values.put(TAG_DOMAIN, entry.modules().stream()
-                .map(PlatformModuleDescriptors::domainKey)
-                .distinct()
+    public static Tags discoveryTags(List<ConsoleContributeNode> modules) {
+        List<String> moduleKeys = modules.stream()
+                .map(ConsoleContributeNode::moduleKey)
                 .sorted()
-                .collect(Collectors.joining(",")));
-        String moduleKeys = entry.modules().stream()
-                .map(PlatformModuleDescriptors::moduleKey)
-                .sorted()
-                .collect(Collectors.joining(","));
-        if (moduleKeys.length() > 64) {
-            moduleKeys = "platform-console";
-        }
-        values.put(TAG_MODULE, moduleKeys);
-        return Tags.from(values);
+                .toList();
+        Tags base = ConsoleContributions.discoveryTags(PLATFORM_CONSOLE, DOMAIN_KEY, moduleKeys);
+        Map<String, String> merged = new LinkedHashMap<>(base.asMap());
+        merged.put(TAG_REALM, TAG_REALM_PLATFORM);
+        return Tags.from(merged);
     }
 }

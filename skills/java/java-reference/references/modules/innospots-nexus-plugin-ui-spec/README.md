@@ -42,7 +42,7 @@ Console 目录同步 / 运行时加载（PageDslLoader）
 | 文档 | 规范 |
 |------|------|
 | 插件清单、console@1 树 | [`plugin-dsl-spec.md`](../../../../../innospots-nexus-plugin/docs/plugin/design/plugin-dsl-spec.md) |
-| Console 贡献设计 | `innospots-nexus-plugin/docs/plugin/design/plugin-console-contribution-design.md` |
+| Console 贡献设计 | `innospots-nexus-plugin/docs/plugin/design/plugin-extensions-v2-design.md` §6.1.2 |
 | **页面 YAML（本文）** | 本目录 `references/` |
 
 `console@1` 中 `ConsoleModuleDeclaration.domainKey` 与 `UiSpecPageDeclaration.pagePath`（`/page/{domain}/{module}/{pageKey}`）与 classpath 布局对齐；默认路径与目录同步见

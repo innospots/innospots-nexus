@@ -10,5 +10,5 @@
 | [`extension-design.md`](extension-design.md) | Console 模块、菜单、页面、Endpoint、权限资源及独立 Extension Runtime | 已归档 |
 | [`plugin-extension-design.md`](plugin-extension-design.md) | Core Capability、配置、依赖及独立 Plugin Runtime | 已归档 |
 
-现行规范见 [`../../../innospots-nexus-plugin/docs/plugin/design/plugin-extension-design.md`](../../../innospots-nexus-plugin/docs/plugin/design/plugin-extension-design.md)。
+现行规范见 [`../../../innospots-nexus-plugin/docs/plugin/design/README.md`](../../../innospots-nexus-plugin/docs/plugin/design/README.md)。
 若归档文档与现行规范冲突，以 plugin 模块文档与根目录 `AGENTS.md` 为准。

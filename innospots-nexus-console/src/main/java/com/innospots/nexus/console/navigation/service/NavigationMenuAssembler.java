@@ -18,7 +18,7 @@ import com.innospots.nexus.console.permission.authorization.AuthorizationSubject
 import com.innospots.nexus.console.catalog.domain.entity.ConsoleCatalogResourceEntity;
 import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
 import com.innospots.nexus.console.permission.service.PermissionVisibilityService;
-import com.innospots.nexus.console.entry.ConsoleModuleDescriptor;
+import com.innospots.nexus.console.entry.ConsolePageRoutes;
 import com.innospots.nexus.console.scope.ConsoleOwnership;
 import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
 
@@ -121,7 +121,7 @@ public final class NavigationMenuAssembler {
         if (menu.getEntryPageKey() == null || menu.getEntryPageKey().isBlank()) {
             return null;
         }
-        return ConsoleModuleDescriptor.pagePath(
+        return ConsolePageRoutes.pagePath(
                 menu.getDomainKey(), menu.getModuleKey(), menu.getEntryPageKey());
     }
 

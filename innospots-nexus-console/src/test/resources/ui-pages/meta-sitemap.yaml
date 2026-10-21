@@ -1,0 +1,7 @@
+id: test-site
+title: Test Console
+description: Meta-sitemap fixture
+version: 1
+updatedAt: "2026-01-01T00:00:00Z"
+menus:
+  - { id: demo-main, type: page, pageId: demo-main, title: Demo, layout: admin, order: 1 }

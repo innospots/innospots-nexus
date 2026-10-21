@@ -114,17 +114,6 @@ public final class ConsolePluginContributionHandler
             invalid("duplicate entryPageKey in module " + module.moduleKey() + ": " + menu.entryPageKey());
         }
         claim(resourceOwners, owner, "MENU", menu.menuResourceKey(module.moduleKey()));
-        String viewGroup = menu.viewGroup() == null ? "default" : menu.viewGroup();
-        boolean knownGroup = false;
-        for (ConsolePermissionGroupDeclaration group : module.viewGroups()) {
-            if (group.group().equals(viewGroup)) {
-                knownGroup = true;
-                break;
-            }
-        }
-        if (!knownGroup) {
-            invalid("MENU viewGroup " + viewGroup + " is not declared on MODULE " + module.moduleKey());
-        }
     }
 
     private void claim(Map<String, String> resourceOwners, String owner, String type, String resourceKey) {

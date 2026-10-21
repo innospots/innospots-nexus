@@ -1,6 +1,9 @@
 package com.innospots.nexus.core.plugin.contribution.console;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import com.innospots.nexus.base.exception.NexusException;
@@ -9,6 +12,9 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
 /**
  * console@2 递归贡献节点（MODULE 或 MENU，由 {@link #entryPageKey()} 与 {@link #children()} 推导）。
+ *
+ * <p>MENU 访问授权名在 catalog 组装时恒为 {@link #entryPageKey()}；页面访问分组由 Page DSL {@code grantGroup}
+ * 与 MODULE {@link #viewGroups()} 对齐（见 plugin-extensions-v2-design §6.8）。</p>
  */
 public record ConsoleContributeNode(
         String moduleKey,
@@ -17,12 +23,13 @@ public record ConsoleContributeNode(
         int orderIndex,
         String entryPageKey,
         String icon,
-        String viewGroup,
-        String grantName,
         List<ConsolePermissionGroupDeclaration> viewGroups,
         List<ConsolePermissionGroupDeclaration> operationGroups,
         List<ConsoleContributeNode> children
 ) {
+
+    /** MODULE {@code viewGroups} / {@code operationGroups} 须包含的分组键。 */
+    public static final String DEFAULT_VIEW_GROUP = "default";
 
     private static final Pattern KEY_PATTERN = Pattern.compile("[a-z][a-z0-9]*(?:-[a-z0-9]+)*");
     private static final Pattern GROUP_PATTERN = Pattern.compile("[a-z][a-z0-9]*(?:-[a-z0-9]+)*");
@@ -44,6 +51,12 @@ public record ConsoleContributeNode(
             if (hasText(entryPageKey)) {
                 invalid("MODULE node must not set entryPageKey");
             }
+            if (viewGroups.isEmpty()) {
+                viewGroups = ConsolePermissionDefaults.defaultViewGroups();
+            }
+            if (operationGroups.isEmpty()) {
+                operationGroups = ConsolePermissionDefaults.defaultOperationGroups();
+            }
             requireDefaultGroup(viewGroups, "viewGroups");
             requireDefaultGroup(operationGroups, "operationGroups");
         } else if (menuNode) {
@@ -51,7 +64,6 @@ public record ConsoleContributeNode(
                 invalid("MENU node must not set moduleKey");
             }
             entryPageKey = requireKey(entryPageKey, "entryPageKey");
-            viewGroup = viewGroup == null || viewGroup.isBlank() ? "default" : viewGroup;
         } else {
             invalid("illegal node: need MODULE (empty entry + children) or MENU (entry + no children)");
         }
@@ -65,23 +77,91 @@ public record ConsoleContributeNode(
         return hasText(entryPageKey) && (children == null || children.isEmpty());
     }
 
-    /** 访问授权名；未声明时使用 {@code view.{entryPageKey}}。 */
-    public String resolvedGrantName() {
-        if (!isMenu()) {
-            return null;
-        }
-        if (grantName != null && !grantName.isBlank()) {
-            return grantName.trim();
-        }
-        return "view." + entryPageKey;
-    }
-
     public String menuResourceKey(String ownerModuleKey) {
         return "menu:" + ownerModuleKey + "." + entryPageKey;
     }
 
     public String moduleResourceKey() {
         return "module:" + moduleKey;
+    }
+
+    public static ConsoleContributeNode module(
+            String moduleKey,
+            int orderIndex,
+            I18nObject displayName,
+            I18nObject description,
+            List<ConsolePermissionGroupDeclaration> viewGroups,
+            List<ConsolePermissionGroupDeclaration> operationGroups,
+            List<ConsoleContributeNode> children
+    ) {
+        List<ConsoleContributeNode> sorted = new ArrayList<>(children);
+        sorted.sort(Comparator.comparingInt(ConsoleContributeNode::orderIndex));
+        return new ConsoleContributeNode(
+                moduleKey,
+                displayName,
+                description,
+                orderIndex,
+                null,
+                null,
+                defaultGroups(viewGroups, ConsolePermissionDefaults.defaultViewGroups()),
+                defaultGroups(operationGroups, ConsolePermissionDefaults.defaultOperationGroups()),
+                List.copyOf(sorted));
+    }
+
+    public static ConsoleContributeNode menu(
+            I18nObject displayName,
+            I18nObject description,
+            int orderIndex,
+            String entryPageKey,
+            String icon
+    ) {
+        return new ConsoleContributeNode(
+                null,
+                displayName,
+                description,
+                orderIndex,
+                entryPageKey,
+                icon,
+                List.of(),
+                List.of(),
+                List.of());
+    }
+
+    public static ConsoleContributeNode menu(
+            I18nObject displayName,
+            int orderIndex,
+            String entryPageKey,
+            String icon
+    ) {
+        return menu(displayName, I18nObject.of(Map.of()), orderIndex, entryPageKey, icon);
+    }
+
+    public static ConsoleContributeNode singlePageModule(
+            String moduleKey,
+            int orderIndex,
+            I18nObject displayName,
+            I18nObject description,
+            String entryPageKey,
+            String icon
+    ) {
+        return module(
+                moduleKey,
+                orderIndex,
+                displayName,
+                description,
+                ConsolePermissionDefaults.defaultViewGroups(),
+                ConsolePermissionDefaults.defaultOperationGroups(),
+                List.of(menu(displayName, description, 0, entryPageKey, icon)));
+    }
+
+    private static List<ConsolePermissionGroupDeclaration> defaultGroups(
+            List<ConsolePermissionGroupDeclaration> groups,
+            List<ConsolePermissionGroupDeclaration> defaults
+    ) {
+        if (groups == null || groups.isEmpty()) {
+            return defaults;
+        }
+        return groups;
     }
 
     static String requireKey(String value, String field) {
@@ -107,7 +187,7 @@ public record ConsoleContributeNode(
         }
         boolean hasDefault = false;
         for (ConsolePermissionGroupDeclaration group : groups) {
-            if ("default".equals(group.group())) {
+            if (DEFAULT_VIEW_GROUP.equals(group.group())) {
                 hasDefault = true;
                 break;
             }

@@ -4,7 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
-import com.innospots.nexus.console.navigation.service.NavigationMenuAssembler;
+import com.innospots.nexus.console.navigation.service.NavigationMenuComposer;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubjectResolver;
 import com.innospots.nexus.platform.navigation.endpoint.PlatformNavigationMenuEndpoint;
 import com.innospots.nexus.platform.navigation.service.PlatformNavigationService;
@@ -14,9 +14,9 @@ public class PlatformNavigationConfiguration {
 
     @Bean
     PlatformNavigationService platformNavigationService(
-            NavigationMenuAssembler navigationMenuAssembler,
+            NavigationMenuComposer navigationMenuComposer,
             AuthorizationSubjectResolver authorizationSubjectResolver) {
-        return new PlatformNavigationService(navigationMenuAssembler, authorizationSubjectResolver);
+        return new PlatformNavigationService(navigationMenuComposer, authorizationSubjectResolver);
     }
 
     @Bean

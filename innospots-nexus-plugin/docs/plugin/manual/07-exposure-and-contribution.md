@@ -129,7 +129,7 @@ Handler.validate(catalog, allEntries)   # 启动前全局校验
 
 ### 2.7 与权限
 
-插件安装的菜单/页面资源携带 `ownerPluginId`（Console 权限模块使用）。详见 [`../design/plugin-console-contribution-design.md`](../design/plugin-console-contribution-design.md)。
+插件安装的菜单/页面资源携带 `ownerPluginId`（Console 权限模块使用）。详见 [`../design/plugin-extensions-v2-design.md`](../design/plugin-extensions-v2-design.md) §6 与 [`../design/plugin-dsl-spec.md`](../design/plugin-dsl-spec.md)。
 
 ### 2.8 仅 Contribution、无 Capability 的插件
 

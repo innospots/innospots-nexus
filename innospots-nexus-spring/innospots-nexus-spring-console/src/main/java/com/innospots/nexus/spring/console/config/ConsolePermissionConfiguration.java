@@ -11,6 +11,8 @@ import com.innospots.nexus.console.permission.authorization.ConsolePagePermissio
 import com.innospots.nexus.console.permission.authorization.SessionAuthorizationSubjectResolver;
 import com.innospots.nexus.console.permission.dao.PermissionGrantDao;
 import com.innospots.nexus.console.permission.service.GrantSubjectAccess;
+import com.innospots.nexus.console.permission.pageaccess.GrantGroupPageAccessVerifier;
+import com.innospots.nexus.console.permission.pageaccess.PageAccessVerifier;
 import com.innospots.nexus.console.permission.service.PermissionGrantService;
 import com.innospots.nexus.console.permission.service.PermissionVisibilityService;
 import com.innospots.nexus.console.role.dao.RoleBindingDao;
@@ -58,5 +60,10 @@ public class ConsolePermissionConfiguration {
             ConsoleCatalogResourceDao resourceDao,
             PermissionGrantDao grantDao) {
         return new ConsolePagePermissionAuthorizer(resourceDao, grantDao);
+    }
+
+    @Bean
+    PageAccessVerifier pageAccessVerifier(ConsolePagePermissionAuthorizer pagePermissionAuthorizer) {
+        return new GrantGroupPageAccessVerifier(pagePermissionAuthorizer);
     }
 }

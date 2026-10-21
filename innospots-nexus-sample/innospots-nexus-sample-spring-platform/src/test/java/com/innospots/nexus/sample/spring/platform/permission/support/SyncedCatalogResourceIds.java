@@ -6,7 +6,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.base.exception.NexusException;
-import com.innospots.nexus.console.entry.ConsoleModuleDescriptor;
+import com.innospots.nexus.console.entry.ConsolePageRoutes;
 import com.innospots.nexus.platform.entry.BuiltinPlatformEntryPlugins;
 /**
  * 从启动同步后的目录索引解析 platform 插件真实资源 ID。
@@ -16,7 +16,7 @@ public final class SyncedCatalogResourceIds {
     private static final String USER_MENU_KEY = "menu:user.user-main";
 
     private static final String USER_PAGE_KEY = "page:user."
-            + ConsoleModuleDescriptor.compositePageKey(
+            + ConsolePageRoutes.compositePageKey(
                     BuiltinPlatformEntryPlugins.DOMAIN_KEY, "user", "main");
 
     private SyncedCatalogResourceIds() {

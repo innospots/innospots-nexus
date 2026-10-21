@@ -1,0 +1,9 @@
+id: group-fixture
+title: Group Fixture
+menus:
+  - id: system
+    type: group
+    title: 系统管理
+    order: 3
+    children:
+      - { id: nav-roles, type: page, pageId: role-list, title: 角色, layout: admin }

@@ -68,6 +68,9 @@ public final class PlatformConstant {
     /** 运营管理平台授权后导航菜单：{@value} */
     public static final String NAVIGATION_MENUS_PATH = API_PREFIX + "/navigation/menus";
 
+    /** 页面访问权限校验：{@value} */
+    public static final String PAGE_ACCESS_VERIFY_PATH = API_PREFIX + "/permission/page-access";
+
     /** 平台用户邀请（管理端）：{@value} */
     public static final String INVITES_PATH = API_PREFIX + "/invites";
 

@@ -7,9 +7,12 @@ import org.springframework.context.annotation.Lazy;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubjectResolver;
 import com.innospots.nexus.console.permission.service.PermissionGrantService;
 import com.innospots.nexus.console.permission.service.PermissionVisibilityService;
+import com.innospots.nexus.console.permission.pageaccess.PageAccessVerifier;
 import com.innospots.nexus.platform.permission.endpoint.PlatformCurrentAuthorizationEndpoint;
 import com.innospots.nexus.platform.permission.endpoint.PlatformGrantManagementEndpoint;
 import com.innospots.nexus.platform.permission.endpoint.PlatformOrganizationUnitGrantManagementEndpoint;
+import com.innospots.nexus.platform.permission.endpoint.PlatformPageAccessEndpoint;
+import com.innospots.nexus.platform.permission.service.PlatformPageAccessService;
 import com.innospots.nexus.platform.permission.service.PlatformPermissionService;
 
 @Configuration
@@ -45,5 +48,18 @@ public class PlatformPermissionConfiguration {
     PlatformCurrentAuthorizationEndpoint platformCurrentAuthorizationEndpoint(
             PlatformPermissionService platformPermissionService) {
         return new PlatformCurrentAuthorizationEndpoint(platformPermissionService);
+    }
+
+    @Bean
+    PlatformPageAccessService platformPageAccessService(
+            PageAccessVerifier pageAccessVerifier,
+            AuthorizationSubjectResolver authorizationSubjectResolver) {
+        return new PlatformPageAccessService(pageAccessVerifier, authorizationSubjectResolver);
+    }
+
+    @Bean
+    @Lazy
+    PlatformPageAccessEndpoint platformPageAccessEndpoint(PlatformPageAccessService platformPageAccessService) {
+        return new PlatformPageAccessEndpoint(platformPageAccessService);
     }
 }

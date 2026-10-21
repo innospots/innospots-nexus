@@ -18,8 +18,6 @@ import com.innospots.nexus.console.catalog.domain.entity.ConsoleCatalogResourceE
 import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
 import com.innospots.nexus.console.catalog.domain.vo.CatalogNodeVo;
 import com.innospots.nexus.console.support.ConsoleExceptions;
-import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributionCatalog;
-
 /**
  * 从宿主级目录索引组装权限目录树。
  */
@@ -30,15 +28,13 @@ public final class ConsoleCatalogService {
 
     public ConsoleCatalogService(
             ConsoleCatalogResourceDao resourceDao,
-            ConsoleContributionCatalog contributionCatalog,
             com.innospots.nexus.console.endpoint.grant.EndpointGrantManager endpointGrantManager
     ) {
         if (resourceDao == null) {
             throw ConsoleExceptions.build(NexusStatusCode.CONFIG_ERROR, "resourceDao is required");
         }
         this.resourceDao = resourceDao;
-        this.grantAssembler = new CatalogPermissionCatalogAssembler(
-                contributionCatalog, endpointGrantManager);
+        this.grantAssembler = new CatalogPermissionCatalogAssembler(endpointGrantManager);
     }
 
     /**

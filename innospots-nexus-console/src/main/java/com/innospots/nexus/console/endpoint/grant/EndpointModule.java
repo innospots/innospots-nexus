@@ -18,7 +18,7 @@ import java.lang.annotation.Target;
 public @interface EndpointModule {
 
     /**
-     * 模块键，与 {@code ConsoleModuleDescriptor.moduleKey()} 对齐。
+     * 模块键，与 console@2 MODULE {@code moduleKey} 对齐。
      */
     String value();
 

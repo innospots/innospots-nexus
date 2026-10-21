@@ -5,10 +5,8 @@ import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Singleton;
 
 import com.innospots.nexus.console.sitemap.config.SitemapYamlConfig;
-import com.innospots.nexus.console.sitemap.endpoint.NexusSitemapEndpoint;
 import com.innospots.nexus.console.sitemap.loader.SitemapConfigLoader;
 import com.innospots.nexus.console.sitemap.parser.SitemapYamlParser;
-import com.innospots.nexus.console.sitemap.service.SitemapMapper;
 import com.innospots.nexus.console.sitemap.service.SitemapService;
 import com.innospots.nexus.console.ui.endpoint.DefaultPageDslEndpoint;
 import com.innospots.nexus.console.ui.spec.config.PageDslConfig;
@@ -68,27 +66,18 @@ public class ConsoleCatalogBeans {
     @Singleton
     SitemapConfigLoader sitemapConfigLoader() {
         return new SitemapConfigLoader(
-                SitemapYamlConfig.defaults(),
+                SitemapYamlConfig.metaSitemapDefaults(),
                 new SitemapYamlParser(),
                 null);
     }
 
     /**
-     * Sitemap 渲染服务。
+     * Meta-sitemap 加载服务。
      */
     @Produces
     @Singleton
     SitemapService sitemapService(SitemapConfigLoader sitemapConfigLoader) {
-        return new SitemapService(sitemapConfigLoader, new SitemapMapper());
-    }
-
-    /**
-     * Sitemap REST 资源。
-     */
-    @Produces
-    @Singleton
-    NexusSitemapEndpoint nexusSitemapEndpoint(SitemapService sitemapService) {
-        return new NexusSitemapEndpoint(sitemapService);
+        return new SitemapService(sitemapConfigLoader);
     }
 
     /**
@@ -120,7 +109,7 @@ public class ConsoleCatalogBeans {
     ConsoleCatalogService consoleCatalogService(
             ConsoleCatalogResourceDao resourceDao,
             EndpointGrantManager endpointGrantManager) {
-        return new ConsoleCatalogService(resourceDao, contributionCatalog, endpointGrantManager);
+        return new ConsoleCatalogService(resourceDao, endpointGrantManager);
     }
 
     /**

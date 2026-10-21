@@ -64,8 +64,6 @@ class PluginDefinitionTest {
                 0,
                 "sample-page",
                 null,
-                "default",
-                null,
                 List.of(),
                 List.of(),
                 List.of());
@@ -74,8 +72,6 @@ class PluginDefinitionTest {
                 I18nObject.of(Map.of("en", "Role")),
                 I18nObject.of(Map.of()),
                 0,
-                null,
-                null,
                 null,
                 null,
                 List.of(new ConsolePermissionGroupDeclaration(

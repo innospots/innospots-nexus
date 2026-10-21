@@ -6,46 +6,68 @@ import org.junit.jupiter.api.Test;
 
 import com.innospots.nexus.console.sitemap.config.SitemapYamlConfig;
 import com.innospots.nexus.console.sitemap.domain.config.SitemapConfig;
-import com.innospots.nexus.console.sitemap.domain.vo.SitemapResource;
+import com.innospots.nexus.console.sitemap.domain.model.SitemapMenuItem;
 import com.innospots.nexus.console.sitemap.loader.SitemapConfigLoader;
 import com.innospots.nexus.console.sitemap.parser.SitemapYamlParser;
-import com.innospots.nexus.console.sitemap.service.SitemapMapper;
 import com.innospots.nexus.console.sitemap.service.SitemapService;
 
 class SitemapYamlLoadTest {
 
     @Test
-    void loadsNexusSitemapYaml() {
+    void loadsMetaSitemapYaml() {
         SitemapConfigLoader loader = new SitemapConfigLoader(
-                SitemapYamlConfig.defaults(),
+                SitemapYamlConfig.metaSitemapDefaults(),
                 new SitemapYamlParser(),
                 SitemapYamlLoadTest.class.getClassLoader());
-        SitemapConfig config = loader.load("nexus");
+        SitemapConfig config = loader.load();
 
-        assertThat(config.getId()).isEqualTo("site");
-        assertThat(config.getResourceType()).isEqualTo("sitemap");
-        assertThat(config.getPages()).isNotEmpty();
-        assertThat(config.getMenus()).isNotEmpty();
-        assertThat(config.getLayouts()).containsKeys("admin", "login", "blank");
-        assertThat(config.getLayouts().get("admin").getBody().getType()).isEqualTo("Layout");
-        assertThat(config.getLayouts().get("admin").getBody().getProps()).isNotEmpty();
+        assertThat(config.getId()).isEqualTo("test-site");
+        assertThat(config.getTitle()).isEqualTo("Test Console");
+        assertThat(config.getMenus()).hasSize(1);
+        assertThat(config.getMenus().getFirst().getPageId()).isEqualTo("demo-main");
     }
 
     @Test
-    void rendersFixedYamlThroughService() {
+    void parsesMenuItemAlignedWithFrontendSitemapYaml() {
+        String yaml = """
+                id: site
+                title: Site
+                menus:
+                  - { id: login, type: page, pageId: login, title: 登录, layout: login, public: true, hidden: true }
+                """;
+        SitemapConfig config = new SitemapYamlParser().parse(yaml);
+        SitemapMenuItem login = config.getMenus().getFirst();
+
+        assertThat(login.getId()).isEqualTo("login");
+        assertThat(login.getType()).isEqualTo("page");
+        assertThat(login.getPageId()).isEqualTo("login");
+        assertThat(login.getTitle()).isEqualTo("登录");
+        assertThat(login.getLayout()).isEqualTo("login");
+        assertThat(login.getPublicAccess()).isTrue();
+        assertThat(login.getHidden()).isTrue();
+    }
+
+    @Test
+    void loadsGroupFixtureFromClasspath() {
+        SitemapConfig config = new SitemapConfigLoader(
+                SitemapYamlConfig.ofResourcePath("ui-pages/group-meta-sitemap.yaml"),
+                new SitemapYamlParser(),
+                SitemapYamlLoadTest.class.getClassLoader()).load();
+
+        assertThat(config.getMenus().getFirst().getType()).isEqualTo("group");
+        assertThat(config.getMenus().getFirst().getChildren().getFirst().getPageId())
+                .isEqualTo("role-list");
+    }
+
+    @Test
+    void loadsThroughService() {
         SitemapService service = new SitemapService(
                 new SitemapConfigLoader(
-                        SitemapYamlConfig.defaults(),
+                        SitemapYamlConfig.metaSitemapDefaults(),
                         new SitemapYamlParser(),
-                        SitemapYamlLoadTest.class.getClassLoader()),
-                new SitemapMapper());
-        SitemapResource resource = service.render("nexus");
+                        SitemapYamlLoadTest.class.getClassLoader()));
+        SitemapConfig resource = service.load();
 
-        assertThat(resource.getId()).isEqualTo("site");
-        assertThat(resource.getPages()).hasSize(1);
-        assertThat(resource.getMenus()).hasSize(1);
-        assertThat(resource.getPages().getFirst().getId()).isEqualTo("nexus-plugin-main");
-        assertThat(resource.getPages().getFirst().getPath()).isEqualTo("/page/nexus/plugin/nexus-plugin-main");
-        assertThat(resource.getLayouts().get("login").getBody().getType()).isEqualTo("Flex");
+        assertThat(resource.getMenus().getFirst().getLayout()).isEqualTo("admin");
     }
 }

@@ -24,7 +24,7 @@
 | **Page DSL 运行时** | `console.ui.spec` / `console.ui.endpoint`（Pactor Page DSL 1.0；Java 快照见 `innospots-nexus-plugin` README，规范见 `innospots-nexus-plugin-ui-spec`） |
 | **Sitemap** | `SitemapService` + `GET /api/public/sitemap/nexus`（`ui-pages/nexus/sitemap.yaml`） |
 | **OpenAPI** | 构建期 bundled 规范目录与 Scalar 文档钩子 |
-| **内置入口** | 六个 `*EntryPlugin`、`ConsoleModuleEntrySupport`（单/多模块、多页、多菜单）+ `ui-pages/nexus/**` |
+| **内置入口** | `PluginManagementEntryPlugin` + `BuiltinConsoleEntryPlugins` / `ConsolePageRoutes`；组装工厂在 **plugin**（`ConsoleEntryPlugins`）+ `ui-pages/nexus/**` |
 | **审计** | `nx_audit_log` 与调用日志管道 |
 
 **不包含：** Spring Boot 自动配置、Servlet 绑定、租户 `/tenant/**` 与平台 `/platform/**` 认证端点实现（归属 portal/platform）、
@@ -477,11 +477,10 @@ java:check      → mvn clean compile / test
 
 | 类 | 类型 | 说明 |
 |------|------|------|
-| `BuiltinConsoleEntryPlugins` | `class` | 内置控制台 entry 插件身份常量 |
-| `ConsoleEntryPluginDescriptor` | `record` | 单插件多模块 entry 元数据 |
-| `ConsoleMenuItemDescriptor` | `record` | 模块内单条顶层菜单节点 |
-| `ConsoleModuleDescriptor` | `record` | 单模块 PageDsl / 菜单元数据 |
-| `ConsoleModuleEntrySupport` | `class` | 组装 `console@1` 与 `PluginDefinition` |
+| `BuiltinConsoleEntryPlugins` | `class` | 本模块内置 entry 插件 ID、`REQUIRED_PLUGIN_IDS`、版本 |
+| `ConsolePageRoutes` | `class` | nexus 域键、复合 pageKey 与 `/page/...` 路由 |
+
+`console@2` 贡献组装见 **plugin** → [contribution-console-entry-assembly.md](../innospots-nexus-plugin/references/contribution-console-entry-assembly.md)。
 
 ### 包 `jaxrs.filter`
 

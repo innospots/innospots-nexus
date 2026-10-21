@@ -24,10 +24,9 @@ public final class ConsolePluginContributionDecoder
             "orderIndex", "entryPageKey", "modules");
     private static final Set<String> MODULE_FIELDS = Set.of(
             "moduleKey", "displayName", "description", "orderIndex", "entryPageKey",
-            "icon", "viewGroup", "grantName", "viewGroups", "operationGroups", "children");
+            "icon", "viewGroups", "operationGroups", "children");
     private static final Set<String> MENU_FIELDS = Set.of(
-            "displayName", "description", "orderIndex", "entryPageKey",
-            "icon", "viewGroup", "grantName", "children");
+            "displayName", "description", "orderIndex", "entryPageKey", "icon", "children");
     private static final Set<String> GROUP_FIELDS = Set.of("group", "label");
 
     @Override
@@ -80,8 +79,6 @@ public final class ConsolePluginContributionDecoder
                 integer(map.getOrDefault("orderIndex", 0), "orderIndex"),
                 entry,
                 optionalText(map.get("icon"), "icon"),
-                optionalText(map.get("viewGroup"), "viewGroup"),
-                optionalText(map.get("grantName"), "grantName"),
                 groupsOrDefault(optionalGroups(map.get("viewGroups")), defaultViewGroups()),
                 groupsOrDefault(optionalGroups(map.get("operationGroups")), defaultOperationGroups()),
                 children);
@@ -124,8 +121,6 @@ public final class ConsolePluginContributionDecoder
                     integer(map.getOrDefault("orderIndex", 0), "orderIndex"),
                     entry,
                     optionalText(map.get("icon"), "icon"),
-                    optionalText(map.get("viewGroup"), "viewGroup"),
-                    optionalText(map.get("grantName"), "grantName"),
                     List.of(),
                     List.of(),
                     List.of());

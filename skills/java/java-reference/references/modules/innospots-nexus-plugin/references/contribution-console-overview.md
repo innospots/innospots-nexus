@@ -1,26 +1,39 @@
-# 贡献与 console@1
+# 贡献与 console@2
 
 | 包 / 类型 | 说明 |
 |-----------|------|
 | `contribution.*` | 贡献模型、decoder/snapshotter 注册表 |
-| `contribution.console.*` | `ConsolePluginContributionHandler`、UI 规范声明 |
+| `contribution.console.*` | `ConsolePluginContribution`（`console@2`）、`ConsoleContributeNode`、Handler、解码器 |
 | `contribution.console.ConsolePluginContributionSnapshotter` | 贡献快照 |
 
-控制台 catalog **表**与同步 REST 归属 **innospots-nexus-console**；plugin 只产出解码后的贡献与 Page 元数据。
+控制台 catalog **表**与同步 REST 归属 **innospots-nexus-console**；plugin 产出解码后的贡献与 Page 元数据。
 
-## `ConsoleModuleDeclaration` 要点
+## `ConsolePluginContribution` 要点
 
 | 字段 | 说明 |
 |------|------|
 | `domainKey` | Page DSL classpath 第一段：`ui-pages/{domainKey}/{moduleKey}/...` |
+| `modules` | 顶层 `ConsoleContributeNode` 列表（均为 MODULE） |
+| `displayName` / `description` / `orderIndex` | 贡献级展示与排序 |
+
+每个 MODULE 节点：
+
+| 字段 | 说明 |
+|------|------|
 | `moduleKey` | 模块键 |
-| `pages` | `UiSpecPageDeclaration`（`pageKey`、`pagePath`、可选嵌套 `children`） |
-| `menuTree` | `MenuDeclaration`（目录或页面入口；页面节点绑定 `pageKey`） |
+| `viewGroups` / `operationGroups` | 权限分组（须含 `default`） |
+| `children` | MENU 子节点：`entryPageKey`、可选 `icon`；访问分组见 Page DSL `grantGroup` |
 
-`pageKey` 须与 Page DSL `page.id` 及 YAML 文件名一致；路径推荐 `/page/{domainKey}/{moduleKey}/{pageKey}`（`ConsoleModuleDescriptor.pagePath`）。
+`pageKey`（MENU 的 `entryPageKey`）须与 Page DSL `page.id` 及 YAML 文件名一致；前端路由推荐 `/page/{domainKey}/{moduleKey}/{pageKey}`（console 侧 `ConsolePageRoutes.pagePath`）。
 
-## 内置 entry 组装（console 模块）
+## Java entry 组装
 
-**innospots-nexus-console** 的 `ConsoleModuleEntrySupport` 从 `ConsoleModuleDescriptor` / `ConsoleEntryPluginDescriptor` 生成上述结构（支持**多模块、多页面、多顶层菜单**）。规范索引：[console-entry-and-pages.md](../../console-entry-and-pages.md)。
+**plugin 模块**提供工厂，见 [contribution-console-entry-assembly.md](contribution-console-entry-assembly.md)：
 
-包级参考：`contribution.md`、`contribution-console.md` 及各子包 `contribution-console-ui-spec-*.md`。
+- `ConsoleContributeNode`（工厂）、`ConsoleContributions`（entry 插件门面）
+
+**console** 仅保留 `BuiltinConsoleEntryPlugins`、`ConsolePageRoutes` 与 `PluginManagementEntryPlugin`。**platform** 使用 `PlatformModuleDescriptors` + `PlatformConsoleEntryPlugin`。
+
+规范索引：[console-entry-and-pages.md](../../console-entry-and-pages.md)。
+
+包级参考：`contribution.md`、`contribution-console.md`（类型快照）、各 `contribution-console-ui-spec-*.md`。

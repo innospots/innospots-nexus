@@ -1,8 +1,0 @@
-dsl: '1.0'
-
-page:
-  id: platform-logger-main
-  name: loggerMain
-  title: Audit Logs
-  description: Platform console logger module.
-  type: general

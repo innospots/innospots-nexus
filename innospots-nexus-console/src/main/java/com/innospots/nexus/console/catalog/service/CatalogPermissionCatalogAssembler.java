@@ -5,38 +5,30 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import com.innospots.nexus.base.i18n.I18nObject;
 import com.innospots.nexus.base.json.Jsons;
 import com.innospots.nexus.console.catalog.domain.entity.ConsoleCatalogResourceEntity;
-import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
 import com.innospots.nexus.console.catalog.domain.vo.CatalogModuleGrantVo;
 import com.innospots.nexus.console.catalog.domain.vo.CatalogPermissionGroupVo;
 import com.innospots.nexus.console.catalog.domain.vo.CatalogViewItemVo;
 import com.innospots.nexus.console.endpoint.grant.EndpointGrantDescriptorVo;
 import com.innospots.nexus.console.endpoint.grant.EndpointGrantManager;
 import com.innospots.nexus.console.endpoint.grant.EndpointModuleGrantCatalogVo;
-import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributeNode;
-import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributionCatalog;
 import com.innospots.nexus.core.plugin.contribution.console.ConsolePermissionGroupDeclaration;
-import com.innospots.nexus.core.plugin.contribution.console.ConsolePluginContribution;
 
 /**
- * 组装 MODULE {@link CatalogModuleGrantVo}（DB + contribution + EndpointGrant）。
+ * 组装 MODULE {@link CatalogModuleGrantVo}（catalog 表 + EndpointGrant）。
+ *
+ * <p>访问项 {@code grantName} 恒为 MENU 的 {@code entryPageKey}（与 console@2 贡献一致）。</p>
  */
 public final class CatalogPermissionCatalogAssembler {
 
-    private final ConsoleContributionCatalog contributionCatalog;
     private final EndpointGrantManager endpointGrantManager;
 
-    public CatalogPermissionCatalogAssembler(
-            ConsoleContributionCatalog contributionCatalog,
-            EndpointGrantManager endpointGrantManager
-    ) {
-        this.contributionCatalog = contributionCatalog;
+    public CatalogPermissionCatalogAssembler(EndpointGrantManager endpointGrantManager) {
         this.endpointGrantManager = endpointGrantManager;
     }
 
@@ -46,7 +38,7 @@ public final class CatalogPermissionCatalogAssembler {
     ) {
         List<CatalogViewItemVo> viewItems = new ArrayList<>();
         for (ConsoleCatalogResourceEntity menu : directMenus) {
-            String grantName = resolveGrantName(moduleRow, menu);
+            String grantName = menu.getEntryPageKey();
             viewItems.add(new CatalogViewItemVo(
                     grantName + ":" + menu.getDomainKey() + "." + menu.getModuleKey(),
                     grantName,
@@ -98,70 +90,6 @@ public final class CatalogPermissionCatalogAssembler {
                     List.copyOf(items)));
         }
         return List.copyOf(groups);
-    }
-
-    private String resolveGrantName(
-            ConsoleCatalogResourceEntity moduleRow,
-            ConsoleCatalogResourceEntity menu
-    ) {
-        Optional<ConsoleContributeNode> node = findMenuNode(
-                menu.getOwnerPluginId(),
-                moduleRow.getDomainKey(),
-                moduleRow.getModuleKey(),
-                menu.getEntryPageKey());
-        if (node.isPresent()) {
-            return node.get().resolvedGrantName();
-        }
-        return "view." + menu.getEntryPageKey();
-    }
-
-    private Optional<ConsoleContributeNode> findMenuNode(
-            String ownerPluginId,
-            String domainKey,
-            String moduleKey,
-            String entryPageKey
-    ) {
-        for (ConsoleContributionCatalog.ActiveConsoleContribution active
-                : contributionCatalog.activeContributions()) {
-            if (!active.ownerPluginId().equals(ownerPluginId)) {
-                continue;
-            }
-            ConsolePluginContribution contribution = active.contribution();
-            if (!contribution.domainKey().equals(domainKey)) {
-                continue;
-            }
-            for (ConsoleContributeNode module : contribution.modules()) {
-                Optional<ConsoleContributeNode> found = findMenuInModule(
-                        module, moduleKey, entryPageKey);
-                if (found.isPresent()) {
-                    return found;
-                }
-            }
-        }
-        return Optional.empty();
-    }
-
-    private Optional<ConsoleContributeNode> findMenuInModule(
-            ConsoleContributeNode module,
-            String moduleKey,
-            String entryPageKey
-    ) {
-        if (!module.isModule() || !module.moduleKey().equals(moduleKey)) {
-            return Optional.empty();
-        }
-        for (ConsoleContributeNode child : module.children()) {
-            if (child.isMenu() && child.entryPageKey().equals(entryPageKey)) {
-                return Optional.of(child);
-            }
-            if (child.isModule()) {
-                Optional<ConsoleContributeNode> nested = findMenuInModule(
-                        child, moduleKey, entryPageKey);
-                if (nested.isPresent()) {
-                    return nested;
-                }
-            }
-        }
-        return Optional.empty();
     }
 
     private static List<ConsolePermissionGroupDeclaration> parseGroups(String json) {

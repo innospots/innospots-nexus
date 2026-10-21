@@ -36,9 +36,9 @@ class ConsoleModuleEntryPluginsTest {
         String entryPageKey = module.children().getFirst().entryPageKey();
         assertThat(module.moduleKey()).isNotBlank();
         assertThat(entryPageKey).isNotBlank();
-        assertThat(ConsoleModuleDescriptor.pagePath(
+        assertThat(ConsolePageRoutes.pagePath(
                 contribution.domainKey(), module.moduleKey(), entryPageKey))
-                .startsWith(ConsoleModuleDescriptor.PAGE_ROUTE_PREFIX);
+                .startsWith(ConsolePageRoutes.PAGE_ROUTE_PREFIX);
         assertThat(module.children()).singleElement()
                 .satisfies(menu -> assertThat(menu.entryPageKey()).isEqualTo(entryPageKey));
         assertThat(definition.contributions()).isNotEmpty();
@@ -53,7 +53,7 @@ class ConsoleModuleEntryPluginsTest {
                 new JacksonPageDslParser(config),
                 getClass().getClassLoader());
 
-        PageDsl document = loader.load(ConsoleModuleDescriptor.BUILTIN_DOMAIN_KEY, moduleKey, pageKey);
+        PageDsl document = loader.load(ConsolePageRoutes.BUILTIN_DOMAIN_KEY, moduleKey, pageKey);
 
         assertThat(document.getPage().getId()).isEqualTo(pageKey);
         assertThat(document.getPage().getType()).isEqualTo("general");
@@ -79,8 +79,8 @@ class ConsoleModuleEntryPluginsTest {
     }
 
     private static Stream<Arguments> moduleEntryPages() {
-        String domain = ConsoleModuleDescriptor.BUILTIN_DOMAIN_KEY;
+        String domain = ConsolePageRoutes.BUILTIN_DOMAIN_KEY;
         return Stream.of(
-                Arguments.of("plugin", ConsoleModuleDescriptor.compositePageKey(domain, "plugin", "main")));
+                Arguments.of("plugin", ConsolePageRoutes.compositePageKey(domain, "plugin", "main")));
     }
 }

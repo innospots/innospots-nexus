@@ -176,8 +176,6 @@ class DefaultPluginManagerTest {
                 0,
                 pageKey,
                 null,
-                "default",
-                null,
                 List.of(),
                 List.of(),
                 List.of());
@@ -186,8 +184,6 @@ class DefaultPluginManagerTest {
                 I18nObject.of(Map.of("en", "Main")),
                 I18nObject.of(Map.of()),
                 0,
-                null,
-                null,
                 null,
                 null,
                 List.of(new ConsolePermissionGroupDeclaration(

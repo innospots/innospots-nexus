@@ -10,7 +10,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import com.innospots.nexus.base.domain.response.R;
-import com.innospots.nexus.console.entry.ConsoleModuleDescriptor;
+import com.innospots.nexus.console.entry.ConsolePageRoutes;
 import com.innospots.nexus.console.ui.domain.request.PageDslRenderRequest;
 import com.innospots.nexus.console.ui.spec.PageDsl;
 import com.innospots.nexus.console.ui.spec.config.PageDslConfig;
@@ -25,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class DefaultPageDslEndpointNexusPagesTest {
 
-    private static final String DOMAIN = ConsoleModuleDescriptor.BUILTIN_DOMAIN_KEY;
+    private static final String DOMAIN = ConsolePageRoutes.BUILTIN_DOMAIN_KEY;
 
     private DefaultPageDslEndpoint endpoint;
 
@@ -69,7 +69,7 @@ class DefaultPageDslEndpointNexusPagesTest {
     }
 
     private static String composite(String moduleKey) {
-        return ConsoleModuleDescriptor.compositePageKey(DOMAIN, moduleKey, "main");
+        return ConsolePageRoutes.compositePageKey(DOMAIN, moduleKey, "main");
     }
 
     private static PageDslRenderRequest pageKeyRequest(String pageKey) throws Exception {

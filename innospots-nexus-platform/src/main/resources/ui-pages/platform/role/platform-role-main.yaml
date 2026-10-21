@@ -1,8 +1,0 @@
-dsl: '1.0'
-
-page:
-  id: platform-role-main
-  name: roleMain
-  title: Role Management
-  description: Platform console role module.
-  type: general

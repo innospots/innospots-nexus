@@ -6,11 +6,12 @@
 
 | 主题 | 权威文档 |
 |------|----------|
-| **`pageKey` / 入口页 / 多模块组装** | [innospots-nexus-console → entry.md](modules/innospots-nexus-console/references/entry.md) |
+| **console@2 贡献树与 Java 组装** | [innospots-nexus-plugin → contribution-console-entry-assembly.md](modules/innospots-nexus-plugin/references/contribution-console-entry-assembly.md) |
+| **本模块内置 entry ID / 路由** | [innospots-nexus-console → entry.md](modules/innospots-nexus-console/references/entry.md) |
+| **Platform 聚合 entry** | `innospots-nexus-platform` 包 `platform.entry`（`PlatformConsoleEntryPlugin`） |
 | **Page DSL YAML 路径与 `parentPageKey`** | [innospots-nexus-plugin-ui-spec → workflow-and-layout.md](modules/innospots-nexus-plugin-ui-spec/references/workflow-and-layout.md) |
 | **`page.id` 与 DSL 顶层字段** | [plugin-ui-spec → yaml-document.md](modules/innospots-nexus-plugin-ui-spec/references/yaml-document.md) |
-| **`console@1` Java 类型** | [innospots-nexus-plugin → contribution-console.md](modules/innospots-nexus-plugin/references/contribution-console.md) |
-| **菜单 entry 示例（`MenuEntryPlugin`）** | [console → menu-entry.md](modules/innospots-nexus-console/references/menu-entry.md) |
+| **`console@2` 运行时类型** | [innospots-nexus-plugin → contribution-console-overview.md](modules/innospots-nexus-plugin/references/contribution-console-overview.md) |
 | **管理 REST 前缀** | [console → endpoint-contracts.md](modules/innospots-nexus-console/references/endpoint-contracts.md)（`ConsoleConstant.API_PREFIX` = `/api/d/nexus`） |
 | **目录树与权限 API** | [console → catalog-permission.md](modules/innospots-nexus-console/references/catalog-permission.md) |
 
@@ -18,56 +19,64 @@
 
 ```text
 plugin.yaml / PluginDefinition
-  └─ console@1（ConsolePluginContribution）
-        ├─ domainKey + moduleKey + pages[].pageKey / pagePath
-        └─ menuTree（MenuDeclaration）
-              │
-              ▼
+  └─ console@2（ConsolePluginContribution）
+        ├─ domainKey
+        └─ modules[] → ConsoleContributeNode（MODULE）
+              └─ children[] → ConsoleContributeNode（MENU：entryPageKey、可选 icon）
+                    │
+                    ▼
 classpath: ui-pages/{domainKey}/{moduleKey}/{pageKey}.yaml  →  Page DSL（page.id = pageKey）
-              │
-              ▼
-console: ConsoleCatalogSyncService  →  nx_console_catalog_resource（MODULE / PAGE 树）
+                    │
+                    ▼
+console: ConsoleCatalogSyncService  →  nx_console_catalog_resource（MODULE / MENU / PAGE 树）
 ```
 
-| 层 | 谁声明「有哪些页面」 | 谁声明「页面父子关系」 |
-|----|----------------------|------------------------|
-| 贡献 / entry 组装 | `UiSpecPageDeclaration` 或 `ConsoleModuleDescriptor.allPageKeys()` | — |
-| Page DSL | — | `page.parentPageKey`（可选） |
+| 层 | 谁声明「有哪些页面」 | 谁声明「侧栏菜单」 |
+|----|----------------------|-------------------|
+| **plugin** `ConsoleContributeNode` / YAML `modules[]` | MENU 的 `entryPageKey`（复合 pageKey）；子页由 YAML `parentPageKey` 与 catalog 发现 | MODULE 下 MENU 子节点（递归 `children`） |
+| **console** `entry` 包 | 仅模块级：`BuiltinConsoleEntryPlugins`、`ConsolePageRoutes` | 内置 SPI：`PluginManagementEntryPlugin` |
 
-内置 entry 通过 **`ConsoleModuleEntrySupport`** 生成 `console@1`：
+**组装归属 plugin 模块**（middleware-free、可被 platform/console 共用）：
 
-- **单模块：** `definition(ConsoleModuleDescriptor)`
-- **多模块：** `definition(ConsoleEntryPluginDescriptor)`（一个 `pluginId`，多个 `ConsoleModuleDescriptor`）
-- **多页面：** `additionalPageKeys` + 各 YAML
-- **多顶层菜单：** `menuEntries`（`ConsoleMenuItemDescriptor` 列表）；为空时沿用单条 `MenuDeclaration.page`
+- `ConsoleContributeNode` — 贡献树节点 + 静态工厂（`module` / `menu` / `singlePageModule`）
+- `ConsoleContributions` — `entryPlugin(...)` 与 `discoveryTags(...)`（`DISCOVERY_TAG_*` 常量）
 
-六个 `*EntryPlugin` 仍为「一插件一模块」；捆绑多模块时使用同一 `pluginId` 的 `ConsoleEntryPluginDescriptor.of(...)`。
+默认权限分组等为包内 `ConsolePermissionDefaults`，不暴露为 public API。
 
-`ConsoleModuleDescriptor.builtin(pluginId, domainKey, moduleKey, entryPageKey, …)` 中 `domainKey` 仍由调用方显式传入；六个内置 entry 使用 `BUILTIN_DOMAIN_KEY`（`nexus`）仅为本模块默认常量，其它产品域传各自 `domainKey`。入口页键使用**复合 pageKey**（`compositePageKey(domainKey, moduleKey, pageSuffix)`，见 `PageDslPageRef`）。自定义 `menuKey` 时用 `ConsoleModuleDescriptor.of(...)`。
+**console 模块**仅保留 `BuiltinConsoleEntryPlugins`、`ConsolePageRoutes` 与 `PluginManagementEntryPlugin`。
+
+## 内置 entry 现状（本仓库）
+
+| 宿主 | 必选插件 ID | 说明 |
+|------|-------------|------|
+| **portal / console 宿主** | `BuiltinConsoleEntryPlugins.REQUIRED_PLUGIN_IDS` | 当前仅 `com.innospots.nexus.console.plugin-management`（`PluginManagementEntryPlugin`） |
+| **platform 宿主** | `BuiltinPlatformEntryPlugins.REQUIRED_PLUGIN_IDS` | `com.innospots.nexus.platform.console`（单插件多 MODULE，`ui-pages/platform/**`） |
+
+`innospots-nexus-console` 的 classpath 仍含 `ui-pages/nexus/{menu,dictionary,...}/` 等 YAML，供后续 entry 或其它模块贡献；**未**再声明对应 `pluginId` 常量或 `*EntryPlugin`。
 
 ## `pageKey` 速查
 
 | 项 | 规则 |
 |----|------|
-| 格式 | `[a-z][a-z0-9]*(?:-[a-z0-9]+)*`，≤ 128 字符 |
-| 一致性 | `console@1.pageKey` = YAML `page.id` = 文件名 `{pageKey}.yaml` |
-| 内置入口页 | 各 `*EntryPlugin` 内经 `compositePageKey(domainKey, moduleKey, pageSuffix)` 声明（如 `nexus-menu-main`），经 `builtin(..., entryPageKey, ...)` 传入 |
-| `domainKey` | 与 `console@1`、`ui-pages/{domainKey}/...` 一致；内置六个 entry 使用 `BUILTIN_DOMAIN_KEY`（`nexus`），**非 API 强制** |
-| 前端路由 | `/page/{domainKey}/{moduleKey}/{pageKey}`（`ConsoleModuleDescriptor.pagePath`） |
+| 格式 | 复合键 `{domainKey}-{moduleKey}-{pageSuffix}`（`PageDslPageRef.encode`）；后缀段 kebab-case，≤ 128 |
+| 一致性 | MENU `entryPageKey` = YAML `page.id` = 文件名 `{pageKey}.yaml` |
+| 内置 nexus 域 | `ConsolePageRoutes.BUILTIN_DOMAIN_KEY`（`nexus`） |
+| 授权名 | catalog 访问项 `grantName` = MENU `entryPageKey` |
+| 前端路由 | `/page/{domainKey}/{moduleKey}/{pageKey}`（`ConsolePageRoutes.pagePath`） |
 
 ## 易混概念
 
 | 名称 | 说明 |
 |------|------|
-| **`MenuEntryPlugin`** | 贡献「菜单管理」**功能模块**的 entry，不是租户 `nx_menu` 数据 |
-| **`menuKey`（console@1）** | 贡献内菜单节点稳定键；内置常与 `entryPageKey` 相同 |
-| **侧栏导航 API** | `GET /api/d/nexus/navigation/menus`（授权后组装，与 entry 贡献不同） |
-| **权限配置树** | `GET /api/d/nexus/catalog/tree`（MODULE → PAGE → 子 PAGE，不含 MENU 节点） |
+| **`MenuEntryPlugin`（历史）** | 已移除；菜单管理页 YAML 仍在 `ui-pages/nexus/menu/`，需新 entry 或 portal 贡献时再注册 |
+| **`menu:` 资源键** | catalog 中 MENU 节点（`menu:{moduleKey}.{entryPageKey}`），与租户 `nx_menu` 表无关 |
+| **侧栏导航 API** | `GET /api/d/nexus/navigation/menus`（授权后组装） |
+| **权限配置树** | `GET /api/d/nexus/catalog/tree`（MODULE → PAGE 嵌套；不含 MENU 节点） |
 
 ## 模块归属（摘要）
 
-- **plugin：** 贡献解码、Page DSL 解析/校验、`console@1` 模型
-- **console：** 内置 `*EntryPlugin`、`ConsoleModuleEntrySupport`、catalog 同步与 REST
-- **不得**在 console 重复定义 contribution 约束（归属 plugin）
+- **plugin：** `console@2` 模型、解码、entry 组装工厂、Page DSL 解析类型（Java 部分在 console）
+- **console：** 内置 `PluginManagementEntryPlugin`、`ConsolePageRoutes`、catalog 同步与 REST
+- **platform：** `PlatformModuleDescriptors` + `PlatformConsoleEntryPlugin`（聚合 platform 模块 entry）
 
 完整归属见 [module-ownership.md](module-ownership.md)。

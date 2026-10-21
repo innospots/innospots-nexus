@@ -49,8 +49,6 @@ class PluginDefinitionSnapshotMapperTest {
                 0,
                 "snapshot-page",
                 null,
-                "default",
-                null,
                 List.of(),
                 List.of(),
                 List.of());
@@ -59,8 +57,6 @@ class PluginDefinitionSnapshotMapperTest {
                 I18nObject.of(Map.of("en", "Role")),
                 I18nObject.of(Map.of()),
                 0,
-                null,
-                null,
                 null,
                 null,
                 List.of(new ConsolePermissionGroupDeclaration(
