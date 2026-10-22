@@ -49,7 +49,7 @@ public class PlatformUserOauthEntity extends BaseEntity {
     
     @Override
     public String idPrefix() {
-        return "poi";
+        return "POI";
     }
 
     /**

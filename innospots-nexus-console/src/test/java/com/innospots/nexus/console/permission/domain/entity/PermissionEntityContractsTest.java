@@ -19,6 +19,7 @@ class PermissionEntityContractsTest {
         assertThat(PermissionGrantEntity.class.getAnnotation(TableName.class).value())
                 .isEqualTo("nx_permission_grant");
         assertThat(PermissionGrantEntity.class.getSuperclass()).isEqualTo(OwnershipEntity.class);
+        assertThat(new PermissionGrantEntity().idPrefix()).isEqualTo("PGR");
     }
 
     @Test

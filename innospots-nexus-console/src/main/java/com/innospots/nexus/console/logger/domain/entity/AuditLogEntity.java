@@ -41,7 +41,7 @@ public class AuditLogEntity extends OwnershipEntity {
 
     @Override
     public String idPrefix() {
-        return "alg";
+        return "ALG";
     }
 
     @Column(length = 64, nullable = false)

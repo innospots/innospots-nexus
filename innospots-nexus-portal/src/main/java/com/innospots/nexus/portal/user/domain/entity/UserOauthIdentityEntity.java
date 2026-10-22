@@ -49,7 +49,7 @@ public class UserOauthIdentityEntity extends BaseEntity {
     
     @Override
     public String idPrefix() {
-        return "toi";
+        return "TOI";
     }
 
     /**

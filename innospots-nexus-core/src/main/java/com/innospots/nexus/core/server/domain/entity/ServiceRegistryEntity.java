@@ -40,7 +40,7 @@ public class ServiceRegistryEntity extends BaseEntity {
 
     @Override
     public String idPrefix() {
-        return "srv";
+        return "SRV";
     }
 
     /** 逻辑服务类型名称。 */

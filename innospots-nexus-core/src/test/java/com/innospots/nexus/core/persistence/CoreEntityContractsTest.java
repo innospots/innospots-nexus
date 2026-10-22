@@ -101,14 +101,14 @@ class CoreEntityContractsTest {
         assertThat(ServiceRegistryEntity.class.getAnnotation(TableName.class).value()).isEqualTo("nx_service_registry");
 
         MetaResourceEntity resource = new MetaResourceEntity();
-        resource.setResourceId("res01HZY8J6Y3D6S4V7N9X2M5Q8");
+        resource.setResourceId("RES01HZY8J6Y3D6S4V7N9X2M5Q8");
         resource.setFileUri("file://demo");
 
         ServiceRegistryEntity service = new ServiceRegistryEntity();
-        service.setServiceRegistryId("srv01HZY8J6Y3D6S4V7N9X2M5Q8");
+        service.setServiceRegistryId("SRV01HZY8J6Y3D6S4V7N9X2M5Q8");
         service.setServiceName("nexus-core");
 
-        assertThat(resource.getResourceId()).startsWith("res");
+        assertThat(resource.getResourceId()).startsWith("RES");
         assertThat(service.getServiceName()).isEqualTo("nexus-core");
         assertThat(ServiceRegistryEntity.class.getDeclaredFields())
                 .extracting(Field::getName)
@@ -126,8 +126,8 @@ class CoreEntityContractsTest {
     void databasePrimaryGeneratorUsesEntityPrefixes() {
         DbPrimaryGenerator generator = new DbPrimaryGenerator();
 
-        assertThat(generator.nextUUID(new MetaResourceEntity())).startsWith("res").hasSize(29);
-        assertThat(generator.nextUUID(new ServiceRegistryEntity())).startsWith("srv").hasSize(29);
+        assertThat(generator.nextUUID(new MetaResourceEntity())).startsWith("RES").hasSize(29);
+        assertThat(generator.nextUUID(new ServiceRegistryEntity())).startsWith("SRV").hasSize(29);
         assertThat(generator.nextUUID(new BaseEntity())).hasSize(26);
     }
 

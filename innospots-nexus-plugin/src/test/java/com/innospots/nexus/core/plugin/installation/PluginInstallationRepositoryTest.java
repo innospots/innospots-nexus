@@ -48,7 +48,7 @@ class PluginInstallationRepositoryTest {
     @Test
     void rejectsInvalidInstallationIntentAtTheDomainAndRepositoryBoundaries() {
         assertThatThrownBy(() -> new PluginInstallation(
-                "plg-invalid", "com.example.invalid", "1.0.0", PluginSourceType.JAVA,
+                "PLG-invalid", "com.example.invalid", "1.0.0", PluginSourceType.JAVA,
                 "class:Example", PluginPresence.PRESENT, false, true, "{}", null, null,
                 null, null, null, null, null, null))
                 .isInstanceOf(NexusException.class);

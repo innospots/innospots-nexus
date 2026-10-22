@@ -25,7 +25,7 @@ class OtpChallengeEntityContractsTest {
         assertThat(OtpChallengeEntity.class.getAnnotation(TableName.class).value())
                 .isEqualTo("nx_otp_challenge");
         assertThat(OtpChallengeEntity.class.getSuperclass()).isEqualTo(OwnershipEntity.class);
-        assertThat(new OtpChallengeEntity().idPrefix()).isEqualTo("och");
+        assertThat(new OtpChallengeEntity().idPrefix()).isEqualTo("OCH");
     }
 
     @Test

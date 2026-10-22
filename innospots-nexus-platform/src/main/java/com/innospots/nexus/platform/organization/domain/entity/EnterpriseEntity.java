@@ -44,7 +44,7 @@ public class EnterpriseEntity extends BaseEntity {
      */
     @Override
     public String idPrefix() {
-        return "ent";
+        return "ENT";
     }
 
     /**

@@ -262,7 +262,7 @@ com.innospots.nexus.core.plugin
 - 列名镜像 Java 业务术语：`roleId` 映射到 `role_id`，`createdAt` 映射到 `created_at`。
 - 索引名显式且表作用域。唯一索引用 `uk_`，非唯一用 `idx_`，后跟表概念和索引目的，如 `uk_nx_role_owner_code` 或 `idx_nx_role_status`。
 - 关联表名标识双方或关联概念。
-- `idPrefix()` 返回的实体 ID 前缀简短、小写、稳定，且足以标识记录族。不要从临时模块名派生，或在普通重构中更改。
+- `idPrefix()` 返回的实体 ID 前缀简短、全大写字母、稳定，且足以标识记录族。不要从临时模块名派生，或在普通重构中更改。
 - 事件类型字符串和配置键使用稳定的小写点分名称，如 `role.created`。将它们视为公共标识符，而非展示文本。
 
 ## 文件与测试命名

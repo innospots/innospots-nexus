@@ -54,7 +54,7 @@ public class SystemSettingEntity extends BaseEntity {
 
     @Override
     public String idPrefix() {
-        return "set";
+        return "SET";
     }
 
     /** 设置域，由上层模块约定（如 {@code platform}）。 */

@@ -46,7 +46,7 @@ public class UserCredentialEntity extends OwnershipEntity {
     public static final String TABLE_NAME = "nx_user_credential";
 
     /**
-     * 凭据行主键；前缀 {@code ucr}（见 {@link #idPrefix()}）。
+     * 凭据行主键；前缀 {@code UCR}（见 {@link #idPrefix()}）。
      */
     @TableId(type = IdType.ASSIGN_UUID)
     @Id
@@ -55,7 +55,7 @@ public class UserCredentialEntity extends OwnershipEntity {
 
     @Override
     public String idPrefix() {
-        return "ucr";
+        return "UCR";
     }
 
     /**

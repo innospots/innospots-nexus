@@ -99,6 +99,6 @@ public class PluginInstallationEntity extends BaseEntity {
 
     @Override
     public String idPrefix() {
-        return "plg";
+        return "PLG";
     }
 }

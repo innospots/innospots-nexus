@@ -25,7 +25,7 @@ class UserCredentialEntityContractsTest {
         assertThat(UserCredentialEntity.class.getAnnotation(TableName.class).value())
                 .isEqualTo("nx_user_credential");
         assertThat(UserCredentialEntity.class.getSuperclass()).isEqualTo(OwnershipEntity.class);
-        assertThat(new UserCredentialEntity().idPrefix()).isEqualTo("ucr");
+        assertThat(new UserCredentialEntity().idPrefix()).isEqualTo("UCR");
     }
 
     @Test

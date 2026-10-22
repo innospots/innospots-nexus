@@ -23,14 +23,14 @@ class OrganizationEntityContractsTest {
     void organizationUnitEntityExposesTenantScopedPersistenceTable() {
         assertPersistenceTable(OrganizationUnitEntity.class, "nx_organization_unit");
         assertThat(OrganizationUnitEntity.class.getSuperclass()).isEqualTo(TenantBaseEntity.class);
-        assertThat(new OrganizationUnitEntity().idPrefix()).isEqualTo("org");
+        assertThat(new OrganizationUnitEntity().idPrefix()).isEqualTo("ORG");
     }
 
     @Test
     void organizationMemberEntityExposesTenantScopedPersistenceTable() {
         assertPersistenceTable(OrganizationMemberEntity.class, "nx_organization_member");
         assertThat(OrganizationMemberEntity.class.getSuperclass()).isEqualTo(TenantBaseEntity.class);
-        assertThat(new OrganizationMemberEntity().idPrefix()).isEqualTo("ogm");
+        assertThat(new OrganizationMemberEntity().idPrefix()).isEqualTo("OGM");
     }
 
     @Test

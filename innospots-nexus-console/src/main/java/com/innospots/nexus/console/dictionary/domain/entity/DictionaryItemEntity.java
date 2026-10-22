@@ -37,7 +37,7 @@ public class DictionaryItemEntity extends OwnershipEntity {
 
     @Override
     public String idPrefix() {
-        return "dci";
+        return "DCI";
     }
 
     @Column(length = 64, nullable = false)

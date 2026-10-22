@@ -52,6 +52,6 @@ public class PermissionGrantEntity extends OwnershipEntity {
 
     @Override
     public String idPrefix() {
-        return "pgr";
+        return "PGR";
     }
 }

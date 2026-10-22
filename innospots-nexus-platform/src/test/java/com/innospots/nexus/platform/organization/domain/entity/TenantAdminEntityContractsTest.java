@@ -23,7 +23,7 @@ class TenantAdminEntityContractsTest {
     void tenantAdminEntityExposesPersistenceTable() {
         assertPersistenceTable(TenantAdminEntity.class, "nx_pl_tenant_admin");
         assertThat(TenantAdminEntity.class.getSuperclass()).isEqualTo(BaseEntity.class);
-        assertThat(new TenantAdminEntity().idPrefix()).isEqualTo("tad");
+        assertThat(new TenantAdminEntity().idPrefix()).isEqualTo("TAD");
     }
 
     @Test

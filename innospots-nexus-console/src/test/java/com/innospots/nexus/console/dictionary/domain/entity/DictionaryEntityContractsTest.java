@@ -25,8 +25,8 @@ class DictionaryEntityContractsTest {
 
         assertThat(DictionaryTypeEntity.class.getSuperclass()).isEqualTo(OwnershipEntity.class);
         assertThat(DictionaryItemEntity.class.getSuperclass()).isEqualTo(OwnershipEntity.class);
-        assertThat(new DictionaryTypeEntity().idPrefix()).isEqualTo("dct");
-        assertThat(new DictionaryItemEntity().idPrefix()).isEqualTo("dci");
+        assertThat(new DictionaryTypeEntity().idPrefix()).isEqualTo("DCT");
+        assertThat(new DictionaryItemEntity().idPrefix()).isEqualTo("DCI");
     }
 
     @Test

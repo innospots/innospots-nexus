@@ -45,7 +45,7 @@ public class ProjectEntity extends TenantWorkspaceBaseEntity {
     
     @Override
     public String idPrefix() {
-        return "prj";
+        return "PRJ";
     }
 
     /**

@@ -51,7 +51,7 @@ public class PlatformUserEntity extends BaseEntity {
     
     @Override
     public String idPrefix() {
-        return "pus";
+        return "PUS";
     }
 
     /**

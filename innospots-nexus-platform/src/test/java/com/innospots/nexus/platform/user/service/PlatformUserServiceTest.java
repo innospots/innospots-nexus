@@ -58,7 +58,7 @@ class PlatformUserServiceTest {
                 "ops,viewer",
                 "front-encrypted-password"));
 
-        assertThat(created.platformUserId()).startsWith("pus");
+        assertThat(created.platformUserId()).startsWith("PUS");
         assertThat(created.loginName()).isEqualTo("ops.alice");
         assertThat(created.status()).isEqualTo(PlatformUserStatus.ACTIVE.name());
         verify(decryptor).decrypt("front-encrypted-password");

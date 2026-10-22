@@ -24,7 +24,7 @@ class NexusPersistenceIdentifierGeneratorTest {
             assertThat(context).hasSingleBean(IdentifierGenerator.class);
             assertThat(context.getBean(IdentifierGenerator.class)).isInstanceOf(DbPrimaryGenerator.class);
             IdentifierGenerator generator = context.getBean(IdentifierGenerator.class);
-            assertThat(generator.nextUUID(new MetaResourceEntity())).startsWith("res");
+            assertThat(generator.nextUUID(new MetaResourceEntity())).startsWith("RES");
         });
     }
 }

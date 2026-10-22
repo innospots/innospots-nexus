@@ -25,8 +25,8 @@ class PlatformUserEntityContractsTest {
         assertPersistenceTable(PlatformUserEntity.class, "nx_pl_user");
         assertPersistenceTable(PlatformUserOauthEntity.class, "nx_pl_user_oauth");
         assertThat(PlatformUserEntity.class.getSuperclass()).isEqualTo(BaseEntity.class);
-        assertThat(new PlatformUserEntity().idPrefix()).isEqualTo("pus");
-        assertThat(new PlatformUserOauthEntity().idPrefix()).isEqualTo("poi");
+        assertThat(new PlatformUserEntity().idPrefix()).isEqualTo("PUS");
+        assertThat(new PlatformUserOauthEntity().idPrefix()).isEqualTo("POI");
     }
 
     @Test

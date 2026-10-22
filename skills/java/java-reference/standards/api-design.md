@@ -134,7 +134,7 @@ if (role == null) {
 - 字符串列长度必须是 2 的幂，例如 `16`、`32`、`64`、`128`、`256`、`512` 或 `1024`。有意无界的文本使用 `@Lob`，不要选择任意大长度。
 - 每个持久化实体必须声明 `public static final String TABLE_NAME` 常量，并在 Jakarta Persistence `@Table(name = EntityType.TABLE_NAME)` 和 MyBatis-Plus `@TableName(EntityType.TABLE_NAME)` 中使用该常量。
 - 持久化实体类是非 record 领域类，因此必须使用 Lombok `@Getter` 和 `@Setter`。
-- 实体主键使用 `IdType.ASSIGN_UUID`。每个实体必须重写 `BaseEntity.idPrefix()`，使用简短稳定的领域前缀。共享的 `DbPrimaryGenerator` 通过 `IdGenerator.ulid(prefix)` 生成 ID；operator 不得手动分配生成的主键。
+- 实体主键使用 `IdType.ASSIGN_UUID`。每个实体必须重写 `BaseEntity.idPrefix()`，使用简短稳定且仅含大写字母的领域前缀。共享的 `DbPrimaryGenerator` 通过 `IdGenerator.ulid(prefix)` 生成 ID；operator 不得手动分配生成的主键。
 - 具体持久化实体应为唯一查找字段、外键查找字段和分页查询过滤字段声明必要的 JPA `@Table(indexes = ...)` 注解。索引名称应显式且带表前缀。
 
 ```java

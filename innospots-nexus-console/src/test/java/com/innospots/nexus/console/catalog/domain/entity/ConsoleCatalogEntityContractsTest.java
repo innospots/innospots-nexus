@@ -15,6 +15,11 @@ class ConsoleCatalogEntityContractsTest {
     }
 
     @Test
+    void usesUppercaseIdPrefix() {
+        assertThat(new ConsoleCatalogResourceEntity().idPrefix()).isEqualTo("CCR");
+    }
+
+    @Test
     void resourceTypesAreModuleAndMenuOnly() {
         assertThat(CatalogResourceType.values()).containsExactly(
                 CatalogResourceType.MODULE,

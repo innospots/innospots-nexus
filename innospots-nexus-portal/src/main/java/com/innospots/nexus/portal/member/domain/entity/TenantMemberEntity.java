@@ -50,7 +50,7 @@ public class TenantMemberEntity extends TenantBaseEntity {
     
     @Override
     public String idPrefix() {
-        return "tmb";
+        return "TMB";
     }
 
     /**

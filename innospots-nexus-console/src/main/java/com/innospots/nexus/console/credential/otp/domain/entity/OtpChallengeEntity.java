@@ -41,7 +41,7 @@ public class OtpChallengeEntity extends OwnershipEntity {
     public static final String TABLE_NAME = "nx_otp_challenge";
 
     /**
-     * 挑战主键；前缀 {@code och}（见 {@link #idPrefix()}）。
+     * 挑战主键；前缀 {@code OCH}（见 {@link #idPrefix()}）。
      */
     @TableId(type = IdType.ASSIGN_UUID)
     @Id
@@ -51,11 +51,11 @@ public class OtpChallengeEntity extends OwnershipEntity {
     /**
      * Console 侧 ID 生成前缀，与 {@link #challengeId} 分配策略一致。
      *
-     * @return 固定值 {@code och}
+     * @return 固定值 {@code OCH}
      */
     @Override
     public String idPrefix() {
-        return "och";
+        return "OCH";
     }
 
     /**

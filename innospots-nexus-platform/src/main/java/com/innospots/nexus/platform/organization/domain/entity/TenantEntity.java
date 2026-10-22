@@ -48,7 +48,7 @@ public class TenantEntity extends BaseEntity {
      */
     @Override
     public String idPrefix() {
-        return "tnt";
+        return "TNT";
     }
 
     /**

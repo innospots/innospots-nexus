@@ -51,7 +51,7 @@ public class UserEntity extends BaseEntity {
     
     @Override
     public String idPrefix() {
-        return "tus";
+        return "TUS";
     }
 
     /**

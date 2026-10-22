@@ -63,7 +63,7 @@ public final class PluginInstallationRepository {
         PluginInstallationEntity entity = selectByPluginId(snapshot.pluginId());
         if (entity == null) {
             entity = new PluginInstallationEntity();
-            entity.setInstallationId(com.innospots.nexus.base.util.IdGenerator.ulid("plg"));
+            entity.setInstallationId(com.innospots.nexus.base.util.IdGenerator.ulid(entity.idPrefix()));
             entity.setPluginId(snapshot.pluginId());
             entity.setPluginVersion(snapshot.version());
             entity.setSourceType(snapshot.sourceType());

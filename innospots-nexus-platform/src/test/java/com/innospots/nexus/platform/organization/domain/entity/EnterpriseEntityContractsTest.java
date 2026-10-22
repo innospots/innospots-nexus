@@ -22,7 +22,7 @@ class EnterpriseEntityContractsTest {
     void enterpriseEntityExposesGlobalPersistenceTable() {
         assertPersistenceTable(EnterpriseEntity.class, "nx_pl_enterprise");
         assertThat(EnterpriseEntity.class.getSuperclass()).isEqualTo(BaseEntity.class);
-        assertThat(new EnterpriseEntity().idPrefix()).isEqualTo("ent");
+        assertThat(new EnterpriseEntity().idPrefix()).isEqualTo("ENT");
     }
 
     @Test

@@ -35,7 +35,7 @@ public class TenantAdminEntity extends BaseEntity {
 
     @Override
     public String idPrefix() {
-        return "tad";
+        return "TAD";
     }
 
     @Column(length = 32, nullable = false)

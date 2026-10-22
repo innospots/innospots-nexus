@@ -41,7 +41,7 @@ public class PlatformAccessRequestEntity extends BaseEntity {
 
     @Override
     public String idPrefix() {
-        return "par";
+        return "PAR";
     }
 
     @Column(length = 128, nullable = false)

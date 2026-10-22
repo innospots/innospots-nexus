@@ -41,7 +41,7 @@ public class RoleBindingEntity extends OwnershipEntity {
 
     @Override
     public String idPrefix() {
-        return "rbn";
+        return "RBN";
     }
 
     @Column(length = 32, nullable = false)

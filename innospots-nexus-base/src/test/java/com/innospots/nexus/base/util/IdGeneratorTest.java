@@ -49,13 +49,13 @@ class IdGeneratorTest {
     void generatesSnowflakeBase62WithOptionalPrefix() {
         IdGenerator generator = IdGenerator.of(3, 4);
 
-        String withPrefix = generator.nextIdBase62("tnt");
+        String withPrefix = generator.nextIdBase62("TNT");
         String withoutPrefix = generator.nextIdBase62(null);
-        String globalId = IdGenerator.nextBase62("pus");
+        String globalId = IdGenerator.nextBase62("PUS");
 
-        assertThat(withPrefix).startsWith("tnt").matches("tnt[0-9A-Za-z]{11}");
+        assertThat(withPrefix).startsWith("TNT").matches("TNT[0-9A-Za-z]{11}");
         assertThat(withoutPrefix).matches("[0-9A-Za-z]{11}");
-        assertThat(globalId).startsWith("pus").hasSize(3 + 11);
+        assertThat(globalId).startsWith("PUS").hasSize(3 + 11);
         assertThat(IdGenerator.snowflakeBase62()).matches("[0-9A-Za-z]{11}");
         assertThat(IdGenerator.encodeBase62(0L)).isEqualTo("00000000000");
         assertThat(IdGenerator.encodeBase62(62L)).isEqualTo("00000000010");

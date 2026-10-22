@@ -26,8 +26,8 @@ class UserEntityContractsTest {
     void userEntitiesExposeTenantRealmPersistenceTables() {
         assertPersistenceTable(UserEntity.class, "nx_tenant_user");
         assertPersistenceTable(UserOauthIdentityEntity.class, "nx_tenant_user_oauth");
-        assertThat(new UserEntity().idPrefix()).isEqualTo("tus");
-        assertThat(new UserOauthIdentityEntity().idPrefix()).isEqualTo("toi");
+        assertThat(new UserEntity().idPrefix()).isEqualTo("TUS");
+        assertThat(new UserOauthIdentityEntity().idPrefix()).isEqualTo("TOI");
     }
 
     @Test
@@ -90,7 +90,7 @@ class UserEntityContractsTest {
     @Test
     void entitiesCanBeCreatedByMybatisPlusAndJpaReflection() {
         UserEntity user = new UserEntity();
-        user.setTenantUserId("tus01HZY8J6Y3D6S4V7N9X2M5Q8");
+        user.setTenantUserId("TUS01HZY8J6Y3D6S4V7N9X2M5Q8");
         user.setUserName("alice");
         user.setRegisterSource(UserRegisterSource.PASSWORD.name());
         user.setStatus(UserStatus.ACTIVE.name());

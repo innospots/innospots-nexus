@@ -62,7 +62,7 @@ public class RoleEntity extends WorkspaceBaseEntity {
 
     @Override
     public String idPrefix() {
-        return "rol";
+        return "ROL";
     }
 }
 ```
@@ -74,7 +74,7 @@ public class RoleEntity extends WorkspaceBaseEntity {
 - `TABLE_NAME` 常量同时用于 `@Table` 与 `@TableName`
 - 字符串长度均为 2 的幂；无界文本用 `@Lob`
 - Lombok `@Getter` + `@Setter`（不是 `@Data`）
-- 覆写 `idPrefix()`，短小稳定
+- 覆写 `idPrefix()`，短小稳定且仅含大写字母
 - 索引名 `uk_` / `idx_` + 表概念 + 用途
 - 不重复声明 `tenantId` / `workspaceId` / `createdAt` / `updatedAt` / `createdBy` / `updatedBy`
 

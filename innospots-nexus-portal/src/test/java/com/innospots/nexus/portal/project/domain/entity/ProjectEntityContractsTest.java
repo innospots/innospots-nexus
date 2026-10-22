@@ -22,7 +22,7 @@ class ProjectEntityContractsTest {
     void projectEntityExposesWorkspaceScopedPersistenceTable() {
         assertPersistenceTable(ProjectEntity.class, "nx_project");
         assertThat(ProjectEntity.class.getSuperclass()).isEqualTo(TenantWorkspaceBaseEntity.class);
-        assertThat(new ProjectEntity().idPrefix()).isEqualTo("prj");
+        assertThat(new ProjectEntity().idPrefix()).isEqualTo("PRJ");
     }
 
     @Test

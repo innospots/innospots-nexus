@@ -46,7 +46,7 @@ public class WorkspaceEntity extends TenantBaseEntity {
     
     @Override
     public String idPrefix() {
-        return "wks";
+        return "WKS";
     }
 
     /**

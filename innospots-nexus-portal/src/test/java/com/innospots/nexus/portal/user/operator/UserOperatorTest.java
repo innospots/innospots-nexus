@@ -204,7 +204,7 @@ class UserOperatorTest {
                 "zh-CN",
                 "front-encrypted-password"));
 
-        assertThat(profile.userId()).startsWith("tus");
+        assertThat(profile.userId()).startsWith("TUS");
         assertThat(profile.userId()).hasSize(29);
         assertThat(profile.registerSource()).isEqualTo(UserRegisterSource.PASSWORD);
         assertThat(profile.region()).isEqualTo("CN");

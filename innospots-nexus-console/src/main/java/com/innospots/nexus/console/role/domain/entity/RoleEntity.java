@@ -42,7 +42,7 @@ public class RoleEntity extends BaseEntity {
 
     @Override
     public String idPrefix() {
-        return "rol";
+        return "ROL";
     }
 
     @Column(length = 64, nullable = false)

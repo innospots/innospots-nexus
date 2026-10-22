@@ -76,7 +76,7 @@ class UserOauthOperatorTest {
                 "refresh-key",
                 LocalDateTime.now().plusDays(1)));
 
-        assertThat(profile.userId()).startsWith("tus");
+        assertThat(profile.userId()).startsWith("TUS");
         assertThat(profile.userId()).hasSize(29);
         assertThat(profile.registerSource()).isEqualTo(UserRegisterSource.OAUTH);
         assertThat(profile.status()).isEqualTo(UserStatus.ACTIVE);
@@ -86,7 +86,7 @@ class UserOauthOperatorTest {
         assertThat(userCaptor.getValue().getTenantUserId()).isEqualTo(profile.userId());
         ArgumentCaptor<UserOauthIdentityEntity> identityCaptor = forClass(UserOauthIdentityEntity.class);
         verify(oauthDao).insert(identityCaptor.capture());
-        assertThat(identityCaptor.getValue().getIdentityId()).startsWith("toi");
+        assertThat(identityCaptor.getValue().getIdentityId()).startsWith("TOI");
         assertThat(identityCaptor.getValue().getIdentityId()).hasSize(29);
         assertThat(identityCaptor.getValue().getTenantUserId()).isEqualTo(profile.userId());
     }

@@ -46,7 +46,7 @@ public class OrganizationMemberEntity extends TenantBaseEntity {
     
     @Override
     public String idPrefix() {
-        return "ogm";
+        return "OGM";
     }
 
     /**

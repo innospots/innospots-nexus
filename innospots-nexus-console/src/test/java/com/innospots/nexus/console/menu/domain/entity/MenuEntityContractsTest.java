@@ -24,6 +24,7 @@ class MenuEntityContractsTest {
         assertThat(MenuEntity.class.getAnnotation(Table.class).name()).isEqualTo("nx_menu");
         assertThat(MenuEntity.class.getAnnotation(TableName.class).value()).isEqualTo("nx_menu");
         assertThat(MenuEntity.class.getSuperclass()).isEqualTo(OwnershipEntity.class);
+        assertThat(new MenuEntity().idPrefix()).isEqualTo("MNU");
     }
 
     @Test

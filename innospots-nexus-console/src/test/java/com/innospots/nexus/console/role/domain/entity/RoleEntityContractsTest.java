@@ -28,7 +28,8 @@ class RoleEntityContractsTest {
 
         assertThat(RoleEntity.class.getSuperclass()).isEqualTo(BaseEntity.class);
         assertThat(RoleBindingEntity.class.getSuperclass()).isEqualTo(OwnershipEntity.class);
-        assertThat(new RoleBindingEntity().idPrefix()).isEqualTo("rbn");
+        assertThat(new RoleEntity().idPrefix()).isEqualTo("ROL");
+        assertThat(new RoleBindingEntity().idPrefix()).isEqualTo("RBN");
     }
 
     @Test

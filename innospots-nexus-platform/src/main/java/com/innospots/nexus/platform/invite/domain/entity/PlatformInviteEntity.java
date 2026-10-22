@@ -41,7 +41,7 @@ public class PlatformInviteEntity extends BaseEntity {
 
     @Override
     public String idPrefix() {
-        return "piv";
+        return "PIV";
     }
 
     @Column(length = 64, nullable = false)

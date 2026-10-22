@@ -85,6 +85,6 @@ public class ConsoleCatalogResourceEntity extends BaseEntity {
 
     @Override
     public String idPrefix() {
-        return "ccr";
+        return "CCR";
     }
 }

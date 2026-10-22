@@ -49,7 +49,7 @@ public class MenuEntity extends OwnershipEntity {
     
     @Override
     public String idPrefix() {
-        return "mnu";
+        return "MNU";
     }
 
     /**

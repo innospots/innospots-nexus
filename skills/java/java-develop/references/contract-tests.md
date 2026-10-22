@@ -81,7 +81,7 @@ class RoleEntityContractsTest {
 
     @Test
     void overridesStableIdPrefix() {
-        assertThat(new RoleEntity().idPrefix()).isEqualTo("rol");
+        assertThat(new RoleEntity().idPrefix()).isEqualTo("ROL");
     }
 }
 ```

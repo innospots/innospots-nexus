@@ -36,7 +36,7 @@ public class MetaResourceEntity extends OwnershipEntity {
 
     @Override
     public String idPrefix() {
-        return "res";
+        return "RES";
     }
 
     /** MIME 类型。 */

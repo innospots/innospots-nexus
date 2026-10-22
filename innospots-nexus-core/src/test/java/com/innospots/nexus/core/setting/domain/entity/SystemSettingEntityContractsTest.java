@@ -11,6 +11,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 class SystemSettingEntityContractsTest {
 
     @Test
+    void usesUppercaseIdPrefix() {
+        assertThat(new SystemSettingEntity().idPrefix()).isEqualTo("SET");
+    }
+
+    @Test
     void settingValueUsesStandardStringLength() throws NoSuchFieldException {
         Field field = SystemSettingEntity.class.getDeclaredField("settingValue");
         Column column = field.getAnnotation(Column.class);

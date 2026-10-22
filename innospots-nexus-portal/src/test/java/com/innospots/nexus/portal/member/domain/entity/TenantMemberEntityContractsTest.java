@@ -24,7 +24,7 @@ class TenantMemberEntityContractsTest {
     void tenantMemberEntityExposesTenantScopedPersistenceTable() {
         assertPersistenceTable(TenantMemberEntity.class, "nx_tenant_member");
         assertThat(TenantMemberEntity.class.getSuperclass()).isEqualTo(TenantBaseEntity.class);
-        assertThat(new TenantMemberEntity().idPrefix()).isEqualTo("tmb");
+        assertThat(new TenantMemberEntity().idPrefix()).isEqualTo("TMB");
     }
 
     @Test

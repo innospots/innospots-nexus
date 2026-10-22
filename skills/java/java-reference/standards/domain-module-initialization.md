@@ -136,7 +136,7 @@
 - 创建后不可变；
 - 变更会破坏引用时，从 update 请求中排除。
 
-用简短稳定的领域前缀重写 `BaseEntity.idPrefix()`。主键由 `DbPrimaryGenerator` 通过 `IdGenerator.ulid(prefix)` 集中生成；operator 不得手动生成主键。
+用简短稳定且仅含大写字母的领域前缀重写 `BaseEntity.idPrefix()`。主键由 `DbPrimaryGenerator` 通过 `IdGenerator.ulid(prefix)` 集中生成；operator 不得手动生成主键。
 
 ### 2.4 评审每个字段
 
