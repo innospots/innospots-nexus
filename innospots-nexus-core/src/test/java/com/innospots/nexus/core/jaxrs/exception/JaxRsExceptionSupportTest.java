@@ -1,6 +1,9 @@
 package com.innospots.nexus.core.jaxrs.exception;
 
-import jakarta.ws.rs.NotFoundException;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 
@@ -14,16 +17,18 @@ import com.innospots.nexus.base.status.StatusCategory;
 import com.innospots.nexus.base.status.StatusCode;
 import com.innospots.nexus.core.jaxrs.support.HttpHeaderNames;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 class JaxRsExceptionSupportTest {
-
-    private final JaxRsExceptionSupport support = new JaxRsExceptionSupport();
 
     @Test
     void mapsNexusExceptionToLegacyRWithHttpStatusAndRequestIdHeader() {
-        NexusException exception = NexusException.build(NexusStatusCode.INVALID_PARAMETER);
+        JaxRsExceptionSupport support = new JaxRsExceptionSupport((httpStatus, body, requestId) -> {
+            assertThat(httpStatus).isEqualTo(NexusStatusCode.INVALID_PARAMETER.httpStatusCode());
+            assertThat(requestId).isEqualTo("unknown");
+            assertThat(body.code()).isEqualTo(NexusStatusCode.INVALID_PARAMETER.fullCode());
+            return stubResponse(httpStatus, requestId, body);
+        });
 
+        NexusException exception = NexusException.build(NexusStatusCode.INVALID_PARAMETER);
         Response response = support.toResponse(exception);
 
         assertThat(response.getStatus()).isEqualTo(NexusStatusCode.INVALID_PARAMETER.httpStatusCode());
@@ -33,7 +38,17 @@ class JaxRsExceptionSupportTest {
 
     @Test
     void keepsNativeWebApplicationResponseWithoutLegacyRWrapping() {
-        WebApplicationException exception = new NotFoundException();
+        Response nativeResponse = mock(Response.class);
+        Response.StatusType statusType = mock(Response.StatusType.class);
+        when(statusType.getStatusCode()).thenReturn(404);
+        when(nativeResponse.getStatus()).thenReturn(404);
+        when(nativeResponse.getStatusInfo()).thenReturn(statusType);
+        when(nativeResponse.getEntity()).thenReturn(null);
+        WebApplicationException exception = new WebApplicationException(nativeResponse);
+
+        JaxRsExceptionSupport support = new JaxRsExceptionSupport((httpStatus, body, requestId) -> {
+            throw new AssertionError("should not build legacy R for native WebApplicationException");
+        });
 
         Response response = support.toWebApplicationResponse(exception);
 
@@ -43,8 +58,12 @@ class JaxRsExceptionSupportTest {
 
     @Test
     void mapsUnknownThrowableToSystemError() {
-        NexusException mapped = NexusException.build(NexusStatusCode.SYSTEM_ERROR, new IllegalStateException("boom"));
+        JaxRsExceptionSupport support = new JaxRsExceptionSupport((httpStatus, body, requestId) -> {
+            assertThat(httpStatus).isEqualTo(NexusStatusCode.SYSTEM_ERROR.httpStatusCode());
+            return stubResponse(httpStatus, requestId, body);
+        });
 
+        NexusException mapped = NexusException.build(NexusStatusCode.SYSTEM_ERROR, new IllegalStateException("boom"));
         Response response = support.toResponse(mapped);
 
         assertThat(response.getStatus()).isEqualTo(NexusStatusCode.SYSTEM_ERROR.httpStatusCode());
@@ -53,9 +72,12 @@ class JaxRsExceptionSupportTest {
 
     @Test
     void mapsProductDomainStatusCodeCarriedByException() {
-        // 产品域状态码（非 AIO* 平台码）按自身 httpStatusCode 返回，而非兜底 500
-        NexusException exception = NexusException.build(TestStatusCode.NOT_FOUND);
+        JaxRsExceptionSupport support = new JaxRsExceptionSupport((httpStatus, body, requestId) -> {
+            assertThat(httpStatus).isEqualTo(404);
+            return stubResponse(httpStatus, requestId, body);
+        });
 
+        NexusException exception = NexusException.build(TestStatusCode.NOT_FOUND);
         Response response = support.toResponse(exception);
 
         assertThat(exception.statusCode()).isEqualTo(TestStatusCode.NOT_FOUND);
@@ -66,13 +88,24 @@ class JaxRsExceptionSupportTest {
 
     @Test
     void resolvesRawErrorCodeWithoutStatusCodeToSystemError() {
-        // 仅携带原始错误码的异常无状态码，未命中平台码时仍为 500 兜底
-        NexusException exception = NexusException.build("TSK139999", "unknown code");
+        JaxRsExceptionSupport support = new JaxRsExceptionSupport((httpStatus, body, requestId) -> {
+            assertThat(httpStatus).isEqualTo(NexusStatusCode.SYSTEM_ERROR.httpStatusCode());
+            return stubResponse(httpStatus, requestId, body);
+        });
 
+        NexusException exception = NexusException.build("TSK139999", "unknown code");
         Response response = support.toResponse(exception);
 
         assertThat(exception.statusCode()).isNull();
         assertThat(response.getStatus()).isEqualTo(NexusStatusCode.SYSTEM_ERROR.httpStatusCode());
+    }
+
+    private static Response stubResponse(int httpStatus, String requestId, R<Void> body) {
+        Response response = mock(Response.class);
+        when(response.getStatus()).thenReturn(httpStatus);
+        when(response.getHeaderString(HttpHeaderNames.REQUEST_ID)).thenReturn(requestId);
+        when(response.getEntity()).thenReturn(body);
+        return response;
     }
 
     /** 产品域测试状态码（模块 TSK），验证异常携带状态码后的 HTTP 解析。 */

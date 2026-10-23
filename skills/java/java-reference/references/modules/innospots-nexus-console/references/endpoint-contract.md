@@ -1,14 +1,8 @@
-# 包 `endpoint.contract`
+# 包 `endpoint.contract`（已迁至 core）
 
-## ConsoleEndpoint
+`ConsoleEndpoint`、`PublicEndpoint` 与 `ConsoleRestPaths` 已归属 **`innospots-nexus-core`**
+（`com.innospots.nexus.core.endpoint.contract`）。
 
-**类型：** interface
+见 [`innospots-nexus-core` → `endpoint-contract.md`](../../innospots-nexus-core/references/endpoint-contract.md)。
 
-根管理控制台端点契约。具体 JAX-RS 根路径由实现绑定到
-`ConsoleConstant.API_PREFIX`（`/api/d/nexus`）。
-
-## PublicEndpoint
-
-**类型：** interface
-
-公共开放 REST API 根契约，对应 `/api/public`；该前缀及业务域 `public` 路径免 Bearer 鉴权。
+Console 侧 `ConsoleConstant` 仍委托 `ConsoleRestPaths` 并提供路径拼接辅助方法。

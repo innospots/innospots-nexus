@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "1",
+  "id": "console",
+  "name": "Nexus 管理控制台",
+  "version": "0.0.0",
+  "pactorVersionRange": "^1.48.0",
+  "basePath": "/console",
+  "sitemap": "dsl/sitemap.yaml",
+  "dslRoot": "dsl",
+  "assetsRoot": "assets",
+  "styles": ["./styles.css"],
+  "clientEntry": "./client/index.js",
+  "dependencies": []
+}

@@ -1,13 +1,15 @@
 # EndpointGrant：REST 授权、审计与跳过策略
 
-`EndpointGrant` 是 console REST 资源的授权与审计元数据单一事实源。它不替代 JAX-RS
+`EndpointGrant` 是平台 REST 资源的授权与审计元数据单一事实源（类型在 **core**
+`endpoint.grant`；console/platform 过滤器与 catalog 消费）。它不替代 JAX-RS
 注解，也不替代 service 中的业务校验；它只描述“这个 HTTP 方法属于哪个模块、是什么操作、
 是否需要登录/权限、是否写审计”。
 
 **模块 API 索引：**
-[`endpoint.grant`](../../java-reference/references/modules/innospots-nexus-console/references/endpoint-grant.md)
+[`endpoint.grant`](../../java-reference/references/modules/innospots-nexus-core/references/endpoint-grant.md)
 与
-[`endpoint.grant.support`](../../java-reference/references/modules/innospots-nexus-console/references/endpoint-grant-support.md)
+[`endpoint.grant.support`](../../java-reference/references/modules/innospots-nexus-core/references/endpoint-grant-support.md)
+（类型在 **innospots-nexus-core**；console 提供过滤器与 catalog 组装）
 
 ## 1. 声明位置
 

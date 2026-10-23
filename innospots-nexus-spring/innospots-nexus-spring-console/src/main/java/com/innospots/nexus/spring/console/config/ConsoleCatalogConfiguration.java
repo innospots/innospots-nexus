@@ -11,7 +11,7 @@ import com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao;
 import com.innospots.nexus.console.catalog.endpoint.ConsoleCatalogEndpoint;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogService;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogSyncService;
-import com.innospots.nexus.console.endpoint.grant.EndpointGrantManager;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrantManager;
 import com.innospots.nexus.console.sitemap.loader.SitemapConfigLoader;
 import com.innospots.nexus.console.sitemap.parser.SitemapYamlParser;
 import com.innospots.nexus.console.sitemap.service.SitemapService;

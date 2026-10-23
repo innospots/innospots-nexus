@@ -1,6 +1,6 @@
 package com.innospots.nexus.console.jaxrs.support;
 
-import com.innospots.nexus.console.endpoint.grant.support.ResolvedEndpointGrant;
+import com.innospots.nexus.core.endpoint.grant.support.ResolvedEndpointGrant;
 
 /**
  * {@link com.innospots.nexus.console.jaxrs.filter.ConsoleResolvedEndpointGrantFilter}

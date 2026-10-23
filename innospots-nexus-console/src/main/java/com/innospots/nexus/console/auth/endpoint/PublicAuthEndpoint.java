@@ -16,10 +16,10 @@ import com.innospots.nexus.console.auth.domain.request.AuthLoginRequest;
 import com.innospots.nexus.console.auth.domain.vo.AuthCaptchaVo;
 import com.innospots.nexus.console.auth.domain.vo.AuthRsaPublicKeyVo;
 import com.innospots.nexus.console.auth.domain.vo.AuthTokenVo;
-import com.innospots.nexus.console.endpoint.grant.EndpointGrant;
-import com.innospots.nexus.console.endpoint.grant.EndpointGrantAction;
-import com.innospots.nexus.console.endpoint.grant.EndpointModule;
-import com.innospots.nexus.console.logger.I18nLiteral;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrant;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
+import com.innospots.nexus.core.endpoint.grant.EndpointModule;
+import com.innospots.nexus.core.endpoint.grant.I18nLiteral;
 
 /**
  * 匿名认证 REST 契约（登录、验证码、RSA 公钥）。

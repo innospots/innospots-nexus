@@ -1,4 +1,4 @@
-package com.innospots.nexus.console.endpoint.grant;
+package com.innospots.nexus.core.endpoint.grant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -14,9 +14,9 @@ import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypePageRequest;
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeVo;
 import com.innospots.nexus.console.dictionary.endpoint.DictionaryTypeEndpoint;
-import com.innospots.nexus.console.endpoint.grant.support.EndpointGrantAnnotations;
-import com.innospots.nexus.console.endpoint.grant.support.EndpointGrantHttpIntrospection;
-import com.innospots.nexus.console.endpoint.grant.support.EndpointGrantPathMatcher;
+import com.innospots.nexus.core.endpoint.grant.support.EndpointGrantAnnotations;
+import com.innospots.nexus.core.endpoint.grant.support.EndpointGrantHttpIntrospection;
+import com.innospots.nexus.core.endpoint.grant.support.EndpointGrantPathMatcher;
 class EndpointGrantManagerTest {
 
     @Test
@@ -31,14 +31,14 @@ class EndpointGrantManagerTest {
         EndpointGrantManager manager = new EndpointGrantManager();
         manager.registerResource(SampleDictionaryResource.class);
 
-        EndpointModuleGrantCatalogVo catalog = manager.moduleCatalog("dictionary").orElseThrow();
+        EndpointModuleGrantCatalog catalog = manager.moduleCatalog("dictionary").orElseThrow();
         assertThat(catalog.readOnly()).hasSize(3);
         assertThat(catalog.operable()).isNotEmpty();
         assertThat(catalog.readOnly())
-                .extracting(EndpointGrantDescriptorVo::name)
+                .extracting(EndpointGrantDescriptor::name)
                 .contains("dictionary.type.page", "dictionary.type.get");
 
-        EndpointGrantDescriptorVo page = catalog.readOnly().stream()
+        EndpointGrantDescriptor page = catalog.readOnly().stream()
                 .filter(item -> "dictionary.type.page".equals(item.name()))
                 .findFirst()
                 .orElseThrow();

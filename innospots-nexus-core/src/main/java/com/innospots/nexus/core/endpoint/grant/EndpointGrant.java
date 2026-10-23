@@ -1,4 +1,4 @@
-package com.innospots.nexus.console.endpoint.grant;
+package com.innospots.nexus.core.endpoint.grant;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -6,12 +6,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.innospots.nexus.console.logger.I18nLiteral;
+import com.innospots.nexus.core.endpoint.grant.I18nLiteral;
 
 /**
- * 单条 REST 方法的授权、审计与跳过策略（console 契约单一事实源）。
+ * 单条 REST 方法的授权、审计与跳过策略（平台 REST 契约单一事实源）。
  *
- * <p>宿主 JAX-RS 过滤器通过 {@link com.innospots.nexus.console.endpoint.grant.support.EndpointGrantAnnotations}
+ * <p>宿主 JAX-RS 过滤器通过 {@link com.innospots.nexus.core.endpoint.grant.support.EndpointGrantAnnotations}
  * 解析；platform/portal 实现类不必重复声明。</p>
  */
 @Documented

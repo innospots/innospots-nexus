@@ -15,8 +15,8 @@ import jakarta.ws.rs.Produces;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.junit.jupiter.api.Test;
 
-import com.innospots.nexus.console.endpoint.grant.EndpointGrant;
-import com.innospots.nexus.console.endpoint.grant.EndpointModule;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrant;
+import com.innospots.nexus.core.endpoint.grant.EndpointModule;
 import com.innospots.nexus.platform.access.endpoint.PlatformAccessRequestEndpoint;
 import com.innospots.nexus.platform.access.endpoint.PlatformPublicAccessRegistrationEndpoint;
 import com.innospots.nexus.platform.access.endpoint.PlatformPublicOpenRegistrationEndpoint;

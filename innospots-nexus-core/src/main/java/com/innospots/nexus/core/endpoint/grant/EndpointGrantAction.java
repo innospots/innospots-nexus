@@ -1,4 +1,4 @@
-package com.innospots.nexus.console.endpoint.grant;
+package com.innospots.nexus.core.endpoint.grant;
 
 /**
  * Endpoint 授权与审计的动作分类。

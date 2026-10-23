@@ -8,12 +8,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
 
-import com.innospots.nexus.console.endpoint.grant.EndpointGrantManager;
-import com.innospots.nexus.console.endpoint.grant.support.EndpointGrantAnnotations;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrantManager;
+import com.innospots.nexus.core.endpoint.grant.support.EndpointGrantAnnotations;
 import com.innospots.nexus.spring.core.jaxrs.NexusJaxRsConfiguration;
 
 /**
- * 启动时扫描 Spring 容器中声明了 {@link com.innospots.nexus.console.endpoint.grant.EndpointModule}
+ * 启动时扫描 Spring 容器中声明了 {@link com.innospots.nexus.core.endpoint.grant.EndpointModule}
  * 的 JAX-RS 资源 Bean（本类或 {@code implements} 的 console 契约接口）并填充 {@link EndpointGrantManager}。
  *
  * <p>与 Jersey 注册条件（类上 {@link jakarta.ws.rs.Path}）解耦：grant 目录以模块归属为准；

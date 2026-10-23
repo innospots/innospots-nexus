@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 
 import com.innospots.nexus.console.auth.service.TokenIssuer;
 import com.innospots.nexus.console.config.AuthConfig;
-import com.innospots.nexus.console.endpoint.root.MainRootEndpoint;
+import com.innospots.nexus.console.endpoint.MainRootEndpoint;
 import com.innospots.nexus.console.jaxrs.filter.ConsoleAuditLogFilter;
 import com.innospots.nexus.console.jaxrs.filter.ConsoleAuthenticationFilter;
 import com.innospots.nexus.console.jaxrs.filter.ConsoleCorsFilter;
@@ -60,7 +60,7 @@ public class ConsoleJaxRsWebConfiguration {
         return new ConsoleCorsFilter(webProperties.getCors());
     }
 
-    /** 在认证前解析 {@link com.innospots.nexus.console.endpoint.grant.support.ResolvedEndpointGrant} 并写入请求上下文。 */
+    /** 在认证前解析 {@link com.innospots.nexus.core.endpoint.grant.support.ResolvedEndpointGrant} 并写入请求上下文。 */
     @Bean
     ConsoleResolvedEndpointGrantFilter consoleResolvedEndpointGrantFilter(
             EndpointMethodResolver endpointMethodResolver) {

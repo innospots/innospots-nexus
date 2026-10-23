@@ -1,6 +1,4 @@
-package com.innospots.nexus.console.endpoint.grant.support;
-
-import com.innospots.nexus.console.jaxrs.support.ConsoleAntPathMatcher;
+package com.innospots.nexus.core.endpoint.grant.support;
 
 /**
  * 将 JAX-RS 路径模板与请求路径匹配（{@code {param}} 视为单段通配）。
@@ -25,7 +23,7 @@ public final class EndpointGrantPathMatcher {
             return false;
         }
         String antPattern = toAntPattern(pathTemplate);
-        return ConsoleAntPathMatcher.matches(antPattern, requestPath);
+        return AntPathMatcher.matches(antPattern, requestPath);
     }
 
     private static String toAntPattern(String jaxRsTemplate) {

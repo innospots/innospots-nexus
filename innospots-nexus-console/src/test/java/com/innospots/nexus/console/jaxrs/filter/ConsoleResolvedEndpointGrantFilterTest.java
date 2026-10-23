@@ -7,7 +7,7 @@ import jakarta.ws.rs.container.ResourceInfo;
 
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeCreateRequest;
 import com.innospots.nexus.console.dictionary.endpoint.DictionaryTypeEndpoint;
-import com.innospots.nexus.console.endpoint.grant.support.ResolvedEndpointGrant;
+import com.innospots.nexus.core.endpoint.grant.support.ResolvedEndpointGrant;
 import com.innospots.nexus.console.jaxrs.support.ConsoleRequestGrants;
 import com.innospots.nexus.console.jaxrs.support.ResolvedEndpointBinding;
 

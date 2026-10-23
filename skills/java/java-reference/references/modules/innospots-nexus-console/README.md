@@ -20,7 +20,7 @@ Jakarta REST、请求过滤器链、request/response record、目录索引、权
 | **JAX-RS 过滤器链** | EndpointGrant 解析、CORS、Bearer 鉴权、dev 会话、页面权限校验、审计与 requestId 上下文（`console.jaxrs`） |
 | **归属与作用域** | `ConsoleOwnership*`、`SessionScopeBinder` 端口 |
 | **目录索引** | 插件贡献同步到 `nx_console_catalog_resource` |
-| **权限运行时** | `EndpointGrantManager`、`ConsolePagePermissionAuthorizer`、`PageAccessVerifier`、`PermissionGrantService` |
+| **权限运行时** | core `EndpointGrantManager` + console `ConsolePagePermissionAuthorizer`、`PageAccessVerifier`、`PermissionGrantService` |
 | **导航** | `NavigationMenuAssembler` / `NavigationMenuComposer` + `/api/d/nexus/navigation/menus` |
 | **凭据** | 密码、OTP、TOTP 与 `nx_user_credential` |
 | **插件管理** | `PluginManagementEndpoint` |
@@ -498,39 +498,11 @@ java:check      → mvn clean compile / test
 |------|------|------|
 | `DictionaryTypeNames` | `class` | 字典类型多语言名称的规范化、存储与展示 |
 
-### 包 `endpoint.contract`
-
-| 类 | 类型 | 说明 |
-|------|------|------|
-| `ConsoleEndpoint` | `interface` | 根管理控制台端点契约 |
-| `PublicEndpoint` | `interface` | 公共开放 REST API 根契约（`/api/public`，免鉴权） |
-
 ### 包 `endpoint.root`
 
 | 类 | 类型 | 说明 |
 |------|------|------|
 | `MainRootEndpoint` | `class` | 站点根路径 `GET /` 重定向至文档入口 |
-
-### 包 `endpoint.grant`
-
-| 类 | 类型 | 说明 |
-|------|------|------|
-| `EndpointGrant` | `annotation` | 单条 REST 方法的授权、审计与跳过策略 |
-| `EndpointGrantAction` | `enum` | 授权/审计动作分类 |
-| `EndpointGrantDescriptorVo` | `record` | 单条 grant 的目录与运行时描述 |
-| `EndpointGrantManager` | `class` | grant 注册、模块目录聚合与路径匹配 |
-| `EndpointModule` | `annotation` | REST 资源/契约接口的模块归属 |
-| `EndpointModuleGrantCatalogVo` | `record` | 按 MODULE 聚合的 grant 目录 |
-
-### 包 `endpoint.grant.support`
-
-| 类 | 类型 | 说明 |
-|------|------|------|
-| `EndpointGrantAnnotations` | `class` | 从实现方法与 console 契约接口解析 grant |
-| `EndpointGrantHttpIntrospection` | `class` | 解析 JAX-RS HTTP 动词与完整路径模板 |
-| `EndpointGrantPathMatcher` | `class` | 将 JAX-RS 模板与请求路径匹配 |
-| `EndpointGrantHttpIntrospection.HttpRouteBinding` | `record` | 一条 HTTP 方法与合并路径模板绑定 |
-| `ResolvedEndpointGrant` | `record` | 合并模块与方法注解后的有效策略 |
 
 ### 包 `entry`
 
@@ -580,8 +552,7 @@ java:check      → mvn clean compile / test
 
 | 类 | 类型 | 说明 |
 |------|------|------|
-| `AuditLogMessages` | `class` | 将 `I18nLiteral` 转为多语言对象并解析操作文案 |
-| `I18nLiteral` | `annotation` | 注解内嵌的 locale → 文案对 |
+| `AuditLogMessages` | `class` | 委托 core `I18nLiteralSupport` 解析审计文案 |
 | `InvocationLogHandler` | `interface` | 通用拦截处理器端口 |
 | `LogExecutor` | `class` | 所有框架适配器共享的可复用拦截例程 |
 
@@ -1015,9 +986,9 @@ java:check      → mvn clean compile / test
 | `dictionary.operator` | [`references/dictionary-operator.md`](references/dictionary-operator.md) |
 | `dictionary.status` | [`references/dictionary-status.md`](references/dictionary-status.md) |
 | `dictionary.support` | [`references/dictionary-support.md`](references/dictionary-support.md) |
-| `endpoint.contract` | [`references/endpoint-contract.md`](references/endpoint-contract.md) |
-| `endpoint.grant` | [`references/endpoint-grant.md`](references/endpoint-grant.md) |
-| `endpoint.grant.support` | [`references/endpoint-grant-support.md`](references/endpoint-grant-support.md) |
+| `endpoint.contract` | 已迁至 **core** → [`innospots-nexus-core` / `endpoint-contract.md`](../innospots-nexus-core/references/endpoint-contract.md)；本模块存根：[`references/endpoint-contract.md`](references/endpoint-contract.md) |
+| `endpoint.grant` | 已迁至 **core** → [`endpoint-grant.md`](../innospots-nexus-core/references/endpoint-grant.md)；本模块存根：[`references/endpoint-grant.md`](references/endpoint-grant.md) |
+| `endpoint.grant.support` | 已迁至 **core** → [`endpoint-grant-support.md`](../innospots-nexus-core/references/endpoint-grant-support.md)；本模块存根：[`references/endpoint-grant-support.md`](references/endpoint-grant-support.md) |
 | `endpoint.root` | [`references/endpoint-root.md`](references/endpoint-root.md) |
 | `entry` | [`references/entry.md`](references/entry.md) |
 | `jaxrs` | [`references/jaxrs.md`](references/jaxrs.md) |

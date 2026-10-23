@@ -14,10 +14,10 @@ import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexus.console.auth.domain.request.PasswordChangeRequest;
 import com.innospots.nexus.console.auth.domain.request.TokenRefreshRequest;
 import com.innospots.nexus.console.auth.domain.vo.AuthTokenVo;
-import com.innospots.nexus.console.endpoint.grant.EndpointGrant;
-import com.innospots.nexus.console.endpoint.grant.EndpointGrantAction;
-import com.innospots.nexus.console.endpoint.grant.EndpointModule;
-import com.innospots.nexus.console.logger.I18nLiteral;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrant;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
+import com.innospots.nexus.core.endpoint.grant.EndpointModule;
+import com.innospots.nexus.core.endpoint.grant.I18nLiteral;
 import com.innospots.nexus.core.openapi.NexusOpenApiSecurityNames;
 
 /**

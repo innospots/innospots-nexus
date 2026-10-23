@@ -4,7 +4,7 @@
 
 **类型：** class（final，静态工具）
 
-将注解中的 `I18nLiteral` 转为 `I18nObject`，并按当前线程 locale 解析审计操作文案。
+将 core 包 `endpoint.grant.I18nLiteral` 转为 `I18nObject`，并按当前线程 locale 解析审计操作文案（委托 `I18nLiteralSupport`）。
 
 ### 方法
 
@@ -15,9 +15,8 @@
 
 ## I18nLiteral
 
-**类型：** annotation，`@Target({})`
-
-注解内嵌的多语言文案声明。`pairs` 交替传入 BCP 47 语言标签与文案。
+已迁至 **core** → `com.innospots.nexus.core.endpoint.grant.I18nLiteral`；解析见
+`I18nLiteralSupport` 与本类静态方法。
 
 ## InvocationLogHandler
 

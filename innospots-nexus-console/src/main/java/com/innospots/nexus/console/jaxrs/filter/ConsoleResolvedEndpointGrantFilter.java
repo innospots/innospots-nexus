@@ -9,8 +9,8 @@ import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.ext.Provider;
 
-import com.innospots.nexus.console.endpoint.grant.support.EndpointGrantAnnotations;
-import com.innospots.nexus.console.endpoint.grant.support.ResolvedEndpointGrant;
+import com.innospots.nexus.core.endpoint.grant.support.EndpointGrantAnnotations;
+import com.innospots.nexus.core.endpoint.grant.support.ResolvedEndpointGrant;
 import com.innospots.nexus.console.jaxrs.support.ConsoleRequestProperties;
 import com.innospots.nexus.console.jaxrs.support.EndpointMethodResolver;
 import com.innospots.nexus.console.jaxrs.support.ResolvedEndpointBinding;

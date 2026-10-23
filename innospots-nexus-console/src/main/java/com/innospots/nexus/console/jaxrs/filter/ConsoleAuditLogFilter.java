@@ -13,7 +13,7 @@ import com.innospots.nexus.base.thread.SessionContext;
 import com.innospots.nexus.console.jaxrs.support.ConsoleRequestGrants;
 import com.innospots.nexus.console.jaxrs.support.ConsoleRequestProperties;
 import com.innospots.nexus.console.jaxrs.support.ResolvedEndpointBinding;
-import com.innospots.nexus.console.endpoint.grant.support.ResolvedEndpointGrant;
+import com.innospots.nexus.core.endpoint.grant.support.ResolvedEndpointGrant;
 import com.innospots.nexus.console.logger.support.AuditLogInvocationState;
 import com.innospots.nexus.console.logger.support.AuditLogRecorder;
 import com.innospots.nexus.core.jaxrs.support.RequestProperties;

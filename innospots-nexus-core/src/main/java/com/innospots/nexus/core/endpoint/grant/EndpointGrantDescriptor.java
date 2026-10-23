@@ -1,9 +1,9 @@
-package com.innospots.nexus.console.endpoint.grant;
+package com.innospots.nexus.core.endpoint.grant;
 
 import com.innospots.nexus.base.i18n.I18nObject;
 
 /**
- * 单条 REST 方法的 grant 元数据（前端展示与过滤器策略共用）。
+ * 单条 REST 方法的 grant 元数据（运行时注册、过滤器策略与目录组装共用）。
  *
  * @param moduleKey        entry 模块键
  * @param httpMethod       HTTP 动词（大写）
@@ -18,7 +18,7 @@ import com.innospots.nexus.base.i18n.I18nObject;
  * @param resourceClass    注册时的 JAX-RS 资源类名
  * @param resourceMethod   资源方法名
  */
-public record EndpointGrantDescriptorVo(
+public record EndpointGrantDescriptor(
         String moduleKey,
         String httpMethod,
         String path,
@@ -33,7 +33,7 @@ public record EndpointGrantDescriptorVo(
         String resourceMethod
 ) {
 
-    public EndpointGrantDescriptorVo {
+    public EndpointGrantDescriptor {
         moduleKey = moduleKey == null ? "" : moduleKey;
         httpMethod = httpMethod == null ? "" : httpMethod;
         path = path == null ? "" : path;

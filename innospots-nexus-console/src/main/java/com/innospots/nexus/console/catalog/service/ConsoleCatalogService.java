@@ -33,7 +33,7 @@ public final class ConsoleCatalogService {
 
     public ConsoleCatalogService(
             ConsoleCatalogResourceDao resourceDao,
-            com.innospots.nexus.console.endpoint.grant.EndpointGrantManager endpointGrantManager
+            com.innospots.nexus.core.endpoint.grant.EndpointGrantManager endpointGrantManager
     ) {
         if (resourceDao == null) {
             throw ConsoleExceptions.build(NexusStatusCode.CONFIG_ERROR, "resourceDao is required");

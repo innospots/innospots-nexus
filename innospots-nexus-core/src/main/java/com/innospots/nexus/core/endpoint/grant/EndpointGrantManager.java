@@ -1,4 +1,4 @@
-package com.innospots.nexus.console.endpoint.grant;
+package com.innospots.nexus.core.endpoint.grant;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -11,11 +11,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import jakarta.ws.rs.container.ResourceInfo;
 
 import com.innospots.nexus.base.i18n.I18nObject;
-import com.innospots.nexus.console.endpoint.grant.support.EndpointGrantAnnotations;
-import com.innospots.nexus.console.endpoint.grant.support.EndpointGrantHttpIntrospection;
-import com.innospots.nexus.console.endpoint.grant.support.EndpointGrantPathMatcher;
-import com.innospots.nexus.console.endpoint.grant.support.ResolvedEndpointGrant;
-import com.innospots.nexus.console.logger.AuditLogMessages;
+import com.innospots.nexus.core.endpoint.grant.support.EndpointGrantAnnotations;
+import com.innospots.nexus.core.endpoint.grant.support.EndpointGrantHttpIntrospection;
+import com.innospots.nexus.core.endpoint.grant.support.EndpointGrantPathMatcher;
+import com.innospots.nexus.core.endpoint.grant.support.ResolvedEndpointGrant;
+import com.innospots.nexus.core.endpoint.grant.I18nLiteralSupport;
 
 /**
  * 汇总已注册 JAX-RS 资源的 {@link EndpointGrant} 元数据：按模块输出目录 VO，并支持请求匹配与 {@link ResourceInfo} 解析。
@@ -51,7 +51,7 @@ public final class EndpointGrantManager {
      * @param moduleKey entry 模块键
      * @return 目录；未知模块时为空
      */
-    public Optional<EndpointModuleGrantCatalogVo> moduleCatalog(String moduleKey) {
+    public Optional<EndpointModuleGrantCatalog> moduleCatalog(String moduleKey) {
         if (moduleKey == null || moduleKey.isBlank()) {
             return Optional.empty();
         }
@@ -59,7 +59,7 @@ public final class EndpointGrantManager {
         if (accumulator == null) {
             return Optional.empty();
         }
-        return Optional.of(accumulator.toVo());
+        return Optional.of(accumulator.toCatalog());
     }
 
     /**
@@ -67,10 +67,10 @@ public final class EndpointGrantManager {
      *
      * @return 不可变映射
      */
-    public Map<String, EndpointModuleGrantCatalogVo> allModuleCatalogs() {
-        Map<String, EndpointModuleGrantCatalogVo> snapshot = new LinkedHashMap<>();
+    public Map<String, EndpointModuleGrantCatalog> allModuleCatalogs() {
+        Map<String, EndpointModuleGrantCatalog> snapshot = new LinkedHashMap<>();
         for (Map.Entry<String, ModuleAccumulator> entry : modules.entrySet()) {
-            snapshot.put(entry.getKey(), entry.getValue().toVo());
+            snapshot.put(entry.getKey(), entry.getValue().toCatalog());
         }
         return Map.copyOf(snapshot);
     }
@@ -82,7 +82,7 @@ public final class EndpointGrantManager {
      * @param requestPath 请求路径（Jersey {@code UriInfo#getPath()} 形态）
      * @return 匹配到的描述
      */
-    public Optional<EndpointGrantDescriptorVo> match(String httpMethod, String requestPath) {
+    public Optional<EndpointGrantDescriptor> match(String httpMethod, String requestPath) {
         if (httpMethod == null || httpMethod.isBlank()) {
             return Optional.empty();
         }
@@ -104,7 +104,7 @@ public final class EndpointGrantManager {
      * @param resourceInfo JAX-RS 资源信息
      * @return 描述；未标注 grant 时为 empty
      */
-    public Optional<EndpointGrantDescriptorVo> resolve(ResourceInfo resourceInfo) {
+    public Optional<EndpointGrantDescriptor> resolve(ResourceInfo resourceInfo) {
         if (resourceInfo == null) {
             return Optional.empty();
         }
@@ -135,7 +135,7 @@ public final class EndpointGrantManager {
             return;
         }
         for (EndpointGrantHttpIntrospection.HttpRouteBinding binding : bindings) {
-            EndpointGrantDescriptorVo descriptor = toDescriptor(
+            EndpointGrantDescriptor descriptor = toDescriptor(
                     resourceClass,
                     method,
                     binding.httpMethod(),
@@ -146,15 +146,15 @@ public final class EndpointGrantManager {
         }
     }
 
-    private static EndpointGrantDescriptorVo toDescriptor(
+    private static EndpointGrantDescriptor toDescriptor(
             Class<?> resourceClass,
             Method method,
             String httpMethod,
             String path,
             ResolvedEndpointGrant grant
     ) {
-        I18nObject label = AuditLogMessages.toI18nObject(grant.label());
-        return new EndpointGrantDescriptorVo(
+        I18nObject label = I18nLiteralSupport.toI18nObject(grant.label());
+        return new EndpointGrantDescriptor(
                 grant.moduleKey(),
                 httpMethod,
                 path,
@@ -172,9 +172,9 @@ public final class EndpointGrantManager {
     private static final class RouteEntry {
         private final String httpMethod;
         private final String pathTemplate;
-        private final EndpointGrantDescriptorVo descriptor;
+        private final EndpointGrantDescriptor descriptor;
 
-        private RouteEntry(String httpMethod, String pathTemplate, EndpointGrantDescriptorVo descriptor) {
+        private RouteEntry(String httpMethod, String pathTemplate, EndpointGrantDescriptor descriptor) {
             this.httpMethod = httpMethod;
             this.pathTemplate = pathTemplate;
             this.descriptor = descriptor;
@@ -188,23 +188,23 @@ public final class EndpointGrantManager {
             return pathTemplate;
         }
 
-        private EndpointGrantDescriptorVo descriptor() {
+        private EndpointGrantDescriptor descriptor() {
             return descriptor;
         }
     }
 
     private static final class ModuleAccumulator {
         private final String moduleKey;
-        private final List<EndpointGrantDescriptorVo> readOnly = new ArrayList<>();
-        private final List<EndpointGrantDescriptorVo> operable = new ArrayList<>();
-        private final List<EndpointGrantDescriptorVo> ignoreAuth = new ArrayList<>();
-        private final List<EndpointGrantDescriptorVo> ignorePermission = new ArrayList<>();
+        private final List<EndpointGrantDescriptor> readOnly = new ArrayList<>();
+        private final List<EndpointGrantDescriptor> operable = new ArrayList<>();
+        private final List<EndpointGrantDescriptor> ignoreAuth = new ArrayList<>();
+        private final List<EndpointGrantDescriptor> ignorePermission = new ArrayList<>();
 
         private ModuleAccumulator(String moduleKey) {
             this.moduleKey = moduleKey;
         }
 
-        private void add(EndpointGrantDescriptorVo descriptor) {
+        private void add(EndpointGrantDescriptor descriptor) {
             if (descriptor.ignoreAuth()) {
                 ignoreAuth.add(descriptor);
             }
@@ -218,8 +218,8 @@ public final class EndpointGrantManager {
             }
         }
 
-        private EndpointModuleGrantCatalogVo toVo() {
-            return new EndpointModuleGrantCatalogVo(
+        private EndpointModuleGrantCatalog toCatalog() {
+            return new EndpointModuleGrantCatalog(
                     moduleKey,
                     List.copyOf(readOnly),
                     List.copyOf(operable),

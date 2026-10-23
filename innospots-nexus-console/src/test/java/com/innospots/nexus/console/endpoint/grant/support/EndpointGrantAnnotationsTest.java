@@ -1,4 +1,4 @@
-package com.innospots.nexus.console.endpoint.grant.support;
+package com.innospots.nexus.core.endpoint.grant.support;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -9,10 +9,10 @@ import org.junit.jupiter.api.TestReporter;
 
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeCreateRequest;
 import com.innospots.nexus.console.dictionary.endpoint.DictionaryTypeEndpoint;
-import com.innospots.nexus.console.endpoint.grant.EndpointGrant;
-import com.innospots.nexus.console.endpoint.grant.EndpointGrantAction;
-import com.innospots.nexus.console.endpoint.grant.EndpointModule;
-import com.innospots.nexus.console.logger.I18nLiteral;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrant;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
+import com.innospots.nexus.core.endpoint.grant.EndpointModule;
+import com.innospots.nexus.core.endpoint.grant.I18nLiteral;
 
 class EndpointGrantAnnotationsTest {
 

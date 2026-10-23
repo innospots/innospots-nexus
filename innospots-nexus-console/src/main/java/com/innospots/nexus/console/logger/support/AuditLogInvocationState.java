@@ -1,6 +1,6 @@
 package com.innospots.nexus.console.logger.support;
 
-import com.innospots.nexus.console.endpoint.grant.support.ResolvedEndpointGrant;
+import com.innospots.nexus.core.endpoint.grant.support.ResolvedEndpointGrant;
 
 /**
  * 宿主在响应阶段组装的不可变审计调用元数据。

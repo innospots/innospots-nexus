@@ -2,7 +2,7 @@ package com.innospots.nexus.console.logger;
 
 import java.util.Objects;
 
-import com.innospots.nexus.console.endpoint.grant.support.ResolvedEndpointGrant;
+import com.innospots.nexus.core.endpoint.grant.support.ResolvedEndpointGrant;
 import com.innospots.nexus.console.logger.domain.context.InvocationLogContext;
 
 /**

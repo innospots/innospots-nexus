@@ -19,7 +19,7 @@ import com.innospots.nexus.base.json.Jsons;
 import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
 import com.innospots.nexus.console.catalog.domain.vo.CatalogNodeVo;
 import com.innospots.nexus.console.config.ConsoleConstant;
-import com.innospots.nexus.console.endpoint.grant.EndpointGrantManager;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrantManager;
 import com.innospots.nexus.sample.spring.platform.SamplePlatformConsoleServer;
 import com.innospots.nexus.sample.spring.platform.catalog.support.CatalogTreeVerificationSupport;
 import com.innospots.nexus.sample.spring.platform.role.support.RoleEndpointHttpClient;

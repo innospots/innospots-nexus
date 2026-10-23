@@ -15,9 +15,9 @@ import com.innospots.nexus.console.catalog.domain.model.CatalogGrantKeys;
 import com.innospots.nexus.console.catalog.domain.vo.CatalogModuleGrantVo;
 import com.innospots.nexus.console.catalog.domain.vo.CatalogPermissionGroupVo;
 import com.innospots.nexus.console.catalog.domain.vo.CatalogViewItemVo;
-import com.innospots.nexus.console.endpoint.grant.EndpointGrantDescriptorVo;
-import com.innospots.nexus.console.endpoint.grant.EndpointGrantManager;
-import com.innospots.nexus.console.endpoint.grant.EndpointModuleGrantCatalogVo;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrantDescriptor;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrantManager;
+import com.innospots.nexus.core.endpoint.grant.EndpointModuleGrantCatalog;
 import com.innospots.nexus.core.plugin.contribution.console.ConsolePermissionGroupDeclaration;
 
 /**
@@ -73,7 +73,7 @@ public final class CatalogPermissionCatalogAssembler {
                 ? moduleRow.getOperationGroups()
                 : directMenus.isEmpty() ? null : directMenus.getFirst().getOperationGroups();
         List<ConsolePermissionGroupDeclaration> declarations = parseGroups(groupsJson);
-        EndpointModuleGrantCatalogVo catalog = endpointGrantManager
+        EndpointModuleGrantCatalog catalog = endpointGrantManager
                 .moduleCatalog(moduleRow.getModuleKey())
                 .orElse(null);
         Map<String, List<CatalogViewItemVo>> itemsByGroup = new LinkedHashMap<>();
@@ -81,7 +81,7 @@ public final class CatalogPermissionCatalogAssembler {
             itemsByGroup.put(declaration.group(), new ArrayList<>());
         }
         if (catalog != null) {
-            for (EndpointGrantDescriptorVo descriptor : catalog.operable()) {
+            for (EndpointGrantDescriptor descriptor : catalog.operable()) {
                 String group = "default";
                 itemsByGroup.computeIfAbsent(group, ignored -> new ArrayList<>())
                         .add(new CatalogViewItemVo(

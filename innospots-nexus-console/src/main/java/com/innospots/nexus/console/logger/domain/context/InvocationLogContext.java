@@ -11,7 +11,7 @@ package com.innospots.nexus.console.logger.domain.context;
  * @date 2026/09/13
  * @param className  被拦截方法的声明类名
  * @param methodName 被拦截的方法名
- * @param action     由 {@link com.innospots.nexus.console.endpoint.grant.EndpointGrant#action()} 声明的操作类型
+ * @param action     由 {@link com.innospots.nexus.core.endpoint.grant.EndpointGrant#action()} 声明的操作类型
  * @param arguments  捕获的方法参数；未记录时为空数组
  * @param result     捕获的返回值；未记录或失败时为 null
  * @param exception  抛出的异常；成功时为 null
@@ -20,7 +20,7 @@ package com.innospots.nexus.console.logger.domain.context;
  * @param actor            操作用户身份；未知时为空字符串
  * @param operationMessage 注解声明的操作说明（当前语言环境解析后）
  * @param httpPath         HTTP 方法 + 路径；非 HTTP 拦截时可为空
- * @param target           由 {@link com.innospots.nexus.console.endpoint.grant.EndpointGrant#name()}
+ * @param target           由 {@link com.innospots.nexus.core.endpoint.grant.EndpointGrant#name()}
  *                         声明的操作对象
  */
 public record InvocationLogContext(

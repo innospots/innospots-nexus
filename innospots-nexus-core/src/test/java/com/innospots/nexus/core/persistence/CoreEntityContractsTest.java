@@ -9,6 +9,8 @@ import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import com.innospots.nexus.base.thread.TLC;
 import com.innospots.nexus.core.persistence.entity.BaseEntity;
 import com.innospots.nexus.core.persistence.entity.OwnershipEntity;
+import com.innospots.nexus.core.persistence.entity.ProjectBaseEntity;
+import com.innospots.nexus.core.persistence.entity.WorkspaceBaseEntity;
 import com.innospots.nexus.core.persistence.handler.AuditMetaObjectHandler;
 import com.innospots.nexus.core.persistence.id.DbPrimaryGenerator;
 import com.innospots.nexus.core.resource.domain.entity.MetaResourceEntity;
@@ -46,6 +48,20 @@ class CoreEntityContractsTest {
                 .isEqualTo(FieldFill.INSERT_UPDATE);
         assertColumnNameIsImplicit(BaseEntity.class.getDeclaredField("updatedBy"));
         assertThat(BaseEntity.class.getDeclaredField("updatedBy").getAnnotation(Column.class).length()).isEqualTo(64);
+    }
+
+    @Test
+    void workspaceScopedBasesFormCoreHierarchy() throws NoSuchFieldException {
+        assertThat(WorkspaceBaseEntity.class.getAnnotation(MappedSuperclass.class)).isNotNull();
+        assertThat(ProjectBaseEntity.class.getAnnotation(MappedSuperclass.class)).isNotNull();
+
+        assertThat(WorkspaceBaseEntity.class.getSuperclass()).isEqualTo(BaseEntity.class);
+        assertThat(ProjectBaseEntity.class.getSuperclass()).isEqualTo(WorkspaceBaseEntity.class);
+
+        assertThat(WorkspaceBaseEntity.class.getDeclaredField("workspaceId").getAnnotation(TableField.class).fill())
+                .isEqualTo(FieldFill.INSERT);
+        assertThat(ProjectBaseEntity.class.getDeclaredField("projectId").getAnnotation(TableField.class).fill())
+                .isEqualTo(FieldFill.INSERT);
     }
 
     @Test

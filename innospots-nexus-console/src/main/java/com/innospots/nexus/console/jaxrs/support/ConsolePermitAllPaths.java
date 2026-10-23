@@ -1,5 +1,7 @@
 package com.innospots.nexus.console.jaxrs.support;
 
+import com.innospots.nexus.console.endpoint.MainRootEndpoint;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +27,7 @@ public final class ConsolePermitAllPaths {
     /** Spring Boot Actuator 健康端点。 */
     public static final String ACTUATOR_HEALTH = "/actuator/health/**";
 
-    /** 站点根路径（{@link com.innospots.nexus.console.endpoint.root.MainRootEndpoint} 重定向）。 */
+    /** 站点根路径（{@link MainRootEndpoint} 重定向）。 */
     public static final String ROOT = "/";
 
     private static final List<String> DEFAULT_PATTERNS = List.of(

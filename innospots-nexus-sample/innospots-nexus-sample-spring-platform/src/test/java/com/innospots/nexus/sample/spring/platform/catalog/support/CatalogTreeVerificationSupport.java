@@ -15,10 +15,10 @@ import com.innospots.nexus.base.json.Jsons;
 import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
 import com.innospots.nexus.console.catalog.domain.vo.CatalogNodeVo;
 import com.innospots.nexus.console.catalog.domain.vo.CatalogViewItemVo;
-import com.innospots.nexus.console.endpoint.grant.EndpointGrantAction;
-import com.innospots.nexus.console.endpoint.grant.EndpointGrantDescriptorVo;
-import com.innospots.nexus.console.endpoint.grant.EndpointGrantManager;
-import com.innospots.nexus.console.endpoint.grant.EndpointModuleGrantCatalogVo;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrantDescriptor;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrantManager;
+import com.innospots.nexus.core.endpoint.grant.EndpointModuleGrantCatalog;
 
 /**
  * 权限目录树 HTTP 响应解析与 {@link CatalogNodeVo} / grants 校验辅助。
@@ -54,10 +54,10 @@ public final class CatalogTreeVerificationSupport {
 
     public static Map<String, Set<String>> operableGrantNamesByModule(EndpointGrantManager endpointGrantManager) {
         Map<String, Set<String>> namesByModule = new LinkedHashMap<>();
-        for (Map.Entry<String, EndpointModuleGrantCatalogVo> entry
+        for (Map.Entry<String, EndpointModuleGrantCatalog> entry
                 : endpointGrantManager.allModuleCatalogs().entrySet()) {
             Set<String> names = entry.getValue().operable().stream()
-                    .map(EndpointGrantDescriptorVo::name)
+                    .map(EndpointGrantDescriptor::name)
                     .collect(Collectors.toCollection(TreeSet::new));
             namesByModule.put(entry.getKey(), names);
         }
@@ -106,14 +106,14 @@ public final class CatalogTreeVerificationSupport {
         if (moduleNode.resourceType() != CatalogResourceType.MODULE || moduleNode.grants() == null) {
             return;
         }
-        EndpointModuleGrantCatalogVo catalog = endpointGrantManager
+        EndpointModuleGrantCatalog catalog = endpointGrantManager
                 .moduleCatalog(moduleNode.moduleKey())
                 .orElse(null);
         if (catalog == null) {
             return;
         }
         Map<String, EndpointGrantAction> actionByName = catalog.operable().stream()
-                .collect(Collectors.toMap(EndpointGrantDescriptorVo::name, EndpointGrantDescriptorVo::action));
+                .collect(Collectors.toMap(EndpointGrantDescriptor::name, EndpointGrantDescriptor::action));
         for (CatalogViewItemVo item : moduleNode.grants().operationGroups().stream()
                 .flatMap(group -> group.items().stream())
                 .toList()) {

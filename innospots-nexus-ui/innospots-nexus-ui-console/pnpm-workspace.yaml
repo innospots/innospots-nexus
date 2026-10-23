@@ -1,4 +1,5 @@
 allowBuilds:
+  esbuild: set this to true or false
   unrs-resolver: true
 # 模板独立安装（pnpm install）时批准运行构建脚本的原生依赖：
 # sharp（Next.js 图片优化可选依赖）与 unrs-resolver（eslint-config-next

@@ -2,6 +2,7 @@ package com.innospots.nexus.console.endpoint.root;
 
 import java.net.URI;
 
+import com.innospots.nexus.console.endpoint.MainRootEndpoint;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;

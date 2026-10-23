@@ -1,6 +1,6 @@
 package com.innospots.nexus.console.logger.support;
 
-import com.innospots.nexus.console.endpoint.grant.support.ResolvedEndpointGrant;
+import com.innospots.nexus.core.endpoint.grant.support.ResolvedEndpointGrant;
 import com.innospots.nexus.console.logger.AuditLogMessages;
 import com.innospots.nexus.console.logger.InvocationLogHandler;
 import com.innospots.nexus.console.logger.domain.context.InvocationLogContext;

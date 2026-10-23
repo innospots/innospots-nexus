@@ -1,11 +1,11 @@
-package com.innospots.nexus.console.endpoint.grant.support;
+package com.innospots.nexus.core.endpoint.grant.support;
 
 import java.lang.reflect.Method;
 
-import com.innospots.nexus.console.endpoint.grant.EndpointGrant;
-import com.innospots.nexus.console.endpoint.grant.EndpointGrantAction;
-import com.innospots.nexus.console.endpoint.grant.EndpointModule;
-import com.innospots.nexus.console.logger.I18nLiteral;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrant;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
+import com.innospots.nexus.core.endpoint.grant.EndpointModule;
+import com.innospots.nexus.core.endpoint.grant.I18nLiteral;
 
 /**
  * 从 JAX-RS 资源实现方法与 console 契约接口解析 {@link EndpointGrant}。

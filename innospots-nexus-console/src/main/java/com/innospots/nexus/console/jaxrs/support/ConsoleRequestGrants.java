@@ -2,7 +2,7 @@ package com.innospots.nexus.console.jaxrs.support;
 
 import jakarta.ws.rs.container.ContainerRequestContext;
 
-import com.innospots.nexus.console.endpoint.grant.support.ResolvedEndpointGrant;
+import com.innospots.nexus.core.endpoint.grant.support.ResolvedEndpointGrant;
 
 /**
  * 从 JAX-RS 请求上下文读取 {@link ResolvedEndpointGrant} 与关联绑定。

@@ -2,7 +2,6 @@ package com.innospots.nexus.core.jaxrs.exception;
 
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ContainerRequestContext;
-import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import org.slf4j.Logger;
@@ -13,7 +12,6 @@ import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.base.status.StatusCode;
 import com.innospots.nexus.base.thread.TLC;
-import com.innospots.nexus.core.jaxrs.support.HttpHeaderNames;
 import com.innospots.nexus.core.jaxrs.support.RequestProperties;
 import com.innospots.nexus.core.jaxrs.support.RequestScope;
 
@@ -23,6 +21,16 @@ import com.innospots.nexus.core.jaxrs.support.RequestScope;
 public final class JaxRsExceptionSupport {
 
     private static final Logger LOG = LoggerFactory.getLogger(JaxRsExceptionSupport.class);
+
+    private final JaxRsErrorResponseBuilder responseBuilder;
+
+    public JaxRsExceptionSupport() {
+        this(JaxRsErrorResponseBuilder.JAKARTA);
+    }
+
+    JaxRsExceptionSupport(JaxRsErrorResponseBuilder responseBuilder) {
+        this.responseBuilder = responseBuilder;
+    }
 
     /**
      * 记录 JAX-RS {@link WebApplicationException}（含路由未匹配的 {@link jakarta.ws.rs.NotFoundException}）。
@@ -66,7 +74,7 @@ public final class JaxRsExceptionSupport {
         if (response != null) {
             return response;
         }
-        return Response.serverError().build();
+        return responseBuilder.serverError();
     }
 
     /**
@@ -152,11 +160,7 @@ public final class JaxRsExceptionSupport {
         String requestId = resolveRequestId(requestContext);
         int httpStatus = resolveHttpStatus(exception);
         R<Void> body = R.fail(exception.code(), exception.getMessage(), exception.display());
-        return Response.status(httpStatus)
-                .type(MediaType.APPLICATION_JSON)
-                .header(HttpHeaderNames.REQUEST_ID, requestId)
-                .entity(body)
-                .build();
+        return responseBuilder.build(httpStatus, body, requestId);
     }
 
     private static int resolveHttpStatus(NexusException exception) {

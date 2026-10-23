@@ -22,11 +22,6 @@
             <groupId>com.innospots</groupId>
             <artifactId>innospots-nexus-plugin</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.glassfish.jersey.core</groupId>
-            <artifactId>jersey-common</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>
@@ -51,6 +46,7 @@
                             </scanners>
                             <scanPackages>
                                 com.innospots.nexus.console,
+                                com.innospots.nexus.core.endpoint.contract,
                                 com.innospots.nexus.base.domain.response,
                                 com.innospots.nexus.base.i18n,
                                 com.innospots.nexus.base.domain.enums,

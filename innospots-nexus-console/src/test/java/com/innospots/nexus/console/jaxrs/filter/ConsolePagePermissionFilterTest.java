@@ -9,7 +9,7 @@ import jakarta.ws.rs.container.ContainerRequestContext;
 
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.status.NexusStatusCode;
-import com.innospots.nexus.console.endpoint.grant.support.ResolvedEndpointGrant;
+import com.innospots.nexus.core.endpoint.grant.support.ResolvedEndpointGrant;
 import com.innospots.nexus.console.jaxrs.support.ConsoleRequestProperties;
 import com.innospots.nexus.console.jaxrs.support.ResolvedEndpointBinding;
 import com.innospots.nexus.console.jaxrs.web.ConsoleWebSecuritySettings;

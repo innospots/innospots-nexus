@@ -1,7 +1,8 @@
 package com.innospots.nexus.console.logger;
 
-import com.innospots.nexus.console.endpoint.grant.EndpointGrantAction;
-import com.innospots.nexus.console.endpoint.grant.support.ResolvedEndpointGrant;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
+import com.innospots.nexus.core.endpoint.grant.I18nLiteral;
+import com.innospots.nexus.core.endpoint.grant.support.ResolvedEndpointGrant;
 
 public final class EndpointGrantFixtures {
 

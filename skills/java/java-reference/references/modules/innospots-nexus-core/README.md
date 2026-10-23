@@ -23,6 +23,7 @@
 | **Watchers** | `IWatcher` / `AbstractWatcher` / `WatcherSupervisor` 后台循环 |
 | **系统设置** | `SystemSettingService` + `SettingKey` 类型化键值配置（`nx_system_setting`） |
 | **OpenAPI** | `@NexusAuthenticatedApi` Bearer 安全标记、构建期规范目录与 Scalar 文档页 |
+| **Endpoint grant** | `@EndpointModule` / `@EndpointGrant`、`EndpointGrantManager`、契约根路径（`endpoint.contract` / `endpoint.grant`） |
 | **文件元数据** | `nx_meta_resource`、`MetaResourceService`、`ResourceStorageRegistry` |
 
 ## 扩展指南
@@ -50,6 +51,38 @@
 | `NexusStartup` | `class` | 启动后初始化编排入口；宿主在配置期组装任务，运行期仅调用 {@link #run()} |
 | `NexusStartupContext` | `class` | 启动任务执行过程中跨步骤传递的轻量上下文 |
 | `NexusStartupTask` | `interface` | 框架无关的启动后初始化步骤 |
+
+### 包 `endpoint.contract`
+
+| 类 | 类型 | 说明 |
+|------|------|------|
+| `ConsoleRestPaths` | `class` | 控制台与公共开放 REST API 根路径前缀 |
+| `ConsoleEndpoint` | `interface` | 根管理控制台端点契约 |
+| `PublicEndpoint` | `interface` | 公共开放 REST API 根契约（`/api/public`） |
+
+### 包 `endpoint.grant`
+
+| 类 | 类型 | 说明 |
+|------|------|------|
+| `EndpointGrant` | `annotation` | 单条 REST 方法的授权、审计与跳过策略 |
+| `EndpointGrantAction` | `enum` | 授权/审计动作分类 |
+| `EndpointGrantDescriptor` | `record` | 单条 grant 的运行时目录描述（非 REST `Vo`） |
+| `EndpointGrantManager` | `class` | grant 注册、模块目录聚合与路径匹配 |
+| `EndpointModule` | `annotation` | REST 资源/契约接口的模块归属 |
+| `EndpointModuleGrantCatalog` | `record` | 按 MODULE 聚合的 grant 目录（运行时模型） |
+| `I18nLiteral` | `annotation` | `@EndpointGrant#label()` 内嵌多语言文案 |
+| `I18nLiteralSupport` | `class` | `I18nLiteral` → `I18nObject` 与 locale 解析 |
+
+### 包 `endpoint.grant.support`
+
+| 类 | 类型 | 说明 |
+|------|------|------|
+| `AntPathMatcher` | `class` | Ant 风格路径匹配（`*`、`**`） |
+| `EndpointGrantAnnotations` | `class` | 从实现方法与 console 契约接口解析 grant |
+| `EndpointGrantHttpIntrospection` | `class` | 解析 JAX-RS HTTP 动词与完整路径模板 |
+| `EndpointGrantPathMatcher` | `class` | 将 JAX-RS 模板与请求路径匹配 |
+| `EndpointGrantHttpIntrospection.HttpRouteBinding` | `record` | 一条 HTTP 方法与合并路径模板绑定 |
+| `ResolvedEndpointGrant` | `record` | 合并模块与方法注解后的有效策略 |
 
 ### 包 `jaxrs.exception`
 
@@ -279,6 +312,7 @@
 | 领域 | 参考 |
 |------|-----------|
 | 启动 SPI | [`references/bootstrap.md`](references/bootstrap.md) |
+| Endpoint 契约与 grant | [`references/endpoint-contract.md`](references/endpoint-contract.md)、[`references/endpoint-grant.md`](references/endpoint-grant.md)、[`references/endpoint-grant-support.md`](references/endpoint-grant-support.md) |
 | JAX-RS 横切 | [`references/jaxrs.md`](references/jaxrs.md) |
 | 持久化 | [`references/persistence.md`](references/persistence.md) |
 | OpenAPI | [`references/openapi.md`](references/openapi.md) |

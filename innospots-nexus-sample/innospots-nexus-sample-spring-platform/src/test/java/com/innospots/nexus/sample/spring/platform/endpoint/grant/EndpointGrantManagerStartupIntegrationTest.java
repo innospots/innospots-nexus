@@ -15,9 +15,9 @@ import org.springframework.test.context.TestPropertySource;
 
 import com.innospots.nexus.console.catalog.endpoint.ConsoleCatalogEndpoint;
 import com.innospots.nexus.console.config.ConsoleConstant;
-import com.innospots.nexus.console.endpoint.grant.EndpointGrantDescriptorVo;
-import com.innospots.nexus.console.endpoint.grant.EndpointGrantManager;
-import com.innospots.nexus.console.endpoint.grant.EndpointModuleGrantCatalogVo;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrantDescriptor;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrantManager;
+import com.innospots.nexus.core.endpoint.grant.EndpointModuleGrantCatalog;
 import com.innospots.nexus.console.plugin.endpoint.PluginManagementEndpoint;
 import com.innospots.nexus.platform.config.PlatformConstant;
 import com.innospots.nexus.platform.dictionary.endpoint.PlatformDictionaryTypeEndpoint;
@@ -93,9 +93,9 @@ class EndpointGrantManagerStartupIntegrationTest {
 
     @Test
     void startupManagerCatalogMatchesIndependentScan() {
-        Map<String, EndpointModuleGrantCatalogVo> expected =
+        Map<String, EndpointModuleGrantCatalog> expected =
                 EndpointGrantManagerStartupExpectations.computeExpectedCatalogs(applicationContext);
-        Map<String, EndpointModuleGrantCatalogVo> actual = endpointGrantManager.allModuleCatalogs();
+        Map<String, EndpointModuleGrantCatalog> actual = endpointGrantManager.allModuleCatalogs();
 
         LOGGER.info("Expected grant catalog summary:\n{}", String.join(
                 "\n",
@@ -120,8 +120,8 @@ class EndpointGrantManagerStartupIntegrationTest {
 
     @Test
     void platformContractImplementationLoadsDictionaryGrants() {
-        Map<String, EndpointModuleGrantCatalogVo> catalogs = endpointGrantManager.allModuleCatalogs();
-        EndpointModuleGrantCatalogVo dictionary = catalogs.get("dictionary");
+        Map<String, EndpointModuleGrantCatalog> catalogs = endpointGrantManager.allModuleCatalogs();
+        EndpointModuleGrantCatalog dictionary = catalogs.get("dictionary");
         assertThat(dictionary).isNotNull();
 
         Set<String> names = EndpointGrantManagerStartupExpectations.allGrantNames(
@@ -135,7 +135,7 @@ class EndpointGrantManagerStartupIntegrationTest {
                 "dictionary.type.delete",
                 "dictionary.type.options");
 
-        EndpointGrantDescriptorVo page = EndpointGrantManagerStartupExpectations.streamAll(catalogs)
+        EndpointGrantDescriptor page = EndpointGrantManagerStartupExpectations.streamAll(catalogs)
                 .filter(item -> "dictionary.type.page".equals(item.name()))
                 .findFirst()
                 .orElseThrow();
@@ -150,7 +150,7 @@ class EndpointGrantManagerStartupIntegrationTest {
                 .size();
         assertThat(userDescriptors).isGreaterThanOrEqualTo(1L);
 
-        EndpointGrantDescriptorVo create = EndpointGrantManagerStartupExpectations.streamAll(
+        EndpointGrantDescriptor create = EndpointGrantManagerStartupExpectations.streamAll(
                         endpointGrantManager.allModuleCatalogs())
                 .filter(item -> "platform.user.create".equals(item.name()))
                 .findFirst()
@@ -159,13 +159,13 @@ class EndpointGrantManagerStartupIntegrationTest {
 
         assertThat(create.resourceClass()).isEqualTo(PlatformUserEndpoint.class.getName());
         assertThat(endpointGrantManager.match(create.httpMethod(), create.path()))
-                .map(EndpointGrantDescriptorVo::name)
+                .map(EndpointGrantDescriptor::name)
                 .hasValue("platform.user.create");
     }
 
     @Test
     void consoleModuleEndpointsLoadCatalogAndPluginGrants() {
-        EndpointGrantDescriptorVo catalogTree = EndpointGrantManagerStartupExpectations.streamAll(
+        EndpointGrantDescriptor catalogTree = EndpointGrantManagerStartupExpectations.streamAll(
                         endpointGrantManager.allModuleCatalogs())
                 .filter(item -> "catalog.tree".equals(item.name()))
                 .findFirst()
@@ -173,7 +173,7 @@ class EndpointGrantManagerStartupIntegrationTest {
         assertThat(catalogTree.resourceClass()).isEqualTo(ConsoleCatalogEndpoint.class.getName());
         assertThat(catalogTree.path()).isEqualTo(ConsoleConstant.apiPath("/catalog") + "/tree");
 
-        EndpointGrantDescriptorVo pluginList = EndpointGrantManagerStartupExpectations.streamAll(
+        EndpointGrantDescriptor pluginList = EndpointGrantManagerStartupExpectations.streamAll(
                         endpointGrantManager.allModuleCatalogs())
                 .filter(item -> "plugin.list".equals(item.name()))
                 .findFirst()
@@ -184,7 +184,7 @@ class EndpointGrantManagerStartupIntegrationTest {
         LOGGER.info("Console plugin grant: {}", pluginList);
 
         assertThat(endpointGrantManager.match(catalogTree.httpMethod(), catalogTree.path()))
-                .map(EndpointGrantDescriptorVo::name)
+                .map(EndpointGrantDescriptor::name)
                 .hasValue("catalog.tree");
     }
 
@@ -193,19 +193,19 @@ class EndpointGrantManagerStartupIntegrationTest {
         assertThat(endpointGrantManager.match(
                 "GET",
                 PlatformConstant.DICTIONARY_TYPES_PATH))
-                .map(EndpointGrantDescriptorVo::name)
+                .map(EndpointGrantDescriptor::name)
                 .hasValue("dictionary.type.page");
 
         assertThat(endpointGrantManager.match(
                 "GET",
                 PlatformConstant.DICTIONARY_TYPES_PATH + "/type-1"))
-                .map(EndpointGrantDescriptorVo::name)
+                .map(EndpointGrantDescriptor::name)
                 .hasValue("dictionary.type.get");
 
         assertThat(endpointGrantManager.match(
                 "GET",
                 ConsoleConstant.apiPath("/catalog/tree")))
-                .map(EndpointGrantDescriptorVo::name)
+                .map(EndpointGrantDescriptor::name)
                 .hasValue("catalog.tree");
     }
 }

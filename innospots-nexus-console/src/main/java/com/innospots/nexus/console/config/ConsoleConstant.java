@@ -1,5 +1,7 @@
 package com.innospots.nexus.console.config;
 
+import com.innospots.nexus.core.endpoint.contract.ConsoleRestPaths;
+
 /**
  * 控制台模块共享常量。
  *
@@ -9,13 +11,13 @@ package com.innospots.nexus.console.config;
 public final class ConsoleConstant {
 
     /** 控制台管理 REST API 根路径前缀。 */
-    public static final String API_PREFIX = "/api/d/nexus";
+    public static final String API_PREFIX = ConsoleRestPaths.API_PREFIX;
 
     /**
      * 公共开放 REST API 根路径前缀（无需鉴权）。
      * <p>运营域、租户域等业务域路径不在此定义，由各业务模块自行维护。</p>
      */
-    public static final String PUBLIC_API_PREFIX = "/api/public";
+    public static final String PUBLIC_API_PREFIX = ConsoleRestPaths.PUBLIC_API_PREFIX;
 
     private ConsoleConstant() {
     }

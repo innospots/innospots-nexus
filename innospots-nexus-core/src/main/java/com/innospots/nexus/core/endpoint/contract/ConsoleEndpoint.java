@@ -1,4 +1,4 @@
-package com.innospots.nexus.console.endpoint.contract;
+package com.innospots.nexus.core.endpoint.contract;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -9,11 +9,10 @@ import jakarta.ws.rs.core.MediaType;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
-import com.innospots.nexus.console.config.ConsoleConstant;
-import com.innospots.nexus.console.endpoint.grant.EndpointGrant;
-import com.innospots.nexus.console.endpoint.grant.EndpointGrantAction;
-import com.innospots.nexus.console.endpoint.grant.EndpointModule;
-import com.innospots.nexus.console.logger.I18nLiteral;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrant;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
+import com.innospots.nexus.core.endpoint.grant.EndpointModule;
+import com.innospots.nexus.core.endpoint.grant.I18nLiteral;
 
 /**
  * 根管理控制台端点契约。
@@ -27,7 +26,7 @@ import com.innospots.nexus.console.logger.I18nLiteral;
  * @date 2026/09/13
  */
 @EndpointModule(value = "console", ignoreAuth = true, ignorePermission = true)
-@Path(ConsoleConstant.API_PREFIX)
+@Path(ConsoleRestPaths.API_PREFIX)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Console", description = "控制台状态与健康")

@@ -1,4 +1,4 @@
-package com.innospots.nexus.console.endpoint.grant;
+package com.innospots.nexus.core.endpoint.grant;
 
 import org.junit.jupiter.api.Test;
 

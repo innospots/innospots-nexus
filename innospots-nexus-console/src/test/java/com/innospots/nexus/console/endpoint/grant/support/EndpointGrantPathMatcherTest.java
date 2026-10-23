@@ -1,4 +1,4 @@
-package com.innospots.nexus.console.endpoint.grant.support;
+package com.innospots.nexus.core.endpoint.grant.support;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

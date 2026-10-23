@@ -1,4 +1,4 @@
-package com.innospots.nexus.console.endpoint.grant;
+package com.innospots.nexus.core.endpoint.grant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import java.lang.reflect.Method;
@@ -27,7 +27,7 @@ import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeUpdat
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeOptionVo;
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeVo;
 import com.innospots.nexus.console.dictionary.endpoint.DictionaryTypeEndpoint;
-import com.innospots.nexus.console.logger.I18nLiteral;
+import com.innospots.nexus.core.endpoint.grant.I18nLiteral;
 
 /**
  * {@link EndpointGrantManager} 注册、目录聚合与路由匹配的专项测试。
@@ -68,19 +68,19 @@ class EndpointGrantManagerRegistrationTest {
     void registersCatalogFixtureWithCorrectBuckets(TestReporter reporter) {
         manager.registerResource(CatalogFixtureResource.class);
 
-        EndpointModuleGrantCatalogVo catalog = manager.moduleCatalog("catalog-fixture").orElseThrow();
+        EndpointModuleGrantCatalog catalog = manager.moduleCatalog("catalog-fixture").orElseThrow();
         reporter.publishEntry("input", "resourceClass=CatalogFixtureResource");
         reporter.publishEntry("output", catalog.toString());
 
         assertThat(catalog.moduleKey()).isEqualTo("catalog-fixture");
-        assertThat(catalog.readOnly()).extracting(EndpointGrantDescriptorVo::name)
+        assertThat(catalog.readOnly()).extracting(EndpointGrantDescriptor::name)
                 .containsExactlyInAnyOrder("fixture.read", "fixture.export", "fixture.public");
-        assertThat(catalog.operable()).extracting(EndpointGrantDescriptorVo::name)
+        assertThat(catalog.operable()).extracting(EndpointGrantDescriptor::name)
                 .contains("fixture.create", "fixture.delete", "fixture.execute", "fixture.upsert");
         assertThat(catalog.operable().stream().filter(d -> "fixture.upsert".equals(d.name())).count())
                 .isEqualTo(2);
 
-        EndpointGrantDescriptorVo create = findDescriptor(catalog, "fixture.create");
+        EndpointGrantDescriptor create = findDescriptor(catalog, "fixture.create");
         assertThat(create.httpMethod()).isEqualTo("POST");
         assertThat(create.path()).isEqualTo("/api/fixture/create");
         assertThat(create.action()).isEqualTo(EndpointGrantAction.CREATE);
@@ -90,17 +90,17 @@ class EndpointGrantManagerRegistrationTest {
         assertThat(create.resourceClass()).isEqualTo(CatalogFixtureResource.class.getName());
         assertThat(create.resourceMethod()).isEqualTo("create");
 
-        EndpointGrantDescriptorVo export = findDescriptor(catalog, "fixture.export");
+        EndpointGrantDescriptor export = findDescriptor(catalog, "fixture.export");
         assertThat(export.action()).isEqualTo(EndpointGrantAction.EXPORT);
         assertThat(catalog.readOnly()).contains(export);
 
-        EndpointGrantDescriptorVo execute = findDescriptor(catalog, "fixture.execute");
+        EndpointGrantDescriptor execute = findDescriptor(catalog, "fixture.execute");
         assertThat(execute.action()).isEqualTo(EndpointGrantAction.EXECUTE);
         assertThat(catalog.operable()).contains(execute);
         assertThat(catalog.ignorePermission()).contains(execute);
         assertThat(catalog.ignoreAuth()).doesNotContain(execute);
 
-        EndpointGrantDescriptorVo publicRead = findDescriptor(catalog, "fixture.public");
+        EndpointGrantDescriptor publicRead = findDescriptor(catalog, "fixture.public");
         assertThat(catalog.ignoreAuth()).contains(publicRead);
         assertThat(catalog.ignorePermission()).contains(publicRead);
     }
@@ -109,8 +109,8 @@ class EndpointGrantManagerRegistrationTest {
     void registersContractImplementationFromConsoleInterface(TestReporter reporter) {
         manager.registerResource(ContractOnlyImpl.class);
 
-        EndpointModuleGrantCatalogVo catalog = manager.moduleCatalog("contract-only").orElseThrow();
-        EndpointGrantDescriptorVo list = findDescriptor(catalog, "contract.list");
+        EndpointModuleGrantCatalog catalog = manager.moduleCatalog("contract-only").orElseThrow();
+        EndpointGrantDescriptor list = findDescriptor(catalog, "contract.list");
 
         reporter.publishEntry("input", "resourceClass=ContractOnlyImpl");
         reporter.publishEntry("output", list.toString());
@@ -126,17 +126,17 @@ class EndpointGrantManagerRegistrationTest {
     void registersDictionaryContractImplementation(TestReporter reporter) {
         manager.registerResource(DictionaryResourceFixture.class);
 
-        EndpointModuleGrantCatalogVo catalog = manager.moduleCatalog("dictionary").orElseThrow();
+        EndpointModuleGrantCatalog catalog = manager.moduleCatalog("dictionary").orElseThrow();
         reporter.publishEntry("input", "resourceClass=DictionaryResourceFixture");
         reporter.publishEntry("output", "readOnly=" + catalog.readOnly().size()
                 + ", operable=" + catalog.operable().size());
 
         assertThat(catalog.readOnly()).hasSize(3);
         assertThat(catalog.operable()).isNotEmpty();
-        assertThat(catalog.ignorePermission()).extracting(EndpointGrantDescriptorVo::name)
+        assertThat(catalog.ignorePermission()).extracting(EndpointGrantDescriptor::name)
                 .contains("dictionary.type.options");
 
-        EndpointGrantDescriptorVo page = findDescriptor(catalog, "dictionary.type.page");
+        EndpointGrantDescriptor page = findDescriptor(catalog, "dictionary.type.page");
         assertThat(page.httpMethod()).isEqualTo("GET");
         assertThat(page.path()).isEqualTo("/api/test/dictionary/types");
         assertThat(page.label().cnValue()).isEqualTo("分页查询字典类型");
@@ -147,12 +147,12 @@ class EndpointGrantManagerRegistrationTest {
         manager.registerResource(CatalogFixtureResource.class);
         manager.registerResource(OtherModuleResource.class);
 
-        Map<String, EndpointModuleGrantCatalogVo> all = manager.allModuleCatalogs();
+        Map<String, EndpointModuleGrantCatalog> all = manager.allModuleCatalogs();
         reporter.publishEntry("input", "CatalogFixtureResource + OtherModuleResource");
         reporter.publishEntry("output", "moduleKeys=" + all.keySet());
 
         assertThat(all).containsOnlyKeys("catalog-fixture", "other-module");
-        assertThat(all.get("other-module").readOnly()).extracting(EndpointGrantDescriptorVo::name)
+        assertThat(all.get("other-module").readOnly()).extracting(EndpointGrantDescriptor::name)
                 .containsExactly("other.ping");
     }
 
@@ -177,12 +177,12 @@ class EndpointGrantManagerRegistrationTest {
         var wrongVerb = manager.match("GET", "/api/fixture/create");
         var wrongPath = manager.match("GET", "/api/fixture/unknown");
 
-        reporter.publishEntry("match", "GET /api/fixture/read -> " + getRead.map(EndpointGrantDescriptorVo::name));
-        reporter.publishEntry("match", "POST /api/fixture/create -> " + postCreate.map(EndpointGrantDescriptorVo::name));
+        reporter.publishEntry("match", "GET /api/fixture/read -> " + getRead.map(EndpointGrantDescriptor::name));
+        reporter.publishEntry("match", "POST /api/fixture/create -> " + postCreate.map(EndpointGrantDescriptor::name));
         reporter.publishEntry("match", "GET /api/fixture/create -> empty=" + wrongVerb.isEmpty());
 
-        assertThat(getRead).map(EndpointGrantDescriptorVo::name).hasValue("fixture.read");
-        assertThat(postCreate).map(EndpointGrantDescriptorVo::name).hasValue("fixture.create");
+        assertThat(getRead).map(EndpointGrantDescriptor::name).hasValue("fixture.read");
+        assertThat(postCreate).map(EndpointGrantDescriptor::name).hasValue("fixture.create");
         assertThat(wrongVerb).isEmpty();
         assertThat(wrongPath).isEmpty();
         assertThat(manager.match(null, "/api/fixture/read")).isEmpty();
@@ -195,9 +195,9 @@ class EndpointGrantManagerRegistrationTest {
 
         var byId = manager.match("GET", "/api/test/dictionary/types/dt-99");
         reporter.publishEntry("input", "GET /api/test/dictionary/types/dt-99");
-        reporter.publishEntry("output", byId.map(EndpointGrantDescriptorVo::name).orElse(""));
+        reporter.publishEntry("output", byId.map(EndpointGrantDescriptor::name).orElse(""));
 
-        assertThat(byId).map(EndpointGrantDescriptorVo::name).hasValue("dictionary.type.get");
+        assertThat(byId).map(EndpointGrantDescriptor::name).hasValue("dictionary.type.get");
     }
 
     @Test
@@ -207,7 +207,7 @@ class EndpointGrantManagerRegistrationTest {
         Method method = CatalogFixtureResource.class.getMethod("read");
         ResourceInfo resourceInfo = new FixedResourceInfo(method, CatalogFixtureResource.class);
 
-        EndpointGrantDescriptorVo descriptor = manager.resolve(resourceInfo).orElseThrow();
+        EndpointGrantDescriptor descriptor = manager.resolve(resourceInfo).orElseThrow();
         reporter.publishEntry("input", "ResourceInfo -> CatalogFixtureResource#read");
         reporter.publishEntry("output", descriptor.toString());
 
@@ -245,7 +245,7 @@ class EndpointGrantManagerRegistrationTest {
         manager.registerResource(OtherModuleResource.class);
         manager.registerResource(OtherModuleResource.class);
 
-        EndpointModuleGrantCatalogVo catalog = manager.moduleCatalog("other-module").orElseThrow();
+        EndpointModuleGrantCatalog catalog = manager.moduleCatalog("other-module").orElseThrow();
         reporter.publishEntry("input", "register OtherModuleResource twice");
         reporter.publishEntry("output", "readOnly size=" + catalog.readOnly().size());
 
@@ -253,11 +253,11 @@ class EndpointGrantManagerRegistrationTest {
         assertThat(manager.match("GET", "/api/other/ping")).isPresent();
     }
 
-    private static EndpointGrantDescriptorVo findDescriptor(
-            EndpointModuleGrantCatalogVo catalog,
+    private static EndpointGrantDescriptor findDescriptor(
+            EndpointModuleGrantCatalog catalog,
             String name
     ) {
-        Set<EndpointGrantDescriptorVo> merged = catalog.readOnly().stream()
+        Set<EndpointGrantDescriptor> merged = catalog.readOnly().stream()
                 .collect(Collectors.toSet());
         catalog.operable().forEach(merged::add);
         return merged.stream()

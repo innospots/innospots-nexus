@@ -1,7 +1,7 @@
-package com.innospots.nexus.console.endpoint.grant.support;
+package com.innospots.nexus.core.endpoint.grant.support;
 
-import com.innospots.nexus.console.endpoint.grant.EndpointGrantAction;
-import com.innospots.nexus.console.logger.I18nLiteral;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
+import com.innospots.nexus.core.endpoint.grant.I18nLiteral;
 
 /**
  * 合并模块与方法注解后的有效 endpoint 策略。
