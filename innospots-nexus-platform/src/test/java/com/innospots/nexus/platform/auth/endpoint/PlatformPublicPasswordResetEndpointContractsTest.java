@@ -27,6 +27,15 @@ class PlatformPublicPasswordResetEndpointContractsTest {
                         .getAnnotation(Operation.class)
                         .operationId())
                 .isEqualTo("authPasswordReset");
+        assertThat(PlatformPublicPasswordResetEndpoint.class.getMethod(
+                                "resetPassword", PasswordResetRequest.class)
+                        .getAnnotation(Operation.class)
+                        .operationId())
+                .isEqualTo("platformAuthPasswordReset");
+        assertThat(PlatformPublicPasswordResetEndpoint.class.getMethod(
+                                "resetPassword", PasswordResetRequest.class)
+                        .getAnnotation(POST.class))
+                .isNotNull();
         assertThat(PublicPasswordResetEndpoint.class.getMethod("resetPassword", PasswordResetRequest.class)
                         .getAnnotation(POST.class))
                 .isNotNull();

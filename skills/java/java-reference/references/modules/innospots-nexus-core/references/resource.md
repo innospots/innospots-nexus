@@ -43,7 +43,7 @@ MetaResourceEntity          workspace-scoped metadata row
 
 **类型：** class，继承 `WorkspaceBaseEntity`
 
-表：`nx_meta_resource`。主键：`resourceId`（`idPrefix()` → `"res"`）。
+表：`nx_meta_resource`。主键：`resourceId`（`idPrefix()` → `"RES"`）。
 
 按 `module_key` 和 `uri_key` 建立索引。
 

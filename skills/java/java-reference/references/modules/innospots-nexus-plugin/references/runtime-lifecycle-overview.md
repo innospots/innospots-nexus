@@ -2,13 +2,15 @@
 
 | 包 / 类型 | 说明 |
 |-----------|------|
-| `contract.Plugin` | classpath 插件唯一 SPI |
-| `declaration.*` | `PluginDefinition`、能力需求、贡献声明 |
-| `runtime.*` | 插件运行时组装 |
-| `lifecycle.*` | `PluginState`、`PluginRuntimeInfo` |
-| `event.*` | `PluginEventBus`、启动/停止事件 |
-| `capability.*` | `CapabilityRouter`、注册与路由 |
-| `resource.*` | `ResourceScope`、插件资源注册 |
-| `bootstrap.*` | 宿主侧引导钩子 |
+| `contract.Plugin` / `PluginContext` | 唯一插件 SPI 与启动周期上下文 |
+| `declaration.*` | `PluginDefinition`、`PluginManifest`、来源与标签 |
+| `runtime.*` | `PluginManager`、`DefaultPluginManager`、`PluginRuntimeConfig` |
+| `lifecycle.*` | `PluginState`、`PluginRuntimeInfo`、可用性门控 |
+| `contribution.*` | 声明、解码、全局校验、事务提交与快照 |
+| `event.*` | 运行时本地事件总线与启停观测事件 |
+| `resource.*` | 单次启动周期的逆序资源释放 |
+| `bootstrap.*` | 宿主启动任务与属性 |
 
-包级参考：`contract.md`、`runtime.md`、`lifecycle.md`、`capability.md`、`event.md`、`resource.md`。
+包级参考：[contract.md](contract.md)、[runtime.md](runtime.md)、[lifecycle.md](lifecycle.md)、
+[contribution.md](contribution.md)、[event.md](event.md)、[resource.md](resource.md)、
+[bootstrap.md](bootstrap.md)。

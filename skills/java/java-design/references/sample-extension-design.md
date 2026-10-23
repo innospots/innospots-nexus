@@ -33,7 +33,8 @@ console.<domain>  — 管理台 API + Console*Service
 inbound.<domain>  — 对外 API + Inbound*Service
 ```
 
-- 功能子模块（如 `support.assignment`）写在 **core** 下优先；若仅 inbound 可见的薄适配，可放 `inbound.<domain>.<function>`。
+- 功能子包写在对应**技术模块**下，例如 `core.support.service.assignment`；
+  若仅 inbound 可见的薄适配，可放 `inbound.<domain>.service.<function>`。
 - 禁止技术层优先：`endpoint.announcement`、`dao.support`（在交付面之下仍 **领域优先**）。
 
 ---

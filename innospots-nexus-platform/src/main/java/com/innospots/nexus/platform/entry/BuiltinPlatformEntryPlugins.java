@@ -15,7 +15,7 @@ public final class BuiltinPlatformEntryPlugins {
 
     public static final String PLATFORM_CONSOLE = "com.innospots.nexus.platform.console";
 
-    /** PageDsl / console 贡献领域：{@code ui-pages/platform/...}。 */
+    /** platform console 贡献领域键。 */
     public static final String DOMAIN_KEY = "platform";
 
     /** platform 宿主在通用 entry 标签之上追加的 realm 键。 */

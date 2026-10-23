@@ -7,28 +7,30 @@
 
 ## 模块概览
 
-基于 `innospots-nexus-core` 与 `innospots-nexus-plugin` 的管理控制台 **API 表面**：Jakarta REST、请求过滤器链、request/response record、目录索引、权限运行时、导航组装、平台域认证编排、凭据（密码/OTP/TOTP）、动态页面 Sitemap、OpenAPI 规范目录，以及内置控制台入口插件。
+基于 `innospots-nexus-core` 与 `innospots-nexus-plugin` 的管理控制台 **API 表面**：
+Jakarta REST、请求过滤器链、request/response record、目录索引、权限运行时、导航组装、
+平台域认证编排、凭据（密码/OTP/TOTP）、meta-sitemap 导航配置、OpenAPI 规范目录，
+以及内置控制台入口插件。
 
 **能力一览：**
 
 | 能力 | 说明 |
 |------|------|
 | **REST 表面** | `/api/d/nexus/**`（`ConsoleConstant.API_PREFIX`）与公共开放 `/api/public/**`（免鉴权） |
-| **JAX-RS 过滤器链** | CORS、Bearer 鉴权、dev 会话、页面权限校验与 requestId 上下文（`console.jaxrs`） |
+| **JAX-RS 过滤器链** | EndpointGrant 解析、CORS、Bearer 鉴权、dev 会话、页面权限校验、审计与 requestId 上下文（`console.jaxrs`） |
 | **归属与作用域** | `ConsoleOwnership*`、`SessionScopeBinder` 端口 |
 | **目录索引** | 插件贡献同步到 `nx_console_catalog_resource` |
-| **权限运行时** | `ConsolePagePermissionAuthorizer`、`PermissionGrantService` |
-| **导航** | `NavigationMenuAssembler` + `/api/d/nexus/navigation/menus` |
+| **权限运行时** | `EndpointGrantManager`、`ConsolePagePermissionAuthorizer`、`PageAccessVerifier`、`PermissionGrantService` |
+| **导航** | `NavigationMenuAssembler` / `NavigationMenuComposer` + `/api/d/nexus/navigation/menus` |
 | **凭据** | 密码、OTP、TOTP 与 `nx_user_credential` |
 | **插件管理** | `PluginManagementEndpoint` |
-| **Page DSL 运行时** | `console.ui.spec` / `console.ui.endpoint`（Pactor Page DSL 1.0；Java 快照见 `innospots-nexus-plugin` README，规范见 `innospots-nexus-plugin-ui-spec`） |
-| **Sitemap** | `SitemapService` + `GET /api/public/sitemap/nexus`（`ui-pages/nexus/sitemap.yaml`） |
-| **OpenAPI** | 构建期 bundled 规范目录与 Scalar 文档钩子 |
-| **内置入口** | `PluginManagementEntryPlugin` + `BuiltinConsoleEntryPlugins` / `ConsolePageRoutes`；组装工厂在 **plugin**（`ConsoleEntryPlugins`）+ `ui-pages/nexus/**` |
+| **Meta Sitemap** | `SitemapService` 读取 `console/meta-sitemap.yaml`，供 `NavigationMenuComposer` 合并默认菜单 |
+| **OpenAPI** | console 的全局 OpenAPI 元数据；规范目录运行时代码归属 core |
+| **内置入口** | `PluginManagementEntryPlugin` + `BuiltinConsoleEntryPlugins` / `ConsolePageRoutes`；组装入口在 **plugin**（`ConsoleContributions`），`entryPageKey` 为 `nexus-plugin-main` |
 | **审计** | `nx_audit_log` 与调用日志管道 |
 
-**不包含：** Spring Boot 自动配置、Servlet 绑定、租户 `/tenant/**` 与平台 `/platform/**` 认证端点实现（归属 portal/platform）、
-插件规范 / Page DSL 定义。
+**不包含：** Spring Boot 自动配置、Servlet 绑定、租户 `/tenant/**` 与平台 `/platform/**`
+认证端点实现（归属 portal/platform）、插件规范与 contribution 约束定义。
 
 ## 边界契约
 
@@ -36,7 +38,7 @@
 
 | 关注点 | 归属 | 控制台提供 |
 |---------|-------|------------------|
-| 插件发现、贡献解码、Page DSL | **plugin** | 消费 plugin API 做目录同步 |
+| 插件发现、贡献解码 | **plugin** | 消费 plugin API 做目录同步 |
 | 目录持久化索引（`nx_console_catalog_resource`） | **console** | `ConsoleCatalogSyncService`、`ConsoleCatalogService` |
 | 权限授权（`nx_permission_grant`） | **console** | 实体、DAO、`PermissionGrantService`、`ConsolePagePermissionAuthorizer` |
 | 用户 / 成员持久化 | **portal** / **platform** | `UserDirectory`、`MembershipDirectory` 等端口 |
@@ -54,7 +56,7 @@ endpoint → service → operator → dao
 - 依赖方向：**operator 只能依赖 dao**（禁止依赖 service 或其他 operator）；
   **service 可依赖 operator、其他 service 和 dao**（不得形成循环）。
 - 端点：`jakarta.ws.rs`；返回 `R<T>`（分页为 `R<PageResult<T>>`）。
-- `domain.request` / `domain.vo`：**record**。
+- `domain.request` / `domain.vo`：**record**；不可变 `domain.model` 优先 record。
 - 事务：`jakarta.transaction.Transactional` 仅在 service/operator。
 - 需 Bearer 的管理 API 使用 `@NexusAuthenticatedApi`（core OpenAPI 契约）。
 
@@ -62,7 +64,7 @@ endpoint → service → operator → dao
 
 | 表 | 实体 | 基类 / 归属 |
 |-------|--------|----------------|
-| `nx_console_catalog_resource` | `ConsoleCatalogResourceEntity` | `BaseEntity` + 目录键 |
+| `nx_console_catalog_resource` | `ConsoleCatalogResourceEntity` | `BaseEntity` + MODULE/MENU 目录键 |
 | `nx_permission_grant` | `PermissionGrantEntity` | `OwnershipEntity` |
 | `nx_role` | `RoleEntity` | `BaseEntity` + `ownerType`/`ownerId`/`securityRealm` 列 |
 | `nx_role_binding` | `RoleBindingEntity` | `OwnershipEntity` |
@@ -79,10 +81,10 @@ endpoint → service → operator → dao
 | 租户登录/注册/作用域 | 端口与 VO 形状 | **portal** |
 | 会话绑定 TLC | `SessionScopeBinder` 端口、`SessionScopeTlc` | adapter |
 | 控制台归属解析 | `ConsoleOwnershipScope`、`ConsoleOwnershipGuard` | console operator |
-| 页面/数据源授权 | `ConsolePagePermissionAuthorizer` | `jaxrs.filter.ConsolePagePermissionFilter`（或 adapter 过滤器） |
+| 页面入口授权 | `ConsolePagePermissionAuthorizer` / `PageAccessVerifier` | `jaxrs.filter.ConsolePagePermissionFilter`（或 adapter 过滤器） |
 | 当前用户主体 | `AuthorizationSubjectResolver`（默认 `SessionAuthorizationSubjectResolver`） | adapter 可替换 |
 | 目录同步 | `ConsoleCatalogSyncService`、`ConsoleCatalogSyncStartupTask` | 宿主注册启动任务 |
-| OpenAPI 规范目录 | `OpenApiCatalogEndpoint` | console + 构建期 bundled specs |
+| OpenAPI 全局元数据 | `NexusConsoleOpenApiDefinition` | console；规范目录实现见 core |
 | 新管理 REST 域 | endpoint + request/vo + service/operator/dao | console 模块内 |
 
 **不要**在 console 中放置插件规范、贡献约束或 Spring 绑定。
@@ -102,13 +104,15 @@ endpoint → service → operator → dao
 | `/api/d/nexus/roles` | `RoleEndpoint` | 角色 CRUD（可继承） |
 | `/api/d/nexus/roles/{roleId}/bindings` | `RoleBindingEndpoint` | 角色绑定 |
 | `/api/d/nexus` | `GrantManagementEndpoint` | 角色/组织单元授权替换 |
-| `/api/d/nexus/dictionary-types` | `DictionaryTypeEndpoint` | 字典类型 |
-| `/api/d/nexus/dictionary-types/{typeCode}/items` | `DictionaryItemEndpoint` | 字典项 |
-| `/api/public/pages/{pageKey}` | `DefaultPageDslEndpoint` | 复合 pageKey 页面渲染（免鉴权） |
-| `/api/public/sitemap/nexus` | `NexusSitemapEndpoint` | 内置 nexus Sitemap（免鉴权） |
-| `/openapi/specs` | `OpenApiCatalogEndpoint` | OpenAPI 文档目录 |
+| `/api/d/nexus/dictionary-types` | `DictionaryTypeEndpoint` | 字典类型；实现类绑定类级路径，字典项随类型读写 |
+| `/api/public/page-access` | `PageAccessEndpoint` | catalog 页面入口访问校验（免鉴权） |
 
-内置 entry 与 `pageKey` 规范见 [console-entry-and-pages.md](../../console-entry-and-pages.md) 与 [references/entry.md](references/entry.md)。
+`auth.*` 下三个接口只定义 JAX-RS 方法契约，类级路径由 portal/platform 的业务实现绑定。
+`/openapi/specs` 由 `innospots-nexus-core` 的 OpenAPI catalog 提供。
+
+内置 entry 与稳定 `entryPageKey` 规范见
+[console-entry-and-configuration.md](../../console-entry-and-configuration.md) 与
+[references/entry.md](references/entry.md)。
 
 租户 `/tenant/**`、平台 `/platform/**` 契约由 **portal** / **platform** 实现，见对应模块文档。
 
@@ -161,17 +165,35 @@ java:check      → mvn clean compile / test
 | 类 | 类型 | 说明 |
 |------|------|------|
 | `AuthCaptchaVo` | `record` | 登录图形验证码发放结果（REST 形状） |
+| `AuthRsaPublicKeyVo` | `record` | 登录密码 RSA 加密用 X.509 SPKI 公钥 |
 | `AuthTokenVo` | `record` | 登录、注册、刷新或租户选择后返回的令牌对 |
+| `PublicRegistrationPolicyVo` | `record` | 匿名注册入口与 OTP 校验策略 |
+
+### 包 `auth.endpoint`
+
+| 类 | 类型 | 说明 |
+|------|------|------|
+| `AuthSessionEndpoint` | `interface` | 已登录会话的刷新、登出与改密 JAX-RS 契约 |
+| `PublicAuthEndpoint` | `interface` | 匿名 RSA 公钥、验证码与登录 JAX-RS 契约 |
+| `PublicPasswordResetEndpoint` | `interface` | 匿名密码重置 JAX-RS 契约 |
 
 ### 包 `auth.service`
 
 | 类 | 类型 | 说明 |
 |------|------|------|
 | `AuthFacade` | `class` | 运维平台域登录与令牌刷新编排 |
+| `AuthRsaKeyService` | `class` | 返回配置的 RSA 公钥，必要时从私钥推导 |
 | `AuthSessionScope` | `record` | 已签发认证令牌对携带的作用域 |
 | `AuthTokenPairIssuer` | `class` | 从会话作用域签发访问与刷新令牌对 |
 | `LoginCaptchaGate` | `class` | 登录前图形验证码策略与编排；实现委托 CaptchaChallengeService |
+| `RegistrationPolicyService` | `class` | 公开注册策略查询与自助注册模式门禁 |
 | `TokenIssuer` | `class` | 签发并解析 AES-GCM 紧凑令牌 |
+
+### 包 `auth.status`
+
+| 类 | 类型 | 说明 |
+|------|------|------|
+| `RegistrationPolicyStatusCode` | `enum` | 注册策略状态码 |
 
 ### 包 `catalog.bootstrap`
 
@@ -195,19 +217,23 @@ java:check      → mvn clean compile / test
 
 | 类 | 类型 | 说明 |
 |------|------|------|
-| `CatalogResourceType` | `enum` | Console 插件贡献向目录索引暴露的资源类型 |
+| `CatalogResourceType` | `enum` | Console 目录索引资源类型，当前仅 `MODULE` / `MENU` |
 
 ### 包 `catalog.domain.model`
 
 | 类 | 类型 | 说明 |
 |------|------|------|
+| `CatalogGrantKeys` | `class` | 生成 `grantName:domainKey.moduleKey` 形式的稳定授权键 |
 | `CatalogSyncResult` | `record` | Console 目录显式同步结果 |
 
 ### 包 `catalog.domain.vo`
 
 | 类 | 类型 | 说明 |
 |------|------|------|
-| `CatalogNodeVo` | `record` | 权限设置页的插件功能树节点 |
+| `CatalogModuleGrantVo` | `record` | MODULE 节点上的访问项与操作分组授权面 |
+| `CatalogNodeVo` | `record` | 权限设置页的 MODULE / MENU 递归节点 |
+| `CatalogPermissionGroupVo` | `record` | MODULE 操作权限分组 |
+| `CatalogViewItemVo` | `record` | 页面访问项或操作项 |
 
 ### 包 `catalog.endpoint`
 
@@ -219,15 +245,21 @@ java:check      → mvn clean compile / test
 
 | 类 | 类型 | 说明 |
 |------|------|------|
+| `CatalogPermissionCatalogAssembler` | `class` | 将 catalog MODULE/MENU 与 EndpointGrant 组装为权限目录 |
 | `ConsoleCatalogService` | `class` | 从宿主级目录索引组装权限设置树 |
-| `ConsoleCatalogSyncService` | `class` | 将已激活 Console Contribution 和 PageDsl 同步为宿主级目录索引 |
+| `ConsoleCatalogSyncService` | `class` | 将已激活 `console@2` MODULE/MENU 贡献同步为宿主级目录索引 |
 
 ### 包 `config`
 
 | 类 | 类型 | 说明 |
 |------|------|------|
-| `ConsoleConstant` | `class` | 控制台共享路径常量：管理 API `/api/d/nexus`、公共 API `/api/public` 及拼接工具 |
 | `AuthConfig` | `class` | 控制台认证的令牌签发设置 |
+| `AuthConfigRsaMapper` | `class` | 将外部 RSA 公钥/私钥配置映射为 `AuthConfig.Rsa` |
+| `ConsoleConstant` | `class` | 控制台共享路径常量：管理 API `/api/d/nexus`、公共 API `/api/public` 及拼接工具 |
+| `RegistrationConfig` | `class` | 自助注册模式、OTP 校验方式与投递参数配置 |
+| `RegistrationMode` | `enum` | CLOSED / OPEN / INVITE / APPROVAL 注册模式 |
+| `RegistrationOtpVerification` | `enum` | 注册 OTP 校验方式 |
+| `RsaKeyMaterial` | `class` | RSA 密钥材料解析与 SPKI 公钥推导 |
 
 ### 包 `credential.otp.captcha`
 
@@ -291,6 +323,12 @@ java:check      → mvn clean compile / test
 | 类 | 类型 | 说明 |
 |------|------|------|
 | `OtpStatusCode` | `enum` | OTP 子域业务状态码（模块标识 OTP，完整码形如 OTP-0001） |
+
+### 包 `credential.otp.support`
+
+| 类 | 类型 | 说明 |
+|------|------|------|
+| `RegistrationOtpDebugLogger` | `class` | 联调期注册 OTP 日志输出；默认关闭 |
 
 ### 包 `credential.ownership`
 
@@ -417,9 +455,6 @@ java:check      → mvn clean compile / test
 | 类 | 类型 | 说明 |
 |------|------|------|
 | `DictionaryItemCreateRequest` | `record` | 在类型编码下创建字典项的请求 |
-| `DictionaryItemPageRequest` | `class` | 由管理控制台查询参数绑定的分页字典项查询 |
-| `DictionaryItemStatusUpdateRequest` | `record` | 启用或禁用字典项的请求 |
-| `DictionaryItemUpdateRequest` | `record` | 更新可变字典项字段的请求；项值不可变 |
 | `DictionaryTypeCreateRequest` | `record` | 创建字典类型的请求 |
 | `DictionaryTypePageRequest` | `class` | 由管理控制台查询参数绑定的分页字典类型查询 |
 | `DictionaryTypeStatusUpdateRequest` | `record` | 启用或禁用字典类型的请求 |
@@ -437,27 +472,19 @@ java:check      → mvn clean compile / test
 
 | 类 | 类型 | 说明 |
 |------|------|------|
-| `DictionaryItemEndpoint` | `class` | 字典项管理 REST 资源 |
-| `DictionaryTypeEndpoint` | `class` | 字典类型管理 REST 资源 |
+| `DictionaryTypeEndpoint` | `interface` | 字典类型 JAX-RS 契约；字典项随类型请求体维护 |
 
-### 包 `dictionary.entry`
+### 包 `dictionary.json`
 
 | 类 | 类型 | 说明 |
 |------|------|------|
-| `DictionaryEntryPlugin` | `class` | 贡献字典管理主页面的内置 entry 插件 |
+| `DictionaryTypeI18nSerializer` | `class` | 字典类型名称的多语言 JSON 序列化 |
 
 ### 包 `dictionary.operator`
 
 | 类 | 类型 | 说明 |
 |------|------|------|
-| `DictionaryItemOperator` | `class` | 租户级字典项持久化与查询 |
-| `DictionaryTypeOperator` | `class` | 租户级字典类型持久化与查询 |
-
-### 包 `dictionary.service`
-
-| 类 | 类型 | 说明 |
-|------|------|------|
-| `DictionaryService` | `class` | 字典类型与字典项的应用服务 |
+| `DictionaryTypeOperator` | `class` | 字典类型及其内嵌字典项的持久化与查询 |
 
 ### 包 `dictionary.status`
 
@@ -465,20 +492,52 @@ java:check      → mvn clean compile / test
 |------|------|------|
 | `DictionaryStatusCode` | `enum` | 字典域状态码 |
 
-### 包 `endpoint`
+### 包 `dictionary.support`
+
+| 类 | 类型 | 说明 |
+|------|------|------|
+| `DictionaryTypeNames` | `class` | 字典类型多语言名称的规范化、存储与展示 |
+
+### 包 `endpoint.contract`
 
 | 类 | 类型 | 说明 |
 |------|------|------|
 | `ConsoleEndpoint` | `interface` | 根管理控制台端点契约 |
-| `MainRootEndpoint` | `class` | 站点根路径 `GET /` 重定向至文档入口 |
 | `PublicEndpoint` | `interface` | 公共开放 REST API 根契约（`/api/public`，免鉴权） |
+
+### 包 `endpoint.root`
+
+| 类 | 类型 | 说明 |
+|------|------|------|
+| `MainRootEndpoint` | `class` | 站点根路径 `GET /` 重定向至文档入口 |
+
+### 包 `endpoint.grant`
+
+| 类 | 类型 | 说明 |
+|------|------|------|
+| `EndpointGrant` | `annotation` | 单条 REST 方法的授权、审计与跳过策略 |
+| `EndpointGrantAction` | `enum` | 授权/审计动作分类 |
+| `EndpointGrantDescriptorVo` | `record` | 单条 grant 的目录与运行时描述 |
+| `EndpointGrantManager` | `class` | grant 注册、模块目录聚合与路径匹配 |
+| `EndpointModule` | `annotation` | REST 资源/契约接口的模块归属 |
+| `EndpointModuleGrantCatalogVo` | `record` | 按 MODULE 聚合的 grant 目录 |
+
+### 包 `endpoint.grant.support`
+
+| 类 | 类型 | 说明 |
+|------|------|------|
+| `EndpointGrantAnnotations` | `class` | 从实现方法与 console 契约接口解析 grant |
+| `EndpointGrantHttpIntrospection` | `class` | 解析 JAX-RS HTTP 动词与完整路径模板 |
+| `EndpointGrantPathMatcher` | `class` | 将 JAX-RS 模板与请求路径匹配 |
+| `EndpointGrantHttpIntrospection.HttpRouteBinding` | `record` | 一条 HTTP 方法与合并路径模板绑定 |
+| `ResolvedEndpointGrant` | `record` | 合并模块与方法注解后的有效策略 |
 
 ### 包 `entry`
 
 | 类 | 类型 | 说明 |
 |------|------|------|
 | `BuiltinConsoleEntryPlugins` | `class` | 本模块内置 entry 插件 ID、`REQUIRED_PLUGIN_IDS`、版本 |
-| `ConsolePageRoutes` | `class` | nexus 域键、复合 pageKey 与 `/page/...` 路由 |
+| `ConsolePageRoutes` | `class` | nexus 域键、稳定入口键与 `/page/...` 路由 |
 
 `console@2` 贡献组装见 **plugin** → [contribution-console-entry-assembly.md](../innospots-nexus-plugin/references/contribution-console-entry-assembly.md)。
 
@@ -486,11 +545,13 @@ java:check      → mvn clean compile / test
 
 | 类 | 类型 | 说明 |
 |------|------|------|
+| `ConsoleAuditLogFilter` | `class` | 读取 resolved grant，在响应阶段记录审计日志 |
 | `ConsoleCorsFilter` | `class` | 可配置 JAX-RS CORS 支持（预检 + 响应头，默认关闭） |
 | `ConsoleAuthenticationFilter` | `class` | 解析 Bearer 访问令牌并填充 SessionContext |
 | `ConsoleDevSessionFilter` | `class` | 关闭请求侧安全时按配置注入开发用固定会话 |
-| `ConsolePagePermissionFilter` | `class` | 控制台页面权限校验（catalog PAGE/DATASOURCE，`X-Nexus-Page-Key` 头） |
+| `ConsolePagePermissionFilter` | `class` | 读取页面键并按叶子 MODULE/MENU 的 `entryPageKey` 校验控制台页面权限 |
 | `ConsoleRequestContextFilter` | `class` | 分配 requestId（TLC.TRACE_ID）并在响应后清理线程上下文 |
+| `ConsoleResolvedEndpointGrantFilter` | `class` | 认证前解析资源方法 grant 并写入请求属性 |
 
 ### 包 `jaxrs.support`
 
@@ -499,8 +560,12 @@ java:check      → mvn clean compile / test
 | `ConsoleAntPathMatcher` | `class` | 简单 Ant 风格路径匹配（`*`、`**`） |
 | `ConsolePermitAllPaths` | `class` | 默认免登录路径模式（OpenAPI、公共 API、健康检查、根路径） |
 | `ConsolePublicApiPaths` | `class` | 公共开放 API 路径匹配（`/api/public/**` 与 `/api/d/{domain}/public/**`） |
+| `ConsoleRequestGrants` | `class` | 从请求上下文读取 resolved grant/binding |
+| `ConsoleRequestProperties` | `class` | 管理控制台 JAX-RS 请求属性键 |
 | `ConsoleTokenSessionBinder` | `class` | 将访问令牌声明绑定到 SessionContext / TLC |
 | `ConsoleDevSessionBinder` | `class` | 关闭请求侧安全时将 dev 身份绑定到 SessionContext |
+| `EndpointMethodResolver` | `interface` | 宿主提供当前请求匹配的资源方法与实现类 |
+| `ResolvedEndpointBinding` | `record` | grant、资源类名与方法名的请求级绑定 |
 
 ### 包 `jaxrs.web`
 
@@ -515,9 +580,16 @@ java:check      → mvn clean compile / test
 
 | 类 | 类型 | 说明 |
 |------|------|------|
-| `AuditLog` | `@interface` | 标记方法为审计日志操作 |
+| `AuditLogMessages` | `class` | 将 `I18nLiteral` 转为多语言对象并解析操作文案 |
+| `I18nLiteral` | `annotation` | 注解内嵌的 locale → 文案对 |
 | `InvocationLogHandler` | `interface` | 通用拦截处理器端口 |
 | `LogExecutor` | `class` | 所有框架适配器共享的可复用拦截例程 |
+
+### 包 `logger.converter`
+
+| 类 | 类型 | 说明 |
+|------|------|------|
+| `AuditLogConverter` | `class` | 审计日志实体与 VO 转换 |
 
 ### 包 `logger.dao`
 
@@ -537,11 +609,23 @@ java:check      → mvn clean compile / test
 |------|------|------|
 | `AuditLogEntity` | `class` | 管理控制台操作的仅追加审计日志；归属列记录操作发生的控制台上下文 |
 
-### 包 `logger.entry`
+### 包 `logger.domain.request`
 
 | 类 | 类型 | 说明 |
 |------|------|------|
-| `LoggerEntryPlugin` | `class` | 贡献审计日志管理主页面的内置 entry 插件 |
+| `AuditLogPageRequest` | `class` | 审计日志分页查询参数 |
+
+### 包 `logger.domain.vo`
+
+| 类 | 类型 | 说明 |
+|------|------|------|
+| `AuditLogVo` | `record` | 审计日志管理视图 |
+
+### 包 `logger.endpoint`
+
+| 类 | 类型 | 说明 |
+|------|------|------|
+| `AuditLogEndpoint` | `interface` | 审计日志查询 JAX-RS 契约 |
 
 ### 包 `logger.handler`
 
@@ -553,7 +637,21 @@ java:check      → mvn clean compile / test
 
 | 类 | 类型 | 说明 |
 |------|------|------|
+| `AuditLogOperator` | `class` | 审计日志持久化查询 |
 | `InvocationLogOperator` | `class` | 将被拦截调用持久化到审计日志领域的数据操作器 |
+
+### 包 `logger.status`
+
+| 类 | 类型 | 说明 |
+|------|------|------|
+| `AuditLogStatusCode` | `enum` | 审计日志域状态码 |
+
+### 包 `logger.support`
+
+| 类 | 类型 | 说明 |
+|------|------|------|
+| `AuditLogInvocationState` | `record` | 响应阶段组装的不可变审计调用元数据 |
+| `AuditLogRecorder` | `class` | 将 resolved grant 与调用结果组装到 `InvocationLogHandler` |
 
 ### 包 `menu.dao`
 
@@ -592,59 +690,26 @@ java:check      → mvn clean compile / test
 | `MenuVo` | `record` | 管理控制台菜单详情及嵌套子节点 |
 | `NavigationMenuVo` | `record` | 交付给管理前端的只读导航节点 |
 
-### 包 `menu.entry`
-
-| 类 | 类型 | 说明 |
-|------|------|------|
-| `MenuEntryPlugin` | `class` | 贡献菜单管理主页面的内置 entry 插件 |
-
 ### 包 `navigation.endpoint`
 
 | 类 | 类型 | 说明 |
 |------|------|------|
-| `NavigationMenuEndpoint` | `class` | 当前用户可见的侧边栏导航接口 |
+| `NavigationMenuEndpoint` | `interface` | 当前用户可见的侧边栏导航 JAX-RS 契约 |
 
 ### 包 `navigation.service`
 
 | 类 | 类型 | 说明 |
 |------|------|------|
+| `MetaSitemapMenuFilter` | `class` | 按 hidden 与角色裁剪 meta-sitemap 菜单 |
+| `MetaSitemapNavigationConverter` | `class` | 将 meta-sitemap 菜单转换为导航 VO |
 | `NavigationMenuAssembler` | `class` | 从持久化权限目录组装当前用户可见的导航菜单树 |
+| `NavigationMenuComposer` | `class` | 合并 catalog 导航与 meta-sitemap 默认菜单 |
 
 ### 包 `openapi`
 
 | 类 | 类型 | 说明 |
 |------|------|------|
 | `NexusConsoleOpenApiDefinition` | `class` | 控制台 OpenAPI 全局元数据（构建期扫描；非 JAX-RS Application，以便与 portal/platform 共宿主） |
-
-### 包 `openapi.domain.vo`
-
-| 类 | 类型 | 说明 |
-|------|------|------|
-| `OpenApiSpecItemVo` | `record` | classpath 上的单个 OpenAPI 模块规范 |
-
-### 包 `openapi.endpoint`
-
-| 类 | 类型 | 说明 |
-|------|------|------|
-| `OpenApiCatalogEndpoint` | `class` | 构建期 OpenAPI 规范目录：列表与按 specId 读取 YAML |
-
-### 包 `openapi.internal`
-
-| 类 | 类型 | 说明 |
-|------|------|------|
-| `OpenApiBundledSpecs` | `class` | 读取 META-INF/nexus-openapi/.yaml 构建期产物 |
-
-### 包 `openapi.operator`
-
-| 类 | 类型 | 说明 |
-|------|------|------|
-| `OpenApiCatalogOperator` | `class` | 按文件名加载 OpenApiBundledSpecs 下的 OpenAPI YAML |
-
-### 包 `openapi.scalar`
-
-| 类 | 类型 | 说明 |
-|------|------|------|
-| `OpenApiScalarDocumentation` | `class` | Scalar 文档 UI 的框架无关配置与渲染，供 Spring、Quarkus 等运行时挂载 HTTP 路由时复用 |
 
 ### 包 `permission.api`
 
@@ -662,7 +727,7 @@ java:check      → mvn clean compile / test
 | `AuthorizationScope` | `class` | 通过线程上下文向数据访问适配器传递鉴权结果 |
 | `AuthorizationSubject` | `record` | 由应用安全适配器提供的当前鉴权主体 |
 | `AuthorizationSubjectResolver` | `interface` | 从当前请求上下文解析鉴权主体的端口 |
-| `ConsolePagePermissionAuthorizer` | `class` | 控制台 catalog 页面与 datasource 代理的权限判定（框架中立） |
+| `ConsolePagePermissionAuthorizer` | `class` | 按叶子 MODULE/MENU 的 `entryPageKey` 做页面访问判定（框架中立） |
 | `SessionAuthorizationSubjectResolver` | `class` | 从 SessionContext 与角色绑定表解析当前鉴权主体 |
 
 ### 包 `permission.dao`
@@ -694,21 +759,26 @@ java:check      → mvn clean compile / test
 
 | 类 | 类型 | 说明 |
 |------|------|------|
-| `PermissionResourceSyncVo` | `record` | 显式同步扩展和 UiSpec 权限目录后的处理结果 |
+| `PermissionResourceSyncVo` | `record` | 显式同步 `console@2` 贡献到权限目录后的计数结果 |
 | `PermissionResourceVo` | `record` | 面向管理端和前端的权限资源目录视图 |
 
 ### 包 `permission.endpoint`
 
 | 类 | 类型 | 说明 |
 |------|------|------|
-| `CurrentAuthorizationEndpoint` | `class` | 当前用户可见权限资源的 REST 资源 |
-| `GrantManagementEndpoint` | `class` | 角色与组织单元权限全量替换的管理 REST 资源 |
+| `CurrentAuthorizationEndpoint` | `interface` | 当前用户可见权限资源 JAX-RS 契约 |
+| `GrantManagementEndpoint` | `interface` | 角色权限全量替换 JAX-RS 契约 |
+| `OrganizationUnitGrantManagementEndpoint` | `interface` | 组织单元权限全量替换 JAX-RS 契约 |
+| `PageAccessEndpoint` | `interface` | catalog 页面入口访问校验契约 |
 
-### 包 `permission.entry`
+### 包 `permission.pageaccess`
 
 | 类 | 类型 | 说明 |
 |------|------|------|
-| `PermissionEntryPlugin` | `class` | 贡献权限管理主页面的内置 entry 插件 |
+| `GrantGroupPageAccessVerifier` | `class` | 基于 catalog 页面授权与 `grantGroup` 的默认校验器 |
+| `PageAccessVerifier` | `interface` | 页面访问校验端口 |
+| `PageAccessVerifyRequest` | `record` | 页面定位与 `grantGroup` 校验请求 |
+| `PageAccessVerifyResult` | `record` | 页面访问允许/拒绝结果 |
 
 ### 包 `permission.service`
 
@@ -716,7 +786,7 @@ java:check      → mvn clean compile / test
 |------|------|------|
 | `GrantSubjectAccess` | `class` | 校验授权主体属于当前控制台归属上下文 |
 | `PermissionGrantService` | `class` | 管理角色和组织单元授权，并以全量替换方式保存授权结果 |
-| `PermissionVisibilityService` | `class` | 按当前主体构建菜单、页面、action 和 datasource 的可见资源视图 |
+| `PermissionVisibilityService` | `class` | 按当前主体构建 MODULE/MENU 可见资源视图 |
 
 ### 包 `plugin.converter`
 
@@ -792,14 +862,8 @@ java:check      → mvn clean compile / test
 
 | 类 | 类型 | 说明 |
 |------|------|------|
-| `RoleBindingEndpoint` | `class` | 角色绑定 REST 资源 |
-| `RoleEndpoint` | `class` | 角色生命周期与查询 REST 资源，可直接继承以扩展路由或响应包装 |
-
-### 包 `role.entry`
-
-| 类 | 类型 | 说明 |
-|------|------|------|
-| `RoleEntryPlugin` | `class` | 贡献角色管理主页面的内置 entry 插件 |
+| `RoleBindingEndpoint` | `interface` | 角色绑定 JAX-RS 契约；类级路径由业务实现绑定 |
+| `RoleEndpoint` | `interface` | 角色生命周期与查询 JAX-RS 契约；类级路径由业务实现绑定 |
 
 ### 包 `role.operator`
 
@@ -807,12 +871,6 @@ java:check      → mvn clean compile / test
 |------|------|------|
 | `RoleBindingOperator` | `class` | 角色与主体绑定关系维护，可供子类扩展校验或同步逻辑 |
 | `RoleOperator` | `class` | 工作空间作用域内角色持久化与查询，可供子类扩展过滤或校验规则 |
-
-### 包 `role.service`
-
-| 类 | 类型 | 说明 |
-|------|------|------|
-| `RoleService` | `class` | 角色与绑定管理工作流入口，子类可覆写方法以组合扩展 operator 行为 |
 
 ### 包 `role.status`
 
@@ -828,6 +886,8 @@ java:check      → mvn clean compile / test
 | `ConsoleOwnershipGuard` | `class` | 控制台 API 入口校验会话是否满足数据归属层级要求 |
 | `ConsoleOwnershipLevel` | `enum` | 控制台数据默认归属层级（业务可见性与会话要求） |
 | `ConsoleOwnershipScope` | `class` | 基于 ownerType / ownerId / securityRealm 的查询隔离 |
+| `ConsoleSessionContext` | `class` | 当前控制台会话归属与安全域的读取入口 |
+| `ConsoleSessionScope` | `enum` | 控制台会话作用域层级 |
 
 ### 包 `scope.service`
 
@@ -836,62 +896,48 @@ java:check      → mvn clean compile / test
 | `SessionScopeBinder` | `interface` | 将认证身份与作用域快照绑定到会话上下文；由 portal / platform 装配提供具体实现 |
 | `SessionScopeTlc` | `class` | 会话 TLC / SessionContext 绑定的共享辅助方法 |
 
+### 包 `support`
+
+| 类 | 类型 | 说明 |
+|------|------|------|
+| `ConsoleExceptions` | `class` | 构造带 console 状态码的领域异常 |
+
 
 ### 包 `sitemap.config`
 
 | 类 | 类型 | 说明 |
 |------|------|------|
-| `SitemapYamlConfig` | `class` | Classpath sitemap YAML 资源定位配置（默认 `ui-pages/{domainKey}/sitemap.yaml`） |
+| `SitemapYamlConfig` | `class` | Classpath meta-sitemap 资源定位（默认 `console/meta-sitemap.yaml`） |
 
 ### 包 `sitemap.domain.config`
 
 | 类 | 类型 | 说明 |
 |------|------|------|
-| `SitemapConfig` | `class` | 从 classpath YAML 解析的 sitemap 配置文档（会话无关超集） |
+| `SitemapConfig` | `class` | 会话无关的 meta-sitemap 根文档：标题、版本与菜单树 |
 
 ### 包 `sitemap.domain.model`
 
 | 类 | 类型 | 说明 |
 |------|------|------|
-| `SitemapAppInfo` | `class` | Sitemap 应用展示元数据 |
-| `SitemapAuthConfig` | `class` | Sitemap 认证相关配置（登录页路径） |
-| `SitemapPageDescriptor` | `class` | Sitemap 中的页面声明（路由、权限码、懒加载、内联 PageDsl） |
-| `SitemapMenuItem` | `class` | Sitemap 菜单树节点（page / group / link） |
-| `SitemapLayoutDefinition` | `class` | 命名布局的 DSL 定义 |
-| `SitemapLayoutNode` | `class` | 布局 DSL 内联组件节点（props/events 开放结构） |
-
-### 包 `sitemap.domain.vo`
-
-| 类 | 类型 | 说明 |
-|------|------|------|
-| `SitemapResource` | `class` | 对外下发的 sitemap 资源（预留会话动态字段） |
-
-### 包 `sitemap.endpoint`
-
-| 类 | 类型 | 说明 |
-|------|------|------|
-| `SitemapEndpoint` | `interface` | Sitemap 渲染端口（非 JAX-RS） |
-| `NexusSitemapEndpoint` | `class` | 内置 nexus 领域 sitemap 端点：`GET /api/public/sitemap/nexus` |
+| `SitemapMenuItem` | `class` | meta-sitemap 菜单树节点（page / group） |
 
 ### 包 `sitemap.loader`
 
 | 类 | 类型 | 说明 |
 |------|------|------|
-| `SitemapConfigLoader` | `class` | 从 classpath `ui-pages/{domainKey}/sitemap.yaml` 加载 sitemap 配置 |
+| `SitemapConfigLoader` | `class` | 从 classpath 加载 meta-sitemap 配置 |
 
 ### 包 `sitemap.parser`
 
 | 类 | 类型 | 说明 |
 |------|------|------|
-| `SitemapYamlParser` | `class` | 基于 Jackson 的 sitemap YAML 解析器（宽松未知字段） |
+| `SitemapYamlParser` | `class` | 基于 Jackson 的 meta-sitemap YAML 解析器（忽略未知字段） |
 
 ### 包 `sitemap.service`
 
 | 类 | 类型 | 说明 |
 |------|------|------|
-| `SitemapService` | `class` | 加载并渲染 sitemap（当前按固定 YAML 全量返回） |
-| `SitemapMapper` | `class` | 将 classpath 配置映射为对外 sitemap 资源 |
-
+| `SitemapService` | `class` | 加载 meta-sitemap；不执行权限裁剪或 HTTP 渲染 |
 
 ## 包参考
 
@@ -923,7 +969,9 @@ java:check      → mvn clean compile / test
 | `auth.domain.model` | [`references/auth-domain-model.md`](references/auth-domain-model.md) |
 | `auth.domain.request` | [`references/auth-domain-request.md`](references/auth-domain-request.md) |
 | `auth.domain.vo` | [`references/auth-domain-vo.md`](references/auth-domain-vo.md) |
+| `auth.endpoint` | [`references/auth-endpoint.md`](references/auth-endpoint.md) |
 | `auth.service` | [`references/auth-service.md`](references/auth-service.md) |
+| `auth.status` | [`references/auth-status.md`](references/auth-status.md) |
 | `catalog.bootstrap` | [`references/catalog-bootstrap.md`](references/catalog-bootstrap.md) |
 | `catalog.dao` | [`references/catalog-dao.md`](references/catalog-dao.md) |
 | `catalog.domain.entity` | [`references/catalog-domain-entity.md`](references/catalog-domain-entity.md) |
@@ -942,6 +990,7 @@ java:check      → mvn clean compile / test
 | `credential.otp.policy` | [`references/credential-otp-policy.md`](references/credential-otp-policy.md) |
 | `credential.otp.service` | [`references/credential-otp-service.md`](references/credential-otp-service.md) |
 | `credential.otp.status` | [`references/credential-otp-status.md`](references/credential-otp-status.md) |
+| `credential.otp.support` | [`references/credential-otp-support.md`](references/credential-otp-support.md) |
 | `credential.ownership` | [`references/credential-ownership.md`](references/credential-ownership.md) |
 | `credential.password` | [`references/credential-password.md`](references/credential-password.md) |
 | `credential.password.algorithm` | [`references/credential-password-algorithm.md`](references/credential-password-algorithm.md) |
@@ -962,37 +1011,39 @@ java:check      → mvn clean compile / test
 | `dictionary.domain.request` | [`references/dictionary-domain-request.md`](references/dictionary-domain-request.md) |
 | `dictionary.domain.vo` | [`references/dictionary-domain-vo.md`](references/dictionary-domain-vo.md) |
 | `dictionary.endpoint` | [`references/dictionary-endpoint.md`](references/dictionary-endpoint.md) |
-| `dictionary.entry` | [`references/dictionary-entry.md`](references/dictionary-entry.md) |
+| `dictionary.json` | [`references/dictionary-json.md`](references/dictionary-json.md) |
 | `dictionary.operator` | [`references/dictionary-operator.md`](references/dictionary-operator.md) |
-| `dictionary.service` | [`references/dictionary-service.md`](references/dictionary-service.md) |
 | `dictionary.status` | [`references/dictionary-status.md`](references/dictionary-status.md) |
-| `endpoint` | [`references/endpoint.md`](references/endpoint.md) |
+| `dictionary.support` | [`references/dictionary-support.md`](references/dictionary-support.md) |
+| `endpoint.contract` | [`references/endpoint-contract.md`](references/endpoint-contract.md) |
+| `endpoint.grant` | [`references/endpoint-grant.md`](references/endpoint-grant.md) |
+| `endpoint.grant.support` | [`references/endpoint-grant-support.md`](references/endpoint-grant-support.md) |
+| `endpoint.root` | [`references/endpoint-root.md`](references/endpoint-root.md) |
 | `entry` | [`references/entry.md`](references/entry.md) |
 | `jaxrs` | [`references/jaxrs.md`](references/jaxrs.md) |
 | `jaxrs.filter` | [`references/jaxrs-filter.md`](references/jaxrs-filter.md) |
 | `jaxrs.support` | [`references/jaxrs-support.md`](references/jaxrs-support.md) |
 | `jaxrs.web` | [`references/jaxrs-web.md`](references/jaxrs-web.md) |
 | `logger` | [`references/logger.md`](references/logger.md) |
+| `logger.converter` | [`references/logger-converter.md`](references/logger-converter.md) |
 | `logger.dao` | [`references/logger-dao.md`](references/logger-dao.md) |
 | `logger.domain.context` | [`references/logger-domain-context.md`](references/logger-domain-context.md) |
 | `logger.domain.entity` | [`references/logger-domain-entity.md`](references/logger-domain-entity.md) |
-| `logger.entry` | [`references/logger-entry.md`](references/logger-entry.md) |
+| `logger.domain.request` | [`references/logger-domain-request.md`](references/logger-domain-request.md) |
+| `logger.domain.vo` | [`references/logger-domain-vo.md`](references/logger-domain-vo.md) |
+| `logger.endpoint` | [`references/logger-endpoint.md`](references/logger-endpoint.md) |
 | `logger.handler` | [`references/logger-handler.md`](references/logger-handler.md) |
 | `logger.operator` | [`references/logger-operator.md`](references/logger-operator.md) |
+| `logger.status` | [`references/logger-status.md`](references/logger-status.md) |
+| `logger.support` | [`references/logger-support.md`](references/logger-support.md) |
 | `menu.dao` | [`references/menu-dao.md`](references/menu-dao.md) |
 | `menu.domain.entity` | [`references/menu-domain-entity.md`](references/menu-domain-entity.md) |
 | `menu.domain.enums` | [`references/menu-domain-enums.md`](references/menu-domain-enums.md) |
 | `menu.domain.request` | [`references/menu-domain-request.md`](references/menu-domain-request.md) |
 | `menu.domain.vo` | [`references/menu-domain-vo.md`](references/menu-domain-vo.md) |
-| `menu.entry` | [`references/menu-entry.md`](references/menu-entry.md) |
 | `navigation.endpoint` | [`references/navigation-endpoint.md`](references/navigation-endpoint.md) |
 | `navigation.service` | [`references/navigation-service.md`](references/navigation-service.md) |
 | `openapi` | [`references/openapi.md`](references/openapi.md) |
-| `openapi.domain.vo` | [`references/openapi-domain-vo.md`](references/openapi-domain-vo.md) |
-| `openapi.endpoint` | [`references/openapi-endpoint.md`](references/openapi-endpoint.md) |
-| `openapi.internal` | [`references/openapi-internal.md`](references/openapi-internal.md) |
-| `openapi.operator` | [`references/openapi-operator.md`](references/openapi-operator.md) |
-| `openapi.scalar` | [`references/openapi-scalar.md`](references/openapi-scalar.md) |
 | `permission.api` | [`references/permission-api.md`](references/permission-api.md) |
 | `permission.authorization` | [`references/permission-authorization.md`](references/permission-authorization.md) |
 | `permission.dao` | [`references/permission-dao.md`](references/permission-dao.md) |
@@ -1001,7 +1052,6 @@ java:check      → mvn clean compile / test
 | `permission.domain.request` | [`references/permission-domain-request.md`](references/permission-domain-request.md) |
 | `permission.domain.vo` | [`references/permission-domain-vo.md`](references/permission-domain-vo.md) |
 | `permission.endpoint` | [`references/permission-endpoint.md`](references/permission-endpoint.md) |
-| `permission.entry` | [`references/permission-entry.md`](references/permission-entry.md) |
 | `permission.service` | [`references/permission-service.md`](references/permission-service.md) |
 | `plugin.converter` | [`references/plugin-converter.md`](references/plugin-converter.md) |
 | `plugin.domain.vo` | [`references/plugin-domain-vo.md`](references/plugin-domain-vo.md) |
@@ -1014,17 +1064,14 @@ java:check      → mvn clean compile / test
 | `role.domain.request` | [`references/role-domain-request.md`](references/role-domain-request.md) |
 | `role.domain.vo` | [`references/role-domain-vo.md`](references/role-domain-vo.md) |
 | `role.endpoint` | [`references/role-endpoint.md`](references/role-endpoint.md) |
-| `role.entry` | [`references/role-entry.md`](references/role-entry.md) |
 | `role.operator` | [`references/role-operator.md`](references/role-operator.md) |
-| `role.service` | [`references/role-service.md`](references/role-service.md) |
 | `role.status` | [`references/role-status.md`](references/role-status.md) |
 | `scope` | [`references/scope.md`](references/scope.md) |
 | `scope.service` | [`references/scope-service.md`](references/scope-service.md) |
+| `support` | [`references/support.md`](references/support.md) |
 | `sitemap.config` | [`references/sitemap-config.md`](references/sitemap-config.md) |
 | `sitemap.domain.config` | [`references/sitemap-domain-config.md`](references/sitemap-domain-config.md) |
 | `sitemap.domain.model` | [`references/sitemap-domain-model.md`](references/sitemap-domain-model.md) |
-| `sitemap.domain.vo` | [`references/sitemap-domain-vo.md`](references/sitemap-domain-vo.md) |
-| `sitemap.endpoint` | [`references/sitemap-endpoint.md`](references/sitemap-endpoint.md) |
 | `sitemap.loader` | [`references/sitemap-loader.md`](references/sitemap-loader.md) |
 | `sitemap.parser` | [`references/sitemap-parser.md`](references/sitemap-parser.md) |
 | `sitemap.service` | [`references/sitemap-service.md`](references/sitemap-service.md) |

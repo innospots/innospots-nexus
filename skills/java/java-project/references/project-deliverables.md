@@ -63,7 +63,7 @@
 | 信号 | 动作 |
 |------|------|
 | 只是新业务域（role、menu…） | **不建** Maven 模块 → `portal` 下新领域包 → `java:design` |
-| 单领域类型将超 40～50 且无子模块规划 | 先 `java:design` 拆功能子模块（仍是 Java 包） |
+| 单领域类型将超 40～50 且无功能子包规划 | 先 `java:design` 在技术模块内拆功能子包（仍是 Java 包） |
 | 需同时依赖 portal 与 platform | **application 组装模块**，禁止 portal↔platform 互依 |
 | 外部系统 / 客户专属集成 | **adapter** 模块 |
 | classpath 插件、不经管理台表 | **plugin** 边界或独立插件工程 |

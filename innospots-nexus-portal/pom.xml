@@ -46,6 +46,7 @@
                             </scanners>
                             <scanPackages>
                                 com.innospots.nexus.portal,
+                                com.innospots.nexus.console.auth.domain,
                                 com.innospots.nexus.base.domain.response,
                                 com.innospots.nexus.base.i18n,
                                 com.innospots.nexus.base.domain.enums

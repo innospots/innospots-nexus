@@ -66,7 +66,7 @@ class ConsolePagePermissionFilterTest {
     void skipsPublicApiPath() {
         ConsolePagePermissionFilter filter = newFilter(new ConsoleWebSecuritySettings());
 
-        filter.filter(JaxRsFilterTestSupport.mockRequest("/api/public/pages/demo"));
+        filter.filter(JaxRsFilterTestSupport.mockRequest("/api/public/page-access/verify"));
 
         verify(pagePermissionAuthorizer, never()).authorize(any());
     }

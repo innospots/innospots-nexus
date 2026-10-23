@@ -5,6 +5,7 @@ import java.util.Arrays;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -40,6 +41,18 @@ class PlatformAuthSessionEndpointContractsTest {
                         .getAnnotation(POST.class))
                 .isNotNull();
         assertThat(PlatformConstant.AUTH_REFRESH_PATH).isEqualTo("/api/d/platform/auth/refresh");
+        assertThat(PlatformAuthSessionEndpoint.class.getMethod("refresh", TokenRefreshRequest.class)
+                        .getAnnotation(Operation.class)
+                        .operationId())
+                .isEqualTo("platformAuthRefresh");
+        assertThat(PlatformAuthSessionEndpoint.class.getMethod("logout")
+                        .getAnnotation(Operation.class)
+                        .operationId())
+                .isEqualTo("platformAuthLogout");
+        assertThat(PlatformAuthSessionEndpoint.class.getMethod("changePassword", PasswordChangeRequest.class)
+                        .getAnnotation(Operation.class)
+                        .operationId())
+                .isEqualTo("platformAuthPasswordChange");
         assertThat(AuthSessionEndpoint.class.getMethod("logout").getAnnotation(POST.class))
                 .isNotNull();
         assertThat(AuthSessionEndpoint.class.getMethod("changePassword", PasswordChangeRequest.class)

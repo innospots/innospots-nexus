@@ -48,22 +48,36 @@ L1/L2 设计文档须用 [design-deliverables.md](design-deliverables.md) 模板
 
 ### 2.1 平台库（portal / platform / console 业务域）
 
-**第一刀：领域名** → **第二刀：功能子模块（按需）** → **第三刀：职责包**。
+**第一刀：领域名** → **第二刀：技术模块** → **第三刀：功能子包（按需）**。
 
 ```text
 com.innospots.nexus.<module>.<domain>
-  ├── <subcapability>/          # authorization、grant、entry …
-  ├── endpoint | dao | domain/… | operator | service
+  ├── endpoint
+  ├── dao
+  ├── service
+  ├── operator
+  ├── domain/
+  │   ├── entity
+  │   ├── vo
+  │   ├── model
+  │   └── request
+  ├── filter/                   # 按需
+  └── loader/                   # 按需
 ```
 
+技术模块内类型较多或功能边界清晰时，再拆 `service/<subcapability>`、
+`endpoint/<subcapability>` 等功能子包；类型不多或区分度不大时保持扁平。
 禁止：`endpoint.<domain>`、`dao.<domain>`、模块根 `service` 多领域桶。
 
 ### 2.2 扩展库（sample-platform 等：交付面 × 领域）
 
-**第一刀：交付面 `core` | `console` | `inbound`** → **第二刀：领域** → **第三刀：职责**。
+**第一刀：交付面 `core` | `console` | `inbound`** → **第二刀：领域** →
+**第三刀：技术模块** → **第四刀：按需功能子包**。
 
-- `core`：entity、dao、operator、service、loader（无 JAX-RS）
-- `console` / `inbound`：endpoint interface + 薄 service
+- `core`：entity、dao、operator、service、loader（无 JAX-RS）；功能较多时用
+  `service.<function>` 等子包
+- `console` / `inbound`：endpoint interface + 薄 service；功能较多时用
+  `endpoint.<function>` 或 `service.<function>` 等子包
 - **禁止** inbound 依赖 console 包
 
 ### 2.3 DDD 边界表（设计文档必填）
@@ -80,6 +94,7 @@ com.innospots.nexus.<module>.<domain>
 ### 设计门禁
 
 - [ ] 领域优先；单包 ≤15 个 `.java`
+- [ ] `domain` 固定包含 `entity`/`vo`/`model`/`request`；不可变模型优先 record
 - [ ] `endpoint → service → operator → dao`；operator 只能依赖 dao，无 operator→service；service 可依赖 operator/其他 service/dao 且无循环；无 endpoint→dao
 - [ ] 跨表读：分批单表 + 内存组装（无 join 设计）
 

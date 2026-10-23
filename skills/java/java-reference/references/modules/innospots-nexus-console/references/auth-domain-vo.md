@@ -41,3 +41,31 @@
 | `tenantMemberId` | `String` | 在 TENANT 业务令牌上设置 |
 | `workspaceId` | `String` | 工作区活跃时设置 |
 | `projectId` | `String` | 项目活跃时设置 |
+
+## AuthRsaPublicKeyVo
+
+**类型：** record
+
+登录密码 RSA 加密用公钥。
+
+### 组件（record）
+
+| 名称 | 类型 | 说明 |
+|------|------|------|
+| `publicKeyBase64` | `String` | X.509 SubjectPublicKeyInfo 公钥 Base64，不含 PEM 头尾 |
+
+## PublicRegistrationPolicyVo
+
+**类型：** record
+
+匿名注册入口与 OTP 校验策略，供登录/注册页决定路由与表单项显隐。
+
+### 组件（record）
+
+| 名称 | 类型 | 说明 |
+|------|------|------|
+| `registrationMode` | `RegistrationMode` | 当前自助注册模式 |
+| `otpVerification` | `RegistrationOtpVerification` | 注册 OTP 校验方式 |
+| `openRegistrationEnabled` | `boolean` | 是否开放 `/register/open` |
+| `inviteRegistrationEnabled` | `boolean` | 是否开放邀请码注册 |
+| `approvalRegistrationEnabled` | `boolean` | 是否开放待审核注册 |

@@ -175,9 +175,7 @@ grill-me  →  java:project（需新建/改模块时）  →  java:design  →  
   处理。
 - 拥有 plugin discovery、declaration、lifecycle、installation、capability
   routing、contribution decode/validate/snapshot。
-  **Pactor Page DSL 1.0** Java 运行时与 REST 端点归属 `innospots-nexus-console`
- （`console.ui.spec`、`console.ui.endpoint`）。
-- 拥有 `console@1` contribution 契约与 runtime handler；**不**拥有
+- 拥有 `console@2` contribution 契约与 runtime handler；**不**拥有
   持久化 console catalog 索引（`nx_console_catalog_resource` — 归属
   `innospots-nexus-console`）。
 - 必须保持业务域中立且 middleware-binding-free（无 Spring
@@ -188,8 +186,6 @@ grill-me  →  java:project（需新建/改模块时）  →  java:design  →  
 ### `innospots-nexus-console`
 
 - 基于 Core 与 Plugin 构建的 management-console **API surface** 模块。
-- 拥有 **Pactor Page DSL 1.0** 解析/校验/加载与页面渲染端点（`console.ui.spec`、
-  `console.ui.endpoint`）。
 - 提供 Jakarta REST management endpoints、request/response VO、converter，
   以及持久化 **console catalog index**（`console.catalog.*`）。
 - **不得**拥有 plugin specification 或 contribution constraint 定义；
@@ -210,11 +206,12 @@ grill-me  →  java:project（需新建/改模块时）  →  java:design  →  
   registration、users、roles、permissions、menus、dictionaries、audit support
   及其他 baseline 平台功能。
 - 业务代码先按 domain 组织，再按职责分包，例如
-  `endpoint`、`dao`、`domain`、`converter`、`operator`、`service`、
-  `handler`、`interceptor`、`listener`（`portal.role.endpoint`，而非
-  `portal.endpoint.role`）。大 domain 使用功能子包
-  （`permission.authorization`、`grant.service`）；禁止 module 级 `service`
-  堆放区；每个包目录最多 15 个 `.java` 文件。见
+  `endpoint`、`dao`、`service`、`operator`、`domain`、`filter`、`loader`
+  （`portal.role.endpoint`，而非 `portal.endpoint.role`）。`domain` 固定包含
+  `entity`、`vo`、`model`、`request`；不可变 request/vo/model 优先使用 `record`，
+  持久化实体及确有可变身份/生命周期的 model 使用 class。技术模块内类型较多或
+  功能边界清晰时再按功能子包拆分子包（如 `permission.service.grant`）；禁止
+  module 级 `service` 堆放区；每个包目录最多 15 个 `.java` 文件。见
   `skills/java/java-reference/references/package-structure.md`。
 - 必须使用 `base`、`core`、`console` 的共享基础设施与契约，
   而不是重新实现。

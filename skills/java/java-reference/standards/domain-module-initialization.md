@@ -66,8 +66,9 @@
 ```
 
 **禁止**技术层优先（`endpoint/<domain>`、`dao/<domain>`、`domain/<domain>/entity`）。
-**禁止**在模块根或单个扁平 `service` 包内堆积全部业务；大领域须按功能子模块
-（`authorization`、`grant`、`entry` …）划分，且**单包 ≤15** 个 `.java`。
+**禁止**在模块根或单个扁平 `service` 包内堆积全部业务。先固定技术模块；技术模块
+较大或功能边界清晰时，再在该技术模块内按功能拆子包（`service/authorization`、
+`service/grant`、`endpoint/entry` …），且**单包 ≤15** 个 `.java`。
 理由、标准骨架与自检清单见 [`package-structure.md`](../references/package-structure.md)。
 
 ### 1.5 保持初始表面最小
@@ -76,16 +77,23 @@
 
 ```text
 <domain>
+  ├── endpoint
   ├── dao
+  ├── service
+  ├── operator
   ├── domain
   │   ├── entity
-  │   ├── enums
-  │   ├── request
-  │   └── vo
-  └── endpoint
+  │   ├── vo
+  │   ├── model
+  │   └── request
+  ├── filter          （按需）
+  └── loader          （按需）
 ```
 
-仅当当前任务需要其职责时，才添加 `model`、`converter`、`operator`、`service`、`event`、`handler` 或其他包。不要创建空的架构层或占位类型。
+上述技术模块是固定归属；只在出现真实类型时创建目录，不要创建空包或占位类型。
+`domain` 固定使用 `entity`、`vo`、`model`、`request`，按需增加 `enums`、`event`。
+`converter`、`handler`、`listener`、`interceptor` 等按需添加；技术模块内类型较多或
+功能边界清晰时，再在该技术模块内按功能拆分子包。
 
 ## 2. 阶段一：定义实体数据结构
 
@@ -309,7 +317,9 @@
 
 ### 4.4 模型、事件与状态码
 
-仅当内部业务行为需要既非持久化实体也非传输 record 的模型时，才创建 `domain.model`。
+`domain.model` 承载内部业务模型。不可变数据模型和值对象优先使用 record；只有模型天然
+具有可变身份、继承层级或复杂生命周期时才使用 class。不要用 model 重复 entity 或
+request/vo 的职责。
 
 仅对实际解耦交互创建领域事件。发布领域拥有事件契约。
 
@@ -320,12 +330,13 @@
 验证：
 
 - 请求和 VO 是 record；
+- 不可变 model 优先是 record；可变 model 与持久化 entity 未滥用 record；
 - 名称反映其用例；
 - create 和 update 变更权限在必要时不同；
 - 集合不可变；
 - 在适当时将仅用于持久化的 String 暴露为领域枚举；
 - 无 permission、user、role、menu 或其他相邻关注点跨越领域归属泄漏；
-- 未创建推测性 model 或 event 包。
+- 未创建推测性功能子包或 event 包。
 
 对每个应用可见失败，还要验证：
 

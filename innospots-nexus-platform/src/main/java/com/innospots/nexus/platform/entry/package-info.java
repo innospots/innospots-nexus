@@ -3,7 +3,7 @@
  * 经 {@link com.innospots.nexus.platform.entry.PlatformEntryPluginDescriptor} 与
  * {@link com.innospots.nexus.platform.entry.PlatformModuleEntrySupport} 组装。
  *
- * <p>PageDsl 位于 classpath {@code ui-pages/platform/}。宿主应将
+ * <p>Entry 只声明稳定 {@code entryPageKey}，不打包页面运行时资源。宿主应将
  * {@link com.innospots.nexus.platform.entry.BuiltinPlatformEntryPlugins#REQUIRED_PLUGIN_IDS}
  * 列入 {@code nexus.plugins.required}。</p>
  *

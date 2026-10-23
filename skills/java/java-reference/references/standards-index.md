@@ -6,7 +6,8 @@
 跨技能专题（模块归属、**包结构**、作用域、建模、契约）见同目录下的专题参考文件，不在此重复。
 包结构权威专题：[package-structure.md](package-structure.md)。
 `innospots-nexus-sample` 工程与扩展 DDD 边界：[sample-extension-layout.md](sample-extension-layout.md)。
-控制台内置 entry、`pageKey` 与 Page DSL 路径：[console-entry-and-pages.md](console-entry-and-pages.md)。
+控制台内置 entry、插件配置与 `entryPageKey`：
+[console-entry-and-configuration.md](console-entry-and-configuration.md)。
 OpenAPI：条文 [openapi.md](../standards/openapi.md)；注解 [openapi-contract.md](openapi-contract.md)；
 对外模块 Maven 插件 [openapi-maven-plugin.md](openapi-maven-plugin.md)。
 
@@ -66,7 +67,7 @@ OpenAPI：条文 [openapi.md](../standards/openapi.md)；注解 [openapi-contrac
 | 布尔谓词 | `is/has/can/supports/contains/matches` 开头；布尔字段无 `is` 前缀；优先肯定式；谓词名不得隐藏修改或 I/O |
 | 字段、参数与局部变量 | 限定概念 ID（`roleId`）；集合复数；时间点 `At`；数值带单位；对称命名；禁用 `temp/tmp/foo/bar/obj/data/flag` |
 | 缩写与首字母缩略词 | 缩写当单词：`HttpClientBuilder`、`pluginId`；项目既定形式 `Id Url Uri Http Json Rsa Oauth Dao Vo Api Ui Db Io`；禁止 `ID/Id` 混用 |
-| 包命名 | **领域优先**（`role/endpoint`，禁止 `endpoint/role`）；**功能子模块**（`permission.authorization`，禁止 service 堆积）；**单包 ≤15** `.java`；专题见 [package-structure.md](package-structure.md)；`domain.{entity,request,vo,model,enums,event}`；职责包 `endpoint`/`api`/`operator`/`service`/`dao`/…；禁止 `impl`/`common`/`misc`/`util` |
+| 包命名 | **领域优先**（`role/endpoint`，禁止 `endpoint/role`）；技术模块内再按功能拆分（`permission.service.grant`，禁止 service 堆积）；**单包 ≤15** `.java`；专题见 [package-structure.md](package-structure.md)；`domain.{entity,vo,model,request,enums,event}`；职责包 `endpoint`/`dao`/`service`/`operator`/`domain`/`filter`/`loader`；禁止 `impl`/`common`/`misc`/`util` |
 | 持久化命名 | 表/列小写 snake_case；Nexus 表 `nx_` 前缀 + 单数；`TABLE_NAME` 常量；唯一索引 `uk_`、普通索引 `idx_`；ID 前缀短小稳定 |
 | 文件与测试命名 | 一文件一顶层 public 类型；单测 `{Type}Test.java`，契约族 `{Concept}ContractsTest.java`；测试方法 lowerCamelCase 行为短语、**无 `test` 前缀** |
 | 应避免的反例 | 反例对照表 |
@@ -85,7 +86,7 @@ OpenAPI：条文 [openapi.md](../standards/openapi.md)；注解 [openapi-contrac
 | 校验与归一化 | record 紧凑构造器管不变量；请求 `validate()` 管字段组合；operator 管数据前置条件与映射缺失；service 管工作流/授权/跨记录；endpoint 只管传输层 |
 | 异常处理 | 见 `exception-status-code.md` |
 | 持久化实体 | 默认 `WorkspaceBaseEntity`；可选 `TenantBaseEntity`/`BaseEntity`；`ProjectBaseEntity` 仅设计评审批准后；禁止裸 `projectId` 列；主键 `String` + `@TableId(ASSIGN_UUID)` + `@Id` + `@Column(length=32)`；字符串长度为 2 的幂；`TABLE_NAME` 常量双注解共用；Lombok `@Getter`+`@Setter`；显式 `@Table(indexes=...)` |
-| 领域模型 | `domain` 下按 `entity/request/vo/model/enums` 划分；配置类放模块级 `config` 包，不放 `domain` |
+| 领域模型 | `domain` 固定使用 `entity/vo/model/request`，按需增加 `enums/event`；不可变 request/vo/model 优先 record；配置类放模块级 `config` 包，不放 `domain` |
 | REST 端点契约 | `*Endpoint` + `endpoint` 包；`jakarta.ws.rs`；每个方法返回 `R<T>`/`R<PageResult<T>>`/`R<Void>`；**service/operator 不得返回 `R`** |
 | DAO 契约 | 同 `code-style.md`；一表一 Dao；yaml 禁 properties/XML；跨表读用分批查询+内存组装；跨表写交由事务 service；细则见 `persistence-config.md` |
 | Service 与 Operator 边界 | operator 简单数据操作，**只能依赖 DAO**，禁止依赖 service 或另一 operator；service 复杂工作流，可依赖 operator、其他 service 和 DAO（不得循环）；分页返回 `PageResult<T>` |

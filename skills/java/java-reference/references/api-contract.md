@@ -106,6 +106,7 @@ Lombok 只消除访问器样板，**不替代**领域类的显式行为方法。
 |------|------|
 | 路径、`R<T>`、request/vo record 在 **console** 锁定 | 在 console 写 role/menu 等业务工作流 |
 | 实现类在 portal/platform，遵守领域优先包结构 | 为单测 mock 在业务域随意抽 endpoint 接口 |
+| 实现类重复类级与方法级 JAX-RS / OpenAPI 传输注解供构建期扫描 | 在实现类重复 `@EndpointModule` / `@EndpointGrant` |
 | 契约测试反射锁定 console 侧 interface | portal 改路径而不更新 console 契约 |
 
 **新业务域**（portal/platform 内）仍默认**具体 endpoint 类**；不要机械复制 console 的 interface 模式。

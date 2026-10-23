@@ -6,7 +6,7 @@ import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
 /**
- * Contribution 的稳定类型标识，例如 {@code console@1}。
+ * Contribution 的稳定类型标识，例如 {@code console@2}。
  *
  * @param name 小写点分类型名称
  * @param majorVersion 正整数形式的类型主版本

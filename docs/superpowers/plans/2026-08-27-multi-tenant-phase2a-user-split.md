@@ -75,13 +75,13 @@ Token vo: `realm`, `tokenType`（`IDENTITY` | `BUSINESS`）, `accessToken`, `ref
 
 | 旧 | 新 |
 |-----|-----|
-| `nx_user` / `userId` prefix `usr` | `nx_tenant_user` / `tenantUserId` prefix `tus` |
+| `nx_user` / `userId` prefix `USR` | `nx_tenant_user` / `tenantUserId` prefix `TUS` |
 | `nx_user_password` / `userId` | `nx_tenant_user_password` / `tenantUserId` |
 | `nx_user_oauth` / `userId` | `nx_tenant_user_oauth` / `tenantUserId` |
 
 `TenantUserEntity` 字段按规格：`userName` 64 not null unique, `displayName` 128, `email` 128 unique, `mobile` 32 unique, `region` 32, `timeZone` 64, `language` 32, `avatarKey` 256, `registerSource` 32 not null, `status` 32 not null, `emailVerified`/`mobileVerified` Boolean not null, `lastLoginTime`, `lastLoginIp` 64。**无 `realName`。** 删除 `locale`。
 
-本 slice 中 Java 类型名仍为 `UserEntity` / `UserOperator` / `UserProfileVO`；表与 PK 字段符合规格（`nx_tenant_user`, `tenantUserId`, prefix `tus`）。更新 register request（删除 `realName`；添加 `region`, `timeZone`, `language`）。
+本 slice 中 Java 类型名仍为 `UserEntity` / `UserOperator` / `UserProfileVo`；表与 PK 字段符合规格（`nx_tenant_user`, `tenantUserId`, prefix `TUS`）。更新 register request（删除 `realName`；添加 `region`, `timeZone`, `language`）。
 
 - [x] **Step 1：** 重写 `UserEntityContractsTest` 以适配 tenant-user 表（将失败）。
 - [x] **Step 2：** 确认 RED。
@@ -92,12 +92,12 @@ Token vo: `realm`, `tokenType`（`IDENTITY` | `BUSINESS`）, `accessToken`, `ref
 
 ### Task 4：Platform user 表与 admin create
 
-**文件：** platform `user` domain，镜像 tenant password/oauth 形状，使用 `platformUserId` prefix `pus`，表 `nx_platform_user`。
+**文件：** platform `user` domain，镜像 tenant password/oauth 形状，使用 `platformUserId` prefix `PUS`，表 `nx_platform_user`。
 
 字段：`loginName` 64 unique not null, `displayName` 128, `email` 128, `mobile` 32, `employeeNo` 64, `status` 32 not null。
 
-Password: `nx_platform_user_password`, FK `platformUserId`, prefix `ppc`。
-OAuth: `nx_platform_user_oauth`, prefix `poi`。
+Password: `nx_platform_user_password`, FK `platformUserId`, prefix `PPC`。
+OAuth: `nx_platform_user_oauth`, prefix `POI`。
 
 `PlatformUserOperator.createWithPassword` — 仅 admin 持久化；使用 console `PasswordDecryptor`。无公开 register。
 

@@ -1,35 +1,28 @@
 # 包 `contract`
 
-## CapabilityProvider
+## `Plugin`
 
 **类型：** interface
 
-运行时管理的 Capability 实现所遵循的标记和生命周期契约。
+声明插件及其插件级生命周期的唯一 classpath SPI。
 
+| 方法 | 说明 |
+|------|------|
+| `definition() → PluginDefinition` | 返回无副作用的不可变定义 |
+| `initialize(PluginContext context)` | 初始化一次启动周期；默认空操作 |
+| `start()` | 在初始化和 Contribution 准备后启动插件行为；默认空操作 |
+| `stop()` | 在资源作用域关闭前停止插件行为；默认空操作 |
 
-## CapabilityProviderContext
-
-**类型：** interface
-
-面向一个已声明 Capability Provider 的专用插件上下文。
-
-
-## CapabilityProviderFactory
-
-**类型：** interface
-
-无副作用地创建一个全新的、尚未初始化的 Capability Provider。
-
-
-## Plugin
+## `PluginContext`
 
 **类型：** interface
 
-用于声明插件及其插件级生命周期的唯一 classpath SPI。
+一次插件启动周期内暴露的只读运行时服务。
 
-
-## PluginContext
-
-**类型：** interface
-
-一次插件启动周期内向插件暴露的只读运行时服务。
+| 方法 | 说明 |
+|------|------|
+| `definition() → PluginDefinition` | 当前插件定义 |
+| `config() → PluginConfig` | 当前插件作用域的已校验配置 |
+| `events() → PluginEventBus` | 绑定当前资源作用域的事件总线 |
+| `resources() → ResourceScope` | 当前启动周期的资源所有权边界 |
+| `logger() → System.Logger` | 使用插件身份命名的日志器 |

@@ -3,7 +3,8 @@
 回答「这块业务数据应该长什么样」。代码模板见 `java:develop` → `code-templates.md`。
 
 作用域层级见 [scope-hierarchy.md](scope-hierarchy.md)。包结构见 [package-structure.md](package-structure.md)
-（**领域优先** + **功能子模块** + 单包 ≤15 类；禁止 `dao/role` 与 service 堆积）。本文件聚焦建模取舍。
+（**领域优先** + **技术模块** + 按需功能子包 + 单包 ≤15 类；禁止 `dao/role` 与
+service 堆积）。本文件聚焦建模取舍。
 
 ---
 
@@ -42,7 +43,7 @@
 | 技术主键 | `String` + `@TableId(ASSIGN_UUID)` + `@Id` + `@Column(length=32)`；operator 不得手工赋值 |
 | 稳定业务键 | 归属范围内唯一、创建后不可变；排除出 update 请求 |
 
-`idPrefix()` 短小、小写、稳定；不得在普通重构中更改。
+`idPrefix()` 短小、稳定且仅由大写字母组成；不得在普通重构中更改。
 
 ### 索引设计
 
@@ -79,7 +80,9 @@
 
 ## 内部模型、枚举、事件、状态码
 
-- **Model**：仅当既非实体也非传输 record 时需要；按业务概念命名，无 `Model` 后缀
+- **Model**：位于 `domain.model`，用于承载领域行为或内部业务形状；不可变模型优先使用
+  record，只有确需可变身份、继承或复杂生命周期时才使用 class。按业务概念命名，无
+  `Model` 后缀
 - **Enums**：封闭业务概念；`State`/`Status`/`Mode`/`Type` 语义区分
 - **Event**：不可变 record；发布域拥有；portal 与 platform 不得互引对方事件类型
 - **StatusCode**：先搜现有目录；九字符全码；见 [`standards/exception-status-code.md`](../standards/exception-status-code.md)
@@ -94,5 +97,6 @@
 - [ ] 每个字段都能回答评审八问
 - [ ] 索引与访问模式匹配
 - [ ] 请求按修改权拆分；VO 未暴露实体
+- [ ] 不可变 model 使用 record；可变 model/entity 未滥用 record
 - [ ] 枚举/事件/状态码归属正确
 - [ ] 未创建投机性 model / event 包

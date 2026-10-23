@@ -1,6 +1,7 @@
 # innospots-nexus-plugin 文档
 
-本目录为 **`innospots-nexus-plugin`** 模块文档：classpath 插件运行时、`console@1` 贡献处理与 Pactor Page DSL。
+本目录为 **`innospots-nexus-plugin`** 模块文档：classpath 插件运行时、`console@2`
+贡献处理与插件配置接入。
 
 ## 入口
 
@@ -12,9 +13,9 @@
 
 | 归属 plugin | 归属 console | 归属 core |
 |-------------|--------------|-----------|
-| 发现、安装、生命周期、Capability | catalog 索引表持久化与同步 REST | 持久化基类、审计填充 |
-| `console@1` 声明模型与 Handler | `ConsoleCatalogSyncService`、`ConsoleCatalogResourceEntity` | Quartz、server、watcher |
-| Page DSL 解析与校验 | 管理 REST、VO/Converter | `MetaResourceService` |
+| 发现、安装、生命周期、Contribution | catalog 索引表持久化与同步 REST | 持久化基类、审计填充 |
+| `console@2` 声明模型与 Handler | `ConsoleCatalogSyncService`、`ConsoleCatalogResourceEntity` | Quartz、server、watcher |
+| 插件配置 schema、Entry 组装 | 管理 REST、VO/Converter | `MetaResourceService` |
 
 Java 包名仍为 `com.innospots.nexus.core.plugin.*`（兼容既有 import）；Maven artifact 为
 `innospots-nexus-plugin`。

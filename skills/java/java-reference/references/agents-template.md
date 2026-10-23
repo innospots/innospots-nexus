@@ -97,7 +97,7 @@ grill-me  →  核对根 AGENTS.md  →  java:project（动 POM）  →  java:de
 
 在编写代码、修改 POM、定架构或注册新模块**之前**，若需求**通用宽泛不具体**、
 **新需求**、**新设计**或**新建工程/模块**，**必须先**使用 `grill-me`。
-完整说明见 [`skills/java/java-reference/references/grill-me.md`](skills/java/java-reference/references/grill-me.md)。
+完整说明见 [`skills/java/java-reference/references/grill-me.md`](grill-me.md)。
 
 未安装时：
 
@@ -157,12 +157,12 @@ npx skills use "https://github.com/mattpocock/skills" --skill "grill-me"
 
 | 文件 | 内容 |
 |------|------|
-| [`code-style.md`](skills/java/java-reference/standards/code-style.md) | 花括号、缩进、行宽、import 顺序 |
-| [`code-comments.md`](skills/java/java-reference/standards/code-comments.md) | Javadoc 层级 |
-| [`naming.md`](skills/java/java-reference/standards/naming.md) | 命名约定 |
-| [`api-design.md`](skills/java/java-reference/standards/api-design.md) | 方法签名、异常、事务 |
-| [`domain-module-initialization.md`](skills/java/java-reference/standards/domain-module-initialization.md) | 领域初始化 |
-| [`module-skills.md`](skills/java/java-reference/standards/module-skills.md) | 模块 API 索引策略 |
+| [`code-style.md`](../standards/code-style.md) | 花括号、缩进、行宽、import 顺序 |
+| [`code-comments.md`](../standards/code-comments.md) | Javadoc 层级 |
+| [`naming.md`](../standards/naming.md) | 命名约定 |
+| [`api-design.md`](../standards/api-design.md) | 方法签名、异常、事务 |
+| [`domain-module-initialization.md`](../standards/domain-module-initialization.md) | 领域初始化 |
+| [`module-skills.md`](../standards/module-skills.md) | 模块 API 索引策略 |
 
 ## 验证
 

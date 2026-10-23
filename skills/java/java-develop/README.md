@@ -41,9 +41,15 @@
 ### 产出位置
 
 ```text
-innospots-nexus-<module>/src/main/java/.../<domain>/{endpoint,service,operator,dao,converter,domain/...}
+innospots-nexus-<module>/src/main/java/.../<domain>/{endpoint,dao,service,operator,domain}
+innospots-nexus-<module>/src/main/java/.../<domain>/domain/{entity,vo,model,request}
+innospots-nexus-<module>/src/main/java/.../<domain>/{filter,loader,...}   # 按需
 innospots-nexus-<module>/src/test/java/...   # 镜像包路径
 ```
+
+`domain.request` / `domain.vo` 使用 record；不可变 `domain.model` 优先 record。
+持久化实体及确有可变身份/生命周期的 model 使用 class。技术模块内类型较多或功能
+边界清晰时，再在对应技术模块下拆功能子包。
 
 ### 按任务的最小交付集
 
@@ -114,3 +120,5 @@ java:check
 - [persistence-mybatis.md](references/persistence-mybatis.md) — MyBatis-Plus、yaml 配置、禁 XML/properties
 - [exception-handling.md](references/exception-handling.md) — 异常实现
 - [change-workflow.md](references/change-workflow.md) — 加功能 / Bug / 重构
+- [endpoint-grants.md](references/endpoint-grants.md) — REST 授权/审计注解、Filter 行为与测试
+- [plugin-entry-and-configuration.md](references/plugin-entry-and-configuration.md) — 插件配置、entry 组装与平台多模块描述符

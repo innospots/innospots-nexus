@@ -34,7 +34,7 @@
 |------|------|------|
 | `dictionaryTypeId` | `String` | type 标识符 |
 | `typeCode` | `String` | 稳定的类型编码 |
-| `typeName` | `String` | 显示名称 |
+| `typeName` | `I18nObject` | 多语言显示名称 |
 
 
 ## DictionaryTypeVo
@@ -56,3 +56,4 @@
 | `builtIn` | `Boolean` | 类型是否由系统管理 |
 | `createdAt` | `LocalDateTime` | 创建时间 |
 | `updatedAt` | `LocalDateTime` | 最后更新时间 |
+| `items` | `List<DictionaryItemVo>` | 字典项；详情与写入响应返回，类型分页不填充 |

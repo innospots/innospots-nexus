@@ -33,7 +33,7 @@
 ### 方法
 
 #### `idPrefix() → String`
-- **说明：** 返回主键前缀 `"set"`（`DbPrimaryGenerator` ULID 使用）
+- **说明：** 返回主键前缀 `"SET"`（`DbPrimaryGenerator` ULID 使用）
 
 #### `settingScopeEnum() → SettingScope`
 - **说明：** 返回作用范围枚举

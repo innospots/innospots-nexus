@@ -71,7 +71,7 @@ nx_plugin_installation
 
 | 字段 | 类型/长度 | 约束 | 含义 |
 |------|-----------|------|------|
-| `installation_id` | varchar(32) | PK | 安装记录 ID，前缀 `plg` |
+| `installation_id` | varchar(32) | PK | 安装记录 ID，前缀 `PLG` |
 | `plugin_id` | varchar(256) | NOT NULL, UNIQUE | 稳定插件身份 |
 | `plugin_version` | varchar(64) | NOT NULL | 最近发现版本 |
 | `source_type` | varchar(16) | NOT NULL | JAVA/YAML |

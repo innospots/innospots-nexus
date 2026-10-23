@@ -206,13 +206,13 @@ package com.innospots.nexus.console.auth;
 
 **接口：**
 - 消费： `BaseEntity`, table `nx_tenant`
-- 产出： `TenantEntity` with `idPrefix() == "tnt"`, fields below
+- 产出： `TenantEntity` with `idPrefix() == "TNT"`, fields below
 
 字段（勿重复声明 audit 列）：
 
 | 字段 | 类型 | 列 | 说明 |
 |-------|------|--------|-------|
-| tenantId | String | PK 32 | prefix `tnt` |
+| tenantId | String | PK 32 | prefix `TNT` |
 | tenantName | String | 128, not null | |
 | tenantCode | String | 64, not null | unique index `uk_nx_tenant_code` |
 | status | String | 32, not null | `TenantStatus` persisted as name |
@@ -236,7 +236,7 @@ package com.innospots.nexus.console.auth;
 
 **接口：**
 - 消费： `BaseEntity`, `TenantEntity.tenantId`
-- 产出： `nx_enterprise`, `idPrefix() == "ent"`, unique `tenant_id`
+- 产出： `nx_enterprise`, `idPrefix() == "ENT"`, unique `tenant_id`
 
 | field | type | length | nullable |
 |-------|------|--------|----------|
@@ -344,7 +344,7 @@ No runtime implementation class in this task (contract only, same as `RoleEndpoi
 **接口：**
 - Superclass: `TenantBaseEntity` (inherits `tenantId`; do not redeclare)
 - Table: `nx_workspace`
-- Prefix: `wks`
+- Prefix: `WKS`
 - Fields: `workspaceId` PK, `workspaceName` 128 not null, `workspaceCode` 64 not null, `description` 512 nullable, `status` 32 not null
 - Unique: `uk_nx_workspace_tenant_code` on `tenant_id,workspace_code`
 
@@ -367,7 +367,7 @@ No runtime implementation class in this task (contract only, same as `RoleEndpoi
 **接口：**
 - Superclass: `TenantBaseEntity`
 - Table: `nx_tenant_member`
-- Prefix: `tmb`
+- Prefix: `TMB`
 - Fields: `tenantMemberId` PK, `tenantUserId` 32 not null, `status` 32 not null, `joinedAt` `LocalDateTime` not null
 - Unique: `uk_nx_tenant_member_user` on `tenant_id,tenant_user_id`
 - `TenantMemberStatus`: `ACTIVE`, `DISABLED`, `PENDING`
@@ -387,12 +387,12 @@ No runtime implementation class in this task (contract only, same as `RoleEndpoi
 
 **接口：**
 
-`nx_organization_unit` extends `TenantBaseEntity`, prefix `org`:
+`nx_organization_unit` extends `TenantBaseEntity`, prefix `ORG`:
 - `unitId` PK, `parentId` 32 nullable, `unitCode` 64 not null, `unitName` 128 not null, `unitType` 32 not null, `sortOrder` Integer not null, `status` 32 not null
 - Unique `uk_nx_organization_unit_code` on `tenant_id,unit_code`
 - Index `idx_nx_organization_unit_parent` on `tenant_id,parent_id,sort_order`
 
-`nx_organization_member` extends `TenantBaseEntity`, prefix `ogm`:
+`nx_organization_member` extends `TenantBaseEntity`, prefix `OGM`:
 - `organizationMemberId` PK, `unitId` 32 not null, `tenantMemberId` 32 not null
 - Unique `uk_nx_organization_member` on `tenant_id,unit_id,tenant_member_id`
 

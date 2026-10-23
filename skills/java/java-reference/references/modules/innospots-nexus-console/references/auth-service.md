@@ -86,6 +86,48 @@
 #### `verifyIfRequired(SecurityRealm realm, AuthLoginRequest request) → void`
 - **说明：** 若策略开启则校验登录请求中的图形码；失败对外统一为认证失败。 / public void verifyIfRequired(SecurityRealm realm, AuthLoginRequest request)
 
+## AuthRsaKeyService
+
+**类型：** class
+
+登录密码 RSA 公钥查询。未显式配置公钥时，从 PKCS#8 私钥推导 SPKI 公钥。
+
+### 构造方法
+
+#### `AuthRsaKeyService(AuthConfig authConfig)`
+- **参数：**
+  - `authConfig` — 包含 RSA 公钥/私钥的认证配置
+
+### 方法
+
+#### `getPasswordEncryptionPublicKey() → AuthRsaPublicKeyVo`
+- **说明：** 返回前端登录密码加密用公钥
+- **异常：** `NexusException`（`CRYPTO_FAILED`）— 未配置有效公钥且无法从私钥推导时
+
+## RegistrationPolicyService
+
+**类型：** class
+
+基于 `RegistrationConfig` 的公开注册策略查询与门禁。
+
+### 构造方法
+
+#### `RegistrationPolicyService(RegistrationConfig registrationConfig)`
+- **参数：**
+  - `registrationConfig` — 部署期注册与 OTP 配置
+
+### 方法
+
+#### `getPublicPolicy() → PublicRegistrationPolicyVo`
+- **说明：** 返回不含 SMTP 密钥等敏感投递参数的匿名策略快照
+
+#### `requireSelfServiceMode(RegistrationMode expected) → void`
+- **说明：** 校验当前部署允许指定的注册流程
+- **异常：** `NexusException`（`REGISTRATION_MODE_DISABLED`）— 模式不一致或已关闭时
+
+#### `registrationConfig() → RegistrationConfig`
+- **说明：** 返回底层注册配置，供平台注册服务读取 OTP 与投递参数
+
 
 ## TokenIssuer
 

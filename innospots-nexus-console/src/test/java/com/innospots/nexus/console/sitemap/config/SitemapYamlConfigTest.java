@@ -8,9 +8,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class SitemapYamlConfigTest {
 
     @Test
-    void metaSitemapDefaultsPointsToUiPagesMetaSitemapYaml() {
+    void metaSitemapDefaultsPointsToConsoleMetaSitemapYaml() {
         assertThat(SitemapYamlConfig.metaSitemapDefaults().resourcePath())
-                .isEqualTo("ui-pages/meta-sitemap.yaml");
+                .isEqualTo("console/meta-sitemap.yaml");
     }
 
     @Test

@@ -18,9 +18,9 @@ class ConsolePublicApiPathsTest {
     @Test
     void matchesLegacyPublicApiPrefixAndDescendants() {
         assertThat(ConsolePublicApiPaths.matches("/api/public")).isTrue();
-        assertThat(ConsolePublicApiPaths.matches("/api/public/pages/nexus-menu-main")).isTrue();
+        assertThat(ConsolePublicApiPaths.matches("/api/public/page-access/verify")).isTrue();
         assertThat(ConsolePublicApiPaths.matches("/api/public/ui/sitemap/nexus")).isTrue();
-        assertThat(ConsolePublicApiPaths.matches("api/public/pages/foo")).isTrue();
+        assertThat(ConsolePublicApiPaths.matches("api/public/page-access/verify")).isTrue();
     }
 
     @Test
@@ -44,12 +44,12 @@ class ConsolePublicApiPathsTest {
     @Test
     void legacyAndDomainMatchersAgreeWithAntPatterns() {
         assertThat(ConsoleAntPathMatcher.matches(
-                ConsolePublicApiPaths.LEGACY_PUBLIC_PATTERN, "/api/public/pages/x"))
+                ConsolePublicApiPaths.LEGACY_PUBLIC_PATTERN, "/api/public/page-access/verify"))
                 .isTrue();
         assertThat(ConsoleAntPathMatcher.matches(
                 ConsolePublicApiPaths.DOMAIN_PUBLIC_PATTERN, "/api/d/platform/public/auth/login"))
                 .isTrue();
-        assertThat(ConsolePublicApiPaths.matches("/api/public/pages/x")).isTrue();
+        assertThat(ConsolePublicApiPaths.matches("/api/public/page-access/verify")).isTrue();
         assertThat(ConsolePublicApiPaths.matches("/api/d/platform/public/auth/login")).isTrue();
     }
 }

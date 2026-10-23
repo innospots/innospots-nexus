@@ -161,8 +161,9 @@ public class RoleEntity extends WorkspaceBaseEntity {
 
 ## 领域模型
 
-- 业务数据类型属于 `domain`，按职责分为 `entity`、`request`、`vo`、`model` 和 `enums`。
+- 业务数据类型属于 `domain`，固定使用 `entity`、`vo`、`model`、`request` 四个子包，按需增加 `enums`、`event`。
 - 请求和 VO 类型必须是 record。请求名以 `Request` 结尾，响应视图名以 `Vo` 结尾。
+- 不可变 model 和值对象优先使用 record；持久化实体以及确有可变身份/生命周期的 model 使用 class。
 - 实体名以 `Entity` 结尾。内部模型名表达实际业务概念，无需技术后缀。
 - 领域类型可拥有校验、计算、不变式和状态转换。当行为属于对象时，优先使用行为丰富的模型；不要仅为保持领域对象为纯数据结构而将所有业务逻辑移到 service。
 - 配置文件绑定对象及其他系统配置类型属于模块级 `config` 包，不属于 `domain`。

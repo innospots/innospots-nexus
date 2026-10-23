@@ -77,7 +77,7 @@ grill-me（新设计必经，琐碎 L0 可跳过）
 ### 出口门禁
 
 - [ ] 包路径 **领域优先**（`role/endpoint`，非 `endpoint/role`）
-- [ ] 大领域已规划**功能子模块**（grant / authorization …），非扁平 service 桶
+- [ ] 已先固定技术模块；技术模块较大时再规划**功能子包**（`service/grant`、`endpoint/authorization` …），非扁平 service 桶
 - [ ] 单包预计 **≤15** 类；过大已规划拆分
 - [ ] Session 作用域（Snapshot）与 Entity 基类（Tenant/Workspace/Project）已分别选定
 - [ ] 分层：`endpoint → service → operator → dao`；operator 只能依赖 dao，无 operator→service；service 可依赖 operator/其他 service/dao 且无循环；无 endpoint→dao

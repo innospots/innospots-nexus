@@ -112,13 +112,19 @@ JSON 序列化时敏感数据的预定义脱敏策略。 每种策略定义字�
 
 | 常量 | 说明 |
 |------|------|
-| `PASSWORD` | — |
-| `HIDE` | — |
+| `PHONE` | 手机号：保留前 3 位与后 4 位，如 `138****1234` |
+| `EMAIL` | 邮箱：保留本地部分首字符与完整域名，如 `a***@example.com` |
+| `ID_CARD` | 身份证号：保留前 3 位与后 4 位 |
+| `BANK_CARD` | 银行卡号：保留前 4 位与后 4 位 |
+| `NAME` | 姓名：保留首字（长姓名保留前两字），其余遮蔽 |
+| `PASSWORD` | 密码：固定输出 `******` |
+| `HIDE` | 完全隐藏：固定输出 `***` |
+| `CUSTOM` | 原样返回，由 `MaskValue.keepHead` / `keepTail` 组合处理 |
 
 ### 方法
 
 #### `apply(String value) → String`
-- **说明：** 138****1234 — 保留前 3 位、后 4 位 PHONE(s -> mask(s, 3, 4)), /** a***@example.com — 保留 @ 前第 1 位，域名完整保留 EMAIL(s -> { if (s == null || !s.contains("@")) { return "***"; } int at = s.indexOf('@'); String local = s.substring(0, at); String domain = s.substring(at); return (local.isEmpty() ? "" : local.charAt(0)) + "***" + domain; }), /** 320***********1234 — 保留前 3 位、后 4 位 ID_CARD(s -> mask(s, 3, 4)), /** 6222****1234 — 保留前 4 位、后 4 位 BANK_CARD(s -> mask(s, 4, 4)), /** 张* / 张三* — 保留首字（长度 > 2 时保留前两个），其余遮蔽 NAME(s -> { if (s == null || s.isEmpty()) { return "***"; } if (s.length() == 2) { return s.charAt(0) + "*"; } return s.charAt(0) + s.substring(1, 2) + "*".repeat(Math.max(1, s.length() - 2)); }), /** ****** — 完全遮蔽 PASSWORD(s -> "******"), /** 不保留任何字符，全部替换为 *** HIDE(s -> "***"), /** 自定义策略 — 使用 MaskValue 和 MaskValue CUSTOM(s -> s); private final Function masker; MaskStrategy(Function masker) { this.masker = masker; } /** 对给定值应用脱敏转换。
+- **说明：** 按当前枚举常量对应的策略转换字符串；`CUSTOM` 原样返回。
 - **参数：**
   - `value` — 原始字符串值（可为 null）
 - **返回：** 脱敏后的字符串；输入为 null 时返回 null

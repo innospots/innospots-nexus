@@ -69,16 +69,16 @@
 | `Service` | 编排内聚业务工作流或跨领域行为 | `PermissionGrantService` |
 | `Operator` | 对 DAO 执行直接面向数据的业务操作 | `PlatformUserOperator` |
 | `Manager` | 拥有运行时设施的生命周期和协调状态 | `PluginManager`, `QuartzScheduleManager` |
-| `Registry` | 按稳定身份存储和查找注册 | `CapabilityRegistry`, `ExtensionRegistry` |
+| `Registry` | 按稳定身份存储和查找注册 | `PluginContributionDecoderRegistry`, `ExtensionRegistry` |
 | `Catalog` | 暴露可索引或已发现的定义集以供检查 | `PluginCatalog` |
-| `Router` | 从可用注册中选择目标或提供方 | `CapabilityRouter` |
-| `Provider` | 通过扩展或 SPI 边界提供能力 | `CapabilityProvider` |
-| `Factory` | 创建构造可变或封装的实例 | `CapabilityProviderFactory` |
-| `Resolver` | 将输入或需求解析为结果 | `DependencyResolver`, `I18nMessageResolver` |
+| `Router` | 从可用注册中选择目标或提供方 | `ConsolePageRoutes` |
+| `Provider` | 通过扩展或 SPI 边界提供能力 | `PermissionProvider` |
+| `Factory` | 创建构造可变或封装的实例 | `PluginRuntimeFactory` |
+| `Resolver` | 将输入或需求解析为结果 | `EndpointMethodResolver`, `I18nMessageResolver` |
 | `Discovery` | 从外部源发现实现或声明 | `ClasspathPluginDiscovery` |
-| `Loader` | 从位置加载已知资源 | `UiSpecLoader` |
-| `Parser` | 将序列化语法转换为结构化表示 | `UiSpecParser` |
-| `Validator` | 检查可复用规则集而不拥有工作流 | `PasswordValidator`, `UiSpecValidator` |
+| `Loader` | 从位置加载已知资源 | `SitemapConfigLoader` |
+| `Parser` | 将序列化语法转换为结构化表示 | `JacksonPluginManifestParser` |
+| `Validator` | 检查可复用规则集而不拥有工作流 | `PasswordValidator`, `UploadValidator` |
 | `Builder` | 增量组装带最终 build 步骤的值 | `ThreadPoolBuilder` |
 | `Repository` | 当存储是领域或基础设施端口而非 MyBatis mapper 时抽象存储 | `ConversationRepository` |
 | `Store` | 作为可复用端口提供键/资源导向持久化 | `CredentialStore`, `ResourceStore` |
@@ -197,9 +197,9 @@
 - 非业务模块和包（如 `base`、`script`、工具和可复用技术能力）按功能组织。
 - **业务代码必须领域优先**：第一级包段是领域名（`role`、`menu`、`permission`），其下再分 `endpoint`、`dao`、`domain` 等职责包。
 - **禁止技术层优先**：不得使用 `endpoint/role`、`dao/menu`、`domain/permission/entity` 这类「先技术后领域」的结构。完整说明与反例见 [`package-structure.md`](../references/package-structure.md)。
-- 每个业务领域内，按需使用 `endpoint`、`dao`、`domain`、`converter`、`operator`、`service`、`interceptor`、`handler` 和 `listener` 等职责包。仅创建有具体职责的包；不要脚手架空层。
-- **功能子模块**：领域较大或存在多个独立功能曲面时，在领域根下增加子包（`permission.authorization`、`permission.entry`、`catalog.bootstrap`），其下再挂职责包；**禁止**在模块根 `service` 或单个扁平 `service` 包内堆积全部业务类。见 [`package-structure.md`](../references/package-structure.md)。
-- **单包上限**：同一包目录内直接的 `*.java` 文件（不含子目录）不得超过 **15** 个；达到 12 应规划按功能子模块或职责子包拆分。
+- 每个业务领域内，按需使用 `endpoint`、`dao`、`service`、`operator`、`domain`、`filter`、`loader`、`converter`、`interceptor`、`handler` 和 `listener` 等技术模块包。`domain` 固定使用 `entity`、`vo`、`model`、`request`，按需增加 `enums`、`event`；不可变 request/vo/model 优先 record。仅创建有具体职责的包；不要脚手架空层。
+- **功能子包**：先保留固定的技术模块（`endpoint`、`dao`、`service`、`operator`、`domain` 等）；某个技术模块较大或存在多个独立功能曲面时，再在该技术模块下增加子包（`permission.service.authorization`、`permission.endpoint.grant`、`catalog.service.bootstrap`）。**禁止**在领域根下预建功能包，**禁止**在模块根 `service` 或单个扁平 `service` 包内堆积全部业务类。见 [`package-structure.md`](../references/package-structure.md)。
+- **单包上限**：同一包目录内直接的 `*.java` 文件（不含子目录）不得超过 **15** 个；达到 12 应规划按功能子包拆分。
 - 使用单数名词：`domain.condition` 而非 `domain.conditions`。`domain.enums` 包是明确的项目约定和例外。
 - 不要创建 `impl`、`common`、`misc` 或 `util` 子包来掩盖不清晰的归属。实现类与其契约放在一起，或放在精确职责包如 `runtime`、`adapter` 或 `persistence`。
 - 基础设施属于 adapter/plugin 模块，不属于领域包。
@@ -248,7 +248,8 @@ com.innospots.nexus.core.plugin
   ├── contract
   ├── declaration
   ├── discovery
-  ├── capability
+  ├── contribution
+  ├── installation
   ├── lifecycle
   ├── event
   └── runtime
@@ -281,7 +282,7 @@ com.innospots.nexus.core.plugin
 | 避免 | 优先 | 原因 |
 |-------|--------|--------|
 | `CommonUtils` | 内聚名称如 `StringUtils` 或 `Checks` | `Common` 无边界 |
-| `DataManager` | `CapabilityRegistry`、`SessionService` 或其他精确角色 | 数据和职责都未命名 |
+| `DataManager` | `PluginManager`、`PermissionProvider` 或其他精确角色 | 数据和职责都未命名 |
 | `RoleBusinessService` | `RoleService` | `Business` 重复 service 角色 |
 | `RoleDataDao` | `RoleDao` | `Data` 重复 DAO 角色 |
 | `UserDTO`, `UserVO` | `UserProfileVo` | 项目后缀和用例明确 |
@@ -295,7 +296,7 @@ com.innospots.nexus.core.plugin
 | `endpoint.menu.MenuEndpoint` | `menu.endpoint.MenuEndpoint` | 技术层优先 |
 | `domain.role.entity.RoleEntity` | `role.domain.entity.RoleEntity` | 全局 domain 包下按领域再分 |
 | `portal.service.RoleService` 等数十个 Service | `portal.role…`、`portal.menu…` 各领域子树 | 模块级 service 垃圾桶 |
-| `permission.service` 内 20+ 编排类 | `permission.grant.service`、`permission.authorization` 等 | 未按功能子模块拆分 |
+| `permission.service` 内 20+ 编排类 | `permission.service.grant`、`permission.service.authorization` 等 | 未在技术模块内按功能拆分 |
 
 ## 命名清单
 
@@ -309,6 +310,6 @@ com.innospots.nexus.core.plugin
 - 布尔、集合、标识符、时间、计数和单位名称是否明确？
 - 首字母缩写是否按项目形式大小写？
 - 包是否**领域优先**（`role/endpoint` 而非 `endpoint/role`），且无 `impl`、`common` 或 `misc`？
-- 是否已按**功能子模块**拆分，避免模块根或领域内 `service` 堆积？每个包是否 **≤15** 个类型？
+- 技术模块较大时是否已按**功能子包**拆分，避免扁平 `service` 堆积？每个包是否 **≤15** 个类型？
 - 读者是否无需打开实现即可理解名称？
 - 若内部实现变更，名称是否仍然准确？

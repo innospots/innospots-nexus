@@ -107,17 +107,18 @@ innospots-nexus-sample/                    packaging=pom，parent=innospots-nexu
 
 ## 3. 扩展库：交付面 × 领域（DDD 边界）
 
-`innospots-nexus-sample-platform` 在 **单个 Maven 模块** 内用 **第一级交付面、第二级领域、第三级职责** 组织代码。
+`innospots-nexus-sample-platform` 在 **单个 Maven 模块** 内用
+**第一级交付面、第二级领域、第三级技术模块、按需第四级功能子包** 组织代码。
 这与平台库 `com.innospots.nexus.platform.<domain>.<responsibility>`（领域在第一级）**并存**：
 扩展库多一刀交付面，避免与平台内置领域包名冲突，且区分管理台与对外 API。
 
-### 3.1 三层结构
+### 3.1 四层结构
 
 ```text
 交付面（console | core | inbound）   ← 按产品裁剪：不是每个领域都需要三个面
   └── 业务领域（announcement | support | …）
-        └── 功能子模块（assignment | publish | …，按需）
-              └── 职责包（endpoint | service | dao | domain/… | loader）
+        └── 技术模块（endpoint | service | dao | domain/… | loader）
+              └── 功能子包（assignment | publish | …，按需）
 ```
 
 **交付面按需：** `core` 为领域真源，**几乎总是需要**；`console` 仅在有管理台 HTTP 时建；
@@ -129,7 +130,7 @@ innospots-nexus-sample/                    packaging=pom，parent=innospots-nexu
 |--------|--------|------|----------|
 | **core** | `…sample.platform.core.<domain>` | 领域真源：持久化、编排、启动加载 | `*Entity`、`*Dao`、`*Operator`、`*Service`、`loader/*Loader` |
 | **console** | `…sample.platform.console.<domain>` | 管理台 HTTP 边界 + 管理台编排 | `Console*Endpoint`（interface）、`Console*Service` |
-| **inbound** | `…sample.platform.inbound.<domain>` | 对外 API 边界 + 对外编排 | `Inbound*Endpoint`、`Inbound*Service`、按需 `inbound.<domain>.<function>` |
+| **inbound** | `…sample.platform.inbound.<domain>` | 对外 API 边界 + 对外编排 | `Inbound*Endpoint`、`Inbound*Service`、按需 `inbound.<domain>.service.<function>` |
 
 **调用方向（不可违反）：**
 
@@ -146,8 +147,10 @@ core.<domain>.loader        → 仅调用 core 内 service/operator；由 NexusS
 ### 3.3 领域内职责（与平台一致）
 
 在 `core.<domain>` 或各交付面的 `<domain>` 下，仍遵守
-[package-structure.md](package-structure.md) 的职责包含义：`domain/entity|request|vo|enums`、
-`dao`、`operator`、`service`；单包 ≤15 个 `.java`；大领域用功能子模块（示例：`core.support.assignment`）。
+[package-structure.md](package-structure.md) 的职责包含义：
+`domain/{entity,vo,model,request}`、`dao`、`operator`、`service`；不可变 request/vo/model
+优先 record；单包 ≤15 个 `.java`；技术模块内类型较多时再按功能拆分（示例：
+`core.support.service.assignment`）。
 
 ### 3.4 参考包树（两个领域）
 
@@ -161,11 +164,11 @@ com.innospots.nexus.sample.platform
 └── inbound.announcement.{endpoint,service}
 ```
 
-**支持 `support`（含功能子模块 `assignment`）：**
+**支持 `support`（含功能子包 `assignment`）：**
 
 ```text
 core.support.{dao,domain,operator,service}
-core.support.assignment.service
+core.support.service.assignment
 console.support.{endpoint,service}
 inbound.support.{endpoint,service}
 ```

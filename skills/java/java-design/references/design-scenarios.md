@@ -11,7 +11,7 @@
 |------|---------|----------|-----------|------|
 | 单端点字段 / 行为澄清 | **L0** | 可跳过 | ②③ 简写；④ 增量契约 | develop |
 | 模块内新领域 | **L1** | 必经 | ①–④ 完整 | develop |
-| 模块内大领域扩展（多表、多端点） | **L1** | 必经 | ③ 功能子模块；④ 完整 | develop |
+| 模块内大领域扩展（多表、多端点） | **L1** | 必经 | ③ 技术模块与按需功能子包；④ 完整 | develop |
 | 跨模块 / 新中间件 / 存储大改 | **L2** | 必经 | ① + architecture-decision；十二节文档 | develop（+ project 若需） |
 | 单项技术选型 | **L3 ADR** | 按需 | 可并入 L2 §12 或独立 ADR | 视决策 |
 | 需新建 Maven 模块 | **L1/L2** + | 必经 | ① 判定模块类型；**project** | project → develop |
@@ -61,7 +61,7 @@
 
 | 能力 | 设计归属文档 |
 |------|-------------|
-| 插件运行时、Page DSL、安装 | `innospots-nexus-plugin/docs/plugin/design/` |
+| 插件运行时、`console@2` 贡献与安装 | `innospots-nexus-plugin/docs/plugin/design/` |
 | Catalog 索引、管理台 REST 契约 | console 域 + `docs/design/` 或 console `docs/` |
 | 租户侧用户/权限实现 | portal |
 

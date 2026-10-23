@@ -7,6 +7,9 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import org.junit.jupiter.api.Test;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
+
+import com.innospots.nexus.console.auth.domain.request.AuthCaptchaIssueRequest;
 import com.innospots.nexus.console.auth.domain.request.AuthLoginRequest;
 import com.innospots.nexus.console.auth.domain.request.PasswordChangeRequest;
 import com.innospots.nexus.console.auth.domain.request.PasswordResetRequest;
@@ -28,6 +31,20 @@ class TenantAuthEndpointContractsTest {
         assertHttpMethod(TenantAuthEndpoint.class, "logout", POST.class);
         assertHttpMethod(TenantAuthEndpoint.class, "changePassword", POST.class, PasswordChangeRequest.class);
         assertHttpMethod(TenantAuthEndpoint.class, "resetPassword", POST.class, PasswordResetRequest.class);
+        assertOperationId(TenantAuthEndpoint.class, "register", "tenantAuthRegister",
+                TenantRegisterRequest.class);
+        assertOperationId(TenantAuthEndpoint.class, "issueLoginCaptcha", "tenantAuthCaptchaIssue",
+                AuthCaptchaIssueRequest.class);
+        assertOperationId(TenantAuthEndpoint.class, "login", "tenantAuthLogin", AuthLoginRequest.class);
+        assertOperationId(TenantAuthEndpoint.class, "selectTenant", "tenantAuthSelectTenant",
+                SelectTenantRequest.class);
+        assertOperationId(TenantAuthEndpoint.class, "refresh", "tenantAuthRefresh",
+                TokenRefreshRequest.class);
+        assertOperationId(TenantAuthEndpoint.class, "logout", "tenantAuthLogout");
+        assertOperationId(TenantAuthEndpoint.class, "changePassword", "tenantAuthPasswordChange",
+                PasswordChangeRequest.class);
+        assertOperationId(TenantAuthEndpoint.class, "resetPassword", "tenantAuthPasswordReset",
+                PasswordResetRequest.class);
     }
 
     private static void assertHttpMethod(
@@ -38,5 +55,15 @@ class TenantAuthEndpointContractsTest {
     ) throws NoSuchMethodException {
         Method method = endpointType.getMethod(methodName, parameterTypes);
         assertThat(method.getAnnotation(httpAnnotation)).isNotNull();
+    }
+
+    private static void assertOperationId(
+            Class<?> endpointType,
+            String methodName,
+            String operationId,
+            Class<?>... parameterTypes
+    ) throws NoSuchMethodException {
+        Method method = endpointType.getMethod(methodName, parameterTypes);
+        assertThat(method.getAnnotation(Operation.class).operationId()).isEqualTo(operationId);
     }
 }

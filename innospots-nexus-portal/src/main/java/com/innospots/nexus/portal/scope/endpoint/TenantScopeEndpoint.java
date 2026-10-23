@@ -44,5 +44,6 @@ public interface TenantScopeEndpoint {
      */
     @POST
     @Path("/select-project")
+    @Operation(operationId = "tenantScopeSelectProject", summary = "选择项目")
     R<AuthTokenVo> selectProject(SelectProjectRequest request);
 }

@@ -19,8 +19,9 @@ portal            platform
 - **platform**：运营域（PLATFORM Realm）管理平台，承载运营用户、Tenant 生命周期。
 - **运营用户与租户用户分表**，不使用 Group，批量授权主体仅为 Organization Unit。
 
-本文是**可落地的开发设计方案**，基于当前 `innospots-nexus` 工程现状编写。Console UI
-权限实现细节见 [`innospots-nexus-portal/docs/permission-design.md`](../../innospots-nexus-portal/docs/permission-design.md)（迁移目标：console 模块）。
+本文是**可落地的开发设计方案**，基于当前 `innospots-nexus` 工程现状编写。Console
+目录与页面授权实现见
+[`docs/superpowers/specs/2026-09-04-console-catalog-and-navigation-design.md`](../superpowers/specs/2026-09-04-console-catalog-and-navigation-design.md)。
 
 ### 1.1 设计目标
 
@@ -96,10 +97,10 @@ flowchart TB
         UserGlobal[UserEntity_global]
         ProjectScope[workspaceId_scope]
         RoleGroup[Role_Group_per_workspace]
-        UiPerm[UiSpec_PermissionGrant]
+        CatalogGrant[Console_Catalog_PermissionGrant]
         UserGlobal --> RoleGroup
         ProjectScope --> RoleGroup
-        RoleGroup --> UiPerm
+        RoleGroup --> CatalogGrant
     end
 
     subgraph target [TargetModel]
@@ -110,7 +111,7 @@ flowchart TB
         TenantUser[TenantUser]
         OrgUnit[OrganizationUnit]
         Workspace[Workspace]
-        ConsolePerm[Console_UI_Permission]
+        ConsolePerm[Console_Catalog_Permission]
         ConsoleMod --> PortalMod
         ConsoleMod --> PlatformMod
         PortalMod --> TenantUser
@@ -259,8 +260,9 @@ Workspace；也不能因角色名含 Admin 而获得 Tenant 业务数据访问�
 
 ### 4.4 Platform 层 grant 示例
 
-Platform 层角色通过 `nx_permission_grant` 获得目录中的 CAPABILITY / PAGE 等资源。
-这些 resource 的 `security_realm=PLATFORM`，**不能**授权给 Tenant 域角色：
+Platform 层角色通过 `nx_permission_grant` 获得目录中的页面访问项与
+`EndpointGrant` 操作项。这些授权项的 catalog 来源资源标记
+`security_realm=PLATFORM`，**不能**授权给 Tenant 域角色：
 
 ```text
 platform.tenant.read
@@ -458,7 +460,7 @@ Platform 层角色                         TenantMember → 各层角色绑定
 ```text
 nx_platform_user
 ----------------
-platform_user_id    PK   前缀 pus
+platform_user_id    PK   前缀 PUS
 login_name          UNIQUE（platform 域内）
 email / mobile
 display_name
@@ -477,7 +479,7 @@ nx_platform_user_oauth        platform_user_id FK
 ```text
 nx_tenant_user
 --------------
-tenant_user_id      PK   前缀 tus
+tenant_user_id      PK   前缀 TUS
 user_name           UNIQUE     登录用户名（Tenant Realm 内全局唯一）
 display_name                   显示用户名（界面展示，可与 user_name 不同）
 email                          独立字段；非空时 Realm 内唯一
@@ -775,24 +777,25 @@ V1 不做：跨 Realm 单点登录、MFA、社交账号把运营与租户合成�
 
 ## 7. 角色与权限体系
 
-Nexus 采用 **「资源目录 + 授权记录」单一权限模型**，与
-[`permission-design.md`](../../innospots-nexus-portal/docs/permission-design.md) 一致：
+Nexus 采用 **「Console catalog + 授权记录」单一权限模型**：
 
 ```text
-nx_permission_resource   ← 权限目录（可授权能力的唯一事实源）
-nx_permission_grant      ← 授权记录（角色/部门 → 资源）
+nx_console_catalog_resource  ← 活动插件 MODULE/MENU 索引
+EndpointGrant                 ← REST 操作项运行时目录
+nx_permission_grant           ← 授权记录（角色/部门 → 稳定 grant key）
 ```
 
 **不再单独保留** `nx_tenant_permission`、`nx_platform_permission` 及对应的
-`*_role_permission` 表。每个稳定资源本身就是可授权能力；`nx_permission_grant`
-即「角色/部门对该资源具有的权限」。
+`*_role_permission` 表。页面访问项与 REST 操作项都使用稳定 `grant_key`；
+`nx_permission_grant` 即「角色/部门对该授权项具有的权限」。
 
 ### 7.1 模型总览
 
 ```mermaid
 flowchart LR
-    subgraph catalog [权限目录_console]
-        Resource[nx_permission_resource]
+    subgraph catalog [Console目录_console]
+        Resource[nx_console_catalog_resource]
+        EndpointGrant[EndpointGrant_runtime]
     end
 
     subgraph subjects [授权主体]
@@ -811,32 +814,30 @@ flowchart LR
     Role --> PG
     OrgUnit --> PG
     PG --> Resource
+    EndpointGrant --> Resource
     RB --> Role
 ```
 
 | 概念 | 表 | 回答的问题 |
 |------|-----|-----------|
-| **权限目录** | `nx_permission_resource` | 系统里有哪些可授权资源 |
-| **授权** | `nx_permission_grant` | 哪个角色/部门对哪个资源有权限 |
+| **目录索引** | `nx_console_catalog_resource` | 活动插件贡献了哪些 MODULE/MENU |
+| **操作目录** | `EndpointGrantManager` | 每个 MODULE 暴露了哪些 REST 操作 |
+| **授权** | `nx_permission_grant` | 哪个角色/部门对哪个稳定 grant key 有权限 |
 | **角色定义** | `nx_role` | 某层级节点上有哪些角色 |
 | **角色绑定** | `nx_role_binding` | 哪个用户/成员/部门拥有哪个角色 |
 
-### 7.2 权限目录（resource = permission）
+### 7.2 权限目录（catalog + EndpointGrant）
 
-`nx_permission_resource` 收录 **所有** 可授权项，按 `resourceType` 区分：
+`nx_console_catalog_resource` 只收录插件贡献的 `MODULE` / `MENU`。REST 操作项由
+`EndpointGrantManager` 在读取权限目录时按 `moduleKey` 派生，不写入 catalog 表：
 
-| resourceType | 来源 | 示例 stable key | 用途 |
-|--------------|------|-----------------|------|
-| MODULE | 扩展模块 | `module:sales` | 管理树根 |
-| MENU | 菜单声明 | `menu:sales.order` | 导航可见性 |
-| PAGE | 页面声明 | `page:sales.order-list` | 页面进入 |
-| ACTION | UiSpec action | `action:sales.order-list.export` | 按钮可见性 |
-| DATASOURCE | UiSpec datasource | `datasource:sales.order-list.order-query` | 接口调用 + 数据条件 |
-| **CAPABILITY** | 产品/扩展注册 | `capability:tenant.member.invite` | 无 UI 的治理/API 能力 |
-| | | `capability:platform.tenant.suspend` | Platform 运营 API |
+| 来源 | 示例稳定键 | 用途 |
+|------|--------------|------|
+| 叶子 MODULE / MENU 的 `entryPageKey` | `sales-order-list:sales.order` | 页面进入与导航可见性 |
+| `@EndpointGrant.name` | `sales.order.export:sales.order` | 按钮/接口操作授权 |
 
-与 `permission-design.md` §10.1 一致：**删除中间 Permission 层**，不再先定义
-`permissionCode` 再映射到 resource。
+`grant_key` 统一格式为 `grantName:domainKey.moduleKey`。删除中间 Permission 层，
+不再先定义 `permissionCode` 再映射到资源。
 
 隔离：`security_realm`（`PLATFORM | TENANT`）+ `workspace_id`（TENANT 域）。
 
@@ -847,20 +848,22 @@ flowchart LR
 ```text
 nx_permission_grant
 -------------------
-grant_id            PK
+grant_id            PK，前缀 PGR
+owner_type          PLATFORM | TENANT | WORKSPACE
+owner_id            授权生效的归属节点
 security_realm      PLATFORM | TENANT
-workspace_id        TENANT 域作用域（PLATFORM 域可为 null）
 subject_type        ROLE | ORG_UNIT
 subject_id          role_id 或 organization_unit_id
-resource_id         FK → nx_permission_resource
-constraint_definition  DATASOURCE 附加查询条件（可选）
+grant_key           grantName:domainKey.moduleKey
+constraint_definition  旧数据槽；catalog v2 当前拒绝非空约束
 ```
 
 - **角色权限**：`subject_type=ROLE`，对角色做权限全量替换（`PUT .../roles/{id}/permissions`）。
 - **部门权限**：`subject_type=ORG_UNIT`，部门成员继承并集。
 - **有效权限** = 用户所有启用角色的 grant ∪ 所属 OrgUnit 的 grant。
 
-**不存在** `*_role_permission` 表——角色与资源的关联 **就是** `nx_permission_grant`。
+**不存在** `*_role_permission` 表——角色与授权项的关联 **就是**
+`nx_permission_grant`。
 
 ### 7.4 角色等级 = 层级归属（非固定档位）
 
@@ -909,17 +912,17 @@ subject_id          platform_user_id / tenant_member_id / organization_unit_id
 
 ### 7.5 与旧「三层权限」说法的对照
 
-早期草案曾拆出「Tenant Permission + Console UI Permission」两层，**与现有
-permission-design 冲突，已废弃**：
+早期草案曾拆出「Tenant Permission + Console UI Permission」两层，**与当前
+catalog 模型冲突，已废弃**：
 
 | 已废弃 | 统一后 |
 |--------|--------|
-| `nx_tenant_permission` | `nx_permission_resource`（含 CAPABILITY 类型） |
+| `nx_tenant_permission` | `nx_console_catalog_resource` + `EndpointGrant` 目录 |
 | `nx_tenant_role_permission` | `nx_permission_grant`（subject=ROLE） |
 | `nx_platform_permission` | 同上，`security_realm=PLATFORM` |
 | `nx_platform_role_permission` | 同上 |
 
-UI 菜单/页面/按钮/API 调用、无 UI 的治理能力，**全部走同一目录 + 同一 grant 表**。
+页面入口、菜单与 REST 操作项 **全部走同一 grant key + 同一授权表**。
 
 ### 7.6 权限检查链路（统一）
 
@@ -933,7 +936,7 @@ sequenceDiagram
     participant User as PlatformUser
     participant UR as RoleBinding
     participant Grant as PermissionGrant
-    participant Res as PermissionResource
+    participant Res as Catalog_EndpointGrant
 
     Client->>API: Token realm=PLATFORM
     API->>Ctx: resolve context
@@ -955,7 +958,7 @@ sequenceDiagram
     participant Org as OrganizationUnit
     participant Bind as RoleBinding
     participant Grant as PermissionGrant
-    participant Res as PermissionResource
+    participant Res as Catalog_EndpointGrant
 
     Client->>API: Token realm=TENANT
     API->>Ctx: resolve context
@@ -964,12 +967,12 @@ sequenceDiagram
     Member->>Org: org membership
     Org->>Grant: ORG_UNIT grants
     Bind->>Grant: ROLE grants via roles
-    Grant->>Res: PAGE/ACTION/DATASOURCE/CAPABILITY
+    Grant->>Res: page entry / EndpointGrant key
     Res-->>API: allow/deny
 ```
 
-页面加载走 PAGE/ACTION grant 裁剪 UiSpec；datasource 请求走 DATASOURCE grant；
-纯 REST 治理接口走 CAPABILITY grant。**单一授权快照，一条检查链路**。
+页面入口使用叶子 MODULE/MENU 的 `entryPageKey` 授权键；REST 方法使用
+`@EndpointGrant.name` 授权键。两者共用 `nx_permission_grant` 与同一检查链路。
 
 ---
 
@@ -1213,8 +1216,8 @@ Platform 发布 `TenantCreatedEvent` → portal `provisioning` 初始化默认�
 | Platform 元数据 | `nx_` | `nx_tenant`, `nx_enterprise`, `nx_support_access_grant` | platform |
 | Tenant 治理 | `nx_` | `nx_tenant_member`, `nx_organization_unit`, `nx_organization_member` | portal |
 | 业务结构 | `nx_` | `nx_workspace` | portal |
-| **权限（唯一）** | `nx_` | `nx_permission_resource`, `nx_permission_grant`, `nx_menu` | console |
-| 字典/扩展 | `nx_` / `nexus_` | dictionary 表、`nexus_extension_installation` | console |
+| **权限（唯一）** | `nx_` | `nx_console_catalog_resource`, `nx_permission_grant` | console |
+| 字典/插件 | `nx_` | dictionary 表、`nx_plugin_installation` | console / plugin |
 | 审计 | `nx_` / `nx_platform_` | `nx_tenant_audit_log`, `nx_platform_audit_log` | portal / platform |
 
 ### 10.2 用户表（分表）
@@ -1223,7 +1226,7 @@ Platform 发布 `TenantCreatedEvent` → portal `provisioning` 初始化默认�
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| platform_user_id | VARCHAR(32) PK | 前缀 `pus` |
+| platform_user_id | VARCHAR(32) PK | 前缀 `PUS` |
 | login_name | VARCHAR(64) UNIQUE | 运营域登录名 |
 | email / mobile / display_name | | |
 | employee_no | VARCHAR(64) | |
@@ -1240,7 +1243,7 @@ Platform 发布 `TenantCreatedEvent` → portal `provisioning` 初始化默认�
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| tenant_user_id | VARCHAR(32) PK | 前缀 `tus` |
+| tenant_user_id | VARCHAR(32) PK | 前缀 `TUS` |
 | user_name | VARCHAR(64) NOT NULL UNIQUE | 登录用户名 |
 | display_name | VARCHAR(128) | 显示用户名；空则展示时回退 `user_name` |
 | email | VARCHAR(128) | 独立字段；非空 UNIQUE |
@@ -1274,7 +1277,7 @@ Platform 发布 `TenantCreatedEvent` → portal `provisioning` 初始化默认�
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| tenant_id | VARCHAR(32) PK | 前缀 `tnt` |
+| tenant_id | VARCHAR(32) PK | 前缀 `TNT` |
 | tenant_name | VARCHAR(128) | |
 | tenant_code | VARCHAR(64) UNIQUE | |
 | status | VARCHAR(32) | ACTIVE / SUSPENDED / ARCHIVED |
@@ -1291,7 +1294,7 @@ Platform 发布 `TenantCreatedEvent` → portal `provisioning` 初始化默认�
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| enterprise_id | VARCHAR(32) PK | 前缀 `ent` |
+| enterprise_id | VARCHAR(32) PK | 前缀 `ENT` |
 | tenant_id | VARCHAR(32) UNIQUE FK | 对应 nx_tenant |
 | legal_name | VARCHAR(256) | 企业法定名称 |
 | credit_code | VARCHAR(64) | 统一社会信用代码（或同等证件号） |
@@ -1337,7 +1340,7 @@ Platform 发布 `TenantCreatedEvent` → portal `provisioning` 初始化默认�
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| tenant_member_id | VARCHAR(32) PK | 前缀 `tmb` |
+| tenant_member_id | VARCHAR(32) PK | 前缀 `TMB` |
 | tenant_id | FK | |
 | tenant_user_id | FK → nx_tenant_user | |
 | status | VARCHAR(32) | |
@@ -1353,7 +1356,7 @@ Platform 发布 `TenantCreatedEvent` → portal `provisioning` 初始化默认�
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| unit_id | VARCHAR(32) PK | 前缀 `org` |
+| unit_id | VARCHAR(32) PK | 前缀 `ORG` |
 | tenant_id | FK | |
 | parent_id | VARCHAR(32) | 父节点，根为 null |
 | unit_code | VARCHAR(64) | tenant 内唯一 |
@@ -1385,7 +1388,7 @@ Platform 发布 `TenantCreatedEvent` → portal `provisioning` 初始化默认�
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| role_id | VARCHAR(32) PK | 前缀 `rol` |
+| role_id | VARCHAR(32) PK | 前缀 `ROL` |
 | security_realm | VARCHAR(32) | PLATFORM / TENANT |
 | owner_type | VARCHAR(32) | PLATFORM / TENANT / WORKSPACE |
 | owner_id | VARCHAR(32) | 归属节点 ID；PLATFORM 可为 null |
@@ -1405,7 +1408,7 @@ Platform 发布 `TenantCreatedEvent` → portal `provisioning` 初始化默认�
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| binding_id | VARCHAR(32) PK | 前缀 `rbn` |
+| binding_id | VARCHAR(32) PK | 前缀 `RBN` |
 | role_id | FK → nx_role | 生效范围跟随角色归属 |
 | subject_type | VARCHAR(32) | USER / ORG_UNIT |
 | subject_id | VARCHAR(32) | platform_user_id / tenant_member_id / organization_unit_id |
@@ -1421,7 +1424,7 @@ Platform 发布 `TenantCreatedEvent` → portal `provisioning` 初始化默认�
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| workspace_id | VARCHAR(32) PK | 前缀 `wks` |
+| workspace_id | VARCHAR(32) PK | 前缀 `WKS` |
 | tenant_id | FK | |
 | workspace_name | VARCHAR(128) | |
 | workspace_code | VARCHAR(64) | tenant 内唯一 |
@@ -1435,32 +1438,47 @@ Platform 发布 `TenantCreatedEvent` → portal `provisioning` 初始化默认�
 
 ### 10.7 权限目录与授权（唯一权限存储）
 
-与 [`permission-design.md`](../../innospots-nexus-portal/docs/permission-design.md) §10 一致，
-**仅两张权限业务表**，不引入 `*_permission` / `*_role_permission`。
+与
+[`2026-09-04-console-catalog-and-navigation-design.md`](../superpowers/specs/2026-09-04-console-catalog-and-navigation-design.md)
+一致，**仅一张目录表和一张授权表**，不引入 `*_permission` / `*_role_permission`。
 
-#### nx_permission_resource
+#### nx_console_catalog_resource
 
-权限目录；每个稳定资源即一项可授权能力。在现有字段基础上：
+活动插件贡献的宿主级目录索引，只保存 `MODULE` / `MENU`：
 
-| 变更 | 说明 | Phase |
-|------|------|-------|
-| 新增 `security_realm` | `PLATFORM \| TENANT` | 2 |
-| `workspace_id` / `tenant_id` | 已由 `WorkspaceBaseEntity` 提供 | 已落地 |
-| 扩展 `resourceType` | 增加 `CAPABILITY`（无 UI 的治理/API 能力） | 2 |
+| 字段 | 说明 |
+|------|------|
+| `resource_id` | PK，前缀 `CCR` |
+| `owner_plugin_id` | 贡献来源插件 |
+| `domain_key` / `module_key` | 稳定领域与模块身份 |
+| `resource_type` | `MODULE` / `MENU` |
+| `resource_key` | `module:{moduleKey}` 或 `menu:{moduleKey}.{entryPageKey}` |
+| `parent_resource_id` | 嵌套 MODULE/MENU 的父节点 |
+| `entry_page_key` | 叶子 MODULE/MENU 的稳定页面入口 |
+| `view_groups` / `operation_groups` | 页面与操作权限分组声明 |
+| `status` | `ENABLED` / `DISABLED` |
+| `security_realm` | `PLATFORM` / `TENANT` |
+
+REST 操作项不落此表，由 `EndpointGrantManager.moduleCatalog(moduleKey)` 在读取权限目录时派生。
 
 #### nx_permission_grant
 
-角色/部门对资源的授权；**即权限分配本身**。
+角色/部门对稳定 `grant_key` 的授权；**即权限分配本身**。
 
-| 变更 | 说明 | Phase |
-|------|------|-------|
-| 新增 `security_realm` | 与 resource 一致 | 2 |
-| `workspace_id` | 已由 `WorkspaceBaseEntity` 提供 | 已落地 |
-| `subject_type` | `ROLE \| ORG_UNIT`（Group 删除） | 3 |
+| 字段 | 说明 |
+|------|------|
+| `grant_id` | PK，前缀 `PGR` |
+| `owner_type` / `owner_id` | 授权生效的归属节点 |
+| `security_realm` | `PLATFORM` / `TENANT` |
+| `subject_type` | `ROLE` / `ORG_UNIT` |
+| `subject_id` | 角色或组织单元 ID |
+| `grant_key` | `grantName:domainKey.moduleKey` |
+| `constraint_definition` | 旧数据槽；catalog v2 当前拒绝非空约束 |
 
-#### nx_menu（变更）
+#### nx_menu
 
-同 permission_resource，隔离列为 `workspace_id`（`WorkspaceBaseEntity`）。
+不是插件目录或权限目录事实源。控制台导航从 `nx_console_catalog_resource` 投影；
+`nx_menu` 只保留为独立业务菜单数据，不与 `entryPageKey` 建立第二套同步链路。
 
 ### 10.8 审计
 
@@ -1498,7 +1516,7 @@ erDiagram
     OrganizationUnit ||--o{ RoleBinding : subject_ORG_UNIT
     Role ||--o{ PermissionGrant : subject_ROLE
     OrganizationUnit ||--o{ PermissionGrant : subject_ORG_UNIT
-    PermissionResource ||--o{ PermissionGrant : target
+    ConsoleCatalogResource ||--o{ PermissionGrant : grant_key
 ```
 
 `nx_role.owner_type + owner_id` 指向 Platform / Tenant / Workspace。不在 ER 上拆成多张角色表。
@@ -1519,9 +1537,10 @@ erDiagram
 | `GroupEntity` / `nx_group` | **删除** | — | 不迁移，OrgUnit 新建 | 2 |
 | `GroupMemberEntity` | **删除** | — | — | 2 |
 | `permission/*` | 迁至 console | console | 模块迁移 | 2 |
-| `menu/*`、`extension/*`、`logger/*` | 迁至 console | console | 模块迁移 | 2 |
-| `PermissionResourceEntity` | 同表 + realm + workspace_id | console | 加列 | 3 |
-| `PermissionGrantEntity` | 同表 + realm + workspace_id | console | subject 仅 ROLE/ORG_UNIT | 3 |
+| `menu/*`、`logger/*` | 迁至 console | console | 模块迁移 | 2 |
+| `extension/*` | 插件运行时迁至 plugin；页面运行时删除 | plugin / console | 不保留双轨 | 2 |
+| `PermissionResourceEntity` | `ConsoleCatalogResourceEntity` | console | 改为 MODULE/MENU 目录索引 | 3 |
+| `PermissionGrantEntity` | 同表 + `grant_key` | console | subject 仅 ROLE/ORG_UNIT | 3 |
 | 无 | `WorkspaceEntity` | portal | 新建 | 1 |
 | 无 | `PlatformUserEntity` 等 | platform | 新建 | 1–2 |
 | 无 | `TenantMemberEntity` | portal | 新建 | 1 |
@@ -1544,7 +1563,7 @@ BaseEntity
 
 ### 11.3 RoleEntity 演进
 
-现有 [`RoleEntity`](../../innospots-nexus-portal/src/main/java/com/innospots/nexus/portal/role/domain/entity/RoleEntity.java)
+现有 [`RoleEntity`](../../innospots-nexus-console/src/main/java/com/innospots/nexus/console/role/domain/entity/RoleEntity.java)
 按 project 隔离，含 `builtIn` 和 `administrator` 字段。
 
 迁移策略：
@@ -1557,8 +1576,7 @@ BaseEntity
 
 ### 11.4 Group 删除
 
-现有 [`GroupEntity`](../../innospots-nexus-portal/src/main/java/com/innospots/nexus/portal/group/domain/entity/GroupEntity.java)
-**不再迁移**，Phase 2 起：
+现有 legacy `GroupEntity` **不再迁移**，Phase 2 起：
 
 1. 停止写入 `nx_group` / `nx_group_member`。
 2. 新建 OrganizationUnit，按业务需要手工或脚本重建组织树。
@@ -1567,19 +1585,25 @@ BaseEntity
 
 ### 11.5 PermissionGrant 演进
 
-现有 [`PermissionGrantEntity`](../../innospots-nexus-portal/src/main/java/com/innospots/nexus/portal/permission/domain/entity/PermissionGrantEntity.java)：
+现有
+[`PermissionGrantEntity`](../../innospots-nexus-console/src/main/java/com/innospots/nexus/console/permission/domain/entity/PermissionGrantEntity.java)：
 
 ```text
-workspace_id + subject_type(ROLE|GROUP) + subject_id + resource_id
+owner_type + owner_id + security_realm
+  + subject_type(ROLE|ORG_UNIT) + subject_id
+  + grant_key
 ```
 
 目标：
 
 ```text
-tenant_id + workspace_id + subject_type(ROLE|ORG_UNIT) + subject_id + resource_id
+owner_type + owner_id + security_realm
+  + subject_type(ROLE|ORG_UNIT) + subject_id
+  + grant_key
 ```
 
-`workspace_id` 已由 `WorkspaceBaseEntity` 提供。Phase 3 将 `GROUP` 迁为 `ORG_UNIT`。
+`owner_type/owner_id` 由 `OwnershipEntity` 提供；`grant_key` 只接受当前启用权限目录中的
+页面入口键或 `EndpointGrant.name` 组合键。Phase 3 将 `GROUP` 迁为 `ORG_UNIT`。
 
 ### 11.6 TLC 演进
 
@@ -1662,7 +1686,8 @@ gantt
 1. Platform 和 Tenant 属于两个独立授权域。
 2. Platform User 与 Tenant Member 使用不同业务身份表。
 3. Platform 与 Tenant **角色共用** `nx_role`，用 `security_realm` + `owner_type` 隔离。
-4. **权限只有** `nx_permission_resource` + `nx_permission_grant`，不按域再拆 permission 表。
+4. **权限只有** `nx_console_catalog_resource` + `nx_permission_grant`，REST 操作项由
+   `EndpointGrant` 派生，不按域再拆 permission 表。
 5. 角色绑定共用 `nx_role_binding`；生效范围跟随角色归属，不分 Platform/Tenant 两套 binding 表。
 6. Platform Audit 与 Tenant Audit 分域记录。
 7. Platform Token 与 Tenant Token 使用不同 Security Realm；身份票与业务票权限不同。console 签发 Token，platform/portal 不各自签发。
@@ -1708,7 +1733,7 @@ gantt
 
 | 文档 | 路径 | 关系 |
 |------|------|------|
-| Console UI 权限设计 | `innospots-nexus-portal/docs/permission-design.md` | 权限目录 + 授权唯一模型（resource = permission） |
+| Console catalog 与导航 | `docs/superpowers/specs/2026-09-04-console-catalog-and-navigation-design.md` | MODULE/MENU 目录、EndpointGrant、导航与页面授权 |
 | 插件扩展系统设计 | `innospots-nexus-plugin/docs/plugin/design/plugin-extensions-v2-design.md` | 插件、console@2 与权限 catalog 来源 |
 | 领域模块初始化规范 | `skills/java/java-reference/standards/domain-module-initialization.md` | 新 domain 包开发流程 |
 | 模块职责指南 | `AGENTS.md` | 模块边界与依赖规则 |

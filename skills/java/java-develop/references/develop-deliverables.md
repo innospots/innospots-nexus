@@ -38,14 +38,17 @@
 innospots-nexus-<module>/
 ├── src/main/java/com/innospots/nexus/<module>/<domain>/
 │   ├── endpoint/
-│   ├── service/          # 仅多步编排或事务时需要
+│   ├── service/
 │   ├── operator/
 │   ├── dao/
 │   ├── converter/      # 非平凡 MapStruct
+│   ├── filter/         # JAX-RS/请求链过滤（按需）
+│   ├── loader/         # 配置、资源或快照加载（按需）
 │   └── domain/
 │       ├── entity/
-│       ├── request/      # record
 │       ├── vo/           # record
+│       ├── model/        # 不可变时优先 record
+│       ├── request/      # record
 │       ├── enums/
 │       └── event/        # 领域事件 record（按需）
 └── src/test/java/        # 镜像生产包路径
@@ -66,27 +69,29 @@ innospots-nexus-<module>/
 [module-ownership.md](../../java-reference/references/module-ownership.md)、
 [module-layout.md](../../java-project/references/module-layout.md)。
 
-### 三层划分（先想清楚再建目录）
+### 四层划分（先想清楚再建目录）
 
 ```text
 Maven 模块（portal / console / platform / adapter …）   ← 部署与依赖边界
   └── 业务领域（role / permission / catalog …）         ← 有界上下文
-        └── 功能子模块（grant / authorization / sync …） ← 领域内独立曲面（按需）
-              └── 职责包（endpoint / service / dao / domain/…） ← 技术职责
+        └── 技术模块（endpoint / dao / service / operator / domain …） ← 技术职责
+              └── 功能子包（grant / authorization / sync …，按需）
 ```
 
 | 刀法 | 问什么 | 典型产物 |
 |------|--------|---------|
 | **第一刀：Maven 模块** | 能否独立测试？依赖方向是否干净？是否业务中立？ | 留在 `portal` **或** 新建 `adapter` / `application` / 业务 extension |
 | **第二刀：领域包** | 词汇是否独立？与相邻域是否常改同一批文件？ | `portal.role.*`、`console.catalog.*` |
-| **第三刀：功能子模块** | 领域内是否有多种工作流（鉴权、同步、授予、入口）？ | `permission.grant.*`、`permission.authorization.*` |
+| **第三刀：技术模块** | 代码承担哪类职责？ | `permission.endpoint`、`permission.service`、`permission.domain.entity` |
+| **第四刀：功能子包** | 某个技术模块是否类型较多且功能区分明显？ | `permission.service.grant`、`permission.endpoint.authorization` |
 
-**小领域**（整个领域预计 < 15 个类型）：领域根下 `endpoint` + `dao` + `domain` 即可，
-`service` 仅 1～3 个编排类。**不要**预建 `grant/`、`sync/` 等空子模块。
+**小领域或功能区分度不大**：保持领域根下 `endpoint`、`dao`、`service`、`operator`、
+`domain` 扁平划分。只有出现真实类型时才创建目录，**不要**预建空包或功能子包。
+技术模块类型较多或存在清晰、可独立命名的功能曲面时，才在对应技术模块下按功能拆分。
 
 ### 标准领域骨架（按任务扩展）
 
-初始**只建当前任务需要的包**（与上文「产出位置」一致）。扩展规则：
+包归属固定，目录在出现首个真实类型时创建（与上文「产出位置」一致）。扩展规则：
 
 | 包 | 何时添加 | 避免 |
 |----|---------|------|
@@ -94,26 +99,26 @@ Maven 模块（portal / console / platform / adapter …）   ← 部署与依�
 | `service` | 多步工作流、跨 operator、**需事务** | 一个类只做 endpoint→dao 转发 |
 | `converter` | MapStruct、非平凡映射重复 ≥2 次 | 每个字段手写 copy |
 | `domain/event` + `handler` | design 已定义事件与订阅 | 投机性空 `event` 包 |
-| `<subcapability>/` | 子能力已有 ≥5 类且职责可命名 | 全堆进扁平 `service/` |
+| `<technology>/<subcapability>/` | 技术模块内类型较多且功能边界清晰 | 为少量类强行分层，或继续堆进扁平包 |
 
-### 功能子模块示例（中/大领域）
+### 功能子包示例（中/大领域）
 
 对齐 `console.permission` 模式（见 package-structure.md）：
 
 ```text
 com.innospots.nexus.console.permission
-  ├── authorization/          # 请求鉴权（与 grant 分离）
-  ├── entry/                # 控制台 entry 插件（见 java:reference → console-entry-and-pages.md）
-  ├── grant/                # 授权授予（继续长大时自带 service/operator/domain）
-  │   ├── service/
-  │   ├── operator/
-  │   └── domain/...
-  ├── endpoint/             # 领域级 HTTP；端点过多可 grant/endpoint
+  ├── endpoint/
+  │   ├── grant/             # 端点较多且功能区分清晰时
+  │   └── visibility/
+  ├── service/
+  │   ├── grant/
+  │   └── visibility/
+  ├── operator/
   ├── dao/
   └── domain/
 ```
 
-`portal` / `platform` 新领域应对齐同一模式：`com.innospots.nexus.portal.<domain>.<responsibility>`。
+`portal` / `platform` 新领域应对齐同一模式。功能区分度不大时不要拆子包，保持技术模块扁平。
 
 ### 单包 ≤15 类（硬上限）
 
@@ -125,7 +130,7 @@ com.innospots.nexus.console.permission
 | 13～15 | 可合并，但新增前应规划子包 |
 | **> 15** | **禁止合并**；先拆子包再继续实现 |
 
-适用：`endpoint`、`service`、`operator`、`dao`、`domain.request`、`domain.vo`、功能子模块根包。
+适用：`endpoint`、`service`、`operator`、`dao`、`domain.request`、`domain.vo`、技术模块内的功能子包。
 
 自检（实现过程中随时跑）：
 
@@ -133,7 +138,8 @@ com.innospots.nexus.console.permission
 find innospots-nexus-<module>/src/main/java/<pkg/path> -maxdepth 1 -name '*.java' | wc -l
 ```
 
-拆分顺序：**功能子模块** → 职责子包（`grant.service`）→ **禁止** `common`/`misc`/`util` 逃避。
+拆分顺序：**领域** → **技术模块**（`service`）→ **功能子包**（`service/grant`）→
+**禁止** `common`/`misc`/`util` 逃避。
 
 ### 禁止的结构（实现时常见误用）
 
@@ -141,7 +147,7 @@ find innospots-nexus-<module>/src/main/java/<pkg/path> -maxdepth 1 -name '*.java
 |------|--------|
 | `portal.service.RoleService` + `portal.service.MenuService` … | `portal.role.service`、`portal.menu.service` |
 | `endpoint/role`、`dao/role`（技术层优先） | `role/endpoint`、`role/dao` |
-| 一个 `permission.service` 里 20+ 编排类 | `permission.grant.service`、`permission.visibility.service` … |
+| 一个 `permission.service` 里 20+ 编排类 | `permission.service.grant`、`permission.service.visibility` … |
 | 为凑分层建空 `service`/`event` | 有任务再建 |
 | 把 A 领域类型放进 B 领域包「方便调用」 | 下沉 `base`/`console` 契约或 service 编排 |
 | 用事件让 `portal` 与 `platform` 互引 | `application` 组装模块或下沉中立契约 |
@@ -154,7 +160,7 @@ develop **不得**在代码里硬扩边界；出现下列信号应**暂停提交
 |------|------|
 | 新能力说不清归 `portal` 还是 `platform` | `java:design` + 必要时 `grill-me` |
 | 需要 `portal` 依赖 `platform`（或反向） | 契约下沉 `console`/`core`，或 `java:project` 新建 `application`/`adapter` |
-| 单一领域包树预计 **> 40～50** 个生产类型且无功能子模块规划 | `java:design` 拆功能子模块或拆领域 |
+| 单一领域包树预计 **> 40～50** 个生产类型且无功能子包规划 | `java:design` 拆技术模块内功能子包或拆领域 |
 | 整个 `innospots-nexus-portal` 持续新增**无关**业务域 | 评估是否应独立 Maven 模块（插件、adapter、extension） |
 | 业务逻辑塞进 `core`/`console` 只为少写一个模块 | 回到 module-ownership；业务归 portal/platform |
 | 插件能力 vs 管理台契约混淆 | plugin 管运行时与 DSL；console 管 REST/catalog 索引 |
@@ -177,7 +183,7 @@ develop **不得**在代码里硬扩边界；出现下列信号应**暂停提交
 
 - [ ] 第一级业务包段是**领域名**，不是 `endpoint`/`dao`/`service`
 - [ ] 模块根下**无**多领域共用的 `service/` 桶
-- [ ] 中/大领域已按**功能子模块**拆分（非扁平 service 堆积）
+- [ ] 技术模块较大或功能边界清晰时已按**功能子包**拆分；小模块未过度分层
 - [ ] 每个包目录 `.java` **≤ 15**
 - [ ] 未创建 `impl`/`common`/`misc`/`util` 逃避归属
 - [ ] 共享类型在正确 **Maven 模块**（非邻近领域包塞入）
@@ -191,7 +197,7 @@ develop **不得**在代码里硬扩边界；出现下列信号应**暂停提交
 
 | 任务 | 生产代码 | 测试 | 验证 |
 |------|---------|------|------|
-| **新领域** | 完整域包树（entity→dao→record→status→service/operator→endpoint→converter） | 实体/DAO/端点/状态码契约测试 + 关键行为单测 | `mvn -pl <m> -am clean compile test` → `java:check` |
+| **新领域** | 完整域包树（entity→dao→record/model→status→service/operator→endpoint→converter） | 实体/DAO/端点/状态码契约测试 + 关键行为单测 | `mvn -pl <m> -am clean compile test` → `java:check` |
 | **加功能** | 受影响分层的最小增量 | 新行为单测 + 必要时契约测试增补 | 聚焦 `mvn -pl <m> test` → `java:check` |
 | **修 Bug** | 归属边界上的最小修复 | **先**复现测试（红灯）→ 修代码转绿 | 同上 |
 | **重构** | 结构变更、无新公共契约 | 现有测试全绿；缺覆盖先补 | 全量 `mvn test` → `java:check` |
@@ -209,7 +215,7 @@ develop **不得**在代码里硬扩边界；出现下列信号应**暂停提交
 |----|------|-------------|-------------|------|
 | 1 | 实体契约 | `{Domain}EntityContractsTest` | `domain/entity/*Entity.java` | 写测 → 红灯 → 实现 → compile |
 | 2 | DAO 绑定 | `{Domain}DaoContractsTest` | `dao/*Dao.java` | 同上 |
-| 3 | 领域类型 | Request/VO/枚举/状态码契约测试 | `domain/request`、`vo`、`enums` | 同上 |
+| 3 | 领域类型 | Request/VO/Model/枚举/状态码契约测试 | `domain/request`、`vo`、`model`、`enums` | 同上 |
 | 4 | 转换器（非平凡时） | `{Domain}ConverterTest` | `converter/*Converter.java` | 见 [contract-tests.md](contract-tests.md) |
 | 5 | 编排与入口 | 行为单测 + 端点契约测试 | `operator`/`service`、`endpoint` | 同上 |
 | 6 | 事件（按需） | 事件形状 + handler 行为单测 | `domain/event`、`handler` | 见 [domain-events.md](domain-events.md) |
@@ -273,7 +279,8 @@ mvn -pl <module> -am verify                 # 含 failsafe（有 *IT 时）
 - [ ] 未误改模块 API 索引与设计文档（除非本任务包含）
 - [ ] 未使用 `@RestController` / Spring Data / Spring Security
 - [ ] 无 `mapper.xml` / `beans.xml`；无新建 `*.properties`；Dao 符合 persistence-mybatis
-- [ ] 包结构符合领域优先；单包 ≤15 类；无模块级 service 垃圾桶（见上文「模块与包结构」）
+- [ ] 包结构符合领域优先；`domain` 固定包含 `entity`/`vo`/`model`/`request`；
+      不可变类型优先 record；单包 ≤15 类；无模块级 service 垃圾桶
 
 全量 L0–L5 由 `java:check` 执行；本清单是 develop **自检最小集**。
 

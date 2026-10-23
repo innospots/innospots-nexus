@@ -68,7 +68,7 @@
 | base middleware-free | AGENTS 与 POM 均允许 base 引数据库/Spring |
 | core 不绑 Spring Boot auto-config | AGENTS 或代码出现 `@AutoConfiguration` 在 core |
 | portal ↔ platform | AGENTS 或 POM 允许互依；或设计对齐表声称无互依但 tree 有 |
-| plugin / console 边界 | catalog 索引归 console；Page DSL 归 plugin — 写反或代码反 |
+| plugin / console 边界 | catalog 索引归 console；`console@2` 贡献契约归 plugin — 写反或代码反 |
 | service 模块中立 | service 子模块依赖 portal/platform/console |
 | 禁止清单 | AGENTS「不得拥有」项出现在该模块 diff 中 |
 

@@ -7,7 +7,7 @@
 
 **前置硬门禁**：必须先完成 `java:design` 四步法（见 `module-ownership.md`）。
 包树须**领域优先**（`role/dao`、`role/endpoint`），禁止 `dao/role`、`endpoint/role`；
-大领域须划**功能子模块**，禁止 service 堆积；**单包 ≤15** 类（见
+先固定技术模块，技术模块较大时再划**功能子包**，禁止 service 堆积；**单包 ≤15** 类（见
 [package-structure.md](package-structure.md)）。
 
 **测试先行**：由 `java:develop` 与实现同步完成；顺序见

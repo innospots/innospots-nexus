@@ -4,7 +4,7 @@ import com.innospots.nexus.core.plugin.contract.Plugin;
 import com.innospots.nexus.core.plugin.declaration.PluginDefinition;
 
 /**
- * 运营管理平台管理能力聚合 entry 插件（组织、平台用户、注册策略等 PageDsl 与菜单）。
+ * 运营管理平台管理能力聚合 entry 插件（组织、平台用户、注册策略等 MODULE 与 MENU）。
  */
 public final class PlatformConsoleEntryPlugin implements Plugin {
 

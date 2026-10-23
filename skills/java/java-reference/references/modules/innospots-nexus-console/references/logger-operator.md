@@ -1,5 +1,21 @@
 # 包 `logger.operator`
 
+## AuditLogOperator
+
+**类型：** class
+
+审计日志只读查询。写入路径由 `InvocationLogOperator` 负责。
+
+### 方法
+
+#### `pageLogs(AuditLogPageRequest request, ConsoleOwnership ownership) → PageResult<AuditLogVo>`
+
+按归属与时间范围、操作者、动作、结果、关键词筛选并分页。
+
+#### `getLog(String auditLogId, ConsoleOwnership ownership) → AuditLogVo`
+
+按归属读取单条日志；不存在时抛出 `AuditLogStatusCode.NOT_FOUND`。
+
 ## InvocationLogOperator
 
 **类型：** class

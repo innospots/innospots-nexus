@@ -32,6 +32,7 @@
 
 | 常量 | 说明 |
 |------|------|
+| `PLATFORM` | 运营平台级数据；要求 PLATFORM 安全域，不依赖租户或工作区 |
 | `TENANT` | — |
 | `WORKSPACE` | — |
 
@@ -78,3 +79,33 @@
 
 #### `workspaceOwnership(String workspaceId, String securityRealm) → ConsoleOwnership`
 - **说明：** 由工作区 ID 构造 WORKSPACE 归属（导航、授权可见性等）。 / public static ConsoleOwnership workspaceOwnership(String workspaceId, String securityRealm)
+
+## ConsoleSessionContext
+
+**类型：** class（final）
+
+当前线程控制台会话层级的读写门面，委托 `SessionScopeTlc`。
+
+### 方法
+
+- `bindScope(ConsoleSessionScope scope)`：显式绑定会话层级。
+- `scope()`：读取已绑定层级，未绑定时按安全域与快照推断。
+- `inferFromSession()`：仅从当前会话快照推断层级。
+
+## ConsoleSessionScope
+
+**类型：** enum
+
+当前操作上下文层级。
+
+| 常量 | 说明 |
+|------|------|
+| `PLATFORM` | 运营平台会话 |
+| `TENANT` | 租户会话 |
+| `WORKSPACE` | 工作区会话 |
+
+### 方法
+
+#### `parse(String value) → ConsoleSessionScope`
+
+忽略大小写解析；空白或未知值返回 `null`。

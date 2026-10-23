@@ -3,7 +3,7 @@ package com.innospots.nexus.console.sitemap.config;
 /**
  * Classpath meta-sitemap YAML 资源定位。
  *
- * <p>默认：{@code ui-pages/meta-sitemap.yaml}（与前端工程 {@code sitemap.yaml} 无关）。</p>
+ * <p>默认：{@code console/meta-sitemap.yaml}（与前端工程 {@code sitemap.yaml} 无关）。</p>
  */
 public final class SitemapYamlConfig {
 
@@ -20,7 +20,7 @@ public final class SitemapYamlConfig {
      * 默认 meta-sitemap 路径。
      */
     public static SitemapYamlConfig metaSitemapDefaults() {
-        return ofResourcePath("ui-pages/meta-sitemap.yaml");
+        return ofResourcePath("console/meta-sitemap.yaml");
     }
 
     /**

@@ -6,7 +6,7 @@ import com.innospots.nexus.console.config.ConsoleConstant;
  * 公共开放 API 路径匹配（Jersey 请求路径）。
  *
  * <ul>
- *   <li>{@link ConsoleConstant#PUBLIC_API_PREFIX} 及其子路径（如 {@code /api/public/pages/...}）</li>
+ *   <li>{@link ConsoleConstant#PUBLIC_API_PREFIX} 及其子路径（如 {@code /api/public/page-access}）</li>
  *   <li>{@code /api/d/{domain}/public} 及其子路径，{@code domain} 为领域键（如 {@code nexus}、{@code platform}、{@code nexmux}）</li>
  * </ul>
  */

@@ -99,9 +99,8 @@ public record PluginRuntimeInfo(
 ) {
 }
 
-return registrations.stream()
-        .filter(CapabilityRegistration::active)
-        .map(CapabilityRegistration::provider)
+return contributionCatalog.activeContributions().stream()
+        .map(ConsoleContributionCatalog.ActiveConsoleContribution::contribution)
         .toList();
 ```
 
@@ -109,8 +108,8 @@ return registrations.stream()
 
 - 使用构造函数注入的实现类应优先使用 `@RequiredArgsConstructor` 配合 `final` 依赖字段，而不是手写样板构造函数。
 - operator 和 service 类必须使用 Lombok `@Slf4j` 记录日志。不要声明手写 logger 字段，不要使用错误的 `@Sl4j` 拼写。
-- 可变持久化实体必须使用 Lombok `@Getter` 和 `@Setter`。可变配置文件绑定对象和声明式 UI/规格对象在绑定框架需要 JavaBean 访问器时也应使用相同注解。
-- 内部领域模型不自动为可变。不可变或行为导向的模型应仅暴露其契约所需的访问器和状态变更；视情况使用不带 `@Setter` 的 `@Getter`、record 或显式行为方法。
+- 可变持久化实体必须使用 Lombok `@Getter` 和 `@Setter`。其它绑定框架要求 JavaBean 访问器的可变配置对象也应使用相同注解。
+- 内部领域模型不自动为可变。不可变数据形态和值对象优先使用 `record`；需要可变身份、继承或复杂生命周期的 model 才使用 class，并仅暴露契约所需的访问器和状态变更。
 - `domain.request` 和 `domain.vo` 下的类型必须是 Java record，因此不适用 Lombok `@Getter` 和 `@Setter`。
 - Lombok 导入放在第三方导入组，位于 `com.innospots.*` 项目导入之前。
 - Lombok 仅消除访问器样板。领域类仍应暴露校验、状态转换和业务行为的显式方法。
@@ -120,6 +119,7 @@ return registrations.stream()
 ## 领域类型
 
 - `domain.request` 和 `domain.vo` 类型必须声明为 record。
+- `domain.model` 中的不可变模型和值对象优先声明为 record；仅当身份或可变状态是模型语义的一部分时使用 class。
 - 请求和 VO record 可使用紧凑构造函数、静态工厂和实例方法校验或派生值。
 - 实体和 model 类可封装自身的不变式、校验、计算和状态转换。不要强迫领域类型成为无行为的数据持有者。
 

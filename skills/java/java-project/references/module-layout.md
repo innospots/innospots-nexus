@@ -15,7 +15,7 @@ innospots-nexus (root, packaging=pom)
 ├── innospots-nexus-parent           构建 parent（无代码，默认继承目标）
 ├── innospots-nexus-base             纯 Java 基础
 ├── innospots-nexus-core             业务中立的平台基础设施
-├── innospots-nexus-plugin           插件运行时与 Page DSL
+├── innospots-nexus-plugin           插件运行时与 console@2 贡献
 ├── innospots-nexus-console          管理台契约与 catalog 索引（引用此模块 = 控制台地基）
 ├── innospots-nexus-portal           租户侧管理业务（业务类管理端）
 ├── innospots-nexus-platform         运营域平台（系统运营类）
@@ -89,13 +89,16 @@ base  →  core  →  plugin  →  console  →  portal
 
 - 必须保持业务中立：用户、角色、权限、菜单、catalog 索引等不属于此模块
 - 可以依赖所需的中间件 API 与实现，但**不得绑定 Spring Boot 自动配置**
-- 不含插件运行时与 Page DSL（见 `innospots-nexus-plugin`）
+- 不含插件运行时与 console@2 贡献处理（见 `innospots-nexus-plugin`）
 
 ### innospots-nexus-plugin
 
-**定位**：classpath 插件运行时、贡献解码与 Page DSL。
+**定位**：classpath 插件运行时与贡献解码。
 
-**可包含**：插件发现/安装/生命周期、`console@1` 贡献契约、Pactor Page DSL 1.0。
+**可包含**：插件发现/安装/生命周期、`console@2` 贡献契约。
+
+**边界**：拥有 `console@2` 贡献契约、解码与运行时 handler；catalog 持久化索引归属
+`innospots-nexus-console`。
 
 **硬约束**：
 
@@ -108,7 +111,8 @@ base  →  core  →  plugin  →  console  →  portal
 
 **Maven 引用场景**：需要管理台 REST 契约、catalog、权限运行时等，但**不含**具体业务实现时引此模块。
 
-**可包含**：Jakarta REST 端点契约、console catalog 索引持久化与同步、VO/转换器。
+**可包含**：Jakarta REST 端点契约、console catalog 索引持久化与同步、权限与导航运行时、
+VO/转换器。
 
 **硬约束**：
 
@@ -184,11 +188,15 @@ base  →  core  →  plugin  →  console  →  portal
 
 ```text
 com.innospots.nexus.portal
-  ├── permission                    # 较大领域：先划功能子模块
-  │   ├── authorization             # 请求鉴权
-  │   ├── grant                     # 授权授予（可含 service/operator/domain）
-  │   ├── entry                     # 控制台插件入口
-  │   ├── endpoint / dao / domain / service（单包 ≤15 类）
+  ├── permission                    # 较大领域：先保留技术模块
+  │   ├── endpoint                  # HTTP 边界
+  │   ├── dao                       # 持久化映射
+  │   ├── domain
+  │   │   ├── entity / request / vo / model / enums / event
+  │   ├── service
+  │   │   ├── authorization         # 技术模块内按功能拆分（类多时）
+  │   │   └── grant
+  │   └── operator                  # 按需
   └── role                          # 较小领域：领域根下直接挂职责包
       ├── endpoint                  # Jakarta REST HTTP 边界
       ├── dao                       # MyBatis-Plus 持久化映射
@@ -207,7 +215,7 @@ com.innospots.nexus.portal
 | 必须 | 禁止 |
 |------|------|
 | 领域优先：`portal.role.endpoint` | 技术层优先：`portal.endpoint.role` |
-| 大领域按功能子模块：`permission.authorization`、`grant.service` | 模块根 `service` 或单包堆满 `*Service` |
+| 先固定技术模块，技术模块内按功能拆子包：`permission.service.authorization`、`permission.endpoint.grant` | 领域根预建功能包；模块根 `service` 或单包堆满 `*Service` |
 | 单包 ≤15 个 `.java` | 单包 16+ 类不分子包 |
 | 只用清单内的职责包名 | 自造层级 |
 | 只为有实际职责的包建目录 | 脚手架式空分层、占位类型 |

@@ -12,7 +12,7 @@
 @Priority(50)    ConsoleCorsFilter              CORS 预检 + 响应头（默认关闭）
 AUTHENTICATION   ConsoleAuthenticationFilter    Bearer 令牌解析 → SessionContext 绑定
 AUTHENTICATION+10 ConsoleDevSessionFilter       关闭安全时注入固定 dev 会话
-AUTHENTICATION+100 ConsolePagePermissionFilter  控制台页面权限校验（catalog PAGE/DATASOURCE）
+AUTHENTICATION+100 ConsolePagePermissionFilter  控制台页面入口权限校验（叶子 MODULE/MENU）
 USER             ConsoleRequestContextFilter    分配 requestId（TLC.TRACE_ID），响应后清理线程上下文
 ```
 
@@ -22,7 +22,8 @@ USER             ConsoleRequestContextFilter    分配 requestId（TLC.TRACE_ID�
   含 `/openapi/**`、公共 API、健康检查与站点根）**完全跳过**。
 - 公共开放 API（`ConsolePublicApiPaths`）匿名可访问；携带 Bearer 时仍校验并绑定会话。
 - 页面权限 Filter 仅对 `consolePathPatterns`（默认 `/console/datasource/**`）生效，
-  使用请求头 `X-Nexus-Page-Key` 定位页面；公共 API 不做页面权限校验。
+  使用请求头 `X-Nexus-Page-Key` 定位页面，再由 catalog 叶子 MODULE/MENU 的
+  `entryPageKey` 做授权；公共 API 不做页面权限校验。
 
 详细 API 见 [`jaxrs-filter.md`](jaxrs-filter.md)、[`jaxrs-support.md`](jaxrs-support.md)、
 [`jaxrs-web.md`](jaxrs-web.md)。

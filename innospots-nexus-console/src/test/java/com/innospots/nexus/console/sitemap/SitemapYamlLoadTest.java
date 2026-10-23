@@ -50,7 +50,7 @@ class SitemapYamlLoadTest {
     @Test
     void loadsGroupFixtureFromClasspath() {
         SitemapConfig config = new SitemapConfigLoader(
-                SitemapYamlConfig.ofResourcePath("ui-pages/group-meta-sitemap.yaml"),
+                SitemapYamlConfig.ofResourcePath("console/group-meta-sitemap.yaml"),
                 new SitemapYamlParser(),
                 SitemapYamlLoadTest.class.getClassLoader()).load();
 

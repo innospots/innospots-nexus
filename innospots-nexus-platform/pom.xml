@@ -48,7 +48,14 @@
                                 com.innospots.nexus.platform,
                                 com.innospots.nexus.base.domain.response,
                                 com.innospots.nexus.base.i18n,
-                                com.innospots.nexus.base.domain.enums
+                                com.innospots.nexus.base.domain.enums,
+                                com.innospots.nexus.console.auth.domain,
+                                com.innospots.nexus.console.dictionary.domain,
+                                com.innospots.nexus.console.logger.domain,
+                                com.innospots.nexus.console.menu.domain.vo,
+                                com.innospots.nexus.console.permission.domain,
+                                com.innospots.nexus.console.permission.pageaccess,
+                                com.innospots.nexus.console.role.domain
                             </scanPackages>
                             <scanDependenciesDisable>false</scanDependenciesDisable>
                             <openApiVersion>3.1.0</openApiVersion>

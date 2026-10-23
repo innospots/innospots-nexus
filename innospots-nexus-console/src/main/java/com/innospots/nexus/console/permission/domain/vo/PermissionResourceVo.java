@@ -24,7 +24,7 @@ public record PermissionResourceVo(
         String resourceKey,
         @Schema(description = "资源父节点主键")
         String parentResourceId,
-        @Schema(description = "MENU 入口页 PageDsl 键")
+        @Schema(description = "MENU 稳定入口页键")
         String entryPageKey,
         @Schema(description = "目录展示名称", required = true)
         String displayName,

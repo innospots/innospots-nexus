@@ -21,7 +21,8 @@
 
 1. **Plugin 运行时过度分层**：`capabilities` 与 `contributions` 命名与职责重叠；`CapabilityType`、路由（`Tags`/`CapabilityRouter`）、依赖解析在业务侧几乎无消费者，却占用认知与代码量。
 2. **跨模块协作**：期望以 **`functionName` + 统一上下文** 同步调用，而非 Java 接口 + 多 Provider 路由；结果用 **`CallResult`**；可选事件通知。
-3. **Console 声明过重**：模块需列举 `pages` / `menuTree` 与 PageDsl 联动；plugin 同步链路解析 UiSpec，与「页面 YAML 独立演进」冲突。
+3. **Console 声明过重**：旧模型并列维护 `pages` / `menuTree`；v2 统一为 `modules[]` +
+  递归 `children[]`，插件只声明目录与稳定入口键。
 4. **权限 Catalog 展示**：当前 `MODULE → PAGE` 树与菜单/页面展示名不一致；权限应基于 **模块 + 访问分组 + 操作分组/操作项**，操作来自 **`@EndpointModule` / `@EndpointGrant`**，分组元数据由 **plugin contribute** 提供。
 
 ### 2.2 成功标准
@@ -29,10 +30,9 @@
 | 标准 | 说明 |
 |------|------|
 | 心智模型单一 | 插件作者只记 `extensions[]` 三种 `kind` |
-| Plugin 不碰 PageDsl | contribute **`modules` + 递归 `children`**；catalog sync **不**扫 Page YAML |
+| Plugin 只声明目录入口 | contribute **`modules` + 递归 `children`**；catalog sync 不读取任何页面运行时资源 |
 | 权限树清晰 | 模块下：**viewItems 可勾选**；**operationGroups（`CatalogPermissionGroup`）+ 组内项可勾选**；无 PAGE 子树 |
 | 可彻底删 v1 能力线 | 移除 Capability 路由/依赖及相关 manifest 字段（**breaking**，`apiVersion: 2`） |
-| Page DSL 最小扩展 | 仅增加 **`page.grantGroup`**（对应 MODULE `viewGroups[].group`）；**不**改 Pactor 组件语法与其余 page 字段语义 |
 
 ---
 
@@ -40,7 +40,6 @@
 
 | 排除项 | 理由 |
 |--------|------|
-| Page DSL 大改 / Pactor 语法变更 | 排除；**仅**允许新增可选 `page.grantGroup`（§6.8） |
 | `provide` / `subscribe` 进入角色权限 UI | 跨模块函数与 HTTP 授权命名空间分离 |
 | 恢复 `nx_menu` 业务表或第三套菜单存储 | 仍用 catalog 索引 + navigation 投影 |
 | Portal 租户 IAM 域模型变更 | 仅 grant 目标 `resourceKey` 与 catalog 资源类型变化 |
@@ -59,7 +58,7 @@
 | 调用上下文 | `PluginCallContext` | `core.plugin.function` | — | 不可变 record |
 | 调用结果 | `PluginCallResult` | `core.plugin.function` | — | 含可选 `event` |
 | Console 贡献节点 | `ConsoleContributeNode` | `core.plugin.extension.console` | 见 §6.1.2 | MODULE/MENU 递归 `children`；扩展根用 **`modules[]`** |
-| 页面访问分组 | `grantGroup` | `console.ui.spec` / PageDsl `page` | `viewGroups[].group` | 运行时鉴权与 catalog 访问分组对齐（§6.8） |
+| 页面访问分组 | `grantGroup` | `console.permission.pageaccess` | `viewGroups[].group` | 请求缺省 `default`；与 catalog 访问分组对齐 |
 | 节点类型 | `MODULE` / `MENU` | contribute / catalog | — | **由 `entryPageKey` 与 `children` 推导**，无显式 type 字段 |
 | 操作分组 | `operationGroup` | **MODULE 节点** `operationGroups[]` | `group` key | label 为 I18n；须含 `default` |
 | 访问分组元数据 | `viewGroups` | **MODULE 节点** | `group` key | 访问分组标题（I18n）；须含 `default`；**MENU 不声明** |
@@ -116,7 +115,8 @@ console.endpoint.grant   # @EndpointGrant(+group)；Manager 按 action 归类输
 console.permission       # grant 存取以 resourceKey 为对外稳定键
 ```
 
-**禁止**：plugin 模块依赖 portal/platform；catalog sync **不**调用 `PageDslLoader`（删除 `collectModulePages` / ACTION / DATASOURCE 同步路径）。
+**禁止**：plugin 模块依赖 portal/platform；catalog sync 只消费 `console@2` 与
+`EndpointGrantManager`，不读取页面运行时资源。
 
 ### 5.3 数据流（一层索引，两个投影）
 
@@ -206,7 +206,7 @@ Java `Plugin#definition()` 使用同名 `extensions` 列表；编译后与 YAML 
 | `displayName` | I18n map | 必填 |
 | `description` | I18n map | 可选 |
 | `orderIndex` | int | 同级排序 |
-| `entryPageKey` | string \| null | 入口页 PageDsl `page.id`；**空**表示非菜单叶 |
+| `entryPageKey` | string \| null | 稳定入口键；**空**表示非菜单叶 |
 | `children` | `ConsoleContributeNode[]` | 子节点；**MENU 必须为 `[]`** |
 
 **仅 `CatalogResourceType.MODULE` 节点额外字段**：
@@ -217,7 +217,9 @@ Java `Plugin#definition()` 使用同名 `extensions` 列表；编译后与 YAML 
 | `viewGroups` | array | **访问分组**元数据：`group` + `label`（I18n）；须含 **`default`** |
 | `operationGroups` | array | **操作分组**元数据：`group` + `label`（I18n）；须含 **`default`** |
 
-**MENU 叶可选**：`icon`（string）。访问授权名 **`grantName`** 在 catalog 组装时 **恒等于 `entryPageKey`**（见 §6.6.2）；页面访问分组由 Page DSL **`page.grantGroup`** 对齐 MODULE **`viewGroups[].group`**（§6.8），**不在 MENU contribute 重复声明**。
+**MENU 叶可选**：`icon`（string）。访问授权名 **`grantName`** 在 catalog 组装时
+**恒等于 `entryPageKey`**（见 §6.6.2）；页面访问分组由请求中的 `grantGroup` 对齐
+MODULE **`viewGroups[].group`**，**不在 MENU contribute 重复声明**。
 
 **类型判定**（无 YAML `type` 字段；编译/sync 时推导，并写入 catalog / `CatalogNodeVo.resourceType`）：
 
@@ -350,7 +352,8 @@ public interface PluginFunctionInvoker {
 规则：
 
 - **同步**：`invoke` 阻塞返回 `PluginCallResult`；被调方内部可用线程池实现异步，但对调用方仍一次 `CallResult`。
-- **调用方**：仅 **provide 实现内部** + **宿主桥接**（如 console service）；Page 运行时 **不**直接 invoke（无 Page DSL 扩展）。
+- **调用方**：仅 **provide 实现内部** + **宿主桥接**（如 console service）；
+  页面运行时不直接 invoke。
 - **权限**：function **不**出现在 `permission-catalog` 与角色 grant UI。
 
 ### 6.3 REST 注解契约
@@ -399,7 +402,7 @@ public class PlatformOrganizationEndpoint {
 |------|------|----------|
 | GET | `/api/d/nexus/catalog/permission-catalog` | **新增**（v2 权限配置专用）；响应见 §6.5 |
 | GET | `/api/d/nexus/catalog/tree` | **废弃**（v2 移除或 410）；不再返回 v1 多态权限树（OPERATION 等混入 `children`） |
-| POST | `/api/d/nexus/catalog/sync` | 输入：contribute.console@2 + EndpointGrantManager；**不读 PageDsl** |
+| POST | `/api/d/nexus/catalog/sync` | 输入：contribute.console@2 + EndpointGrantManager |
 
 Navigation：`GET /api/d/nexus/navigation/menus` 仍为运行时侧栏（`NavigationMenuVo`，权限裁剪）；与权限配置 API **分离**。
 
@@ -621,34 +624,19 @@ public record PermissionGrantReplaceRequest(
 
 存储层可继续用 `resourceId` FK；API 与前端 Tree `key` 统一 `resourceKey`。
 
-### 6.8 运行时鉴权与 Page DSL `grantGroup`（Q4）
+### 6.8 页面访问与 HTTP 鉴权
 
-v2 **删除** catalog 中 PAGE / ACTION / DATASOURCE 行后，页面与 API 鉴权改由 **grant `resourceKey`** + **Page 元数据** 驱动（替代 `ConsolePagePermissionAuthorizer` 查 `page:` / datasource 行）。
+页面访问校验由 `console.permission.pageaccess` 承担，输入为 `domainKey`、`moduleKey`、
+稳定 `pageKey` 与可选 `grantGroup`（缺省 `default`）。校验依据 catalog 中叶子
+MODULE/MENU 的 `entryPageKey` 及对应 `CatalogViewItemVo.resourceKey`，不依赖页面运行时资源。
 
-#### 6.8.1 Page DSL 扩展
+HTTP API 仍由 `@EndpointModule` / `@EndpointGrant` 元数据驱动：
 
-在 Page DSL **`page`** 段增加可选字段：
+- **变更类**：按 **method + path** 匹配 `EndpointGrant`，校验
+  **`{name}:{domainKey}.{moduleKey}`** grant。
+- **READ / EXPORT**：`group` = **`grantName`**，与 permission-catalog 中访问项一致。
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| `grantGroup` | string | 对应所属 MODULE 在 contribute / catalog 中的 **`viewGroups[].group`**；缺省 **`default`** |
-
-- **校验**（`PageDslValidator` 或 sync 后交叉校验）：`grantGroup` 必须存在于该页所在 **`domainKey` + `moduleKey`** 下 MODULE 的 `viewGroups` 定义中（与 MENU 行下沉的 `view_groups` JSON 一致）。
-- 入口页（`entryPageKey` == `page.id`）与子页面均通过 **`page.grantGroup`** 选择访问分组（缺省 `default`）；**不在 MENU contribute 上重复 `viewGroup` 字段**。
-
-#### 6.8.2 页面访问判定
-
-1. 由路由解析 **`domainKey`、`moduleKey`、`pageKey`**（与 navigation / 页面渲染一致）。
-2. 加载 **PageDsl `page.grantGroup`**（缺省 `default`）。
-3. 在 catalog 组装结果中，找到该 MODULE 下 **`viewItems`** 中归属该访问分组的项（由 `view_groups` 元数据 + MENU/`grantName` 规则生成；实现可先用「分组内全部 view grant」或「`grantName` 与入口页绑定」—与 §6.5 一致）。
-4. 主体须持有对应 **`CatalogViewItemVo.resourceKey`**（`{grantName}:{domainKey}.{moduleKey}`）至少一项，方允许进入页面（具体「一项 vs 全部」由产品默认 **OR：持有该分组下任一 view grant**）。
-
-#### 6.8.3 HTTP API（`@EndpointGrant`）
-
-- **变更类**：按 **method + path** 匹配 `EndpointGrant`；校验 **`{name}:{domainKey}.{moduleKey}`** grant。
-- **READ / EXPORT**：`group` = **`grantName`**，与 permission-catalog 中访问项一致；可与页面 `grantGroup` 间接相关（READ 通常挂在入口页对应 `grantName`）。
-
-**边界**：`PageDslLoader` **仅** console 运行时 / 鉴权 / 校验使用；**plugin** 与 **catalog sync** 仍 **不**遍历 Page YAML 建 catalog 行（§5.2）。
+**边界**：plugin 与 catalog sync 均不读取页面运行时资源。
 
 **permission-catalog 聚合根**：HTTP 响应用 `CatalogNodeVo.children` 列出各 **MODULE**（内容与 contribute 根下 **`modules[]` 同序、同构**；仅根层 YAML 字段名为 `modules`，API 保持 `children` 以免双字段）。
 
@@ -664,7 +652,7 @@ v2 **删除** catalog 中 PAGE / ACTION / DATASOURCE 行后，页面与 API 鉴�
 | `@EndpointGrant.group` 与 `action` 不匹配（如 READ 用了未知 menuKey，或 OPERABLE 用了未知 operation group） | ENDPOINT_GRANT_INVALID（或 catalog sync 失败） | 启动或 sync |
 | READ/EXPORT 未声明 `group` | 同上 | 编译期或启动期 |
 | sync 后 grant 指向已删除 resourceKey | PERMISSION_RESOURCE_UNKNOWN | grant replace（可选宽松忽略） |
-| `page.grantGroup` 不在 MODULE `viewGroups` 中 | PAGE_DSL_INVALID 或 CATALOG_SYNC_CONFLICT | PageDsl 校验 / 可选 sync 交叉校验 |
+| `PageAccessVerifyRequest.grantGroup` 不在 MODULE `viewGroups` 中 | PERMISSION_RESOURCE_UNKNOWN | 页面访问校验 |
 
 具体 local code 在实现阶段对齐 `PluginStatusCode` / `NexusStatusCode` 目录，**不新增 JDK 业务异常**。
 
@@ -693,7 +681,7 @@ v2 **删除** catalog 中 PAGE / ACTION / DATASOURCE 行后，页面与 API 鉴�
 | Catalog 仅 MODULE/MENU；`permission-catalog` 组装 | **已落地**（console） |
 | Manifest **`apiVersion: 2` + `extensions[]`** 替代 v1 文档头 + `contributions` | **未落地** |
 | `FunctionRegistry` / `provide` / `subscribe` | **未落地** |
-| Page DSL `page.grantGroup` 与鉴权闭环（§6.8） | **部分** |
+| 页面访问校验基于 catalog `resourceKey`（§6.8） | **已落地** |
 | DB 清理历史 PAGE/ACTION/DATASOURCE catalog 行 | **按环境迁移** |
 
 ### 9.2 迁移步骤（剩余）
@@ -701,7 +689,7 @@ v2 **删除** catalog 中 PAGE / ACTION / DATASOURCE 行后，页面与 API 鉴�
 1. **plugin**：Manifest `apiVersion: 2`、`extensions[]` 编译；`function/` 包与注册表。
 2. **dsl**：发布 `plugin-dsl-v2.schema.json`；宿主能力档案更新为 `console@2` only。
 3. **console**：`@EndpointGrant.group` 与 assembler 操作分组端到端；`resourceKey` grant 迁移。
-4. **手册**：`docs/plugin/manual` 去除 Capability / `console@1` 叙述（与代码同步）。
+4. **手册**：`docs/plugin/manual` 已去除 Capability / `console@1` 叙述，与当前代码同步。
 
 ### 9.3 双轨
 
@@ -718,14 +706,14 @@ v2 **删除** catalog 中 PAGE / ACTION / DATASOURCE 行后，页面与 API 鉴�
 | Subscribe | `PluginEventBusTest` | on 匹配 |
 | Console decode | `ConsoleExtensionV2DecoderTest` | 根 `modules`、MODULE `children`、viewGroups、operationGroups |
 | Endpoint | `EndpointGrantManagerRegistrationTest` | READ 用 **grantName**；operable 默认 default |
-| Page DSL | `PageDslValidatorTest` / grantGroup | `grantGroup` 须在 MODULE viewGroups 内 |
-| 鉴权 | `ConsolePagePermissionAuthorizer`（v2 重写） | 页面 grantGroup + view grant `resourceKey`；API 用 EndpointGrant |
-| Catalog sync | `ConsoleCatalogSyncServiceTest` | 仅 MODULE/MENU 行；无 PageDsl |
+| 页面访问 | `GrantGroupPageAccessVerifierTest` | 请求 `grantGroup` 与 catalog 访问项一致；API 用 EndpointGrant |
+| 鉴权 | `ConsolePagePermissionAuthorizerTest` | 叶子 MODULE/MENU `entryPageKey` + `resourceKey` |
+| Catalog sync | `ConsoleCatalogSyncServiceTest` | 仅 MODULE/MENU 行；不读取页面运行时资源 |
 | Permission catalog | `ConsoleCatalogPermissionCatalogTest` | Q1：MENU 在树、勾选在 grants；Q2 嵌套 MODULE；Q3 `grantName` = `entryPageKey` |
 | 集成 | `ConsoleCatalogPermissionCatalogIntegrationTest` | HTTP permission-catalog 契约 |
 | 权限 HTTP | `PlatformPermissionEndpointIntegrationTest` | grant 使用 resourceKey |
 
-**不测**：Pactor 页面渲染全量回归；**测** `grantGroup` 绑定与校验。
+**不测**：前端页面渲染；**测** 目录、授权键与 HTTP grant 契约。
 
 ---
 
@@ -753,7 +741,7 @@ v2 **删除** catalog 中 PAGE / ACTION / DATASOURCE 行后，页面与 API 鉴�
 | 新 Maven 模块 | 在 plugin/console 内重构即可 |
 | CapabilityType / Tags / Router | 已决策删除 |
 | 通用 ContributionDecoderRegistry 插件链 | console@2 + provide 内置解码 |
-| PageDslLoader 在 plugin 或 catalog sync | 明确排除 |
+| 页面运行时资源进入 plugin 或 catalog sync | 明确排除 |
 | 权限 UI 上的 function 勾选 | Q7 C |
 | `operationId` / pluginId 前缀函数名 | 使用全局 `functionName` |
 | 第三套菜单存储 | 沿用 catalog |
@@ -789,15 +777,17 @@ v2 **删除** catalog 中 PAGE / ACTION / DATASOURCE 行后，页面与 API 鉴�
 ## 15. 已确认决策（grill-me 摘要）
 
 1. Plugin **双轨**（YAML + Java），统一 `extensions[]`。
-2. Console：扩展根 **`modules[]`** + MODULE/MENU 递归 **`children`**；MODULE 上 `viewGroups` / `operationGroups`；catalog sync **不扫 PageDsl**。
+2. Console：扩展根 **`modules[]`** + MODULE/MENU 递归 **`children`**；MODULE 上
+   `viewGroups` / `operationGroups`；catalog sync 不读取页面运行时资源。
 3. Catalog 表仅 **MODULE/MENU**（**§6.6.1** 列与 contribute 对齐）；**viewItems / operationGroups** 为读取时组装。
 4. `@EndpointGrant` 的 **`group`**：READ/EXPORT = **`grantName`**；可变更类 = **operationGroups.group**（缺省 `default`）。
 5. 授权键：**`{grantName}:{domainKey}.{moduleKey}`**；**`CatalogViewItemVo`** 统一访问项与操作项；权限树节点 **`CatalogNodeVo`**。
 6. **invoke(functionName)** + **CallResult** + 可选 **event**；**subscribe** 用 `on:`。
 7. **删除** capability 路由与依赖；**同 PR** 最小改 console（实现阶段）。
-8. Page DSL **仅增** `page.grantGroup`（§6.8）；其余 Page YAML 不改。
+8. 页面访问校验只消费 `domainKey` / `moduleKey` / `pageKey` / `grantGroup`，
+   不依赖页面运行时资源。
 9. 扩展根 **无 `moduleKey`**；子树从 **`modules[]`** 起（Q5）。
-10. **权限 UI（Q1）**：树含 MENU；grant 勾选仅在 MODULE **`grants`**。
+10. **权限目录（Q1）**：树含 MENU；grant 勾选仅在 MODULE **`grants`**。
 11. **嵌套 MODULE（Q2）**：每层 MODULE 独立 **`grants`**（直接子 MENU；`@EndpointModule` = 该层 `moduleKey`）。
 12. **组装（Q3）**：`CatalogPermissionCatalogAssembler` = **catalog DB** + `EndpointGrantManager`（§6.6.2）；访问 `grantName` = `entryPageKey`。
 
@@ -812,4 +802,4 @@ v2 **删除** catalog 中 PAGE / ACTION / DATASOURCE 行后，页面与 API 鉴�
 - `plugin-v1-implementation-plan.md`
 - `plugin-dsl-v1.schema.json`
 
-操作手册 [`../manual/06-capability-usage.md`](../manual/06-capability-usage.md) 等仍可能引用旧概念，刷新手册时以 [README.md](README.md) 为准。
+操作手册以 [`../manual/README.md`](../manual/README.md) 为准。

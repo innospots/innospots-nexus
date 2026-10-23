@@ -367,7 +367,8 @@ Client                                      Server
 
 ### 7.6 会话 ID
 
-使用 `com.innospots.nexus.base.util.IdGenerator.ulid(...)` 生成，前缀建议 `"sec"` 或空（与项目 ULID 惯例对齐，implement 时二选一并写死）。
+使用 `com.innospots.nexus.base.util.IdGenerator.ulid(...)` 生成，实体前缀使用
+`"SEC"`（与项目全大写实体 ID 前缀惯例一致，implement 时写死）。
 
 ---
 

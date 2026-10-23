@@ -6,6 +6,10 @@
 
 以下将**六阶段**映射为 develop 的测试先行步骤（与 [test-conventions.md](test-conventions.md) 一致）。
 
+业务领域统一采用 `<domain>/{endpoint,dao,service,operator,domain}`，`domain` 固定
+包含 `entity`、`vo`、`model`、`request`；按需增加 `filter`、`loader`、`converter` 等。
+不可变 request/vo/model 优先使用 record；实体和确需可变身份的 model 使用 class。
+
 在 **`innospots-nexus-sample-platform`** 实施时，先读交付面顺序：
 [sample-extension-development.md](sample-extension-development.md)。
 
@@ -17,9 +21,9 @@
 |----|---------------|---------|---------|------|
 | 1 | 实体与表映射 | `{Domain}EntityContractsTest` | `domain/entity/*Entity.java` | 红灯 → 实现 → `mvn -pl <m> -am clean compile` |
 | 2 | DAO | `{Domain}DaoContractsTest` | `dao/*Dao.java` | 同上 |
-| 3 | Request/VO/枚举 | record 契约测试 | `domain/request`、`domain/vo`、`domain/enums` | 同上 |
+| 3 | Request/VO/Model/枚举 | record 契约测试 | `domain/request`、`domain/vo`、`domain/model`、`domain/enums` | 同上 |
 | 4 | 状态码 | `{Domain}StatusCodeContractsTest` | `domain/enums/*StatusCode.java` | 同上 |
-| 5 | Operator/Service | `{Type}Test`（拒绝路径 + 正常路径） | `operator`、`service`（按需） | 同上 |
+| 5 | Operator/Service | `{Type}Test`（拒绝路径 + 正常路径） | `operator`、`service` | 同上 |
 | 6 | 端点 | `{Domain}EndpointContractsTest` | `endpoint/*Endpoint.java` | 同上 |
 | 7 | 转换器（非平凡） | `{Domain}ConverterTest` | `converter/*Converter.java` | 同上 |
 | 8 | 事件（按需） | 见 [domain-events.md](domain-events.md) | `domain/event`、`handler` | 同上 |

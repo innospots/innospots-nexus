@@ -11,6 +11,7 @@
 | 名称 | 类型 | 说明 |
 |------|------|------|
 | `pluginId` | `String` | — |
+| `pluginName` | `String` | 插件展示名称 |
 | `version` | `String` | — |
 | `presence` | `PluginPresence` | — |
 | `installed` | `boolean` | — |

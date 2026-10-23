@@ -5,7 +5,6 @@ import java.util.List;
 import com.innospots.nexus.base.i18n.I18nObject;
 import com.innospots.nexus.console.entry.BuiltinConsoleEntryPlugins;
 import com.innospots.nexus.console.entry.ConsolePageRoutes;
-import com.innospots.nexus.console.ui.spec.PageDslPageRef;
 import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributeNode;
 import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributions;
 import com.innospots.nexus.core.plugin.contract.Plugin;
@@ -17,7 +16,7 @@ import com.innospots.nexus.core.plugin.declaration.PluginDefinition;
 public final class PluginManagementEntryPlugin implements Plugin {
 
     private static final String DOMAIN_KEY = ConsolePageRoutes.BUILTIN_DOMAIN_KEY;
-    private static final String ENTRY_PAGE_KEY = PageDslPageRef.encode(DOMAIN_KEY, "plugin", "main");
+    private static final String ENTRY_PAGE_KEY = "nexus-plugin-main";
 
     private static final PluginDefinition DEFINITION = ConsoleContributions.entryPlugin(
             BuiltinConsoleEntryPlugins.PLUGIN_MANAGEMENT,

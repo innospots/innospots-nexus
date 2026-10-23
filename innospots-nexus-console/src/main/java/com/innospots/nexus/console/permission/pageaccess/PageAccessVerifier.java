@@ -3,7 +3,7 @@ package com.innospots.nexus.console.permission.pageaccess;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubject;
 
 /**
- * 按 Page DSL {@code grantGroup} 与 catalog 授权校验页面访问（与 HTTP Filter 解耦）。
+ * 按 catalog 页面入口与权限分组校验页面访问（与 HTTP Filter 解耦）。
  */
 public interface PageAccessVerifier {
 

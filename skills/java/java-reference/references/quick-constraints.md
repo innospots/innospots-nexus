@@ -25,10 +25,10 @@
 |------|------|
 | 业务包先领域后职责：`role/endpoint`、`role/dao`、`role/domain/entity` | 技术层优先：`endpoint/role`、`dao/menu`、`domain/permission/entity` |
 | 同一领域代码聚在一个领域根下（如 `portal/role/**`） | 为「分层」把多领域塞进同一 `endpoint/`、`dao/` 顶层包 |
-| 大领域按功能子模块：`permission/authorization`、`grant/service` | 模块根 `service` 或单包堆满全部 `*Service` |
+| 技术模块内按功能拆子包：`permission/service/grant`、`permission/endpoint/authorization` | 领域根预建功能包；模块根 `service` 或单包堆满全部 `*Service` |
 | 单包 ≤15 个 `.java`（达 12 规划拆分） | 单包 16+ 类仍平铺 |
-| `domain` 子包仅用 `entity`/`request`/`vo`/`model`/`enums`/`event` | `role/entity` 缺 `domain` 层；或 `domain/<领域名>/` 套娃 |
-| 初始面最小，按需加 `service`/`operator`/`converter` | 空包、`impl`/`common`/`misc` 逃避归属 |
+| `domain` 固定使用 `entity`/`vo`/`model`/`request`，按需加 `enums`/`event` | `role/entity` 缺 `domain` 层；或 `domain/<领域名>/` 套娃 |
+| 不可变 request/vo/model 优先 record；技术模块按需加 `filter`/`loader`/`converter` | 空包、可变数据滥用 record、`impl`/`common`/`misc` 逃避归属 |
 
 完整说明：[package-structure.md](package-structure.md)。
 

@@ -1,18 +1,9 @@
 package com.innospots.nexus.platform.entry;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 
-import com.innospots.nexus.console.ui.spec.PageDsl;
-import com.innospots.nexus.console.ui.spec.PageDslPageRef;
-import com.innospots.nexus.console.ui.spec.config.PageDslConfig;
-import com.innospots.nexus.console.ui.spec.loader.ClasspathPageDslLoader;
-import com.innospots.nexus.console.ui.spec.parser.JacksonPageDslParser;
 import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributeNode;
 import com.innospots.nexus.core.plugin.contribution.console.ConsolePluginContribution;
 import com.innospots.nexus.core.plugin.declaration.PluginDefinition;
@@ -20,8 +11,6 @@ import com.innospots.nexus.core.plugin.declaration.PluginDefinition;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class PlatformConsoleEntryPluginTest {
-
-    private static final String DOMAIN = BuiltinPlatformEntryPlugins.DOMAIN_KEY;
 
     @Test
     void declaresAggregatedPlatformConsoleContribution() {
@@ -52,24 +41,24 @@ class PlatformConsoleEntryPluginTest {
     }
 
     @Test
-    void eachModuleDeclaresSingleMenuWithEntryPageKey() {
+    void eachModuleDeclaresSinglePageModuleWithEntryPageKey() {
         ConsolePluginContribution contribution = consoleContribution();
         ConsoleContributeNode userModule = contribution.modules().stream()
                 .filter(module -> "user".equals(module.moduleKey()))
                 .findFirst()
                 .orElseThrow();
 
-        assertThat(PlatformModuleDescriptors.USERS.children()).hasSize(1);
-        assertThat(PlatformModuleDescriptors.USERS.children().getFirst().isMenu()).isTrue();
-        assertThat(userModule.children()).hasSize(1);
-        assertThat(userModule.children().getFirst().entryPageKey())
-                .isEqualTo(PlatformModuleDescriptors.USERS.children().getFirst().entryPageKey());
+        assertThat(PlatformModuleDescriptors.USERS.children()).isEmpty();
+        assertThat(PlatformModuleDescriptors.USERS.isModule()).isTrue();
+        assertThat(userModule.children()).isEmpty();
+        assertThat(userModule.entryPageKey())
+                .isEqualTo(PlatformModuleDescriptors.USERS.entryPageKey());
 
         ConsoleContributeNode organization = contribution.modules().stream()
                 .filter(module -> "organization".equals(module.moduleKey()))
                 .findFirst()
                 .orElseThrow();
-        assertThat(organization.children()).hasSize(1);
+        assertThat(organization.children()).isEmpty();
         assertThat(organization.operationGroups()).extracting(group -> group.group())
                 .containsExactly(ConsoleContributeNode.DEFAULT_VIEW_GROUP);
     }
@@ -86,21 +75,6 @@ class PlatformConsoleEntryPluginTest {
         assertThat(pluginClasses).contains("com.innospots.nexus.platform.entry.PlatformConsoleEntryPlugin");
     }
 
-    @ParameterizedTest
-    @MethodSource("platformEntryPages")
-    void loadsPageDslFromClasspath(String moduleKey, String pageKey) {
-        PageDslConfig config = PageDslConfig.defaults();
-        ClasspathPageDslLoader loader = new ClasspathPageDslLoader(
-                config,
-                new JacksonPageDslParser(config),
-                getClass().getClassLoader());
-
-        PageDsl document = loader.load(DOMAIN, moduleKey, pageKey);
-
-        assertThat(document.getPage().getId()).isEqualTo(pageKey);
-        assertThat(document.getPage().getType()).isEqualTo("general");
-    }
-
     private static ConsolePluginContribution consoleContribution() {
         return new PlatformConsoleEntryPlugin().definition().contributions().stream()
                 .filter(ConsolePluginContribution.class::isInstance)
@@ -109,22 +83,4 @@ class PlatformConsoleEntryPluginTest {
                 .orElseThrow();
     }
 
-    private static Stream<Arguments> platformEntryPages() {
-        return Stream.of(
-                Arguments.of(
-                        "organization",
-                        PageDslPageRef.encode(DOMAIN, "organization", "main")),
-                Arguments.of("user", PageDslPageRef.encode(DOMAIN, "user", "main")),
-                Arguments.of("user", PageDslPageRef.encode(DOMAIN, "user", "add")),
-                Arguments.of("user", PageDslPageRef.encode(DOMAIN, "user", "invite")),
-                Arguments.of("user", PageDslPageRef.encode(DOMAIN, "user", "access")),
-                Arguments.of(
-                        "settings",
-                        PageDslPageRef.encode(DOMAIN, "settings", "registration-mode")),
-                Arguments.of("menu", PageDslPageRef.encode(DOMAIN, "menu", "main")),
-                Arguments.of("dictionary", PageDslPageRef.encode(DOMAIN, "dictionary", "main")),
-                Arguments.of("role", PageDslPageRef.encode(DOMAIN, "role", "main")),
-                Arguments.of("permission", PageDslPageRef.encode(DOMAIN, "permission", "main")),
-                Arguments.of("logger", PageDslPageRef.encode(DOMAIN, "logger", "main")));
-    }
 }

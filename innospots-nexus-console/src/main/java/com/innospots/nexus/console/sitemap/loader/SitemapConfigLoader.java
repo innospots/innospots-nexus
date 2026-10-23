@@ -13,7 +13,7 @@ import com.innospots.nexus.console.sitemap.domain.config.SitemapConfig;
 import com.innospots.nexus.console.sitemap.parser.SitemapYamlParser;
 
 /**
- * 从 classpath {@code ui-pages/meta-sitemap.yaml} 加载默认菜单配置。
+ * 从 classpath {@code console/meta-sitemap.yaml} 加载默认菜单配置。
  */
 public final class SitemapConfigLoader {
 

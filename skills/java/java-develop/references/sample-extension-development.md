@@ -10,7 +10,7 @@
 
 | 序 | 位置 | 产出 | 测试（先红后绿） |
 |----|------|------|------------------|
-| 1 | `core.<domain>.domain` | enums、entity、request、vo | `*EntityContractsTest`、record 契约 |
+| 1 | `core.<domain>.domain` | entity、vo、model、request、按需 enums | `*EntityContractsTest`、record 契约 |
 | 2 | `core.<domain>.dao` | `*Dao extends BaseMapper` | `*DaoContractsTest` |
 | 3 | `core.<domain>.operator` | `*Operator` | 拒绝路径 + 正常路径单测 |
 | 4 | `core.<domain>.service` | `*Service` | 编排单测（mock operator/dao） |

@@ -296,6 +296,33 @@ public record RoleOptionVo(String roleId, String roleCode, String roleName) {
 
 ---
 
+## 领域模型（Model）
+
+`domain.model` 承载内部业务模型。不可变模型和值对象优先使用 record：
+
+```java
+package com.innospots.nexus.portal.role.domain.model;
+
+/**
+ * 角色的内部不可变模型。
+ *
+ * @param roleId 技术标识
+ * @param roleCode 稳定业务键
+ * @param roleName 显示名称
+ */
+public record Role(String roleId, String roleCode, String roleName) {
+}
+```
+
+要点核对：
+
+- 不可变 model 优先 record；不因惯例盲目创建 class
+- 只有可变身份、继承层级或复杂生命周期属于模型语义时才使用 class
+- 不重复 entity 的持久化职责，也不替代 request/vo
+- model 与 entity/request/vo 之间的非平凡转换使用 MapStruct
+
+---
+
 ## 领域枚举与状态码
 
 ```java

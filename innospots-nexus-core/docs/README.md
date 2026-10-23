@@ -16,7 +16,7 @@ innospots-nexus-console
 portal / platform
 ```
 
-Core **不再**包含插件运行时、Page DSL、console catalog 索引或会话/对话领域。详见根目录
+Core **不再**包含插件运行时、console catalog 索引或会话/对话领域。详见根目录
 [`AGENTS.md`](../../AGENTS.md)。
 
 ## 职责范围
@@ -53,7 +53,7 @@ BaseEntity
 | 主题 | 位置 |
 |------|------|
 | **模块 API 索引（开发引用）** | [`../../skills/java/java-reference/references/modules/innospots-nexus-core/README.md`](../../skills/java/java-reference/references/modules/innospots-nexus-core/README.md) |
-| 插件运行时、安装、`console@1`、Page DSL | [`../../innospots-nexus-plugin/docs/plugin/manual/README.md`](../../innospots-nexus-plugin/docs/plugin/manual/README.md) |
+| 插件运行时、安装、`console@2` 与配置接入 | [`../../innospots-nexus-plugin/docs/plugin/manual/README.md`](../../innospots-nexus-plugin/docs/plugin/manual/README.md) |
 | Console catalog 索引（`nx_console_catalog_resource`） | `innospots-nexus-console` 模块 `console.catalog.*` |
 | 模块分层与依赖规则 | [`../../skills/java/java-project/references/module-layout.md`](../../skills/java/java-project/references/module-layout.md) |
 | 历史扩展设计（归档，只读） | [`archive/README.md`](archive/README.md) |

@@ -48,15 +48,7 @@
 
 | 名称 | 类型 | 说明 |
 |------|------|------|
-| `eventType(` | `MetaResource metaResource) implements DomainEvent {
-
-    /**
-     * 返回事件类型标识。
-     *
-     * @return 事件类型字符串
-     */
-    @Override
-    public String` | — |
+| `metaResource` | `MetaResource` | 已保存的资源元数据 |
 
 ### 方法
 

@@ -5,7 +5,7 @@
  * 本模块依赖 {@code innospots-nexus-console}，不得依赖 portal。</p>
  *
  * <p>按职责分包：{@code organization}、{@code user}、{@code invite}、{@code access}、
- * {@code registration}、{@code auth}、{@code entry}（PageDsl / 插件 SPI）等。</p>
+ * {@code registration}、{@code auth}、{@code entry}（插件 SPI）等。</p>
  *
  * @author Smars
  * @date 2026/09/13

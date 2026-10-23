@@ -56,13 +56,13 @@ class PlatformOrganizationEndpointIntegrationTest {
         String createTenantBody = """
                 {
                   "tenantName": "IT Enterprise Tenant",
-                  "tenantCode": "it-ent-tenant",
+                  "tenantCode": "it_ent_tenant",
                   "tenantType": "ENTERPRISE"
                 }
                 """;
         HttpResponse<String> created = http.postJson(PlatformConstant.TENANTS_PATH, createTenantBody);
         assertThat(created.statusCode()).as(created.body()).isEqualTo(200);
-        assertThat(created.body()).contains("it-ent-tenant");
+        assertThat(created.body()).contains("it_ent_tenant");
         PlatformDatabaseJsonSnapshot.logAndPersist(
                 jdbcTemplate,
                 OUTPUT_DIR,
@@ -72,7 +72,7 @@ class PlatformOrganizationEndpointIntegrationTest {
         String tenantId = jdbcTemplate.queryForObject(
                 "SELECT tenant_id FROM nx_pl_tenant WHERE tenant_code = ?",
                 String.class,
-                "it-ent-tenant");
+                "it_ent_tenant");
 
         HttpResponse<String> gotTenant = http.get(PlatformConstant.TENANTS_PATH + "/" + tenantId);
         assertThat(gotTenant.statusCode()).isEqualTo(200);

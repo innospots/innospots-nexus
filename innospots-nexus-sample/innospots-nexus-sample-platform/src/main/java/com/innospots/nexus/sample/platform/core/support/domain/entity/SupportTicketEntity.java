@@ -33,6 +33,11 @@ public class SupportTicketEntity extends BaseEntity {
     @Column(length = 32, nullable = false)
     private String ticketId;
 
+    @Override
+    public String idPrefix() {
+        return "SPT";
+    }
+
     @Column(length = 32, nullable = false)
     private String tenantId;
 

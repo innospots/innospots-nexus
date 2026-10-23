@@ -1,17 +1,18 @@
 # Java SPI 插件手册
 
+本文说明当前 Java classpath 插件的声明方式：`Plugin` SPI、配置 schema 与 `console@2`
+Entry 贡献。YAML 交换格式见 [04-yaml-plugin.md](04-yaml-plugin.md)。
+
 ## 1. 最小结构
 
-```
+```text
 my-plugin.jar
 ├── META-INF/services/com.innospots.nexus.core.plugin.contract.Plugin
-│   └── com.example.myplugin.MyPlugin
 └── com/example/myplugin/
-    ├── MyPlugin.java
-    └── WeComSender.java          # CapabilityProvider 实现
+    └── MyPlugin.java
 ```
 
-SPI 文件内容为实现类全限定名（一行一个）。
+SPI 文件每行写一个 `Plugin` 实现类全限定名。
 
 ## 2. 实现 Plugin
 
@@ -22,158 +23,125 @@ public final class MyPlugin implements Plugin {
     public PluginDefinition definition() {
         return PluginDefinition.builder("com.example.message-wecom")
                 .name("WeCom Messaging")
-                .description("Send messages via WeCom")
                 .version("1.0.0")
-                .tags(Tags.of("vendor", "wecom"))
                 .config(ConfigDefinition.builder()
-                        .string("corpId").required().end()
-                        .secret("secret").required().end()
-                        .end())
-                .provide(
-                        MESSAGE_SENDER,
-                        "wecom",
-                        Tags.of("channel", "wecom"),
-                        ConfigDefinition.builder()
-                                .string("agentId").required().end()
-                                .end(),
-                        WeComSender::new)
-                .require(OTHER_CAPABILITY, true)
+                        .string("corpId")
+                        .required()
+                        .description("企业 ID")
+                        .end()
+                        .secret("secret")
+                        .required()
+                        .description("应用密钥")
+                        .end()
+                        .build())
                 .build();
     }
 
     @Override
     public void initialize(PluginContext context) {
-        // 读取插件级配置：context.config()
+        String corpId = context.config().required("corpId");
+        String secret = context.config().secret("secret");
+        // 创建当前插件作用域内的资源
     }
 
     @Override
     public void start() {
-        // 插件级启动逻辑（Provider 已 initialize 之后）
+        // 启动行为
     }
 
     @Override
     public void stop() {
-        // 插件级停止逻辑（资源作用域关闭之前）
+        // 释放行为；ResourceScope 随后关闭
     }
 }
 ```
 
-## 3. Builder 常用 API
+`definition()` 必须无副作用，只返回不可变声明。配置值通过 `PluginContext.config()`
+读取，不在 `definition()` 中读取环境变量或数据库。
 
-| 方法 | 说明 |
+## 3. 配置 schema
+
+`ConfigDefinition` 只声明允许的键、类型和校验元数据：
+
+| 方法 | 用途 |
 |------|------|
-| `builder(pluginId)` | 必填；反向域名 |
-| `name` / `description` | 展示文案（`I18nObject` 或单语言） |
-| `version` | 语义版本字符串 |
-| `tags(Tags)` | 插件级路由标签，与 Provider 标签合并 |
-| `config(ConfigDefinition)` | 插件共享配置 schema |
-| `provide(type, factory)` | 最简 Capability 声明 |
-| `provide(type, providerId, tags, config, factory)` | 完整 Capability 声明 |
-| `require(type, required)` | Capability 依赖 |
-| `require(type, required, tags)` | 带标签约束的依赖 |
-| `contribute(PluginContribution)` | 添加 `console@1` 等静态贡献声明 |
+| `string` / `integer` / `longNumber` / `bool` / `decimal` | 基础类型 |
+| `duration` / `uri` | 结构化文本类型 |
+| `enumeration(key, values...)` | 枚举值 |
+| `secret(key)` | 密文；诊断与日志不得输出原值 |
+| `required()` / `defaultValue(...)` / `description(...)` | 必填、默认值和展示说明 |
 
-`provide` 的 `factory` 类型为 `CapabilityProviderFactory`，常用方法引用 `WeComSender::new`（要求 public 无参构造）。
+配置值来源与优先级、环境变量命名、密文处理见
+[`java:develop` → plugin-entry-and-configuration.md](../../../../skills/java/java-develop/references/plugin-entry-and-configuration.md)。
 
-## 4. 声明 `console@1` 页面与菜单
+## 4. 声明 console@2 Entry
 
-Java SPI 插件可以直接构造 `ConsolePluginContribution`，把控制台模块、页面树和菜单树挂到
-`PluginDefinition.Builder.contribute(...)`：
+Entry 只声明目录树与稳定 `entryPageKey`，不打包页面资源，也不实现 REST。
 
 ```java
-import java.util.List;
+ConsoleContributeNode reports = ConsoleContributeNode.singlePageModule(
+        "reports",
+        10,
+        I18nObject.of("zh-CN", "报表"),
+        I18nObject.of("zh-CN", "报表管理"),
+        "reports-reports-main",
+        "chart");
 
-import com.innospots.nexus.base.i18n.I18nObject;
-import com.innospots.nexus.core.plugin.contribution.console.ConsoleModuleDeclaration;
-import com.innospots.nexus.core.plugin.contribution.console.ConsolePluginContribution;
-import com.innospots.nexus.core.plugin.contribution.console.MenuDeclaration;
-import com.innospots.nexus.core.plugin.contribution.console.UiSpecPageDeclaration;
-
-public final class ConsolePlugin implements Plugin {
-
-    @Override
-    public PluginDefinition definition() {
-        return PluginDefinition.builder("com.example.sales-console")
-                .name("Sales Console")
-                .version("1.0.0")
-                .contribute(new ConsolePluginContribution(List.of(
-                        new ConsoleModuleDeclaration(
-                                "sales",
-                                I18nObject.of("zh-CN", "销售"),
-                                I18nObject.of("zh-CN", "销售管理"),
-                                List.of(new UiSpecPageDeclaration(
-                                        "order-list",
-                                        "/sales/orders",
-                                        List.of(new UiSpecPageDeclaration(
-                                                "order-detail",
-                                                "/sales/orders/{orderId}",
-                                                List.of())))),
-                                List.of(MenuDeclaration.directory(
-                                        "sales-root",
-                                        I18nObject.of("zh-CN", "销售"),
-                                        "shopping-cart",
-                                        10,
-                                        List.of(MenuDeclaration.page(
-                                                "order-list",
-                                                I18nObject.of("zh-CN", "订单列表"),
-                                                "list",
-                                                10,
-                                                "order-list")))))))
-                .build();
-    }
+@Override
+public PluginDefinition definition() {
+    return PluginDefinition.builder("com.example.reports.console")
+            .version("1.0.0")
+            .name("Reports Console")
+            .contribute(new ConsolePluginContribution(
+                    "reports",
+                    I18nObject.of("zh-CN", "报表"),
+                    I18nObject.of("zh-CN", "报表管理"),
+                    0,
+                    List.of(reports)))
+            .build();
 }
 ```
 
-声明要点：
+规则：
 
-- `ConsolePluginContribution` 的 `modules` 不能为空。
-- `ConsoleModuleDeclaration.pages` 必填，表达页面树；`menuTree` 可选，表达静态导航。
-- `UiSpecPageDeclaration.pageKey` 必须和 `ui-spec/<moduleKey>/<pageKey>.yaml` 中的
-  `pageInfo.pageId` 对齐。
-- `MenuDeclaration` 只能二选一：目录节点使用 `children`，页面入口使用 `pageKey`。
-- 带必填路径变量的页面，例如 `/sales/orders/{orderId}`，可以是合法 PAGE，但不能直接做静态菜单入口。
+- 扩展根 `modules[]` 至少一项，且只能放 MODULE。
+- MODULE 必须有 `moduleKey`，并且有 `entryPageKey` 或非空 `children`，二者不能同时存在。
+- MENU 没有 `moduleKey`，必须有 `entryPageKey`，且 `children` 为空。
+- `domainKey`、`moduleKey`、`group`、`entryPageKey` 使用小写 kebab-case。
+- `entryPageKey` 是稳定不透明键；推荐 `{domainKey}-{moduleKey}-{pageSuffix}`，运行时不得拆分解析。
 
-## 5. 实现 CapabilityProvider
+需要同时声明配置和 Entry 时，使用 `PluginDefinition.builder(...).config(...).contribute(...)`；
+仅声明 console Entry 时也可使用 `ConsoleContributions.entryPlugin(...)` 组装。
 
-```java
-public final class WeComSender implements MessageSender {
+## 5. ModuleDescriptors 与 EntryPluginDescriptor
 
-    @Override
-    public void initialize(CapabilityProviderContext context) {
-        String corpId = context.config().require("corpId");
-        String agentId = context.providerConfig().require("agentId");
-        try (SecretValue secret = context.config().requireSecret("secret")) {
-            secret.use(chars -> { /* 使用密文 */ return null; });
-        }
-    }
+一个宿主模块包含多个 MODULE 时，推荐拆成四个窄类型：
 
-    @Override
-    public void send(String target, String body) {
-        // ...
-    }
+| 类型 | 职责 |
+|------|------|
+| `XxxModuleDescriptors` | 集中声明 MODULE 常量及稳定顺序；只构造 `ConsoleContributeNode` |
+| `XxxEntryPluginDescriptor` | 绑定 pluginId、显示文本和 MODULE 列表；拒绝空列表 |
+| `XxxModuleEntrySupport` | 调用 `ConsoleContributions.entryPlugin(...)` |
+| `XxxConsoleEntryPlugin` | 实现 `Plugin.definition()`，返回组装结果 |
 
-    @Override
-    public void destroy() {
-        // 释放连接等
-    }
-}
+platform 的现有实现可直接对照：
+
+- `PlatformModuleDescriptors`
+- `PlatformEntryPluginDescriptor`
+- `PlatformModuleEntrySupport`
+- `PlatformConsoleEntryPlugin`
+
+Descriptor 不注册 Bean、不访问数据库、不构造 REST 响应。新增跨模块通用描述符前，必须有
+至少两个真实消费者；单个宿主继续使用本模块的 record。
+
+## 6. 注册与验证
+
+1. 将 `Plugin` 实现放入所属模块的 `entry` 包。
+2. 注册 `META-INF/services/com.innospots.nexus.core.plugin.contract.Plugin`。
+3. 仅在宿主必须启用时加入对应 `Builtin*EntryPlugins.REQUIRED_PLUGIN_IDS`。
+4. 测试 `definition()`、配置 schema、稳定 `entryPageKey` 与 MODULE/MENU 形态。
+5. 每批 Java 改动后运行：
+
+```bash
+mvn -pl innospots-nexus-plugin -am clean compile
 ```
-
-## 6. 约束
-
-- `definition()` 必须无副作用、可重复调用；发现阶段只会调用一次。
-- `pluginId`、`providerId` 格式见 [04-yaml-plugin.md](04-yaml-plugin.md) 标识符一节（与 YAML 相同规则）。
-- 同一插件内 `providerId` 不能重复。
-- V1 不支持在 Java 定义里写 `exposures` 或远程 bind。
-- Java `console@1` 声明中的页面与菜单规则，与 YAML `contributions` 完全一致。
-- 页面树负责表达领域归属；菜单树负责表达导航结构，二者不要互相代替。
-
-## 7. 本地验证
-
-```java
-ClassLoader cl = ...; // 含插件 JAR
-var report = new ClasspathPluginDiscovery(cl, decoders).discoverReport();
-assertThat(report.rejectedDefinitions()).isEmpty();
-```
-
-参考测试：`ClasspathPluginDiscoveryTest`、`ManagedPluginTest`、`PluginConsoleAssemblyTest`。

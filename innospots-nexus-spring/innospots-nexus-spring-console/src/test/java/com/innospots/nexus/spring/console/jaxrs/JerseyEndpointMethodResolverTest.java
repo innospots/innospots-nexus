@@ -68,7 +68,8 @@ class JerseyEndpointMethodResolverTest {
 
         InvocationLogContext context = recorded.get();
         assertThat(context).isNotNull();
-        assertThat(context.action()).isEqualTo("audit.create");
+        assertThat(context.action()).isEqualTo("CREATE");
+        assertThat(context.target()).isEqualTo("audit.create");
         assertThat(context.methodName()).isEqualTo("create");
         assertThat(context.className()).isEqualTo(AuditResource.class.getName());
         assertThat(context.httpPath()).isEqualTo("POST /audit");

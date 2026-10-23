@@ -112,7 +112,7 @@ innospots-nexus-parent   ← 构建 parent（插件、编译基线、公共 test
 | **运营侧平台**（租户生命周期、企业主体、平台 IAM、`/platform/**`） | `innospots-nexus-platform` | 系统运营类平台；传递带来 `console`；**不得**依赖 `portal` |
 | 仅需业务中立平台基础设施（持久化基类、Quartz、watcher 等） | `innospots-nexus-core` | 不含控制台与管理业务 |
 | 仅需纯 Java 基础契约与工具 | `innospots-nexus-base` | 零中间件 |
-| 插件运行时与 Page DSL（不经管理台） | `innospots-nexus-plugin` | 见下文「直接引用 plugin」 |
+| 插件运行时与 `console@2` 贡献（不经管理台） | `innospots-nexus-plugin` | 见下文「直接引用 plugin」 |
 | **Spring Boot 运行时组装** | `innospots-nexus-spring` 子模块 | 见下文「运行时组装」 |
 | **Quarkus 运行时组装** | `innospots-nexus-quarkus` 子模块 | 见下文「运行时组装」 |
 
@@ -123,8 +123,8 @@ innospots-nexus-parent   ← 构建 parent（插件、编译基线、公共 test
 | 场景 | 引用 | 不引 |
 |------|------|------|
 | 独立 classpath 插件 JAR、贡献解码/安装宿主 | `plugin`（传递 `core`/`base`） | `console`、`portal` |
-| 仅需 Page DSL / contribution 运行时，无管理台 REST | `plugin` | `console` |
-| 管理台 UI + catalog + 权限 + REST 契约 | `console`（已传递 `plugin`） | 单独再写 `plugin` |
+| 仅需 plugin / contribution 运行时，无管理台 REST | `plugin` | `console` |
+| 管理台前端 + catalog + 权限 + REST 契约 | `console`（已传递 `plugin`） | 单独再写 `plugin` |
 
 插件扩展模块若只实现 `Plugin` 贡献、不暴露管理台 API，通常 **`plugin` 即可**；
 需要挂到控制台目录与权限体系时再引 **`console`**。

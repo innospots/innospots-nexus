@@ -1,139 +1,161 @@
-# Console 插件 Catalog 与 Navigation 设计
+# Console Catalog 与 Navigation 设计
 
 ## 1. 文档定位
 
-`innospots-nexus-console` 的两类菜单 API：
+本文定义 `innospots-nexus-console` 当前的控制台目录与导航投影，以及它们与
+`console@2` 插件贡献、`EndpointGrant` 和权限授权之间的关系。
 
-1. **Catalog** — 权限设置页的插件功能树（菜单 + 页面操作）。
-2. **Navigation** — 登录用户侧边栏 MENU 树。
-
-共享持久化索引 `nx_permission_resource`；Catalog 与 Navigation 是不同投影。
-
-## 2. 已确认决策
-
-1. 事实源：运行时 `ConsoleContributionCatalog` + `UiSpecLoader`；**不是** `nx_menu`。
-2. `PermissionResourceSyncService` 归属 **console**（从 portal 迁入）。
-3. sync 输入：**仅 ACTIVE 插件贡献**；workspace **全量对账**（非 per-plugin 增量）。
-4. API：`GET /console/catalog/tree`、`POST /console/catalog/sync`、`GET /console/navigation/menus`。
-5. 删除未实现的 `PermissionCatalogEndpoint`。
-6. `nx_menu` / `MenuEndpoint` 本阶段不实现；`MenuEntryPlugin` 保留为插件入口页。
-7. sync 触发：**启动 Task（order=200）** + **PluginManagementEndpoint 启停后** + 手动 POST；**不用** PluginEventBus 监听器（V1）。
-8. 内置插件 ACTIVE：宿主配置 `requiredPluginIds`（唯一方式）。
-
-## 3. 模块职责（单一职责）
-
-| 包 | 职责 | 禁止 |
-|----|------|------|
-| `console.catalog` | sync、树组装、`ConsoleCatalogEndpoint` | JWT、grant 写入 |
-| `console.navigation` | MENU 树组装、`NavigationMenuEndpoint` | 读内存 Catalog |
-| `console.permission` | 实体/DAO、grant、visibility、`RequestAuthorizer` | HTTP 路由 |
-| `console.plugin` | 安装启停 API；**启停成功后调 sync** | 定义插件运行时 |
-| `console.entry` | 内置 entryPlugin 声明 | 业务 CRUD |
-| **core** | `ConsoleContributionCatalog`、插件运行时 | sync、菜单 API |
-
-portal：**不**含 sync、菜单 API。
-
-## 4. 架构（一层索引，两个投影）
+事实源固定为：
 
 ```text
-ACTIVE 插件 → ConsoleContributionCatalog（内存，鉴权校验用）
-                    │
-                    │  PermissionResourceSyncService.sync()  全量对账
-                    ▼
-              nx_permission_resource（DB，API 读这里）
-                    │
-        ┌───────────┴───────────┐
-        ▼                       ▼
-  catalog/tree            navigation/menus
-  （全集 ENABLED）         （MENU + 权限裁剪）
+ACTIVE 插件的 console@2 Contribution
+  -> ConsoleContributionCatalog（内存活动快照）
+  -> ConsoleCatalogSyncService（全量对账）
+  -> nx_console_catalog_resource（宿主级持久化目录）
+  -> permission-catalog / navigation / page-access 三个读侧投影
 ```
 
-**不维护第三套菜单表。** `nx_menu` 废弃，不双轨。
+`nx_menu` 不是插件目录事实源，`entryPageKey` 也不指向任何宿主页面运行时文件。
 
-## 5. API
+## 2. 当前模型
 
-| 方法 | 路径 | 读源 | 用途 |
-|------|------|------|------|
-| GET | `/console/catalog/tree` | DB | 权限设置勾选 |
-| POST | `/console/catalog/sync` | 写 DB | 手动刷新 |
-| GET | `/console/navigation/menus` | DB + visibility | 侧边栏 |
+### 2.1 Catalog 资源
 
-`GET /console/me/permissions` 保留为扁平可见资源（按钮/接口显隐），**不是**导航。
+目录只持久化两类资源：
 
-### 5.1 VO
+| 类型 | resourceKey | 说明 |
+|------|-------------|------|
+| `MODULE` | `module:{moduleKey}` | 顶层或嵌套管理模块；叶子 MODULE 可携带 `entryPageKey` |
+| `MENU` | `menu:{moduleKey}.{entryPageKey}` | 叶子 MODULE 下的菜单入口 |
 
-**CatalogNodeVo** — 树节点（含 `children`）。由 `ConsoleCatalogService` 从 flat `PermissionResourceEntity` 组装。
+插件贡献根节点不落 catalog。MODULE 必须有 `moduleKey`，并满足以下二选一：
 
-**NavigationMenuVo** — 仅 MENU；扩展字段：`ownerPluginId`、`moduleKey`、`pageKey`、`resourceId`。
+- 有 `entryPageKey` 且 `children` 为空；
+- 无 `entryPageKey` 且 `children` 非空。
 
-V1 **不做** `includeDisabled` 查询参数；DISABLED 资源不出现在 catalog tree（grant 历史仍在 DB）。
+MENU 没有 `moduleKey`，必须有 `entryPageKey`，且 `children` 为空。
 
-## 6. sync
+`entryPageKey` 是稳定、不透明的小写 kebab-case 身份，推荐格式为
+`{domainKey}-{moduleKey}-{pageSuffix}`。运行时不得通过拆分字符串推导领域或模块。
 
-### 6.1 算法（已有实现，保持不变）
+### 2.2 权限目录
+
+`GET /api/d/nexus/catalog/permission-catalog` 从持久化 catalog 组装权限配置树：
 
 ```text
-discover()       ← ConsoleContributionCatalog.activeContributions() 全集
-loadExisting()   ← workspace 全部 nx_permission_resource
-upsert           ← 新增/更新
-disableMissing() ← 不在发现集合中的 ENABLED → DISABLED（grant 不删）
+MODULE
+  ├─ viewItems[]        ← 叶子 MODULE / MENU 的 entryPageKey
+  ├─ operationGroups[]  ← EndpointGrantManager.moduleCatalog(moduleKey)
+  └─ children[]         ← 嵌套 MODULE 或 MENU
 ```
 
-### 6.2 谁进入 discover
+授权键统一为：
 
-| 插件状态 | 进入 sync |
-|----------|-----------|
-| 扫描未安装 | 否 |
-| 安装未启用 | 否 |
-| ACTIVE | 是 |
+```text
+grantName:domainKey.moduleKey
+```
 
-### 6.3 触发（V1 仅三处，无事件监听器）
+- 页面访问项的 `grantName` 是叶子 MODULE/MENU 的 `entryPageKey`；
+- 操作项的 `grantName` 是 `@EndpointGrant.name`；
+- 当前 `@EndpointGrant.group` 尚未参与目录归组，操作项进入 `default` 分组；
+- 当前页面访问校验只实现 `grantGroup=default`，其他分组失败关闭。
+
+`GET /api/d/nexus/catalog/tree` 已废弃，仅作为 `permission-catalog` 的兼容别名。
+
+### 2.3 Navigation
+
+`GET /api/d/nexus/navigation/menus` 从启用 catalog 中读取 MENU 与叶子 MODULE，
+按当前主体的页面授权裁剪后返回侧栏导航。导航与权限目录是同一索引的两个投影，
+不维护第三套菜单表。
+
+## 3. 同步
+
+`ConsoleCatalogSyncService.sync()` 只读取 `ConsoleContributionCatalog` 中已提交且
+ACTIVE 的 `console@2` 贡献，并按宿主目录做全量对账：
+
+```text
+discover active contributions
+  -> upsert MODULE / MENU
+  -> mark missing resources DISABLED
+  -> preserve nx_permission_grant history
+```
+
+触发点：
 
 | 时机 | 调用方 |
 |------|--------|
-| 服务启动 | `ConsoleCatalogSyncStartupTask`（`NexusStartupTask` order=200） |
-| `PluginManagementEndpoint` enable/disable 成功 | endpoint 内直接 `syncService.sync()` |
-| 手动 | `POST /console/catalog/sync` |
+| 服务启动 | `ConsoleCatalogSyncStartupTask`（order=200） |
+| 插件安装、启用或停用成功后 | `PluginManagementEndpoint` |
+| 管理员显式刷新 | `POST /api/d/nexus/catalog/sync` |
 
-**为何不用 PluginEventBus 监听器：** 启停入口已在 console `PluginManagementEndpoint`，直接调用最简单；
-MISSING/重启由启动 Task 兜底。避免 core→console 事件订阅的额外装配。
+停用插件不会删除历史授权记录；对应 catalog 资源变为 DISABLED，重新启用后可继续使用
+相同稳定键。
 
-### 6.4 两层状态
+## 4. EndpointGrant
 
-| 层 | 更新 | 谁读 |
-|----|------|------|
-| 内存 Catalog | 启停即时 | `RequestAuthorizer`（校验 plugin 仍 ACTIVE） |
-| DB 索引 | sync 时 | catalog、navigation、grant |
+`@EndpointModule` 声明 REST 契约归属的 `moduleKey`，`@EndpointGrant` 声明每个 HTTP
+方法的授权、审计与跳过策略。console 契约接口是注解单一事实源；portal/platform
+实现类不得重复声明。
 
-disable 后必须 sync，否则 navigation 短暂过期；由 endpoint 内同步调用保证。
+最小示例：
 
-## 7. AuthorizationSubjectResolver
+```java
+@EndpointModule("dictionary")
+@Path("/api/d/nexus/dictionary-types")
+public interface DictionaryTypeEndpoint {
 
-console 定义端口；Spring/Quarkus **应用层**实现（从 token 取 roleIds/orgUnitIds）。
-navigation 与 `/me/permissions` 共用。console 不解析 HTTP。
+    @GET
+    @EndpointGrant(
+            action = EndpointGrantAction.READ,
+            name = "dictionary.type.page")
+    R<PageResult<DictionaryTypeVo>> pageDictionaryTypes(
+            @BeanParam DictionaryTypePageRequest request);
+}
+```
 
-## 8. 删除 / 不做（防过度设计）
+`EndpointGrantManager` 在启动时登记资源类，拼接类级与方法级 `@Path`，形成模块级
+只读/可操作目录。解析优先级和完整字段语义见
+`skills/java/java-develop/references/endpoint-grants.md`。
 
-| 项 | 决定 |
-|----|------|
-| `CatalogSyncOnPluginLifecycleListener` | **不做**（V1） |
-| `disableByOwnerPluginId` 快速路径 | **不做**（V2 按需） |
-| `includeDisabled` catalog 参数 | **不做**（V1） |
-| `GET /console/pages/...` UiSpec HTTP | 后续 |
-| `BuiltinConsolePluginInstallInitializer` | **删除**；用 `requiredPluginIds` |
-| `NavigationMenuEndpoint` 读内存 Catalog | **禁止** |
-| portal `PermissionResourceSyncService` | **删除** |
+## 5. 页面访问校验
 
-## 9. 测试要点
+`POST /api/public/page-access` 接收：
 
-1. sync 全量对账：ACTIVE upsert；停用后 disableMissing。
-2. disable 后 navigation 不含该 MENU（endpoint 内 sync）。
-3. catalog tree / navigation 契约与组装逻辑。
-4. sync 不在 portal。
+```json
+{
+  "domainKey": "platform",
+  "moduleKey": "user",
+  "pageKey": "platform-user-main",
+  "grantGroup": "default"
+}
+```
 
-## 10. 验收标准
+`GrantGroupPageAccessVerifier` 先按 `entryPageKey` 查找唯一启用的叶子 MODULE/MENU，
+再以 `entryPageKey:domainKey.moduleKey` 校验角色或组织单元授权。管理员直接通过；
+未找到资源、未授权或非 `default` 分组均拒绝。
 
-1. 启动后 catalog tree 含 6 个内置模块（`requiredPluginIds` + 启动 sync）。
-2. 插件 disable 后 navigation 立即更新（endpoint sync）。
-3. 重启后 DB 与 ACTIVE 集合一致（启动 sync）。
-4. core 无 console 业务；console 无 Spring 依赖。
+## 6. 模块职责
+
+| 模块 | 职责 |
+|------|------|
+| `innospots-nexus-plugin` | `console@2` 声明、解码、校验、Contribution Handler 与活动快照 |
+| `innospots-nexus-console` | catalog 持久化索引、权限目录、页面访问校验、`EndpointGrant` 运行时 |
+| `innospots-nexus-platform` | 平台侧导航 REST 实现；不维护第二份 catalog |
+| `innospots-nexus-portal` | 租户业务域；不维护插件目录同步 |
+
+Spring/Quarkus 适配层只负责注册 DAO、Service、Handler 和 Endpoint Bean，不定义目录语义。
+
+## 7. 已移除
+
+- console 页面运行时包、页面解析/渲染端点和测试页面资源；
+- 旧页面规格、页面 URL 权限模型和 PAGE/ACTION/DATASOURCE 资源类型；
+- Capability 路由、Provider 注册表和跨插件 Capability 依赖；
+- `console@1` 页面树与旧 Extension 运行时。
+
+## 8. 验收
+
+1. ACTIVE 插件贡献可同步为 MODULE/MENU，停用后标记 DISABLED。
+2. `permission-catalog` 同时包含页面访问项和 `EndpointGrant` 操作项。
+3. 页面访问授权键与 `entryPageKey` 稳定对应。
+4. 非 `default` 页面授权分组明确拒绝。
+5. console、plugin、platform、portal 均不依赖已删除的页面运行时。

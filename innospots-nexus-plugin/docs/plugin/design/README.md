@@ -27,4 +27,4 @@
 | `provide` / `subscribe` / `FunctionRegistry` | **未落地** |
 | `plugin-dsl-v2.schema.json` | **未落地** |
 
-操作手册见 [`../manual/README.md`](../manual/README.md)；手册中与 Capability / `console@1` 相关的章节待随手册迭代刷新。
+操作手册见 [`../manual/README.md`](../manual/README.md)，已与当前 `console@2` 和配置实现同步。

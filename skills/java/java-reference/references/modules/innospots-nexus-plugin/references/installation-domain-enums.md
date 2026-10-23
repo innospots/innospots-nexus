@@ -4,14 +4,12 @@
 
 **类型：** enum
 
-插件定义在当前有效目录中的存在性。
-
-### 枚举常量
+插件定义在当前有效 classpath 目录中的存在性。
 
 | 常量 | 说明 |
 |------|------|
-| `PRESENT` | — |
-| `MISSING` | — |
+| `PRESENT` | 当前发现结果中存在该插件 |
+| `MISSING` | 安装记录存在，但当前发现结果中不存在 |
 
 
 ## PluginSourceType
@@ -20,25 +18,14 @@
 
 插件定义来源类型。
 
-### 枚举常量
-
 | 常量 | 说明 |
 |------|------|
-| `JAVA` | — |
-
-### 成员变量
-
-| 名称 | 类型 | 说明 |
-|------|------|------|
-| ` ` | `Java SPI 或 classpath 实现类。 */
-    JAVA,
-
-    /** YAML 资源声明。` | Java SPI 或 classpath 实现类。 JAVA, /** YAML 资源声明。 YAML; |
+| `JAVA` | Java SPI 或 classpath 实现类 |
+| `YAML` | classpath `META-INF/nexus/plugin.yaml` 资源声明 |
 
 ### 方法
 
 #### `from(String value) → PluginSourceType`
-- **说明：** Java SPI 或 classpath 实现类。 JAVA, /** YAML 资源声明。 YAML; /** 将来源文本转换为枚举。
-- **参数：**
-  - `value` — 持久化或声明中的来源文本
-- **返回：** 匹配的枚举值；输入为 null 时返回 null
+
+忽略大小写转换为枚举；输入为 `null` 时返回 `null`，未知文本抛出
+`IllegalArgumentException`。

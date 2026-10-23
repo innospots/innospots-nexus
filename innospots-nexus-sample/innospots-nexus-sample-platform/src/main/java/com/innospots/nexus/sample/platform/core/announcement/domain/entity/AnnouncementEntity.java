@@ -33,6 +33,11 @@ public class AnnouncementEntity extends BaseEntity {
     @Column(length = 32, nullable = false)
     private String announcementId;
 
+    @Override
+    public String idPrefix() {
+        return "ANN";
+    }
+
     @Column(length = 128, nullable = false)
     private String title;
 

@@ -10,7 +10,7 @@ description: |
   触发词：Java 规范、编码规范、命名规范、代码风格、注释规范、API 设计、
   异常规范、状态码、java 标准、standards。
 category: java
-version: 1.9.1
+version: 1.10.0
 ---
 
 # Java 通用规范与标准
@@ -55,8 +55,10 @@ version: 1.9.1
 | 结构简化与防过度设计 | [code-quality-constraints.md](references/code-quality-constraints.md) | 冗余、死代码、wrapper、双轨 API、diff 体量 smell |
 | 规范章节地图 | [standards-index.md](references/standards-index.md) | 定位规则在哪份 standards 文件的哪一节 |
 | 模块归属 | [module-ownership.md](references/module-ownership.md) | Maven 模块与业务域判定 |
-| 控制台 entry 与 pageKey | [console-entry-and-pages.md](references/console-entry-and-pages.md) | 内置 entry 组装、多模块/多页、classpath 与 catalog 分工 |
-| 包结构（领域优先） | [package-structure.md](references/package-structure.md) | 领域 → 功能子模块 → 职责；禁止 service 堆积；单包 ≤15 类 |
+| 控制台 entry、插件配置与 ModuleDescriptors | [console-entry-and-configuration.md](references/console-entry-and-configuration.md) | `console@2`、配置接入、稳定 `entryPageKey`、ModuleDescriptors / EntryPluginDescriptor 与 catalog 分工 |
+| REST 授权与审计 | `java:develop` → [endpoint-grants.md](../java-develop/references/endpoint-grants.md) | `@EndpointModule` / `@EndpointGrant`、Filter 链路与契约测试 |
+| 插件 Entry 与配置实施 | `java:develop` → [plugin-entry-and-configuration.md](../java-develop/references/plugin-entry-and-configuration.md) | schema、来源优先级、`SecretValue`、platform 聚合 |
+| 包结构（领域优先） | [package-structure.md](references/package-structure.md) | 领域 → 技术模块 → 按需功能子包；禁止 service 堆积；单包 ≤15 类 |
 | sample 示例工程 | [sample-extension-layout.md](references/sample-extension-layout.md) | reactor、交付面×领域 DDD、HTTP 前缀、扩展与 platform 边界 |
 | 作用域层级 | [scope-hierarchy.md](references/scope-hierarchy.md) | Session/Snapshot 与 Entity 基类 |
 | 领域建模 | [domain-modeling.md](references/domain-modeling.md) | 实体/请求/VO/事件建模决策 |
@@ -104,7 +106,7 @@ version: 1.9.1
 | 3 | 状态码九字符：`MODULE(3) + CATEGORY(2) + LOCAL(4)` |
 | 4 | DAO 单表、无 join、无 Mapper XML；配置用 yaml，禁 properties/beans.xml |
 | 5 | 端点只用 `jakarta.ws.rs`，返回 `R<T>` |
-| 6 | `domain.request` / `domain.vo` 必须是 record |
+| 6 | `domain.request` / `domain.vo` 必须是 record；不可变 `domain.model` 优先 record |
 | 7 | `endpoint → service → operator → dao`；operator 只能依赖 dao，禁止依赖 service/其他 operator；service 可依赖 operator、其他 service、dao |
 | 8 | 事务只用 `jakarta.transaction.Transactional` |
 | 9 | 不得复制遗留工程源码或机械复刻包结构 |
@@ -132,10 +134,9 @@ version: 1.9.1
 | `innospots-nexus-core` | [README.md](references/modules/innospots-nexus-core/README.md) |
 | `innospots-nexus-console` | [README.md](references/modules/innospots-nexus-console/README.md) |
 | `innospots-nexus-plugin` | [README.md](references/modules/innospots-nexus-plugin/README.md)（设计见 `innospots-nexus-plugin/docs/plugin/design/`） |
-| `innospots-nexus-plugin-ui-spec` | [README.md](references/modules/innospots-nexus-plugin-ui-spec/README.md)（Pactor Page DSL 1.0 YAML 规范，非 Maven 模块） |
 | `innospots-nexus-openapi` | [README.md](references/modules/innospots-nexus-openapi/README.md)（REST OpenAPI 构建与注解索引，非 Maven 模块） |
 | `innospots-nexus-portal` | 暂无 API 索引；归属见 [module-ownership.md](references/module-ownership.md)；包结构见 [package-structure.md](references/package-structure.md) |
-| `innospots-nexus-platform` | 暂无 API 索引；归属见 [module-ownership.md](references/module-ownership.md) |
+| `innospots-nexus-platform` | 暂无完整 API 索引；`platform.entry` 的 `ModuleDescriptors` / `EntryPluginDescriptor` 见 [console-entry-and-configuration.md](references/console-entry-and-configuration.md) |
 | `innospots-nexus-sample` | 结构/契约见 [sample-extension-layout.md](references/sample-extension-layout.md)（非模块 API 索引） |
 
 显式扫描请求时可生成 plugin/portal/platform 索引（见 [`standards/module-skills.md`](standards/module-skills.md)）。

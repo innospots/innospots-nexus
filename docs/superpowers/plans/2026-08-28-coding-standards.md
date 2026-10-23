@@ -33,7 +33,7 @@ Review 当前 type table、domain-first package layout 与 file naming
 suffix、request/view name、method verb、field 与 parameter、boolean 与
 collection name、time/unit name、acronym casing、persistence name、test
 name。使用 `PlatformUserPasswordEntity`、
-`RoleStatusUpdateRequest`、`CapabilityRegistry`、`PluginManager`、
+`RoleStatusUpdateRequest`、`PermissionProvider`、`PluginManager`、
 `ClasspathPluginDiscovery`、`hasAvailableThread` 等当前示例。
 
 - [x] **Step 3：添加反例与 naming checklist**

@@ -397,13 +397,14 @@ ExecutorService 优雅关闭工具。
 
 | 常量 | 说明 |
 |------|------|
-| `WORKER` | — |
+| `WORKER` | 非守护线程，适合业务异步与需完整生命周期的任务 |
+| `BACKGROUND` | 守护线程，适合定时、超时、清理等后台任务 |
 
 ### 方法
 
 #### `daemon() → boolean`
-- **说明：** 非守护线程，适合业务异步与需完整生命周期的任务。 WORKER(false), /** 守护线程，适合定时、超时、清理等后台任务。 BACKGROUND(true); private final boolean daemon; ThreadExecutionRole(boolean daemon) { this.daemon = daemon; } /** 是否以守护线程运行。
-- **返回：** 后台角色为 true
+- **说明：** 返回该执行角色是否为守护线程。
+- **返回：** `BACKGROUND` 为 `true`，`WORKER` 为 `false`
 
 
 ## ThreadPoolBuilder

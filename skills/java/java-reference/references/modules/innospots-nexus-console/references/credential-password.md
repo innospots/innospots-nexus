@@ -53,14 +53,9 @@ nx_user_credential.credential_kind 取值；与 com.innospots.nexus.console.cred
 
 | 名称 | 类型 | 说明 |
 |------|------|------|
-| `Objects.requireNonNull(privateKey` | `String privateKey) implements PasswordDecryptor {
+| `privateKey` | `String` | Base64 编码的 PKCS#8 RSA 私钥；不可为 null |
 
-    public RsaPasswordDecryptor {` | — |
-| `encryptedPassword` | `"privateKey must not be null");
-    }
-
-    @Override
-    public String decrypt(String` | — |
+`decrypt(encryptedPassword)` 使用该私钥解密客户端提交的 RSA 密文。
 
 
 ## VerificationType

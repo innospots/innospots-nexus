@@ -35,7 +35,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("test")
 @TestPropertySource(properties = {
         "spring.datasource.url=" + PlatformIntegrationTestSupport.H2_URL_ACCESS_APPROVAL_E2E_IT,
-        "spring.config.import=" + PlatformIntegrationTestSupport.SPRING_CONFIG_IMPORT
+        "spring.config.import=" + PlatformIntegrationTestSupport.SPRING_CONFIG_IMPORT,
+        "nexus.console.registration.mode=APPROVAL",
+        "nexus.console.registration.otp-verification=EMAIL",
+        "nexus.console.registration.otp.debug-log-enabled=true"
 })
 class PlatformAccessRegistrationApprovalE2EIntegrationTest {
 

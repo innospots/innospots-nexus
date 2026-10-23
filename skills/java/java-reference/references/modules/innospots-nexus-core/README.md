@@ -293,6 +293,6 @@
 | 主题 | 模块 / 文档 |
 |-------|----------------|
 | 快照、`SessionContext`、`ResourceStore` SPI | `innospots-nexus-base` |
-| 插件运行时、Page DSL | `innospots-nexus-plugin` |
+| 插件运行时、`console@2` 贡献 | `innospots-nexus-plugin` |
 | 控制台 catalog 索引 | `innospots-nexus-console` |
 | 模块布局规则 | `java:project` → `module-layout.md` |

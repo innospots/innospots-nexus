@@ -14,8 +14,8 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
  * console@2 递归贡献节点（MODULE 或 MENU，由 {@link #moduleKey()} 与 {@link #children()} 推导）。
  *
  * <p>MODULE 可以是仅承载子节点的分组，也可以直接携带 {@link #entryPageKey()} 成为可访问叶子。
- * MENU 仅用于显式声明多页面模块下的菜单项；页面访问分组由 Page DSL {@code grantGroup}
- * 与 MODULE {@link #viewGroups()} 对齐（见 plugin-extensions-v2-design §6.8）。</p>
+ * MENU 仅用于显式声明多页面模块下的菜单项；页面访问分组由请求侧 {@code grantGroup}
+ * 与 MODULE {@link #viewGroups()} 对齐。</p>
  */
 public record ConsoleContributeNode(
         String moduleKey,

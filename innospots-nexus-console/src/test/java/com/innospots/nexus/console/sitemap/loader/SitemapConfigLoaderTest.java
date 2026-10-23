@@ -14,7 +14,7 @@ class SitemapConfigLoaderTest {
     @Test
     void failsWhenResourceMissing() {
         SitemapConfigLoader loader = new SitemapConfigLoader(
-                SitemapYamlConfig.ofResourcePath("ui-pages/missing-meta-sitemap.yaml"),
+                SitemapYamlConfig.ofResourcePath("console/missing-meta-sitemap.yaml"),
                 new SitemapYamlParser(),
                 SitemapConfigLoaderTest.class.getClassLoader());
 

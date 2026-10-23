@@ -6,6 +6,8 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import org.junit.jupiter.api.Test;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
+
 import com.innospots.nexus.portal.scope.domain.request.SelectProjectRequest;
 import com.innospots.nexus.portal.scope.domain.request.SelectWorkspaceRequest;
 
@@ -18,6 +20,10 @@ class TenantScopeEndpointContractsTest {
         assertThat(TenantScopeEndpoint.class.getAnnotation(Path.class).value()).isEqualTo("/tenant/scope");
         assertHttpMethod(TenantScopeEndpoint.class, "selectWorkspace", POST.class, SelectWorkspaceRequest.class);
         assertHttpMethod(TenantScopeEndpoint.class, "selectProject", POST.class, SelectProjectRequest.class);
+        assertOperationId(TenantScopeEndpoint.class, "selectWorkspace", "tenantScopeSelectWorkspace",
+                SelectWorkspaceRequest.class);
+        assertOperationId(TenantScopeEndpoint.class, "selectProject", "tenantScopeSelectProject",
+                SelectProjectRequest.class);
     }
 
     private static void assertHttpMethod(
@@ -28,5 +34,15 @@ class TenantScopeEndpointContractsTest {
     ) throws NoSuchMethodException {
         Method method = endpointType.getMethod(methodName, parameterTypes);
         assertThat(method.getAnnotation(httpAnnotation)).isNotNull();
+    }
+
+    private static void assertOperationId(
+            Class<?> endpointType,
+            String methodName,
+            String operationId,
+            Class<?>... parameterTypes
+    ) throws NoSuchMethodException {
+        Method method = endpointType.getMethod(methodName, parameterTypes);
+        assertThat(method.getAnnotation(Operation.class).operationId()).isEqualTo(operationId);
     }
 }

@@ -7,7 +7,8 @@
 
 ## 模块概览
 
-基于 `innospots-nexus-core` 的 classpath 插件运行时：发现与声明编译、安装与生命周期、Capability 路由、贡献解码/校验/快照，以及 `console@1` 贡献契约。Pactor Page DSL 1.0 的 Java 运行时与 REST 端点归属 **console**（`console.ui.spec`、`console.ui.endpoint`）；其 Java 快照表保留于本索引（历史文档布局），规范见 `innospots-nexus-plugin-ui-spec`。
+基于 `innospots-nexus-core` 的 classpath 插件运行时：发现与声明编译、安装与生命周期、
+Contribution 解码/校验/快照，以及 `console@2` 贡献契约。
 
 **能力一览：**
 
@@ -17,10 +18,8 @@
 | **发现** | `ClasspathPluginDiscovery`、`PluginCatalog`、`PluginDefinitionCompiler` |
 | **安装** | `PluginInstallationManager`、`PluginInstallationEntity`、状态机 |
 | **生命周期** | `PluginState`、`PluginRuntimeInfo`、事件总线 |
-| **Capability** | `CapabilityRouter`、`CapabilityTypeRegistry`、`ProviderRef` |
 | **贡献** | `PluginContribution*` 注册表、decoder/snapshotter |
-| **Console 贡献** | `ConsolePluginContributionHandler`、`console@1` 模型 |
-| **Page DSL** | YAML 解析、节点/数据源/动作/权限 DSL 类型（Java 包归属 console，快照保留于本索引） |
+| **Console 贡献** | `ConsoleContributions`、`ConsoleContributeNode`、`ConsolePluginContributionHandler` |
 | **资源作用域** | `ResourceScope`、`ResourceRegistration` |
 
 **不包含：** Spring/Quarkus 自动配置、控制台 catalog 表持久化（`nx_console_catalog_resource` 归属 **console**）、
@@ -30,8 +29,8 @@
 
 | 归属 plugin | 归属 console | 归属 core |
 |-------------|--------------|-----------|
-| 发现、安装、生命周期、Capability 路由 | catalog 索引持久化与同步 REST | 持久化基类、审计、`OwnershipEntity` |
-| `console@1` 声明、Handler、贡献快照 | `ConsoleCatalogSyncService`、**Pactor Page DSL 1.0** 解析/校验/加载与渲染端点 | Quartz、server、watcher |
+| 发现、安装、生命周期、Contribution 处理 | catalog 索引持久化与同步 REST | 持久化基类、审计、`OwnershipEntity` |
+| `console@2` 声明、Handler、贡献快照 | `ConsoleCatalogSyncService` | Quartz、server、watcher |
 | — | 权限运行时、导航组装 | `MetaResourceService` |
 
 Java 包名：`com.innospots.nexus.core.plugin.*`（兼容既有 import）。Maven artifact：`innospots-nexus-plugin`。
@@ -41,19 +40,19 @@ Java 包名：`com.innospots.nexus.core.plugin.*`（兼容既有 import）。Mav
 | 需求 | 使用 plugin 中的 | 不要放在 plugin 中 |
 |------|------------------|---------------------|
 | 新 classpath 插件 | 实现 `Plugin` + `PluginDefinition` | HTTP 端点、租户业务 |
-| 控制台 UI 贡献 | `console@1` + `ConsolePluginContributionHandler` | catalog 表 DAO（console） |
-| 页面 YAML | console 的 `PageDslLoader` / `JacksonPageDslParser`（快照见本索引 Page DSL 章节） | 前端渲染（产品侧） |
+| 控制台 entry 贡献 | `ConsoleContributions.entryPlugin(...)` + `ConsoleContributeNode` | catalog 表 DAO（console） |
 | 安装/启用/禁用 | `PluginInstallationManager`、`PluginRuntimeFactory` | console 管理 REST（委托 manager） |
-| 能力暴露 | `CapabilityRouter`、`CapabilityRegistration` | 业务域服务实现 |
+| Contribution 扩展 | `PluginContributionDecoder`、Handler、Snapshotter 注册表；`PluginContributionInventory` 统计扩展规模 | 业务域服务实现 |
 | 宿主启动 | `PluginHostBootstrap`、`NexusStartupTask` 注册 | Spring `@Configuration` |
 
 深度设计见模块内文档：`innospots-nexus-plugin/docs/plugin/design/`。
 手册：`innospots-nexus-plugin/docs/plugin/manual/README.md`。
 
-**Pactor Page DSL 1.0（页面 YAML）规范索引：**
-`skills/java/java-reference/references/modules/innospots-nexus-plugin-ui-spec/README.md`
-（与 `plugin.yaml` 分离；默认路径 `ui-pages/{domainKey}/{moduleKey}/{pageKey}.yaml`）。
-内置控制台 entry 与 `pageKey` 约定见 [console-entry-and-pages.md](../console-entry-and-pages.md)。
+配置接入、Entry 组装与 platform `ModuleDescriptors` / `EntryPluginDescriptor` 的
+实现规范见
+[`java:develop` → plugin-entry-and-configuration.md](../../../../java-develop/references/plugin-entry-and-configuration.md)。
+内置控制台 entry 与稳定 `entryPageKey` 约定见
+[console-entry-and-configuration.md](../../console-entry-and-configuration.md)。
 
 ## 技能用法（java:reference）
 
@@ -74,21 +73,6 @@ java:check      → mvn -pl innospots-nexus-plugin -am test
 | `PluginHostStartupTask` | `class` | 内置启动任务：启用插件子系统 |
 | `PluginStartupAttributes` | `class` | 插件子系统的启动属性键与辅助方法 |
 
-### 包 `capability`
-
-| 类 | 类型 | 说明 |
-|------|------|------|
-| `CapabilityKey` | `record` | Capability API 主版本的稳定逻辑身份 |
-| `CapabilityManager` | `interface` | 用于选择活动 Capability Provider 的类型安全读取边界 |
-| `CapabilityRegistration` | `record` | 插件启动成功后才发布的不可变 Provider 注册记录 |
-| `CapabilityRegistry` | `class` | 通过写时复制向并发读者提供完整不可变快照的 Capability 注册表 |
-| `CapabilityRouter` | `class` | 应用显式标签、配置默认路由和唯一 Provider 回退，不依赖注册顺序选择 Provider |
-| `CapabilityType` | `record` | Capability 逻辑身份与 Java API 之间的类型安全关联 |
-| `CapabilityTypeRegistry` | `class` | Capability 逻辑身份到 Java API 的映射表，不注册 Provider 实现类 |
-| `ProviderRef` | `record` | 插件内 Provider 的稳定身份，由所属插件标识和插件内唯一编号组成 |
-| `Tag` | `record` | 一个不可变的路由标签属性 |
-| `Tags` | `class` | 不可变且按名称排序的路由标签 |
-
 ### 包 `config`
 
 | 类 | 类型 | 说明 |
@@ -98,7 +82,6 @@ java:check      → mvn -pl innospots-nexus-plugin -am test
 | `ConfigSource` | `interface` | 宿主侧动态配置来源扩展点 |
 | `ConfigType` | `enum` | 插件配置支持的值类型 |
 | `ConfigurationManager` | `class` | 解析插件默认值、宿主配置、动态配置来源、环境变量、系统属性和运行时覆盖值 |
-| `DefaultPluginConfig` | `class` | 一个插件的不可变类型化配置快照 |
 | `PluginConfig` | `interface` | 限定在一个插件命名空间内的不可变已校验配置视图 |
 | `SecretValue` | `class` | 可关闭的内存密文包装器，其文本表示始终为遮罩值 |
 
@@ -106,9 +89,6 @@ java:check      → mvn -pl innospots-nexus-plugin -am test
 
 | 类 | 类型 | 说明 |
 |------|------|------|
-| `CapabilityProvider` | `interface` | 运行时管理的 Capability 实现所遵循的标记和生命周期契约 |
-| `CapabilityProviderContext` | `interface` | 面向一个已声明 Capability Provider 的专用插件上下文 |
-| `CapabilityProviderFactory` | `interface` | 无副作用地创建一个全新的、尚未初始化的 Capability Provider |
 | `Plugin` | `interface` | 用于声明插件及其插件级生命周期的唯一 classpath SPI |
 | `PluginContext` | `interface` | 一次插件启动周期内向插件暴露的只读运行时服务 |
 
@@ -122,158 +102,39 @@ java:check      → mvn -pl innospots-nexus-plugin -am test
 | `PluginContributionDecoderRegistry` | `class` | 宿主显式注册的通用 Contribution Decoder 表 |
 | `PluginContributionEntry` | `record` | 将 Contribution 与声明它的插件绑定，供 Handler 做全局校验 |
 | `PluginContributionHandler` | `interface` | 负责一种 Contribution 全局校验和事务准备的宿主处理器 |
+| `PluginContributionInventories` | `class` | 汇总 Contribution 的模块数与组件数，供发现与启动日志使用 |
+| `PluginContributionInventory` | `interface` | 各 Contribution 声明自身扩展规模的只读契约 |
 | `PluginContributionSnapshotter` | `interface` | 将 Contribution 转为不含类、Handler 或 Secret 的安全快照 |
 | `PluginContributionSnapshotterRegistry` | `class` | 宿主显式注册的安全 Contribution 快照器表 |
-| `PluginContributionType` | `record` | Contribution 的稳定类型标识，例如 console@1 |
+| `PluginContributionType` | `record` | Contribution 的稳定类型标识，例如 console@2 |
 | `PreparedPluginContribution` | `interface` | 一个已准备但尚未对外可见的 Contribution 事务句柄 |
 
 ### 包 `contribution.console`
 
 | 类 | 类型 | 说明 |
 |------|------|------|
-| `ConsoleContributionCatalog` | `class` | Console Contribution 的活动资源目录，不保存安装事实或 PluginState |
-| `ConsoleI18n` | `class` | Console 静态声明共用的本地化文本校验与防御性复制工具 |
-| `ConsoleModuleDeclaration` | `record` | 一个 Console 管理模块及其页面树、菜单树 |
-| `ConsolePluginContribution` | `record` | console@1 管理模块、页面和菜单的静态资源贡献 |
-| `ConsolePluginContributionDecoder` | `class` | 将 YAML 的通用 map 严格解码为不可变 console@1 声明 |
-| `ConsolePluginContributionHandler` | `class` | Console Contribution 的全局资源校验器和活动目录事务适配器 |
-| `ConsolePluginContributionSnapshotter` | `class` | 仅保存 Console 模块、页面、菜单稳定身份的安全快照器 |
-| `MenuDeclaration` | `record` | Console 菜单树节点；目录和页面入口互斥 |
-| `ReservedPluginResourceCatalog` | `class` | 由 Core 安全快照提供的历史插件资源身份保留目录 |
-| `UiSpecPageDeclaration` | `record` | 由 PageDsl page.id 唯一对应的页面身份声明 |
-
-### 包 `console.ui.spec`
-
-| 类 | 类型 | 说明 |
-|------|------|------|
-| `HttpRequest` | `class` | HTTP 数据源与动态 DSL 源使用的 HTTP 请求定义 |
-| `LifecycleConfig` | `class` | 以动作序列表达的页面生命周期钩子 |
-| `PageDsl` | `class` | Pactor Page DSL 1.0 的根文档 |
-| `PageDslPageRef` | `class` | 页面 DSL 复合 pageKey（`{domainKey}-{moduleKey}-{xxx}`）的编码与解析 |
-| `PageMeta` | `class` | 由 PageDsl 声明的页面标识与展示元数据 |
-| `PaginationConfig` | `class` | 返回分页结果的数据源的分页绑定配置 |
-| `RequiresConfig` | `class` | 由 PageDsl 声明的运行时与组件能力要求 |
-
-### 包 `console.ui.spec.action`
-
-| 类 | 类型 | 说明 |
-|------|------|------|
-| `ActionConfig` | `class` | 在运行时动作注册表中注册的一次动作调用 |
-| `ActionOrList` | `record` | 单个动作或有序动作序列 |
-
-### 包 `console.ui.spec.config`
-
-| 类 | 类型 | 说明 |
-|------|------|------|
-| `PageDslConfig` | `record` | 定位与解析 Pactor 页面 DSL 文件的不可变配置 |
-
-### 包 `console.ui.spec.datasource`
-
-| 类 | 类型 | 说明 |
-|------|------|------|
-| `ComputedDataSource` | `class` | 协议预留的计算数据源；运行时语义由实现定义 |
-| `DataSourceConfig` | `interface` | 命名页面数据源配置 |
-| `HttpDataSource` | `class` | HTTP 后端数据源；页面需直接调用具体 HTTP 端点时使用 |
-| `OptionMappingDataSource` | `class` | 具体数据源类型共享的选项映射与自动加载字段 |
-| `ResourceDataSource` | `class` | 协议预留的资源数据源；运行时语义由实现定义 |
-| `ServiceDataSource` | `class` | 服务注册表支持的数据源；业务页面首选，因 DSL 不直接绑定 HTTP 端点 |
-| `StaticDataSource` | `class` | 文档内静态数据源，用于枚举、固定配置与演示数据 |
-
-### 包 `console.ui.endpoint`
-
-| 类 | 类型 | 说明 |
-|------|------|------|
-| `DefaultPageDslEndpoint` | `class` | 默认 PageDslEndpoint 实现：`GET /api/public/pages/{pageKey}`（复合 pageKey、免鉴权），从 classpath 加载并通过过滤器链处理 |
-| `PageDslEndpoint` | `interface` | 加载与准备页面 DSL 文档的渲染时 API |
-
-### 包 `console.ui.domain.request`
-
-| 类 | 类型 | 说明 |
-|------|------|------|
-| `PageDslRenderRequest` | `class` | 页面 DSL 渲染路径参数：复合 pageKey（`{domainKey}-{moduleKey}-{xxx}`，`@BeanParam`） |
-
-### 包 `console.ui.spec.filter`
-
-| 类 | 类型 | 说明 |
-|------|------|------|
-| `PageDslFilter` | `interface` | 在渲染时准备阶段转换页面 DSL 文档 |
-| `PageDslFilterChain` | `class` | 有序的 PageDslFilter 实例链 |
-| `PageDslRenderContext` | `class` | 在 PageDslFilterChain 中传递的渲染时上下文 |
-| `StateBindingPageDslFilter` | `class` | 将请求参数绑定到页面 DSL 的 state 映射 |
-
-### 包 `console.ui.spec.jackson`
-
-| 类 | 类型 | 说明 |
-|------|------|------|
-| `ActionOrListDeserializer` | `class` | 将单个动作或动作数组反序列化为 ActionOrList |
-| `ActionOrListMapDeserializer` | `class` | 反序列化命名动作映射 |
-| `ChildrenDeserializer` | `class` | 从 YAML 数组或单个 com.innospots.nexus.console.ui.spec.node.DslSourceRef 对象反序列化 com.innospots.nexus.console.ui.spec… |
-| `DslNodeDeserializer` | `class` | 反序列化 DslNode 实例 |
-| `DslRenderableDeserializer` | `class` | 反序列化一个可渲染 DSL 片段 |
-| `DslRenderableMapDeserializer` | `class` | 反序列化命名可渲染组件映射 |
-| `EventMapDeserializer` | `class` | 反序列化组件事件映射 |
-| `ExpressionOrBooleanDeserializer` | `class` | 反序列化表达式字符串或布尔字面量 |
-
-### 包 `console.ui.spec.loader`
-
-| 类 | 类型 | 说明 |
-|------|------|------|
-| `ClasspathPageDslLoader` | `class` | 使用 com.innospots.nexus.console.ui.spec.config.PageDslConfig 从 classpath 加载页面 DSL 文档 |
-| `PageDslLoader` | `interface` | 从后端存储加载页面 DSL 文档 |
-
-### 包 `console.ui.spec.node`
-
-| 类 | 类型 | 说明 |
-|------|------|------|
-| `Children` | `record` | 以数组或单个动态源引用声明的子可渲染节点 |
-| `ComponentNode` | `class` | 以注册表 type 声明的内联组件节点 |
-| `ComponentReferenceNode` | `class` | 对 com.innospots.nexus.console.ui.spec.PageDsl 中声明的命名组件的引用 |
-| `DslHttpSource` | `class` | HTTP 支持的动态 DSL 源 |
-| `DslNode` | `interface` | 以 type 或 component 声明的 UI 树节点 |
-| `DslRenderable` | `interface` | 可渲染 DSL 片段：内联节点或动态源 |
-| `DslServiceSource` | `class` | 服务支持的动态 DSL 源 |
-| `DslSource` | `interface` | DslSourceRef 的动态 DSL 源定义 |
-| `DslSourceRef` | `class` | 从服务或 HTTP 源加载的动态 DSL 片段 |
-
-### 包 `console.ui.spec.parser`
-
-| 类 | 类型 | 说明 |
-|------|------|------|
-| `JacksonPageDslParser` | `class` | 基于 Jackson 的 Pactor 页面 DSL 严格 YAML 解析器 |
-| `PageDslParser` | `interface` | 解析与序列化 Pactor 页面 DSL 文档 |
-
-### 包 `console.ui.spec.permission`
-
-| 类 | 类型 | 说明 |
-|------|------|------|
-| `PermissionConfig` | `class` | 权限声明，支持单个代码、任一匹配代码数组或详细对象形式 |
-| `PermissionConfigDeserializer` | `class` | 从字符串、数组或对象形式反序列化 PermissionConfig |
-| `PermissionDenied` | `enum` | 未授予访问权限时的拒绝行为 |
-
-### 包 `console.ui.spec.validation`
-
-| 类 | 类型 | 说明 |
-|------|------|------|
-| `PageDslValidator` | `class` | 校验页面 DSL 文档中的结构与交叉引用规则 |
+| `ConsoleContributeNode` | `record` | `console@2` 递归 MODULE / MENU 节点与静态工厂 |
+| `ConsoleContributionCatalog` | `class` | 按插件保存已提交的活动 Contribution |
+| `ConsoleContributions` | `class` | `entryPlugin(...)` 与发现标签组装门面 |
+| `ConsolePermissionGroupDeclaration` | `record` | MODULE 页面访问/操作分组声明 |
+| `ConsolePluginContribution` | `record` | `console@2` MODULE/MENU 静态资源贡献 |
+| `ConsolePluginContributionDecoder` | `class` | 将 YAML 通用 map 严格解码为 `console@2` |
+| `ConsolePluginContributionHandler` | `class` | 全局资源校验和活动目录事务适配器 |
+| `ConsolePluginContributionSnapshotter` | `class` | 仅保存 MODULE/MENU 稳定身份的安全快照器 |
+| `ReservedPluginResourceCatalog` | `class` | 历史插件资源身份保留目录 |
 
 ### 包 `declaration`
 
 | 类 | 类型 | 说明 |
 |------|------|------|
-| `CapabilityContribution` | `record` | 将一个 Capability API、Provider 身份、路由标签和配置绑定到插件工厂 |
-| `CapabilityRequirement` | `record` | 声明插件所需的 Capability 及其路由标签 |
 | `JacksonPluginManifestParser` | `class` | 基于 Jackson YAML 的严格 DSL 解析器，限制输入大小、深度和 YAML 扩展语法 |
 | `PluginDefinition` | `record` | 已通过静态校验的不可变插件运行时定义 |
 | `PluginManifest` | `record` | YAML DSL 的纯数据模型 |
 | `PluginManifestParser` | `interface` | 将 UTF-8 YAML 文档解析为严格的 PluginManifest |
+| `ProviderRef` | `record` | Contribution 等扩展条目的稳定身份 |
 | `PluginSource` | `record` | 描述插件定义的声明来源和发现时间 |
-
-### 包 `dependency`
-
-| 类 | 类型 | 说明 |
-|------|------|------|
-| `DependencyResolution` | `record` | 一条 Capability 依赖声明的不可变诊断快照 |
-| `DependencyResolver` | `class` | 解析已声明且当前可用的 Capability 依赖，不绑定到具体 Provider 实例 |
+| `Tag` | `record` | 单个不可变标签属性 |
+| `Tags` | `class` | 不可变且按名称排序的标签集合 |
 
 ### 包 `discovery`
 
@@ -295,7 +156,7 @@ java:check      → mvn -pl innospots-nexus-plugin -am test
 | `PluginEvent` | `interface` | 进程内不可变插件运行观测事件的标记契约 |
 | `PluginEventBus` | `interface` | 限定在一个插件管理器内的同步尽力而为事件通道 |
 | `PluginFailedEvent` | `record` | 不包含异常对象或配置值的插件失败观测事件 |
-| `PluginStartedEvent` | `record` | 所有 Capability 对外可见后发布的插件激活观测事件 |
+| `PluginStartedEvent` | `record` | Contribution 提交与插件激活完成后发布的观测事件 |
 | `PluginStoppedEvent` | `record` | 资源释放后发布的插件停止观测事件 |
 | `Subscription` | `interface` | 可幂等取消的事件订阅句柄 |
 
@@ -357,9 +218,9 @@ java:check      → mvn -pl innospots-nexus-plugin -am test
 
 | 类 | 类型 | 说明 |
 |------|------|------|
-| `ManagedPlugin` | `class` | 持有一个插件实例、Provider、上下文、资源以及原子生命周期转换 |
-| `PluginAvailability` | `class` | Capability 与 Contribution 共用的原子可用性门控 |
-| `PluginAvailabilityIndex` | `class` | 将插件标识映射到运行时可用性门控，供 Capability 查询过滤未激活 Provider |
+| `ManagedPlugin` | `class` | 持有一个插件实例、上下文、Contribution 与资源，并执行原子生命周期转换 |
+| `PluginAvailability` | `class` | Contribution 提交后控制其是否对外可见的原子门控 |
+| `PluginAvailabilityIndex` | `class` | 将插件标识映射到插件可用性门控 |
 | `PluginRuntimeInfo` | `record` | 不可变且已脱敏的运行快照，不保留运行时对象或配置值 |
 | `PluginState` | `enum` | 对外暴露的插件粗粒度生命周期状态 |
 
@@ -375,8 +236,8 @@ java:check      → mvn -pl innospots-nexus-plugin -am test
 
 | 类 | 类型 | 说明 |
 |------|------|------|
-| `DefaultPluginManager` | `class` | 轻量级依赖感知插件运行时，使用一把串行生命周期锁，不持有全局单例状态 |
-| `PluginManager` | `interface` | 宿主侧插件运行时入口，负责依赖感知生命周期、诊断和 Capability 查询 |
+| `DefaultPluginManager` | `class` | 轻量级插件运行时，使用一把串行生命周期锁，不持有全局单例状态 |
+| `PluginManager` | `interface` | 宿主侧插件运行时入口，负责批量/单项启停、诊断和关闭 |
 | `PluginRuntimeConfig` | `record` | 一个独立插件管理器实例使用的不可变宿主配置 |
 
 ### 包 `status`
@@ -392,9 +253,8 @@ java:check      → mvn -pl innospots-nexus-plugin -am test
 |------|------|
 | 运行时与生命周期 | [runtime-lifecycle-overview.md](references/runtime-lifecycle-overview.md) |
 | 发现与安装 | [discovery-installation-overview.md](references/discovery-installation-overview.md) |
-| 贡献与 console@1 | [contribution-console-overview.md](references/contribution-console-overview.md) |
-| Page DSL | [page-dsl-overview.md](references/page-dsl-overview.md) |
-| Page DSL YAML 规范 | [innospots-nexus-plugin-ui-spec](../innospots-nexus-plugin-ui-spec/README.md) |
+| 贡献与 console@2 | [contribution-console-overview.md](references/contribution-console-overview.md) |
+| Entry 组装 | [contribution-console-entry-assembly.md](references/contribution-console-entry-assembly.md) |
 
 ## 相关模块
 
@@ -410,25 +270,11 @@ java:check      → mvn -pl innospots-nexus-plugin -am test
 | 包 | 参考 |
 |------|------|
 | `bootstrap` | [`references/bootstrap.md`](references/bootstrap.md) |
-| `capability` | [`references/capability.md`](references/capability.md) |
 | `config` | [`references/config.md`](references/config.md) |
 | `contract` | [`references/contract.md`](references/contract.md) |
 | `contribution` | [`references/contribution.md`](references/contribution.md) |
 | `contribution.console` | [`references/contribution-console.md`](references/contribution-console.md) |
-| `console.ui.spec` | [`references/contribution-console-ui-spec.md`](references/contribution-console-ui-spec.md) |
-| `console.ui.spec.action` | [`references/contribution-console-ui-spec-action.md`](references/contribution-console-ui-spec-action.md) |
-| `console.ui.spec.config` | [`references/contribution-console-ui-spec-config.md`](references/contribution-console-ui-spec-config.md) |
-| `console.ui.spec.datasource` | [`references/contribution-console-ui-spec-datasource.md`](references/contribution-console-ui-spec-datasource.md) |
-| `console.ui.endpoint` | [`references/contribution-console-ui-spec-endpoint.md`](references/contribution-console-ui-spec-endpoint.md) |
-| `console.ui.spec.filter` | [`references/contribution-console-ui-spec-filter.md`](references/contribution-console-ui-spec-filter.md) |
-| `console.ui.spec.jackson` | [`references/contribution-console-ui-spec-jackson.md`](references/contribution-console-ui-spec-jackson.md) |
-| `console.ui.spec.loader` | [`references/contribution-console-ui-spec-loader.md`](references/contribution-console-ui-spec-loader.md) |
-| `console.ui.spec.node` | [`references/contribution-console-ui-spec-node.md`](references/contribution-console-ui-spec-node.md) |
-| `console.ui.spec.parser` | [`references/contribution-console-ui-spec-parser.md`](references/contribution-console-ui-spec-parser.md) |
-| `console.ui.spec.permission` | [`references/contribution-console-ui-spec-permission.md`](references/contribution-console-ui-spec-permission.md) |
-| `console.ui.spec.validation` | [`references/contribution-console-ui-spec-validation.md`](references/contribution-console-ui-spec-validation.md) |
 | `declaration` | [`references/declaration.md`](references/declaration.md) |
-| `dependency` | [`references/dependency.md`](references/dependency.md) |
 | `discovery` | [`references/discovery.md`](references/discovery.md) |
 | `event` | [`references/event.md`](references/event.md) |
 | `installation.bootstrap` | [`references/installation-bootstrap.md`](references/installation-bootstrap.md) |

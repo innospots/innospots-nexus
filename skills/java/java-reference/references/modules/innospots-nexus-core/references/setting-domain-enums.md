@@ -17,7 +17,7 @@
 **类型：** enum
 
 设置值逻辑类型（持久化为 `nx_system_setting.value_type` 字符串码）。取值均存于
-`setting_value` 文本列；类型仅约束格式校验与 UI/管理端展示语义。
+`setting_value` 文本列；类型仅约束格式校验与管理端展示语义。
 
 ### 枚举常量
 

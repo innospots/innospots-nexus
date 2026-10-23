@@ -24,9 +24,9 @@ Innospots 使用 **MicroProfile OpenAPI 注解** + **SmallRye Maven 插件**在 
 
 | 文档 | 内容 |
 |------|------|
-| [`standards/openapi.md`](../../standards/openapi.md) | **权威**：注解与交付要求 |
-| [`references/openapi-contract.md`](../../references/openapi-contract.md) | 模板、检查清单 |
-| [`references/openapi-maven-plugin.md`](../../references/openapi-maven-plugin.md) | **smallrye-open-api-maven-plugin** 配置与对外模块 POM |
+| [`standards/openapi.md`](../../../standards/openapi.md) | **权威**：注解与交付要求 |
+| [`openapi-contract.md`](../../openapi-contract.md) | 模板、检查清单 |
+| [`openapi-maven-plugin.md`](../../openapi-maven-plugin.md) | **smallrye-open-api-maven-plugin** 配置与对外模块 POM |
 | [`api-contract.md`](../../api-contract.md) | REST 分层 + OpenAPI 链接 |
 
 ## 构建产物
@@ -41,7 +41,7 @@ Innospots 使用 **MicroProfile OpenAPI 注解** + **SmallRye Maven 插件**在 
 
 打包方式：console / platform 在 `process-classes` 直接写入上述路径；portal 经
 `target/generated/openapi` 再由 `maven-resources-plugin`（`package-openapi`）复制入 JAR。
-详见 [`openapi-maven-plugin.md`](../../references/openapi-maven-plugin.md)。
+详见 [`openapi-maven-plugin.md`](../../openapi-maven-plugin.md)。
 
 ## 类参考（关键类型）
 

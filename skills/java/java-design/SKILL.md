@@ -9,7 +9,7 @@ description: |
   Entity 设计、枚举设计、状态码、异常契约、接口设计、API 设计、DDD 边界、
   技术选型、设计评审。
 category: java
-version: 2.0.0
+version: 2.1.0
 ---
 
 # 架构、模块、接口与类设计
@@ -48,7 +48,7 @@ version: 2.0.0
 | **依赖规则** | 依赖方向单向、最小依赖；portal 与 platform 不得互依 |
 | **DDD 规则** | 领域概念与基础设施分离；ports and adapters |
 | **编码规范入口** | 契约细节回查 `skills/java/java-reference/standards/` |
-| **控制台 entry / Page DSL** | `console@1` 与 `pageKey` 见 [console-entry-and-pages.md](../java-reference/references/console-entry-and-pages.md) |
+| **控制台插件配置 / Entry** | `console@2`、`ModuleDescriptors` 与 `EntryPluginDescriptor` 见 [console-entry-and-configuration.md](../java-reference/references/console-entry-and-configuration.md) |
 | **REST OpenAPI** | 端点表含 `operationId` / Tag；条文 [openapi.md](../java-reference/standards/openapi.md)、[openapi-contract.md](../java-reference/references/openapi-contract.md) |
 | **Agent 工作流** | 新需求/新设计须先 grill-me；Java 任务按 AGENTS.md 技能路由表选用对应 `java:*` 技能 |
 
@@ -102,13 +102,14 @@ npx skills use "https://github.com/mattpocock/skills" --skill "grill-me"
 ## 设计评审门禁
 
 - [ ] 归属模块与业务域正确（含 plugin / console 边界），未与相邻域混同
-- [ ] 包结构领域优先（`role/endpoint`，禁止 `endpoint/role`）；大领域已划功能子模块；单包 ≤15 类（见 package-structure.md）
+- [ ] 包结构领域优先（`role/endpoint`，禁止 `endpoint/role`）；固定包含 `endpoint`/`dao`/`service`/`operator`/`domain`，`domain` 固定包含 `entity`/`vo`/`model`/`request`；技术模块较大或功能边界清晰时才拆功能子包；单包 ≤15 类
 - [ ] 若为 sample 扩展：交付面（core/console/inbound）与 `/platform/.../sample/...` 路径已定义（见 sample-extension-design.md）
 - [ ] 术语在端点/实体/DAO/数据库/测试之间一致
 - [ ] 运行时作用域（Session）与持久化范围（Entity 基类）已分别判定
 - [ ] 技术主键与稳定业务键已区分，稳定键的不可变性已定义
 - [ ] 分层依赖方向正确，无 operator→service、无 endpoint→dao
 - [ ] request/vo 是 record，集合已防御拷贝
+- [ ] 不可变 model 优先 record；可变 model/entity 未滥用 record
 - [ ] 接口引入有真实边界理由，非为 mock
 - [ ] 端点边界内聚，约 7 个方法已触发复审
 - [ ] 每个应用可见失败都有归属明确的状态码，且契约仅使用 `NexusException`（禁止 JDK/`RuntimeException` 等作为业务失败）

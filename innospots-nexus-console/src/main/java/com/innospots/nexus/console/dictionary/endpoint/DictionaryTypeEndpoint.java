@@ -35,8 +35,9 @@ import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 /**
  * 字典类型管理 REST 契约（字典项随类型详情与创建/更新请求体维护，无独立字典项资源）。
  *
- * <p>类级 {@code @Path} 由业务域实现（如 platform）绑定；实现类不必重复方法级
- * JAX-RS / OpenAPI 注解。</p>
+ * <p>类级 {@code @Path} 由业务域实现（如 platform）绑定。实现类必须重复方法级
+ * JAX-RS 与 OpenAPI 注解供构建期扫描；{@code @EndpointModule} / {@code @EndpointGrant}
+ * 仍只在本接口声明。</p>
  */
 @EndpointModule("dictionary")
 @Produces(MediaType.APPLICATION_JSON)

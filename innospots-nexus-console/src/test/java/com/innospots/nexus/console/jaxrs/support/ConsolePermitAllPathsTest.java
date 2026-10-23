@@ -32,7 +32,7 @@ class ConsolePermitAllPathsTest {
     void defaultPatternsPermitOpenApiAndPublicApi() {
         assertThat(matchesDefault("/openapi")).isTrue();
         assertThat(matchesDefault("/openapi/specs")).isTrue();
-        assertThat(matchesDefault("/api/public/pages/demo")).isTrue();
+        assertThat(matchesDefault("/api/public/page-access/verify")).isTrue();
         assertThat(matchesDefault("/api/d/platform/public/auth/login")).isTrue();
         assertThat(matchesDefault("/api/d/nexmux/public/health")).isTrue();
     }

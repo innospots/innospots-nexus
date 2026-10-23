@@ -3,7 +3,7 @@ package com.innospots.nexus.console.permission.domain.vo;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 /**
- * 显式同步扩展和 UiSpec 权限目录后的处理结果。
+ * 显式同步 console catalog 与 EndpointGrant 权限目录后的处理结果。
  *
  * @author Smars
  * @date 2026/09/13

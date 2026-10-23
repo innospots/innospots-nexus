@@ -1,151 +1,86 @@
 # 包 `lifecycle`
 
-## ManagedPlugin
+## `ManagedPlugin`
 
-**类型：** class
+**类型：** class（final）
 
-持有一个插件实例、Provider、上下文、资源以及原子生命周期转换。 生命周期转换串行执行，但未知插件代码不会在本对象的生命周期锁内执行。
+持有一个插件实例、配置供应器、事件总线、资源作用域和已准备 Contribution，执行
+`DESCRIBED → STARTING → ACTIVE → STOPPING → STOPPED/FAILED` 生命周期转换。
 
-### 方法
+### 构造方法
 
-#### `start() → void`
-- **说明：** 为一个已发现插件创建生命周期管理包装器。
-- **参数：**
-  - `discovered` — 已发现插件
-  - `config` — 每次启动使用的配置快照
-  - `registry` — Capability 注册表
-  - `eventBus` — 插件事件总线
-  - `configSupplier` — 插件共享配置解析器
-  - `providerConfigSupplier` — Provider 私有配置解析器
-  - `contributionHandlers` — 按类型索引的 Contribution Handler 列表
-
-#### `stop() → void`
-- **说明：** 原子撤出 Capability，再销毁 Provider、插件状态和资源。 / public void stop()
-
-#### `waiting(Map<CapabilityKey, DependencyResolution> dependencies) → void`
-- **说明：** 将插件标记为等待所需 Capability。
-- **参数：**
-  - `dependencies` — 当前声明快照的依赖诊断
-
-#### `dependencies(Map<CapabilityKey, DependencyResolution> dependencies) → void`
-- **说明：** 更新依赖诊断，但不改变生命周期状态。
-- **参数：**
-  - `dependencies` — 当前声明快照的依赖诊断
-
-#### `info() → PluginRuntimeInfo`
-- **说明：** 返回不含运行时对象和配置值的不可变运行快照。
-- **返回：** 当前插件运行诊断
-
-#### `availability() → PluginAvailability`
-- **说明：** 返回 Capability 与 Contribution 共用的可用性门控。
-- **返回：** 插件可用性门控
-
-#### `definition() → PluginDefinition`
-- **说明：** 返回不可变的插件定义快照。
-- **返回：** 发现时缓存的插件定义
-
-
-## PluginAvailability
-
-**类型：** class
-
-Capability 与 Contribution 共用的原子可用性门控。
+#### `ManagedPlugin(DiscoveredPlugin discovered, Supplier<PluginConfig> configSupplier, DefaultPluginEventBus eventBus, List<PluginContributionHandler<?>> contributionHandlers)`
 
 ### 方法
 
-#### `isActive() → boolean`
-- **说明：** 返回当前是否允许外部访问插件资源。
-- **返回：** 门控已激活时 true
+- `start()`：解析配置、准备全部 Contribution、调用插件 `initialize/start`、按顺序
+  `stage/commit`，最后激活可用性门控并发布 `PluginStartedEvent`。
+- `stop()`：先关闭可用性门控，再逆序回滚/关闭 Contribution、调用插件 `stop`、关闭资源作用域。
+- `info() → PluginRuntimeInfo`：返回脱敏运行快照。
+- `availability() → PluginAvailability`：返回 Contribution 可见性门控。
+- `definition() → PluginDefinition`：返回发现时缓存的不可变定义。
 
-#### `generation() → long`
-- **说明：** 返回当前资源代次。
-- **返回：** 最近一次成功激活后的代次；未激活时为 0
+启动与停止失败会执行回滚并记录脱敏错误码，不把异常对象写入运行快照。
 
-#### `activate() → synchronized long`
-- **说明：** 将本次已提交资源切换为可见。 重复激活保持幂等，不递增代次。
-- **返回：** 激活后的资源代次
+## `PluginAvailability`
 
-#### `deactivate() → synchronized void`
-- **说明：** 关闭门控并使旧代次失效。 重复关闭保持幂等，不递减代次。 / public synchronized void deactivate()
+**类型：** class（final）
 
-#### `requireActive() → void`
-- **说明：** 校验当前门控仍然有效。 / public void requireActive()
+Contribution 对外可见性的原子门控。
 
+| 方法 | 说明 |
+|------|------|
+| `isActive() → boolean` | 当前是否允许外部访问 |
+| `generation() → long` | 最近成功激活代次 |
+| `activate() → long` | 幂等激活并返回代次 |
+| `deactivate()` | 幂等失活 |
+| `requireActive()` | 未激活时抛 `NexusException`（`CAPABILITY_NOT_FOUND`） |
 
-## PluginAvailabilityIndex
+## `PluginAvailabilityIndex`
 
-**类型：** class
+**类型：** class（final）
 
-将插件标识映射到运行时可用性门控，供 Capability 查询过滤未激活 Provider。
+维护 pluginId → `PluginAvailability`，供宿主查询插件资源是否可见。
 
-### 方法
+| 方法 | 说明 |
+|------|------|
+| `register(String pluginId, PluginAvailability availability)` | 登记；重复登记失败 |
+| `unregister(String pluginId)` | 移除 |
+| `isVisible(String pluginId) → boolean` | 门控已激活时返回 `true` |
 
-#### `register(String pluginId, PluginAvailability availability) → void`
-- **说明：** 登记一个插件的可用性门控。
-- **参数：**
-  - `pluginId` — 稳定的插件标识
-  - `availability` — 插件运行时门控
-
-#### `unregister(String pluginId) → void`
-- **说明：** 移除一个插件的可用性门控。
-- **参数：**
-  - `pluginId` — 稳定的插件标识
-
-#### `isVisible(String pluginId) → boolean`
-- **说明：** 判断指定插件的 Capability 是否对外可见。
-- **参数：**
-  - `pluginId` — 稳定的插件标识
-- **返回：** 门控已激活时 true；未登记或门控未激活时 false
-
-
-## PluginRuntimeInfo
+## `PluginRuntimeInfo`
 
 **类型：** record
 
-不可变且已脱敏的运行快照，不保留运行时对象或配置值。
-
-### 组件（record）
-
-| 名称 | 类型 | 说明 |
+| 组件 | 类型 | 说明 |
 |------|------|------|
-| `id` | `String` | — |
-| `name` | `String` | — |
-| `version` | `String` | — |
-| `implementationClass` | `String` | — |
-| `state` | `PluginState` | — |
-| `phase` | `String` | — |
-| `tags` | `Tags` | — |
-| `providedCapabilities` | `List<CapabilityKey>` | — |
-| `requirements` | `List<CapabilityRequirement>` | — |
-| `dependencies` | `Map<CapabilityKey, DependencyResolution>` | — |
-| `discoveredAt` | `Instant` | — |
-| `startedAt` | `Instant` | — |
-| `lastError` | `String` | — |
+| `id` | `String` | 插件标识 |
+| `name` | `String` | 默认语言显示名称 |
+| `version` | `String` | 插件版本 |
+| `implementationClass` | `String` | `Plugin` 实现类名 |
+| `state` | `PluginState` | 生命周期状态 |
+| `phase` | `String` | 当前/最近失败阶段 |
+| `tags` | `Tags` | 插件标签 |
+| `discoveredAt` | `Instant` | 发现时间 |
+| `startedAt` | `Instant` | 最近启动时间 |
+| `lastError` | `String` | 最近脱敏错误码 |
 
-### 方法
+另提供 `pluginId()` 与 `displayName()` 别名。
 
-#### `pluginId() → String`
-- **说明：** 返回语义更明确的插件稳定身份别名。 public String pluginId()
-
-#### `displayName() → String`
-- **说明：** 返回插件展示名称别名。 public String displayName()
-
-
-## PluginState
+## `PluginState`
 
 **类型：** enum
 
-对外暴露的插件粗粒度生命周期状态。
-
-### 枚举常量
+对外暴露的插件粗粒度生命周期状态。当前 `DefaultPluginManager` 不实现依赖等待调度；
+正常启动路径从 `DESCRIBED` 进入。
 
 | 常量 | 说明 |
 |------|------|
-| `DISCOVERED` | — |
-| `DESCRIBED` | — |
-| `WAITING` | — |
-| `STARTING` | — |
-| `ACTIVE` | — |
-| `STOPPING` | — |
-| `STOPPED` | — |
-| `FAILED` | — |
+| `DISCOVERED` | 已在 Catalog 中发现，尚未完成定义编译或预检 |
+| `DESCRIBED` | 定义已编译并通过预检，尚未进入启动队列 |
+| `WAITING` | 等待依赖满足或宿主允许启动 |
+| `STARTING` | 正在执行启动事务 |
+| `ACTIVE` | 启动成功且对外可用 |
+| `STOPPING` | 正在执行停止事务 |
+| `STOPPED` | 已停止且资源作用域已释放 |
+| `FAILED` | 启动或停止失败；是否重试由上层策略决定 |

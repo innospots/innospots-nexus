@@ -51,6 +51,7 @@
 | `TIME` | — |
 | `DATE_TIME` | — |
 | `OBJECT` | — |
+| `ARRAY` | 对象数组；`convert` 对非数组输入原样返回 |
 
 ### 方法
 

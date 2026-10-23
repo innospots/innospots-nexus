@@ -116,6 +116,7 @@
 | `STARTING` | — |
 | `READY` | — |
 | `PENDING` | — |
+| `PAUSED` | 暂停中 |
 | `RUNNING` | — |
 | `STOPPING` | — |
 | `STOPPED` | — |

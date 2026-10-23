@@ -1753,8 +1753,7 @@ V1 实现期间：
 后续 Console 管理支持另行设计：Console 保存管理员启停意图，通过 Core PluginManager 执行操作，
 读取 PluginRuntimeInfo。运行状态事实仍由 Core 持有，Console 不实现第二套发现、依赖解析或状态机。
 
-现有 `extension-design.md` 描述 Console 页面扩展，不作为本通用插件内核实现规范。本方案不提前删除
-该文档或代码。
+旧 Console 页面扩展设计与运行时已删除；本归档仅保留通用插件内核的迁移背景，不作为现行实现规范。
 
 ## 22. V1 测试策略
 

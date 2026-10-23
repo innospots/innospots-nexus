@@ -33,6 +33,13 @@ class PlatformPublicAuthEndpointContractsTest {
                         .getAnnotation(Operation.class)
                         .operationId())
                 .isEqualTo("authLogin");
+        assertThat(PlatformPublicAuthEndpoint.class.getMethod("login", AuthLoginRequest.class)
+                        .getAnnotation(Operation.class)
+                        .operationId())
+                .isEqualTo("platformAuthLogin");
+        assertThat(PlatformPublicAuthEndpoint.class.getMethod("login", AuthLoginRequest.class)
+                        .getAnnotation(POST.class))
+                .isNotNull();
         assertThat(PublicAuthEndpoint.class.getMethod("login", AuthLoginRequest.class)
                         .getAnnotation(POST.class))
                 .isNotNull();

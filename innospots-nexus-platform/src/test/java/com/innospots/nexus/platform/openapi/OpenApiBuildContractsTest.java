@@ -39,6 +39,8 @@ class OpenApiBuildContractsTest {
         assertThat(yaml).doesNotContain("operationId: platformPublicRegistrationSettingsGet");
         assertThat(yaml).doesNotContain(PlatformConstant.AUTH_PATH + "/onboarding");
         assertThat(yaml).contains("operationId: platformAuthLogin");
+        assertThat(yaml).contains("$ref: \"#/components/schemas/AuthLoginRequest\"");
+        assertThat(yaml).contains("AuthLoginRequest:");
         assertThat(yaml).contains("operationId: platformTenantPage");
         assertThat(yaml).contains("operationId: platformTenantCreate");
         assertThat(yaml).contains("operationId: platformTenantEnterpriseUpsert");

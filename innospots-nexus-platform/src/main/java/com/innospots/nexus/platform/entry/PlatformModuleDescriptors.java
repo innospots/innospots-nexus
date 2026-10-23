@@ -3,7 +3,6 @@ package com.innospots.nexus.platform.entry;
 import java.util.List;
 
 import com.innospots.nexus.base.i18n.I18nObject;
-import com.innospots.nexus.console.ui.spec.PageDslPageRef;
 import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributeNode;
 
 /**
@@ -108,7 +107,11 @@ public final class PlatformModuleDescriptors {
                 orderIndex,
                 displayName,
                 description,
-                PageDslPageRef.encode(DOMAIN, moduleKey, pageSuffix),
+                entryPageKey(moduleKey, pageSuffix),
                 icon);
+    }
+
+    private static String entryPageKey(String moduleKey, String pageSuffix) {
+        return DOMAIN + "-" + moduleKey + "-" + pageSuffix;
     }
 }

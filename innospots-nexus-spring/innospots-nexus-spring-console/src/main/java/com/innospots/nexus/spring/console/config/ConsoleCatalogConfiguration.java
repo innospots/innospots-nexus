@@ -16,16 +16,10 @@ import com.innospots.nexus.console.sitemap.loader.SitemapConfigLoader;
 import com.innospots.nexus.console.sitemap.parser.SitemapYamlParser;
 import com.innospots.nexus.console.sitemap.service.SitemapService;
 import com.innospots.nexus.console.sitemap.config.SitemapYamlConfig;
-import com.innospots.nexus.console.ui.endpoint.DefaultPageDslEndpoint;
-import com.innospots.nexus.console.ui.spec.filter.PageDslFilterChain;
 import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributionCatalog;
-import com.innospots.nexus.console.ui.spec.config.PageDslConfig;
-import com.innospots.nexus.console.ui.spec.loader.ClasspathPageDslLoader;
-import com.innospots.nexus.console.ui.spec.loader.PageDslLoader;
-import com.innospots.nexus.console.ui.spec.parser.JacksonPageDslParser;
 
 /**
- * {@code console.catalog} 域 Spring 装配：插件贡献目录索引与 Page DSL 加载。
+ * {@code console.catalog} 域 Spring 装配：插件贡献目录索引。
  *
  * @author Smars
  * @date 2026/09/23
@@ -36,17 +30,6 @@ import com.innospots.nexus.console.ui.spec.parser.JacksonPageDslParser;
         annotationClass = Mapper.class,
         sqlSessionFactoryRef = "sqlSessionFactory")
 public class ConsoleCatalogConfiguration {
-
-    @Bean
-    PageDslLoader pageDslLoader() {
-        PageDslConfig config = PageDslConfig.defaults();
-        return new ClasspathPageDslLoader(config, new JacksonPageDslParser(config), null);
-    }
-
-    @Bean
-    DefaultPageDslEndpoint defaultPageDslEndpoint(PageDslLoader pageDslLoader) {
-        return new DefaultPageDslEndpoint(pageDslLoader, PageDslFilterChain.create());
-    }
 
     @Bean
     SitemapConfigLoader sitemapConfigLoader() {

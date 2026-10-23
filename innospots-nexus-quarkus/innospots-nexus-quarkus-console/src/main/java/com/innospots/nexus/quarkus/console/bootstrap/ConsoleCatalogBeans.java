@@ -8,12 +8,6 @@ import com.innospots.nexus.console.sitemap.config.SitemapYamlConfig;
 import com.innospots.nexus.console.sitemap.loader.SitemapConfigLoader;
 import com.innospots.nexus.console.sitemap.parser.SitemapYamlParser;
 import com.innospots.nexus.console.sitemap.service.SitemapService;
-import com.innospots.nexus.console.ui.endpoint.DefaultPageDslEndpoint;
-import com.innospots.nexus.console.ui.spec.config.PageDslConfig;
-import com.innospots.nexus.console.ui.spec.filter.PageDslFilterChain;
-import com.innospots.nexus.console.ui.spec.loader.ClasspathPageDslLoader;
-import com.innospots.nexus.console.ui.spec.loader.PageDslLoader;
-import com.innospots.nexus.console.ui.spec.parser.JacksonPageDslParser;
 import com.innospots.nexus.console.catalog.bootstrap.ConsoleCatalogSyncStartupTask;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogService;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogSyncService;
@@ -39,25 +33,6 @@ import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributionC
  */
 @ApplicationScoped
 public class ConsoleCatalogBeans {
-
-    /**
-     * PageDsl 加载器 Bean。
-     */
-    @Produces
-    @Singleton
-    PageDslLoader pageDslLoader() {
-        PageDslConfig config = PageDslConfig.defaults();
-        return new ClasspathPageDslLoader(config, new JacksonPageDslParser(config), null);
-    }
-
-    /**
-     * 页面 DSL 加载、渲染与 REST 资源。
-     */
-    @Produces
-    @Singleton
-    DefaultPageDslEndpoint defaultPageDslEndpoint(PageDslLoader pageDslLoader) {
-        return new DefaultPageDslEndpoint(pageDslLoader, PageDslFilterChain.create());
-    }
 
     /**
      * Sitemap YAML 配置加载器。
@@ -87,8 +62,7 @@ public class ConsoleCatalogBeans {
     @Singleton
     ConsoleCatalogSyncService permissionResourceSyncService(
             ConsoleCatalogResourceDao resourceDao,
-            ConsoleContributionCatalog contributionCatalog,
-            PageDslLoader pageDslLoader) {
+            ConsoleContributionCatalog contributionCatalog) {
         return new ConsoleCatalogSyncService(resourceDao, contributionCatalog);
     }
 

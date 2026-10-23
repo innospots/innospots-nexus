@@ -36,8 +36,8 @@
 ### 文件命名示例
 
 ```text
-permission-design.md
 2026-09-04-console-catalog-and-navigation-design.md   # 带日期的规格名
+service-contract-design.md                              # 模块内设计
 0003-use-event-bus-for-in-process-events.md             # ADR
 ```
 
@@ -50,7 +50,7 @@ permission-design.md
 | **平台级 / 跨多模块** | `docs/design/` | `docs/design/multi-tenant-governance-design.md` |
 | **带日期的规格迭代**（superpowers 流程） | `docs/superpowers/specs/` | `docs/superpowers/specs/2026-09-04-console-catalog-and-navigation-design.md` |
 | **单项架构决策（ADR）** | `docs/design/adr/` | `docs/design/adr/0002-portal-platform-isolation.md` |
-| **单 Maven 模块、单域或子系统** | `<artifact-id>/docs/` | `innospots-nexus-portal/docs/permission-design.md` |
+| **单 Maven 模块、单域或子系统** | `<artifact-id>/docs/` | `innospots-nexus-service/docs/service-contract-design.md` |
 | **模块内子系统（较深）** | `<artifact-id>/docs/<area>/design/` | `innospots-nexus-plugin/docs/plugin/design/plugin-runtime-design.md` |
 
 **选择规则：**
@@ -103,7 +103,7 @@ permission-design.md
 
 ### 5.2 包结构
 
-- 完整包路径（领域优先或 sample 交付面×领域）；功能子模块列表
+- 完整包路径（领域优先或 sample 交付面×领域）；技术模块与按需功能子包列表
 - 单包 ≤15 类；过大时的拆分计划
 - 与相邻域交互（调用 / 事件 / 禁止依赖）
 
@@ -199,7 +199,7 @@ service 可依赖 operator/其他 service/dao 且无循环）；禁止项（oper
 未决项与决策截止；已闭合项移到「已确认决策」。
 ```
 
-已有文档（如 `permission-design.md`）可保留自有章节编号，但须**覆盖上表信息面**，
+已有设计文档可保留自有章节编号，但须**覆盖上表信息面**，
 develop 不得因章节标题不同而遗漏契约。
 
 ---

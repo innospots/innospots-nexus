@@ -15,18 +15,8 @@ OTP 明文码投递请求；adapter 订阅后按 {@link #channel} 与 {@link #te
 | `channel` | `OtpChannel` | 下发通道，影响 {@link #eventType()} 与投递实现选择 |
 | `destination` | `String` | 已规范化的投递地址（与库表 destination 一致） |
 | `plaintextCode` | `String` | 一次性数字验证码明文 |
-| `templateId` | `String` | 稳定模板键，形如 credential.otp.. |
-| `eventType(` | `String locale
-) implements DomainEvent {
-
-    /**
-     * 按通道区分的类型标识，供 {@link com.innospots.nexus.base.events.EventHandler} 过滤。
-     * <p>例如邮箱为 {@code credential.otp.send.email}。</p>
-     *
-     * @return 小写通道后缀的事件类型名
-     */
-    @Override
-    public String` | — |
+| `templateId` | `String` | 稳定模板键，形如 `credential.otp.<purpose>.<channel>` |
+| `locale` | `String` | 模板语言标签；`null` 表示使用默认语言 |
 
 ### 方法
 

@@ -11,7 +11,7 @@
 | 名称 | 类型 | 说明 |
 |------|------|------|
 | `subjectType` | `RoleBindingSubjectType` | 主体类型 |
-| `subjectIds` | `List<String>` | subject 标识符s to bind |
+| `subjectIds` | `List<String>` | 要绑定的主体标识符集合 |
 
 
 ## RoleBindingPageRequest
@@ -25,7 +25,7 @@
 
 **类型：** record
 
-创建由平台、租户或工作区节点拥有的角色的请求。
+创建角色请求；不接收归属字段，由业务域 service 固化 `ownerType` 与 `securityRealm`。
 
 ### 组件（record）
 
@@ -33,11 +33,7 @@
 |------|------|------|
 | `roleName` | `String` | 显示名称 |
 | `roleCode` | `String` | 归属范围内唯一的稳定编码 |
-| `ownerType` | `RoleOwnerType` | 归属层级 |
-| `ownerId` | `String` | owner 标识符; empty for PLATFORM |
-| `securityRealm` | `SecurityRealm` | PLATFORM 或 TENANT |
 | `description` | `String` | 可选 role 描述 |
-| `sortOrder` | `Integer` | 显示顺序 |
 
 
 ## RolePageRequest

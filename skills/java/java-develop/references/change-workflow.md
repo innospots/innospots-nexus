@@ -171,7 +171,7 @@
 |------|------|
 | 重命名类型/方法 | 若属 public 兼容面需迁移方案；遗留坏名不应仅因视觉一致而保留 |
 | 提取方法/类型 | 新类型需符合命名职责后缀表 |
-| 调整包结构 | 领域优先 + 功能子模块；禁止 service 堆积；单包 ≤15 类；见 [package-structure.md](../../java-reference/references/package-structure.md)；禁止 `impl`/`common`/`misc`/`util` |
+| 调整包结构 | 领域优先 → 技术模块 → 按需功能子包；禁止 service 堆积；单包 ≤15 类；见 [package-structure.md](../../java-reference/references/package-structure.md)；禁止 `impl`/`common`/`misc`/`util` |
 | 消除重复 | 判定重复是同一概念还是偶然相似 |
 | 拆分类 | 端点约 7 个方法触发边界复审 |
 | 引入接口 | 仅在有真实边界理由时 |

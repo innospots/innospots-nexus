@@ -11,7 +11,7 @@
 | 读者 | 目标 |
 |------|------|
 | 业务功能开发者 | 在 portal / platform 中扩展管理能力与租户侧业务 |
-| 插件开发者 | 通过 Capability 与 `console@1` 贡献扩展控制台 |
+| 插件开发者 | 通过插件配置与 `console@2` 贡献扩展控制台 |
 | 集成与宿主开发者 | 在 Spring / Quarkus 进程中装配框架与插件 |
 | 使用 Cursor / AI Agent 的开发者 | 按技能路由完成规范一致的设计与交付 |
 
@@ -32,7 +32,7 @@ innospots-nexus-base          共享契约、工具、Snapshot（middleware-free
         ↓
 innospots-nexus-core          持久化基类、Quartz、资源元数据、平台基础设施
         ↓
-innospots-nexus-plugin        插件运行时、Contribution、Page DSL
+innospots-nexus-plugin        插件运行时、Contribution、配置与 Entry 组装
         ↓
 innospots-nexus-console       管理台 REST 契约、VO、Catalog 索引
         ↓
@@ -58,15 +58,17 @@ Tenant → Workspace（共享资源）→ Project（业务隔离）
 
 ### 2.4 包结构：领域优先
 
-业务代码 **先按领域分包，再按职责分包**：
+业务代码 **先按领域分包，再按技术模块分包；技术模块较大时再按功能拆子包**：
 
 ```text
 com.innospots.nexus.portal.<domain>/
-  ├── endpoint / dao / domain / converter / operator / service（按需）
-  └── <subcapability>/   # 单包超过约 15 类时再分子能力包
+  ├── endpoint / dao / service / operator / domain
+  ├── domain/{entity,vo,model,request}
+  └── <technology>/<function>/   # 单包超过约 15 类且功能边界清晰时才拆
 ```
 
-禁止 `endpoint/role`、`dao/role` 这类技术层优先结构；禁止在模块根用单个 `service` 包承载全部业务。
+禁止 `endpoint/role`、`dao/role` 这类技术层优先结构；禁止在领域根预建功能包；
+禁止在模块根用单个 `service` 包承载全部业务。不可变 request/vo/model 优先使用 record。
 
 详见 [package-structure.md](../skills/java/java-reference/references/package-structure.md)。
 
@@ -82,7 +84,7 @@ com.innospots.nexus.portal.<domain>/
 | 租户开通、企业主体、平台审计 | `innospots-nexus-platform` | 通常 **否** |
 | 管理台 REST 路径与 VO 契约 | `innospots-nexus-console`（interface + VO） | 否 |
 | 管理台业务实现与工作流 | `portal` / `platform` | 否 |
-| 插件能力、控制台页面贡献 | 独立插件 JAR + `innospots-nexus-plugin` 运行时 | 常为 **是**（插件 artifact） |
+| 插件配置、`console@2` 目录贡献 | 独立插件 JAR + `innospots-nexus-plugin` 运行时 | 常为 **是**（插件 artifact） |
 | 客户专属集成、外部系统对接 | 新建 `adapter` 模块 | **是** |
 | 同进程组装 portal + platform 的可运行服务 | `innospots-nexus-spring-*` / Quarkus 对应模块 | 按需 |
 | 统一 HTTP/流/WS 治理（权限、审计、追踪） | 业务模块依赖 `innospots-nexus-service` 中立库 | 否 |
@@ -166,13 +168,15 @@ Operator 不得依赖 service 或其他 operator。DAO 单表、无 join、无 M
 
 | 步骤 | 说明 | 文档 |
 |------|------|------|
-| 定义 Capability API 并实现 Provider | 共享契约 + 插件实现 | [02-development-workflow.md](../innospots-nexus-plugin/docs/plugin/manual/02-development-workflow.md) |
+| 声明配置 schema 与插件定义 | `ConfigDefinition` + `PluginDefinition` | [02-development-workflow.md](../innospots-nexus-plugin/docs/plugin/manual/02-development-workflow.md) |
 | 选择声明方式 | Java SPI 或 `META-INF/nexus/plugin.yaml` | [03-java-plugin.md](../innospots-nexus-plugin/docs/plugin/manual/03-java-plugin.md)、[04-yaml-plugin.md](../innospots-nexus-plugin/docs/plugin/manual/04-yaml-plugin.md) |
 | 配置运行时参数 | schema + 宿主配置合并 | [08-configuration.md](../innospots-nexus-plugin/docs/plugin/manual/08-configuration.md) |
-| 控制台贡献 | `console@1` 页面与菜单 | [07-exposure-and-contribution.md](../innospots-nexus-plugin/docs/plugin/manual/07-exposure-and-contribution.md) |
-| 宿主装配 | Spring / Quarkus 注册 Decoder、Handler | [09-host-assembly.md](../innospots-nexus-plugin/docs/plugin/manual/09-host-assembly.md)、[10-host-extension-guide.md](../innospots-nexus-plugin/docs/plugin/manual/10-host-extension-guide.md) |
+| 控制台贡献 | `console@2` MODULE/MENU 与 `entryPageKey` | [07-exposure-and-contribution.md](../innospots-nexus-plugin/docs/plugin/manual/07-exposure-and-contribution.md) |
+| 多模块聚合 | `XxxModuleDescriptors` + `XxxEntryPluginDescriptor` | [03-java-plugin.md](../innospots-nexus-plugin/docs/plugin/manual/03-java-plugin.md) |
+| 宿主装配 | Spring / Quarkus 注册 Decoder、Handler、DAO | [09-host-assembly.md](../innospots-nexus-plugin/docs/plugin/manual/09-host-assembly.md)、[10-host-extension-guide.md](../innospots-nexus-plugin/docs/plugin/manual/10-host-extension-guide.md) |
 
-**V1 能力边界：** 支持 Java SPI、YAML 声明、`console@1`、Tags 路由；不支持远程 bind、动态 JAR 安装、独立 ClassLoader。
+**当前能力边界：** 支持 Java SPI、YAML 声明、配置 schema、`console@2` 与 Tags 发现；
+不支持 Capability/Provider 路由、跨插件依赖、远程 bind、动态 JAR 安装或独立 ClassLoader。
 
 ### 5.4 使用统一服务框架（service）
 
@@ -307,7 +311,7 @@ npx skills use "https://github.com/mattpocock/skills" --skill "grill-me"
 
 # 示例 3：插件
 实现一个 YAML 插件，提供 message.sender capability，
-并按 console@1 贡献一个设置页。参考 plugin manual 02–07。
+并按 console@2 贡献一个设置页。参考 plugin manual 02–07。
 
 # 示例 4：规范咨询
 DAO 层能否用 @Transactional？请只查 java:reference 并引用 standards 原文。
@@ -353,7 +357,7 @@ DAO 层能否用 @Transactional？请只查 java:reference 并引用 standards �
 | 编码规范原文 | [skills/java/java-reference/standards/](../skills/java/java-reference/standards/) |
 | 插件手册 | [innospots-nexus-plugin/docs/plugin/manual/](../innospots-nexus-plugin/docs/plugin/manual/) |
 | 服务框架 | [innospots-nexus-service/docs/](../innospots-nexus-service/docs/) |
-| 权限设计（portal） | [innospots-nexus-portal/docs/permission-design.md](../innospots-nexus-portal/docs/permission-design.md) |
+| Console catalog 与权限 | [2026-09-04-console-catalog-and-navigation-design.md](superpowers/specs/2026-09-04-console-catalog-and-navigation-design.md) |
 | 架构决策（ADR） | [docs/design/adr/](design/adr/) |
 
 ---

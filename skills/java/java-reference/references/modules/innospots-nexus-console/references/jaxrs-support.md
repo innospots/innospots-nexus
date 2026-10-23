@@ -92,3 +92,53 @@ Filter 中与 OpenAPI 一样**完全跳过** Bearer 校验（含公共开放 API
   `devSession` 为 `null` 时直接返回
 - **参数：**
   - `devSession` — 开发会话配置
+
+## ConsoleRequestGrants
+
+**类型：** class（final，静态工具）
+
+从 JAX-RS 请求上下文读取 `ResolvedEndpointBinding` 或合并后的 `ResolvedEndpointGrant`。
+
+### 方法
+
+| 方法 | 说明 |
+|------|------|
+| `binding(ContainerRequestContext) → ResolvedEndpointBinding` | 返回当前 endpoint 绑定；未解析时为 null |
+| `resolvedGrant(ContainerRequestContext) → ResolvedEndpointGrant` | 返回绑定中的 grant；无绑定时为 null |
+
+## ConsoleRequestProperties
+
+**类型：** class（final）
+
+管理控制台 JAX-RS 请求属性键。
+
+### 常量
+
+| 常量 | 说明 |
+|------|------|
+| `RESOLVED_ENDPOINT_BINDING` | resolved grant、资源类名与方法名的请求属性键 |
+
+## EndpointMethodResolver
+
+**类型：** interface，`@FunctionalInterface`
+
+宿主定位当前请求匹配资源方法与实现类的端口。
+
+### 方法
+
+#### `resolve(ContainerRequestContext requestContext) → ResourceInfo`
+- **说明：** 返回 JAX-RS `ResourceInfo`；未匹配资源时为 null
+
+## ResolvedEndpointBinding
+
+**类型：** record
+
+`ConsoleResolvedEndpointGrantFilter` 写入请求上下文的 endpoint 解析结果。
+
+### 组件（record）
+
+| 名称 | 类型 | 说明 |
+|------|------|------|
+| `grant` | `ResolvedEndpointGrant` | 合并后的 EndpointGrant |
+| `resourceClassName` | `String` | 资源实现类全名 |
+| `resourceMethodName` | `String` | 资源方法名 |

@@ -24,6 +24,6 @@ public class DbPrimaryGenerator implements IdentifierGenerator {
         String prefix = entity instanceof BaseEntity baseEntity
                 ? baseEntity.idPrefix()
                 : "";
-        return IdGenerator.nextBase62(prefix);
+        return IdGenerator.ulid(prefix);
     }
 }

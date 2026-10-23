@@ -82,8 +82,8 @@ contributions:
 | 层级 | 字段 |
 |------|------|
 | 扩展根 | `domainKey`、`modules[]`（至少一项）；根 **无** `moduleKey`；`entryPageKey` 须为空 |
-| MODULE | 有 `moduleKey`、无入口页 `entryPageKey`；`viewGroups` / `operationGroups` 须含 `default` |
-| MENU | 无 `moduleKey`；有 `entryPageKey`；`children: []`；可选 `icon`；访问分组见 Page DSL `grantGroup` |
+| MODULE | 必须有 `moduleKey`；有 `entryPageKey` 或非空 `children`，二者不能同时存在；`viewGroups` / `operationGroups` 须含 `default` |
+| MENU | 无 `moduleKey`；有 `entryPageKey`；`children: []`；可选 `icon`；访问分组由请求侧 `grantGroup` 选择 |
 
 分组元数据键名为 **`label`**（I18n），不是 `displayName`。
 

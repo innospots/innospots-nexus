@@ -12,6 +12,7 @@ public final class PlatformIntegrationTestSupport {
 
     public static final String SPRING_CONFIG_IMPORT =
             "optional:classpath:nexus/console-auth.yaml,optional:classpath:nexus/console-credential.yaml,"
+                    + "optional:classpath:nexus/console-registration.yaml,"
                     + "optional:classpath:nexus/console-web.yaml,optional:classpath:nexus/console-openapi.yaml,"
                     + "optional:classpath:nexus/console-plugins.yaml";
 

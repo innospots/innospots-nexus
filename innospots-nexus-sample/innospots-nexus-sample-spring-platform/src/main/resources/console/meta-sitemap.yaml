@@ -1,0 +1,30 @@
+# 运营平台默认菜单（meta-sitemap）；menus 结构与前端 sitemap.yaml 对齐。
+id: platform-console
+title: Innospots Platform Console
+description: 运营管理平台
+version: 1
+updatedAt: "2026-10-21T00:00:00Z"
+
+menus:
+  - { id: home, type: page, pageId: dashboard, title: 工作台, icon: home, layout: admin, order: 1 }
+  - id: operations
+    type: group
+    title: 运营管理
+    icon: users
+    order: 2
+    children:
+      - { id: nav-organization-tenants, type: page, pageId: tenant-list, title: 租户管理, layout: admin }
+      - { id: nav-platform-users, type: page, pageId: platform-user-list, title: 用户列表, layout: admin }
+      - { id: nav-platform-invites, type: page, pageId: platform-invite-list, title: 邀请, layout: admin }
+      - { id: nav-platform-access-requests, type: page, pageId: platform-access-request-list, title: 注册审批, layout: admin }
+  - id: system
+    type: group
+    title: 系统管理
+    icon: settings
+    order: 3
+    children:
+      - { id: nav-menus, type: page, pageId: menu-config, title: 菜单管理, layout: admin }
+      - { id: nav-dictionaries, type: page, pageId: dictionary-type-list, title: 数据字典, layout: admin }
+      - { id: nav-roles, type: page, pageId: role-list, title: 角色管理, layout: admin }
+      - { id: nav-audit, type: page, pageId: audit-log-list, title: 审计日志, layout: admin }
+      - { id: nav-plugins, type: page, pageId: plugin-list, title: 插件管理, layout: admin }

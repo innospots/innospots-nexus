@@ -55,9 +55,9 @@ class SamplePlatformOpenApiSpringTest {
     void platformBundledYamlContainsDocumentedPaths() {
         String yaml = openApiCatalogOperator.readYaml(PLATFORM_SPEC_ID);
         assertThat(yaml).contains("openapi:");
-        assertThat(yaml).contains("/platform/tenants");
-        assertThat(yaml).contains("/platform/public/auth/login");
-        assertThat(yaml).contains("/platform/auth/refresh");
+        assertThat(yaml).contains("/api/d/platform/tenants");
+        assertThat(yaml).contains("/api/d/platform/public/auth/login");
+        assertThat(yaml).contains("/api/d/platform/auth/refresh");
     }
 
     @Test
@@ -71,7 +71,7 @@ class SamplePlatformOpenApiSpringTest {
     void endpointGetSpecReturnsOpenApiJsonDocument() {
         JsonNode document = openApiCatalogEndpoint.getSpec(PLATFORM_SPEC_ID);
         assertThat(document.get("openapi").asText()).startsWith("3.");
-        assertThat(document.get("paths").toString()).contains("/platform/tenants");
+        assertThat(document.get("paths").toString()).contains("/api/d/platform/tenants");
     }
 
     @Test

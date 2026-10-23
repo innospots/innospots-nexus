@@ -28,7 +28,7 @@ base → core → plugin → console → portal
 |------|---------|
 | 业务中立、依赖轻量的通用能力（异常、状态码、JSON、ID、加解密、HTTP、Snapshot） | `innospots-nexus-base` |
 | 业务中立的中间件/数据库/平台基础设施（持久化基类、Quartz、server、watcher、bootstrap、资源元数据） | `innospots-nexus-core`（API 索引见 `references/modules/innospots-nexus-core/README.md`） |
-| 插件运行时、contribution 解码、Page DSL、插件安装与能力路由 | `innospots-nexus-plugin` |
+| 插件运行时、contribution 解码、插件安装与能力路由 | `innospots-nexus-plugin` |
 | 管理台 REST 契约、VO、converter；**console catalog 索引**（`nx_console_catalog_resource`） | `innospots-nexus-console`（API 索引见 `references/modules/innospots-nexus-console/README.md`） |
 | 认证、用户、角色、权限、菜单、字典、审计、工作区/项目业务 | `innospots-nexus-portal` |
 | 租户生命周期、企业主体、平台用户、平台审计 | `innospots-nexus-platform` |
@@ -38,7 +38,7 @@ base → core → plugin → console → portal
 
 | 能力 | 归属 | 不属于 |
 |------|------|--------|
-| 插件发现、安装、贡献解析、Page DSL | **plugin** | core、console |
+| 插件发现、安装、贡献解析 | **plugin** | core、console |
 | Catalog 持久化索引与同步 | **console** | core、plugin |
 | 插件规范与 contribution 约束定义 | **plugin** | console |
 | 持久化基类、审计填充、ID 生成 | **core** | plugin |
@@ -47,21 +47,22 @@ base → core → plugin → console → portal
 
 Console 传输契约 interface 模式见 [api-contract.md](api-contract.md)「Console 传输契约」。
 
-插件运行时设计文档：`innospots-nexus-plugin/docs/plugin/design/`（Page DSL、安装、贡献解码）。
+插件运行时设计文档：`innospots-nexus-plugin/docs/plugin/design/`（安装、贡献解码）。
 
-内置控制台 **entry 插件**（`ConsoleContributions` / `ConsoleContributeNode`、`pageKey`、classpath `ui-pages/...`）技能索引：
-[console-entry-and-pages.md](console-entry-and-pages.md)。
+内置控制台 **entry 插件**（`ConsoleContributions` / `ConsoleContributeNode`、稳定
+`entryPageKey`）技能索引：
+[console-entry-and-configuration.md](console-entry-and-configuration.md)。
 
 ---
 
 ## 各模块禁止能力（摘要）
 
-完整条文见根目录 [`AGENTS.md`](../../../AGENTS.md)（冲突裁决 #2）。下表供归属评审速查。
+完整条文见根目录 [`AGENTS.md`](../../../../AGENTS.md)（冲突裁决 #2）。下表供归属评审速查。
 
 | 模块 | 禁止放入（归属 elsewhere） |
 |------|---------------------------|
 | **base** | 业务域逻辑；ORM/JDBC/连接池；Cache；Retry/熔断；Jakarta Bean Validation；调度运行时；消息中间件；Spring/Servlet 绑定；业务实体与工作流 |
-| **core** | 插件运行时/Page DSL/安装表；Jakarta REST 端点与 console VO；用户/角色/权限/菜单/catalog 业务；认证会话/聊天产品域；Spring Boot 自动配置绑定 |
+| **core** | 插件运行时/安装表；Jakarta REST 端点与 console VO；用户/角色/权限/菜单/catalog 业务；认证会话/聊天产品域；Spring Boot 自动配置绑定 |
 | **plugin** | Catalog 持久化索引；console 管理 CRUD 实现；portal/platform 业务实体 |
 | **console** | 插件规范与 contribution 约束定义；完整管理业务工作流（实现在 portal/platform） |
 | **portal** | 租户生命周期/企业主体（→ platform）；依赖 platform |
@@ -81,18 +82,24 @@ Console 传输契约 interface 模式见 [api-contract.md](api-contract.md)「Co
 
 ```text
 <domain>/
-  ├── <subcapability>/     # 功能子模块（authorization、grant、entry …，按需）
-  │   └── endpoint / service / operator / domain/…
   ├── endpoint
   ├── dao
-  ├── domain/{entity,request,vo,model,enums,event}
+  ├── service
+  ├── operator
+  ├── domain/{entity,vo,model,request}
+  ├── filter / loader（按需）
   ├── converter
-  ├── operator / service（按需；单包 ≤15 类）
-  ├── handler / listener / interceptor（按需）
+  └── handler / listener / interceptor（按需）
 ```
 
 不得为凑结构创建空包或 `impl` / `common` / `misc` / `util` 子包。
 不得在模块根用 `service` 承载多领域业务；`service` 不是全部逻辑的默认归宿。
+`domain` 固定使用 `entity`、`vo`、`model`、`request`；不可变 request/vo/model 优先
+使用 record，持久化实体及确有可变身份/生命周期的 model 使用 class。
+
+技术模块类型较多或功能边界清晰时，在**技术模块内部**再按功能拆分子包，例如
+`permission/service/grant`、`permission/endpoint/authorization`，而不是在领域根下
+预建功能包。
 
 ---
 

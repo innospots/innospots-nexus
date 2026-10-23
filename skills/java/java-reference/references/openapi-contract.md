@@ -96,6 +96,40 @@ public class RoleEndpoint {
 | `@NexusAuthenticatedApi` | 管理 API 默认需要 |
 | `@BeanParam` 查询类 | 字段级 `@Schema` + `@QueryParam`（见 `RolePageRequest`） |
 
+### console 契约接口 + platform/portal 实现
+
+当 console 声明 `interface *Endpoint`、业务模块提供实现类时，SmallRye 的构建期 JAX-RS
+扫描器**不会继承接口方法注解**。接口保留 `@EndpointModule` / `@EndpointGrant` 作为运行时
+授权单一事实源；实现类必须重复传输契约：
+
+```java
+// console：契约与 grant 单一事实源
+public interface RoleEndpoint {
+
+    @GET
+    @EndpointGrant(action = EndpointGrantAction.READ, name = "role.page")
+    @Operation(operationId = "rolePage", summary = "分页查询角色")
+    R<PageResult<RoleVo>> pageRoles(@BeanParam RolePageRequest request);
+}
+
+// platform/portal：供 JAX-RS 与 OpenAPI 构建期扫描
+@Path(PlatformConstant.ROLES_PATH)
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
+@NexusAuthenticatedApi
+public class PlatformRoleEndpoint implements RoleEndpoint {
+
+    @Override
+    @GET
+    @Operation(operationId = "platformRolePage", summary = "分页查询角色")
+    public R<PageResult<RoleVo>> pageRoles(@BeanParam RolePageRequest request) {
+        // ...
+    }
+}
+```
+
+不得在实现类重复 `@EndpointModule` / `@EndpointGrant`；它们仍由 console 接口解析。
+
 ---
 
 ## Request / VO Schema（模板）
@@ -140,13 +174,49 @@ public enum BasicStatus { ... }
 | `outputDirectory` | 模式 A：`…/META-INF/nexus-openapi`；模式 B：`target/generated/openapi` + copy |
 | `schemaFilename` | `${project.artifactId}` → `<artifactId>.yaml` |
 | `scanners` | `JAX-RS` |
-| `scanPackages` | 本模块根包 + `base.domain.response`、`base.domain.enums`、`base.i18n` |
+| `scanPackages` | 本模块根包 + 被引用的 `base` / `console` 契约类型包 |
 | `scanDependenciesDisable` | `false` |
 | `openApiVersion` | `3.1.0` |
 | `operationIdStrategy` | `CLASS_METHOD` |
 | `infoTitle` / `infoVersion` / … | 与模块 `*OpenApiDefinition` 的 `@Info` 保持一致 |
 
 **扩展 `scanPackages` 时**：只加入必须在文档中出现的**稳定契约类型**；不要扫描整个 `base` 或 `core`。
+
+platform/portal 实现 console 契约时，至少把实际出现在方法签名中的依赖类型包加入
+`scanPackages`。例如 platform 引用 console 的 auth、role、permission、dictionary、
+logger 请求/VO 时，应显式加入：
+
+```xml
+<scanPackages>
+    com.innospots.nexus.platform,
+    com.innospots.nexus.base.domain.response,
+    com.innospots.nexus.base.i18n,
+    com.innospots.nexus.base.domain.enums,
+    com.innospots.nexus.console.auth.domain,
+    com.innospots.nexus.console.dictionary.domain,
+    com.innospots.nexus.console.logger.domain,
+    com.innospots.nexus.console.menu.domain.vo,
+    com.innospots.nexus.console.permission.domain,
+    com.innospots.nexus.console.permission.pageaccess,
+    com.innospots.nexus.console.role.domain
+</scanPackages>
+```
+
+portal 当前通过 console auth 契约暴露登录、验证码、令牌刷新等端点，因此其
+`scanPackages` 也必须包含 `com.innospots.nexus.console.auth.domain`：
+
+```xml
+<scanPackages>
+    com.innospots.nexus.portal,
+    com.innospots.nexus.console.auth.domain,
+    com.innospots.nexus.base.domain.response,
+    com.innospots.nexus.base.i18n,
+    com.innospots.nexus.base.domain.enums
+</scanPackages>
+```
+
+若构建日志出现 `SROAP04005: Could not find schema class in index`，说明依赖契约包未纳入扫描；
+不能把退化后的 `type: object` 当作完成。
 
 | 模块 | 打包模式 |
 |------|----------|
@@ -175,6 +245,8 @@ public enum BasicStatus { ... }
 - [ ] 路径参数有 `@Parameter(description, required = true)`
 - [ ] 新建/修改的 request/vo record（或 BeanParam 类）有类级与字段级 `@Schema`
 - [ ] 需认证资源类有 `@NexusAuthenticatedApi`
+- [ ] console 契约实现类重复类级与方法级 JAX-RS / OpenAPI 传输注解，但不重复 grant
+- [ ] 构建期 `scanPackages` 覆盖方法签名引用的依赖契约类型
 - [ ] `mvn -pl <module> clean compile`
 - [ ] `mvn -pl <module> package` 后检查 `META-INF/nexus-openapi/*.yaml` 是否包含新 operation
 
@@ -182,10 +254,9 @@ public enum BasicStatus { ... }
 
 ---
 
-## 与 Page DSL / plugin.yaml 区分
+## 与插件清单区分
 
 | 文档 | 规范入口 |
 |------|----------|
 | 插件清单 `plugin.yaml` | `innospots-nexus-plugin/docs/plugin/design/plugin-dsl-spec.md` |
-| 控制台页面 YAML | [`innospots-nexus-plugin-ui-spec`](../references/modules/innospots-nexus-plugin-ui-spec/README.md) |
 | REST OpenAPI | 本文件 + `standards/openapi.md` |

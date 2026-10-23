@@ -14,7 +14,8 @@ class PlatformPageAccessEndpointContractsTest {
     @Test
     void implementsConsolePageAccessEndpointOnPublicPath() {
         assertThat(PageAccessEndpoint.class.isAssignableFrom(PlatformPageAccessEndpoint.class)).isTrue();
-        assertThat(PlatformPageAccessEndpoint.class.getAnnotation(Path.class)).isNull();
+        assertThat(PlatformPageAccessEndpoint.class.getAnnotation(Path.class).value())
+                .isEqualTo(ConsoleConstant.PUBLIC_API_PREFIX + "/page-access");
         assertThat(PageAccessEndpoint.class.getAnnotation(Path.class).value())
                 .isEqualTo(ConsoleConstant.PUBLIC_API_PREFIX + "/page-access");
     }

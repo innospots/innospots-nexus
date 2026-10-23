@@ -135,7 +135,7 @@ class ConsoleAuthenticationFilterTest {
         ConsoleWebSecuritySettings security = new ConsoleWebSecuritySettings();
         security.setPermitAllPatterns(List.of("/openapi/**"));
         ConsoleAuthenticationFilter filter = new ConsoleAuthenticationFilter(security, tokenIssuer);
-        ContainerRequestContext request = JaxRsFilterTestSupport.mockRequest("/api/public/pages/demo");
+        ContainerRequestContext request = JaxRsFilterTestSupport.mockRequest("/api/public/page-access");
 
         filter.filter(request);
 
@@ -152,7 +152,7 @@ class ConsoleAuthenticationFilterTest {
 
         ConsoleAuthenticationFilter filter = new ConsoleAuthenticationFilter(security, tokenIssuer);
         ContainerRequestContext request = JaxRsFilterTestSupport.mockRequest(
-                "/api/public/pages/demo",
+                "/api/public/page-access",
                 "GET",
                 Map.of(HttpHeaderNames.AUTHORIZATION, "Bearer public-token"));
 

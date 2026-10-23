@@ -15,5 +15,5 @@
 ### 方法
 
 #### `idPrefix() → String`
-- **说明：** 物理表名 nx_otp_challenge。 / public static final String TABLE_NAME = "nx_otp_challenge"; /** 挑战主键；前缀 och（见 {@link #idPrefix()}）。 / private String challengeId; /** Console 侧 ID 生成前缀，与 {@link #challengeId} 分配策略一致。
-- **返回：** 固定值 och
+- **说明：** 返回 OTP 挑战实体的稳定主键前缀。
+- **返回：** 固定值 `OCH`

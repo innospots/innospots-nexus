@@ -1,119 +1,74 @@
 # 包 `discovery`
 
-## ClasspathPluginDiscovery
+## `ClasspathPluginDiscovery`
 
 **类型：** class
 
-通过 Java SPI 和全部 plugin.yaml 资源发现插件，并统一编译为 Plugin。
+通过 Java SPI 与 classpath `plugin.yaml` 发现插件，并使用宿主注册的
+`PluginContributionDecoderRegistry` 编译为统一的 `Plugin` 目录。
 
-
-## DiscoveredPlugin
+## `DiscoveredPlugin`
 
 **类型：** record
 
-一个已发现的插件实例及其缓存的不可变定义。
-
-### 组件（record）
-
-| 名称 | 类型 | 说明 |
+| 组件 | 类型 | 说明 |
 |------|------|------|
-| `plugin` | `Plugin` | 由 ServiceLoader 创建的插件实例 |
-| `definition` | `PluginDefinition` | 只读取一次的插件定义快照 |
+| `plugin` | `Plugin` | ServiceLoader 或 YAML 适配实例 |
+| `definition` | `PluginDefinition` | 编译后的不可变定义 |
 | `discoveredAt` | `Instant` | 发现时间 |
-| `source` | `PluginSource` | 声明来源元数据 |
+| `source` | `PluginSource` | 声明来源 |
 
-
-## ManifestPlugin
-
-**类型：** class
-
-将 YAML 编译定义适配为唯一 Plugin SPI，避免创建第二套运行时。
-
-### 方法
-
-#### `definition() → PluginDefinition`
-- **说明：** 创建 YAML 插件适配器。
-- **参数：**
-  - `definition` — 已编译的插件定义
-- **返回：** 插件定义快照
-
-
-## PluginCatalog
+## `ManifestPlugin`
 
 **类型：** class
 
-一个插件运行时使用的不可变发现快照。
+把 YAML 编译定义适配为统一 `Plugin` SPI。
+
+## `PluginCatalog`
+
+**类型：** class（final）
+
+单个运行时的不可变发现快照。构造时校验 pluginId 唯一与插件 API 主版本兼容。
 
 ### 方法
 
-#### `of(List<DiscoveredPlugin> plugins) → PluginCatalog`
-- **说明：** 根据发现列表创建目录，并执行全局 pluginId 与 Capability API 冲突校验。
-- **参数：**
-  - `plugins` — 已发现的插件实例和定义
-- **返回：** 按插件标识排序的不可变目录
+- `of(List<DiscoveredPlugin>) → PluginCatalog`
+- `plugins() → List<DiscoveredPlugin>`
+- `plugin(String pluginId) → Optional<DiscoveredPlugin>`
+- `definitions() → List<PluginDefinition>`
 
-#### `plugins() → List<DiscoveredPlugin>`
-- **说明：** 返回按插件标识确定性排序的不可变发现列表。 public List plugins()
+## `PluginDefinitionCompiler`
 
-#### `plugin(String pluginId) → Optional<DiscoveredPlugin>`
-- **说明：** 按稳定标识查找一个已发现插件。
-- **参数：**
-  - `pluginId` — 稳定的插件标识
-- **返回：** 匹配的已发现插件；未找到时返回空 Optional
+**类型：** class（final）
 
-#### `definitions() → List<PluginDefinition>`
-- **说明：** 返回用于诊断和预检校验的不可变插件定义快照。
-- **返回：** 按发现顺序排列的插件定义列表
+将 `PluginManifest` 编译为无副作用的 `PluginDefinition`。
 
+### 构造方法
 
-## PluginDefinitionCompiler
-
-**类型：** class
-
-将 YAML 纯数据模型编译为无副作用的运行时 PluginDefinition。
+#### `PluginDefinitionCompiler(PluginContributionDecoderRegistry contributionDecoders, ClassLoader classLoader)`
 
 ### 方法
-
-#### `registerDeclaredTypes(PluginManifest manifest) → void`
-- **说明：** 创建只支持 Capability Java binding 的编译器。
-- **参数：**
-  - `capabilityTypes` — 发现阶段累积的 Capability 类型表
-  - `classLoader` — 加载实现类的类加载器
-  - `contributionDecoders` — 宿主注册的 Contribution Decoder 表
-  - `manifest` — 已解析的插件清单
 
 #### `compile(PluginManifest manifest, PluginSource source) → PluginDefinition`
-- **说明：** 编译一个 YAML 插件定义。
-- **参数：**
-  - `manifest` — 已解析的插件清单
-  - `source` — 声明来源元数据
-- **返回：** 无副作用的运行时插件定义
 
+校验 DSL 头、API 版本、配置 schema 与 Contribution，并至少要求一份 Contribution。
+非空 `spec.capabilities` / `spec.requirements` 会被明确拒绝。
 
-## PluginDiscoveryReport
+## `PluginDiscoveryReport`
 
 **类型：** record
 
-表示发现阶段成功目录与被拒绝定义的分离结果。
-
-### 组件（record）
-
-| 名称 | 类型 | 说明 |
+| 组件 | 类型 | 说明 |
 |------|------|------|
-| `validCatalog` | `PluginCatalog` | 通过全局校验的插件目录 |
-| `rejectedDefinitions` | `List<RejectedPluginDefinition>` | 被拒绝定义的不可变诊断列表；null 视为空列表 |
+| `validCatalog` | `PluginCatalog` | 通过校验的插件目录 |
+| `rejectedDefinitions` | `List<RejectedPluginDefinition>` | 被拒绝的声明及其诊断 |
 
-
-## RejectedPluginDefinition
+## `RejectedPluginDefinition`
 
 **类型：** record
 
-单个插件定义被拒绝时保留的来源和安全诊断。
-
-### 组件（record）
-
-| 名称 | 类型 | 说明 |
+| 组件 | 类型 | 说明 |
 |------|------|------|
-| `source` | `PluginSource` | 被拒绝定义的来源元数据 |
-| `claimedPluginId` | `String` | 声明的插件标识；未知时可为空 |
-| `diagnostics` | `List<String>` | 脱敏后的拒绝原因列表；null 视为空列表 |
+| `source` | `PluginSource` | 声明来源 |
+| `claimedPluginId` | `String` | 声明中声称的插件标识；无法解析时可为空 |
+| `diagnostics` | `List<String>` | 拒绝原因快照；`null` 归一为空列表 |

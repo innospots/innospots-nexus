@@ -10,7 +10,7 @@ description: |
   领域初始化、建实体、建端点、建 DAO、代码模板、单元测试、契约测试、JUnit、
   去冗余、结构简化、死代码清理。
 category: java
-version: 1.7.0
+version: 1.9.0
 ---
 
 # 功能开发、修改、Bug 修复、重构与单元测试
@@ -43,7 +43,9 @@ version: 1.7.0
 
 - 设计输入与实现输出 → [develop-deliverables.md](references/develop-deliverables.md)
 - 归属与模块边界 → [module-ownership.md](../java-reference/references/module-ownership.md)
-- 控制台内置 entry / Page `pageKey` → [console-entry-and-pages.md](../java-reference/references/console-entry-and-pages.md)
+- 控制台插件配置与 Entry 组装 → [console-entry-and-configuration.md](../java-reference/references/console-entry-and-configuration.md)
+- REST 授权/审计元数据 → [endpoint-grants.md](references/endpoint-grants.md)
+- 插件配置、entry、ModuleDescriptors → [plugin-entry-and-configuration.md](references/plugin-entry-and-configuration.md)
 - 包结构（领域优先） → [package-structure.md](../java-reference/references/package-structure.md)
 - sample 扩展实施 → [sample-extension-development.md](references/sample-extension-development.md)
 - 作用域层级 → [scope-hierarchy.md](../java-reference/references/scope-hierarchy.md)
@@ -62,7 +64,11 @@ version: 1.7.0
 | 重构 / 去冗余 / 死代码 | change-workflow 重构分支 + code-quality-constraints | 行为锁定测试 + 删旧路径 + 全量 `mvn test` |
 
 实现时默认 **最小增量**：不预建分层、不引入未在设计清单内的类型；每批改动后对照
-code-quality-constraints「增加代码前的门禁」。
+code-quality-constraints「增加代码前的门禁」。包结构采用固定领域优先骨架：
+`<domain>/{endpoint,dao,service,operator,domain}`，`domain` 固定承载
+`entity`、`vo`、`model`、`request`，按需增加 `filter`、`loader` 等技术模块。
+技术模块内类型较多或功能边界清晰时再按功能分组；否则保持扁平。不可变数据类型
+优先使用 `record`，持久化实体与确有可变身份的模型使用 class。
 
 ## 测试先行（强制）
 
@@ -81,6 +87,8 @@ code-quality-constraints「增加代码前的门禁」。
 | 修 Bug | 复现测试（修复前红灯，修复后转绿） |
 | 新增/变更状态码 | 状态码契约测试（形状、双语、HTTP 映射） |
 | 非平凡 MapStruct | [contract-tests.md](references/contract-tests.md) 转换器单测 |
+| 新增/变更 REST grant | 注解契约测试 + Filter/目录解析测试（见 [endpoint-grants.md](references/endpoint-grants.md)） |
+| 新增/变更插件配置或 entry | schema/优先级测试 + entry 结构/SPI 测试（见 [plugin-entry-and-configuration.md](references/plugin-entry-and-configuration.md)） |
 | 重构 | 锁定外部行为的现有测试全部通过；缺则先补 |
 | 纯文档/注释 | 可不新增测试 |
 
@@ -107,6 +115,8 @@ code-quality-constraints「增加代码前的门禁」。
 - [persistence-mybatis.md](references/persistence-mybatis.md) — MyBatis-Plus、LambdaWrapper、yaml 配置、禁 XML/properties
 - [exception-handling.md](references/exception-handling.md) — 异常实现
 - [change-workflow.md](references/change-workflow.md) — 加功能/改功能/修 Bug/重构
+- [endpoint-grants.md](references/endpoint-grants.md) — `@EndpointModule` / `@EndpointGrant`、Filter 链路与契约测试
+- [plugin-entry-and-configuration.md](references/plugin-entry-and-configuration.md) — 插件配置接入、entry 组装、ModuleDescriptors / EntryPluginDescriptor
 - [sample-extension-development.md](references/sample-extension-development.md) — innospots-nexus-sample-platform 实施顺序与装配
 - [code-quality-constraints.md](../java-reference/references/code-quality-constraints.md) — 简化、去冗余、删无效代码
 

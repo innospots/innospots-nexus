@@ -5,8 +5,8 @@
 目录索引、权限判定、导航组装、认证/作用域编排，以及内置控制台入口插件。
 
 本模块 **不包含** Spring Boot 自动配置或 Servlet 绑定（归属 Spring/Quarkus 适配与应用装配层）。
-用户/成员持久化、租户业务数据等由 **portal** / **platform** 实现控制台定义的端口；插件规范、
-贡献解码与 Page DSL 归属 **plugin** 模块。
+用户/成员持久化、租户业务数据等由 **portal** / **platform** 实现控制台定义的端口；插件规范与
+贡献解码归属 **plugin** 模块。
 
 ## 在工程中的位置
 
@@ -37,15 +37,15 @@ Maven 依赖：`innospots-nexus-core`、`innospots-nexus-plugin`、`jakarta.ws.r
 | **auth** | 跨域认证契约 | 共享 `UserDirectory`、令牌工具与 **平台域** `AuthFacade`；租户域 `TenantAuthFacade`、成员关系与 `/tenant/auth` 请求形状归属 **portal**。 |
 | **scope** | 控制台归属解析 | `ConsoleOwnership*` 与 `SessionScopeBinder` 端口；租户 `/tenant/scope` 与 `ScopeFacade` 归属 **portal**。 |
 | **credential** | 归属化鉴权凭据 | 统一表 `nx_user_credential`；`CredentialService`（登录 `authenticate` + 生命周期）与 OTP/TOTP 子包。 |
-| **catalog** | 控制台目录索引 | 将插件 `console@1` 贡献与 Page DSL 同步到表 `nx_console_catalog_resource`（`ConsoleCatalogSyncService`）；为权限 UI 提供目录树读取（`ConsoleCatalogService`）。启动钩子：`ConsoleCatalogSyncStartupTask`。 |
-| **permission** | 授权运行时 | 持久化 `nx_permission_grant`；`PermissionGrantService` 管理角色/组织单元的授权替换；`PermissionVisibilityService` 计算当前用户可见资源；`ConsolePagePermissionAuthorizer` 基于目录与授权做 PAGE/DATASOURCE 判定（框架中立，由 adapter 过滤器调用）。REST：授权管理、当前用户权限等。 |
-| **navigation** | 运行时导航 | `NavigationMenuAssembler` 结合目录与授权，组装侧边栏用的 `NavigationMenuVo`（与管理端菜单 CRUD 的 `MenuVo` 区分）。REST：`/api/nexus/navigation/menus`。 |
-| **menu** | 菜单能力（无管理 REST） | 实体 `MenuEntity`、DAO 与领域类型供库内能力预留；运行时侧栏走 **navigation** + **catalog**。不提供 `/api/nexus/menus`。内置 `MenuEntryPlugin`。 |
-| **role** | 角色与绑定 | 表 `nx_role`、`nx_role_binding`；`service` / `operator` / `endpoint` 均在 console，端点为可继承的具体类。内置 `RoleEntryPlugin`。 |
-| **dictionary** | 租户级字典 | `DictionaryType` / `DictionaryItem` Operator、Service 与 REST（TENANT ownership）。内置 `DictionaryEntryPlugin`。 |
+| **catalog** | 控制台目录索引 | 将插件 `console@2` 的 MODULE/MENU 贡献同步到表 `nx_console_catalog_resource`（`ConsoleCatalogSyncService`）；为权限管理提供目录树读取（`ConsoleCatalogService`）。启动钩子：`ConsoleCatalogSyncStartupTask`。 |
+| **permission** | 授权运行时 | 持久化 `nx_permission_grant`；`PermissionGrantService` 管理角色/组织单元的授权替换；`PermissionVisibilityService` 计算当前用户可见 MODULE/MENU；`ConsolePagePermissionAuthorizer` 按叶子 MODULE/MENU 的 `entryPageKey` 做页面入口授权（框架中立，由 adapter 过滤器调用）。REST：授权管理、当前用户权限等。 |
+| **navigation** | 运行时导航 | `NavigationMenuAssembler` 从 catalog 与授权组装插件菜单；`NavigationMenuComposer` 可合并经角色裁剪的 `meta-sitemap.yaml` 默认菜单。REST：`/api/d/nexus/navigation/menus`。 |
+| **menu** | 菜单能力（无管理 REST） | 实体 `MenuEntity`、DAO 与领域类型供库内能力预留；运行时侧栏走 **navigation** + **catalog**。不提供 `/api/d/nexus/menus`，也没有内置 menu entry。 |
+| **role** | 角色与绑定 | 表 `nx_role`、`nx_role_binding`；console 提供实体、DAO、Operator 与 JAX-RS 接口契约，具体实现由 portal/platform 绑定。 |
+| **dictionary** | 租户级字典 | `DictionaryType` / `DictionaryItem` Operator 与 JAX-RS 接口契约（TENANT ownership）；具体实现由业务模块绑定。 |
 | **plugin** | 插件管理 API | `PluginManagementEndpoint`：安装、启用、禁用、重试等，委托 `PluginInstallationManager`（plugin 模块）。内置 `PluginManagementEntryPlugin`。 |
-| **logger** | 审计与调用日志 | `nx_audit_log` 实体、调用日志上下文与 `InvocationLogHandler` 管道，记录管理 API 调用轨迹。内置 `LoggerEntryPlugin`。 |
-| **entry** | 内置控制台入口 | `ConsoleModuleDescriptor`、`BuiltinConsoleEntryPlugins`：六个必选内置模块的 entry 插件 ID 与 Page/菜单元数据；`src/main/resources/ui-pages/` 下对应 Page DSL YAML。 |
+| **logger** | 审计与调用日志 | `nx_audit_log` 实体、`@EndpointGrant` 驱动的 `ConsoleAuditLogFilter`、调用日志上下文与 `InvocationLogHandler` 管道。 |
+| **entry** | 内置控制台入口 | `BuiltinConsoleEntryPlugins`、`ConsolePageRoutes` 与 `PluginManagementEntryPlugin`；声明稳定的 `entryPageKey`，不打包页面运行时资源。 |
 
 ### 内置控制台模块（entry 插件）
 
@@ -53,18 +53,13 @@ Maven 依赖：`innospots-nexus-core`、`innospots-nexus-plugin`、`jakarta.ws.r
 
 | 插件 ID | 模块键 | 典型用途 |
 |---------|--------|----------|
-| `com.innospots.nexus.console.menu` | menu | 菜单配置与管理界面入口 |
-| `com.innospots.nexus.console.dictionary` | dictionary | 数据字典维护入口 |
-| `com.innospots.nexus.console.logger` | logger | 审计/调用日志查看入口 |
-| `com.innospots.nexus.console.permission` | permission | 权限与授权配置入口 |
-| `com.innospots.nexus.console.role` | role | 角色与绑定管理入口 |
 | `com.innospots.nexus.console.plugin-management` | plugin | 插件安装与生命周期管理入口 |
 
 ## REST 路径概览
 
 | 前缀 | 典型能力 |
 |------|----------|
-| `/api/nexus/**` | 目录、插件、导航、角色/菜单/字典管理契约、当前用户权限 |
+| `/api/d/nexus/**` | 目录、插件、导航、角色/菜单/字典管理契约、当前用户权限 |
 | `/tenant/auth`、`/tenant/scope` | 租户域注册、登录、刷新、作用域选择 |
 | `/platform/auth` | 运营管理平台登录（无公开自注册） |
 
@@ -76,7 +71,7 @@ OpenAPI 在 **`mvn package`** 时由 `smallrye-open-api-maven-plugin` 扫描各 
 
 | 关注点 | 归属模块 |
 |--------|----------|
-| 插件发现、贡献解码、Page DSL 规范 | `innospots-nexus-plugin` |
+| 插件发现、`console@2` 贡献解码 | `innospots-nexus-plugin` |
 | `nx_console_catalog_resource` 索引同步与读取 | **本模块** `catalog` |
 | 权限授权存储与 `ConsolePagePermissionAuthorizer` | **本模块** `permission` |
 | 用户/角色/菜单/字典 **业务工作流**与多数端点 **实现** | `innospots-nexus-portal`（platform 负责运营管理平台数据） |
@@ -88,7 +83,7 @@ OpenAPI 在 **`mvn package`** 时由 `smallrye-open-api-maven-plugin` 扫描各 
 |------|------|
 | 模块 API 索引（端点、类表、扩展指南） | [`skills/java/java-reference/references/modules/innospots-nexus-console/README.md`](../skills/java/java-reference/references/modules/innospots-nexus-console/README.md) |
 | 仓库模块职责与依赖规则 | [`AGENTS.md`](../AGENTS.md) |
-| 插件与 `console@1` 贡献 | [`innospots-nexus-plugin/docs/README.md`](../innospots-nexus-plugin/docs/README.md) |
+| 插件与 `console@2` 贡献 | [`innospots-nexus-plugin/docs/README.md`](../innospots-nexus-plugin/docs/README.md) |
 | Core 持久化基类与启动 SPI | [`innospots-nexus-core/docs/README.md`](../innospots-nexus-core/docs/README.md) |
 
 ## 本地验证

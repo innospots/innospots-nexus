@@ -47,6 +47,7 @@ public class TenantAuthEndpoint {
 
     @POST
     @Path("/register")
+    @Operation(operationId = "tenantAuthRegister", summary = "注册租户域身份")
     public R<AuthTokenVo> register(TenantRegisterRequest request) {
         Checks.notNull(request, "request");
         userOperator.registerWithPassword(new UserPasswordRegisterRequest(
@@ -68,6 +69,7 @@ public class TenantAuthEndpoint {
 
     @POST
     @Path("/captcha/issue")
+    @Operation(operationId = "tenantAuthCaptchaIssue", summary = "签发登录验证码")
     public R<AuthCaptchaVo> issueLoginCaptcha(AuthCaptchaIssueRequest request) {
         String clientKey = request == null ? null : request.clientKey();
         return R.ok(tenantAuthFacade.issueLoginCaptcha(clientKey));
@@ -82,6 +84,7 @@ public class TenantAuthEndpoint {
 
     @POST
     @Path("/select-tenant")
+    @Operation(operationId = "tenantAuthSelectTenant", summary = "选择租户")
     public R<AuthTokenVo> selectTenant(SelectTenantRequest request) {
         String tenantUserId = requireAuthenticatedUserId();
         return R.ok(tenantAuthFacade.selectTenant(tenantUserId, request));
@@ -89,12 +92,14 @@ public class TenantAuthEndpoint {
 
     @POST
     @Path("/refresh")
+    @Operation(operationId = "tenantAuthRefresh", summary = "刷新访问令牌")
     public R<AuthTokenVo> refresh(TokenRefreshRequest request) {
         return R.ok(tenantAuthFacade.refresh(request));
     }
 
     @POST
     @Path("/logout")
+    @Operation(operationId = "tenantAuthLogout", summary = "登出当前会话")
     public R<Void> logout() {
         tenantAuthFacade.logout();
         return R.ok();
@@ -102,6 +107,7 @@ public class TenantAuthEndpoint {
 
     @POST
     @Path("/password/change")
+    @Operation(operationId = "tenantAuthPasswordChange", summary = "修改当前用户密码")
     public R<Void> changePassword(PasswordChangeRequest request) {
         Checks.notNull(request, "request");
         String userId = requireAuthenticatedUserId();
@@ -113,6 +119,7 @@ public class TenantAuthEndpoint {
 
     @POST
     @Path("/password/reset")
+    @Operation(operationId = "tenantAuthPasswordReset", summary = "重置密码")
     public R<Void> resetPassword(PasswordResetRequest request) {
         Checks.notNull(request, "request");
         String newPassword = passwordDecryptor.decrypt(request.newEncryptedPassword());

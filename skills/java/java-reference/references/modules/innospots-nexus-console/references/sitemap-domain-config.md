@@ -1,27 +1,18 @@
 # 包 `sitemap.domain.config`
 
-## SitemapConfig
+## `SitemapConfig`
 
-**类型：** class（final，`@Getter @Setter`）
+**类型：** class（final，`@Getter @Setter`、`@JsonAutoDetect(fieldVisibility = ANY)`）
 
-从 classpath YAML 解析的 sitemap 配置文档（会话无关超集）。
+从 classpath `meta-sitemap.yaml` 解析的站点元数据与会话无关默认菜单。
 
-### 成员变量
-
-| 名称 | 类型 | 说明 |
+| 字段 | 类型 | 说明 |
 |------|------|------|
 | `id` | `String` | 站点 id |
-| `resourceType` | `String` | 资源类型（须为 `sitemap`，loader 校验） |
-| `version` | `Integer` | sitemap 版本 |
-| `dslVersion` | `String` | DSL 版本 |
-| `app` | `SitemapAppInfo` | 应用展示元数据 |
-| `layout` | `String` | 默认布局键 |
-| `auth` | `SitemapAuthConfig` | 认证配置 |
-| `pages` | `List<SitemapPageDescriptor>` | 页面声明列表；默认空列表 |
+| `title` | `String` | 站点标题 |
+| `description` | `String` | 站点描述 |
+| `version` | `Integer` | 文档版本 |
+| `updatedAt` | `String` | 更新时间文本 |
 | `menus` | `List<SitemapMenuItem>` | 菜单树；默认空列表 |
-| `layouts` | `Map<String, SitemapLayoutDefinition>` | 命名布局 DSL 表（保持插入序） |
 
-### 备注
-
-`@JsonAutoDetect(fieldVisibility = ANY)` 直接按字段绑定 YAML；与
-`SitemapResource` 结构同构（后者额外预留会话动态字段）。
+该类型不是前端 `sitemap.yaml` 的完整模型，不包含 `pages`、`layouts` 或 `auth`。

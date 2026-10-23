@@ -1,39 +1,24 @@
 # 包 `sitemap.service`
 
-## SitemapService
+## `SitemapService`
 
 **类型：** class（final）
 
-加载并渲染 sitemap（当前按固定 YAML 全量返回，后续按会话与权限裁剪）。
+加载 classpath meta-sitemap，不执行 HTTP 渲染、权限裁剪或会话字段注入。
 
 ### 构造方法
 
-#### `SitemapService(SitemapConfigLoader configLoader, SitemapMapper mapper)`
-- **说明：** 参数缺失时抛 `NexusException`（`CONFIG_ERROR`）
-- **参数：**
-  - `configLoader` — classpath 配置加载器
-  - `mapper` — 配置 → 资源映射
+#### `SitemapService(SitemapConfigLoader configLoader)`
+
+参数为空时抛 `NexusException`（`CONFIG_ERROR`）。
 
 ### 方法
 
-#### `render(String domainKey) → SitemapResource`
-- **说明：** 渲染指定领域的 sitemap 资源
-- **参数：**
-  - `domainKey` — `ui-pages` 领域键
-- **返回：** 对外 sitemap
-- **异常：** `NexusException`（`CONFIG_ERROR`）— domainKey 为空或资源缺失/解析失败时
+#### `load() → SitemapConfig`
 
-## SitemapMapper
+委托 loader 读取并解析文档；资源缺失或解析失败时抛 `NexusException`
+（`CONFIG_ERROR`）。
 
-**类型：** class（final）
-
-将 classpath 配置映射为对外 sitemap 资源。
-
-### 方法
-
-#### `toResource(SitemapConfig config) → SitemapResource`
-- **说明：** 将会话无关配置复制为资源形态（暂不裁剪、不注入会话字段：`user`、`permissions`、
-  `updatedAt` 留空）
-- **参数：**
-  - `config` — YAML 配置
-- **返回：** 对外资源；`config` 为 `null` 时返回 `null`
+菜单的角色/隐藏裁剪与 catalog 合并由 `navigation.service` 的
+`MetaSitemapMenuFilter`、`MetaSitemapNavigationConverter` 和
+`NavigationMenuComposer` 完成。
