@@ -26,7 +26,7 @@ type CatalogNode = {
   displayName?: I18nValue;
   children?: CatalogNode[] | null;
   grants?: {
-    viewItems?: CatalogGrantItem[] | null;
+    viewGroups?: CatalogGrantGroup[] | null;
     operationGroups?: CatalogGrantGroup[] | null;
   } | null;
 };
@@ -110,13 +110,7 @@ function collectCatalogGrantKeys(nodes: CatalogNode[], keys: string[] = []): str
   for (const node of nodes) {
     const grants = node?.grants;
     if (grants != null) {
-      for (const item of grants.viewItems ?? []) {
-        const key = grantKey(item);
-        if (key.length > 0) {
-          keys.push(key);
-        }
-      }
-      for (const group of grants.operationGroups ?? []) {
+      for (const group of [...(grants.viewGroups ?? []), ...(grants.operationGroups ?? [])]) {
         for (const item of group.items ?? []) {
           const key = grantKey(item);
           if (key.length > 0) {
@@ -227,17 +221,17 @@ export function PermissionGrantPanel({
     [effectiveGrants],
   );
 
-  const viewItems = useMemo(() => moduleNode?.grants?.viewItems ?? [], [moduleNode]);
+  const viewGroups = useMemo(() => moduleNode?.grants?.viewGroups ?? [], [moduleNode]);
   const operationGroups = useMemo(
     () => moduleNode?.grants?.operationGroups ?? [],
     [moduleNode],
   );
   const moduleItemKeys = useMemo(
-    () => [
-      ...viewItems.map((item) => grantKey(item)),
-      ...operationGroups.flatMap((group) => (group.items ?? []).map((item) => grantKey(item))),
-    ].filter((key) => key.length > 0),
-    [viewItems, operationGroups],
+    () =>
+      [...viewGroups, ...operationGroups]
+        .flatMap((group) => (group.items ?? []).map((item) => grantKey(item)))
+        .filter((key) => key.length > 0),
+    [viewGroups, operationGroups],
   );
   const selectedCount = moduleItemKeys.filter((key) => selectedKeys.has(key)).length;
 
@@ -272,6 +266,10 @@ export function PermissionGrantPanel({
 
   const selectedName = selectedNode != null ? itemTitle(selectedNode) : selectedKey;
   const moduleName = itemTitle(moduleNode);
+  const viewItemCount = viewGroups.reduce(
+    (total, group) => total + (group.items?.length ?? 0),
+    0,
+  );
   const operationItemCount = operationGroups.reduce(
     (total, group) => total + (group.items?.length ?? 0),
     0,
@@ -300,25 +298,39 @@ export function PermissionGrantPanel({
       <section className="rounded-lg border border-border p-4">
         <div className="flex items-center justify-between gap-2">
           <h4 className="text-sm font-semibold text-foreground">查看访问权限</h4>
-          <span className="text-xs text-muted-foreground">{viewItems.length} 项</span>
+          <span className="text-xs text-muted-foreground">{viewItemCount} 项</span>
         </div>
-        {viewItems.length === 0 ? (
+        {viewItemCount === 0 ? (
           <p className="mt-3 text-sm text-muted-foreground">该模块没有可配置的页面访问项。</p>
         ) : (
-          <div className="mt-3 grid gap-2 xl:grid-cols-2">
-            {viewItems.map((item) => {
-              const key = grantKey(item);
+          <div className="mt-3 space-y-4">
+            {viewGroups.map((group, groupIndex) => {
+              const items = group.items ?? [];
+              if (items.length === 0) {
+                return null;
+              }
               return (
-                <GrantCheckbox
-                  key={key}
-                  item={item}
-                  checked={selectedKeys.has(key)}
-                  currentPage={
-                    selectedNode?.resourceType === "MENU"
-                    && selectedNode.entryPageKey === item.grantName
-                  }
-                  onChange={(checked) => toggleGrant(key, checked)}
-                />
+                <div key={`view-${group.group ?? "default"}-${groupIndex}`}>
+                  <div className="mb-2 flex items-center gap-2">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      {resolveI18nText(group.displayName) || group.group || "查看"}
+                    </span>
+                    <span className="h-px flex-1 bg-border" />
+                  </div>
+                  <div className="grid gap-2 xl:grid-cols-2">
+                    {items.map((item) => {
+                      const key = grantKey(item);
+                      return (
+                        <GrantCheckbox
+                          key={key}
+                          item={item}
+                          checked={selectedKeys.has(key)}
+                          onChange={(checked) => toggleGrant(key, checked)}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
               );
             })}
           </div>

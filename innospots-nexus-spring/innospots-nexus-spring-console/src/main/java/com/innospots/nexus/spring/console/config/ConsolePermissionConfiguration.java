@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogService;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubjectResolver;
-import com.innospots.nexus.console.permission.authorization.ConsolePagePermissionAuthorizer;
+import com.innospots.nexus.console.permission.authorization.ConsoleResourcePermissionAuthorizer;
 import com.innospots.nexus.console.permission.authorization.SessionAuthorizationSubjectResolver;
 import com.innospots.nexus.console.permission.dao.PermissionGrantDao;
 import com.innospots.nexus.console.permission.service.GrantSubjectAccess;
@@ -57,14 +57,14 @@ public class ConsolePermissionConfiguration {
     }
 
     @Bean
-    ConsolePagePermissionAuthorizer consolePagePermissionAuthorizer(
+    ConsoleResourcePermissionAuthorizer consoleResourcePermissionAuthorizer(
             ConsoleCatalogResourceDao resourceDao,
             PermissionGrantDao grantDao) {
-        return new ConsolePagePermissionAuthorizer(resourceDao, grantDao);
+        return new ConsoleResourcePermissionAuthorizer(resourceDao, grantDao);
     }
 
     @Bean
-    PageAccessVerifier pageAccessVerifier(ConsolePagePermissionAuthorizer pagePermissionAuthorizer) {
-        return new GrantGroupPageAccessVerifier(pagePermissionAuthorizer);
+    PageAccessVerifier pageAccessVerifier(PermissionGrantDao grantDao) {
+        return new GrantGroupPageAccessVerifier(grantDao);
     }
 }

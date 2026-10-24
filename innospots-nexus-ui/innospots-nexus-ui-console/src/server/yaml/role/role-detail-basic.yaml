@@ -1,8 +1,19 @@
 dsl: "1.0"
 page:
   id: role-detail-basic
-  title: 角色基本信息
-  name: roleDetailBasic
+  title: 角色详情
+  name: roleDetail
+
+state:
+  activeTab: basic
+  resourceSearch: ""
+  selectedResourceKey: ""
+  draftGrants: null
+  dirty: false
+  subjectType: USER
+  input: ""
+  pageNo: 1
+  pageSize: 20
 
 dataSources:
   role:
@@ -11,12 +22,59 @@ dataSources:
     request:
       method: GET
       url: /api/d/platform/roles/${params.roleId}
+  catalog:
+    type: http
+    autoLoad: false
+    request:
+      method: GET
+      url: /api/d/nexus/catalog/tree
+  grants:
+    type: http
+    autoLoad: false
+    request:
+      method: GET
+      url: /api/d/platform/roles/${params.roleId}/permissions
+  bindings:
+    type: http
+    autoLoad: false
+    request:
+      method: GET
+      url: /api/d/platform/roles/${params.roleId}/bindings
+      params:
+        subjectType: ${state.subjectType}
+        input: ${state.input}
+        pageNo: ${state.pageNo}
+        pageSize: ${state.pageSize}
 
 lifecycle:
   onShow:
+    - action: setState
+      params:
+        activeTab: "${route.query.tab == 'permissions' || route.query.tab == 'members' ? route.query.tab : 'basic'}"
     - action: reload
       params:
         dataSource: role
+    - action: if
+      params:
+        condition: ${route.query.tab == 'permissions'}
+        then:
+          - action: reload
+            params:
+              dataSource: catalog
+          - action: reload
+            params:
+              dataSource: grants
+          - action: setState
+            params:
+              draftGrants: ${data.grants.grants}
+              dirty: false
+    - action: if
+      params:
+        condition: ${route.query.tab == 'members'}
+        then:
+          - action: reload
+            params:
+              dataSource: bindings
 
 body:
   type: Page
@@ -27,168 +85,415 @@ body:
           - label: 角色管理
             href: /system/roles
           - label: "${data.role != null && data.role.roleName != null ? data.role.roleName : params.roleId}"
-    - type: Button
-      props:
-        text: ← 返回角色列表
-        variant: link
-      events:
-        onClick:
-          - action: navigate
-            params: { to: /system/roles }
-    - type: Flex
-      when: ${data.role != null}
-      props:
-        justify: space-between
-        align: start
-        className: mt-2
-      children:
-        - type: Typography
-          props:
-            variant: h3
-            text: "${data.role.roleCode != null ? data.role.roleCode + ' · ' : ''}${data.role.roleName != null ? data.role.roleName : params.roleId}"
-        - type: Flex
-          props:
-            gap: small
-          children:
-            - type: Button
-              when: ${data.role.status == 'ENABLED' || data.role.status == 'DISABLED'}
-              props:
-                text: "${data.role.status == 'ENABLED' ? '停用' : '启用'}"
-              events:
-                onClick:
-                  - action: confirm
-                    params:
-                      title: 确认变更状态
-                      content: 确定要变更该角色的启用状态吗？
-                  - action: request
-                    params:
-                      method: PUT
-                      url: /api/d/platform/roles/${params.roleId}/status
-                      body:
-                        status: "${data.role.status == 'ENABLED' ? 'DISABLED' : 'ENABLED'}"
-                  - action: message
-                    params:
-                      messageType: success
-                      text: 状态已更新
-                  - action: reload
-                    params:
-                      dataSource: role
-            - type: Button
-              props:
-                text: 修改
-                variant: primary
-              events:
-                onClick:
-                  - action: overlay.open
-                    params:
-                      overlay:
-                        type: modal
-                        title: 修改角色
-                        width: 520
-                        content:
-                          type: Form
-                          props:
-                            name: roleEditForm
-                            layout: vertical
-                            initialValues: ${data.role}
-                          events:
-                            onSubmit:
-                              - action: request
-                                params:
-                                  method: PUT
-                                  url: /api/d/platform/roles/${params.roleId}
-                                  body:
-                                    roleName: ${event.roleName}
-                                    description: ${event.description}
-                              - action: message
-                                params:
-                                  messageType: success
-                                  text: 已保存修改
-                              - action: overlay.close
-                              - action: reload
-                                params:
-                                  dataSource: role
-                          children:
-                            - type: Field
-                              props:
-                                label: 角色名称
-                                required: true
-                              children:
-                                - type: Input
-                                  props:
-                                    name: roleName
-                                    placeholder: 请输入角色名称
-                                    rules:
-                                      - required: true
-                                        message: 请输入角色名称
-                            - type: Field
-                              props:
-                                label: 描述
-                              children:
-                                - type: Textarea
-                                  props:
-                                    name: description
-                                    placeholder: 角色用途说明
-                            - type: Flex
-                              props:
-                                justify: end
-                                gap: small
-                                className: mt-4
-                              children:
-                                - type: Button
-                                  props:
-                                    text: 取消
-                                  events:
-                                    onClick:
-                                      - action: overlay.close
-                                - type: Button
-                                  props:
-                                    text: 保存
-                                    variant: primary
-                                    submit: true
-                                    htmlType: submit
     - type: Tabs
       props:
-        activeKey: basic
+        className: mt-3
+        variant: line
+        activeKey: ${state.activeTab}
+        contentClassName: pt-4
         items:
-          - { key: basic, label: 基本信息 }
-          - { key: permissions, label: 权限设置 }
-          - { key: members, label: 成员列表 }
+          - key: basic
+            label: 基本信息
+            children:
+              - type: Flex
+                when: ${data.role != null}
+                props:
+                  justify: end
+                  gap: small
+                  className: mb-3
+                children:
+                  - type: Button
+                    when: ${data.role.status == 'ENABLED' || data.role.status == 'DISABLED'}
+                    props:
+                      text: "${data.role.status == 'ENABLED' ? '停用' : '启用'}"
+                    events:
+                      onClick:
+                        - action: confirm
+                          params:
+                            title: 确认变更状态
+                            content: 确定要变更该角色的启用状态吗？
+                        - action: request
+                          params:
+                            method: PUT
+                            url: /api/d/platform/roles/${params.roleId}/status
+                            body:
+                              status: "${data.role.status == 'ENABLED' ? 'DISABLED' : 'ENABLED'}"
+                        - action: message
+                          params:
+                            messageType: success
+                            text: 状态已更新
+                        - action: reload
+                          params:
+                            dataSource: role
+                  - type: Button
+                    props:
+                      text: 修改
+                      variant: primary
+                    events:
+                      onClick:
+                        - action: overlay.open
+                          params:
+                            overlay:
+                              type: modal
+                              title: 修改角色
+                              width: 520
+                              content:
+                                type: Form
+                                props:
+                                  name: roleEditForm
+                                  layout: vertical
+                                  initialValues: ${data.role}
+                                events:
+                                  onSubmit:
+                                    - action: request
+                                      params:
+                                        method: PUT
+                                        url: /api/d/platform/roles/${params.roleId}
+                                        body:
+                                          roleName: ${event.roleName}
+                                          description: ${event.description}
+                                    - action: message
+                                      params:
+                                        messageType: success
+                                        text: 已保存修改
+                                    - action: overlay.close
+                                    - action: reload
+                                      params:
+                                        dataSource: role
+                                children:
+                                  - type: Field
+                                    props:
+                                      label: 角色名称
+                                      required: true
+                                    children:
+                                      - type: Input
+                                        props:
+                                          name: roleName
+                                          placeholder: 请输入角色名称
+                                          rules:
+                                            - required: true
+                                              message: 请输入角色名称
+                                  - type: Field
+                                    props:
+                                      label: 描述
+                                    children:
+                                      - type: Textarea
+                                        props:
+                                          name: description
+                                          placeholder: 角色用途说明
+                                  - type: Flex
+                                    props:
+                                      justify: end
+                                      gap: small
+                                      className: mt-4
+                                    children:
+                                      - type: Button
+                                        props:
+                                          text: 取消
+                                        events:
+                                          onClick:
+                                            - action: overlay.close
+                                      - type: Button
+                                        props:
+                                          text: 保存
+                                          variant: primary
+                                          submit: true
+                                          htmlType: submit
+              - type: Card
+                when: ${data.role != null}
+                children:
+                  - type: Descriptions
+                    props:
+                      items:
+                        - { label: 角色名称, value: "${data.role.roleName != null ? data.role.roleName : '—'}" }
+                        - { label: 角色编码, value: "${data.role.roleCode != null ? data.role.roleCode : '—'}" }
+                        - label: 归属层级
+                          value: "${data.role.ownerType != null ? data.role.ownerType : '—'}"
+                        - label: 状态
+                          value: "${data.role.status == 'ENABLED' ? '启用' : data.role.status == 'DISABLED' ? '停用' : data.role.status}"
+                        - { label: 成员数量, value: "${data.role.memberCount != null ? data.role.memberCount : 0}" }
+                        - label: 描述
+                          value: "${data.role.description != null && data.role.description != '' ? data.role.description : '—'}"
+          - key: permissions
+            label: 权限设置
+            children:
+              - type: Flex
+                props:
+                  justify: space-between
+                  align: center
+                children:
+                  - type: Text
+                    props:
+                      text: 当前角色已选授权项以保存前草稿为准；保存将全量替换该角色现有授权。
+                  - type: Input
+                    props:
+                      value: ${state.resourceSearch}
+                      placeholder: 搜索资源名称 / Key
+                    events:
+                      onChange:
+                        - action: setState
+                          params:
+                            resourceSearch: ${event}
+              - type: Flex
+                props:
+                  gap: middle
+                  className: mt-4
+                  align: stretch
+                children:
+                  - type: Card
+                    props:
+                      style: { flex: 1, minWidth: 280 }
+                    children:
+                      - type: Flex
+                        props:
+                          justify: space-between
+                          align: center
+                        children:
+                          - type: Text
+                            props:
+                              text: 后台资源目录
+                              strong: true
+                          - type: Button
+                            props:
+                              text: 同步目录
+                              size: small
+                            events:
+                              onClick:
+                                - action: request
+                                  params:
+                                    method: POST
+                                    url: /api/d/nexus/catalog/sync
+                                - action: message
+                                  params:
+                                    messageType: success
+                                    text: 目录已同步
+                                - action: reload
+                                  params:
+                                    dataSource: catalog
+                      - type: Text
+                        when: ${dataStatus.catalog.loading}
+                        props:
+                          text: 加载目录中…
+                          type: secondary
+                          className: mt-2
+                      - type: CatalogTree
+                        when: ${!dataStatus.catalog.loading}
+                        props:
+                          className: mt-2
+                          treeData: ${data.catalog}
+                          search: ${state.resourceSearch}
+                        events:
+                          onSelect:
+                            - action: setState
+                              params:
+                                selectedResourceKey: ${event[0]}
+                  - type: Card
+                    props:
+                      style: { flex: 2 }
+                    children:
+                      - type: Text
+                        props:
+                          text: 当前资源授权
+                          strong: true
+                      - type: Text
+                        when: ${dataStatus.grants.loading}
+                        props:
+                          text: 加载授权中…
+                          type: secondary
+                          className: mt-2
+                      - type: PermissionGrantPanel
+                        when: ${!dataStatus.grants.loading}
+                        props:
+                          className: mt-3
+                          catalog: ${data.catalog}
+                          selectedResourceKey: ${state.selectedResourceKey}
+                          grants: ${data.grants.grants}
+                          draftGrants: ${state.draftGrants}
+                        events:
+                          onChange:
+                            - action: setState
+                              params:
+                                draftGrants: ${event.grants}
+                                dirty: true
+              - type: Flex
+                props:
+                  justify: space-between
+                  align: center
+                  className: mt-4
+                children:
+                  - type: Text
+                    props:
+                      text: "${state.dirty ? '变更尚未保存' : '无未保存变更'}"
+                      type: secondary
+                  - type: Flex
+                    props:
+                      gap: small
+                    children:
+                      - type: Button
+                        props:
+                          text: 取消
+                        events:
+                          onClick:
+                            - action: reload
+                              params:
+                                dataSource: grants
+                            - action: setState
+                              params:
+                                draftGrants: ${data.grants.grants}
+                                dirty: false
+                      - type: Button
+                        props:
+                          text: 保存完整授权
+                          variant: primary
+                          disabled: ${!state.dirty}
+                        events:
+                          onClick:
+                            - action: confirm
+                              params:
+                                title: 保存完整授权
+                                content: 本次提交会替换该角色现有的全部授权，确定继续吗？
+                            - action: request
+                              params:
+                                method: PUT
+                                url: /api/d/platform/roles/${params.roleId}/permissions
+                                body:
+                                  grants: "${state.draftGrants != null ? state.draftGrants : data.grants.grants}"
+                            - action: message
+                              params:
+                                messageType: success
+                                text: 授权已保存
+                            - action: setState
+                              params:
+                                dirty: false
+                            - action: reload
+                              params:
+                                dataSource: grants
+                            - action: setState
+                              params:
+                                draftGrants: ${data.grants.grants}
+                                dirty: false
+          - key: members
+            label: 成员列表
+            children:
+              - type: Card
+                children:
+                  - type: Form
+                    props:
+                      name: memberSearch
+                      layout: inline
+                    events:
+                      onSubmit:
+                        - action: setState
+                          params:
+                            input: ${event.input}
+                            pageNo: 1
+                        - action: reload
+                          params:
+                            dataSource: bindings
+                    children:
+                      - type: Field
+                        props:
+                          label: 搜索
+                        children:
+                          - type: Input
+                            props:
+                              name: input
+                              placeholder: 名称 / 账号 / 组织单元
+                      - type: Field
+                        props:
+                          label: " "
+                        children:
+                          - type: Button
+                            props:
+                              text: 查询
+                              submit: true
+                              htmlType: submit
+                  - type: Flex
+                    when: ${data.role != null}
+                    props:
+                      justify: end
+                      className: mt-4
+                    children:
+                      - type: Button
+                        props:
+                          text: + 添加成员
+                          variant: primary
+                        events:
+                          onClick:
+                            - action: overlay.open
+                              params:
+                                overlay:
+                                  type: modal
+                                  title: "添加到「${data.role.roleName}」"
+                                  width: 720
+                                  content:
+                                    type: Text
+                                    props:
+                                      text: 暂无可添加的成员。
+                  - type: Table
+                    props:
+                      rowKey: bindingId
+                      dataSource: ${data.bindings.records}
+                      loading: ${dataStatus.bindings.loading}
+                      className: mt-4
+                      columns:
+                        - title: 主体类型
+                          dataIndex: subjectType
+                        - title: 主体 ID
+                          dataIndex: subjectId
+                        - title: 操作
+                          cell:
+                            type: Button
+                            props:
+                              text: 移除
+                              variant: link
+                              size: small
+                              danger: true
+                            events:
+                              onClick:
+                                - action: confirm
+                                  params:
+                                    title: 移除成员
+                                    content: 仅解除该角色绑定，不删除用户或组织单元。确定移除吗？
+                                - action: request
+                                  params:
+                                    method: DELETE
+                                    url: /api/d/platform/roles/${params.roleId}/bindings/${row.bindingId}
+                                - action: message
+                                  params:
+                                    messageType: success
+                                    text: 已移除
+                                - action: reload
+                                  params:
+                                    dataSource: bindings
+                  - type: Text
+                    props:
+                      text: 共 ${data.bindings.total} 条
+                      type: secondary
+                      className: mt-3
       events:
         onChange:
+          - action: setState
+            params:
+              activeTab: ${event}
           - action: if
             params:
               condition: ${event == 'permissions'}
               then:
-                - action: navigate
+                - action: reload
                   params:
-                    to: /system/roles/${params.roleId}/permissions
+                    dataSource: catalog
+                - action: reload
+                  params:
+                    dataSource: grants
+                - action: setState
+                  params:
+                    draftGrants: ${data.grants.grants}
+                    dirty: false
           - action: if
             params:
               condition: ${event == 'members'}
               then:
-                - action: navigate
+                - action: reload
                   params:
-                    to: /system/roles/${params.roleId}/members
-    - type: Card
-      when: ${data.role != null}
-      props:
-        className: mt-4
-      children:
-        - type: Text
-          props:
-            text: 基本信息
-            strong: true
-        - type: Descriptions
-          props:
-            className: mt-3
-            items:
-              - { label: 角色名称, value: "${data.role.roleName != null ? data.role.roleName : '—'}" }
-              - { label: 角色编码, value: "${data.role.roleCode != null ? data.role.roleCode : '—'}" }
-              - label: 归属层级
-                value: "${data.role.ownerType != null ? data.role.ownerType : '—'}"
-              - label: 状态
-                value: "${data.role.status == 'ENABLED' ? '启用' : data.role.status == 'DISABLED' ? '停用' : data.role.status}"
-              - { label: 成员数量, value: "${data.role.memberCount != null ? data.role.memberCount : 0}" }
-              - label: 描述
-                value: "${data.role.description != null && data.role.description != '' ? data.role.description : '—'}"
+                    dataSource: bindings

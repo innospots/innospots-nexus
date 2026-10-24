@@ -116,8 +116,10 @@ public final class ConsoleCatalogService {
     private static void collectGrantKeys(CatalogNodeVo node, Set<String> keys) {
         CatalogModuleGrantVo grants = node.grants();
         if (grants != null) {
-            for (CatalogViewItemVo item : grants.viewItems()) {
-                addGrantKey(item, keys);
+            for (CatalogPermissionGroupVo group : grants.viewGroups()) {
+                for (CatalogViewItemVo item : group.items()) {
+                    addGrantKey(item, keys);
+                }
             }
             for (CatalogPermissionGroupVo group : grants.operationGroups()) {
                 for (CatalogViewItemVo item : group.items()) {

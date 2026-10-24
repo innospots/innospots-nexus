@@ -1,5 +1,5 @@
 /**
- * 管理控制台 Jakarta REST 横切能力：请求过滤器、页面权限路径工具与会话绑定。
+ * 管理控制台 Jakarta REST 横切能力：请求过滤器、资源权限路径工具与会话绑定。
  *
  * <p>业务中立的异常映射与请求元数据支持位于
  * {@code com.innospots.nexus.core.jaxrs}；宿主无关的 Jersey 装配与

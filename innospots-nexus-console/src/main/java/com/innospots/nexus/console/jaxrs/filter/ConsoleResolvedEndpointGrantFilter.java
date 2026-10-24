@@ -16,7 +16,7 @@ import com.innospots.nexus.console.jaxrs.support.EndpointMethodResolver;
 import com.innospots.nexus.console.jaxrs.support.ResolvedEndpointBinding;
 
 /**
- * 在认证与页面权限过滤器之前解析 {@link ResolvedEndpointGrant} 并写入请求上下文。
+ * 在认证与资源权限过滤器之前解析 {@link ResolvedEndpointGrant} 并写入请求上下文。
  */
 @Provider
 @Priority(Priorities.AUTHENTICATION - 100)

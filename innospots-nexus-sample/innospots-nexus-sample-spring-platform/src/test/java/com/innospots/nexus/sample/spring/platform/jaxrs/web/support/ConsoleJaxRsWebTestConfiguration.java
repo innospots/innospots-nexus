@@ -16,10 +16,10 @@ import com.innospots.nexus.core.openapi.catalog.OpenApiCatalogEndpoint;
 import com.innospots.nexus.core.openapi.catalog.OpenApiCatalogOperator;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubject;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubjectResolver;
-import com.innospots.nexus.console.permission.authorization.ConsolePagePermissionAuthorizer;
+import com.innospots.nexus.console.permission.authorization.ConsoleResourcePermissionAuthorizer;
 
 /**
- * Web 过滤器测试用最小 Bean（不含真实 {@link ConsolePagePermissionAuthorizer}）。
+ * Web 过滤器测试用最小 Bean（不含真实 {@link ConsoleResourcePermissionAuthorizer}）。
  */
 @Configuration
 @Profile("jaxrs-web-it")
@@ -57,8 +57,8 @@ public class ConsoleJaxRsWebTestConfiguration {
 
     @Bean
     @Primary
-    ConsolePagePermissionAuthorizer consoleJaxRsWebTestPagePermissionAuthorizer() {
-        return ConsoleJaxRsWebTestMocks.PAGE_PERMISSION_AUTHORIZER;
+    ConsoleResourcePermissionAuthorizer consoleJaxRsWebTestResourcePermissionAuthorizer() {
+        return ConsoleJaxRsWebTestMocks.RESOURCE_PERMISSION_AUTHORIZER;
     }
 
     @Bean
@@ -77,8 +77,8 @@ public class ConsoleJaxRsWebTestConfiguration {
     }
 
     @Bean
-    ConsoleJaxRsWebDatasourceTestResource consoleJaxRsWebDatasourceTestResource() {
-        return new ConsoleJaxRsWebDatasourceTestResource();
+    ConsoleJaxRsWebGrantedApiTestResource consoleJaxRsWebGrantedApiTestResource() {
+        return new ConsoleJaxRsWebGrantedApiTestResource();
     }
 
 }

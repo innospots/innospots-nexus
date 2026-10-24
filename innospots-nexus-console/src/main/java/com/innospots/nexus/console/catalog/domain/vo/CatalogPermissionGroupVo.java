@@ -5,7 +5,7 @@ import java.util.List;
 import com.innospots.nexus.base.i18n.I18nObject;
 
 /**
- * 操作侧权限分组。
+ * 访问或操作侧权限分组。
  */
 public record CatalogPermissionGroupVo(
         String group,

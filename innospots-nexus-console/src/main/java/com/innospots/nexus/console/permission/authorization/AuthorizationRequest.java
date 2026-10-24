@@ -12,17 +12,9 @@ public record AuthorizationRequest(
          */
         String workspaceId,
         /**
-         * 实际 HTTP 方法。
+         * catalog 授权资源键，格式 {@code grantName:domainKey.moduleKey}。
          */
-        String method,
-        /**
-         * 实际请求路径，可以带查询字符串。
-         */
-        String path,
-        /**
-         * 请求头中的页面 key。
-         */
-        String pageKey,
+        String resourceKey,
         /**
          * 当前登录主体及其角色、组织单元信息。
          */

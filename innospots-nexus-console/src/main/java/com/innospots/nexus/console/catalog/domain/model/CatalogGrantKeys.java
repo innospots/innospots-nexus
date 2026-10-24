@@ -5,8 +5,8 @@ import com.innospots.nexus.console.catalog.domain.entity.ConsoleCatalogResourceE
 /**
  * Console catalog 授权项的稳定键。
  *
- * <p>键格式为 {@code grantName:domainKey.moduleKey}；页面访问项的 grantName 为
- * {@code entryPageKey}，操作项的 grantName 为 {@code EndpointGrant.name}。</p>
+ * <p>键格式为 {@code grantName:domainKey.moduleKey}；{@code grantName} 为
+ * {@code EndpointGrant.name}（访问项对应模块 {@code readOnly}，操作项对应 {@code operable}）。</p>
  */
 public final class CatalogGrantKeys {
 
@@ -16,7 +16,7 @@ public final class CatalogGrantKeys {
     /**
      * 组装 catalog 授权项键。
      *
-     * @param grantName 页面入口键或操作名
+     * @param grantName EndpointGrant 稳定业务名
      * @param domainKey 领域键
      * @param moduleKey 模块键
      * @return 授权项键；必要字段缺失时返回 null
@@ -29,16 +29,30 @@ public final class CatalogGrantKeys {
     }
 
     /**
-     * 返回 catalog 页面资源的访问授权键。
+     * 返回资源所属模块的授权键后缀 {@code :domainKey.moduleKey}。
      *
      * @param resource catalog 资源
-     * @return 授权键；资源没有入口页时返回 null
+     * @return 后缀；必要字段缺失时返回 null
      */
-    public static String viewKey(ConsoleCatalogResourceEntity resource) {
+    public static String moduleKeySuffix(ConsoleCatalogResourceEntity resource) {
         if (resource == null) {
             return null;
         }
-        return of(resource.getEntryPageKey(), resource.getDomainKey(), resource.getModuleKey());
+        return moduleKeySuffix(resource.getDomainKey(), resource.getModuleKey());
+    }
+
+    /**
+     * 返回模块授权键后缀 {@code :domainKey.moduleKey}。
+     *
+     * @param domainKey 领域键
+     * @param moduleKey 模块键
+     * @return 后缀；必要字段缺失时返回 null
+     */
+    public static String moduleKeySuffix(String domainKey, String moduleKey) {
+        if (blank(domainKey) || blank(moduleKey)) {
+            return null;
+        }
+        return ":" + domainKey + "." + moduleKey;
     }
 
     private static boolean blank(String value) {

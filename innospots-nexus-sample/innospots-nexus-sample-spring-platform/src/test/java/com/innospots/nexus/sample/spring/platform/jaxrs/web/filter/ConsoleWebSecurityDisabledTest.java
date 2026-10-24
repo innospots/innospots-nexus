@@ -25,10 +25,10 @@ class ConsoleWebSecurityDisabledTest extends ConsoleJaxRsWebIntegrationTest {
     }
 
     @Test
-    void consolePathWithoutPageKeySucceedsWhenSecurityDisabled() throws Exception {
-        HttpResponse<String> response = http.get("/console/datasource/demo");
+    void grantedApiPathSucceedsWhenSecurityDisabled() throws Exception {
+        HttpResponse<String> response = http.get("/api/d/platform/jaxrs-web-test/secured-echo");
         assertThat(response.statusCode()).isEqualTo(200);
-        assertThat(response.body()).contains("datasource");
+        assertThat(response.body()).contains("granted-api");
     }
 
     @Test

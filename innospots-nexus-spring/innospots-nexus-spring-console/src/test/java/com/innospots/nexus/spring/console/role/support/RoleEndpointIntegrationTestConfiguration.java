@@ -14,7 +14,7 @@ import com.innospots.nexus.console.logger.InvocationLogHandler;
 import com.innospots.nexus.console.logger.support.AuditLogRecorder;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubject;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubjectResolver;
-import com.innospots.nexus.console.permission.authorization.ConsolePagePermissionAuthorizer;
+import com.innospots.nexus.console.permission.authorization.ConsoleResourcePermissionAuthorizer;
 
 /**
  * Jersey Web 集成测试所需的最小控制台横切 Bean。
@@ -37,8 +37,8 @@ public class RoleEndpointIntegrationTestConfiguration {
 
     @Bean
     @Primary
-    ConsolePagePermissionAuthorizer roleEndpointIntegrationPagePermissionAuthorizer() {
-        return Mockito.mock(ConsolePagePermissionAuthorizer.class);
+    ConsoleResourcePermissionAuthorizer roleEndpointIntegrationResourcePermissionAuthorizer() {
+        return Mockito.mock(ConsoleResourcePermissionAuthorizer.class);
     }
 
     @Bean

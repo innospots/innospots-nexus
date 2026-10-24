@@ -18,7 +18,7 @@ pages:
   - { id: dashboard, path: /, title: 工作台, version: 1, lazy: true }
   - { id: menu-config, path: /system/menus, title: 自定义导航, version: 1, lazy: true }
   - { id: role-list, path: /system/roles, title: 角色管理, version: 1, lazy: true }
-  - { id: role-detail-basic, path: /system/roles/:roleId, title: 角色基本信息, version: 1, lazy: true }
+  - { id: role-detail-basic, path: /system/roles/:roleId, title: 角色详情, version: 1, lazy: true }
   - { id: role-detail-permissions, path: /system/roles/:roleId/permissions, title: 角色权限设置, version: 1, lazy: true }
   - { id: role-detail-members, path: /system/roles/:roleId/members, title: 角色成员列表, version: 1, lazy: true }
   - { id: dictionary-type-list, path: /system/dictionaries, title: 数据字典, version: 1, lazy: true }

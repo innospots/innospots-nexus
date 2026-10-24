@@ -26,7 +26,7 @@ public class ConsoleWebProperties {
     /** 是否启用控制台 Jersey 过滤器、CORS 与统一异常映射；默认 {@code true}。 */
     private boolean enabled = true;
 
-    /** Jersey 请求侧安全（鉴权、页面权限路径规则）。 */
+    /** Jersey 请求侧安全（鉴权、资源权限路径规则）。 */
     private ConsoleWebSecuritySettings security = new ConsoleWebSecuritySettings();
 
     /** 浏览器跨域（CORS）响应头；默认关闭。 */

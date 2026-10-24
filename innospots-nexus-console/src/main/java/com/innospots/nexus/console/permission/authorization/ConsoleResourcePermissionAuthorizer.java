@@ -15,16 +15,20 @@ import com.innospots.nexus.console.permission.domain.entity.PermissionGrantEntit
 import com.innospots.nexus.console.permission.domain.enums.PermissionSubjectType;
 import com.innospots.nexus.console.scope.ConsoleOwnership;
 import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
+import com.innospots.nexus.core.endpoint.grant.support.ResolvedEndpointGrant;
 
 /**
- * 控制台页面访问鉴权（catalog v2：叶子 MODULE 或 MENU 入口 + 授权记录）。
+ * 控制台资源授权判定（catalog v2：按 {@link CatalogGrantKeys} 资源键匹配 {@code nx_permission_grant}）。
+ *
+ * <p>HTTP 请求侧由 Filter 传入 {@link ResolvedEndpointGrant}，拼出
+ * {@code EndpointGrant.name:domainKey.moduleKey} 后查授权表；页面访问校验则直接传入已拼好的资源键。</p>
  */
-public final class ConsolePagePermissionAuthorizer {
+public final class ConsoleResourcePermissionAuthorizer {
 
     private final ConsoleCatalogResourceDao resourceDao;
     private final PermissionGrantDao grantDao;
 
-    public ConsolePagePermissionAuthorizer(
+    public ConsoleResourcePermissionAuthorizer(
             ConsoleCatalogResourceDao resourceDao,
             PermissionGrantDao grantDao
     ) {
@@ -32,37 +36,68 @@ public final class ConsolePagePermissionAuthorizer {
         this.grantDao = grantDao;
     }
 
-    public AuthorizationDecision authorize(AuthorizationRequest request) {
-        if (request == null || request.workspaceId() == null || request.subject() == null
-                || blank(request.pageKey())) {
+    /**
+     * 按已解析的 endpoint grant 拼装资源键并判定是否已授权。
+     *
+     * @param workspaceId 当前 workspace
+     * @param grant       请求方法上的 {@link ResolvedEndpointGrant}
+     * @param subject     当前主体
+     * @return 鉴权结果
+     */
+    public AuthorizationDecision authorizeEndpoint(
+            String workspaceId,
+            ResolvedEndpointGrant grant,
+            AuthorizationSubject subject
+    ) {
+        if (workspaceId == null || grant == null || subject == null
+                || blank(grant.name()) || blank(grant.moduleKey())) {
             return AuthorizationDecision.deny("Invalid authorization request");
         }
-        String pageKey = request.pageKey().trim();
-        ConsoleCatalogResourceEntity pageResource = pageResourceByEntryPageKey(pageKey);
-        if (pageResource == null) {
-            return AuthorizationDecision.deny("Page is not available");
+        String domainKey = domainKeyByModuleKey(grant.moduleKey().trim());
+        if (blank(domainKey)) {
+            return AuthorizationDecision.deny("Module is not available");
         }
-        String grantKey = CatalogGrantKeys.viewKey(pageResource);
-        if (blank(grantKey)) {
-            return AuthorizationDecision.deny("Page is not grantable");
+        String resourceKey = CatalogGrantKeys.of(
+                grant.name().trim(),
+                domainKey,
+                grant.moduleKey().trim());
+        if (blank(resourceKey)) {
+            return AuthorizationDecision.deny("Resource is not grantable");
         }
-        if (!request.subject().administrator()
-                && !hasGrant(request.workspaceId(), grantKey, request.subject())) {
-            return AuthorizationDecision.deny("Page permission is required");
-        }
-        return AuthorizationDecision.allow(new AuthorizationContext(
-                request.workspaceId(), pageKey, null, List.of()));
+        return authorize(new AuthorizationRequest(workspaceId, resourceKey, subject));
     }
 
-    private ConsoleCatalogResourceEntity pageResourceByEntryPageKey(String entryPageKey) {
-        List<ConsoleCatalogResourceEntity> resources = resourceDao.selectList(
+    /**
+     * 按资源键判定当前主体是否已授权。
+     *
+     * @param request 含 workspace、资源键与主体
+     * @return 鉴权结果
+     */
+    public AuthorizationDecision authorize(AuthorizationRequest request) {
+        if (request == null || request.workspaceId() == null || request.subject() == null
+                || blank(request.resourceKey())) {
+            return AuthorizationDecision.deny("Invalid authorization request");
+        }
+        String resourceKey = request.resourceKey().trim();
+        if (!request.subject().administrator()
+                && !hasGrant(request.workspaceId(), resourceKey, request.subject())) {
+            return AuthorizationDecision.deny("Resource permission is required");
+        }
+        return AuthorizationDecision.allow(new AuthorizationContext(
+                request.workspaceId(), resourceKey, null, List.of()));
+    }
+
+    private String domainKeyByModuleKey(String moduleKey) {
+        List<ConsoleCatalogResourceEntity> modules = resourceDao.selectList(
                 Wrappers.<ConsoleCatalogResourceEntity>lambdaQuery()
-                        .in(ConsoleCatalogResourceEntity::getResourceType,
-                                CatalogResourceType.MODULE.name(),
-                                CatalogResourceType.MENU.name())
-                        .eq(ConsoleCatalogResourceEntity::getEntryPageKey, entryPageKey)
+                        .eq(ConsoleCatalogResourceEntity::getResourceType,
+                                CatalogResourceType.MODULE.name())
+                        .eq(ConsoleCatalogResourceEntity::getModuleKey, moduleKey)
                         .eq(ConsoleCatalogResourceEntity::getStatus, BasicStatus.ENABLED.name()));
-        return resources.size() == 1 ? resources.getFirst() : null;
+        if (modules.size() != 1) {
+            return null;
+        }
+        return modules.getFirst().getDomainKey();
     }
 
     private List<PermissionGrantEntity> grants(

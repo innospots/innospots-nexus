@@ -15,13 +15,13 @@ import com.innospots.nexus.console.jaxrs.filter.ConsoleAuditLogFilter;
 import com.innospots.nexus.console.jaxrs.filter.ConsoleAuthenticationFilter;
 import com.innospots.nexus.console.jaxrs.filter.ConsoleCorsFilter;
 import com.innospots.nexus.console.jaxrs.filter.ConsoleDevSessionFilter;
-import com.innospots.nexus.console.jaxrs.filter.ConsolePagePermissionFilter;
+import com.innospots.nexus.console.jaxrs.filter.ConsoleResourcePermissionFilter;
 import com.innospots.nexus.console.jaxrs.filter.ConsoleRequestContextFilter;
 import com.innospots.nexus.console.jaxrs.filter.ConsoleResolvedEndpointGrantFilter;
 import com.innospots.nexus.console.jaxrs.support.EndpointMethodResolver;
 import com.innospots.nexus.console.logger.support.AuditLogRecorder;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubjectResolver;
-import com.innospots.nexus.console.permission.authorization.ConsolePagePermissionAuthorizer;
+import com.innospots.nexus.console.permission.authorization.ConsoleResourcePermissionAuthorizer;
 import com.innospots.nexus.spring.console.jaxrs.JerseyEndpointMethodResolver;
 
 /**
@@ -81,14 +81,14 @@ public class ConsoleJaxRsWebConfiguration {
         return new ConsoleDevSessionFilter(webProperties.getSecurity());
     }
 
-    /** 对 {@link com.innospots.nexus.console.jaxrs.web.ConsoleWebSecuritySettings#getConsolePathPatterns()} 命中路径执行页面权限校验。 */
+    /** 对 {@link com.innospots.nexus.console.jaxrs.web.ConsoleWebSecuritySettings#getConsolePathPatterns()} 命中路径执行资源权限校验。 */
     @Bean
-    ConsolePagePermissionFilter consolePagePermissionFilter(
+    ConsoleResourcePermissionFilter consoleResourcePermissionFilter(
             ConsoleWebProperties webProperties,
-            ConsolePagePermissionAuthorizer pagePermissionAuthorizer,
+            ConsoleResourcePermissionAuthorizer resourcePermissionAuthorizer,
             AuthorizationSubjectResolver subjectResolver) {
-        return new ConsolePagePermissionFilter(
-                webProperties.getSecurity(), pagePermissionAuthorizer, subjectResolver);
+        return new ConsoleResourcePermissionFilter(
+                webProperties.getSecurity(), resourcePermissionAuthorizer, subjectResolver);
     }
 
     /** 分配 {@code X-Request-Id}、写入 TLC，并在响应结束后清理线程上下文。 */
@@ -123,7 +123,7 @@ public class ConsoleJaxRsWebConfiguration {
             ConsoleResolvedEndpointGrantFilter resolvedEndpointGrantFilter,
             ConsoleAuthenticationFilter authenticationFilter,
             ConsoleDevSessionFilter devSessionFilter,
-            ConsolePagePermissionFilter pagePermissionFilter,
+            ConsoleResourcePermissionFilter resourcePermissionFilter,
             ConsoleRequestContextFilter requestContextFilter,
             ConsoleAuditLogFilter auditLogFilter) {
         return resourceConfig -> {
@@ -131,7 +131,7 @@ public class ConsoleJaxRsWebConfiguration {
             resourceConfig.register(resolvedEndpointGrantFilter);
             resourceConfig.register(authenticationFilter);
             resourceConfig.register(devSessionFilter);
-            resourceConfig.register(pagePermissionFilter);
+            resourceConfig.register(resourcePermissionFilter);
             resourceConfig.register(requestContextFilter);
             resourceConfig.register(auditLogFilter);
         };

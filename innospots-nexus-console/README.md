@@ -38,7 +38,7 @@ Maven 依赖：`innospots-nexus-core`、`innospots-nexus-plugin`、`jakarta.ws.r
 | **scope** | 控制台归属解析 | `ConsoleOwnership*` 与 `SessionScopeBinder` 端口；租户 `/tenant/scope` 与 `ScopeFacade` 归属 **portal**。 |
 | **credential** | 归属化鉴权凭据 | 统一表 `nx_user_credential`；`CredentialService`（登录 `authenticate` + 生命周期）与 OTP/TOTP 子包。 |
 | **catalog** | 控制台目录索引 | 将插件 `console@2` 的 MODULE/MENU 贡献同步到表 `nx_console_catalog_resource`（`ConsoleCatalogSyncService`）；为权限管理提供目录树读取（`ConsoleCatalogService`）。启动钩子：`ConsoleCatalogSyncStartupTask`。 |
-| **permission** | 授权运行时 | 持久化 `nx_permission_grant`；`PermissionGrantService` 管理角色/组织单元的授权替换；`PermissionVisibilityService` 计算当前用户可见 MODULE/MENU；`ConsolePagePermissionAuthorizer` 按叶子 MODULE/MENU 的 `entryPageKey` 做页面入口授权（框架中立，由 adapter 过滤器调用）。REST：授权管理、当前用户权限等。 |
+| **permission** | 授权运行时 | 持久化 `nx_permission_grant`；`PermissionGrantService` 管理角色/组织单元的授权替换；`PermissionVisibilityService` 按模块后缀 `*:domain.module` 计算可见 MODULE/MENU；`ConsoleResourcePermissionAuthorizer` 按 `ResolvedEndpointGrant` 拼出的 `grantName:domainKey.moduleKey` 查授权表。权限目录的 `viewGroups`/`operationGroups` 分别来自 EndpointGrant `readOnly`/`operable`。 |
 | **navigation** | 运行时导航 | `NavigationMenuAssembler` 从 catalog 与授权组装插件菜单；`NavigationMenuComposer` 可合并经角色裁剪的 `meta-sitemap.yaml` 默认菜单。REST：`/api/d/nexus/navigation/menus`。 |
 | **menu** | 菜单能力（无管理 REST） | 实体 `MenuEntity`、DAO 与领域类型供库内能力预留；运行时侧栏走 **navigation** + **catalog**。不提供 `/api/d/nexus/menus`，也没有内置 menu entry。 |
 | **role** | 角色与绑定 | 表 `nx_role`、`nx_role_binding`；console 提供实体、DAO、Operator 与 JAX-RS 接口契约，具体实现由 portal/platform 绑定。 |
@@ -73,7 +73,7 @@ OpenAPI 在 **`mvn package`** 时由 `smallrye-open-api-maven-plugin` 扫描各 
 |--------|----------|
 | 插件发现、`console@2` 贡献解码 | `innospots-nexus-plugin` |
 | `nx_console_catalog_resource` 索引同步与读取 | **本模块** `catalog` |
-| 权限授权存储与 `ConsolePagePermissionAuthorizer` | **本模块** `permission` |
+| 权限授权存储与 `ConsoleResourcePermissionAuthorizer` | **本模块** `permission` |
 | 用户/角色/菜单/字典 **业务工作流**与多数端点 **实现** | `innospots-nexus-portal`（platform 负责运营管理平台数据） |
 | JAX-RS Bean 注册、鉴权过滤器、`AuthorizationSubjectResolver` 实现 | adapter / application |
 

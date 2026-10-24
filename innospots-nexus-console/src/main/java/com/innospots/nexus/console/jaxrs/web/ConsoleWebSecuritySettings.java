@@ -4,19 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.innospots.nexus.console.jaxrs.support.ConsolePermitAllPaths;
-import com.innospots.nexus.console.permission.authorization.ConsolePagePermissionAuthorizer;
+import com.innospots.nexus.console.permission.authorization.ConsoleResourcePermissionAuthorizer;
 
 import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Jersey 鉴权相关路径与请求头配置。
+ * Jersey 鉴权相关路径配置。
  */
 @Getter
 public class ConsoleWebSecuritySettings {
 
     /**
-     * 是否启用 Jersey 请求侧安全（Bearer 鉴权 + 控制台页面权限 Filter）；默认 {@code true}。
+     * 是否启用 Jersey 请求侧安全（Bearer 鉴权 + 控制台资源权限 Filter）；默认 {@code true}。
      */
     @Setter
     private boolean enabled = true;
@@ -31,15 +31,14 @@ public class ConsoleWebSecuritySettings {
     private final List<String> permitAllPatterns = ConsolePermitAllPaths.defaultPatterns();
 
     /**
-     * 控制台页面权限 Filter 生效的 HTTP 路径 Ant 模式。
+     * 控制台资源权限 Filter 生效的 HTTP 路径 Ant 模式。
      *
-     * @see ConsolePagePermissionAuthorizer
+     * <p>命中路径且请求已解析出 {@code ResolvedEndpointGrant}（且未 {@code ignorePermission}）时，
+     * 按 {@code grantName:domainKey.moduleKey} 查授权表。</p>
+     *
+     * @see ConsoleResourcePermissionAuthorizer
      */
-    private final List<String> consolePathPatterns = new ArrayList<>(List.of("/console/datasource/**"));
-
-    /** 控制台页面权限鉴权用的页面键请求头名（默认 {@code X-Nexus-Page-Key}）。 */
-    @Setter
-    private String pageKeyHeader = "X-Nexus-Page-Key";
+    private final List<String> consolePathPatterns = new ArrayList<>(List.of("/api/d/**"));
 
     /**
      * 设置免登录路径列表。
@@ -56,9 +55,9 @@ public class ConsoleWebSecuritySettings {
     }
 
     /**
-     * 设置控制台页面权限 Filter 生效的路径列表。
+     * 设置控制台资源权限 Filter 生效的路径列表。
      *
-     * @param consolePathPatterns 路径 Ant 模式；{@code null} 时清空列表（不启用页面权限 Filter）
+     * @param consolePathPatterns 路径 Ant 模式；{@code null} 时清空列表（不启用资源权限 Filter）
      */
     public void setConsolePathPatterns(List<String> consolePathPatterns) {
         this.consolePathPatterns.clear();

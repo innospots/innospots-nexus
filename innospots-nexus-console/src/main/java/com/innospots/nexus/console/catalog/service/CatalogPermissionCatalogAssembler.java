@@ -1,10 +1,10 @@
 package com.innospots.nexus.console.catalog.service;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -21,11 +21,15 @@ import com.innospots.nexus.core.endpoint.grant.EndpointModuleGrantCatalog;
 import com.innospots.nexus.core.plugin.contribution.console.ConsolePermissionGroupDeclaration;
 
 /**
- * 组装 MODULE {@link CatalogModuleGrantVo}（catalog 表 + EndpointGrant）。
+ * 组装 MODULE {@link CatalogModuleGrantVo}（catalog 分组元数据 + EndpointGrant 目录）。
  *
- * <p>访问项 {@code grantName} 恒为 MENU 的 {@code entryPageKey}（与 console@2 贡献一致）。</p>
+ * <p>访问项取自 {@link EndpointModuleGrantCatalog#readOnly()}，操作项取自
+ * {@link EndpointModuleGrantCatalog#operable()}；{@code grantName} 均为
+ * {@link EndpointGrantDescriptor#name()}，不再使用 {@code entryPageKey}。</p>
  */
 public final class CatalogPermissionCatalogAssembler {
+
+    private static final String DEFAULT_GROUP = "default";
 
     private final EndpointGrantManager endpointGrantManager;
 
@@ -37,41 +41,44 @@ public final class CatalogPermissionCatalogAssembler {
             ConsoleCatalogResourceEntity moduleRow,
             List<ConsoleCatalogResourceEntity> directMenus
     ) {
-        List<CatalogViewItemVo> viewItems = new ArrayList<>();
-        if (hasText(moduleRow.getEntryPageKey())) {
-            viewItems.add(viewItem(moduleRow, moduleRow.getEntryPageKey()));
-        }
-        for (ConsoleCatalogResourceEntity menu : directMenus) {
-            if (hasText(menu.getEntryPageKey())) {
-                viewItems.add(viewItem(menu, menu.getEntryPageKey()));
-            }
-        }
-        viewItems.sort(Comparator.comparing(CatalogViewItemVo::orderIndex,
-                Comparator.nullsLast(Integer::compareTo)));
-
-        List<CatalogPermissionGroupVo> operationGroups = buildOperationGroups(moduleRow, directMenus);
-        return new CatalogModuleGrantVo(List.copyOf(viewItems), operationGroups);
+        return new CatalogModuleGrantVo(
+                buildViewGroups(moduleRow, directMenus),
+                buildOperationGroups(moduleRow, directMenus));
     }
 
-    private static CatalogViewItemVo viewItem(
-            ConsoleCatalogResourceEntity resource,
-            String grantName
-    ) {
-        return new CatalogViewItemVo(
-                CatalogGrantKeys.of(grantName, resource.getDomainKey(), resource.getModuleKey()),
-                grantName,
-                parseI18n(resource.getDisplayName()),
-                parseI18n(resource.getDescription()),
-                resource.getSortOrder());
-    }
-
-    private List<CatalogPermissionGroupVo> buildOperationGroups(
+    /**
+     * 按 MODULE/MENU 的 {@code viewGroups} 声明与模块 {@code readOnly} grants 组装访问分组。
+     */
+    List<CatalogPermissionGroupVo> buildViewGroups(
             ConsoleCatalogResourceEntity moduleRow,
             List<ConsoleCatalogResourceEntity> directMenus
     ) {
-        String groupsJson = hasText(moduleRow.getOperationGroups())
-                ? moduleRow.getOperationGroups()
-                : directMenus.isEmpty() ? null : directMenus.getFirst().getOperationGroups();
+        return buildGrantGroups(
+                moduleRow,
+                resolveGroupsJson(moduleRow.getViewGroups(), directMenus,
+                        ConsoleCatalogResourceEntity::getViewGroups),
+                EndpointModuleGrantCatalog::readOnly);
+    }
+
+    /**
+     * 按 MODULE/MENU 的 {@code operationGroups} 声明与模块 {@code operable} grants 组装操作分组。
+     */
+    List<CatalogPermissionGroupVo> buildOperationGroups(
+            ConsoleCatalogResourceEntity moduleRow,
+            List<ConsoleCatalogResourceEntity> directMenus
+    ) {
+        return buildGrantGroups(
+                moduleRow,
+                resolveGroupsJson(moduleRow.getOperationGroups(), directMenus,
+                        ConsoleCatalogResourceEntity::getOperationGroups),
+                EndpointModuleGrantCatalog::operable);
+    }
+
+    private List<CatalogPermissionGroupVo> buildGrantGroups(
+            ConsoleCatalogResourceEntity moduleRow,
+            String groupsJson,
+            Function<EndpointModuleGrantCatalog, List<EndpointGrantDescriptor>> descriptors
+    ) {
         List<ConsolePermissionGroupDeclaration> declarations = parseGroups(groupsJson);
         EndpointModuleGrantCatalog catalog = endpointGrantManager
                 .moduleCatalog(moduleRow.getModuleKey())
@@ -81,18 +88,10 @@ public final class CatalogPermissionCatalogAssembler {
             itemsByGroup.put(declaration.group(), new ArrayList<>());
         }
         if (catalog != null) {
-            for (EndpointGrantDescriptor descriptor : catalog.operable()) {
-                String group = "default";
+            for (EndpointGrantDescriptor descriptor : descriptors.apply(catalog)) {
+                String group = DEFAULT_GROUP;
                 itemsByGroup.computeIfAbsent(group, ignored -> new ArrayList<>())
-                        .add(new CatalogViewItemVo(
-                                CatalogGrantKeys.of(
-                                        descriptor.name(),
-                                        moduleRow.getDomainKey(),
-                                        moduleRow.getModuleKey()),
-                                descriptor.name(),
-                                descriptor.label(),
-                                I18nObject.of(Map.of()),
-                                null));
+                        .add(grantItem(moduleRow, descriptor));
             }
         }
         List<CatalogPermissionGroupVo> groups = new ArrayList<>();
@@ -108,19 +107,41 @@ public final class CatalogPermissionCatalogAssembler {
         return List.copyOf(groups);
     }
 
+    private static CatalogViewItemVo grantItem(
+            ConsoleCatalogResourceEntity moduleRow,
+            EndpointGrantDescriptor descriptor
+    ) {
+        return new CatalogViewItemVo(
+                CatalogGrantKeys.of(
+                        descriptor.name(),
+                        moduleRow.getDomainKey(),
+                        moduleRow.getModuleKey()),
+                descriptor.name(),
+                descriptor.label(),
+                I18nObject.of(Map.of()),
+                null);
+    }
+
+    private static String resolveGroupsJson(
+            String moduleGroupsJson,
+            List<ConsoleCatalogResourceEntity> directMenus,
+            Function<ConsoleCatalogResourceEntity, String> menuGroups
+    ) {
+        if (hasText(moduleGroupsJson)) {
+            return moduleGroupsJson;
+        }
+        if (directMenus == null || directMenus.isEmpty()) {
+            return null;
+        }
+        return menuGroups.apply(directMenus.getFirst());
+    }
+
     private static List<ConsolePermissionGroupDeclaration> parseGroups(String json) {
         if (json == null || json.isBlank()) {
             return List.of();
         }
         return Jsons.fromJson(json, new TypeReference<List<ConsolePermissionGroupDeclaration>>() {
         });
-    }
-
-    private static I18nObject parseI18n(String json) {
-        if (json == null || json.isBlank()) {
-            return I18nObject.of(Map.of());
-        }
-        return Jsons.fromJson(json, I18nObject.class);
     }
 
     private static boolean hasText(String value) {

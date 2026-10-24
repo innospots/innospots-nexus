@@ -14,11 +14,11 @@ public record AuthorizationContext(
          */
         String workspaceId,
         /**
-         * 请求头中解析出的页面 key。
+         * 本次请求命中的授权资源键。
          */
-        String pageKey,
+        String resourceKey,
         /**
-         * 根据页面、HTTP 方法和 URL 匹配出的 datasource key。
+         * 根据页面、HTTP 方法和 URL 匹配出的 datasource key（可选）。
          */
         String datasourceKey,
         /**

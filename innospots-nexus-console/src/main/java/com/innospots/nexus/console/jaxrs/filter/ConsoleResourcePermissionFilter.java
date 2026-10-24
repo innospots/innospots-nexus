@@ -6,44 +6,41 @@ import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.ext.Provider;
 
-import com.innospots.nexus.base.exception.NexusException;
-import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.base.thread.SessionContext;
 import com.innospots.nexus.console.permission.authorization.AuthorizationDecision;
-import com.innospots.nexus.console.permission.authorization.AuthorizationRequest;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubjectResolver;
-import com.innospots.nexus.console.permission.authorization.ConsolePagePermissionAuthorizer;
+import com.innospots.nexus.console.permission.authorization.ConsoleResourcePermissionAuthorizer;
 import com.innospots.nexus.console.jaxrs.support.ConsoleAntPathMatcher;
 import com.innospots.nexus.console.jaxrs.support.ConsoleRequestGrants;
 import com.innospots.nexus.console.jaxrs.web.ConsoleWebSecuritySettings;
 import com.innospots.nexus.console.jaxrs.support.ConsolePublicApiPaths;
+import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.core.endpoint.grant.support.ResolvedEndpointGrant;
 import com.innospots.nexus.core.jaxrs.support.RequestProperties;
 
 /**
- * 对 {@link ConsoleWebSecuritySettings#getConsolePathPatterns()} 命中的路径执行控制台页面权限校验
+ * 对 {@link ConsoleWebSecuritySettings#getConsolePathPatterns()} 命中的路径执行控制台资源权限校验
  *（在 {@link ConsoleAuthenticationFilter} Bearer 鉴权之后）。
  *
- * <p>公共 API（{@link com.innospots.nexus.console.config.ConsoleConstant#PUBLIC_API_PREFIX}）不执行页面权限校验。
- * 将 HTTP 方法、路径与 {@link ConsoleWebSecuritySettings#getPageKeyHeader()} 转为
- * {@link AuthorizationRequest}，委托 {@link ConsolePagePermissionAuthorizer} 判定 catalog PAGE/DATASOURCE
- * 授权；与「是否已登录」的认证 Filter 语义区分。</p>
+ * <p>公共 API（{@link com.innospots.nexus.console.config.ConsoleConstant#PUBLIC_API_PREFIX}）不执行权限校验。
+ * 读取请求上的 {@link ResolvedEndpointGrant}，按 {@code grantName:domainKey.moduleKey} 拼资源键，
+ * 委托 {@link ConsoleResourcePermissionAuthorizer} 判定是否落在授权表中；与「是否已登录」的认证 Filter 语义区分。</p>
  */
 @Provider
 @Priority(Priorities.AUTHENTICATION + 100)
-public final class ConsolePagePermissionFilter implements ContainerRequestFilter {
+public final class ConsoleResourcePermissionFilter implements ContainerRequestFilter {
 
     private final ConsoleWebSecuritySettings security;
-    private final ConsolePagePermissionAuthorizer pagePermissionAuthorizer;
+    private final ConsoleResourcePermissionAuthorizer resourcePermissionAuthorizer;
     private final AuthorizationSubjectResolver subjectResolver;
 
-    public ConsolePagePermissionFilter(
+    public ConsoleResourcePermissionFilter(
             ConsoleWebSecuritySettings security,
-            ConsolePagePermissionAuthorizer pagePermissionAuthorizer,
+            ConsoleResourcePermissionAuthorizer resourcePermissionAuthorizer,
             AuthorizationSubjectResolver subjectResolver) {
         this.security = security;
-        this.pagePermissionAuthorizer = pagePermissionAuthorizer;
+        this.resourcePermissionAuthorizer = resourcePermissionAuthorizer;
         this.subjectResolver = subjectResolver;
     }
 
@@ -53,7 +50,7 @@ public final class ConsolePagePermissionFilter implements ContainerRequestFilter
             return;
         }
         ResolvedEndpointGrant grant = ConsoleRequestGrants.resolvedGrant(requestContext);
-        if (grant != null && grant.ignorePermission()) {
+        if (grant == null || grant.ignorePermission()) {
             return;
         }
         String path = normalizedPath(requestContext);
@@ -63,18 +60,11 @@ public final class ConsolePagePermissionFilter implements ContainerRequestFilter
         if (!ConsoleAntPathMatcher.matchesAny(security.getConsolePathPatterns(), path)) {
             return;
         }
-        String pageKey = requestContext.getHeaderString(security.getPageKeyHeader());
-        if (pageKey == null || pageKey.isBlank()) {
-            throw ConsoleExceptions.build(NexusStatusCode.NO_PERMISSION);
-        }
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(
+        AuthorizationDecision decision = resourcePermissionAuthorizer.authorizeEndpoint(
                 SessionContext.requireWorkspaceId(),
-                requestContext.getMethod(),
-                path,
-                pageKey,
+                grant,
                 subjectResolver.resolve()
                         .orElseThrow(() -> ConsoleExceptions.build(NexusStatusCode.AUTHENTICATION_FAILED)));
-        AuthorizationDecision decision = pagePermissionAuthorizer.authorize(authorizationRequest);
         if (!decision.allowed()) {
             throw ConsoleExceptions.build(NexusStatusCode.NO_PERMISSION);
         }

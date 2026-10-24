@@ -141,8 +141,16 @@ public final class PermissionVisibilityService {
             ConsoleCatalogResourceEntity resource,
             Set<String> grantedKeys
     ) {
-        String grantKey = CatalogGrantKeys.viewKey(resource);
-        return grantKey != null && grantedKeys.contains(grantKey);
+        String suffix = CatalogGrantKeys.moduleKeySuffix(resource);
+        if (suffix == null) {
+            return false;
+        }
+        for (String grantedKey : grantedKeys) {
+            if (grantedKey != null && grantedKey.endsWith(suffix)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static LambdaQueryWrapper<PermissionGrantEntity> scopeGrantQuery(ConsoleOwnership ownership) {

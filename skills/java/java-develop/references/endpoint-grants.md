@@ -167,7 +167,7 @@ ConsoleResolvedEndpointGrantFilter   @Priority(AUTHENTICATION - 100)
 ConsoleAuthenticationFilter          @Priority(AUTHENTICATION)
   → grant.ignoreAuth()
 
-ConsolePagePermissionFilter          @Priority(AUTHENTICATION + 100)
+ConsoleResourcePermissionFilter          @Priority(AUTHENTICATION + 100)
   → grant.ignorePermission()
 
 ConsoleAuditLogFilter                @Priority(USER + 100)
@@ -216,7 +216,7 @@ platform 的聚合契约测试可参考
 | 使用 Java 方法名作为 `name` | 重构方法名会破坏已持久化授权键 |
 | 在实现类复制接口 grant | 两份元数据漂移，测试与运行时可能各读一份 |
 | 实现类只写运行逻辑、不重复 JAX-RS / OpenAPI 注解 | 构建期 OpenAPI 缺失路径或 schema |
-| 登录接口只设 `ignoreAuth` | 仍可能被页面权限过滤器拦截 |
+| 登录接口只设 `ignoreAuth` | 仍可能被资源权限过滤器拦截 |
 | 审计请求参数包含密码/令牌 | 敏感信息落库 |
 | 缺少 `label` 却开启审计 | 审计展示退化为空或不稳定文本 |
 | 依赖 `group` 做分组 | 当前运行时尚未消费该字段，操作项仍进入 `default` |
