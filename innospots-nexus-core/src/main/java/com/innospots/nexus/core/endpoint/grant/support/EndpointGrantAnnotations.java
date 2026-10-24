@@ -80,6 +80,7 @@ public final class EndpointGrantAnnotations {
         }
         return merge(
                 module,
+                grant.group(),
                 grant.name(),
                 grant.label(),
                 grant.recordArgs(),
@@ -91,6 +92,7 @@ public final class EndpointGrantAnnotations {
 
     private static ResolvedEndpointGrant merge(
             EndpointModule module,
+            String grantGroup,
             String name,
             I18nLiteral label,
             boolean recordArgs,
@@ -100,10 +102,13 @@ public final class EndpointGrantAnnotations {
             EndpointGrantAction action
     ) {
         String moduleKey = module == null ? "" : module.value();
+        String domainKey = module == null ? "" : module.domain();
         boolean moduleIgnorePermission = module != null && module.ignorePermission();
         boolean moduleIgnoreAuth = module != null && module.ignoreAuth();
         return new ResolvedEndpointGrant(
                 moduleKey,
+                domainKey,
+                grantGroup,
                 action,
                 name,
                 label,

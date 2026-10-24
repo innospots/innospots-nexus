@@ -20,7 +20,7 @@ import com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao;
 import com.innospots.nexus.console.permission.domain.entity.PermissionGrantEntity;
 import com.innospots.nexus.console.catalog.domain.entity.ConsoleCatalogResourceEntity;
 import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
-import com.innospots.nexus.console.catalog.domain.model.CatalogGrantKeys;
+import com.innospots.nexus.console.catalog.domain.model.CatalogPermissionGroupDeclarations;
 import com.innospots.nexus.console.permission.domain.enums.PermissionSubjectType;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubject;
 
@@ -141,12 +141,8 @@ public final class PermissionVisibilityService {
             ConsoleCatalogResourceEntity resource,
             Set<String> grantedKeys
     ) {
-        String suffix = CatalogGrantKeys.moduleKeySuffix(resource);
-        if (suffix == null) {
-            return false;
-        }
-        for (String grantedKey : grantedKeys) {
-            if (grantedKey != null && grantedKey.endsWith(suffix)) {
+        for (String viewKey : CatalogPermissionGroupDeclarations.viewGrantKeys(resource)) {
+            if (grantedKeys.contains(viewKey)) {
                 return true;
             }
         }

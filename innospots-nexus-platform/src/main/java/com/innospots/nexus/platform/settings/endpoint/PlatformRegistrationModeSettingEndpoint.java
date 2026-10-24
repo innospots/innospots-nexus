@@ -28,7 +28,7 @@ import com.innospots.nexus.platform.settings.service.PlatformRegistrationModeSet
  * @author Smars
  * @date 2026/10/06
  */
-@EndpointModule("settings")
+@EndpointModule(value = "settings", domain = com.innospots.nexus.platform.entry.BuiltinPlatformEntryPlugins.DOMAIN_KEY)
 @Path(PlatformConstant.SETTINGS_REGISTRATION_MODE_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)

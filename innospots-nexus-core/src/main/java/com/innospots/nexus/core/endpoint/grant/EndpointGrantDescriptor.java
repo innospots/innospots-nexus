@@ -1,11 +1,14 @@
 package com.innospots.nexus.core.endpoint.grant;
 
 import com.innospots.nexus.base.i18n.I18nObject;
+import com.innospots.nexus.core.endpoint.grant.support.ResolvedEndpointGrant;
 
 /**
  * 单条 REST 方法的 grant 元数据（运行时注册、过滤器策略与目录组装共用）。
  *
  * @param moduleKey        entry 模块键
+ * @param domainKey        领域键
+ * @param grantGroup       浏览/操作分组键
  * @param httpMethod       HTTP 动词（大写）
  * @param path             合并后的 JAX-RS 路径模板（类 {@link jakarta.ws.rs.Path} + 方法路径）
  * @param name             稳定业务名
@@ -20,6 +23,8 @@ import com.innospots.nexus.base.i18n.I18nObject;
  */
 public record EndpointGrantDescriptor(
         String moduleKey,
+        String domainKey,
+        String grantGroup,
         String httpMethod,
         String path,
         String name,
@@ -35,6 +40,10 @@ public record EndpointGrantDescriptor(
 
     public EndpointGrantDescriptor {
         moduleKey = moduleKey == null ? "" : moduleKey;
+        domainKey = domainKey == null ? "" : domainKey;
+        grantGroup = grantGroup == null || grantGroup.isBlank()
+                ? ResolvedEndpointGrant.DEFAULT_GRANT_GROUP
+                : grantGroup;
         httpMethod = httpMethod == null ? "" : httpMethod;
         path = path == null ? "" : path;
         name = name == null ? "" : name;

@@ -27,7 +27,10 @@ import com.innospots.nexus.platform.config.PlatformConstant;
  * @see PlatformConstant#PUBLIC_REGISTRATION_POLICY_PATH
  * @see RegistrationPolicyService#getPublicPolicy()
  */
-@EndpointModule(value = "settings", ignoreAuth = true)
+@EndpointModule(
+        value = "settings",
+        domain = com.innospots.nexus.platform.entry.BuiltinPlatformEntryPlugins.DOMAIN_KEY,
+        ignoreAuth = true)
 @Path(PlatformConstant.PUBLIC_REGISTRATION_POLICY_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Tag(name = "PlatformPublicRegistrationPolicy", description = "公开注册策略")

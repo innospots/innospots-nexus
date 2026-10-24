@@ -32,7 +32,7 @@ class GrantGroupPageAccessVerifierTest {
     void allowsWhenSubjectHasModuleScopedGrant() {
         PermissionGrantDao grantDao = mock(PermissionGrantDao.class);
         PermissionGrantEntity grant = new PermissionGrantEntity();
-        grant.setGrantKey("platform.user.create:platform.user");
+        grant.setGrantKey("platform.user:default");
         when(grantDao.selectList(any())).thenReturn(List.of(grant));
         PageAccessVerifier verifier = new GrantGroupPageAccessVerifier(grantDao);
 
@@ -45,7 +45,7 @@ class GrantGroupPageAccessVerifierTest {
     }
 
     @Test
-    void deniesWhenSubjectHasNoModuleScopedGrant() {
+    void deniesWhenSubjectHasNoViewGroupGrant() {
         PermissionGrantDao grantDao = mock(PermissionGrantDao.class);
         when(grantDao.selectList(any())).thenReturn(List.of());
         PageAccessVerifier verifier = new GrantGroupPageAccessVerifier(grantDao);

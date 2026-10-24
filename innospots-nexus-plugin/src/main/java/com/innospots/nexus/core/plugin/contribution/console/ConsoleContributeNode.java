@@ -63,7 +63,7 @@ public record ConsoleContributeNode(
             if (operationGroups.isEmpty()) {
                 operationGroups = ConsolePermissionDefaults.defaultOperationGroups();
             }
-            requireDefaultGroup(viewGroups, "viewGroups");
+            requireNonEmptyGroups(viewGroups, "viewGroups");
             requireDefaultGroup(operationGroups, "operationGroups");
         } else if (menuNode) {
             if (moduleKey != null) {
@@ -150,6 +150,25 @@ public record ConsoleContributeNode(
             String entryPageKey,
             String icon
     ) {
+        return singlePageModule(
+                moduleKey,
+                orderIndex,
+                displayName,
+                description,
+                entryPageKey,
+                icon,
+                null);
+    }
+
+    public static ConsoleContributeNode singlePageModule(
+            String moduleKey,
+            int orderIndex,
+            I18nObject displayName,
+            I18nObject description,
+            String entryPageKey,
+            String icon,
+            List<ConsolePermissionGroupDeclaration> viewGroups
+    ) {
         return new ConsoleContributeNode(
                 moduleKey,
                 displayName,
@@ -157,7 +176,7 @@ public record ConsoleContributeNode(
                 orderIndex,
                 entryPageKey,
                 icon,
-                ConsolePermissionDefaults.defaultViewGroups(),
+                defaultGroups(viewGroups, ConsolePermissionDefaults.defaultViewGroups()),
                 ConsolePermissionDefaults.defaultOperationGroups(),
                 List.of());
     }
@@ -184,6 +203,15 @@ public record ConsoleContributeNode(
             invalid("invalid " + field + ": " + value);
         }
         return value;
+    }
+
+    private static void requireNonEmptyGroups(
+            List<ConsolePermissionGroupDeclaration> groups,
+            String field
+    ) {
+        if (groups.isEmpty()) {
+            invalid(field + " must be non-empty");
+        }
     }
 
     private static void requireDefaultGroup(

@@ -21,7 +21,8 @@ import com.innospots.nexus.core.endpoint.grant.support.ResolvedEndpointGrant;
  * 控制台资源授权判定（catalog v2：按 {@link CatalogGrantKeys} 资源键匹配 {@code nx_permission_grant}）。
  *
  * <p>HTTP 请求侧由 Filter 传入 {@link ResolvedEndpointGrant}，拼出
- * {@code EndpointGrant.name:domainKey.moduleKey} 后查授权表；页面访问校验则直接传入已拼好的资源键。</p>
+ * {@code domainKey.moduleKey:grantName} 后查授权表；READ/EXPORT 的 {@code grantName} 为
+ * {@link ResolvedEndpointGrant#grantGroup()}。</p>
  */
 public final class ConsoleResourcePermissionAuthorizer {
 
@@ -50,15 +51,15 @@ public final class ConsoleResourcePermissionAuthorizer {
             AuthorizationSubject subject
     ) {
         if (workspaceId == null || grant == null || subject == null
-                || blank(grant.name()) || blank(grant.moduleKey())) {
+                || blank(grant.moduleKey())) {
             return AuthorizationDecision.deny("Invalid authorization request");
         }
-        String domainKey = domainKeyByModuleKey(grant.moduleKey().trim());
+        String domainKey = resolveDomainKey(grant);
         if (blank(domainKey)) {
             return AuthorizationDecision.deny("Module is not available");
         }
         String resourceKey = CatalogGrantKeys.of(
-                grant.name().trim(),
+                grant.permissionGrantName(),
                 domainKey,
                 grant.moduleKey().trim());
         if (blank(resourceKey)) {
@@ -85,6 +86,13 @@ public final class ConsoleResourcePermissionAuthorizer {
         }
         return AuthorizationDecision.allow(new AuthorizationContext(
                 request.workspaceId(), resourceKey, null, List.of()));
+    }
+
+    private String resolveDomainKey(ResolvedEndpointGrant grant) {
+        if (!blank(grant.domainKey())) {
+            return grant.domainKey().trim();
+        }
+        return domainKeyByModuleKey(grant.moduleKey().trim());
     }
 
     private String domainKeyByModuleKey(String moduleKey) {

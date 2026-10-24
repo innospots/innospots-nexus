@@ -19,6 +19,8 @@ class ResolvedEndpointGrantTest {
 
         ResolvedEndpointGrant grant = new ResolvedEndpointGrant(
                 null,
+                null,
+                null,
                 EndpointGrantAction.READ,
                 null,
                 emptyLabel,
@@ -31,8 +33,11 @@ class ResolvedEndpointGrantTest {
         reporter.publishEntry("output", grant.toString());
 
         assertThat(grant.moduleKey()).isEmpty();
+        assertThat(grant.domainKey()).isEmpty();
+        assertThat(grant.grantGroup()).isEqualTo(ResolvedEndpointGrant.DEFAULT_GRANT_GROUP);
         assertThat(grant.name()).isEmpty();
         assertThat(grant.action()).isEqualTo(EndpointGrantAction.READ);
+        assertThat(grant.permissionGrantName()).isEqualTo(ResolvedEndpointGrant.DEFAULT_GRANT_GROUP);
         assertThat(AuditLogMessages.toI18nObject(grant.label()).isEmpty()).isTrue();
         assertThat(grant.recordArgs()).isTrue();
         assertThat(grant.auditLog()).isFalse();
@@ -46,6 +51,8 @@ class ResolvedEndpointGrantTest {
 
         ResolvedEndpointGrant grant = new ResolvedEndpointGrant(
                 "dictionary",
+                "platform",
+                "ops",
                 EndpointGrantAction.CREATE,
                 "dictionary.type.create",
                 label,
@@ -58,7 +65,10 @@ class ResolvedEndpointGrantTest {
         reporter.publishEntry("output", grant.toString());
 
         assertThat(grant.moduleKey()).isEqualTo("dictionary");
+        assertThat(grant.domainKey()).isEqualTo("platform");
+        assertThat(grant.grantGroup()).isEqualTo("ops");
         assertThat(grant.name()).isEqualTo("dictionary.type.create");
+        assertThat(grant.permissionGrantName()).isEqualTo("dictionary.type.create");
         assertThat(grant.ignorePermission()).isTrue();
         assertThat(grant.ignoreAuth()).isTrue();
         assertThat(AuditLogMessages.toI18nObject(grant.label()).cnValue()).isEqualTo("创建字典类型");

@@ -16,7 +16,7 @@ import com.innospots.nexus.core.endpoint.grant.I18nLiteral;
  */
 @Path("/api/d/platform/jaxrs-web-test")
 @Produces(MediaType.APPLICATION_JSON)
-@EndpointModule("jaxrs-web-test")
+@EndpointModule(value = "jaxrs-web-test", domain = "platform")
 public class ConsoleJaxRsWebGrantedApiTestResource {
 
     @GET

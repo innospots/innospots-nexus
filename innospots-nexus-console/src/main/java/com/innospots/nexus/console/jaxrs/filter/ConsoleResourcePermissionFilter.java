@@ -24,7 +24,7 @@ import com.innospots.nexus.core.jaxrs.support.RequestProperties;
  *（在 {@link ConsoleAuthenticationFilter} Bearer 鉴权之后）。
  *
  * <p>公共 API（{@link com.innospots.nexus.console.config.ConsoleConstant#PUBLIC_API_PREFIX}）不执行权限校验。
- * 读取请求上的 {@link ResolvedEndpointGrant}，按 {@code grantName:domainKey.moduleKey} 拼资源键，
+ * 读取请求上的 {@link ResolvedEndpointGrant}，按 {@code domainKey.moduleKey:grantName} 拼资源键，
  * 委托 {@link ConsoleResourcePermissionAuthorizer} 判定是否落在授权表中；与「是否已登录」的认证 Filter 语义区分。</p>
  */
 @Provider

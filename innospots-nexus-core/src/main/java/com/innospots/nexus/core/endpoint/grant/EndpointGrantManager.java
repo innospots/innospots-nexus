@@ -156,6 +156,8 @@ public final class EndpointGrantManager {
         I18nObject label = I18nLiteralSupport.toI18nObject(grant.label());
         return new EndpointGrantDescriptor(
                 grant.moduleKey(),
+                grant.domainKey(),
+                grant.grantGroup(),
                 httpMethod,
                 path,
                 grant.name(),

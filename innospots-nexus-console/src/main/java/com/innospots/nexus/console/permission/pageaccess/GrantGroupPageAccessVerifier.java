@@ -14,12 +14,9 @@ import com.innospots.nexus.console.scope.ConsoleOwnership;
 import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
 
 /**
- * 基于模块授权键后缀的页面访问校验：主体任一授权落在
- * {@code *:domainKey.moduleKey} 即视为可访问该页。
+ * 基于浏览分组授权键 {@code domainKey.moduleKey:grantGroup} 的页面访问校验。
  */
 public final class GrantGroupPageAccessVerifier implements PageAccessVerifier {
-
-    private static final String DEFAULT_GRANT_GROUP = "default";
 
     private final PermissionGrantDao grantDao;
 
@@ -43,25 +40,26 @@ public final class GrantGroupPageAccessVerifier implements PageAccessVerifier {
         if (subject == null) {
             return PageAccessVerifyResult.deny("Authentication is required");
         }
-        String grantGroup = blank(request.grantGroup()) ? DEFAULT_GRANT_GROUP : request.grantGroup().trim();
-        if (!DEFAULT_GRANT_GROUP.equals(grantGroup)) {
-            return PageAccessVerifyResult.deny("Grant group authorization is not implemented: " + grantGroup);
+        String grantGroup = request.grantGroup();
+        if (blank(grantGroup)) {
+            return PageAccessVerifyResult.deny("Grant group is required");
         }
         if (subject.administrator()) {
             return PageAccessVerifyResult.allow();
         }
-        String suffix = CatalogGrantKeys.moduleKeySuffix(
-                request.domainKey().trim(), request.moduleKey().trim());
-        if (blank(suffix) || !hasModuleGrant(workspaceId, suffix, subject)) {
+        String viewKey = CatalogGrantKeys.viewGroupKey(
+                request.domainKey().trim(),
+                request.moduleKey().trim(),
+                grantGroup.trim());
+        if (blank(viewKey) || !hasViewGroupGrant(workspaceId, viewKey, subject)) {
             return PageAccessVerifyResult.deny("Page permission is required");
         }
         return PageAccessVerifyResult.allow();
     }
 
-    private boolean hasModuleGrant(String workspaceId, String suffix, AuthorizationSubject subject) {
+    private boolean hasViewGroupGrant(String workspaceId, String viewKey, AuthorizationSubject subject) {
         for (PermissionGrantEntity grant : grants(workspaceId, subject)) {
-            String key = grant.getGrantKey();
-            if (key != null && key.endsWith(suffix)) {
+            if (viewKey.equals(grant.getGrantKey())) {
                 return true;
             }
         }

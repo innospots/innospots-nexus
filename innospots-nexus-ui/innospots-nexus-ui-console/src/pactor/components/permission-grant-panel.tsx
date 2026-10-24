@@ -16,6 +16,7 @@ type CatalogGrantItem = {
 type CatalogGrantGroup = {
   group?: string | null;
   displayName?: I18nValue;
+  resourceKey?: string | null;
   items?: CatalogGrantItem[] | null;
 };
 
@@ -67,7 +68,7 @@ function normalizeGrants(raw: unknown): PermissionGrant[] {
   return [];
 }
 
-function grantKey(item: CatalogGrantItem | PermissionGrant | null | undefined): string {
+function grantKey(item: CatalogGrantItem | PermissionGrant | CatalogGrantGroup | null | undefined): string {
   return item?.resourceKey?.trim() ?? "";
 }
 
@@ -106,11 +107,28 @@ function resolveGrantModule(path: CatalogNode[] | null): CatalogNode | null {
   return null;
 }
 
+function viewGroupUsesItems(group: CatalogGrantGroup): boolean {
+  return (group.items?.length ?? 0) > 0;
+}
+
+function viewGroupSelectableKeys(group: CatalogGrantGroup): string[] {
+  if (viewGroupUsesItems(group)) {
+    return (group.items ?? [])
+      .map((item) => grantKey(item))
+      .filter((key) => key.length > 0);
+  }
+  const key = grantKey(group);
+  return key.length > 0 ? [key] : [];
+}
+
 function collectCatalogGrantKeys(nodes: CatalogNode[], keys: string[] = []): string[] {
   for (const node of nodes) {
     const grants = node?.grants;
     if (grants != null) {
-      for (const group of [...(grants.viewGroups ?? []), ...(grants.operationGroups ?? [])]) {
+      for (const group of grants.viewGroups ?? []) {
+        keys.push(...viewGroupSelectableKeys(group));
+      }
+      for (const group of grants.operationGroups ?? []) {
         for (const item of group.items ?? []) {
           const key = grantKey(item);
           if (key.length > 0) {
@@ -124,12 +142,16 @@ function collectCatalogGrantKeys(nodes: CatalogNode[], keys: string[] = []): str
   return keys;
 }
 
-function itemTitle(item: CatalogGrantItem): string {
-  return resolveI18nText(item.displayName) || item.grantName?.trim() || grantKey(item);
+function itemTitle(item: CatalogGrantItem | CatalogNode): string {
+  return resolveI18nText(item.displayName) || (item as CatalogGrantItem).grantName?.trim() || grantKey(item);
 }
 
 function itemDescription(item: CatalogGrantItem): string {
   return resolveI18nText(item.description);
+}
+
+function groupTitle(group: CatalogGrantGroup): string {
+  return resolveI18nText(group.displayName) || group.group?.trim() || "浏览分组";
 }
 
 function GrantCheckbox({
@@ -168,6 +190,42 @@ function GrantCheckbox({
         ) : null}
         <span className="mt-1 block break-all font-mono text-[11px] text-muted-foreground/80">
           {grantKey(item)}
+        </span>
+      </span>
+    </label>
+  );
+}
+
+function ViewGroupCard({
+  group,
+  checked,
+  onChange,
+}: {
+  group: CatalogGrantGroup;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+}) {
+  const key = grantKey(group);
+  return (
+    <label
+      className={`flex cursor-pointer flex-col gap-2 rounded-lg border px-4 py-3 transition-colors ${
+        checked
+          ? "border-primary/50 bg-primary/5 shadow-sm"
+          : "border-border/70 hover:bg-muted/40"
+      }`}
+    >
+      <span className="flex items-start gap-3">
+        <input
+          type="checkbox"
+          className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
+          checked={checked}
+          onChange={(event) => onChange(event.target.checked)}
+        />
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-medium text-foreground">{groupTitle(group)}</span>
+          <span className="mt-1 block break-all font-mono text-[11px] text-muted-foreground/80">
+            {key}
+          </span>
         </span>
       </span>
     </label>
@@ -226,12 +284,20 @@ export function PermissionGrantPanel({
     () => moduleNode?.grants?.operationGroups ?? [],
     [moduleNode],
   );
-  const moduleItemKeys = useMemo(
+  const viewSelectableKeys = useMemo(
+    () => viewGroups.flatMap((group) => viewGroupSelectableKeys(group)),
+    [viewGroups],
+  );
+  const operationItemKeys = useMemo(
     () =>
-      [...viewGroups, ...operationGroups]
+      operationGroups
         .flatMap((group) => (group.items ?? []).map((item) => grantKey(item)))
         .filter((key) => key.length > 0),
-    [viewGroups, operationGroups],
+    [operationGroups],
+  );
+  const moduleItemKeys = useMemo(
+    () => [...viewSelectableKeys, ...operationItemKeys],
+    [viewSelectableKeys, operationItemKeys],
   );
   const selectedCount = moduleItemKeys.filter((key) => selectedKeys.has(key)).length;
 
@@ -266,10 +332,6 @@ export function PermissionGrantPanel({
 
   const selectedName = selectedNode != null ? itemTitle(selectedNode) : selectedKey;
   const moduleName = itemTitle(moduleNode);
-  const viewItemCount = viewGroups.reduce(
-    (total, group) => total + (group.items?.length ?? 0),
-    0,
-  );
   const operationItemCount = operationGroups.reduce(
     (total, group) => total + (group.items?.length ?? 0),
     0,
@@ -298,38 +360,51 @@ export function PermissionGrantPanel({
       <section className="rounded-lg border border-border p-4">
         <div className="flex items-center justify-between gap-2">
           <h4 className="text-sm font-semibold text-foreground">查看访问权限</h4>
-          <span className="text-xs text-muted-foreground">{viewItemCount} 项</span>
+          <span className="text-xs text-muted-foreground">{viewSelectableKeys.length} 项</span>
         </div>
-        {viewItemCount === 0 ? (
+        {viewSelectableKeys.length === 0 ? (
           <p className="mt-3 text-sm text-muted-foreground">该模块没有可配置的页面访问项。</p>
         ) : (
           <div className="mt-3 space-y-4">
             {viewGroups.map((group, groupIndex) => {
               const items = group.items ?? [];
-              if (items.length === 0) {
+              const groupKey = `view-${group.group ?? "group"}-${groupIndex}`;
+              if (viewGroupUsesItems(group)) {
+                return (
+                  <div key={groupKey}>
+                    <div className="mb-2 flex items-center gap-2">
+                      <span className="text-xs font-medium text-muted-foreground">
+                        {groupTitle(group)}
+                      </span>
+                      <span className="h-px flex-1 bg-border" />
+                    </div>
+                    <div className="grid gap-2 xl:grid-cols-2">
+                      {items.map((item) => {
+                        const key = grantKey(item);
+                        return (
+                          <GrantCheckbox
+                            key={key}
+                            item={item}
+                            checked={selectedKeys.has(key)}
+                            onChange={(checked) => toggleGrant(key, checked)}
+                          />
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              }
+              const key = grantKey(group);
+              if (key.length === 0) {
                 return null;
               }
               return (
-                <div key={`view-${group.group ?? "default"}-${groupIndex}`}>
-                  <div className="mb-2 flex items-center gap-2">
-                    <span className="text-xs font-medium text-muted-foreground">
-                      {resolveI18nText(group.displayName) || group.group || "查看"}
-                    </span>
-                    <span className="h-px flex-1 bg-border" />
-                  </div>
-                  <div className="grid gap-2 xl:grid-cols-2">
-                    {items.map((item) => {
-                      const key = grantKey(item);
-                      return (
-                        <GrantCheckbox
-                          key={key}
-                          item={item}
-                          checked={selectedKeys.has(key)}
-                          onChange={(checked) => toggleGrant(key, checked)}
-                        />
-                      );
-                    })}
-                  </div>
+                <div key={groupKey} className="grid gap-3 sm:grid-cols-2">
+                  <ViewGroupCard
+                    group={group}
+                    checked={selectedKeys.has(key)}
+                    onChange={(checked) => toggleGrant(key, checked)}
+                  />
                 </div>
               );
             })}

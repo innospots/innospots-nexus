@@ -166,6 +166,8 @@ class ConsoleAuthenticationFilterTest {
         ResolvedEndpointGrant base = EndpointGrantFixtures.dictionaryTypeCreateGrant();
         return new ResolvedEndpointGrant(
                 base.moduleKey(),
+                base.domainKey(),
+                base.grantGroup(),
                 EndpointGrantAction.READ,
                 base.name(),
                 base.label(),

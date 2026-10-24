@@ -18,6 +18,8 @@ public final class SyncedCatalogResourceIds {
 
     private static final String ROLE_MENU_KEY = "module:role";
 
+    private static final String DEFAULT_VIEW_GROUP = "default";
+
     private SyncedCatalogResourceIds() {
     }
 
@@ -53,9 +55,11 @@ public final class SyncedCatalogResourceIds {
                     NexusStatusCode.INVALID_PARAMETER.fullCode(),
                     "catalog resource has no page grant key: " + resourceKey);
         }
+        String domainKey = row.get("domain_key").toString();
+        String moduleKey = row.get("module_key").toString();
         return new ResourceRow(
                 id.toString(),
-                entryPageKey + ":" + row.get("domain_key") + "." + row.get("module_key"));
+                domainKey + "." + moduleKey + ":" + DEFAULT_VIEW_GROUP);
     }
 
     private record ResourceRow(String resourceId, String viewGrantKey) {

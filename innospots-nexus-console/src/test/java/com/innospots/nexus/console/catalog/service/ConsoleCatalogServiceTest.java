@@ -34,13 +34,13 @@ import com.innospots.nexus.core.endpoint.grant.EndpointGrantManager;
 class ConsoleCatalogServiceTest {
 
     @Test
-    void permissionCatalogBuildsModuleViewGroupsFromReadOnlyGrants() {
+    void permissionCatalogBuildsModuleViewGroupsFromDeclarations() {
         ConsoleCatalogResourceEntity module = entity(
                 "m1", null, CatalogResourceType.MODULE, "module:dictionary", "dictionary", "platform-dictionary-main");
         module.setDomainKey("platform");
         module.setViewGroups(Jsons.toJson(List.of(Map.of(
                 "group", "default",
-                "label", Map.of("zh-CN", "查看", "en", "View")))));
+                "label", Map.of("zh-CN", "字典管理", "en", "Dictionary Management")))));
         module.setOperationGroups(Jsons.toJson(List.of(Map.of(
                 "group", "default",
                 "label", Map.of("zh-CN", "操作", "en", "Operations")))));
@@ -57,13 +57,10 @@ class ConsoleCatalogServiceTest {
         assertThat(roots).hasSize(1);
         assertThat(roots.getFirst().grants()).isNotNull();
         assertThat(roots.getFirst().grants().viewGroups()).hasSize(1);
-        assertThat(roots.getFirst().grants().viewGroups().getFirst().items())
-                .extracting(item -> item.grantName())
-                .contains("dictionary.type.page", "dictionary.type.get")
-                .doesNotContain("dictionary.type.create");
-        assertThat(roots.getFirst().grants().viewGroups().getFirst().items())
-                .extracting(item -> item.resourceKey())
-                .contains("dictionary.type.page:platform.dictionary");
+        assertThat(roots.getFirst().grants().viewGroups().getFirst().group()).isEqualTo("default");
+        assertThat(roots.getFirst().grants().viewGroups().getFirst().resourceKey())
+                .isEqualTo("platform.dictionary:default");
+        assertThat(roots.getFirst().grants().viewGroups().getFirst().items()).isEmpty();
         assertThat(roots.getFirst().grants().operationGroups().getFirst().items())
                 .extracting(item -> item.grantName())
                 .contains("dictionary.type.create")
@@ -89,6 +86,8 @@ class ConsoleCatalogServiceTest {
         List<CatalogNodeVo> roots = service.permissionCatalog();
         assertThat(roots).hasSize(1);
         assertThat(roots.getFirst().grants().viewGroups()).hasSize(1);
+        assertThat(roots.getFirst().grants().viewGroups().getFirst().resourceKey())
+                .isEqualTo("nexus.demo:default");
         assertThat(roots.getFirst().grants().viewGroups().getFirst().items()).isEmpty();
         assertThat(roots.getFirst().grants().operationGroups().getFirst().items()).isEmpty();
     }

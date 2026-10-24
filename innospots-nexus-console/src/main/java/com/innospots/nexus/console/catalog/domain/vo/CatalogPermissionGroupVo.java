@@ -11,6 +11,7 @@ public record CatalogPermissionGroupVo(
         String group,
         I18nObject displayName,
         Integer orderIndex,
+        String resourceKey,
         List<CatalogViewItemVo> items
 ) {
 

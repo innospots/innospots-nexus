@@ -23,6 +23,12 @@ public @interface EndpointModule {
     String value();
 
     /**
+     * 领域键，与 catalog MODULE {@code domainKey} 对齐，用于拼装
+     * {@code domainKey.moduleKey:grantName} 资源标识；未声明时由宿主按 catalog 解析。
+     */
+    String domain() default "";
+
+    /**
      * 模块内全部方法默认跳过权限校验（方法级 {@link EndpointGrant} 可再置 true）。
      */
     boolean ignorePermission() default false;

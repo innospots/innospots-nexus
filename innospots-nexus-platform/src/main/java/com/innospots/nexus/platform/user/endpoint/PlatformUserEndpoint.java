@@ -38,7 +38,7 @@ import com.innospots.nexus.platform.user.service.PlatformUserService;
  * @author Smars
  * @date 2026/09/13
  */
-@EndpointModule("user")
+@EndpointModule(value = "user", domain = com.innospots.nexus.platform.entry.BuiltinPlatformEntryPlugins.DOMAIN_KEY)
 @Path(PlatformConstant.USERS_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)

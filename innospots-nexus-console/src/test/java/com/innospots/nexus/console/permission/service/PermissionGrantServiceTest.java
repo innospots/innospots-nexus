@@ -46,10 +46,10 @@ class PermissionGrantServiceTest {
         ConsoleOwnership ownership = new ConsoleOwnership(
                 RoleOwnerType.PLATFORM, null, SecurityRealm.PLATFORM.name());
         PermissionGrantDao grantDao = mock(PermissionGrantDao.class);
-        when(grantDao.selectList(any())).thenReturn(List.of(grantRow("platform-user-main:platform.user", null)));
+        when(grantDao.selectList(any())).thenReturn(List.of(grantRow("platform.user:default", null)));
         GrantSubjectAccess grantSubjectAccess = mock(GrantSubjectAccess.class);
         PermissionGrantService service = new PermissionGrantService(
-                grantDao, catalogService("platform-user-main:platform.user"), grantSubjectAccess);
+                grantDao, catalogService("platform.user:default"), grantSubjectAccess);
 
         PermissionGrantReplaceRequest result = service.list(PermissionSubjectType.ROLE, "rol-1", ownership);
 
@@ -63,22 +63,22 @@ class PermissionGrantServiceTest {
         ConsoleOwnership ownership = workspaceOwnership("wks-1");
         PermissionGrantDao grantDao = mock(PermissionGrantDao.class);
         when(grantDao.selectList(any())).thenReturn(List.of(
-                grantRow("platform-user-main:platform.user", null),
-                grantRow("platform.user.create:platform.user", "{\"filter\":\"x\"}")));
+                grantRow("platform.user:default", null),
+                grantRow("platform.user:platform.user.create", "{\"filter\":\"x\"}")));
         GrantSubjectAccess grantSubjectAccess = mock(GrantSubjectAccess.class);
 
         PermissionGrantService service = new PermissionGrantService(
                 grantDao,
                 catalogService(
-                        "platform-user-main:platform.user",
-                        "platform.user.create:platform.user"),
+                        "platform.user:default",
+                        "platform.user:platform.user.create"),
                 grantSubjectAccess);
         PermissionGrantReplaceRequest result = service.list(
                 PermissionSubjectType.ROLE, "rol-1", ownership, "tnt-1", "wks-1");
 
         assertThat(result.grants()).containsExactly(
-                new PermissionGrantItemRequest("platform-user-main:platform.user", null),
-                new PermissionGrantItemRequest("platform.user.create:platform.user", "{\"filter\":\"x\"}"));
+                new PermissionGrantItemRequest("platform.user:default", null),
+                new PermissionGrantItemRequest("platform.user:platform.user.create", "{\"filter\":\"x\"}"));
         verifyNoInteractions(grantSubjectAccess);
     }
 
@@ -88,11 +88,11 @@ class PermissionGrantServiceTest {
         ConsoleOwnership ownership = workspaceOwnership("wks-1");
         PermissionGrantService service = newService(
                 mock(PermissionGrantDao.class),
-                catalogService("platform-user-main:platform.user"));
+                catalogService("platform.user:default"));
 
         PermissionGrantReplaceRequest request = new PermissionGrantReplaceRequest(List.of(
-                new PermissionGrantItemRequest("platform-user-main:platform.user", null),
-                new PermissionGrantItemRequest("platform-user-main:platform.user", null)));
+                new PermissionGrantItemRequest("platform.user:default", null),
+                new PermissionGrantItemRequest("platform.user:default", null)));
 
         assertThatThrownBy(() -> service.replace(
                 PermissionSubjectType.ROLE, "rol-1", request, ownership, "tnt-1", "wks-1"))
@@ -122,9 +122,9 @@ class PermissionGrantServiceTest {
         PermissionGrantDao grantDao = mock(PermissionGrantDao.class);
         PermissionGrantService service = newService(
                 grantDao,
-                catalogService("platform-user-main:platform.user"));
+                catalogService("platform.user:default"));
         PermissionGrantReplaceRequest request = new PermissionGrantReplaceRequest(List.of(
-                new PermissionGrantItemRequest("platform-user-main:platform.user", null)));
+                new PermissionGrantItemRequest("platform.user:default", null)));
 
         service.replace(
                 PermissionSubjectType.ROLE, "rol-1", request, ownership, "tnt-1", "wks-1");
@@ -139,9 +139,9 @@ class PermissionGrantServiceTest {
         PermissionGrantDao grantDao = mock(PermissionGrantDao.class);
         PermissionGrantService service = newService(
                 grantDao,
-                catalogService("platform.user.create:platform.user"));
+                catalogService("platform.user:platform.user.create"));
         PermissionGrantReplaceRequest request = new PermissionGrantReplaceRequest(List.of(
-                new PermissionGrantItemRequest("platform.user.create:platform.user", null)));
+                new PermissionGrantItemRequest("platform.user:platform.user.create", null)));
 
         service.replace(
                 PermissionSubjectType.ROLE, "rol-1", request, ownership, "tnt-1", "wks-1");
@@ -155,9 +155,9 @@ class PermissionGrantServiceTest {
         ConsoleOwnership ownership = workspaceOwnership("wks-1");
         PermissionGrantService service = newService(
                 mock(PermissionGrantDao.class),
-                catalogService("sales-orders:sales.orders"));
+                catalogService("sales.orders:sales-orders"));
         PermissionGrantReplaceRequest request = new PermissionGrantReplaceRequest(List.of(
-                new PermissionGrantItemRequest("sales-orders:sales.orders", "{\"filter\":\"x\"}")));
+                new PermissionGrantItemRequest("sales.orders:sales-orders", "{\"filter\":\"x\"}")));
 
         assertThatThrownBy(() -> service.replace(
                 PermissionSubjectType.ROLE, "rol-1", request, ownership, "tnt-1", "wks-1"))
@@ -179,11 +179,11 @@ class PermissionGrantServiceTest {
         GrantSubjectAccess grantSubjectAccess = mock(GrantSubjectAccess.class);
         PermissionGrantService service = new PermissionGrantService(
                 grantDao,
-                catalogService("sales-orders:sales.orders"),
+                catalogService("sales.orders:sales-orders"),
                 grantSubjectAccess);
 
         PermissionGrantReplaceRequest request = new PermissionGrantReplaceRequest(List.of(
-                new PermissionGrantItemRequest("sales-orders:sales.orders", null)));
+                new PermissionGrantItemRequest("sales.orders:sales-orders", null)));
 
         service.replace(PermissionSubjectType.ROLE, "rol-9", request, ownership, "tnt-1", "wks-1");
 
@@ -191,7 +191,7 @@ class PermissionGrantServiceTest {
         assertThat(inserted).hasSize(1);
         assertThat(inserted.get(0).getSubjectType()).isEqualTo(PermissionSubjectType.ROLE.name());
         assertThat(inserted.get(0).getSubjectId()).isEqualTo("rol-9");
-        assertThat(inserted.get(0).getGrantKey()).isEqualTo("sales-orders:sales.orders");
+        assertThat(inserted.get(0).getGrantKey()).isEqualTo("sales.orders:sales-orders");
         assertThat(inserted.get(0).getOwnerId()).isEqualTo("wks-1");
         verify(grantSubjectAccess).ensureSubjectInScope(
                 PermissionSubjectType.ROLE, "rol-9", ownership, "tnt-1", "wks-1");

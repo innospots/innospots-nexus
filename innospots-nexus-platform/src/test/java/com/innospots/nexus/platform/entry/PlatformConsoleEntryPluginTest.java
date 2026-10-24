@@ -59,7 +59,16 @@ class PlatformConsoleEntryPluginTest {
                 .findFirst()
                 .orElseThrow();
         assertThat(organization.children()).isEmpty();
+        assertThat(organization.viewGroups()).extracting(group -> group.group())
+                .containsExactly(ConsoleContributeNode.DEFAULT_VIEW_GROUP);
         assertThat(organization.operationGroups()).extracting(group -> group.group())
+                .containsExactly(ConsoleContributeNode.DEFAULT_VIEW_GROUP);
+
+        ConsoleContributeNode settings = contribution.modules().stream()
+                .filter(module -> "settings".equals(module.moduleKey()))
+                .findFirst()
+                .orElseThrow();
+        assertThat(settings.viewGroups()).extracting(group -> group.group())
                 .containsExactly(ConsoleContributeNode.DEFAULT_VIEW_GROUP);
     }
 

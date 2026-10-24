@@ -74,7 +74,7 @@ class ConsoleResourcePermissionFilterTest extends ConsoleJaxRsWebIntegrationTest
                         anyString(), any(ResolvedEndpointGrant.class), any(AuthorizationSubject.class)))
                 .thenReturn(AuthorizationDecision.allow(new AuthorizationContext(
                         "wks-demo",
-                        "jaxrs.web.test.echo:platform.jaxrs-web-test",
+                        "platform.jaxrs-web-test:jaxrs.web.test.echo",
                         null,
                         List.of())));
         HttpResponse<String> response = http.exchange(

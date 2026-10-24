@@ -28,23 +28,23 @@ class ConsoleResourcePermissionAuthorizerTest {
 
         AuthorizationDecision decision = authorizer.authorize(new AuthorizationRequest(
                 "ws-1",
-                "dictionary.type.create:platform.dictionary",
+                "platform.dictionary:dictionary.type.create",
                 new AuthorizationSubject("u1", Set.of(), Set.of(), true)));
 
         assertThat(decision.allowed()).isTrue();
         assertThat(decision.context().resourceKey())
-                .isEqualTo("dictionary.type.create:platform.dictionary");
+                .isEqualTo("platform.dictionary:dictionary.type.create");
     }
 
     @Test
     void allowsSubjectWithMatchingGrant() {
-        PermissionGrantDao grantDao = grantDaoForKey("dictionary.type.create:platform.dictionary", true);
+        PermissionGrantDao grantDao = grantDaoForKey("platform.dictionary:dictionary.type.create", true);
         ConsoleResourcePermissionAuthorizer authorizer = new ConsoleResourcePermissionAuthorizer(
                 mock(ConsoleCatalogResourceDao.class), grantDao);
 
         AuthorizationDecision decision = authorizer.authorize(new AuthorizationRequest(
                 "ws-1",
-                "dictionary.type.create:platform.dictionary",
+                "platform.dictionary:dictionary.type.create",
                 new AuthorizationSubject("u1", Set.of("role-1"), Set.of(), false)));
 
         assertThat(decision.allowed()).isTrue();
@@ -52,13 +52,13 @@ class ConsoleResourcePermissionAuthorizerTest {
 
     @Test
     void deniesSubjectWithoutMatchingGrant() {
-        PermissionGrantDao grantDao = grantDaoForKey("dictionary.type.create:platform.dictionary", false);
+        PermissionGrantDao grantDao = grantDaoForKey("platform.dictionary:dictionary.type.create", false);
         ConsoleResourcePermissionAuthorizer authorizer = new ConsoleResourcePermissionAuthorizer(
                 mock(ConsoleCatalogResourceDao.class), grantDao);
 
         AuthorizationDecision decision = authorizer.authorize(new AuthorizationRequest(
                 "ws-1",
-                "dictionary.type.create:platform.dictionary",
+                "platform.dictionary:dictionary.type.create",
                 new AuthorizationSubject("u1", Set.of("role-1"), Set.of(), false)));
 
         assertThat(decision.allowed()).isFalse();
@@ -68,7 +68,7 @@ class ConsoleResourcePermissionAuthorizerTest {
     void authorizeEndpointBuildsResourceKeyFromGrantAndModule() {
         ConsoleCatalogResourceDao resourceDao = mock(ConsoleCatalogResourceDao.class);
         when(resourceDao.selectList(any())).thenReturn(List.of(dictionaryModule()));
-        PermissionGrantDao grantDao = grantDaoForKey("dictionary.type.create:platform.dictionary", true);
+        PermissionGrantDao grantDao = grantDaoForKey("platform.dictionary:dictionary.type.create", true);
         ConsoleResourcePermissionAuthorizer authorizer = new ConsoleResourcePermissionAuthorizer(
                 resourceDao, grantDao);
         ResolvedEndpointGrant grant = EndpointGrantFixtures.dictionaryTypeCreateGrant();
@@ -80,7 +80,7 @@ class ConsoleResourcePermissionAuthorizerTest {
 
         assertThat(decision.allowed()).isTrue();
         assertThat(decision.context().resourceKey())
-                .isEqualTo("dictionary.type.create:platform.dictionary");
+                .isEqualTo("platform.dictionary:dictionary.type.create");
     }
 
     @Test

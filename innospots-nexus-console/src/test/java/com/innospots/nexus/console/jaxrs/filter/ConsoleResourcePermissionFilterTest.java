@@ -139,7 +139,7 @@ class ConsoleResourcePermissionFilterTest {
         when(subjectResolver.resolve()).thenReturn(Optional.of(subject()));
         AuthorizationContext context = new AuthorizationContext(
                 "ws-1",
-                "dictionary.type.create:platform.dictionary",
+                "platform.dictionary:dictionary.type.create",
                 null,
                 List.of());
         when(resourcePermissionAuthorizer.authorizeEndpoint(any(), any(), any()))
@@ -188,6 +188,8 @@ class ConsoleResourcePermissionFilterTest {
         ResolvedEndpointGrant base = EndpointGrantFixtures.dictionaryTypeCreateGrant();
         return new ResolvedEndpointGrant(
                 base.moduleKey(),
+                base.domainKey(),
+                base.grantGroup(),
                 base.action(),
                 base.name(),
                 base.label(),

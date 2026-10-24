@@ -27,7 +27,10 @@ import com.innospots.nexus.platform.config.PlatformConstant;
  * @date 2026/10/06
  * @see com.innospots.nexus.platform.access.service.PlatformOpenRegistrationService
  */
-@EndpointModule(value = "user", ignoreAuth = true)
+@EndpointModule(
+        value = "user",
+        domain = com.innospots.nexus.platform.entry.BuiltinPlatformEntryPlugins.DOMAIN_KEY,
+        ignoreAuth = true)
 @Path(PlatformConstant.PUBLIC_OPEN_REGISTRATION_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
