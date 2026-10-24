@@ -6,6 +6,7 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
 
+import com.innospots.nexus.console.entry.ConsolePageRoutes;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrant;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
 import com.innospots.nexus.core.endpoint.grant.EndpointModule;
@@ -15,7 +16,11 @@ import com.innospots.nexus.core.openapi.OpenApiCatalogPaths;
 /**
  * 站点根路径 {@code GET /}：重定向至配置的文档入口（见 {@code nexus.console.web.jersey.root-path}）。
  */
-@EndpointModule(value = "console", ignoreAuth = true, ignorePermission = true)
+@EndpointModule(
+        value = "main-root",
+        domain = ConsolePageRoutes.BUILTIN_DOMAIN_KEY,
+        ignoreAuth = true,
+        ignorePermission = true)
 @Path("/")
 public final class MainRootEndpoint {
 

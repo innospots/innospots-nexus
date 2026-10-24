@@ -7,8 +7,19 @@ import java.lang.reflect.Method;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestReporter;
 
+import java.util.List;
+
+import com.innospots.nexus.base.domain.enums.BasicStatus;
+import com.innospots.nexus.base.domain.response.PageResult;
+import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeCreateRequest;
+import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypePageRequest;
+import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeStatusUpdateRequest;
+import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeUpdateRequest;
+import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeOptionVo;
+import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeVo;
 import com.innospots.nexus.console.dictionary.endpoint.DictionaryTypeEndpoint;
+import com.innospots.nexus.console.entry.ConsolePageRoutes;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrant;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
 import com.innospots.nexus.core.endpoint.grant.EndpointModule;
@@ -18,11 +29,11 @@ class EndpointGrantAnnotationsTest {
 
     @Test
     void resolvesGrantDeclaredOnInterfaceMethod() throws NoSuchMethodException {
-        Method method = DictionaryTypeEndpoint.class.getMethod(
+        Method method = DictionaryGrantImpl.class.getMethod(
                 "createDictionaryType",
                 DictionaryTypeCreateRequest.class);
 
-        ResolvedEndpointGrant grant = EndpointGrantAnnotations.resolve(method, null);
+        ResolvedEndpointGrant grant = EndpointGrantAnnotations.resolve(method, DictionaryGrantImpl.class);
 
         assertThat(grant).isNotNull();
         assertThat(grant.moduleKey()).isEqualTo("dictionary");
@@ -34,18 +45,20 @@ class EndpointGrantAnnotationsTest {
 
     @Test
     void resolveModuleOnContractInterface() {
-        assertThat(EndpointGrantAnnotations.resolveModule(DictionaryTypeEndpoint.class).value())
+        assertThat(EndpointGrantAnnotations.resolveModule(DictionaryTypeEndpoint.class)).isNull();
+        assertThat(EndpointGrantAnnotations.isGrantResourceType(DictionaryTypeEndpoint.class)).isFalse();
+        assertThat(EndpointGrantAnnotations.resolveModule(DictionaryGrantImpl.class).value())
                 .isEqualTo("dictionary");
-        assertThat(EndpointGrantAnnotations.isGrantResourceType(DictionaryTypeEndpoint.class)).isTrue();
+        assertThat(EndpointGrantAnnotations.isGrantResourceType(DictionaryGrantImpl.class)).isTrue();
     }
 
     @Test
     void mergesModuleIgnoreFlags() throws NoSuchMethodException {
-        Method method = DictionaryTypeEndpoint.class.getMethod(
+        Method method = DictionaryGrantImpl.class.getMethod(
                 "listDictionaryTypeOptions",
                 com.innospots.nexus.base.domain.enums.BasicStatus.class);
 
-        ResolvedEndpointGrant grant = EndpointGrantAnnotations.resolve(method, null);
+        ResolvedEndpointGrant grant = EndpointGrantAnnotations.resolve(method, DictionaryGrantImpl.class);
 
         assertThat(grant).isNotNull();
         assertThat(grant.ignorePermission()).isTrue();
@@ -209,6 +222,49 @@ class EndpointGrantAnnotationsTest {
                 name = "solo",
                 auditLog = false)
         public void solo() {
+        }
+    }
+
+    @EndpointModule(value = "dictionary", domain = ConsolePageRoutes.BUILTIN_DOMAIN_KEY)
+    static final class DictionaryGrantImpl implements DictionaryTypeEndpoint {
+
+        @Override
+        public R<PageResult<DictionaryTypeVo>> pageDictionaryTypes(DictionaryTypePageRequest request) {
+            return R.ok();
+        }
+
+        @Override
+        public R<DictionaryTypeVo> getDictionaryType(String dictionaryTypeId) {
+            return R.ok();
+        }
+
+        @Override
+        public R<DictionaryTypeVo> createDictionaryType(DictionaryTypeCreateRequest request) {
+            return R.ok();
+        }
+
+        @Override
+        public R<DictionaryTypeVo> updateDictionaryType(
+                String dictionaryTypeId,
+                DictionaryTypeUpdateRequest request) {
+            return R.ok();
+        }
+
+        @Override
+        public R<Void> updateDictionaryTypeStatus(
+                String dictionaryTypeId,
+                DictionaryTypeStatusUpdateRequest request) {
+            return R.ok();
+        }
+
+        @Override
+        public R<Void> deleteDictionaryType(String dictionaryTypeId) {
+            return R.ok();
+        }
+
+        @Override
+        public R<List<DictionaryTypeOptionVo>> listDictionaryTypeOptions(BasicStatus status) {
+            return R.ok();
         }
     }
 }

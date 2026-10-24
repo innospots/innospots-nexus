@@ -42,21 +42,20 @@ public final class ConsoleAuthenticationFilter implements ContainerRequestFilter
         if (!security.isEnabled()) {
             return;
         }
+        String path = normalizedPath(requestContext);
+        String authorization = requestContext.getHeaderString(HttpHeaderNames.AUTHORIZATION);
+        if (ConsolePublicApiPaths.matches(path)) {
+            if (authorization != null && !authorization.isBlank()) {
+                String token = extractBearerToken(authorization);
+                ConsoleTokenSessionBinder.bindAccessToken(tokenIssuer.parse(token));
+            }
+            return;
+        }
         ResolvedEndpointGrant grant = ConsoleRequestGrants.resolvedGrant(requestContext);
         if (grant != null && grant.ignoreAuth()) {
             return;
         }
-        String path = normalizedPath(requestContext);
         if (ConsoleAntPathMatcher.matchesAny(security.getPermitAllPatterns(), path)) {
-            return;
-        }
-        String authorization = requestContext.getHeaderString(HttpHeaderNames.AUTHORIZATION);
-        if (ConsolePublicApiPaths.matches(path)) {
-            if (authorization == null || authorization.isBlank()) {
-                return;
-            }
-            String token = extractBearerToken(authorization);
-            ConsoleTokenSessionBinder.bindAccessToken(tokenIssuer.parse(token));
             return;
         }
         if (authorization == null || authorization.isBlank()) {

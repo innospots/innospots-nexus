@@ -27,6 +27,7 @@ import com.innospots.nexus.platform.access.domain.request.PlatformAccessRequestR
 import com.innospots.nexus.platform.access.domain.vo.PlatformAccessRequestVo;
 import com.innospots.nexus.platform.access.service.PlatformAccessRequestService;
 import com.innospots.nexus.platform.config.PlatformConstant;
+import com.innospots.nexus.platform.entry.BuiltinPlatformEntryPlugins;
 import com.innospots.nexus.platform.user.domain.vo.PlatformUserVo;
 
 /**
@@ -36,7 +37,7 @@ import com.innospots.nexus.platform.user.domain.vo.PlatformUserVo;
  * @date 2026/10/06
  * @see com.innospots.nexus.platform.access.service.PlatformAccessRequestService
  */
-@EndpointModule(value = "user", domain = com.innospots.nexus.platform.entry.BuiltinPlatformEntryPlugins.DOMAIN_KEY)
+@EndpointModule(value = "user", domain = BuiltinPlatformEntryPlugins.DOMAIN_KEY)
 @Path(PlatformConstant.REGISTRATION_ACCESS_REQUESTS_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)

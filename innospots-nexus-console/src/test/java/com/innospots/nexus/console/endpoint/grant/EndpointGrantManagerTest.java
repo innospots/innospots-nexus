@@ -14,6 +14,7 @@ import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypePageRequest;
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeVo;
 import com.innospots.nexus.console.dictionary.endpoint.DictionaryTypeEndpoint;
+import com.innospots.nexus.console.entry.ConsolePageRoutes;
 import com.innospots.nexus.core.endpoint.grant.support.EndpointGrantAnnotations;
 import com.innospots.nexus.core.endpoint.grant.support.EndpointGrantHttpIntrospection;
 import com.innospots.nexus.core.endpoint.grant.support.EndpointGrantPathMatcher;
@@ -76,6 +77,7 @@ class EndpointGrantManagerTest {
                 .isEqualTo("/api/test/dictionary/types/{dictionaryTypeId}");
     }
 
+    @EndpointModule(value = "dictionary", domain = ConsolePageRoutes.BUILTIN_DOMAIN_KEY)
     @Path("/api/test/dictionary/types")
     static final class SampleDictionaryResource implements DictionaryTypeEndpoint {
 

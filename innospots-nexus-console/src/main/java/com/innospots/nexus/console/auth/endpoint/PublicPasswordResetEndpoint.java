@@ -13,7 +13,6 @@ import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexus.console.auth.domain.request.PasswordResetRequest;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrant;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
-import com.innospots.nexus.core.endpoint.grant.EndpointModule;
 import com.innospots.nexus.core.endpoint.grant.I18nLiteral;
 
 /**
@@ -21,7 +20,6 @@ import com.innospots.nexus.core.endpoint.grant.I18nLiteral;
  *
  * <p>类级 {@code @Path} 由业务域实现（如 platform）绑定。</p>
  */
-@EndpointModule(value = "auth", ignoreAuth = true)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "PublicPasswordReset", description = "匿名密码重置")

@@ -12,7 +12,6 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrant;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
-import com.innospots.nexus.core.endpoint.grant.EndpointModule;
 import com.innospots.nexus.core.endpoint.grant.I18nLiteral;
 import com.innospots.nexus.console.permission.domain.vo.PermissionResourceVo;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
@@ -20,7 +19,6 @@ import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 /**
  * 当前用户可见权限资源 REST 契约。
  */
-@EndpointModule("permission")
 @Produces(MediaType.APPLICATION_JSON)
 @Tag(name = "Permission", description = "授权与可见资源")
 @NexusAuthenticatedApi

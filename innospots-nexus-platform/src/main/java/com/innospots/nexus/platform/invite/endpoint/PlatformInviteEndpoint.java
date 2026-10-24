@@ -23,6 +23,7 @@ import com.innospots.nexus.core.endpoint.grant.EndpointModule;
 import com.innospots.nexus.core.endpoint.grant.I18nLiteral;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 import com.innospots.nexus.platform.config.PlatformConstant;
+import com.innospots.nexus.platform.entry.BuiltinPlatformEntryPlugins;
 import com.innospots.nexus.platform.invite.domain.request.PlatformInviteCreateRequest;
 import com.innospots.nexus.platform.invite.domain.request.PlatformInvitePageRequest;
 import com.innospots.nexus.platform.invite.domain.vo.PlatformInviteVo;
@@ -35,7 +36,7 @@ import com.innospots.nexus.platform.invite.service.PlatformInviteService;
  * @date 2026/10/06
  * @see com.innospots.nexus.platform.invite.service.PlatformInviteService
  */
-@EndpointModule(value = "user", domain = com.innospots.nexus.platform.entry.BuiltinPlatformEntryPlugins.DOMAIN_KEY)
+@EndpointModule(value = "user", domain = BuiltinPlatformEntryPlugins.DOMAIN_KEY)
 @Path(PlatformConstant.INVITES_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)

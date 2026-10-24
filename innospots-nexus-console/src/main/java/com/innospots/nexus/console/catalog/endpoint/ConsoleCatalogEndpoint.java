@@ -14,6 +14,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexus.console.config.ConsoleConstant;
+import com.innospots.nexus.console.entry.ConsolePageRoutes;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrant;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
 import com.innospots.nexus.core.endpoint.grant.EndpointModule;
@@ -28,7 +29,7 @@ import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 /**
  * 权限设置页目录树与显式同步接口。
  */
-@EndpointModule("catalog")
+@EndpointModule(value = "catalog", domain = ConsolePageRoutes.BUILTIN_DOMAIN_KEY)
 @Path(ConsoleConstant.API_PREFIX + "/catalog")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)

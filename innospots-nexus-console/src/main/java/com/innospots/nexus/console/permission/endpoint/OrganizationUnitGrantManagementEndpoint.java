@@ -14,7 +14,6 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrant;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
-import com.innospots.nexus.core.endpoint.grant.EndpointModule;
 import com.innospots.nexus.core.endpoint.grant.I18nLiteral;
 import com.innospots.nexus.console.permission.domain.request.PermissionGrantReplaceRequest;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
@@ -22,7 +21,6 @@ import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 /**
  * 组织单元权限全量替换 REST 契约。
  */
-@EndpointModule("permission")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Permission", description = "授权与可见资源")

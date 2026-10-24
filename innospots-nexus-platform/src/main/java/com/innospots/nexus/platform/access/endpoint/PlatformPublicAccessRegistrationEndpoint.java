@@ -20,6 +20,7 @@ import com.innospots.nexus.platform.access.domain.request.PlatformRegistrationOt
 import com.innospots.nexus.platform.access.domain.vo.PlatformAccessRequestVo;
 import com.innospots.nexus.platform.access.service.PlatformAccessRequestService;
 import com.innospots.nexus.platform.config.PlatformConstant;
+import com.innospots.nexus.platform.entry.BuiltinPlatformEntryPlugins;
 
 /**
  * APPROVAL 模式公开注册 REST（{@link PlatformConstant#PUBLIC_ACCESS_REGISTRATION_PATH}）。
@@ -30,7 +31,7 @@ import com.innospots.nexus.platform.config.PlatformConstant;
  */
 @EndpointModule(
         value = "user",
-        domain = com.innospots.nexus.platform.entry.BuiltinPlatformEntryPlugins.DOMAIN_KEY,
+        domain = BuiltinPlatformEntryPlugins.DOMAIN_KEY,
         ignoreAuth = true)
 @Path(PlatformConstant.PUBLIC_ACCESS_REGISTRATION_PATH)
 @Produces(MediaType.APPLICATION_JSON)

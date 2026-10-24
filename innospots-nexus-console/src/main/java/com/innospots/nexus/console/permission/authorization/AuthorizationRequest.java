@@ -1,5 +1,7 @@
 package com.innospots.nexus.console.permission.authorization;
 
+import java.util.List;
+
 /**
  * 由 Filter 或 REST 适配器提取的、与框架无关的请求鉴权数据。
  *
@@ -12,12 +14,21 @@ public record AuthorizationRequest(
          */
         String workspaceId,
         /**
-         * catalog 授权资源键，格式 {@code grantName:domainKey.moduleKey}。
+         * catalog 授权资源键候选（通常为操作键与分组键），格式 {@code domainKey.moduleKey:grantName}。
+         * 命中其一即视为已授权。
          */
-        String resourceKey,
+        List<String> resourceKeys,
         /**
          * 当前登录主体及其角色、组织单元信息。
          */
         AuthorizationSubject subject
 ) {
+
+    public AuthorizationRequest {
+        if (resourceKeys == null) {
+            resourceKeys = List.of();
+        } else {
+            resourceKeys = List.copyOf(resourceKeys);
+        }
+    }
 }

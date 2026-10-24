@@ -82,7 +82,62 @@ public final class PlatformIntegrationTestSupport {
     public static final String H2_URL_CATALOG_SYNC_DB_IT =
             "jdbc:h2:mem:nexus-sample-platform-catalog-sync-db-it" + H2_SUFFIX;
 
+    public static final String H2_URL_PERMISSION_GRANT_FLOW_IT =
+            "jdbc:h2:mem:nexus-sample-platform-permission-grant-flow-it" + H2_SUFFIX;
+
+    private static final String PLATFORM_IT_ADMIN_ROLE_ID = "ROLITPLATFORMADMIN0001";
+
+    private static final String PLATFORM_IT_ADMIN_ROLE_CODE = "it-platform-admin";
+
     private PlatformIntegrationTestSupport() {
+    }
+
+    /**
+     * 插入平台管理员角色并绑定指定用户，供 security.enabled=true 时通过 HTTP 完成角色/授权配置。
+     *
+     * @return 管理员角色 ID
+     */
+    public static String ensurePlatformAdministratorRoleAndBindUser(
+            JdbcTemplate jdbcTemplate,
+            String platformUserId) {
+        jdbcTemplate.update("DELETE FROM nx_role WHERE role_id = ?", PLATFORM_IT_ADMIN_ROLE_ID);
+        jdbcTemplate.update(
+                """
+                INSERT INTO nx_role (
+                    role_id, role_name, role_code, owner_type, owner_id, security_realm,
+                    description, status, sort_order, built_in, administrator, created_at, updated_at
+                ) VALUES (
+                    ?, 'IT Platform Admin', ?, 'PLATFORM', NULL, 'PLATFORM',
+                    'integration test bootstrap', 'ENABLED', 0, FALSE, TRUE,
+                    CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+                )
+                """,
+                PLATFORM_IT_ADMIN_ROLE_ID,
+                PLATFORM_IT_ADMIN_ROLE_CODE);
+        replacePlatformUserRoleBindings(jdbcTemplate, platformUserId, PLATFORM_IT_ADMIN_ROLE_ID);
+        return PLATFORM_IT_ADMIN_ROLE_ID;
+    }
+
+    public static void replacePlatformUserRoleBindings(
+            JdbcTemplate jdbcTemplate,
+            String platformUserId,
+            String roleId) {
+        jdbcTemplate.update(
+                "DELETE FROM nx_role_binding WHERE subject_type = 'USER' AND subject_id = ?",
+                platformUserId);
+        jdbcTemplate.update(
+                """
+                INSERT INTO nx_role_binding (
+                    binding_id, role_id, subject_type, subject_id, owner_type, owner_id,
+                    security_realm, created_at, updated_at
+                ) VALUES (
+                    ?, ?, 'USER', ?, 'PLATFORM', NULL, 'PLATFORM',
+                    CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+                )
+                """,
+                "RBN" + roleId.substring(3),
+                roleId,
+                platformUserId);
     }
 
     public static void cleanRolePermissionGraph(JdbcTemplate jdbcTemplate) {

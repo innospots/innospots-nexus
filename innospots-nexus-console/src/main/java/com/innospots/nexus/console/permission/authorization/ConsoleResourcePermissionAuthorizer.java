@@ -1,6 +1,7 @@
 package com.innospots.nexus.console.permission.authorization;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -15,14 +16,16 @@ import com.innospots.nexus.console.permission.domain.entity.PermissionGrantEntit
 import com.innospots.nexus.console.permission.domain.enums.PermissionSubjectType;
 import com.innospots.nexus.console.scope.ConsoleOwnership;
 import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
+import com.innospots.nexus.console.scope.ConsoleSessionContext;
+import com.innospots.nexus.console.scope.ConsoleSessionScope;
 import com.innospots.nexus.core.endpoint.grant.support.ResolvedEndpointGrant;
 
 /**
  * 控制台资源授权判定（catalog v2：按 {@link CatalogGrantKeys} 资源键匹配 {@code nx_permission_grant}）。
  *
- * <p>HTTP 请求侧由 Filter 传入 {@link ResolvedEndpointGrant}，拼出
- * {@code domainKey.moduleKey:grantName} 后查授权表；READ/EXPORT 的 {@code grantName} 为
- * {@link ResolvedEndpointGrant#grantGroup()}。</p>
+ * <p>HTTP 请求侧由 Filter 传入 {@link ResolvedEndpointGrant}，拼出操作键
+ * {@code domainKey.moduleKey:name()} 与分组键 {@code domainKey.moduleKey:grantGroup()}，
+ * 授权表命中其一即通过。</p>
  */
 public final class ConsoleResourcePermissionAuthorizer {
 
@@ -50,42 +53,60 @@ public final class ConsoleResourcePermissionAuthorizer {
             ResolvedEndpointGrant grant,
             AuthorizationSubject subject
     ) {
-        if (workspaceId == null || grant == null || subject == null
-                || blank(grant.moduleKey())) {
+        if (grant == null || subject == null || blank(grant.moduleKey())) {
+            return AuthorizationDecision.deny("Invalid authorization request");
+        }
+        if (ConsoleSessionContext.scope() != ConsoleSessionScope.PLATFORM && blank(workspaceId)) {
             return AuthorizationDecision.deny("Invalid authorization request");
         }
         String domainKey = resolveDomainKey(grant);
         if (blank(domainKey)) {
             return AuthorizationDecision.deny("Module is not available");
         }
-        String resourceKey = CatalogGrantKeys.of(
-                grant.permissionGrantName(),
-                domainKey,
-                grant.moduleKey().trim());
-        if (blank(resourceKey)) {
+        String moduleKey = grant.moduleKey().trim();
+        String actionResourceKey = CatalogGrantKeys.of(grant.name(), domainKey, moduleKey);
+        String groupResourceKey = CatalogGrantKeys.of(grant.grantGroup(), domainKey, moduleKey);
+        List<String> resourceKeys = new ArrayList<>(2);
+        if (!blank(actionResourceKey)) {
+            resourceKeys.add(actionResourceKey);
+        }
+        if (!blank(groupResourceKey) && !groupResourceKey.equals(actionResourceKey)) {
+            resourceKeys.add(groupResourceKey);
+        }
+        if (resourceKeys.isEmpty()) {
             return AuthorizationDecision.deny("Resource is not grantable");
         }
-        return authorize(new AuthorizationRequest(workspaceId, resourceKey, subject));
+        return authorize(new AuthorizationRequest(workspaceId, resourceKeys, subject));
     }
 
     /**
      * 按资源键判定当前主体是否已授权。
      *
-     * @param request 含 workspace、资源键与主体
+     * @param request 含 workspace、资源键候选与主体
      * @return 鉴权结果
      */
     public AuthorizationDecision authorize(AuthorizationRequest request) {
-        if (request == null || request.workspaceId() == null || request.subject() == null
-                || blank(request.resourceKey())) {
+        if (request == null || request.subject() == null) {
             return AuthorizationDecision.deny("Invalid authorization request");
         }
-        String resourceKey = request.resourceKey().trim();
-        if (!request.subject().administrator()
-                && !hasGrant(request.workspaceId(), resourceKey, request.subject())) {
-            return AuthorizationDecision.deny("Resource permission is required");
+        if (ConsoleSessionContext.scope() != ConsoleSessionScope.PLATFORM && blank(request.workspaceId())) {
+            return AuthorizationDecision.deny("Invalid authorization request");
+        }
+        List<String> resourceKeys = normalizeResourceKeys(request.resourceKeys());
+        if (resourceKeys.isEmpty()) {
+            return AuthorizationDecision.deny("Invalid authorization request");
+        }
+        String matchedKey = null;
+        if (!request.subject().administrator()) {
+            matchedKey = findMatchedGrantKey(request.workspaceId(), resourceKeys, request.subject());
+            if (matchedKey == null) {
+                return AuthorizationDecision.deny("Resource permission is required");
+            }
+        } else {
+            matchedKey = resourceKeys.getFirst();
         }
         return AuthorizationDecision.allow(new AuthorizationContext(
-                request.workspaceId(), resourceKey, null, List.of()));
+                request.workspaceId(), matchedKey, null, List.of()));
     }
 
     private String resolveDomainKey(ResolvedEndpointGrant grant) {
@@ -108,19 +129,31 @@ public final class ConsoleResourcePermissionAuthorizer {
         return modules.getFirst().getDomainKey();
     }
 
+    private String findMatchedGrantKey(
+            String workspaceId,
+            List<String> grantKeys,
+            AuthorizationSubject subject
+    ) {
+        List<PermissionGrantEntity> rows = grants(workspaceId, grantKeys, subject);
+        if (rows.isEmpty()) {
+            return null;
+        }
+        return rows.getFirst().getGrantKey();
+    }
+
     private List<PermissionGrantEntity> grants(
             String workspaceId,
-            String grantKey,
+            List<String> grantKeys,
             AuthorizationSubject subject
     ) {
         List<PermissionGrantEntity> result = new ArrayList<>();
-        ConsoleOwnership ownership = ConsoleOwnershipScope.workspaceOwnership(workspaceId, null);
+        ConsoleOwnership ownership = ConsoleOwnershipScope.grantQueryOwnership(workspaceId);
         if (!subject.roleIds().isEmpty()) {
             result.addAll(grantDao.selectList(ConsoleOwnershipScope.apply(
                     Wrappers.<PermissionGrantEntity>lambdaQuery()
                             .eq(PermissionGrantEntity::getSubjectType, PermissionSubjectType.ROLE.name())
                             .in(PermissionGrantEntity::getSubjectId, subject.roleIds())
-                            .eq(PermissionGrantEntity::getGrantKey, grantKey),
+                            .in(PermissionGrantEntity::getGrantKey, grantKeys),
                     ownership)));
         }
         if (!subject.orgUnitIds().isEmpty()) {
@@ -128,14 +161,23 @@ public final class ConsoleResourcePermissionAuthorizer {
                     Wrappers.<PermissionGrantEntity>lambdaQuery()
                             .eq(PermissionGrantEntity::getSubjectType, PermissionSubjectType.ORG_UNIT.name())
                             .in(PermissionGrantEntity::getSubjectId, subject.orgUnitIds())
-                            .eq(PermissionGrantEntity::getGrantKey, grantKey),
+                            .in(PermissionGrantEntity::getGrantKey, grantKeys),
                     ownership)));
         }
         return result;
     }
 
-    private boolean hasGrant(String workspaceId, String grantKey, AuthorizationSubject subject) {
-        return !grants(workspaceId, grantKey, subject).isEmpty();
+    private static List<String> normalizeResourceKeys(List<String> resourceKeys) {
+        if (resourceKeys == null || resourceKeys.isEmpty()) {
+            return List.of();
+        }
+        LinkedHashSet<String> unique = new LinkedHashSet<>();
+        for (String key : resourceKeys) {
+            if (!blank(key)) {
+                unique.add(key.trim());
+            }
+        }
+        return List.copyOf(unique);
     }
 
     private static boolean blank(String value) {

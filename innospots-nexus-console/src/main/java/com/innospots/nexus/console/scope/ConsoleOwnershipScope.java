@@ -296,6 +296,19 @@ public final class ConsoleOwnershipScope {
         return new ConsoleOwnership(RoleOwnerType.WORKSPACE, workspaceId, realm);
     }
 
+    /**
+     * 解析 {@code nx_permission_grant} 查询归属：PLATFORM 控制台会话使用平台归属，否则按工作区隔离。
+     *
+     * @param workspaceId 当前工作区；平台会话可省略
+     */
+    public static ConsoleOwnership grantQueryOwnership(String workspaceId) {
+        if (ConsoleSessionContext.scope() == ConsoleSessionScope.PLATFORM) {
+            return requireOwnership(ConsoleOwnershipLevel.PLATFORM);
+        }
+        String realm = StringUtils.defaultIfBlank(TLC.securityRealm(), SecurityRealm.TENANT.name());
+        return workspaceOwnership(Checks.notBlank(workspaceId, "workspaceId"), realm);
+    }
+
     public static void stamp(OwnershipEntity entity, ConsoleOwnership ownership) {
         Checks.notNull(entity, "entity");
         Checks.notNull(ownership, "ownership");

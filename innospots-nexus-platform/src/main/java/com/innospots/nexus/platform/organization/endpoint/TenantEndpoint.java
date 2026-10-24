@@ -23,6 +23,7 @@ import com.innospots.nexus.core.endpoint.grant.EndpointModule;
 import com.innospots.nexus.core.endpoint.grant.I18nLiteral;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 import com.innospots.nexus.platform.config.PlatformConstant;
+import com.innospots.nexus.platform.entry.BuiltinPlatformEntryPlugins;
 import com.innospots.nexus.platform.organization.domain.request.TenantCreateRequest;
 import com.innospots.nexus.platform.organization.domain.request.TenantPageRequest;
 import com.innospots.nexus.platform.organization.domain.request.TenantStatusUpdateRequest;
@@ -40,7 +41,7 @@ import com.innospots.nexus.platform.organization.service.PlatformTenantService;
  * @see com.innospots.nexus.platform.organization.service.PlatformTenantService
  * @see EnterpriseProfileEndpoint
  */
-@EndpointModule(value = "organization", domain = com.innospots.nexus.platform.entry.BuiltinPlatformEntryPlugins.DOMAIN_KEY)
+@EndpointModule(value = "organization", domain = BuiltinPlatformEntryPlugins.DOMAIN_KEY)
 @Path(PlatformConstant.TENANTS_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)

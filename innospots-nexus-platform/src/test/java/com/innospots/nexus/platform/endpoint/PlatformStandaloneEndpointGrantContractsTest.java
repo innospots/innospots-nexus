@@ -44,7 +44,8 @@ import com.innospots.nexus.platform.user.endpoint.PlatformUserEndpoint;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * platform 自有 REST 资源须在本类声明 {@link EndpointGrant}；实现 console 契约的类继承接口元数据，不得重复 grant。
+ * platform 自有 REST 资源须在本类声明 {@link EndpointModule} 与 {@link EndpointGrant}；
+ * 实现 console 契约的类在实现类声明 {@link EndpointModule}，{@link EndpointGrant} 仍继承接口。
  */
 class PlatformStandaloneEndpointGrantContractsTest {
 
@@ -93,11 +94,11 @@ class PlatformStandaloneEndpointGrantContractsTest {
     }
 
     @Test
-    void consoleContractImplementationsDoNotRepeatEndpointGrant() {
+    void consoleContractImplementationsDeclareModuleOnClass() {
         for (Class<?> endpointType : CONSOLE_CONTRACT_IMPLEMENTATIONS) {
             assertThat(endpointType.getAnnotation(EndpointModule.class))
-                    .as("%s must not declare @EndpointModule", endpointType.getSimpleName())
-                    .isNull();
+                    .as("%s must declare @EndpointModule on implementation", endpointType.getSimpleName())
+                    .isNotNull();
             for (Method method : endpointType.getDeclaredMethods()) {
                 if (!declaresHttpVerb(method)) {
                     continue;
@@ -110,18 +111,45 @@ class PlatformStandaloneEndpointGrantContractsTest {
     }
 
     @Test
-    void consoleContractImplementationsDeclareTransportAnnotations() {
+    void consoleContractInterfacesDeclareTransportAnnotations() {
         for (Class<?> endpointType : CONSOLE_CONTRACT_IMPLEMENTATIONS) {
             assertThat(endpointType.getAnnotation(Produces.class))
                     .as("%s must declare @Produces", endpointType.getSimpleName())
                     .isNotNull();
-            for (Method method : endpointType.getDeclaredMethods()) {
-                if (!declaresHttpVerb(method)) {
+            for (Class<?> contract : endpointType.getInterfaces()) {
+                if (!contract.getName().startsWith("com.innospots.nexus.console")) {
                     continue;
                 }
-                assertThat(method.getAnnotation(Operation.class))
-                        .as("%s#%s must declare @Operation", endpointType.getSimpleName(), method.getName())
-                        .isNotNull();
+                for (Method method : contract.getDeclaredMethods()) {
+                    if (!declaresHttpVerb(method)) {
+                        continue;
+                    }
+                    assertThat(method.getAnnotation(Operation.class))
+                            .as("%s#%s must declare @Operation", contract.getSimpleName(), method.getName())
+                            .isNotNull();
+                }
+            }
+        }
+    }
+
+    @Test
+    void consoleContractImplementationsDoNotRepeatInterfaceMethodAnnotations() throws NoSuchMethodException {
+        for (Class<?> endpointType : CONSOLE_CONTRACT_IMPLEMENTATIONS) {
+            for (Class<?> contract : endpointType.getInterfaces()) {
+                if (!contract.getName().startsWith("com.innospots.nexus.console")) {
+                    continue;
+                }
+                for (Method contractMethod : contract.getDeclaredMethods()) {
+                    if (!declaresHttpVerb(contractMethod)) {
+                        continue;
+                    }
+                    Method implMethod = endpointType.getMethod(
+                            contractMethod.getName(),
+                            contractMethod.getParameterTypes());
+                    assertThat(implMethod.getAnnotations())
+                            .as("%s#%s must only use @Override", endpointType.getSimpleName(), implMethod.getName())
+                            .allMatch(annotation -> annotation.annotationType().equals(Override.class));
+                }
             }
         }
     }

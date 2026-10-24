@@ -2,20 +2,12 @@ package com.innospots.nexus.platform.dictionary.endpoint;
 
 import java.util.List;
 
-import jakarta.ws.rs.BeanParam;
 import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.DELETE;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import lombok.RequiredArgsConstructor;
 
-import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import com.innospots.nexus.base.domain.enums.BasicStatus;
@@ -28,16 +20,19 @@ import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeUpdat
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeOptionVo;
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeVo;
 import com.innospots.nexus.console.dictionary.endpoint.DictionaryTypeEndpoint;
+import com.innospots.nexus.core.endpoint.grant.EndpointModule;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 import com.innospots.nexus.platform.config.PlatformConstant;
 import com.innospots.nexus.platform.dictionary.service.PlatformDictionaryService;
+import com.innospots.nexus.platform.entry.BuiltinPlatformEntryPlugins;
 
 /**
  * 运营平台字典类型 REST 实现。
  *
- * <p>HTTP 动词、子路径与 OpenAPI 注解在实现类重复声明，供构建期 JAX-RS 扫描器识别；
- * grant 元数据仍继承 {@link DictionaryTypeEndpoint}。</p>
+ * <p>类级 {@code @Path} 绑定 platform 路由；方法级 JAX-RS / OpenAPI / {@code @EndpointGrant}
+ * 继承 {@link DictionaryTypeEndpoint}。</p>
  */
+@EndpointModule(value = "dictionary", domain = BuiltinPlatformEntryPlugins.DOMAIN_KEY)
 @Path(PlatformConstant.DICTIONARY_TYPES_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -49,62 +44,43 @@ public class PlatformDictionaryTypeEndpoint implements DictionaryTypeEndpoint {
     private final PlatformDictionaryService platformDictionaryService;
 
     @Override
-    @GET
-    @Operation(operationId = "platformDictionaryTypePage", summary = "分页查询字典类型")
-    public R<PageResult<DictionaryTypeVo>> pageDictionaryTypes(@BeanParam DictionaryTypePageRequest request) {
+    public R<PageResult<DictionaryTypeVo>> pageDictionaryTypes(DictionaryTypePageRequest request) {
         return R.ok(platformDictionaryService.pageDictionaryTypes(request));
     }
 
     @Override
-    @GET
-    @Path("/{dictionaryTypeId}")
-    @Operation(operationId = "platformDictionaryTypeGet", summary = "查询字典类型")
-    public R<DictionaryTypeVo> getDictionaryType(@PathParam("dictionaryTypeId") String dictionaryTypeId) {
+    public R<DictionaryTypeVo> getDictionaryType(String dictionaryTypeId) {
         return R.ok(platformDictionaryService.getDictionaryType(dictionaryTypeId));
     }
 
     @Override
-    @POST
-    @Operation(operationId = "platformDictionaryTypeCreate", summary = "创建字典类型")
     public R<DictionaryTypeVo> createDictionaryType(DictionaryTypeCreateRequest request) {
         return R.ok(platformDictionaryService.createDictionaryType(request));
     }
 
     @Override
-    @PUT
-    @Path("/{dictionaryTypeId}")
-    @Operation(operationId = "platformDictionaryTypeUpdate", summary = "更新字典类型")
     public R<DictionaryTypeVo> updateDictionaryType(
-            @PathParam("dictionaryTypeId") String dictionaryTypeId,
+            String dictionaryTypeId,
             DictionaryTypeUpdateRequest request) {
         return R.ok(platformDictionaryService.updateDictionaryType(dictionaryTypeId, request));
     }
 
     @Override
-    @PUT
-    @Path("/{dictionaryTypeId}/status")
-    @Operation(operationId = "platformDictionaryTypeUpdateStatus", summary = "更新字典类型状态")
     public R<Void> updateDictionaryTypeStatus(
-            @PathParam("dictionaryTypeId") String dictionaryTypeId,
+            String dictionaryTypeId,
             DictionaryTypeStatusUpdateRequest request) {
         platformDictionaryService.updateDictionaryTypeStatus(dictionaryTypeId, request);
         return R.ok();
     }
 
     @Override
-    @DELETE
-    @Path("/{dictionaryTypeId}")
-    @Operation(operationId = "platformDictionaryTypeDelete", summary = "删除字典类型")
-    public R<Void> deleteDictionaryType(@PathParam("dictionaryTypeId") String dictionaryTypeId) {
+    public R<Void> deleteDictionaryType(String dictionaryTypeId) {
         platformDictionaryService.deleteDictionaryType(dictionaryTypeId);
         return R.ok();
     }
 
     @Override
-    @GET
-    @Path("/options")
-    @Operation(operationId = "platformDictionaryTypeListOptions", summary = "字典类型下拉选项")
-    public R<List<DictionaryTypeOptionVo>> listDictionaryTypeOptions(@QueryParam("status") BasicStatus status) {
+    public R<List<DictionaryTypeOptionVo>> listDictionaryTypeOptions(BasicStatus status) {
         return R.ok(platformDictionaryService.listDictionaryTypeOptions(status));
     }
 }

@@ -29,7 +29,9 @@ import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeUpdat
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeOptionVo;
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeVo;
 import com.innospots.nexus.console.dictionary.endpoint.DictionaryTypeEndpoint;
+import com.innospots.nexus.console.entry.ConsolePageRoutes;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrantManager;
+import com.innospots.nexus.core.endpoint.grant.EndpointModule;
 
 class ConsoleCatalogServiceTest {
 
@@ -116,6 +118,7 @@ class ConsoleCatalogServiceTest {
         return entity;
     }
 
+    @EndpointModule(value = "dictionary", domain = ConsolePageRoutes.BUILTIN_DOMAIN_KEY)
     @Path("/api/test/dictionary/types")
     static final class SampleDictionaryResource implements DictionaryTypeEndpoint {
 

@@ -68,7 +68,7 @@ public final class GrantGroupPageAccessVerifier implements PageAccessVerifier {
 
     private List<PermissionGrantEntity> grants(String workspaceId, AuthorizationSubject subject) {
         List<PermissionGrantEntity> result = new ArrayList<>();
-        ConsoleOwnership ownership = ConsoleOwnershipScope.workspaceOwnership(workspaceId, null);
+        ConsoleOwnership ownership = ConsoleOwnershipScope.grantQueryOwnership(workspaceId);
         if (!subject.roleIds().isEmpty()) {
             result.addAll(grantDao.selectList(ConsoleOwnershipScope.apply(
                     Wrappers.<PermissionGrantEntity>lambdaQuery()

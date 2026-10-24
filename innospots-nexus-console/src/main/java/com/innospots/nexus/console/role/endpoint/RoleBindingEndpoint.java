@@ -17,7 +17,6 @@ import com.innospots.nexus.base.domain.response.PageResult;
 import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrant;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
-import com.innospots.nexus.core.endpoint.grant.EndpointModule;
 import com.innospots.nexus.core.endpoint.grant.I18nLiteral;
 import com.innospots.nexus.console.role.domain.request.RoleBindingAddRequest;
 import com.innospots.nexus.console.role.domain.request.RoleBindingPageRequest;
@@ -29,7 +28,6 @@ import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
  *
  * <p>仅定义方法级路由；类级 {@code @Path} 由业务域实现绑定（如 platform）。</p>
  */
-@EndpointModule("role")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Role", description = "角色与绑定")

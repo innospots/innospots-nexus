@@ -18,6 +18,7 @@ import com.innospots.nexus.core.endpoint.grant.EndpointModule;
 import com.innospots.nexus.core.endpoint.grant.I18nLiteral;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 import com.innospots.nexus.platform.config.PlatformConstant;
+import com.innospots.nexus.platform.entry.BuiltinPlatformEntryPlugins;
 import com.innospots.nexus.platform.settings.domain.request.PlatformRegistrationPolicyUpdateRequest;
 import com.innospots.nexus.platform.settings.domain.vo.PlatformRegistrationPolicyVo;
 import com.innospots.nexus.platform.settings.service.PlatformRegistrationModeSettingService;
@@ -28,7 +29,7 @@ import com.innospots.nexus.platform.settings.service.PlatformRegistrationModeSet
  * @author Smars
  * @date 2026/10/06
  */
-@EndpointModule(value = "settings", domain = com.innospots.nexus.platform.entry.BuiltinPlatformEntryPlugins.DOMAIN_KEY)
+@EndpointModule(value = "settings", domain = BuiltinPlatformEntryPlugins.DOMAIN_KEY)
 @Path(PlatformConstant.SETTINGS_REGISTRATION_MODE_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)

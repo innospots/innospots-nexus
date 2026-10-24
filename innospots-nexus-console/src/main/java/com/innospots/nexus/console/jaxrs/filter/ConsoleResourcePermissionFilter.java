@@ -15,6 +15,8 @@ import com.innospots.nexus.console.jaxrs.support.ConsoleAntPathMatcher;
 import com.innospots.nexus.console.jaxrs.support.ConsoleRequestGrants;
 import com.innospots.nexus.console.jaxrs.web.ConsoleWebSecuritySettings;
 import com.innospots.nexus.console.jaxrs.support.ConsolePublicApiPaths;
+import com.innospots.nexus.console.scope.ConsoleSessionContext;
+import com.innospots.nexus.console.scope.ConsoleSessionScope;
 import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.core.endpoint.grant.support.ResolvedEndpointGrant;
 import com.innospots.nexus.core.jaxrs.support.RequestProperties;
@@ -60,8 +62,12 @@ public final class ConsoleResourcePermissionFilter implements ContainerRequestFi
         if (!ConsoleAntPathMatcher.matchesAny(security.getConsolePathPatterns(), path)) {
             return;
         }
+        String workspaceId = SessionContext.workspaceId();
+        if (ConsoleSessionContext.scope() != ConsoleSessionScope.PLATFORM) {
+            workspaceId = SessionContext.requireWorkspaceId();
+        }
         AuthorizationDecision decision = resourcePermissionAuthorizer.authorizeEndpoint(
-                SessionContext.requireWorkspaceId(),
+                workspaceId,
                 grant,
                 subjectResolver.resolve()
                         .orElseThrow(() -> ConsoleExceptions.build(NexusStatusCode.AUTHENTICATION_FAILED)));

@@ -357,7 +357,6 @@ class EndpointGrantManagerRegistrationTest {
         }
     }
 
-    @EndpointModule("contract-only")
     interface ContractOnlyEndpoint {
 
         @GET
@@ -366,6 +365,7 @@ class EndpointGrantManagerRegistrationTest {
         String list();
     }
 
+    @EndpointModule(value = "contract-only", domain = com.innospots.nexus.console.entry.ConsolePageRoutes.BUILTIN_DOMAIN_KEY)
     @Path("/impl")
     static final class ContractOnlyImpl implements ContractOnlyEndpoint {
 
@@ -386,6 +386,7 @@ class EndpointGrantManagerRegistrationTest {
         }
     }
 
+    @EndpointModule(value = "dictionary", domain = com.innospots.nexus.console.entry.ConsolePageRoutes.BUILTIN_DOMAIN_KEY)
     @Path("/api/test/dictionary/types")
     static final class DictionaryResourceFixture implements DictionaryTypeEndpoint {
 

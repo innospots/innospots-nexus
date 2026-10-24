@@ -16,7 +16,6 @@ import com.innospots.nexus.console.auth.domain.request.TokenRefreshRequest;
 import com.innospots.nexus.console.auth.domain.vo.AuthTokenVo;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrant;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
-import com.innospots.nexus.core.endpoint.grant.EndpointModule;
 import com.innospots.nexus.core.endpoint.grant.I18nLiteral;
 import com.innospots.nexus.core.openapi.NexusOpenApiSecurityNames;
 
@@ -25,7 +24,6 @@ import com.innospots.nexus.core.openapi.NexusOpenApiSecurityNames;
  *
  * <p>类级 {@code @Path} 由业务域实现（如 platform）绑定。</p>
  */
-@EndpointModule("auth")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "AuthSession", description = "认证会话")

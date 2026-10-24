@@ -9,8 +9,8 @@ import java.lang.annotation.Target;
 /**
  * 声明 REST 契约归属的控制台模块（与 entry 插件 {@code moduleKey} 一致）。
  *
- * <p>标注于 console 侧 endpoint 接口；实现类通过 implements 继承模块级
- * {@link #ignoreAuth()} / {@link #ignorePermission()} 默认值。</p>
+ * <p>标注于 JAX-RS 资源实现类；console 契约接口仅声明 {@link EndpointGrant}。
+ * 实现类通过 {@code domain()} 与 catalog {@code domainKey} 对齐。</p>
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

@@ -23,6 +23,7 @@ import com.innospots.nexus.core.endpoint.grant.EndpointModule;
 import com.innospots.nexus.core.endpoint.grant.I18nLiteral;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 import com.innospots.nexus.platform.config.PlatformConstant;
+import com.innospots.nexus.platform.entry.BuiltinPlatformEntryPlugins;
 import com.innospots.nexus.platform.user.domain.request.PlatformUserCreateRequest;
 import com.innospots.nexus.platform.user.domain.request.PlatformUserPageRequest;
 import com.innospots.nexus.platform.user.domain.request.PlatformUserPasswordResetRequest;
@@ -38,7 +39,7 @@ import com.innospots.nexus.platform.user.service.PlatformUserService;
  * @author Smars
  * @date 2026/09/13
  */
-@EndpointModule(value = "user", domain = com.innospots.nexus.platform.entry.BuiltinPlatformEntryPlugins.DOMAIN_KEY)
+@EndpointModule(value = "user", domain = BuiltinPlatformEntryPlugins.DOMAIN_KEY)
 @Path(PlatformConstant.USERS_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)

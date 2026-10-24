@@ -23,6 +23,7 @@ import com.innospots.nexus.core.endpoint.grant.EndpointModule;
 import com.innospots.nexus.core.endpoint.grant.I18nLiteral;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 import com.innospots.nexus.platform.config.PlatformConstant;
+import com.innospots.nexus.platform.entry.BuiltinPlatformEntryPlugins;
 import com.innospots.nexus.platform.organization.domain.request.TenantAdminAddRequest;
 import com.innospots.nexus.platform.organization.domain.vo.TenantAdminVo;
 import com.innospots.nexus.platform.organization.service.PlatformTenantAdminService;
@@ -30,7 +31,7 @@ import com.innospots.nexus.platform.organization.service.PlatformTenantAdminServ
 /**
  * 租户管理员列表、按邮箱添加与移除。
  */
-@EndpointModule(value = "organization", domain = com.innospots.nexus.platform.entry.BuiltinPlatformEntryPlugins.DOMAIN_KEY)
+@EndpointModule(value = "organization", domain = BuiltinPlatformEntryPlugins.DOMAIN_KEY)
 @Path(PlatformConstant.TENANT_ADMINS_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Tag(name = "PlatformOrganization", description = "组织开通与生命周期")

@@ -17,6 +17,7 @@ import com.innospots.nexus.core.endpoint.grant.EndpointModule;
 import com.innospots.nexus.core.endpoint.grant.I18nLiteral;
 import com.innospots.nexus.console.auth.service.RegistrationPolicyService;
 import com.innospots.nexus.platform.config.PlatformConstant;
+import com.innospots.nexus.platform.entry.BuiltinPlatformEntryPlugins;
 
 /**
  * 公开注册策略（匿名），供登录/注册页按 {@link com.innospots.nexus.console.config.RegistrationConfig}
@@ -29,7 +30,7 @@ import com.innospots.nexus.platform.config.PlatformConstant;
  */
 @EndpointModule(
         value = "settings",
-        domain = com.innospots.nexus.platform.entry.BuiltinPlatformEntryPlugins.DOMAIN_KEY,
+        domain = BuiltinPlatformEntryPlugins.DOMAIN_KEY,
         ignoreAuth = true)
 @Path(PlatformConstant.PUBLIC_REGISTRATION_POLICY_PATH)
 @Produces(MediaType.APPLICATION_JSON)

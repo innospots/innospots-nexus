@@ -19,6 +19,7 @@ import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogSyncService;
 import com.innospots.nexus.console.config.ConsoleConstant;
+import com.innospots.nexus.console.entry.ConsolePageRoutes;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrant;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
 import com.innospots.nexus.core.endpoint.grant.EndpointModule;
@@ -32,7 +33,7 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 /**
  * 管理端插件查询、安装、启停和失败重试接口；不提供 JAR 删除或卸载操作。
  */
-@EndpointModule("plugin")
+@EndpointModule(value = "plugin", domain = ConsolePageRoutes.BUILTIN_DOMAIN_KEY)
 @Path(ConsoleConstant.API_PREFIX + "/plugins")
 @Produces(MediaType.APPLICATION_JSON)
 @Tag(name = "Plugin", description = "插件生命周期")

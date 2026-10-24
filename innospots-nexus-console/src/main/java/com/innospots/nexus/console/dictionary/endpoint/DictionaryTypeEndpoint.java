@@ -28,18 +28,16 @@ import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeOptionVo;
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeVo;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrant;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
-import com.innospots.nexus.core.endpoint.grant.EndpointModule;
 import com.innospots.nexus.core.endpoint.grant.I18nLiteral;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 
 /**
  * 字典类型管理 REST 契约（字典项随类型详情与创建/更新请求体维护，无独立字典项资源）。
  *
- * <p>类级 {@code @Path} 由业务域实现（如 platform）绑定。实现类必须重复方法级
- * JAX-RS 与 OpenAPI 注解供构建期扫描；{@code @EndpointModule} / {@code @EndpointGrant}
- * 仍只在本接口声明。</p>
+ * <p>类级 {@code @Path} 由业务域实现（如 platform）绑定。方法级 JAX-RS、OpenAPI 与
+ * {@code @EndpointGrant} 在本接口声明；{@code @EndpointModule} 在宿主实现类声明，
+ * 实现类方法不得重复上述契约注解。</p>
  */
-@EndpointModule("dictionary")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Dictionary", description = "字典类型与字典项")
