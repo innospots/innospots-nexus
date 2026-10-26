@@ -1,5 +1,8 @@
 package com.innospots.nexus.console.i18n.service;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -14,10 +17,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class MessageBundleServiceTest {
 
-    private final MessageBundleService service = new MessageBundleService(new MessageBundleLoader());
+    private final MessageBundleService service = new MessageBundleService(
+            new MessageBundleLoader(new BundleClassLoader()));
 
     @Test
-    void defaultsToChineseConsoleBundles() {
+    void defaultsToAllIndexedChineseConsoleBundles() {
         MessageBundleSetVo result = service.load(
                 null, null, null, null, null, null);
 
@@ -25,7 +29,7 @@ class MessageBundleServiceTest {
         assertThat(result.locale()).isEqualTo("zh-CN");
         assertThat(result.release()).isEqualTo("build-release");
         assertThat(result.format()).isEqualTo("simple-v1");
-        assertThat(result.bundles()).hasSize(11);
+        assertThat(result.bundles()).containsOnlyKeys("common", "role", "dictionary");
         assertThat(result.bundles().get("common").messages())
                 .containsEntry("common.action.save", "保存");
     }
@@ -113,5 +117,34 @@ class MessageBundleServiceTest {
                         assertThat(owners.put(key, namespace))
                                 .as("duplicate key %s", key)
                                 .isNull()));
+    }
+
+    private static final class BundleClassLoader extends ClassLoader {
+
+        private static final Map<String, String> RESOURCES = Map.ofEntries(
+                Map.entry("i18n/console/namespaces", "common\nrole\ndictionary\n"),
+                Map.entry("i18n/console/common/messages.properties", "common.action.save=保存\n"),
+                Map.entry("i18n/console/common/messages_en.properties", "common.action.save=Save\n"),
+                Map.entry("i18n/console/role/messages.properties",
+                        "role.role-list.body.title=角色管理\n"),
+                Map.entry("i18n/console/role/messages_en.properties",
+                        "role.role-list.body.title=Roles\n"),
+                Map.entry("i18n/console/dictionary/messages.properties",
+                        "dictionary.dictionary-type-list.body.title=数据字典\n"),
+                Map.entry("i18n/console/dictionary/messages_en.properties",
+                        "dictionary.dictionary-type-list.body.title=Dictionaries\n")
+        );
+
+        private BundleClassLoader() {
+            super(null);
+        }
+
+        @Override
+        public InputStream getResourceAsStream(String name) {
+            String content = RESOURCES.get(name);
+            return content == null
+                    ? null
+                    : new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
+        }
     }
 }

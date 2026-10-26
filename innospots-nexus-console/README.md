@@ -45,7 +45,7 @@ Maven 依赖：`innospots-nexus-core`、`innospots-nexus-plugin`、`jakarta.ws.r
 | **dictionary** | 租户级字典 | `DictionaryType` / `DictionaryItem` Operator 与 JAX-RS 接口契约（TENANT ownership）；具体实现由业务模块绑定。 |
 | **plugin** | 插件管理 API | `PluginManagementEndpoint`：安装、启用、禁用、重试等，委托 `PluginInstallationManager`（plugin 模块）。内置 `PluginManagementEntryPlugin`。 |
 | **logger** | 审计与调用日志 | `nx_audit_log` 实体、`@EndpointGrant` 驱动的 `ConsoleAuditLogFilter`、调用日志上下文与 `InvocationLogHandler` 管道。 |
-| **i18n** | 公共语言包 | 从 `src/main/resources/i18n/console/<namespace>/messages*.properties` 读取模块字典，经无登录、无权限要求的 `GET /api/public/i18n/bundles` 提供 Pactor `simple-v1` 语言包。 |
+| **i18n** | 公共语言包 | 从 classpath 的 `i18n/console/namespaces` 索引及 `<namespace>/messages*.properties` 读取字典；语言包资源和索引由 `innospots-nexus-platform` 打包，经无登录、无权限要求的 `GET /api/public/i18n/bundles` 提供 Pactor `simple-v1` 语言包。 |
 | **entry** | 内置控制台入口 | `BuiltinConsoleEntryPlugins`、`ConsolePageRoutes` 与 `PluginManagementEntryPlugin`；声明稳定的 `entryPageKey`，不打包页面运行时资源。 |
 
 ### 内置控制台模块（entry 插件）

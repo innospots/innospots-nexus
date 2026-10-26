@@ -3,7 +3,6 @@ package com.innospots.nexus.console.i18n.service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -14,7 +13,6 @@ import java.util.regex.Pattern;
 
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.status.NexusStatusCode;
-import com.innospots.nexus.console.i18n.domain.enums.ConsoleI18nNamespace;
 import com.innospots.nexus.console.i18n.domain.vo.MessageBundleSetVo;
 import com.innospots.nexus.console.i18n.domain.vo.MessageBundleVo;
 import com.innospots.nexus.console.i18n.loader.MessageBundleLoader;
@@ -81,12 +79,12 @@ public final class MessageBundleService {
     ) {
         requireApplication(appId);
         String resolvedLocale = resolveLocale(locale, cookieLocale, acceptLanguage);
-        Set<ConsoleI18nNamespace> selectedNamespaces = resolveNamespaces(namespaces);
+        Set<String> selectedNamespaces = resolveNamespaces(namespaces);
         String resolvedRelease = resolveRelease(release);
 
         Map<String, MessageBundleVo> bundles = new LinkedHashMap<>();
         Set<String> keyOwners = new LinkedHashSet<>();
-        for (ConsoleI18nNamespace namespace : selectedNamespaces) {
+        for (String namespace : selectedNamespaces) {
             MessageBundleVo bundle = loader.load(resolvedLocale, namespace);
             for (String key : bundle.messages().keySet()) {
                 if (!keyOwners.add(key)) {
@@ -95,7 +93,7 @@ public final class MessageBundleService {
                             "Duplicate cross-namespace message key: " + key);
                 }
             }
-            bundles.put(namespace.code(), bundle);
+            bundles.put(namespace, bundle);
         }
         return new MessageBundleSetVo(
                 APP_ID,
@@ -156,26 +154,26 @@ public final class MessageBundleService {
         return java.util.Optional.empty();
     }
 
-    private static Set<ConsoleI18nNamespace> resolveNamespaces(String namespaces) {
+    private Set<String> resolveNamespaces(String namespaces) {
+        List<String> available = loader.namespaces();
         if (namespaces == null || namespaces.isBlank()) {
-            return EnumSet.allOf(ConsoleI18nNamespace.class);
+            return new LinkedHashSet<>(available);
         }
-        List<ConsoleI18nNamespace> selected = new ArrayList<>();
+        Set<String> selected = new LinkedHashSet<>();
         for (String code : namespaces.split(",")) {
             String normalized = code.trim();
             if (normalized.isEmpty()) {
                 continue;
             }
-            ConsoleI18nNamespace namespace = ConsoleI18nNamespace.fromCode(normalized)
-                    .orElseThrow(() -> ConsoleExceptions.build(I18nStatusCode.NAMESPACE_NOT_SUPPORTED));
-            if (!selected.contains(namespace)) {
-                selected.add(namespace);
+            if (!available.contains(normalized)) {
+                throw ConsoleExceptions.build(I18nStatusCode.NAMESPACE_NOT_SUPPORTED);
             }
+            selected.add(normalized);
         }
         if (selected.isEmpty()) {
-            return EnumSet.allOf(ConsoleI18nNamespace.class);
+            return new LinkedHashSet<>(available);
         }
-        return EnumSet.copyOf(selected);
+        return selected;
     }
 
     private static String resolveRelease(String release) {

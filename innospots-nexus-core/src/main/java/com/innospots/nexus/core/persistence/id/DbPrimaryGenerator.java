@@ -24,6 +24,6 @@ public class DbPrimaryGenerator implements IdentifierGenerator {
         String prefix = entity instanceof BaseEntity baseEntity
                 ? baseEntity.idPrefix()
                 : "";
-        return IdGenerator.ulid(prefix);
+        return IdGenerator.snowflakeBase62(prefix);
     }
 }
