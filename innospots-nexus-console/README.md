@@ -45,6 +45,7 @@ Maven 依赖：`innospots-nexus-core`、`innospots-nexus-plugin`、`jakarta.ws.r
 | **dictionary** | 租户级字典 | `DictionaryType` / `DictionaryItem` Operator 与 JAX-RS 接口契约（TENANT ownership）；具体实现由业务模块绑定。 |
 | **plugin** | 插件管理 API | `PluginManagementEndpoint`：安装、启用、禁用、重试等，委托 `PluginInstallationManager`（plugin 模块）。内置 `PluginManagementEntryPlugin`。 |
 | **logger** | 审计与调用日志 | `nx_audit_log` 实体、`@EndpointGrant` 驱动的 `ConsoleAuditLogFilter`、调用日志上下文与 `InvocationLogHandler` 管道。 |
+| **i18n** | 公共语言包 | 从 `src/main/resources/i18n/console/<namespace>/messages*.properties` 读取模块字典，经无登录、无权限要求的 `GET /api/public/i18n/bundles` 提供 Pactor `simple-v1` 语言包。 |
 | **entry** | 内置控制台入口 | `BuiltinConsoleEntryPlugins`、`ConsolePageRoutes` 与 `PluginManagementEntryPlugin`；声明稳定的 `entryPageKey`，不打包页面运行时资源。 |
 
 ### 内置控制台模块（entry 插件）
@@ -60,6 +61,7 @@ Maven 依赖：`innospots-nexus-core`、`innospots-nexus-plugin`、`jakarta.ws.r
 | 前缀 | 典型能力 |
 |------|----------|
 | `/api/d/nexus/**` | 目录、插件、导航、角色/菜单/字典管理契约、当前用户权限 |
+| `/api/public/i18n/bundles` | 公共语言包加载（支持 `appId`、`locale`、`namespaces`、`release`） |
 | `/tenant/auth`、`/tenant/scope` | 租户域注册、登录、刷新、作用域选择 |
 | `/platform/auth` | 运营管理平台登录（无公开自注册） |
 
@@ -81,6 +83,7 @@ OpenAPI 在 **`mvn package`** 时由 `smallrye-open-api-maven-plugin` 扫描各 
 
 | 主题 | 位置 |
 |------|------|
+| Console 语言包目录、接口与 Next.js 对接 | [`docs/i18n.md`](docs/i18n.md) |
 | 模块 API 索引（端点、类表、扩展指南） | [`skills/java/java-reference/references/modules/innospots-nexus-console/README.md`](../skills/java/java-reference/references/modules/innospots-nexus-console/README.md) |
 | 仓库模块职责与依赖规则 | [`AGENTS.md`](../AGENTS.md) |
 | 插件与 `console@2` 贡献 | [`innospots-nexus-plugin/docs/README.md`](../innospots-nexus-plugin/docs/README.md) |

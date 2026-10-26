@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 
 import { resolveSessionUser } from "@/server/accounts";
 import { corsPreflight, corsHeaders } from "@/server/cors";
+import { getRequestI18n } from "@/server/i18n";
 import { buildSitemap } from "@/server/sitemap";
 
 /**
@@ -12,7 +13,8 @@ import { buildSitemap } from "@/server/sitemap";
 export async function GET(request: Request) {
   const store = await cookies();
   const user = resolveSessionUser(store);
-  return Response.json(buildSitemap(user), {
+  const i18n = await getRequestI18n(request);
+  return Response.json(buildSitemap(user, i18n.messages), {
     headers: { "cache-control": "no-store", ...corsHeaders(request) },
   });
 }

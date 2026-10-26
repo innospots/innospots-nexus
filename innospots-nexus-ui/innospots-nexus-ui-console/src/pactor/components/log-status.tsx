@@ -1,5 +1,7 @@
 "use client";
 
+import { useUiText } from "@/i18n/ui";
+
 /**
  * 调用日志状态色点徽标（运行管理 / 调用日志 共享的自定义组件）。
  * 映射规则（PRD《运行管理/01-调用日志列表与详情》状态图例）：
@@ -49,6 +51,7 @@ const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
 };
 
 export function LogStatus({ status }: { status?: string }) {
+  const t = useUiText();
   const cfg = STATUS_CONFIG[status ?? ""] ?? {
     label: status ?? "—",
     className: "text-muted-foreground",
@@ -58,7 +61,7 @@ export function LogStatus({ status }: { status?: string }) {
       className={`inline-flex w-fit shrink-0 items-center gap-1.5 whitespace-nowrap text-xs font-medium ${cfg.className}`}
     >
       <span className="size-2 rounded-full bg-current" />
-      {cfg.label}
+      {t(cfg.label)}
     </span>
   );
 }

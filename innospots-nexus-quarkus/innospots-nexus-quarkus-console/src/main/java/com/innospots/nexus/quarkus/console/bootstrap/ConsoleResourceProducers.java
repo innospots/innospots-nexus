@@ -8,6 +8,9 @@ import jakarta.inject.Inject;
 import io.quarkus.arc.Unremovable;
 
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogSyncService;
+import com.innospots.nexus.console.i18n.endpoint.I18nBundleEndpoint;
+import com.innospots.nexus.console.i18n.loader.MessageBundleLoader;
+import com.innospots.nexus.console.i18n.service.MessageBundleService;
 import com.innospots.nexus.console.plugin.converter.PluginManagementConverter;
 import com.innospots.nexus.console.plugin.endpoint.PluginManagementEndpoint;
 import com.innospots.nexus.quarkus.plugin.config.PluginInstallationManagerHolder;
@@ -40,5 +43,12 @@ public class ConsoleResourceProducers {
                 managerHolder.requireManager(),
                 PluginManagementConverter.INSTANCE,
                 syncService);
+    }
+
+    @Produces
+    @Dependent
+    @Unremovable
+    I18nBundleEndpoint i18nBundleEndpoint() {
+        return new I18nBundleEndpoint(new MessageBundleService(new MessageBundleLoader()));
     }
 }

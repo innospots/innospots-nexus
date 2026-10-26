@@ -6,6 +6,8 @@ import { Trash2 } from "lucide-react";
 
 import { Button, Input, Select } from "@pactor-app/ui/components";
 
+import { useUiText } from "@/i18n/ui";
+
 import { registerDictionaryTypeSaveSubmit } from "../lib/dictionary-type-save-registry";
 import { DictionaryTypeSection } from "./dictionary-type-section";
 
@@ -121,8 +123,9 @@ function parseTypeNameLocales(value: TypeVo["typeName"]): { tags: string[]; valu
   return { tags: ordered, values };
 }
 
-function localeLabel(tag: string): string {
-  return LOCALE_LABELS[tag] ?? tag;
+function localeLabel(tag: string, translate: (source: string) => string): string {
+  const label = LOCALE_LABELS[tag];
+  return label === undefined ? tag : translate(label);
 }
 
 /**
@@ -137,6 +140,7 @@ export function DictionaryTypeSavePanel({
   onSave,
   onCancel,
 }: DictionaryTypeSavePanelProps) {
+  const t = useUiText();
   const isPage = variant === "page";
   const isCreate = mode === "create";
   const [typeCode, setTypeCode] = useState("");
@@ -158,6 +162,8 @@ export function DictionaryTypeSavePanel({
 
   useEffect(() => {
     if (isCreate) {
+      // 创建态的重置需在 props 切换后同步派生表单状态。
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTypeCode("");
       setLocaleTags([...DEFAULT_LOCALE_TAGS]);
       setTypeNameByLocale({
@@ -186,6 +192,8 @@ export function DictionaryTypeSavePanel({
 
   useEffect(() => {
     if (addableLocales.length === 0) {
+      // 可选语言随当前语言列表派生，清理失效选择。
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLocaleToAdd("");
       return;
     }
@@ -300,31 +308,33 @@ export function DictionaryTypeSavePanel({
   return (
     <div className={rootClass}>
       <div className={`min-h-0 flex-1 space-y-4 ${isPage ? "" : "overflow-y-auto pr-1"}`}>
-        <DictionaryTypeSection title="基本信息">
+        <DictionaryTypeSection title={t("基本信息")}>
           <div className="space-y-3">
             <label className="block text-sm">
-              <span className="text-destructive">*</span> 类型编码
+              <span className="text-destructive">*</span> {t("类型编码")}
               <Input
                 className="mt-1"
                 value={typeCode}
                 disabled={!isCreate}
                 onChange={(event) => setTypeCode(String(event))}
-                placeholder="如 USER_STATUS"
+                placeholder={t("如 USER_STATUS")}
               />
             </label>
             <div className="block text-sm">
               <div className="mb-2">
-                <span className="text-destructive">*</span> 类型名称
+                <span className="text-destructive">*</span> {t("类型名称")}
               </div>
               <div className="space-y-2">
                 {localeTags.map((tag) => (
                   <div key={tag} className="flex items-center gap-2 text-sm">
-                    <span className="w-24 shrink-0 text-muted-foreground">{localeLabel(tag)}</span>
+                    <span className="w-24 shrink-0 text-muted-foreground">
+                      {localeLabel(tag, t)}
+                    </span>
                     <Input
                       className="min-w-0 flex-1"
                       value={typeNameByLocale[tag] ?? ""}
                       onChange={(event) => setLocaleValue(tag, String(event))}
-                      placeholder={tag === LOCALE_ZH_CN ? "如 用户状态" : "User status"}
+                      placeholder={tag === LOCALE_ZH_CN ? t("如 用户状态") : "User status"}
                     />
                     {REQUIRED_LOCALE_TAGS.has(tag) ? (
                       <span className="size-8 shrink-0" aria-hidden="true" />
@@ -332,7 +342,7 @@ export function DictionaryTypeSavePanel({
                       <button
                         type="button"
                         className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-destructive"
-                        aria-label={`删除${localeLabel(tag)}`}
+                        aria-label={t("删除{{locale}}", { locale: localeLabel(tag, t) })}
                         onClick={() => removeLocale(tag)}
                       >
                         <Trash2 className="size-4" aria-hidden="true" />
@@ -346,12 +356,12 @@ export function DictionaryTypeSavePanel({
                   <Select
                     className="mb-0 w-[11rem]"
                     controlClassName="w-[11rem]"
-                    placeholder="选择语言"
+                    placeholder={t("选择语言")}
                     value={localeToAdd}
                     allowClear={false}
                     showSearch={addableLocales.length > 6}
                     options={addableLocales.map((tag) => ({
-                      label: localeLabel(tag),
+                      label: localeLabel(tag, t),
                       value: tag,
                     }))}
                     onChange={(value) => setLocaleToAdd(String(value))}
@@ -363,46 +373,48 @@ export function DictionaryTypeSavePanel({
                     disabled={localeToAdd.length === 0}
                     onClick={addLocale}
                   >
-                    + 添加语言
+                    {t("+ 添加语言")}
                   </Button>
                 </div>
               ) : null}
             </div>
             {isCreate ? (
               <p className="text-xs text-muted-foreground">
-                运营平台新建固定为平台安全域、启用状态；值形式当前按多值字典项保存。
+                {t("运营平台新建固定为平台安全域、启用状态；值形式当前按多值字典项保存。")}
               </p>
             ) : null}
           </div>
         </DictionaryTypeSection>
-        <DictionaryTypeSection title="字典项">
+        <DictionaryTypeSection title={t("字典项")}>
           <div className="mb-3 space-y-2 rounded-md border border-dashed border-border bg-background/50 p-3">
-            <div className="text-xs font-medium text-muted-foreground">添加字典项</div>
+            <div className="text-xs font-medium text-muted-foreground">
+              {t("添加字典项")}
+            </div>
             <div className="grid gap-2 sm:grid-cols-2">
               <Input
                 value={draftValue}
                 onChange={(event) => setDraftValue(String(event))}
-                placeholder="值 *"
+                placeholder={t("值 *")}
               />
               <Input
                 value={draftName}
                 onChange={(event) => setDraftName(String(event))}
-                placeholder="名称 *"
+                placeholder={t("名称 *")}
               />
             </div>
             <Button variant="default" size="small" onClick={addItem}>
-              + 添加字典项
+              {t("+ 添加字典项")}
             </Button>
           </div>
           {items.length === 0 ? (
-            <p className="text-sm text-muted-foreground">暂无字典项</p>
+            <p className="text-sm text-muted-foreground">{t("暂无字典项")}</p>
           ) : (
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border text-left text-muted-foreground">
-                  <th className="py-2 pr-2 font-medium">值</th>
-                  <th className="py-2 pr-2 font-medium">名称</th>
-                  <th className="py-2 font-medium">操作</th>
+                  <th className="py-2 pr-2 font-medium">{t("值")}</th>
+                  <th className="py-2 pr-2 font-medium">{t("名称")}</th>
+                  <th className="py-2 font-medium">{t("操作")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -417,7 +429,7 @@ export function DictionaryTypeSavePanel({
                         className="h-auto p-0 text-destructive"
                         onClick={() => removeItem(index)}
                       >
-                        移除
+                        {t("移除")}
                       </Button>
                     </td>
                   </tr>
@@ -428,16 +440,16 @@ export function DictionaryTypeSavePanel({
         </DictionaryTypeSection>
       </div>
       {hideFooter ? (
-        error != null ? <p className="mt-2 text-sm text-destructive">{error}</p> : null
+        error != null ? <p className="mt-2 text-sm text-destructive">{t(error)}</p> : null
       ) : (
         <div className={footerClass}>
-          {error != null ? <p className="mb-2 text-sm text-destructive">{error}</p> : null}
+          {error != null ? <p className="mb-2 text-sm text-destructive">{t(error)}</p> : null}
           <div className="flex justify-end gap-2">
             <Button variant="default" onClick={() => onCancel?.()}>
-              取消
+              {t("取消")}
             </Button>
             <Button variant="primary" onClick={handleSave}>
-              保存全部
+              {t("保存全部")}
             </Button>
           </div>
         </div>

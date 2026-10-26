@@ -8,6 +8,7 @@ import { apiBaseUrl, pageEndpoint, sitemapSources } from "./config";
 import { pactorActions } from "./actions";
 import { pactorComponents } from "./components";
 import { nexusHttpHooks } from "./http-hooks";
+import type { ConsoleLocale } from "@/i18n/locales";
 
 /**
  * 动态页面应用（design/dynamic-page.md）：框架 SitemapApp + 宿主接线。
@@ -28,15 +29,35 @@ import { nexusHttpHooks } from "./http-hooks";
  * HTTP 钩子使用 {@link nexusHttpHooks} 拆包 Innospots {@code R<T>}（code=OK / success）。
  */
 
-export function PactorApp() {
+export function PactorApp({
+  locale,
+  defaultLocale,
+  messages,
+}: {
+  locale: ConsoleLocale;
+  defaultLocale: ConsoleLocale;
+  messages: Record<string, string>;
+}) {
   return (
     <Suspense fallback={null}>
-      <PactorAppInner />
+      <PactorAppInner
+        locale={locale}
+        defaultLocale={defaultLocale}
+        messages={messages}
+      />
     </Suspense>
   );
 }
 
-function PactorAppInner() {
+function PactorAppInner({
+  locale,
+  defaultLocale,
+  messages,
+}: {
+  locale: ConsoleLocale;
+  defaultLocale: ConsoleLocale;
+  messages: Record<string, string>;
+}) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -51,6 +72,9 @@ function PactorAppInner() {
       actions={pactorActions}
       pageEndpoint={pageEndpoint}
       httpAdapter={nexusHttpHooks}
+      locale={locale}
+      defaultLocale={defaultLocale}
+      messages={messages}
     />
   );
 }

@@ -114,6 +114,9 @@ layouts:
                     - { label: 修改密码, value: password, icon: key }
                     - { label: 退出登录, value: logout, icon: log-out }
               events:
+                onLocaleChange:
+                  - action: app.locale
+                    params: { locale: "${event}" }
                 onUserSelect:
                   - action: if
                     params:

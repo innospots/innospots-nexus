@@ -4,6 +4,8 @@ import { useMemo } from "react";
 
 import { Button } from "@pactor-app/ui/components";
 
+import { useUiText } from "@/i18n/ui";
+
 import { DictionaryTypeSection } from "./dictionary-type-section";
 import { resolveI18nText } from "./i18n-text";
 
@@ -34,8 +36,9 @@ const LOCALE_LABELS: Record<string, string> = {
     de: "Deutsch",
 };
 
-function localeLabel(tag: string): string {
-    return LOCALE_LABELS[tag] ?? tag;
+function localeLabel(tag: string, translate: (source: string) => string): string {
+    const label = LOCALE_LABELS[tag];
+    return label === undefined ? tag : translate(label);
 }
 
 function formatTypeNameEntries(typeName: TypeVo["typeName"]): { tag: string; text: string }[] {
@@ -109,6 +112,7 @@ export function DictionaryTypeViewPanel({
     itemsData,
     onClose,
 }: DictionaryTypeViewPanelProps) {
+    const t = useUiText();
     const isPage = variant === "page";
     const typeNameEntries = useMemo(() => formatTypeNameEntries(typeData?.typeName), [typeData?.typeName]);
     const items = useMemo(() => {
@@ -121,7 +125,7 @@ export function DictionaryTypeViewPanel({
     const displayTitle = resolveI18nText(typeData?.typeName) || typeData?.typeCode || "—";
 
     if (loading) {
-        return <p className="text-sm text-muted-foreground">加载中…</p>;
+        return <p className="text-sm text-muted-foreground">{t("加载中…")}</p>;
     }
 
     const rootClass = isPage ? "flex flex-col" : "flex min-h-[calc(100dvh-8.5rem)] flex-col";
@@ -132,23 +136,25 @@ export function DictionaryTypeViewPanel({
     return (
         <div className={rootClass}>
             <div className={`min-h-0 flex-1 space-y-4 ${isPage ? "" : "overflow-y-auto pr-1"}`}>
-                <DictionaryTypeSection title="基本信息">
+                <DictionaryTypeSection title={t("基本信息")}>
                     <dl className="grid gap-3 text-sm sm:grid-cols-[7rem_1fr]">
-                        <dt className="text-muted-foreground">类型名称</dt>
+                        <dt className="text-muted-foreground">{t("类型名称")}</dt>
                         <dd className="font-medium text-foreground">{displayTitle}</dd>
-                        <dt className="text-muted-foreground">类型编码</dt>
+                        <dt className="text-muted-foreground">{t("类型编码")}</dt>
                         <dd className="font-mono text-xs">{typeData?.typeCode ?? "—"}</dd>
-                        <dt className="text-muted-foreground">状态</dt>
-                        <dd>{formatStatus(typeData?.status)}</dd>
+                        <dt className="text-muted-foreground">{t("状态")}</dt>
+                        <dd>{t(formatStatus(typeData?.status))}</dd>
                     </dl>
                     {typeNameEntries.length > 0 ? (
                         <div className="mt-4 border-t border-border/60 pt-3">
-                            <div className="mb-2 text-xs font-medium text-muted-foreground">多语言名称</div>
+                            <div className="mb-2 text-xs font-medium text-muted-foreground">
+                                {t("多语言名称")}
+                            </div>
                             <dl className="space-y-2 text-sm">
                                 {typeNameEntries.map((entry) => (
                                     <div key={entry.tag} className="flex gap-2">
                                         <span className="w-24 shrink-0 text-muted-foreground">
-                                            {localeLabel(entry.tag)}
+                                            {localeLabel(entry.tag, t)}
                                         </span>
                                         <span>{entry.text}</span>
                                     </div>
@@ -158,17 +164,17 @@ export function DictionaryTypeViewPanel({
                     ) : null}
                 </DictionaryTypeSection>
 
-                <DictionaryTypeSection title="字典项">
+                <DictionaryTypeSection title={t("字典项")}>
                     {items.length === 0 ? (
-                        <p className="text-sm text-muted-foreground">暂无字典项</p>
+                        <p className="text-sm text-muted-foreground">{t("暂无字典项")}</p>
                     ) : (
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="border-b border-border text-left text-muted-foreground">
-                                    <th className="py-2 pr-2 font-medium">值</th>
-                                    <th className="py-2 pr-2 font-medium">名称</th>
-                                    <th className="py-2 pr-2 font-medium">状态</th>
-                                    <th className="py-2 font-medium">排序</th>
+                                    <th className="py-2 pr-2 font-medium">{t("值")}</th>
+                                    <th className="py-2 pr-2 font-medium">{t("名称")}</th>
+                                    <th className="py-2 pr-2 font-medium">{t("状态")}</th>
+                                    <th className="py-2 font-medium">{t("排序")}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -176,7 +182,7 @@ export function DictionaryTypeViewPanel({
                                     <tr key={`${row.itemValue ?? index}`} className="border-b border-border/60">
                                         <td className="py-2 pr-2 font-mono text-xs">{row.itemValue ?? "—"}</td>
                                         <td className="py-2 pr-2">{row.itemName ?? "—"}</td>
-                                        <td className="py-2 pr-2">{formatStatus(row.status)}</td>
+                                        <td className="py-2 pr-2">{t(formatStatus(row.status))}</td>
                                         <td className="py-2">{row.sortOrder ?? "—"}</td>
                                     </tr>
                                 ))}
@@ -185,17 +191,23 @@ export function DictionaryTypeViewPanel({
                     )}
                 </DictionaryTypeSection>
 
-                <DictionaryTypeSection title="其他信息">
+                <DictionaryTypeSection title={t("其他信息")}>
                     <dl className="grid gap-3 text-sm sm:grid-cols-[7rem_1fr]">
-                        <dt className="text-muted-foreground">字典 ID</dt>
+                        <dt className="text-muted-foreground">{t("字典 ID")}</dt>
                         <dd className="font-mono text-xs">{typeData?.dictionaryTypeId ?? "—"}</dd>
-                        <dt className="text-muted-foreground">系统内置</dt>
-                        <dd>{typeData?.builtIn === true ? "是" : typeData?.builtIn === false ? "否" : "—"}</dd>
-                        <dt className="text-muted-foreground">排序</dt>
+                        <dt className="text-muted-foreground">{t("系统内置")}</dt>
+                        <dd>
+                            {typeData?.builtIn === true
+                                ? t("是")
+                                : typeData?.builtIn === false
+                                  ? t("否")
+                                  : "—"}
+                        </dd>
+                        <dt className="text-muted-foreground">{t("排序")}</dt>
                         <dd>{typeData?.sortOrder ?? "—"}</dd>
-                        <dt className="text-muted-foreground">创建时间</dt>
+                        <dt className="text-muted-foreground">{t("创建时间")}</dt>
                         <dd>{formatDateTime(typeData?.createdAt)}</dd>
-                        <dt className="text-muted-foreground">更新时间</dt>
+                        <dt className="text-muted-foreground">{t("更新时间")}</dt>
                         <dd>{formatDateTime(typeData?.updatedAt)}</dd>
                     </dl>
                 </DictionaryTypeSection>
@@ -204,7 +216,7 @@ export function DictionaryTypeViewPanel({
                 <div className={footerClass}>
                     <div className="flex justify-end gap-2">
                         <Button variant="primary" onClick={() => onClose()}>
-                            关闭
+                            {t("关闭")}
                         </Button>
                     </div>
                 </div>

@@ -7,6 +7,7 @@ import { parseDocument } from "yaml";
 import type { LayoutDsl, SitemapResource } from "pactor-app";
 
 import type { DemoUser } from "./accounts";
+import { localizePageDsl, localizeSitemapValue } from "./dsl-i18n";
 
 /**
  * Mock sitemap 数据源（design/dynamic-page.md 方案 B 示例实现）。
@@ -60,23 +61,46 @@ interface SitemapFile {
   menus: SitemapResource["menus"];
 }
 
-/** 递归收集 yaml 下所有页面 DSL（含 route / provider / ops 等域子目录；跳过 sitemap.yaml），按 id → 相对路径建索引 */
-function collectPageFiles(dir: string): Map<string, string> {
-  return new Map(
-    readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
-      const path = join(dir, entry.name);
-      if (entry.isDirectory()) return [...collectPageFiles(path)];
-      if (!entry.name.endsWith(".yaml") || entry.name === "sitemap.yaml") return [];
-      const id = entry.name.slice(0, -".yaml".length);
-      return [[id, relative(YAML_DIR, path)]];
-    }),
-  );
+interface PageFile {
+  namespace: string;
+  path: string;
+}
+
+/** 递归收集 yaml 下所有页面 DSL（含业务域子目录；跳过 sitemap.yaml），按 id 建索引。 */
+function collectPageFiles(dir: string): Map<string, PageFile> {
+  const files = new Map<string, PageFile>();
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const entryPath = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      for (const [id, file] of collectPageFiles(entryPath)) {
+        if (files.has(id)) {
+          throw new Error(`页面 DSL id 重复：${id}`);
+        }
+        files.set(id, file);
+      }
+      continue;
+    }
+    if (!entry.name.endsWith(".yaml") || entry.name === "sitemap.yaml") {
+      continue;
+    }
+    const id = entry.name.slice(0, -".yaml".length);
+    const relativePath = relative(YAML_DIR, entryPath);
+    const namespace = relativePath.includes("/")
+      ? relativePath.split("/")[0]
+      : "common";
+    files.set(id, { namespace, path: relativePath });
+  }
+  return files;
+}
+
+interface LoadedPage {
+  namespace: string;
+  pageDsl: PageDsl;
 }
 
 interface YamlState {
   site: SitemapFile;
-  pageDsls: Map<string, PageDsl>;
-  lazyPageDsls: Map<string, PageDsl>;
+  pages: Map<string, LoadedPage>;
 }
 
 function loadState(): YamlState {
@@ -86,17 +110,19 @@ function loadState(): YamlState {
   function loadPageDsl(id: string): PageDsl {
     const file = pageFiles.get(id);
     if (!file) throw new Error(`页面 DSL 缺失：${id}.yaml`);
-    return loadYaml<PageDsl>(file);
+    return loadYaml<PageDsl>(file.path);
   }
 
-  // 页面 DSL：按 id 约定从 yaml/<域>/<id>.yaml 加载；lazy 页不内联进 sitemap
   return {
     site,
-    pageDsls: new Map(
-      site.pages.filter((p) => !p.lazy).map((p) => [p.id, loadPageDsl(p.id)]),
-    ),
-    lazyPageDsls: new Map(
-      site.pages.filter((p) => p.lazy).map((p) => [p.id, loadPageDsl(p.id)]),
+    pages: new Map(
+      site.pages.map((page) => [
+        page.id,
+        {
+          namespace: pageFiles.get(page.id)?.namespace ?? "common",
+          pageDsl: loadPageDsl(page.id),
+        },
+      ]),
     ),
   };
 }
@@ -183,23 +209,57 @@ function sitemapUser(user: DemoUser): DemoUser {
   };
 }
 
-export function buildSitemap(user: DemoUser | null): SitemapResource {
-  const { site, pageDsls } = state();
+function localizeMenus(
+  menus: SitemapResource["menus"],
+  messages: Readonly<Record<string, string>>,
+): SitemapResource["menus"] {
+  return menus.map((menu) => ({
+    ...menu,
+    title: messages[`common.sitemap.menus.${menu.id}.title`] ?? menu.title,
+    ...(menu.type === "group"
+      ? { children: localizeMenus(menu.children ?? [], messages) }
+      : {}),
+  }));
+}
+
+export function buildSitemap(
+  user: DemoUser | null,
+  messages: Readonly<Record<string, string>> = {},
+): SitemapResource {
+  const { site, pages: loadedPages } = state();
   const pages: SitemapResource["pages"] = site.pages
     .filter((p) => canSee(p, user))
-    .map((p) => ({
-      id: p.id,
-      path: p.path,
-      title: p.title,
-      version: p.version,
-      // 懒加载页不下发 pageDsl，仅 id / path / version，经 /api/public/pages/{id} 按需获取
-      ...(p.lazy ? {} : { pageDsl: pageDsls.get(p.id) }),
-    }));
+    .map((p) => {
+      const loaded = loadedPages.get(p.id);
+      return {
+        id: p.id,
+        path: p.path,
+        title: messages[`common.sitemap.pages.${p.id}.title`] ?? p.title,
+        version: p.version,
+        ...(p.lazy || !loaded
+          ? {}
+          : {
+              pageDsl: localizePageDsl(
+                loaded.pageDsl,
+                p.id,
+                loaded.namespace,
+                messages,
+              ),
+            }),
+      };
+    });
+  const layouts = Object.fromEntries(
+    Object.entries(site.layouts).map(([name, layout]) => [
+      name,
+      localizeSitemapValue(layout, ["layouts", name], messages),
+    ]),
+  ) as SitemapFile["layouts"];
 
   // sitemap.yaml 原样透传，仅覆盖会话相关部分：pages / menus 按可见性过滤，
   // updatedAt / user / permissions 按会话注入
   return {
     ...site,
+    layouts,
     updatedAt: new Date().toISOString(),
     ...(user
       ? {
@@ -208,7 +268,7 @@ export function buildSitemap(user: DemoUser | null): SitemapResource {
         }
       : {}),
     pages,
-    menus: filterMenus(site.menus, user),
+    menus: localizeMenus(filterMenus(site.menus, user), messages),
   };
 }
 
@@ -216,12 +276,16 @@ export function buildSitemap(user: DemoUser | null): SitemapResource {
 export function getLazyPage(
   pageId: string,
   user: DemoUser | null,
+  messages: Readonly<Record<string, string>> = {},
 ): { version: number; pageDsl: PageDsl } | null {
-  const { site, lazyPageDsls } = state();
+  const { site, pages } = state();
   const entry = site.pages.find((p) => p.id === pageId);
-  const pageDsl = lazyPageDsls.get(pageId);
-  if (!entry?.lazy || !pageDsl || !canSee(entry, user)) {
+  const page = pages.get(pageId);
+  if (!entry?.lazy || !page || !canSee(entry, user)) {
     return null;
   }
-  return { version: entry.version, pageDsl };
+  return {
+    version: entry.version,
+    pageDsl: localizePageDsl(page.pageDsl, pageId, page.namespace, messages),
+  };
 }

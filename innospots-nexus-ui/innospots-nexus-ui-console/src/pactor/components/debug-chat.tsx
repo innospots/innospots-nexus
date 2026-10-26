@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Button, ChatInput } from "@pactor-app/ui";
 
+import { useUiText } from "@/i18n/ui";
+
 /**
  * 调试台共享对话面板（客户端调试 / 模型调试 左侧对话区），DSL 自定义组件。
  * PRD《调试台/00-总览》：Chat 对话式左右分栏，左栏 = 对话记录 + 输入框 + 清空对话。
@@ -86,6 +88,7 @@ export function DebugChat({
   onClear,
   onSelectRound,
 }: DebugChatProps) {
+  const t = useUiText();
   const [draft, setDraft] = useState("");
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -109,7 +112,7 @@ export function DebugChat({
       >
         {!messages || messages.length === 0 ? (
           <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-            {emptyHint ?? "暂无对话，输入消息开始调试"}
+            {emptyHint ?? t("暂无对话，输入消息开始调试")}
           </div>
         ) : (
           <div className="flex flex-col gap-4">
@@ -128,9 +131,9 @@ export function DebugChat({
                 >
                   <div className="mb-1 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
                     <span className={`size-2 rounded-full ${cfg.dot}`} />
-                    {cfg.label}
+                    {t(cfg.label)}
                     {msg.streaming && (
-                      <span className="text-muted-foreground/70">（生成中…）</span>
+                      <span className="text-muted-foreground/70">{t("（生成中…）")}</span>
                     )}
                   </div>
                   <div
@@ -162,14 +165,14 @@ export function DebugChat({
       {/* ── 停止生成（流式中） ── */}
       {streaming && onStop && (
         <div className="flex justify-center">
-          <Button text="停止生成" size="small" onClick={() => onStop()} />
+          <Button text={t("停止生成")} size="small" onClick={() => onStop()} />
         </div>
       )}
 
       {/* ── 输入框（Enter 发送 / Shift+Enter 换行，ChatInput 内建） ── */}
       <ChatInput
         value={draft}
-        placeholder={placeholder ?? "输入消息..."}
+        placeholder={placeholder ?? t("输入消息...")}
         disabled={sendDisabled || streaming}
         onChange={setDraft}
         onSubmit={handleSubmit}
@@ -178,7 +181,7 @@ export function DebugChat({
       {/* ── 清空对话 ── */}
       <div className="flex justify-end">
         <Button
-          text="清空对话"
+          text={t("清空对话")}
           size="small"
           disabled={!messages || messages.length === 0}
           onClick={() => onClear?.()}

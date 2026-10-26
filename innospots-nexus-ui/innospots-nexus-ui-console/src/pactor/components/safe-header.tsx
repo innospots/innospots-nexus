@@ -6,7 +6,9 @@ import {
   type HeaderUser,
 } from "@pactor-app/ui/components";
 
-function resolveDisplayName(user: HeaderUser): string {
+import { useUiText } from "@/i18n/ui";
+
+function resolveDisplayName(user: HeaderUser, fallback: string): string {
   if (typeof user.name === "string" && user.name.trim().length > 0) {
     return user.name.trim();
   }
@@ -14,7 +16,7 @@ function resolveDisplayName(user: HeaderUser): string {
   if (typeof extended.username === "string" && extended.username.trim().length > 0) {
     return extended.username.trim();
   }
-  return "用户";
+  return fallback;
 }
 
 /**
@@ -22,6 +24,7 @@ function resolveDisplayName(user: HeaderUser): string {
  * 布局 DSL 在 session 未就绪或仅有 username 时提供稳定展示名。
  */
 export function SafeHeader(props: HeaderProps) {
+  const t = useUiText();
   const { user, ...rest } = props;
   if (user === undefined) {
     return <Header {...rest} />;
@@ -31,7 +34,7 @@ export function SafeHeader(props: HeaderProps) {
       {...rest}
       user={{
         ...user,
-        name: resolveDisplayName(user),
+        name: resolveDisplayName(user, t("用户")),
       }}
     />
   );

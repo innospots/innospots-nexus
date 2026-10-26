@@ -9,21 +9,46 @@
 
 import type { ActionHandler } from "@pactor-app/runtime";
 
+import { translateUi } from "@/i18n/ui";
 import { collectDictionaryTypeSavePayload } from "./lib/dictionary-type-save-registry";
 
 const TENANT_CODE_PATTERN = /^[a-zA-Z0-9_]+$/;
 
 export const pactorActions: Record<string, ActionHandler> = {
+    "app.locale": async (action, ctx) => {
+        const locale = typeof action.params?.locale === "string"
+            ? action.params.locale.trim()
+            : "";
+        if (locale.length === 0) {
+            return {
+                ok: false,
+                error: new Error(translateUi(ctx.context.i18n, "修改失败")),
+            };
+        }
+        const response = await fetch("/api/i18n/locale", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ locale }),
+        });
+        if (!response.ok) {
+            return {
+                ok: false,
+                error: new Error(translateUi(ctx.context.i18n, "修改失败")),
+            };
+        }
+        window.location.reload();
+        return { ok: true };
+    },
     /**
      * 从当前挂载的 DictionaryTypeSavePanel（hideFooter）收集校验后的保存载荷，
      * 供 Drawer / overlay 的 onOk 动作链使用（结果写入 event）。
      */
-    "dictionaryType.collectSave": () => {
+    "dictionaryType.collectSave": (_action, ctx) => {
         const payload = collectDictionaryTypeSavePayload();
         if (payload == null) {
             return {
                 ok: false,
-                error: new Error("请完善字典表单后再保存"),
+                error: new Error(translateUi(ctx.context.i18n, "请完善字典表单后再保存")),
             };
         }
         return { ok: true, data: payload };
@@ -33,7 +58,7 @@ export const pactorActions: Record<string, ActionHandler> = {
         if (payload == null) {
             return {
                 ok: false,
-                error: new Error("请完善字典表单后再保存"),
+                error: new Error(translateUi(ctx.context.i18n, "请完善字典表单后再保存")),
             };
         }
         const editingTypeId = ctx.context.state.get("editingTypeId");
@@ -42,7 +67,7 @@ export const pactorActions: Record<string, ActionHandler> = {
         if (payload.mode === "edit" && dictionaryTypeId.length === 0) {
             return {
                 ok: false,
-                error: new Error("缺少字典类型 ID"),
+                error: new Error(translateUi(ctx.context.i18n, "缺少字典类型 ID")),
             };
         }
         const http = ctx.context.http;
@@ -68,19 +93,19 @@ export const pactorActions: Record<string, ActionHandler> = {
         }
         return { ok: true, data: payload };
     },
-    "validate.tenantCode": (action) => {
+    "validate.tenantCode": (action, ctx) => {
         const value = action.params?.["value"];
         const code = typeof value === "string" ? value.trim() : "";
         if (code.length === 0) {
             return {
                 ok: false,
-                error: new Error("请输入租户编码"),
+                error: new Error(translateUi(ctx.context.i18n, "请输入租户编码")),
             };
         }
         if (!TENANT_CODE_PATTERN.test(code)) {
             return {
                 ok: false,
-                error: new Error("租户编码仅支持字母、数字和下划线"),
+                error: new Error(translateUi(ctx.context.i18n, "租户编码仅支持字母、数字和下划线")),
             };
         }
         return { ok: true };

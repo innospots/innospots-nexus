@@ -5,10 +5,6 @@ type NexusEnvelope<T> = {
     data?: T;
 };
 
-type PageResult<T> = {
-    records?: T[];
-};
-
 export type DictionaryTypeVo = {
     dictionaryTypeId?: string;
     typeCode?: string;

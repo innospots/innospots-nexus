@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import { PactorApp } from "@/pactor/App";
+import { getRequestI18n } from "@/server/i18n";
 // 顺序约定：globals（本项目 tailwind 工具类 + 皮肤无关的外壳规则）→
 // ui 预建样式（同层冲突时 ui 胜出，保证其内部 base/响应式变体排序生效，
 // 如 Sidebar 的 hidden md:block）。主题令牌由 public/skins/<skin>.css
@@ -8,15 +8,20 @@ import { PactorApp } from "@/pactor/App";
 import "./globals.css";
 import "@pactor-app/ui/styles.css";
 
-export const metadata: Metadata = {
-  title: "Pactor Console",
-  description: "Pactor Console 管理台",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const i18n = await getRequestI18n();
+  return {
+    title: i18n.messages["common.metadata.title"] ?? "Nexus Console",
+    description:
+      i18n.messages["common.metadata.description"] ?? "Nexus management console",
+  };
+}
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const i18n = await getRequestI18n();
   return (
     <html
-      lang="zh-CN"
+      lang={i18n.locale}
       suppressHydrationWarning
       className={`h-full antialiased`}
     >
@@ -40,7 +45,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
          * 登录 / 登出后须 window.location 整页跳转以按新会话重拉 sitemap。
          * children（page）恒为 null，路由由 PactorApp 内部按 sitemap 解析。
          */}
-        <PactorApp />
+        <PactorApp
+          locale={i18n.locale}
+          defaultLocale={i18n.defaultLocale}
+          messages={i18n.messages}
+        />
         {children}
       </body>
     </html>

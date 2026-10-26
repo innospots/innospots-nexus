@@ -1,5 +1,7 @@
 "use client";
 
+import { useUiText } from "@/i18n/ui";
+
 /**
  * 启停状态徽标（Provider / Model / Route 页面共享的自定义组件）。
  * 映射规则：
@@ -26,9 +28,11 @@ const BASE =
   "inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-md border px-2 py-0.5 text-xs font-medium whitespace-nowrap";
 
 export function StatusBadge({ status }: { status?: string }) {
+  const t = useUiText();
   const enabled = status === "enabled" || status === "启用";
   const expired = status === "expired" || status === "已过期";
-  const text = STATUS_LABELS[status ?? ""] ?? `● ${status ?? "—"}`;
+  const source = STATUS_LABELS[status ?? ""];
+  const text = source === undefined ? `● ${status ?? "—"}` : t(source);
   return (
     <span
       data-slot="badge"

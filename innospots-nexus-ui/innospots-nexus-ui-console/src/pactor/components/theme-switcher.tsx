@@ -14,6 +14,7 @@ import {
   SKINS,
   SKIN_STORAGE_KEY,
 } from "../skin";
+import { useUiText } from "@/i18n/ui";
 
 /**
  * 外壳 Header 右侧的皮肤切换器：
@@ -51,8 +52,8 @@ const triggerClass =
   "flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground outline-hidden cursor-pointer";
 
 export function ThemeSwitcher() {
+  const t = useUiText();
   const [skin, setSkin] = useState<SkinValue>(DEFAULT_SKIN);
-  const [mode, setMode] = useState<Mode>("system");
   const [dark, setDark] = useState(false);
 
   // 挂载后读取持久化偏好并接管系统深浅色监听（mode 为 system 时）
@@ -60,8 +61,9 @@ export function ThemeSwitcher() {
     const savedSkin = (localStorage.getItem(SKIN_STORAGE_KEY) ??
       DEFAULT_SKIN) as SkinValue;
     const savedMode = (localStorage.getItem("mc-mode") ?? "system") as Mode;
+    // 挂载后才能读取浏览器偏好，完成 SSR 到本地偏好的同步。
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSkin(savedSkin);
-    setMode(savedMode);
     setDark(applyMode(savedMode));
 
     const media = window.matchMedia("(prefers-color-scheme: dark)");
@@ -80,7 +82,6 @@ export function ThemeSwitcher() {
 
   const toggleMode = () => {
     const next: Mode = dark ? "light" : "dark";
-    setMode(next);
     localStorage.setItem("mc-mode", next);
     setDark(applyMode(next));
   };
@@ -99,7 +100,7 @@ export function ThemeSwitcher() {
             className="size-3 rounded-full border border-black/10"
             style={{ backgroundColor: current.color }}
           />
-          {current.label}
+          {t(current.label)}
           <Icon name="chevron-down" size="sm" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
@@ -114,7 +115,7 @@ export function ThemeSwitcher() {
                 className="size-3 rounded-full border border-black/10"
                 style={{ backgroundColor: s.color }}
               />
-              {s.label}
+              {t(s.label)}
               {s.value === skin && (
                 <Icon name="check" size="sm" className="ml-auto" />
               )}
@@ -125,7 +126,7 @@ export function ThemeSwitcher() {
       <button
         type="button"
         data-slot="theme-mode-toggle"
-        aria-label={dark ? "切换为浅色" : "切换为深色"}
+        aria-label={t(dark ? "切换为浅色" : "切换为深色")}
         className={triggerClass}
         onClick={toggleMode}
       >

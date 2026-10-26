@@ -2,6 +2,8 @@
 
 import { useMemo } from "react";
 
+import { useUiText } from "@/i18n/ui";
+
 import { resolveI18nText } from "./i18n-text";
 
 type I18nValue = string | Record<string, string> | null | undefined;
@@ -151,7 +153,7 @@ function itemDescription(item: CatalogGrantItem): string {
 }
 
 function groupTitle(group: CatalogGrantGroup): string {
-  return resolveI18nText(group.displayName) || group.group?.trim() || "浏览分组";
+  return resolveI18nText(group.displayName) || group.group?.trim() || "";
 }
 
 function GrantCheckbox({
@@ -165,6 +167,7 @@ function GrantCheckbox({
   currentPage?: boolean;
   onChange: (checked: boolean) => void;
 }) {
+  const t = useUiText();
   const description = itemDescription(item);
   return (
     <label className="flex cursor-pointer items-start gap-3 rounded-md border border-border/70 px-3 py-2.5 hover:bg-muted/40">
@@ -179,7 +182,7 @@ function GrantCheckbox({
           {itemTitle(item)}
           {currentPage ? (
             <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[11px] font-normal text-primary">
-              当前页面
+              {t("当前页面")}
             </span>
           ) : null}
         </span>
@@ -205,6 +208,7 @@ function ViewGroupCard({
   checked: boolean;
   onChange: (checked: boolean) => void;
 }) {
+  const t = useUiText();
   const key = grantKey(group);
   return (
     <label
@@ -222,7 +226,9 @@ function ViewGroupCard({
           onChange={(event) => onChange(event.target.checked)}
         />
         <span className="min-w-0 flex-1">
-          <span className="block text-sm font-medium text-foreground">{groupTitle(group)}</span>
+          <span className="block text-sm font-medium text-foreground">
+            {groupTitle(group) || t("浏览分组")}
+          </span>
           <span className="mt-1 block break-all font-mono text-[11px] text-muted-foreground/80">
             {key}
           </span>
@@ -252,6 +258,7 @@ export function PermissionGrantPanel({
   className,
   onChange,
 }: PermissionGrantPanelProps) {
+  const t = useUiText();
   const catalogNodes = useMemo(() => normalizeCatalogSource(catalog), [catalog]);
   const selectedKey = selectedResourceKey?.trim() ?? "";
   const selectedPath = useMemo(
@@ -317,7 +324,7 @@ export function PermissionGrantPanel({
   if (selectedKey.length === 0) {
     return (
       <div className="flex min-h-56 items-center justify-center rounded-md border border-dashed border-border px-6 py-10 text-center text-sm text-muted-foreground">
-        请从左侧选择页面或模块，查看并设置访问与操作权限。
+        {t("请从左侧选择页面或模块，查看并设置访问与操作权限。")}
       </div>
     );
   }
@@ -325,7 +332,7 @@ export function PermissionGrantPanel({
   if (moduleNode == null) {
     return (
       <div className="flex min-h-56 items-center justify-center rounded-md border border-dashed border-border px-6 py-10 text-center text-sm text-muted-foreground">
-        当前节点没有可配置的权限模块。
+        {t("当前节点没有可配置的权限模块。")}
       </div>
     );
   }
@@ -344,26 +351,30 @@ export function PermissionGrantPanel({
           <div className="text-base font-semibold text-foreground">{moduleName}</div>
           <div className="mt-1 text-xs text-muted-foreground">
             {selectedNode?.resourceType === "MENU"
-              ? `已从菜单“${selectedName}”定位到所属模块`
-              : "当前模块授权"}
+              ? t("已从菜单“{{name}}”定位到所属模块", { name: selectedName })
+              : t("当前模块授权")}
           </div>
         </div>
         <div className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground">
-          已选 {selectedCount} / {moduleItemKeys.length}
+          {t("已选")} {selectedCount} / {moduleItemKeys.length}
         </div>
       </div>
 
       <p className="rounded-md bg-muted/50 px-3 py-2 text-xs leading-5 text-muted-foreground">
-        查看访问权限决定导航菜单和页面是否可见；操作权限只控制接口动作，不会单独展示菜单。
+        {t("查看访问权限决定导航菜单和页面是否可见；操作权限只控制接口动作，不会单独展示菜单。")}
       </p>
 
       <section className="rounded-lg border border-border p-4">
         <div className="flex items-center justify-between gap-2">
-          <h4 className="text-sm font-semibold text-foreground">查看访问权限</h4>
-          <span className="text-xs text-muted-foreground">{viewSelectableKeys.length} 项</span>
+          <h4 className="text-sm font-semibold text-foreground">{t("查看访问权限")}</h4>
+          <span className="text-xs text-muted-foreground">
+            {viewSelectableKeys.length} {t("项")}
+          </span>
         </div>
         {viewSelectableKeys.length === 0 ? (
-          <p className="mt-3 text-sm text-muted-foreground">该模块没有可配置的页面访问项。</p>
+          <p className="mt-3 text-sm text-muted-foreground">
+            {t("该模块没有可配置的页面访问项。")}
+          </p>
         ) : (
           <div className="mt-3 space-y-4">
             {viewGroups.map((group, groupIndex) => {
@@ -374,7 +385,7 @@ export function PermissionGrantPanel({
                   <div key={groupKey}>
                     <div className="mb-2 flex items-center gap-2">
                       <span className="text-xs font-medium text-muted-foreground">
-                        {groupTitle(group)}
+                        {groupTitle(group) || t("浏览分组")}
                       </span>
                       <span className="h-px flex-1 bg-border" />
                     </div>
@@ -414,11 +425,15 @@ export function PermissionGrantPanel({
 
       <section className="rounded-lg border border-border p-4">
         <div className="flex items-center justify-between gap-2">
-          <h4 className="text-sm font-semibold text-foreground">操作权限</h4>
-          <span className="text-xs text-muted-foreground">{operationItemCount} 项</span>
+          <h4 className="text-sm font-semibold text-foreground">{t("操作权限")}</h4>
+          <span className="text-xs text-muted-foreground">
+            {operationItemCount} {t("项")}
+          </span>
         </div>
         {operationItemCount === 0 ? (
-          <p className="mt-3 text-sm text-muted-foreground">该模块没有单独的操作授权项。</p>
+          <p className="mt-3 text-sm text-muted-foreground">
+            {t("该模块没有单独的操作授权项。")}
+          </p>
         ) : (
           <div className="mt-3 space-y-4">
             {operationGroups.map((group, groupIndex) => {
@@ -430,7 +445,7 @@ export function PermissionGrantPanel({
                 <div key={`${group.group ?? "default"}-${groupIndex}`}>
                   <div className="mb-2 flex items-center gap-2">
                     <span className="text-xs font-medium text-muted-foreground">
-                      {resolveI18nText(group.displayName) || group.group || "操作"}
+                      {resolveI18nText(group.displayName) || group.group || t("操作")}
                     </span>
                     <span className="h-px flex-1 bg-border" />
                   </div>

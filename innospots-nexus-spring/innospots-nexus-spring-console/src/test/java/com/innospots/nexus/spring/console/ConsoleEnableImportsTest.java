@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import com.innospots.nexus.spring.console.config.ConsoleAuthConfiguration;
 import com.innospots.nexus.spring.console.config.ConsoleCatalogConfiguration;
 import com.innospots.nexus.spring.console.config.ConsoleDictionaryConfiguration;
+import com.innospots.nexus.spring.console.config.ConsoleI18nConfiguration;
 import com.innospots.nexus.spring.console.config.ConsoleMenuConfiguration;
 import com.innospots.nexus.spring.console.config.ConsolePluginConfiguration;
 import com.innospots.nexus.spring.console.config.ConsoleRoleConfiguration;
@@ -29,7 +30,8 @@ class ConsoleEnableImportsTest {
                 NexusPersistenceConfiguration.class,
                 NexusSystemSettingConfiguration.class,
                 ConsoleAuthConfiguration.class,
-                ConsoleRoleConfiguration.class);
+                ConsoleRoleConfiguration.class,
+                ConsoleI18nConfiguration.class);
         assertThat(imported).doesNotContain(
                 PluginHostConfiguration.class,
                 PluginHostStartupConfiguration.class,
