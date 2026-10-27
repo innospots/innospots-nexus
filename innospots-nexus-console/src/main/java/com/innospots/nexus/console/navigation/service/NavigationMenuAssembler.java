@@ -7,23 +7,20 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.innospots.nexus.base.thread.TLC;
 import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
+import com.innospots.nexus.console.menu.domain.entity.MenuEntity;
 import com.innospots.nexus.console.menu.domain.enums.MenuOpenMode;
 import com.innospots.nexus.console.menu.domain.vo.NavigationMenuVo;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubject;
-import com.innospots.nexus.console.catalog.domain.entity.ConsoleCatalogResourceEntity;
-import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
 import com.innospots.nexus.console.permission.service.PermissionVisibilityService;
-import com.innospots.nexus.console.entry.ConsolePageRoutes;
 import com.innospots.nexus.console.scope.ConsoleOwnership;
 import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
 
 /**
- * 从持久化权限目录组装当前用户可见的导航菜单树。
+ * 从持久化菜单记录组装当前用户可见的导航菜单树。
  */
 public final class NavigationMenuAssembler {
 
@@ -57,101 +54,82 @@ public final class NavigationMenuAssembler {
         if (ownership == null || subject == null) {
             return List.of();
         }
-        return buildMenus(visibilityService.visible(ownership, subject));
+        return buildMenus(visibilityService.visibleMenus(ownership, subject));
     }
 
-    private List<NavigationMenuVo> buildMenus(List<ConsoleCatalogResourceEntity> visible) {
+    /**
+     * 返回当前归属下的全部启用菜单，不执行权限过滤。
+     */
+    public List<NavigationMenuVo> allNavigationMenus(ConsoleOwnership ownership) {
+        if (ownership == null) {
+            return List.of();
+        }
+        return buildMenus(visibilityService.allMenus(ownership));
+    }
+
+    private List<NavigationMenuVo> buildMenus(List<MenuEntity> visible) {
         Set<String> visibleMenuIds = visible.stream()
-                .filter(NavigationMenuAssembler::navigable)
-                .map(ConsoleCatalogResourceEntity::getResourceId)
+                .map(MenuEntity::getMenuId)
+                .filter(NavigationMenuAssembler::hasText)
                 .collect(Collectors.toCollection(HashSet::new));
-        Map<String, List<ConsoleCatalogResourceEntity>> menusByParent = new LinkedHashMap<>();
-        List<ConsoleCatalogResourceEntity> roots = new ArrayList<>();
-        for (ConsoleCatalogResourceEntity resource : visible) {
-            if (!navigable(resource)) {
-                continue;
-            }
-            String parentId = resource.getParentResourceId();
+        Map<String, List<MenuEntity>> menusByParent = new LinkedHashMap<>();
+        List<MenuEntity> roots = new ArrayList<>();
+        for (MenuEntity menu : visible) {
+            String parentId = menu.getParentId();
             if (parentId == null
                     || parentId.isBlank()
                     || !visibleMenuIds.contains(parentId)) {
-                roots.add(resource);
+                roots.add(menu);
             } else {
-                menusByParent.computeIfAbsent(parentId, ignored -> new ArrayList<>()).add(resource);
+                menusByParent.computeIfAbsent(parentId, ignored -> new ArrayList<>()).add(menu);
             }
         }
-        roots.sort(Comparator.comparing(ConsoleCatalogResourceEntity::getSortOrder,
+        roots.sort(Comparator.comparing(MenuEntity::getSortOrder,
                 Comparator.nullsLast(Integer::compareTo)));
         List<NavigationMenuVo> menus = new ArrayList<>();
-        for (ConsoleCatalogResourceEntity root : roots) {
+        for (MenuEntity root : roots) {
             menus.add(toMenu(root, menusByParent));
         }
         return List.copyOf(menus);
     }
 
     private static NavigationMenuVo toMenu(
-            ConsoleCatalogResourceEntity menu,
-            Map<String, List<ConsoleCatalogResourceEntity>> menusByParent
+            MenuEntity menu,
+            Map<String, List<MenuEntity>> menusByParent
     ) {
-        List<ConsoleCatalogResourceEntity> children = menusByParent.getOrDefault(
-                menu.getResourceId(), List.of());
+        List<MenuEntity> children = menusByParent.getOrDefault(
+                menu.getMenuId(), List.of());
         children = new ArrayList<>(children);
-        children.sort(Comparator.comparing(ConsoleCatalogResourceEntity::getSortOrder,
+        children.sort(Comparator.comparing(MenuEntity::getSortOrder,
                 Comparator.nullsLast(Integer::compareTo)));
         List<NavigationMenuVo> childMenus = new ArrayList<>();
-        for (ConsoleCatalogResourceEntity child : children) {
+        for (MenuEntity child : children) {
             childMenus.add(toMenu(child, menusByParent));
         }
         return new NavigationMenuVo(
-                menuKey(menu),
-                menu.getDisplayName(),
-                routePath(menu),
+                menu.getMenuKey(),
+                menu.getMenuName(),
+                menu.getRoutePath(),
+                menu.getComponentKey(),
+                menu.getExternalUrl(),
+                menu.getIcon(),
+                openMode(menu.getOpenMode()),
                 null,
                 null,
                 null,
-                MenuOpenMode.INTERNAL,
-                menu.getResourceId(),
-                menu.getOwnerPluginId(),
-                menu.getModuleKey(),
-                menu.getEntryPageKey(),
+                null,
                 childMenus);
     }
 
-    private static String routePath(ConsoleCatalogResourceEntity menu) {
-        if (menu.getEntryPageKey() == null || menu.getEntryPageKey().isBlank()) {
-            return null;
+    private static MenuOpenMode openMode(String value) {
+        if (value == null || value.isBlank()) {
+            return MenuOpenMode.INTERNAL;
         }
-        return ConsolePageRoutes.pagePath(
-                menu.getDomainKey(), menu.getModuleKey(), menu.getEntryPageKey());
-    }
-
-    private static String menuKey(String resourceKey) {
-        if (resourceKey == null) {
-            return null;
+        try {
+            return MenuOpenMode.valueOf(value);
+        } catch (IllegalArgumentException exception) {
+            return MenuOpenMode.INTERNAL;
         }
-        if (!resourceKey.startsWith("menu:")) {
-            return resourceKey;
-        }
-        String suffix = resourceKey.substring("menu:".length());
-        int separator = suffix.indexOf('.');
-        if (separator < 0 || separator == suffix.length() - 1) {
-            return suffix;
-        }
-        return suffix.substring(separator + 1);
-    }
-
-    private static String menuKey(ConsoleCatalogResourceEntity menu) {
-        return hasText(menu.getEntryPageKey())
-                ? menu.getEntryPageKey()
-                : menuKey(menu.getResourceKey());
-    }
-
-    private static boolean navigable(ConsoleCatalogResourceEntity resource) {
-        if (CatalogResourceType.MENU.name().equals(resource.getResourceType())) {
-            return true;
-        }
-        return CatalogResourceType.MODULE.name().equals(resource.getResourceType())
-                && hasText(resource.getEntryPageKey());
     }
 
     private static boolean hasText(String value) {

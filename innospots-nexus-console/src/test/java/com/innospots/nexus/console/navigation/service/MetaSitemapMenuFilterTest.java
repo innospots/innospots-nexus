@@ -18,11 +18,14 @@ class MetaSitemapMenuFilterTest {
     void filtersByRolePreset() {
         SitemapMenuItem allowed = menu("allowed", List.of("role-a"));
         SitemapMenuItem denied = menu("denied", List.of("role-b"));
+        SitemapMenuItem unrestricted = menu("unrestricted", List.of());
         AuthorizationSubject subject = new AuthorizationSubject("u1", Set.of("role-a"), Set.of(), false);
 
-        List<SitemapMenuItem> visible = filter.filterVisibleMenus(List.of(allowed, denied), subject);
+        List<SitemapMenuItem> visible = filter.filterVisibleMenus(
+                List.of(allowed, denied, unrestricted), subject);
 
-        assertThat(visible).extracting(SitemapMenuItem::getId).containsExactly("allowed");
+        assertThat(visible).extracting(SitemapMenuItem::getId)
+                .containsExactly("allowed", "unrestricted");
     }
 
     private static SitemapMenuItem menu(String id, List<String> roles) {

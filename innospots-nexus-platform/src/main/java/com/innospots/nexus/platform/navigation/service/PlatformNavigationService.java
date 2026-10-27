@@ -10,7 +10,7 @@ import com.innospots.nexus.console.permission.authorization.AuthorizationSubject
 import com.innospots.nexus.platform.scope.PlatformConsoleSession;
 
 /**
- * 运营平台导航：catalog 菜单与 meta-sitemap 默认项组合。
+ * 运营平台导航：持久化菜单与 meta-sitemap 默认项组合。
  */
 @RequiredArgsConstructor
 public class PlatformNavigationService {

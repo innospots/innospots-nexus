@@ -7,13 +7,14 @@ import org.springframework.context.annotation.Configuration;
 
 import com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogService;
+import com.innospots.nexus.console.menu.dao.MenuDao;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubjectResolver;
 import com.innospots.nexus.console.permission.authorization.ConsoleResourcePermissionAuthorizer;
 import com.innospots.nexus.console.permission.authorization.SessionAuthorizationSubjectResolver;
 import com.innospots.nexus.console.permission.dao.PermissionGrantDao;
-import com.innospots.nexus.console.permission.service.GrantSubjectAccess;
 import com.innospots.nexus.console.permission.pageaccess.GrantGroupPageAccessVerifier;
 import com.innospots.nexus.console.permission.pageaccess.PageAccessVerifier;
+import com.innospots.nexus.console.permission.service.GrantSubjectAccess;
 import com.innospots.nexus.console.permission.service.PermissionGrantService;
 import com.innospots.nexus.console.permission.service.PermissionVisibilityService;
 import com.innospots.nexus.console.role.dao.RoleBindingDao;
@@ -32,8 +33,9 @@ public class ConsolePermissionConfiguration {
     @Bean
     PermissionVisibilityService permissionVisibilityService(
             ConsoleCatalogResourceDao resourceDao,
+            MenuDao menuDao,
             PermissionGrantDao grantDao) {
-        return new PermissionVisibilityService(resourceDao, grantDao);
+        return new PermissionVisibilityService(resourceDao, menuDao, grantDao);
     }
 
     @Bean

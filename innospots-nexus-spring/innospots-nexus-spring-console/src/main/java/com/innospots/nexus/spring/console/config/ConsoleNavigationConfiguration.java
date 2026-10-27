@@ -1,5 +1,6 @@
 package com.innospots.nexus.spring.console.config;
 
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,6 +15,7 @@ import com.innospots.nexus.console.sitemap.service.SitemapService;
  * {@code console.navigation} 域 Spring 装配：导航菜单组装（REST 由 platform 实现）。
  */
 @Configuration
+@EnableConfigurationProperties(ConsoleWebProperties.class)
 public class ConsoleNavigationConfiguration {
 
     @Bean
@@ -36,12 +38,14 @@ public class ConsoleNavigationConfiguration {
             NavigationMenuAssembler navigationMenuAssembler,
             SitemapService sitemapService,
             MetaSitemapMenuFilter metaSitemapMenuFilter,
-            MetaSitemapNavigationConverter metaSitemapNavigationConverter) {
+            MetaSitemapNavigationConverter metaSitemapNavigationConverter,
+            ConsoleWebProperties webProperties) {
         return new NavigationMenuComposer(
                 navigationMenuAssembler,
                 sitemapService,
                 metaSitemapMenuFilter,
-                metaSitemapNavigationConverter);
+                metaSitemapNavigationConverter,
+                webProperties.getSecurity());
     }
 
 }

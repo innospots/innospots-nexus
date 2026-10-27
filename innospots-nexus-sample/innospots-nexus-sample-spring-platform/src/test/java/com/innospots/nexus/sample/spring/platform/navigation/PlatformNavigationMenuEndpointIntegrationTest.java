@@ -28,7 +28,6 @@ import com.innospots.nexus.console.catalog.domain.vo.CatalogViewItemVo;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogService;
 import com.innospots.nexus.console.credential.password.service.CredentialService;
 import com.innospots.nexus.platform.config.PlatformConstant;
-import com.innospots.nexus.platform.entry.BuiltinPlatformEntryPlugins;
 import com.innospots.nexus.sample.spring.platform.SamplePlatformConsoleServer;
 import com.innospots.nexus.sample.spring.platform.permission.support.PermissionGrantDatabaseJsonSnapshot;
 import com.innospots.nexus.sample.spring.platform.permission.support.SyncedCatalogResourceIds;
@@ -42,8 +41,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * {@link com.innospots.nexus.platform.navigation.endpoint.PlatformNavigationMenuEndpoint}
- * HTTP 集成测试：真实平台登录后，导航菜单由数据库中的角色授权
- * （{@code nx_permission_grant}）与角色绑定（{@code nx_role_binding}）驱动。
+ * HTTP 集成测试：真实平台登录后，导航菜单由 {@code nx_menu} 菜单记录、
+ * 角色授权（{@code nx_permission_grant}）与角色绑定（{@code nx_role_binding}）共同驱动。
  */
 @SpringBootTest(
         classes = SamplePlatformConsoleServer.class,
@@ -90,6 +89,10 @@ class PlatformNavigationMenuEndpointIntegrationTest {
                 jdbcTemplate,
                 credentialService,
                 DEV_PASSWORD);
+        PlatformIntegrationTestSupport.ensurePlatformAdministratorRoleAndBindUser(
+                jdbcTemplate,
+                DEV_USER_ID);
+        seedNavigationMenu();
         http = new RoleEndpointHttpClient(port);
         PlatformDatabaseJsonSnapshot.logAndPersist(
                 jdbcTemplate,
@@ -111,7 +114,11 @@ class PlatformNavigationMenuEndpointIntegrationTest {
         UserAndRoleMenus catalog = SyncedCatalogResourceIds.requireUserAndRoleMenus(jdbcTemplate);
         String roleId = createRole("nav-visible-role", "Nav Visible Role");
         grantResourcesToRole(roleId, catalog.userMenuViewGrantKey());
-        bindDevUserToRole(roleId);
+        PlatformIntegrationTestSupport.replacePlatformUserRoleBindings(
+                jdbcTemplate,
+                DEV_USER_ID,
+                roleId);
+        accessToken = loginAsDevUser();
         PermissionGrantDatabaseJsonSnapshot.logAndPersist(jdbcTemplate, "01-grants-bound", "ROLE", roleId);
 
         assertNavigationGrantRows(
@@ -142,12 +149,7 @@ class PlatformNavigationMenuEndpointIntegrationTest {
         assertThat(userMenu.get("menuName").asText()).contains("用户列表");
         assertThat(userMenu.get("routePath").asText())
                 .isEqualTo("/page/platform/user/platform-user-main");
-        assertThat(userMenu.get("resourceId").asText())
-                .isEqualTo(catalog.userMenuResourceId());
-        assertThat(userMenu.get("ownerPluginId").asText())
-                .isEqualTo(BuiltinPlatformEntryPlugins.PLATFORM_CONSOLE);
-        assertThat(userMenu.get("moduleKey").asText()).isEqualTo("user");
-        assertThat(userMenu.get("pageKey").asText()).isEqualTo("platform-user-main");
+        assertThat(userMenu.get("componentKey").asText()).isEqualTo("platform/user/index");
         assertThat(userMenu.get("openMode").asText()).isEqualTo("INTERNAL");
         assertThat(userMenu.get("children").isArray()).as("children must be an array").isTrue();
 
@@ -198,7 +200,11 @@ class PlatformNavigationMenuEndpointIntegrationTest {
         String operationGrantKey = requireOperationGrantKey("module:user", "platform.user.create");
         String roleId = createRole("nav-operation-role", "Nav Operation Role");
         grantResourcesToRole(roleId, operationGrantKey);
-        bindDevUserToRole(roleId);
+        PlatformIntegrationTestSupport.replacePlatformUserRoleBindings(
+                jdbcTemplate,
+                DEV_USER_ID,
+                roleId);
+        accessToken = loginAsDevUser();
         PermissionGrantDatabaseJsonSnapshot.logAndPersist(
                 jdbcTemplate,
                 "operation-only-grant",
@@ -336,21 +342,26 @@ class PlatformNavigationMenuEndpointIntegrationTest {
     ) {
         List<Map<String, Object>> grants = jdbcTemplate.queryForList(
                 """
-                SELECT g.owner_type, g.owner_id, g.security_realm, g.grant_key,
-                       r.resource_key, r.resource_type
-                FROM nx_permission_grant g
-                JOIN nx_console_catalog_resource r
-                    ON g.grant_key = CONCAT(r.entry_page_key, ':', r.domain_key, '.', r.module_key)
-                WHERE g.subject_type = 'ROLE' AND g.subject_id = ?
+                SELECT owner_type, owner_id, security_realm, grant_key
+                FROM nx_permission_grant
+                WHERE subject_type = 'ROLE' AND subject_id = ?
                 """,
                 roleId);
         assertThat(grants).hasSize(1);
         assertThat(grants.get(0).get("grant_key")).isEqualTo(viewGrantKey);
-        assertThat(grants.get(0).get("resource_key")).isEqualTo(resourceKey);
-        assertThat(grants.get(0).get("resource_type")).isEqualTo("MODULE");
         assertThat(grants.get(0).get("owner_type")).isEqualTo("PLATFORM");
         assertThat(grants.get(0).get("owner_id")).isNull();
         assertThat(grants.get(0).get("security_realm")).isEqualTo("PLATFORM");
+
+        Map<String, Object> resource = jdbcTemplate.queryForMap(
+                """
+                SELECT resource_key, resource_type
+                FROM nx_console_catalog_resource
+                WHERE resource_key = ?
+                """,
+                resourceKey);
+        assertThat(resource.get("resource_key")).isEqualTo(resourceKey);
+        assertThat(resource.get("resource_type")).isEqualTo("MODULE");
 
         List<Map<String, Object>> bindings = jdbcTemplate.queryForList(
                 """
@@ -456,19 +467,25 @@ class PlatformNavigationMenuEndpointIntegrationTest {
                 .orElseThrow();
     }
 
-    private void bindDevUserToRole(String roleId) throws Exception {
-        String bindingsPath = PlatformConstant.ROLES_PATH + "/" + roleId + "/bindings";
-        String body = """
-                {
-                  "subjectType": "USER",
-                  "subjectIds": ["%s"]
-                }
-                """.formatted(DEV_USER_ID);
-        HttpResponse<String> bound = http.exchange(
-                "POST",
-                bindingsPath,
-                jsonHeaders(),
-                body);
-        assertThat(bound.statusCode()).as(bound.body()).isEqualTo(200);
+    private void seedNavigationMenu() {
+        jdbcTemplate.update(
+                """
+                DELETE FROM nx_menu
+                WHERE owner_type = 'PLATFORM' AND security_realm = 'PLATFORM'
+                """);
+        jdbcTemplate.update(
+                """
+                INSERT INTO nx_menu (
+                    menu_id, parent_id, menu_key, menu_name, menu_type, route_path,
+                    component_key, redirect_path, external_url, icon, open_mode,
+                    visible, status, sort_order, built_in, owner_type, owner_id,
+                    security_realm, created_at, updated_at
+                ) VALUES (
+                    'MNUNAVUSERMAIN', NULL, 'platform-user-main', '用户列表', 'PAGE',
+                    '/page/platform/user/platform-user-main', 'platform/user/index',
+                    NULL, NULL, 'users', 'INTERNAL', TRUE, 'ENABLED', 0, FALSE,
+                    'PLATFORM', NULL, 'PLATFORM', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+                )
+                """);
     }
 }

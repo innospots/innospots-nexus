@@ -4,22 +4,23 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Singleton;
 
+import com.innospots.nexus.console.catalog.bootstrap.ConsoleCatalogSyncStartupTask;
+import com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao;
+import com.innospots.nexus.console.catalog.service.ConsoleCatalogService;
+import com.innospots.nexus.console.catalog.service.ConsoleCatalogSyncService;
+import com.innospots.nexus.console.menu.dao.MenuDao;
+import com.innospots.nexus.console.navigation.service.NavigationMenuAssembler;
+import com.innospots.nexus.console.permission.authorization.AuthorizationSubjectResolver;
+import com.innospots.nexus.console.permission.authorization.SessionAuthorizationSubjectResolver;
+import com.innospots.nexus.console.permission.dao.PermissionGrantDao;
+import com.innospots.nexus.console.permission.service.PermissionVisibilityService;
+import com.innospots.nexus.console.role.dao.RoleBindingDao;
+import com.innospots.nexus.console.role.dao.RoleDao;
 import com.innospots.nexus.console.sitemap.config.SitemapYamlConfig;
 import com.innospots.nexus.console.sitemap.loader.SitemapConfigLoader;
 import com.innospots.nexus.console.sitemap.parser.SitemapYamlParser;
 import com.innospots.nexus.console.sitemap.service.SitemapService;
-import com.innospots.nexus.console.catalog.bootstrap.ConsoleCatalogSyncStartupTask;
-import com.innospots.nexus.console.catalog.service.ConsoleCatalogService;
-import com.innospots.nexus.console.catalog.service.ConsoleCatalogSyncService;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrantManager;
-import com.innospots.nexus.console.navigation.service.NavigationMenuAssembler;
-import com.innospots.nexus.console.permission.authorization.AuthorizationSubjectResolver;
-import com.innospots.nexus.console.permission.authorization.SessionAuthorizationSubjectResolver;
-import com.innospots.nexus.console.role.dao.RoleBindingDao;
-import com.innospots.nexus.console.role.dao.RoleDao;
-import com.innospots.nexus.console.permission.dao.PermissionGrantDao;
-import com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao;
-import com.innospots.nexus.console.permission.service.PermissionVisibilityService;
 import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributionCatalog;
 
 /**
@@ -103,8 +104,9 @@ public class ConsoleCatalogBeans {
     @Singleton
     PermissionVisibilityService permissionVisibilityService(
             ConsoleCatalogResourceDao resourceDao,
+            MenuDao menuDao,
             PermissionGrantDao grantDao) {
-        return new PermissionVisibilityService(resourceDao, grantDao);
+        return new PermissionVisibilityService(resourceDao, menuDao, grantDao);
     }
 
     /**
