@@ -4,7 +4,7 @@ import { useMemo } from "react";
 
 import { Tree, type TreeNodeData } from "@pactor-app/ui/components";
 
-import { useUiText } from "@/i18n/ui";
+import { useI18n } from "@pactor-app/runtime";
 
 type CatalogNode = {
   resourceKey?: string | null;
@@ -95,7 +95,7 @@ export interface CatalogTreeProps {
  * 将 Console catalog/tree API 节点（resourceKey、displayName）映射为 Tree 所需的 key、title。
  */
 export function CatalogTree({ treeData, search, className, onSelect }: CatalogTreeProps) {
-  const t = useUiText();
+  const { t } = useI18n();
   const nodes = useMemo(() => {
     const mapped = mapCatalogNodes(normalizeCatalogTreeSource(treeData));
     return filterTree(mapped, search ?? "");
@@ -106,7 +106,7 @@ export function CatalogTree({ treeData, search, className, onSelect }: CatalogTr
   if (nodes.length === 0) {
     return (
       <p className="mt-2 text-sm text-muted-foreground">
-        {t("暂无目录资源；若刚完成插件安装，可尝试同步目录索引。")}
+        {t("common.ui.no-catalog-resources-if-you-just-installed-a-plugin-try-synchronizing-th")}
       </p>
     );
   }

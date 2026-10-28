@@ -1,9 +1,11 @@
 dsl: "1.0"
 page:
   id: login
-  title: 登录
+  title: '$i18n{auth.login.title:登录}'
   name: login
-  description: 运营管理平台登录
-
+  description: '$i18n{auth.login.description:运营管理平台登录}'
+i18n:
+  namespaces:
+    - auth
 body:
   type: PlatformLoginForm

@@ -1,16 +1,27 @@
 import { cookies } from "next/headers";
+import { isI18nError, resolveRequestLocale } from "@pactor-app/i18n";
 
-import { LOCALE_COOKIE, normalizeLocale } from "@/i18n/locales";
+import { LOCALE_CONFIG, LOCALE_COOKIE } from "@/pactor/locale";
 
 /**
  * 写入 Console 语言偏好；调用方随后整页刷新以重建 sitemap 与页面。
  */
 export async function POST(request: Request) {
   const payload = await request.json().catch(() => null) as { locale?: unknown } | null;
-  const locale = normalizeLocale(
-    typeof payload?.locale === "string" ? payload.locale : null,
-  );
-  if (!locale) {
+  const requested = typeof payload?.locale === "string" ? payload.locale : undefined;
+  let locale: string;
+  try {
+    locale = resolveRequestLocale(
+      { queryLocale: requested },
+      LOCALE_CONFIG,
+    ).locale;
+  } catch (error) {
+    if (isI18nError(error)) {
+      return Response.json({ error: error.code }, { status: 400 });
+    }
+    throw error;
+  }
+  if (requested === undefined || requested.trim().length === 0) {
     return Response.json({ error: "Unsupported locale" }, { status: 400 });
   }
   const cookieStore = await cookies();

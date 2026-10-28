@@ -1,6 +1,6 @@
 "use client";
 
-import { useUiText } from "@/i18n/ui";
+import { useI18n } from "@pactor-app/runtime";
 
 /**
  * 调用日志状态色点徽标（运行管理 / 调用日志 共享的自定义组件）。
@@ -15,43 +15,43 @@ import { useUiText } from "@/i18n/ui";
  */
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   success: {
-    label: "成功",
+    label: "common.ui.success",
     className: "text-emerald-600 [data-pactor-theme=dark]:text-emerald-400",
   },
   error: {
-    label: "错误",
+    label: "common.ui.error",
     className: "text-red-600 [data-pactor-theme=dark]:text-red-400",
   },
   unfinished: {
-    label: "未完成",
+    label: "common.ui.incomplete",
     className: "text-amber-600 [data-pactor-theme=dark]:text-amber-400",
   },
   cancelled: {
-    label: "已取消",
+    label: "common.ui.cancelled",
     className: "text-violet-600 [data-pactor-theme=dark]:text-violet-400",
   },
-  other: { label: "其他", className: "text-muted-foreground" },
+  other: { label: "common.ui.other", className: "text-muted-foreground" },
   成功: {
-    label: "成功",
+    label: "common.ui.success",
     className: "text-emerald-600 [data-pactor-theme=dark]:text-emerald-400",
   },
   错误: {
-    label: "错误",
+    label: "common.ui.error",
     className: "text-red-600 [data-pactor-theme=dark]:text-red-400",
   },
   未完成: {
-    label: "未完成",
+    label: "common.ui.incomplete",
     className: "text-amber-600 [data-pactor-theme=dark]:text-amber-400",
   },
   已取消: {
-    label: "已取消",
+    label: "common.ui.cancelled",
     className: "text-violet-600 [data-pactor-theme=dark]:text-violet-400",
   },
-  其他: { label: "其他", className: "text-muted-foreground" },
+  其他: { label: "common.ui.other", className: "text-muted-foreground" },
 };
 
 export function LogStatus({ status }: { status?: string }) {
-  const t = useUiText();
+  const { t } = useI18n();
   const cfg = STATUS_CONFIG[status ?? ""] ?? {
     label: status ?? "—",
     className: "text-muted-foreground",

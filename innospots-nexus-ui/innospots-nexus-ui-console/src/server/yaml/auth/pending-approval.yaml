@@ -1,8 +1,10 @@
 dsl: "1.0"
 page:
   id: pending-approval
-  title: 注册待审核
+  title: '$i18n{auth.pending-approval.title:注册待审核}'
   name: pendingApproval
-
+i18n:
+  namespaces:
+    - auth
 body:
   type: PlatformPendingApprovalPage

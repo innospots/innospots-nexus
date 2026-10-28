@@ -8,7 +8,7 @@ import { apiBaseUrl, pageEndpoint, sitemapSources } from "./config";
 import { pactorActions } from "./actions";
 import { pactorComponents } from "./components";
 import { nexusHttpHooks } from "./http-hooks";
-import type { ConsoleLocale } from "@/i18n/locales";
+import type { ConsoleLocale } from "./locale";
 
 /**
  * 动态页面应用（design/dynamic-page.md）：框架 SitemapApp + 宿主接线。

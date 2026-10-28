@@ -38,12 +38,12 @@ export async function platformPublicFetch<T>(
     if (body && typeof body === "object" && "data" in body) {
         const envelope = body as NexusEnvelope<T>;
         if (!response.ok || !isSuccess(envelope)) {
-            throw new Error(envelope.message ?? `请求失败（HTTP ${response.status}）`);
+            throw new Error(envelope.message ?? "common.ui.request-failed");
         }
         return envelope.data as T;
     }
     if (!response.ok) {
-        throw new Error(`请求失败（HTTP ${response.status}）`);
+        throw new Error("common.ui.request-failed");
     }
     return body as T;
 }

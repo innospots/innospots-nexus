@@ -1,7 +1,7 @@
 dsl: "1.0"
 page:
   id: platform-user-detail
-  title: 平台用户详情
+  title: '$i18n{platform-user.platform-user-detail.title:平台用户详情}'
   name: platformUserDetail
 
 state:
@@ -14,7 +14,9 @@ dataSources:
     request:
       method: GET
       url: /api/d/platform/users/${params.platformUserId}
-
+i18n:
+  namespaces:
+    - platform-user
 lifecycle:
   onLoad:
     - action: form.setValues
@@ -29,25 +31,27 @@ lifecycle:
       params:
         form: platformUserEditForm
         values: ${data.user}
-
 body:
   type: Page
   children:
     - type: Breadcrumb
       props:
         items:
-          - label: 运营管理
-          - label: 用户列表
+          - label:
+              '$i18n{platform-user.platform-user-detail.operations:运营管理}'
+          - label:
+              '$i18n{platform-user.platform-user-detail.user-list:用户列表}'
             href: /ops/platform-users
           - label: "${data.user != null && data.user.loginName != null ? data.user.loginName : params.platformUserId}"
     - type: Button
       props:
-        text: ← 返回用户列表
+        text: '$i18n{platform-user.platform-user-detail.back-to-users:← 返回用户列表}'
         variant: link
       events:
         onClick:
           - action: navigate
-            params: { to: /ops/platform-users }
+            params:
+              to: /ops/platform-users
     - type: Flex
       when: ${data.user != null}
       props:
@@ -67,12 +71,16 @@ body:
             - type: Typography
               props:
                 variant: muted
-                text: "登录名 ${data.user.loginName} · 状态 ${data.user.status == 'ACTIVE' ? '● 正常' : data.user.status == 'PENDING_APPROVAL' ? '○ 待审核' : data.user.status == 'DISABLED' ? '○ 禁用' : data.user.status}"
+                text: "${t('platform-user.platform-user-detail.login-status', { loginName: data.user.loginName, status: data.user.status
+                  == 'ACTIVE' ? t('platform-user.platform-user-detail.status.active') : data.user.status ==
+                  'PENDING_APPROVAL' ? t('platform-user.platform-user-detail.status.pending-approval') :
+                  data.user.status == 'DISABLED' ? t('platform-user.platform-user-detail.status.disabled') :
+                  data.user.status })}"
             - type: Alert
               when: ${data.user.status == 'PENDING_APPROVAL'}
               props:
                 variant: info
-                message: 该用户处于待审核状态，请通过注册审批流程处理后再启用为正常状态。
+                message: '$i18n{platform-user.platform-user-detail.this-user-is-pending-approval-complete-the-registration-approval-workflo:该用户处于待审核状态，请通过注册审批流程处理后再启用为正常状态。}'
         - type: Flex
           props:
             gap: small
@@ -80,13 +88,14 @@ body:
             - type: Button
               when: ${data.user.status == 'ACTIVE' || data.user.status == 'DISABLED'}
               props:
-                text: "${data.user.status == 'ACTIVE' ? '禁用' : '启用'}"
+                text: "${data.user.status == 'ACTIVE' ? t('platform-user.platform-user-detail.disable') :
+                  t('platform-user.platform-user-detail.enable')}"
               events:
                 onClick:
                   - action: confirm
                     params:
-                      title: 确认变更状态
-                      content: 确定要变更该用户的启用状态吗？
+                      title: '$i18n{platform-user.platform-user-detail.confirm-status-change:确认变更状态}'
+                      content: '$i18n{platform-user.platform-user-detail.change-this-user-s-enabled-state:确定要变更该用户的启用状态吗？}'
                   - action: request
                     params:
                       method: PUT
@@ -96,20 +105,20 @@ body:
                   - action: message
                     params:
                       messageType: success
-                      text: 状态已更新
+                      text: '$i18n{platform-user.platform-user-detail.status-updated:状态已更新}'
                   - action: reload
                     params:
                       dataSource: user
             - type: Button
               props:
-                text: 重置密码
+                text: '$i18n{platform-user.platform-user-detail.reset-password-2:重置密码}'
               events:
                 onClick:
                   - action: overlay.open
                     params:
                       overlay:
                         type: modal
-                        title: 重置密码
+                        title: '$i18n{platform-user.platform-user-detail.reset-password:重置密码}'
                         width: 480
                         content:
                           type: PlatformUserPasswordResetPanel
@@ -122,11 +131,12 @@ body:
                               - action: message
                                 params:
                                   messageType: success
-                                  text: 密码已重置
+                                  text: '$i18n{platform-user.platform-user-detail.password-reset:密码已重置}'
                               - action: overlay.close
             - type: Button
               props:
-                text: "${state.editing ? '取消编辑' : '编辑'}"
+                text: "${state.editing ? t('platform-user.platform-user-detail.cancel-editing') :
+                  t('platform-user.platform-user-detail.edit')}"
                 variant: primary
               events:
                 onClick:
@@ -152,18 +162,28 @@ body:
       children:
         - type: Text
           props:
-            text: 基本信息
+            text: '$i18n{platform-user.platform-user-detail.basic-information:基本信息}'
             strong: true
         - type: Descriptions
           when: ${!state.editing}
           props:
             className: mt-3
             items:
-              - { label: 用户 ID, value: "${data.user.platformUserId}" }
-              - { label: 登录名, value: "${data.user.loginName}" }
-              - { label: 显示名称, value: "${data.user.displayName != null ? data.user.displayName : '—'}" }
-              - { label: 邮箱, value: "${data.user.email != null ? data.user.email : '—'}" }
-              - { label: 手机, value: "${data.user.mobile != null ? data.user.mobile : '—'}" }
+              - label:
+                  '$i18n{platform-user.platform-user-detail.user-id:用户 ID}'
+                value: ${data.user.platformUserId}
+              - label:
+                  '$i18n{platform-user.platform-user-detail.login-name:登录名}'
+                value: ${data.user.loginName}
+              - label:
+                  '$i18n{platform-user.platform-user-detail.display-name:显示名称}'
+                value: "${data.user.displayName != null ? data.user.displayName : '—'}"
+              - label:
+                  '$i18n{platform-user.platform-user-detail.email:邮箱}'
+                value: "${data.user.email != null ? data.user.email : '—'}"
+              - label:
+                  '$i18n{platform-user.platform-user-detail.mobile:手机}'
+                value: "${data.user.mobile != null ? data.user.mobile : '—'}"
         - type: Form
           when: ${state.editing}
           props:
@@ -184,7 +204,7 @@ body:
               - action: message
                 params:
                   messageType: success
-                  text: 已保存修改
+                  text: '$i18n{platform-user.platform-user-detail.changes-saved:已保存修改}'
               - action: setState
                 params:
                   editing: false
@@ -194,7 +214,7 @@ body:
           children:
             - type: Field
               props:
-                label: 显示名称
+                label: '$i18n{platform-user.platform-user-detail.display-name-2:显示名称}'
               children:
                 - type: Input
                   props:
@@ -206,14 +226,14 @@ body:
               children:
                 - type: Field
                   props:
-                    label: 邮箱
+                    label: '$i18n{platform-user.platform-user-detail.email-2:邮箱}'
                   children:
                     - type: Input
                       props:
                         name: email
                 - type: Field
                   props:
-                    label: 手机
+                    label: '$i18n{platform-user.platform-user-detail.mobile-2:手机}'
                   children:
                     - type: Input
                       props:
@@ -225,7 +245,7 @@ body:
               children:
                 - type: Button
                   props:
-                    text: 保存修改
+                    text: '$i18n{platform-user.platform-user-detail.save-changes:保存修改}'
                     variant: primary
                     submit: true
                     htmlType: submit
@@ -236,15 +256,19 @@ body:
       children:
         - type: Text
           props:
-            text: 登录信息
+            text: '$i18n{platform-user.platform-user-detail.login-information:登录信息}'
             strong: true
         - type: Descriptions
           props:
             className: mt-3
             items:
-              - label: 上次登录
-                value: "${data.user.lastLoginTime != null ? data.user.lastLoginTime + (data.user.lastLoginIp != null ? ' · ' + data.user.lastLoginIp : '') : '—'}"
-              - { label: 创建时间, value: "${data.user.createdAt != null ? data.user.createdAt : '—'}" }
+              - label:
+                  '$i18n{platform-user.platform-user-detail.last-sign-in:上次登录}'
+                value: "${data.user.lastLoginTime != null ? data.user.lastLoginTime + (data.user.lastLoginIp != null ? ' · ' +
+                  data.user.lastLoginIp : '') : '—'}"
+              - label:
+                  '$i18n{platform-user.platform-user-detail.created-at:创建时间}'
+                value: "${data.user.createdAt != null ? data.user.createdAt : '—'}"
     - type: Card
       when: ${data.user != null}
       props:
@@ -252,5 +276,5 @@ body:
       children:
         - type: Text
           props:
-            text: 角色（Console）
+            text: '$i18n{platform-user.platform-user-detail.role-console:角色（Console）}'
             strong: true

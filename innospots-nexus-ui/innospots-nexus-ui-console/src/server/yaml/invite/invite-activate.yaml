@@ -1,8 +1,10 @@
 dsl: "1.0"
 page:
   id: invite-activate
-  title: 邀请码注册
+  title: '$i18n{invite.invite-activate.title:邀请码注册}'
   name: inviteActivate
-
+i18n:
+  namespaces:
+    - invite
 body:
   type: PlatformInviteActivateForm

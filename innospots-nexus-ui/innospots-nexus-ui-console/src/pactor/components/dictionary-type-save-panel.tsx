@@ -6,7 +6,7 @@ import { Trash2 } from "lucide-react";
 
 import { Button, Input, Select } from "@pactor-app/ui/components";
 
-import { useUiText } from "@/i18n/ui";
+import { useI18n } from "@pactor-app/runtime";
 
 import { registerDictionaryTypeSaveSubmit } from "../lib/dictionary-type-save-registry";
 import { DictionaryTypeSection } from "./dictionary-type-section";
@@ -30,9 +30,9 @@ const LOCALE_ZH_CN = "zh-CN";
 const LOCALE_EN = "en";
 
 const LOCALE_LABELS: Record<string, string> = {
-  [LOCALE_ZH_CN]: "简体中文",
+  [LOCALE_ZH_CN]: "common.ui.simplified-chinese",
   [LOCALE_EN]: "English",
-  ja: "日本語",
+  ja: "common.ui.japanese",
   ko: "한국어",
   fr: "Français",
   de: "Deutsch",
@@ -140,7 +140,7 @@ export function DictionaryTypeSavePanel({
   onSave,
   onCancel,
 }: DictionaryTypeSavePanelProps) {
-  const t = useUiText();
+  const { t } = useI18n();
   const isPage = variant === "page";
   const isCreate = mode === "create";
   const [typeCode, setTypeCode] = useState("");
@@ -231,11 +231,11 @@ export function DictionaryTypeSavePanel({
     const value = draftValue.trim();
     const name = draftName.trim();
     if (value.length === 0 || name.length === 0) {
-      setError("字典项的值与名称均不能为空");
+      setError("common.ui.dictionary-item-value-and-name-are-required");
       return;
     }
     if (items.some((row) => row.itemValue === value)) {
-      setError("同一类型内字典项值不可重复");
+      setError("common.ui.dictionary-item-values-must-be-unique-within-a-type");
       return;
     }
     setItems((prev) => [{ itemValue: value, itemName: name }, ...prev]);
@@ -257,11 +257,11 @@ export function DictionaryTypeSavePanel({
     const code = typeCode.trim();
     const zhName = typeNameByLocale[LOCALE_ZH_CN]?.trim() ?? "";
     if (code.length === 0 || zhName.length === 0) {
-      setError("类型编码与简体中文类型名称不能为空");
+      setError("common.ui.type-code-and-simplified-chinese-type-name-are-required");
       return null;
     }
     if (items.length === 0) {
-      setError("请至少配置一个字典项");
+      setError("common.ui.configure-at-least-one-dictionary-item");
       return null;
     }
     const typeName: Record<string, string> = {};
@@ -308,21 +308,21 @@ export function DictionaryTypeSavePanel({
   return (
     <div className={rootClass}>
       <div className={`min-h-0 flex-1 space-y-4 ${isPage ? "" : "overflow-y-auto pr-1"}`}>
-        <DictionaryTypeSection title={t("基本信息")}>
+        <DictionaryTypeSection title={t("common.ui.basic-information")}>
           <div className="space-y-3">
             <label className="block text-sm">
-              <span className="text-destructive">*</span> {t("类型编码")}
+              <span className="text-destructive">*</span> {t("common.ui.type-code")}
               <Input
                 className="mt-1"
                 value={typeCode}
                 disabled={!isCreate}
                 onChange={(event) => setTypeCode(String(event))}
-                placeholder={t("如 USER_STATUS")}
+                placeholder={t("common.ui.e-g-user-status-2")}
               />
             </label>
             <div className="block text-sm">
               <div className="mb-2">
-                <span className="text-destructive">*</span> {t("类型名称")}
+                <span className="text-destructive">*</span> {t("common.ui.type-name")}
               </div>
               <div className="space-y-2">
                 {localeTags.map((tag) => (
@@ -334,7 +334,7 @@ export function DictionaryTypeSavePanel({
                       className="min-w-0 flex-1"
                       value={typeNameByLocale[tag] ?? ""}
                       onChange={(event) => setLocaleValue(tag, String(event))}
-                      placeholder={tag === LOCALE_ZH_CN ? t("如 用户状态") : "User status"}
+                      placeholder={tag === LOCALE_ZH_CN ? t("common.ui.e-g-user-status") : "User status"}
                     />
                     {REQUIRED_LOCALE_TAGS.has(tag) ? (
                       <span className="size-8 shrink-0" aria-hidden="true" />
@@ -342,7 +342,7 @@ export function DictionaryTypeSavePanel({
                       <button
                         type="button"
                         className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-destructive"
-                        aria-label={t("删除{{locale}}", { locale: localeLabel(tag, t) })}
+                        aria-label={t("common.ui.delete-locale", { locale: localeLabel(tag, t) })}
                         onClick={() => removeLocale(tag)}
                       >
                         <Trash2 className="size-4" aria-hidden="true" />
@@ -356,7 +356,7 @@ export function DictionaryTypeSavePanel({
                   <Select
                     className="mb-0 w-[11rem]"
                     controlClassName="w-[11rem]"
-                    placeholder={t("选择语言")}
+                    placeholder={t("common.ui.select-language")}
                     value={localeToAdd}
                     allowClear={false}
                     showSearch={addableLocales.length > 6}
@@ -373,48 +373,48 @@ export function DictionaryTypeSavePanel({
                     disabled={localeToAdd.length === 0}
                     onClick={addLocale}
                   >
-                    {t("+ 添加语言")}
+                    {t("common.ui.add-language")}
                   </Button>
                 </div>
               ) : null}
             </div>
             {isCreate ? (
               <p className="text-xs text-muted-foreground">
-                {t("运营平台新建固定为平台安全域、启用状态；值形式当前按多值字典项保存。")}
+                {t("common.ui.new-operations-platform-dictionaries-use-the-platform-security-domain-an")}
               </p>
             ) : null}
           </div>
         </DictionaryTypeSection>
-        <DictionaryTypeSection title={t("字典项")}>
+        <DictionaryTypeSection title={t("common.ui.dictionary-items")}>
           <div className="mb-3 space-y-2 rounded-md border border-dashed border-border bg-background/50 p-3">
             <div className="text-xs font-medium text-muted-foreground">
-              {t("添加字典项")}
+              {t("common.ui.add-dictionary-item-2")}
             </div>
             <div className="grid gap-2 sm:grid-cols-2">
               <Input
                 value={draftValue}
                 onChange={(event) => setDraftValue(String(event))}
-                placeholder={t("值 *")}
+                placeholder={t("common.ui.value-2")}
               />
               <Input
                 value={draftName}
                 onChange={(event) => setDraftName(String(event))}
-                placeholder={t("名称 *")}
+                placeholder={t("common.ui.name-2")}
               />
             </div>
             <Button variant="default" size="small" onClick={addItem}>
-              {t("+ 添加字典项")}
+              {t("common.ui.add-dictionary-item")}
             </Button>
           </div>
           {items.length === 0 ? (
-            <p className="text-sm text-muted-foreground">{t("暂无字典项")}</p>
+            <p className="text-sm text-muted-foreground">{t("common.ui.no-dictionary-items")}</p>
           ) : (
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border text-left text-muted-foreground">
-                  <th className="py-2 pr-2 font-medium">{t("值")}</th>
-                  <th className="py-2 pr-2 font-medium">{t("名称")}</th>
-                  <th className="py-2 font-medium">{t("操作")}</th>
+                  <th className="py-2 pr-2 font-medium">{t("common.ui.value")}</th>
+                  <th className="py-2 pr-2 font-medium">{t("common.ui.name")}</th>
+                  <th className="py-2 font-medium">{t("common.ui.actions")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -429,7 +429,7 @@ export function DictionaryTypeSavePanel({
                         className="h-auto p-0 text-destructive"
                         onClick={() => removeItem(index)}
                       >
-                        {t("移除")}
+                        {t("common.ui.remove")}
                       </Button>
                     </td>
                   </tr>
@@ -446,10 +446,10 @@ export function DictionaryTypeSavePanel({
           {error != null ? <p className="mb-2 text-sm text-destructive">{t(error)}</p> : null}
           <div className="flex justify-end gap-2">
             <Button variant="default" onClick={() => onCancel?.()}>
-              {t("取消")}
+              {t("common.ui.cancel")}
             </Button>
             <Button variant="primary" onClick={handleSave}>
-              {t("保存全部")}
+              {t("common.ui.save-all")}
             </Button>
           </div>
         </div>

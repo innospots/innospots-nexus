@@ -1,6 +1,25 @@
 allowBuilds:
   esbuild: true
   unrs-resolver: true
+minimumReleaseAgeExclude:
+  - '@pactor-app/app@1.58.0'
+  - '@pactor-app/blocks@1.58.0'
+  - '@pactor-app/chart@1.58.0'
+  - '@pactor-app/chat@1.58.0'
+  - '@pactor-app/cli@1.58.0'
+  - '@pactor-app/core@1.58.0'
+  - '@pactor-app/expression@1.58.0'
+  - '@pactor-app/i18n@1.58.0'
+  - '@pactor-app/markdown@1.58.0'
+  - '@pactor-app/module-pack@1.58.0'
+  - '@pactor-app/permission@1.58.0'
+  - '@pactor-app/resource@1.58.0'
+  - '@pactor-app/router@1.58.0'
+  - '@pactor-app/runtime@1.58.0'
+  - '@pactor-app/schema@1.58.0'
+  - '@pactor-app/ui@1.58.0'
+  - '@pactor-app/vite-plugin@1.58.0'
+  - pactor-app@1.58.0
 # 模板独立安装（pnpm install）时批准运行构建脚本的原生依赖：
 # sharp（Next.js 图片优化可选依赖）与 unrs-resolver（eslint-config-next
 # 依赖链上的原生解析器）。显式批准而非 ignoredBuiltDependencies 静默，

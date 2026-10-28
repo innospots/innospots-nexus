@@ -4,7 +4,7 @@ import { useMemo } from "react";
 
 import { Button } from "@pactor-app/ui/components";
 
-import { useUiText } from "@/i18n/ui";
+import { useI18n } from "@pactor-app/runtime";
 
 import { DictionaryTypeSection } from "./dictionary-type-section";
 import { resolveI18nText } from "./i18n-text";
@@ -28,9 +28,9 @@ type ItemVo = {
 };
 
 const LOCALE_LABELS: Record<string, string> = {
-    "zh-CN": "简体中文",
+    "zh-CN": "common.ui.simplified-chinese",
     en: "English",
-    ja: "日本語",
+    ja: "common.ui.japanese",
     ko: "한국어",
     fr: "Français",
     de: "Deutsch",
@@ -77,12 +77,12 @@ function formatTypeNameEntries(typeName: TypeVo["typeName"]): { tag: string; tex
     return entries;
 }
 
-function formatStatus(status: string | undefined): string {
+function statusKey(status: string | undefined): string {
     if (status === "ENABLED") {
-        return "启用";
+        return "common.ui.enabled";
     }
     if (status === "DISABLED") {
-        return "禁用";
+        return "common.ui.disabled";
     }
     return status ?? "—";
 }
@@ -112,7 +112,8 @@ export function DictionaryTypeViewPanel({
     itemsData,
     onClose,
 }: DictionaryTypeViewPanelProps) {
-    const t = useUiText();
+    const i18n = useI18n();
+    const { t } = i18n;
     const isPage = variant === "page";
     const typeNameEntries = useMemo(() => formatTypeNameEntries(typeData?.typeName), [typeData?.typeName]);
     const items = useMemo(() => {
@@ -122,10 +123,11 @@ export function DictionaryTypeViewPanel({
         return itemsData.filter((row) => row != null);
     }, [itemsData]);
 
-    const displayTitle = resolveI18nText(typeData?.typeName) || typeData?.typeCode || "—";
+    const displayTitle = resolveI18nText(typeData?.typeName, i18n.locale, i18n.defaultLocale)
+        || typeData?.typeCode || "—";
 
     if (loading) {
-        return <p className="text-sm text-muted-foreground">{t("加载中…")}</p>;
+        return <p className="text-sm text-muted-foreground">{t("common.ui.loading")}</p>;
     }
 
     const rootClass = isPage ? "flex flex-col" : "flex min-h-[calc(100dvh-8.5rem)] flex-col";
@@ -136,19 +138,19 @@ export function DictionaryTypeViewPanel({
     return (
         <div className={rootClass}>
             <div className={`min-h-0 flex-1 space-y-4 ${isPage ? "" : "overflow-y-auto pr-1"}`}>
-                <DictionaryTypeSection title={t("基本信息")}>
+                <DictionaryTypeSection title={t("common.ui.basic-information")}>
                     <dl className="grid gap-3 text-sm sm:grid-cols-[7rem_1fr]">
-                        <dt className="text-muted-foreground">{t("类型名称")}</dt>
+                        <dt className="text-muted-foreground">{t("common.ui.type-name")}</dt>
                         <dd className="font-medium text-foreground">{displayTitle}</dd>
-                        <dt className="text-muted-foreground">{t("类型编码")}</dt>
+                        <dt className="text-muted-foreground">{t("common.ui.type-code")}</dt>
                         <dd className="font-mono text-xs">{typeData?.typeCode ?? "—"}</dd>
-                        <dt className="text-muted-foreground">{t("状态")}</dt>
-                        <dd>{t(formatStatus(typeData?.status))}</dd>
+                        <dt className="text-muted-foreground">{t("common.ui.status")}</dt>
+                        <dd>{t(statusKey(typeData?.status))}</dd>
                     </dl>
                     {typeNameEntries.length > 0 ? (
                         <div className="mt-4 border-t border-border/60 pt-3">
                             <div className="mb-2 text-xs font-medium text-muted-foreground">
-                                {t("多语言名称")}
+                                {t("common.ui.localized-names")}
                             </div>
                             <dl className="space-y-2 text-sm">
                                 {typeNameEntries.map((entry) => (
@@ -164,17 +166,17 @@ export function DictionaryTypeViewPanel({
                     ) : null}
                 </DictionaryTypeSection>
 
-                <DictionaryTypeSection title={t("字典项")}>
+                <DictionaryTypeSection title={t("common.ui.dictionary-items")}>
                     {items.length === 0 ? (
-                        <p className="text-sm text-muted-foreground">{t("暂无字典项")}</p>
+                        <p className="text-sm text-muted-foreground">{t("common.ui.no-dictionary-items")}</p>
                     ) : (
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="border-b border-border text-left text-muted-foreground">
-                                    <th className="py-2 pr-2 font-medium">{t("值")}</th>
-                                    <th className="py-2 pr-2 font-medium">{t("名称")}</th>
-                                    <th className="py-2 pr-2 font-medium">{t("状态")}</th>
-                                    <th className="py-2 font-medium">{t("排序")}</th>
+                                    <th className="py-2 pr-2 font-medium">{t("common.ui.value")}</th>
+                                    <th className="py-2 pr-2 font-medium">{t("common.ui.name")}</th>
+                                    <th className="py-2 pr-2 font-medium">{t("common.ui.status")}</th>
+                                    <th className="py-2 font-medium">{t("common.ui.order")}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -182,7 +184,7 @@ export function DictionaryTypeViewPanel({
                                     <tr key={`${row.itemValue ?? index}`} className="border-b border-border/60">
                                         <td className="py-2 pr-2 font-mono text-xs">{row.itemValue ?? "—"}</td>
                                         <td className="py-2 pr-2">{row.itemName ?? "—"}</td>
-                                        <td className="py-2 pr-2">{t(formatStatus(row.status))}</td>
+                                        <td className="py-2 pr-2">{t(statusKey(row.status))}</td>
                                         <td className="py-2">{row.sortOrder ?? "—"}</td>
                                     </tr>
                                 ))}
@@ -191,23 +193,23 @@ export function DictionaryTypeViewPanel({
                     )}
                 </DictionaryTypeSection>
 
-                <DictionaryTypeSection title={t("其他信息")}>
+                <DictionaryTypeSection title={t("common.ui.additional-information")}>
                     <dl className="grid gap-3 text-sm sm:grid-cols-[7rem_1fr]">
-                        <dt className="text-muted-foreground">{t("字典 ID")}</dt>
+                        <dt className="text-muted-foreground">{t("common.ui.dictionary-id")}</dt>
                         <dd className="font-mono text-xs">{typeData?.dictionaryTypeId ?? "—"}</dd>
-                        <dt className="text-muted-foreground">{t("系统内置")}</dt>
+                        <dt className="text-muted-foreground">{t("common.ui.system-built-in")}</dt>
                         <dd>
                             {typeData?.builtIn === true
-                                ? t("是")
+                                ? t("common.ui.yes")
                                 : typeData?.builtIn === false
-                                  ? t("否")
+                                  ? t("common.ui.no")
                                   : "—"}
                         </dd>
-                        <dt className="text-muted-foreground">{t("排序")}</dt>
+                        <dt className="text-muted-foreground">{t("common.ui.order")}</dt>
                         <dd>{typeData?.sortOrder ?? "—"}</dd>
-                        <dt className="text-muted-foreground">{t("创建时间")}</dt>
+                        <dt className="text-muted-foreground">{t("common.ui.created-at")}</dt>
                         <dd>{formatDateTime(typeData?.createdAt)}</dd>
-                        <dt className="text-muted-foreground">{t("更新时间")}</dt>
+                        <dt className="text-muted-foreground">{t("common.ui.updated-at")}</dt>
                         <dd>{formatDateTime(typeData?.updatedAt)}</dd>
                     </dl>
                 </DictionaryTypeSection>
@@ -216,7 +218,7 @@ export function DictionaryTypeViewPanel({
                 <div className={footerClass}>
                     <div className="flex justify-end gap-2">
                         <Button variant="primary" onClick={() => onClose()}>
-                            {t("关闭")}
+                            {t("common.ui.close")}
                         </Button>
                     </div>
                 </div>

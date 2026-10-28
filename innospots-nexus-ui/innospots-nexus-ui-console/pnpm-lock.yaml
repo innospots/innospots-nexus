@@ -9,14 +9,20 @@ importers:
   .:
     dependencies:
       '@pactor-app/core':
-        specifier: ^1.56.0
-        version: 1.56.0
+        specifier: ^1.58.0
+        version: 1.58.0
+      '@pactor-app/i18n':
+        specifier: 1.58.0
+        version: 1.58.0(yaml@2.9.1)
       '@pactor-app/runtime':
-        specifier: ^1.56.0
-        version: 1.56.0(react@19.2.8)
+        specifier: ^1.58.0
+        version: 1.58.0(react@19.2.8)
+      '@pactor-app/schema':
+        specifier: 1.58.0
+        version: 1.58.0
       '@pactor-app/ui':
-        specifier: ^1.56.0
-        version: 1.56.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)(supports-color@7.2.0)
+        specifier: ^1.58.0
+        version: 1.58.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
       lucide-react:
         specifier: 1.45.0
         version: 1.45.0(react@19.2.8)
@@ -24,8 +30,8 @@ importers:
         specifier: 16.3.5
         version: 16.3.5(@babel/core@7.29.7(supports-color@7.2.0))(@types/node@20.19.43)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       pactor-app:
-        specifier: ^1.56.0
-        version: 1.56.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)(supports-color@7.2.0)(vite@8.3.5(@types/node@20.19.43)(esbuild@0.25.12)(jiti@2.7.0)(yaml@2.9.1))
+        specifier: ^1.58.0
+        version: 1.58.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)(vite@8.3.5(@types/node@20.19.43)(esbuild@0.25.12)(jiti@2.7.0)(yaml@2.9.1))
       react:
         specifier: 19.2.8
         version: 19.2.8
@@ -686,92 +692,101 @@ packages:
   '@oxc-project/types@0.155.0':
     resolution: {integrity: sha512-SeE8JPwW1xs1tHeNycjUtUBdhorRa8o4jlvjwk49R7/Z291i+4DQa7JJIgOm/TaYQZx+QrPQbVJ/9c8dMIZN8Q==}
 
-  '@pactor-app/app@1.56.0':
-    resolution: {integrity: sha512-fCHTuokiwSeLPwugwW96LQRw+FhuTJ4mxdxit4N+NlF2yLTI9pi74q1Go/og0ItirJINbgjHSrsJc/yteaz8wQ==}
+  '@pactor-app/app@1.58.0':
+    resolution: {integrity: sha512-h6GAqoNHY341NDx1mda5ahRU6QIDqJGC4SqKyq/Z/GoRqlSE6MJH83+nZasYNV/htv53WDjUFBNbWZZMRjvc+g==}
     engines: {node: '>=18'}
     peerDependencies:
       react: '>=18'
       react-dom: '>=18'
       react-router-dom: '>=6'
 
-  '@pactor-app/blocks@1.56.0':
-    resolution: {integrity: sha512-uNjpsGAnIv2IDOEeF2vuo7twNrQyJ9X52dGWF4XPK4T4c3TmKBSADRwyv53wJ6rMfaYCdEMkLxnOuBGt+RinwQ==}
+  '@pactor-app/blocks@1.58.0':
+    resolution: {integrity: sha512-PTYDAw7jr6CrRgzf9zY+Zkk+Zv6WtPyZG2btINNyY/t6gRKePmg8sAUPJUGgzBIFDE6xn9kCpsWKKL+eH2WrGA==}
     engines: {node: '>=18'}
     peerDependencies:
       react: '>=18'
       react-dom: '>=18'
 
-  '@pactor-app/chart@1.56.0':
-    resolution: {integrity: sha512-N2yjWu78KZqWeIgzNylKPRPIS/wFtqgH3ebzDTOo/0rKw0OcImH6I3mqRyebH+KP6sxCo3UUwuJfcuu38axhqw==}
+  '@pactor-app/chart@1.58.0':
+    resolution: {integrity: sha512-yJvEjNch5fbwjAuZZbVMYntFpPXO2XcWMQ+Ui75NTpa4qJVUaEoc2bcCJuY89K/NhPNvGWYCreodzbWymnC+Cw==}
     engines: {node: '>=18'}
     peerDependencies:
       react: '>=18'
       react-dom: '>=18'
 
-  '@pactor-app/chat@1.56.0':
-    resolution: {integrity: sha512-6ut+P8Nkh+Gt3z8a1TlGj4XXa5jHqKfiIg63WVRmjXuEP4WF8Hi/oGcPRkW1GV+8/lygpyaE30Hcw5EQpb4cwA==}
+  '@pactor-app/chat@1.58.0':
+    resolution: {integrity: sha512-yiZU4e1OgKqDLh7toLK6HggKL4FLlGTkaO26sJuwPdvsM1THZzeQ8E206rgLR3oztVRUOZ/xPHOIbJ3AA3e01A==}
     engines: {node: '>=18'}
     peerDependencies:
       react: '>=18'
       react-dom: '>=18'
 
-  '@pactor-app/cli@1.56.0':
-    resolution: {integrity: sha512-ynwRRPMW1+FWEgg9ekVQAD8WOFoD73YVEwxh7ZpjEs9bPe1jN8ltbdiEUpgvEHKKxWIUWeoqRR77Kmdh/ssB1A==}
+  '@pactor-app/cli@1.58.0':
+    resolution: {integrity: sha512-7qc9vvsr8g++E6XV06oJOq0m7+ZQ9el9DyLBn2yHMhs+cgaXiAd9v56szMjfXdKzcMEuJk9L7UmmCGzFu1XzsA==}
     engines: {node: '>=18'}
     hasBin: true
 
-  '@pactor-app/core@1.56.0':
-    resolution: {integrity: sha512-gPlre1lj8PkcIRZaJ7wcWn62N+Ee4zo3p91TiMc2q+E5HI41NXBLbb/KhU5Cpb6c55SDOLNv5eX6k9FRYyF4eQ==}
+  '@pactor-app/core@1.58.0':
+    resolution: {integrity: sha512-GbwtqCBo71vTMhpPJx745xrYT+Hl52DLt1FllmuEisr8dKHVuYbR9QWRLBLDYhEdS6ythaXIoqHy6gGo3v3sEA==}
     engines: {node: '>=18'}
 
-  '@pactor-app/expression@1.56.0':
-    resolution: {integrity: sha512-6eGABEZ/OSfIivvlwCSlAAif/lNF+1IK29RtT65yC2GDra+9MWAyTZPGc7g/3O9DUHIPJV8/rvoYv5NjwNPR+w==}
+  '@pactor-app/expression@1.58.0':
+    resolution: {integrity: sha512-BDOCLLN1hHVrKJx1p5b693O6Irq35MNb+Bo6hNnQUCxieKKYS6+FeOCexbTGXHt4tkISCz1A7iAmq3QZ94GuIg==}
     engines: {node: '>=18'}
 
-  '@pactor-app/markdown@1.56.0':
-    resolution: {integrity: sha512-E2195CSn5pooAX/EaqqKDhO6MGn7FmgRBtVrPQoYtRfdEFTs4ffnximGdDrN7Bdg10IbfdWkebkvgvwXeiTRnA==}
+  '@pactor-app/i18n@1.58.0':
+    resolution: {integrity: sha512-DqriWQlGzkzyk16FlJKuIW9C/9UMqvEv/QEGJEK59WO0XZQWG/hvTJRvkvuio4+XshVhloDcB4cNujRWL9Sjpw==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      yaml: ^2.9.0
+    peerDependenciesMeta:
+      yaml:
+        optional: true
+
+  '@pactor-app/markdown@1.58.0':
+    resolution: {integrity: sha512-2a3EEMGQyJirdTtn4+yKWkyVF8n5b19+Acr6ZEF7mcbmztC3NFYQaP3V/HujdSRrFJA82vv7Ex5iDP8zU9oRvg==}
     engines: {node: '>=18'}
     peerDependencies:
       react: '>=18'
 
-  '@pactor-app/module-pack@1.56.0':
-    resolution: {integrity: sha512-4ZFIkEBmHVznDzJ9xohWH4kBj3Ex5OSMa/1HS9MiELHaCFmwexm7+8/4zqNdD8sKgmyhuMwRBXs7KiYlqctEyA==}
+  '@pactor-app/module-pack@1.58.0':
+    resolution: {integrity: sha512-eVQheu28Luw6jLUmPnrA+T2EEN0pzgZFvxne1zWBMIK7buUFlKfDJRmxnPFdDHcpIwoeVJgz7kU3qOqUaT/ETA==}
     engines: {node: '>=18'}
 
-  '@pactor-app/permission@1.56.0':
-    resolution: {integrity: sha512-urNPN8UOPq17PEIYT6kQx9m0TP35wKeschyjJUUtPCWK6zHhA8y4BYA2GyZNnOTiXqx1LKQyHEeDXhpCr1Ixlg==}
+  '@pactor-app/permission@1.58.0':
+    resolution: {integrity: sha512-6Oa6MPdHPsynI6a/X8VnBfzEHXgJnzJhzqZZG/phYWTjfm96ojPsL6ph1YRTbgL4otFSFkKsybcn/YIflORnGw==}
     engines: {node: '>=18'}
 
-  '@pactor-app/resource@1.56.0':
-    resolution: {integrity: sha512-xDyxITPkNG3gYerPRQ26Wb/DXrFvp1ORL0kuHaBTbaLVAnJLGl1d47fDsiWtFqZ52OlGYkHN1LeDyqsCPF63tw==}
+  '@pactor-app/resource@1.58.0':
+    resolution: {integrity: sha512-I8e1+0cxML7/81ZzKeVhfGf+0t+BhIaiL8bZdqKxG2c8koQccaStMQ88Zz6Mz2nSkuc0ivs1yGiq+1dm0eFEhg==}
     engines: {node: '>=18'}
 
-  '@pactor-app/router@1.56.0':
-    resolution: {integrity: sha512-XXenpIUcbMMt1WH/L1GDHb7cGlUzJhMUSpRtrzmkiOF4C83lBBvxjLu6wbE+pmpAdPpd0dgqzpUV9qcj6T+p1Q==}
+  '@pactor-app/router@1.58.0':
+    resolution: {integrity: sha512-yex2+hZB6txsUGWWJdqDH1R62PJeG7vBPJa/WB8DyEmobnQo1dCStjNg9nH0b+onB1pUrrhXXk2WEojSwbjAOQ==}
     engines: {node: '>=18'}
     peerDependencies:
       react: '>=18'
       react-router-dom: '>=6'
 
-  '@pactor-app/runtime@1.56.0':
-    resolution: {integrity: sha512-QbdMif+sDrXD1zRi7j8Rj4dbL8gQQ6uMaQ8txGdFNJsjqrglnuI9ZzniVsSSS2PUXuCuNq1KkXQ1UHVCUkcNDA==}
+  '@pactor-app/runtime@1.58.0':
+    resolution: {integrity: sha512-1sPX7Us+FKkGeRMI4I5SlrLeh9IBB1rDdRvVNsjCd4ZAu4zEUG001g+HYPUiPk/ij7DOoSyKYISbQCfjea23TA==}
     engines: {node: '>=18'}
     peerDependencies:
       react: '>=18'
 
-  '@pactor-app/schema@1.56.0':
-    resolution: {integrity: sha512-NdgyLi//RwxLWspTfw3PnsgYfpqjAX0NhZVQ9dKxxu82VY+1YyRW8Oo+mC+fHgqqgcpO6IFpeQErKiLkgiFS0Q==}
+  '@pactor-app/schema@1.58.0':
+    resolution: {integrity: sha512-ajZoOp5QY4Skgyy2JEfmBXJXFSMTMH5WB3cJgN3weaP+1dLT3FDB6xS6GpTTbagXV7/K6XFfJda4aiU2wXfGSw==}
     engines: {node: '>=18'}
 
-  '@pactor-app/ui@1.56.0':
-    resolution: {integrity: sha512-PBWu8ufnafPZhuBX5C2uhs97+slC8mFg74gm/fXUisxVmDI1cSLlQsHddwpUVFaF2L6OrdiWwVLlkLZeTDaXHw==}
+  '@pactor-app/ui@1.58.0':
+    resolution: {integrity: sha512-q6pHSPc0iVf03Yo0BRTuP1FKQ9qWx/qx8ha56Krs8FribSa1auVdzbMN27BE5hIV3KDjixHr1BY+FTPUYitzUg==}
     engines: {node: '>=18'}
     peerDependencies:
       react: '>=18'
       react-dom: '>=18'
 
-  '@pactor-app/vite-plugin@1.56.0':
-    resolution: {integrity: sha512-TynLn6E3F40Q43Ptn+MV9SKlxYHfzbNIdiZD+qtbRbfizYiCASSpbTITpXvP9ltQr6eb2D5xAz9Hjxt5jG9osw==}
+  '@pactor-app/vite-plugin@1.58.0':
+    resolution: {integrity: sha512-/8DtlGlZLPK1NST6lhChvcFiE3lA7IePc9pdfhrK+F2rGn7GycLUNNpBSeR4CfWj5tfl1WKYwfoF1qY2FLuduQ==}
     engines: {node: '>=18'}
     peerDependencies:
       vite: '>=5'
@@ -2770,8 +2785,8 @@ packages:
     resolution: {integrity: sha512-R4nPAVTAU0B9D35/Gk3uJf/7XYbQcyohSKdvAxIRSNghFl4e71hVoGnBNQz9cWaXxO2I10KTC+3jMdvvoKw6dQ==}
     engines: {node: '>=6'}
 
-  pactor-app@1.56.0:
-    resolution: {integrity: sha512-mYZ6603mGGauAzWQvXPfVbx7BzZoUBRUgqbwwqRcspVa2eKrfisoJhv7qnu4MaQFjztnQpZ5Qx5Ly8hBJgmqeQ==}
+  pactor-app@1.58.0:
+    resolution: {integrity: sha512-H+tZC+iujT9xDwTuNZKWOJGs+Bck4AXjCuSmgEQyUt5ITzRzmyKFyLvOHL75SzLjBor6LK08DinDS5cFYudvDg==}
     engines: {node: '>=18'}
     peerDependencies:
       react: '>=18'
@@ -3448,7 +3463,7 @@ snapshots:
       '@babel/code-frame': 7.29.7
       '@babel/generator': 7.29.8
       '@babel/helper-compilation-targets': 7.29.7
-      '@babel/helper-module-transforms': 7.29.7(@babel/core@7.29.7(supports-color@7.2.0))(supports-color@7.2.0)
+      '@babel/helper-module-transforms': 7.29.7(@babel/core@7.29.7(supports-color@7.2.0))
       '@babel/helpers': 7.29.10
       '@babel/parser': 7.29.11
       '@babel/template': 7.29.7
@@ -3481,17 +3496,17 @@ snapshots:
 
   '@babel/helper-globals@7.29.7': {}
 
-  '@babel/helper-module-imports@7.29.7(supports-color@7.2.0)':
+  '@babel/helper-module-imports@7.29.7':
     dependencies:
       '@babel/traverse': 7.29.10(supports-color@7.2.0)
       '@babel/types': 7.29.11
     transitivePeerDependencies:
       - supports-color
 
-  '@babel/helper-module-transforms@7.29.7(@babel/core@7.29.7(supports-color@7.2.0))(supports-color@7.2.0)':
+  '@babel/helper-module-transforms@7.29.7(@babel/core@7.29.7(supports-color@7.2.0))':
     dependencies:
       '@babel/core': 7.29.7(supports-color@7.2.0)
-      '@babel/helper-module-imports': 7.29.7(supports-color@7.2.0)
+      '@babel/helper-module-imports': 7.29.7
       '@babel/helper-validator-identifier': 7.29.7
       '@babel/traverse': 7.29.10(supports-color@7.2.0)
     transitivePeerDependencies:
@@ -3931,16 +3946,16 @@ snapshots:
 
   '@oxc-project/types@0.155.0': {}
 
-  '@pactor-app/app@1.56.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)(supports-color@7.2.0)':
+  '@pactor-app/app@1.58.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)':
     dependencies:
-      '@pactor-app/core': 1.56.0
-      '@pactor-app/expression': 1.56.0
-      '@pactor-app/permission': 1.56.0
-      '@pactor-app/resource': 1.56.0
-      '@pactor-app/router': 1.56.0(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
-      '@pactor-app/runtime': 1.56.0(react@19.2.8)
-      '@pactor-app/schema': 1.56.0
-      '@pactor-app/ui': 1.56.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)(supports-color@7.2.0)
+      '@pactor-app/core': 1.58.0
+      '@pactor-app/expression': 1.58.0
+      '@pactor-app/permission': 1.58.0
+      '@pactor-app/resource': 1.58.0
+      '@pactor-app/router': 1.58.0(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
+      '@pactor-app/runtime': 1.58.0(react@19.2.8)
+      '@pactor-app/schema': 1.58.0
+      '@pactor-app/ui': 1.58.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
       react-router-dom: 7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -3950,11 +3965,11 @@ snapshots:
       - '@types/react-dom'
       - supports-color
 
-  '@pactor-app/blocks@1.56.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)(supports-color@7.2.0)':
+  '@pactor-app/blocks@1.58.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)':
     dependencies:
-      '@pactor-app/core': 1.56.0
-      '@pactor-app/runtime': 1.56.0(react@19.2.8)
-      '@pactor-app/ui': 1.56.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)(supports-color@7.2.0)
+      '@pactor-app/core': 1.58.0
+      '@pactor-app/runtime': 1.58.0(react@19.2.8)
+      '@pactor-app/ui': 1.58.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
       ace-builds: 1.45.2
       clsx: 2.1.1
       lucide-react: 1.45.0(react@19.2.8)
@@ -3968,11 +3983,11 @@ snapshots:
       - react-router-dom
       - supports-color
 
-  '@pactor-app/chart@1.56.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)(supports-color@7.2.0)':
+  '@pactor-app/chart@1.58.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)':
     dependencies:
-      '@pactor-app/core': 1.56.0
-      '@pactor-app/runtime': 1.56.0(react@19.2.8)
-      '@pactor-app/ui': 1.56.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)(supports-color@7.2.0)
+      '@pactor-app/core': 1.58.0
+      '@pactor-app/runtime': 1.58.0(react@19.2.8)
+      '@pactor-app/ui': 1.58.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
       clsx: 2.1.1
       echarts: 6.1.0
       lucide-react: 1.45.0(react@19.2.8)
@@ -3986,13 +4001,13 @@ snapshots:
       - react-router-dom
       - supports-color
 
-  '@pactor-app/chat@1.56.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)(supports-color@7.2.0)':
+  '@pactor-app/chat@1.58.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)':
     dependencies:
-      '@pactor-app/core': 1.56.0
-      '@pactor-app/markdown': 1.56.0(@types/react@19.3.0)(react@19.2.8)(supports-color@7.2.0)
-      '@pactor-app/permission': 1.56.0
-      '@pactor-app/runtime': 1.56.0(react@19.2.8)
-      '@pactor-app/ui': 1.56.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)(supports-color@7.2.0)
+      '@pactor-app/core': 1.58.0
+      '@pactor-app/markdown': 1.58.0(@types/react@19.3.0)(react@19.2.8)
+      '@pactor-app/permission': 1.58.0
+      '@pactor-app/runtime': 1.58.0(react@19.2.8)
+      '@pactor-app/ui': 1.58.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
       clsx: 2.1.1
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
@@ -4004,74 +4019,82 @@ snapshots:
       - react-router-dom
       - supports-color
 
-  '@pactor-app/cli@1.56.0':
+  '@pactor-app/cli@1.58.0':
     dependencies:
-      '@pactor-app/core': 1.56.0
-      '@pactor-app/expression': 1.56.0
-      '@pactor-app/module-pack': 1.56.0
-      '@pactor-app/schema': 1.56.0
+      '@pactor-app/core': 1.58.0
+      '@pactor-app/expression': 1.58.0
+      '@pactor-app/module-pack': 1.58.0
+      '@pactor-app/schema': 1.58.0
       yaml: 2.9.1
 
-  '@pactor-app/core@1.56.0': {}
+  '@pactor-app/core@1.58.0': {}
 
-  '@pactor-app/expression@1.56.0':
+  '@pactor-app/expression@1.58.0':
     dependencies:
-      '@pactor-app/core': 1.56.0
+      '@pactor-app/core': 1.58.0
 
-  '@pactor-app/markdown@1.56.0(@types/react@19.3.0)(react@19.2.8)(supports-color@7.2.0)':
+  '@pactor-app/i18n@1.58.0(yaml@2.9.1)':
     dependencies:
-      '@pactor-app/core': 1.56.0
+      '@pactor-app/core': 1.58.0
+      '@pactor-app/schema': 1.58.0
+    optionalDependencies:
+      yaml: 2.9.1
+
+  '@pactor-app/markdown@1.58.0(@types/react@19.3.0)(react@19.2.8)':
+    dependencies:
+      '@pactor-app/core': 1.58.0
       katex: 0.18.10
       react: 19.2.8
-      react-markdown: 10.1.0(@types/react@19.3.0)(react@19.2.8)(supports-color@7.2.0)
+      react-markdown: 10.1.0(@types/react@19.3.0)(react@19.2.8)
       react-syntax-highlighter: 16.1.2(react@19.2.8)
       rehype-katex: 7.0.1
-      remark-gfm: 4.0.1(supports-color@7.2.0)
-      remark-math: 6.0.0(supports-color@7.2.0)
+      remark-gfm: 4.0.1
+      remark-math: 6.0.0
     transitivePeerDependencies:
       - '@types/react'
       - supports-color
 
-  '@pactor-app/module-pack@1.56.0':
+  '@pactor-app/module-pack@1.58.0':
     dependencies:
       esbuild: 0.25.12
       yaml: 2.9.1
 
-  '@pactor-app/permission@1.56.0':
+  '@pactor-app/permission@1.58.0':
     dependencies:
-      '@pactor-app/core': 1.56.0
+      '@pactor-app/core': 1.58.0
 
-  '@pactor-app/resource@1.56.0':
+  '@pactor-app/resource@1.58.0':
     dependencies:
-      '@pactor-app/core': 1.56.0
+      '@pactor-app/core': 1.58.0
 
-  '@pactor-app/router@1.56.0(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)':
+  '@pactor-app/router@1.58.0(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)':
     dependencies:
-      '@pactor-app/core': 1.56.0
-      '@pactor-app/permission': 1.56.0
+      '@pactor-app/core': 1.58.0
+      '@pactor-app/permission': 1.58.0
       react: 19.2.8
       react-router-dom: 7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
 
-  '@pactor-app/runtime@1.56.0(react@19.2.8)':
+  '@pactor-app/runtime@1.58.0(react@19.2.8)':
     dependencies:
-      '@pactor-app/core': 1.56.0
-      '@pactor-app/expression': 1.56.0
-      '@pactor-app/schema': 1.56.0
+      '@pactor-app/core': 1.58.0
+      '@pactor-app/expression': 1.58.0
+      '@pactor-app/schema': 1.58.0
       react: 19.2.8
+      semver: 7.8.5
 
-  '@pactor-app/schema@1.56.0':
+  '@pactor-app/schema@1.58.0':
     dependencies:
-      '@pactor-app/core': 1.56.0
+      '@pactor-app/core': 1.58.0
       ajv: 8.20.0
 
-  '@pactor-app/ui@1.56.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)(supports-color@7.2.0)':
+  '@pactor-app/ui@1.58.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@base-ui/react': 1.9.0(@date-fns/tz@1.5.0)(@types/react@19.3.0)(date-fns@4.4.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@pactor-app/core': 1.56.0
-      '@pactor-app/markdown': 1.56.0(@types/react@19.3.0)(react@19.2.8)(supports-color@7.2.0)
-      '@pactor-app/permission': 1.56.0
-      '@pactor-app/router': 1.56.0(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
-      '@pactor-app/runtime': 1.56.0(react@19.2.8)
+      '@pactor-app/core': 1.58.0
+      '@pactor-app/markdown': 1.58.0(@types/react@19.3.0)(react@19.2.8)
+      '@pactor-app/permission': 1.58.0
+      '@pactor-app/router': 1.58.0(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
+      '@pactor-app/runtime': 1.58.0(react@19.2.8)
       class-variance-authority: 0.7.1
       clsx: 2.1.1
       cmdk: 1.1.1(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -4095,10 +4118,10 @@ snapshots:
       - react-router-dom
       - supports-color
 
-  '@pactor-app/vite-plugin@1.56.0(vite@8.3.5(@types/node@20.19.43)(esbuild@0.25.12)(jiti@2.7.0)(yaml@2.9.1))':
+  '@pactor-app/vite-plugin@1.58.0(vite@8.3.5(@types/node@20.19.43)(esbuild@0.25.12)(jiti@2.7.0)(yaml@2.9.1))':
     dependencies:
-      '@pactor-app/core': 1.56.0
-      '@pactor-app/schema': 1.56.0
+      '@pactor-app/core': 1.58.0
+      '@pactor-app/schema': 1.58.0
       vite: 8.3.5(@types/node@20.19.43)(esbuild@0.25.12)(jiti@2.7.0)(yaml@2.9.1)
       yaml: 2.9.1
 
@@ -4420,7 +4443,7 @@ snapshots:
       '@typescript-eslint/parser': 8.72.0(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.9.3)
       '@typescript-eslint/scope-manager': 8.72.0
       '@typescript-eslint/type-utils': 8.72.0(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.9.3)
-      '@typescript-eslint/utils': 8.72.0(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.9.3)
+      '@typescript-eslint/utils': 8.72.0(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(typescript@5.9.3)
       '@typescript-eslint/visitor-keys': 8.72.0
       eslint: 9.39.5(jiti@2.7.0)(supports-color@7.2.0)
       ignore: 7.0.14
@@ -4434,7 +4457,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/scope-manager': 8.72.0
       '@typescript-eslint/types': 8.72.0
-      '@typescript-eslint/typescript-estree': 8.72.0(supports-color@7.2.0)(typescript@5.9.3)
+      '@typescript-eslint/typescript-estree': 8.72.0(typescript@5.9.3)
       '@typescript-eslint/visitor-keys': 8.72.0
       debug: 4.4.3(supports-color@7.2.0)
       eslint: 9.39.5(jiti@2.7.0)(supports-color@7.2.0)
@@ -4442,7 +4465,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/project-service@8.72.0(supports-color@7.2.0)(typescript@5.9.3)':
+  '@typescript-eslint/project-service@8.72.0(typescript@5.9.3)':
     dependencies:
       '@typescript-eslint/tsconfig-utils': 8.72.0(typescript@5.9.3)
       '@typescript-eslint/types': 8.72.0
@@ -4463,8 +4486,8 @@ snapshots:
   '@typescript-eslint/type-utils@8.72.0(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.9.3)':
     dependencies:
       '@typescript-eslint/types': 8.72.0
-      '@typescript-eslint/typescript-estree': 8.72.0(supports-color@7.2.0)(typescript@5.9.3)
-      '@typescript-eslint/utils': 8.72.0(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.9.3)
+      '@typescript-eslint/typescript-estree': 8.72.0(typescript@5.9.3)
+      '@typescript-eslint/utils': 8.72.0(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(typescript@5.9.3)
       debug: 4.4.3(supports-color@7.2.0)
       eslint: 9.39.5(jiti@2.7.0)(supports-color@7.2.0)
       ts-api-utils: 2.5.0(typescript@5.9.3)
@@ -4474,9 +4497,9 @@ snapshots:
 
   '@typescript-eslint/types@8.72.0': {}
 
-  '@typescript-eslint/typescript-estree@8.72.0(supports-color@7.2.0)(typescript@5.9.3)':
+  '@typescript-eslint/typescript-estree@8.72.0(typescript@5.9.3)':
     dependencies:
-      '@typescript-eslint/project-service': 8.72.0(supports-color@7.2.0)(typescript@5.9.3)
+      '@typescript-eslint/project-service': 8.72.0(typescript@5.9.3)
       '@typescript-eslint/tsconfig-utils': 8.72.0(typescript@5.9.3)
       '@typescript-eslint/types': 8.72.0
       '@typescript-eslint/visitor-keys': 8.72.0
@@ -4489,12 +4512,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/utils@8.72.0(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.9.3)':
+  '@typescript-eslint/utils@8.72.0(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(typescript@5.9.3)':
     dependencies:
       '@eslint-community/eslint-utils': 4.10.1(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))
       '@typescript-eslint/scope-manager': 8.72.0
       '@typescript-eslint/types': 8.72.0
-      '@typescript-eslint/typescript-estree': 8.72.0(supports-color@7.2.0)(typescript@5.9.3)
+      '@typescript-eslint/typescript-estree': 8.72.0(typescript@5.9.3)
       eslint: 9.39.5(jiti@2.7.0)(supports-color@7.2.0)
       typescript: 5.9.3
     transitivePeerDependencies:
@@ -5073,7 +5096,7 @@ snapshots:
     dependencies:
       '@next/eslint-plugin-next': 16.3.5(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))
       eslint: 9.39.5(jiti@2.7.0)(supports-color@7.2.0)
-      eslint-import-resolver-node: 0.3.10(supports-color@7.2.0)
+      eslint-import-resolver-node: 0.3.10
       eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0)(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)
       eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.72.0(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)
       eslint-plugin-jsx-a11y: 6.10.2(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))
@@ -5089,7 +5112,7 @@ snapshots:
       - eslint-plugin-import-x
       - supports-color
 
-  eslint-import-resolver-node@0.3.10(supports-color@7.2.0):
+  eslint-import-resolver-node@0.3.10:
     dependencies:
       debug: 3.2.7(supports-color@7.2.0)
       is-core-module: 2.17.0
@@ -5112,13 +5135,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.14.0(@typescript-eslint/parser@8.72.0(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.9.3))(eslint-import-resolver-node@0.3.10(supports-color@7.2.0))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0):
+  eslint-module-utils@2.14.0(@typescript-eslint/parser@8.72.0(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.9.3))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0):
     dependencies:
       debug: 3.2.7(supports-color@7.2.0)
     optionalDependencies:
       '@typescript-eslint/parser': 8.72.0(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.9.3)
       eslint: 9.39.5(jiti@2.7.0)(supports-color@7.2.0)
-      eslint-import-resolver-node: 0.3.10(supports-color@7.2.0)
+      eslint-import-resolver-node: 0.3.10
       eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0)(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)
     transitivePeerDependencies:
       - supports-color
@@ -5133,8 +5156,8 @@ snapshots:
       debug: 3.2.7(supports-color@7.2.0)
       doctrine: 2.1.0
       eslint: 9.39.5(jiti@2.7.0)(supports-color@7.2.0)
-      eslint-import-resolver-node: 0.3.10(supports-color@7.2.0)
-      eslint-module-utils: 2.14.0(@typescript-eslint/parser@8.72.0(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.9.3))(eslint-import-resolver-node@0.3.10(supports-color@7.2.0))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)
+      eslint-import-resolver-node: 0.3.10
+      eslint-module-utils: 2.14.0(@typescript-eslint/parser@8.72.0(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.9.3))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)
       hasown: 2.0.4
       is-core-module: 2.17.0
       is-glob: 4.0.3
@@ -5472,7 +5495,7 @@ snapshots:
     dependencies:
       '@types/hast': 3.0.5
 
-  hast-util-to-jsx-runtime@2.3.6(supports-color@7.2.0):
+  hast-util-to-jsx-runtime@2.3.6:
     dependencies:
       '@types/estree': 1.0.9
       '@types/hast': 3.0.5
@@ -5481,9 +5504,9 @@ snapshots:
       devlop: 1.1.0
       estree-util-is-identifier-name: 3.0.0
       hast-util-whitespace: 3.0.0
-      mdast-util-mdx-expression: 2.0.1(supports-color@7.2.0)
-      mdast-util-mdx-jsx: 3.2.0(supports-color@7.2.0)
-      mdast-util-mdxjs-esm: 2.0.1(supports-color@7.2.0)
+      mdast-util-mdx-expression: 2.0.1
+      mdast-util-mdx-jsx: 3.2.0
+      mdast-util-mdxjs-esm: 2.0.1
       property-information: 7.2.0
       space-separated-tokens: 2.0.2
       style-to-js: 1.1.21
@@ -5884,14 +5907,14 @@ snapshots:
       unist-util-is: 6.0.1
       unist-util-visit-parents: 6.1.0
 
-  mdast-util-from-markdown@2.1.0(supports-color@7.2.0):
+  mdast-util-from-markdown@2.1.0:
     dependencies:
       '@types/mdast': 4.0.4
       '@types/unist': 3.0.3
       decode-named-character-reference: 1.3.0
       devlop: 1.1.0
       mdast-util-to-string: 4.0.0
-      micromark: 4.0.3(supports-color@7.2.0)
+      micromark: 4.0.3
       micromark-util-decode-numeric-character-reference: 2.0.2
       micromark-util-decode-string: 2.0.1
       micromark-util-normalize-identifier: 2.0.1
@@ -5909,79 +5932,79 @@ snapshots:
       mdast-util-find-and-replace: 3.0.4
       micromark-util-character: 2.1.1
 
-  mdast-util-gfm-footnote@2.1.0(supports-color@7.2.0):
+  mdast-util-gfm-footnote@2.1.0:
     dependencies:
       '@types/mdast': 4.0.4
       devlop: 1.1.0
-      mdast-util-from-markdown: 2.1.0(supports-color@7.2.0)
+      mdast-util-from-markdown: 2.1.0
       mdast-util-to-markdown: 2.2.0
       micromark-util-normalize-identifier: 2.0.1
     transitivePeerDependencies:
       - supports-color
 
-  mdast-util-gfm-strikethrough@2.0.1(supports-color@7.2.0):
+  mdast-util-gfm-strikethrough@2.0.1:
     dependencies:
       '@types/mdast': 4.0.4
-      mdast-util-from-markdown: 2.1.0(supports-color@7.2.0)
+      mdast-util-from-markdown: 2.1.0
       mdast-util-to-markdown: 2.2.0
     transitivePeerDependencies:
       - supports-color
 
-  mdast-util-gfm-table@2.0.0(supports-color@7.2.0):
+  mdast-util-gfm-table@2.0.0:
     dependencies:
       '@types/mdast': 4.0.4
       devlop: 1.1.0
       markdown-table: 3.0.4
-      mdast-util-from-markdown: 2.1.0(supports-color@7.2.0)
+      mdast-util-from-markdown: 2.1.0
       mdast-util-to-markdown: 2.2.0
     transitivePeerDependencies:
       - supports-color
 
-  mdast-util-gfm-task-list-item@2.0.0(supports-color@7.2.0):
+  mdast-util-gfm-task-list-item@2.0.0:
     dependencies:
       '@types/mdast': 4.0.4
       devlop: 1.1.0
-      mdast-util-from-markdown: 2.1.0(supports-color@7.2.0)
+      mdast-util-from-markdown: 2.1.0
       mdast-util-to-markdown: 2.2.0
     transitivePeerDependencies:
       - supports-color
 
-  mdast-util-gfm@3.1.0(supports-color@7.2.0):
+  mdast-util-gfm@3.1.0:
     dependencies:
-      mdast-util-from-markdown: 2.1.0(supports-color@7.2.0)
+      mdast-util-from-markdown: 2.1.0
       mdast-util-gfm-autolink-literal: 2.0.1
-      mdast-util-gfm-footnote: 2.1.0(supports-color@7.2.0)
-      mdast-util-gfm-strikethrough: 2.0.1(supports-color@7.2.0)
-      mdast-util-gfm-table: 2.0.0(supports-color@7.2.0)
-      mdast-util-gfm-task-list-item: 2.0.0(supports-color@7.2.0)
+      mdast-util-gfm-footnote: 2.1.0
+      mdast-util-gfm-strikethrough: 2.0.1
+      mdast-util-gfm-table: 2.0.0
+      mdast-util-gfm-task-list-item: 2.0.0
       mdast-util-to-markdown: 2.2.0
     transitivePeerDependencies:
       - supports-color
 
-  mdast-util-math@3.0.0(supports-color@7.2.0):
+  mdast-util-math@3.0.0:
     dependencies:
       '@types/hast': 3.0.5
       '@types/mdast': 4.0.4
       devlop: 1.1.0
       longest-streak: 3.1.0
-      mdast-util-from-markdown: 2.1.0(supports-color@7.2.0)
+      mdast-util-from-markdown: 2.1.0
       mdast-util-to-markdown: 2.2.0
       unist-util-remove-position: 5.0.0
     transitivePeerDependencies:
       - supports-color
 
-  mdast-util-mdx-expression@2.0.1(supports-color@7.2.0):
+  mdast-util-mdx-expression@2.0.1:
     dependencies:
       '@types/estree-jsx': 1.0.5
       '@types/hast': 3.0.5
       '@types/mdast': 4.0.4
       devlop: 1.1.0
-      mdast-util-from-markdown: 2.1.0(supports-color@7.2.0)
+      mdast-util-from-markdown: 2.1.0
       mdast-util-to-markdown: 2.2.0
     transitivePeerDependencies:
       - supports-color
 
-  mdast-util-mdx-jsx@3.2.0(supports-color@7.2.0):
+  mdast-util-mdx-jsx@3.2.0:
     dependencies:
       '@types/estree-jsx': 1.0.5
       '@types/hast': 3.0.5
@@ -5989,7 +6012,7 @@ snapshots:
       '@types/unist': 3.0.3
       ccount: 2.0.1
       devlop: 1.1.0
-      mdast-util-from-markdown: 2.1.0(supports-color@7.2.0)
+      mdast-util-from-markdown: 2.1.0
       mdast-util-to-markdown: 2.2.0
       parse-entities: 4.0.2
       stringify-entities: 4.0.4
@@ -5998,13 +6021,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  mdast-util-mdxjs-esm@2.0.1(supports-color@7.2.0):
+  mdast-util-mdxjs-esm@2.0.1:
     dependencies:
       '@types/estree-jsx': 1.0.5
       '@types/hast': 3.0.5
       '@types/mdast': 4.0.4
       devlop: 1.1.0
-      mdast-util-from-markdown: 2.1.0(supports-color@7.2.0)
+      mdast-util-from-markdown: 2.1.0
       mdast-util-to-markdown: 2.2.0
     transitivePeerDependencies:
       - supports-color
@@ -6230,7 +6253,7 @@ snapshots:
 
   micromark-util-types@2.0.3: {}
 
-  micromark@4.0.3(supports-color@7.2.0):
+  micromark@4.0.3:
     dependencies:
       '@types/debug': 4.1.13
       debug: 4.4.3(supports-color@7.2.0)
@@ -6388,23 +6411,23 @@ snapshots:
 
   p-try@2.2.0: {}
 
-  pactor-app@1.56.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)(supports-color@7.2.0)(vite@8.3.5(@types/node@20.19.43)(esbuild@0.25.12)(jiti@2.7.0)(yaml@2.9.1)):
+  pactor-app@1.58.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)(vite@8.3.5(@types/node@20.19.43)(esbuild@0.25.12)(jiti@2.7.0)(yaml@2.9.1)):
     dependencies:
-      '@pactor-app/app': 1.56.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)(supports-color@7.2.0)
-      '@pactor-app/blocks': 1.56.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)(supports-color@7.2.0)
-      '@pactor-app/chart': 1.56.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)(supports-color@7.2.0)
-      '@pactor-app/chat': 1.56.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)(supports-color@7.2.0)
-      '@pactor-app/cli': 1.56.0
-      '@pactor-app/core': 1.56.0
-      '@pactor-app/expression': 1.56.0
-      '@pactor-app/markdown': 1.56.0(@types/react@19.3.0)(react@19.2.8)(supports-color@7.2.0)
-      '@pactor-app/permission': 1.56.0
-      '@pactor-app/resource': 1.56.0
-      '@pactor-app/router': 1.56.0(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
-      '@pactor-app/runtime': 1.56.0(react@19.2.8)
-      '@pactor-app/schema': 1.56.0
-      '@pactor-app/ui': 1.56.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)(supports-color@7.2.0)
-      '@pactor-app/vite-plugin': 1.56.0(vite@8.3.5(@types/node@20.19.43)(esbuild@0.25.12)(jiti@2.7.0)(yaml@2.9.1))
+      '@pactor-app/app': 1.58.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
+      '@pactor-app/blocks': 1.58.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
+      '@pactor-app/chart': 1.58.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
+      '@pactor-app/chat': 1.58.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
+      '@pactor-app/cli': 1.58.0
+      '@pactor-app/core': 1.58.0
+      '@pactor-app/expression': 1.58.0
+      '@pactor-app/markdown': 1.58.0(@types/react@19.3.0)(react@19.2.8)
+      '@pactor-app/permission': 1.58.0
+      '@pactor-app/resource': 1.58.0
+      '@pactor-app/router': 1.58.0(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
+      '@pactor-app/runtime': 1.58.0(react@19.2.8)
+      '@pactor-app/schema': 1.58.0
+      '@pactor-app/ui': 1.58.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
+      '@pactor-app/vite-plugin': 1.58.0(vite@8.3.5(@types/node@20.19.43)(esbuild@0.25.12)(jiti@2.7.0)(yaml@2.9.1))
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
       react-router-dom: 7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -6498,17 +6521,17 @@ snapshots:
 
   react-is@16.13.1: {}
 
-  react-markdown@10.1.0(@types/react@19.3.0)(react@19.2.8)(supports-color@7.2.0):
+  react-markdown@10.1.0(@types/react@19.3.0)(react@19.2.8):
     dependencies:
       '@types/hast': 3.0.5
       '@types/mdast': 4.0.4
       '@types/react': 19.3.0
       devlop: 1.1.0
-      hast-util-to-jsx-runtime: 2.3.6(supports-color@7.2.0)
+      hast-util-to-jsx-runtime: 2.3.6
       html-url-attributes: 3.0.1
       mdast-util-to-hast: 13.2.1
       react: 19.2.8
-      remark-parse: 11.0.0(supports-color@7.2.0)
+      remark-parse: 11.0.0
       remark-rehype: 11.1.2
       unified: 11.0.5
       unist-util-visit: 5.2.0
@@ -6611,30 +6634,30 @@ snapshots:
       unist-util-visit-parents: 6.1.0
       vfile: 6.0.3
 
-  remark-gfm@4.0.1(supports-color@7.2.0):
+  remark-gfm@4.0.1:
     dependencies:
       '@types/mdast': 4.0.4
-      mdast-util-gfm: 3.1.0(supports-color@7.2.0)
+      mdast-util-gfm: 3.1.0
       micromark-extension-gfm: 3.0.0
-      remark-parse: 11.0.0(supports-color@7.2.0)
+      remark-parse: 11.0.0
       remark-stringify: 11.0.0
       unified: 11.0.5
     transitivePeerDependencies:
       - supports-color
 
-  remark-math@6.0.0(supports-color@7.2.0):
+  remark-math@6.0.0:
     dependencies:
       '@types/mdast': 4.0.4
-      mdast-util-math: 3.0.0(supports-color@7.2.0)
+      mdast-util-math: 3.0.0
       micromark-extension-math: 3.1.0
       unified: 11.0.5
     transitivePeerDependencies:
       - supports-color
 
-  remark-parse@11.0.0(supports-color@7.2.0):
+  remark-parse@11.0.0:
     dependencies:
       '@types/mdast': 4.0.4
-      mdast-util-from-markdown: 2.1.0(supports-color@7.2.0)
+      mdast-util-from-markdown: 2.1.0
       micromark-util-types: 2.0.3
       unified: 11.0.5
     transitivePeerDependencies:
@@ -6997,8 +7020,8 @@ snapshots:
     dependencies:
       '@typescript-eslint/eslint-plugin': 8.72.0(@typescript-eslint/parser@8.72.0(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.9.3))(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.9.3)
       '@typescript-eslint/parser': 8.72.0(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.9.3)
-      '@typescript-eslint/typescript-estree': 8.72.0(supports-color@7.2.0)(typescript@5.9.3)
-      '@typescript-eslint/utils': 8.72.0(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.9.3)
+      '@typescript-eslint/typescript-estree': 8.72.0(typescript@5.9.3)
+      '@typescript-eslint/utils': 8.72.0(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(typescript@5.9.3)
       eslint: 9.39.5(jiti@2.7.0)(supports-color@7.2.0)
       typescript: 5.9.3
     transitivePeerDependencies:

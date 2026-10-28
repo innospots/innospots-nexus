@@ -1,7 +1,7 @@
 dsl: "1.0"
 page:
   id: plugin-detail
-  title: 插件详情
+  title: '$i18n{plugin.plugin-detail.title:插件详情}'
   name: pluginDetail
 
 dataSources:
@@ -11,30 +11,34 @@ dataSources:
     request:
       method: GET
       url: /api/d/nexus/plugins/${route.params.pluginId}
-
+i18n:
+  namespaces:
+    - plugin
 lifecycle:
   onShow:
     - action: reload
       params:
         dataSource: pluginInfo
-
 body:
   type: Page
   children:
     - type: Breadcrumb
       props:
         items:
-          - label: 插件管理
+          - label:
+              '$i18n{plugin.plugin-detail.plugin-management:插件管理}'
             href: /system/plugins
-          - label: "${data.pluginInfo != null && data.pluginInfo.pluginName != null ? data.pluginInfo.pluginName : route.params.pluginId}"
+          - label: "${data.pluginInfo != null && data.pluginInfo.pluginName != null ? data.pluginInfo.pluginName :
+              route.params.pluginId}"
     - type: Button
       props:
-        text: ← 返回插件列表
+        text: '$i18n{plugin.plugin-detail.back-to-plugins:← 返回插件列表}'
         variant: link
       events:
         onClick:
           - action: navigate
-            params: { to: /system/plugins }
+            params:
+              to: /system/plugins
     - type: Card
       when: ${data.pluginInfo != null}
       props:
@@ -61,14 +65,14 @@ body:
                 - type: Typography
                   props:
                     variant: muted
-                    text: 版本 ${data.pluginInfo.version}
+                    text: "${t('plugin.plugin-detail.version', { version: data.pluginInfo.version })}"
                 - type: Flex
                   props:
                     gap: small
                   children:
                     - type: Badge
                       props:
-                        text: "${data.pluginInfo.installed ? '已安装' : '未安装'}"
+                        text: "${data.pluginInfo.installed ? t('plugin.plugin-detail.installed') : t('plugin.plugin-detail.not-installed')}"
                     - type: Badge
                       when: ${data.pluginInfo.installed}
                       props:
@@ -80,14 +84,14 @@ body:
                 - type: Button
                   when: ${!data.pluginInfo.installed}
                   props:
-                    text: 安装
+                    text: '$i18n{plugin.plugin-detail.install:安装}'
                     variant: primary
                   events:
                     onClick:
                       - action: confirm
                         params:
-                          title: 安装插件
-                          content: 确定安装吗？
+                          title: '$i18n{plugin.plugin-detail.install-plugin:安装插件}'
+                          content: '$i18n{plugin.plugin-detail.install-this-plugin:确定安装吗？}'
                       - action: request
                         params:
                           method: POST
@@ -98,14 +102,14 @@ body:
                 - type: Button
                   when: ${data.pluginInfo.installed && data.pluginInfo.desiredEnabled}
                   props:
-                    text: 停用
+                    text: '$i18n{plugin.plugin-detail.disable:停用}'
                     variant: primary
                   events:
                     onClick:
                       - action: confirm
                         params:
-                          title: 停用插件
-                          content: 确定停用吗？
+                          title: '$i18n{plugin.plugin-detail.disable-plugin:停用插件}'
+                          content: '$i18n{plugin.plugin-detail.disable-it:确定停用吗？}'
                       - action: request
                         params:
                           method: POST
@@ -116,7 +120,7 @@ body:
                 - type: Button
                   when: ${data.pluginInfo.installed && !data.pluginInfo.desiredEnabled}
                   props:
-                    text: 启用
+                    text: '$i18n{plugin.plugin-detail.enable:启用}'
                     variant: primary
                   events:
                     onClick:
@@ -130,7 +134,7 @@ body:
                 - type: Button
                   when: ${data.pluginInfo.lastError != null && data.pluginInfo.lastError != ''}
                   props:
-                    text: 重试
+                    text: '$i18n{plugin.plugin-detail.retry:重试}'
                   events:
                     onClick:
                       - action: request
@@ -147,7 +151,7 @@ body:
       children:
         - type: Text
           props:
-            text: 基本信息
+            text: '$i18n{plugin.plugin-detail.basic-information:基本信息}'
             strong: true
         - type: Descriptions
           props:
@@ -155,14 +159,30 @@ body:
             bordered: true
             column: 2
             items:
-              - { label: 插件 ID, value: "${data.pluginInfo.pluginId}" }
-              - { label: 展示名称, value: "${data.pluginInfo.pluginName != null ? data.pluginInfo.pluginName : '—'}" }
-              - { label: 版本号, value: "${data.pluginInfo.version}" }
-              - { label: 来源类型, value: "${data.pluginInfo.sourceType != null ? data.pluginInfo.sourceType : '—'}" }
-              - { label: 来源位置, value: "${data.pluginInfo.sourceLocation != null ? data.pluginInfo.sourceLocation : '—'}" }
-              - { label: 运行状态, value: "${data.pluginInfo.runtimeState != null ? data.pluginInfo.runtimeState : '—'}" }
-              - { label: 安装日期, value: "${data.pluginInfo.installedAt != null ? data.pluginInfo.installedAt : '—'}" }
-              - { label: 最近发现, value: "${data.pluginInfo.lastDiscoveredAt != null ? data.pluginInfo.lastDiscoveredAt : '—'}" }
+              - label:
+                  '$i18n{plugin.plugin-detail.plugin-id:插件 ID}'
+                value: ${data.pluginInfo.pluginId}
+              - label:
+                  '$i18n{plugin.plugin-detail.display-name:展示名称}'
+                value: "${data.pluginInfo.pluginName != null ? data.pluginInfo.pluginName : '—'}"
+              - label:
+                  '$i18n{plugin.plugin-detail.version:版本号}'
+                value: ${data.pluginInfo.version}
+              - label:
+                  '$i18n{plugin.plugin-detail.source-type:来源类型}'
+                value: "${data.pluginInfo.sourceType != null ? data.pluginInfo.sourceType : '—'}"
+              - label:
+                  '$i18n{plugin.plugin-detail.source-location:来源位置}'
+                value: "${data.pluginInfo.sourceLocation != null ? data.pluginInfo.sourceLocation : '—'}"
+              - label:
+                  '$i18n{plugin.plugin-detail.runtime-status:运行状态}'
+                value: "${data.pluginInfo.runtimeState != null ? data.pluginInfo.runtimeState : '—'}"
+              - label:
+                  '$i18n{plugin.plugin-detail.installation-date:安装日期}'
+                value: "${data.pluginInfo.installedAt != null ? data.pluginInfo.installedAt : '—'}"
+              - label:
+                  '$i18n{plugin.plugin-detail.recently-discovered:最近发现}'
+                value: "${data.pluginInfo.lastDiscoveredAt != null ? data.pluginInfo.lastDiscoveredAt : '—'}"
     - type: Card
       when: ${data.pluginInfo != null && data.pluginInfo.lastError != null && data.pluginInfo.lastError != ''}
       props:
@@ -177,4 +197,4 @@ body:
       props:
         className: mt-4
         variant: error
-        message: 加载插件详情失败，请确认插件标识与后端版本是否正确。
+        message: '$i18n{plugin.plugin-detail.failed-to-load-plugin-details-verify-the-plugin-identifier-and-backend-v:加载插件详情失败，请确认插件标识与后端版本是否正确。}'

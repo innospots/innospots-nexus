@@ -61,7 +61,7 @@ export async function fetchPasswordEncryptionPublicKey(): Promise<string> {
             .then((payload) => {
                 const key = payload.publicKeyBase64?.trim();
                 if (!key) {
-                    throw new Error("RSA 公钥不可用");
+                    throw new Error("common.ui.rsa-public-key-is-unavailable");
                 }
                 cachedPublicKeyBase64 = key;
                 return key;

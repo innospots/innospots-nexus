@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 
-import { useUiText } from "@/i18n/ui";
+import { useI18n } from "@pactor-app/runtime";
 
 import { resolveI18nText } from "./i18n-text";
 
@@ -144,16 +144,22 @@ function collectCatalogGrantKeys(nodes: CatalogNode[], keys: string[] = []): str
   return keys;
 }
 
-function itemTitle(item: CatalogGrantItem | CatalogNode): string {
-  return resolveI18nText(item.displayName) || (item as CatalogGrantItem).grantName?.trim() || grantKey(item);
+type TranslateText = ReturnType<typeof useI18n>;
+
+function itemTitle(item: CatalogGrantItem | CatalogNode, i18n: TranslateText): string {
+  return resolveI18nText(item.displayName, i18n.locale, i18n.defaultLocale)
+    || (item as CatalogGrantItem).grantName?.trim()
+    || grantKey(item);
 }
 
-function itemDescription(item: CatalogGrantItem): string {
-  return resolveI18nText(item.description);
+function itemDescription(item: CatalogGrantItem, i18n: TranslateText): string {
+  return resolveI18nText(item.description, i18n.locale, i18n.defaultLocale);
 }
 
-function groupTitle(group: CatalogGrantGroup): string {
-  return resolveI18nText(group.displayName) || group.group?.trim() || "";
+function groupTitle(group: CatalogGrantGroup, i18n: TranslateText): string {
+  return resolveI18nText(group.displayName, i18n.locale, i18n.defaultLocale)
+    || group.group?.trim()
+    || "";
 }
 
 function GrantCheckbox({
@@ -167,8 +173,9 @@ function GrantCheckbox({
   currentPage?: boolean;
   onChange: (checked: boolean) => void;
 }) {
-  const t = useUiText();
-  const description = itemDescription(item);
+  const i18n = useI18n();
+  const { t } = i18n;
+  const description = itemDescription(item, i18n);
   return (
     <label className="flex cursor-pointer items-start gap-3 rounded-md border border-border/70 px-3 py-2.5 hover:bg-muted/40">
       <input
@@ -179,10 +186,10 @@ function GrantCheckbox({
       />
       <span className="min-w-0">
         <span className="flex flex-wrap items-center gap-2 text-sm font-medium text-foreground">
-          {itemTitle(item)}
+          {itemTitle(item, i18n)}
           {currentPage ? (
             <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[11px] font-normal text-primary">
-              {t("当前页面")}
+              {t("common.ui.current-page")}
             </span>
           ) : null}
         </span>
@@ -208,7 +215,8 @@ function ViewGroupCard({
   checked: boolean;
   onChange: (checked: boolean) => void;
 }) {
-  const t = useUiText();
+  const i18n = useI18n();
+  const { t } = i18n;
   const key = grantKey(group);
   return (
     <label
@@ -227,7 +235,7 @@ function ViewGroupCard({
         />
         <span className="min-w-0 flex-1">
           <span className="block text-sm font-medium text-foreground">
-            {groupTitle(group) || t("浏览分组")}
+            {groupTitle(group, i18n) || t("common.ui.browse-groups")}
           </span>
           <span className="mt-1 block break-all font-mono text-[11px] text-muted-foreground/80">
             {key}
@@ -258,7 +266,8 @@ export function PermissionGrantPanel({
   className,
   onChange,
 }: PermissionGrantPanelProps) {
-  const t = useUiText();
+  const i18n = useI18n();
+  const { t } = i18n;
   const catalogNodes = useMemo(() => normalizeCatalogSource(catalog), [catalog]);
   const selectedKey = selectedResourceKey?.trim() ?? "";
   const selectedPath = useMemo(
@@ -324,7 +333,7 @@ export function PermissionGrantPanel({
   if (selectedKey.length === 0) {
     return (
       <div className="flex min-h-56 items-center justify-center rounded-md border border-dashed border-border px-6 py-10 text-center text-sm text-muted-foreground">
-        {t("请从左侧选择页面或模块，查看并设置访问与操作权限。")}
+        {t("common.ui.select-a-page-or-module-on-the-left-to-view-and-configure-access-and-ope")}
       </div>
     );
   }
@@ -332,13 +341,13 @@ export function PermissionGrantPanel({
   if (moduleNode == null) {
     return (
       <div className="flex min-h-56 items-center justify-center rounded-md border border-dashed border-border px-6 py-10 text-center text-sm text-muted-foreground">
-        {t("当前节点没有可配置的权限模块。")}
+        {t("common.ui.the-selected-node-has-no-configurable-permission-modules")}
       </div>
     );
   }
 
-  const selectedName = selectedNode != null ? itemTitle(selectedNode) : selectedKey;
-  const moduleName = itemTitle(moduleNode);
+  const selectedName = selectedNode != null ? itemTitle(selectedNode, i18n) : selectedKey;
+  const moduleName = itemTitle(moduleNode, i18n);
   const operationItemCount = operationGroups.reduce(
     (total, group) => total + (group.items?.length ?? 0),
     0,
@@ -351,29 +360,29 @@ export function PermissionGrantPanel({
           <div className="text-base font-semibold text-foreground">{moduleName}</div>
           <div className="mt-1 text-xs text-muted-foreground">
             {selectedNode?.resourceType === "MENU"
-              ? t("已从菜单“{{name}}”定位到所属模块", { name: selectedName })
-              : t("当前模块授权")}
+              ? t("common.ui.located-the-parent-module-from-menu-name", { name: selectedName })
+              : t("common.ui.current-module-authorization")}
           </div>
         </div>
         <div className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground">
-          {t("已选")} {selectedCount} / {moduleItemKeys.length}
+          {t("common.ui.selected")} {selectedCount} / {moduleItemKeys.length}
         </div>
       </div>
 
       <p className="rounded-md bg-muted/50 px-3 py-2 text-xs leading-5 text-muted-foreground">
-        {t("查看访问权限决定导航菜单和页面是否可见；操作权限只控制接口动作，不会单独展示菜单。")}
+        {t("common.ui.view-permissions-determine-whether-navigation-menus-and-pages-are-visibl")}
       </p>
 
       <section className="rounded-lg border border-border p-4">
         <div className="flex items-center justify-between gap-2">
-          <h4 className="text-sm font-semibold text-foreground">{t("查看访问权限")}</h4>
+          <h4 className="text-sm font-semibold text-foreground">{t("common.ui.view-permissions")}</h4>
           <span className="text-xs text-muted-foreground">
-            {viewSelectableKeys.length} {t("项")}
+            {viewSelectableKeys.length} {t("common.ui.items")}
           </span>
         </div>
         {viewSelectableKeys.length === 0 ? (
           <p className="mt-3 text-sm text-muted-foreground">
-            {t("该模块没有可配置的页面访问项。")}
+            {t("common.ui.this-module-has-no-configurable-page-access-permissions")}
           </p>
         ) : (
           <div className="mt-3 space-y-4">
@@ -385,7 +394,7 @@ export function PermissionGrantPanel({
                   <div key={groupKey}>
                     <div className="mb-2 flex items-center gap-2">
                       <span className="text-xs font-medium text-muted-foreground">
-                        {groupTitle(group) || t("浏览分组")}
+                        {groupTitle(group, i18n) || t("common.ui.browse-groups")}
                       </span>
                       <span className="h-px flex-1 bg-border" />
                     </div>
@@ -425,14 +434,14 @@ export function PermissionGrantPanel({
 
       <section className="rounded-lg border border-border p-4">
         <div className="flex items-center justify-between gap-2">
-          <h4 className="text-sm font-semibold text-foreground">{t("操作权限")}</h4>
+          <h4 className="text-sm font-semibold text-foreground">{t("common.ui.operation-permissions")}</h4>
           <span className="text-xs text-muted-foreground">
-            {operationItemCount} {t("项")}
+            {operationItemCount} {t("common.ui.items")}
           </span>
         </div>
         {operationItemCount === 0 ? (
           <p className="mt-3 text-sm text-muted-foreground">
-            {t("该模块没有单独的操作授权项。")}
+            {t("common.ui.this-module-has-no-standalone-operation-permissions")}
           </p>
         ) : (
           <div className="mt-3 space-y-4">
@@ -445,7 +454,9 @@ export function PermissionGrantPanel({
                 <div key={`${group.group ?? "default"}-${groupIndex}`}>
                   <div className="mb-2 flex items-center gap-2">
                     <span className="text-xs font-medium text-muted-foreground">
-                      {resolveI18nText(group.displayName) || group.group || t("操作")}
+                      {resolveI18nText(group.displayName, i18n.locale, i18n.defaultLocale)
+                        || group.group
+                        || t("common.ui.actions")}
                     </span>
                     <span className="h-px flex-1 bg-border" />
                   </div>

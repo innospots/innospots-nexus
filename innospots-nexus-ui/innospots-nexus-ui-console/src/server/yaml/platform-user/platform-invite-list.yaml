@@ -1,7 +1,7 @@
 dsl: "1.0"
 page:
   id: platform-invite-list
-  title: 邀请列表
+  title: '$i18n{platform-user.platform-invite-list.title:邀请列表}'
   name: platformInviteList
 
 state:
@@ -29,15 +29,19 @@ dataSources:
     request:
       method: GET
       url: /api/d/platform/invites/${state.detailInviteId}
-
+i18n:
+  namespaces:
+    - platform-user
 body:
   type: Page
   children:
     - type: Breadcrumb
       props:
         items:
-          - label: 运营管理
-          - label: 邀请
+          - label:
+              '$i18n{platform-user.platform-invite-list.operations:运营管理}'
+          - label:
+              '$i18n{platform-user.platform-invite-list.invitations:邀请}'
     - type: Flex
       props:
         justify: space-between
@@ -52,14 +56,14 @@ body:
             - type: Typography
               props:
                 variant: h3
-                text: 邀请
+                text: '$i18n{platform-user.platform-invite-list.invitations-2:邀请}'
             - type: Typography
               props:
                 variant: muted
-                text: 查看、重发或撤销平台用户邀请；已接受的可进入用户详情。
+                text: '$i18n{platform-user.platform-invite-list.view-resend-or-revoke-platform-user-invitations-accepted-invitations-can:查看、重发或撤销平台用户邀请；已接受的可进入用户详情。}'
         - type: Button
           props:
-            text: + 添加用户
+            text: '$i18n{platform-user.platform-invite-list.add-user:+ 添加用户}'
             variant: primary
           events:
             onClick:
@@ -88,29 +92,39 @@ body:
           children:
             - type: Field
               props:
-                label: 邮箱/手机
+                label: '$i18n{platform-user.platform-invite-list.email-mobile:邮箱/手机}'
               children:
                 - type: Input
                   props:
                     name: input
-                    placeholder: 模糊匹配联系方式
+                    placeholder: '$i18n{platform-user.platform-invite-list.fuzzy-match-contact-details:模糊匹配联系方式}'
             - type: Field
               props:
-                label: 状态
+                label: '$i18n{platform-user.platform-invite-list.status:状态}'
               children:
                 - type: FilterSelect
                   props:
                     name: status
-                    placeholder: 全部
+                    placeholder: '$i18n{platform-user.platform-invite-list.all-2:全部}'
                     options:
-                      - { label: 全部, value: "" }
-                      - { label: 待接受, value: PENDING }
-                      - { label: 已接受, value: ACCEPTED }
-                      - { label: 已撤销, value: REVOKED }
-                      - { label: 已过期, value: EXPIRED }
+                      - label:
+                          '$i18n{platform-user.platform-invite-list.all:全部}'
+                        value: ""
+                      - label:
+                          '$i18n{platform-user.platform-invite-list.pending-acceptance:待接受}'
+                        value: PENDING
+                      - label:
+                          '$i18n{platform-user.platform-invite-list.accepted:已接受}'
+                        value: ACCEPTED
+                      - label:
+                          '$i18n{platform-user.platform-invite-list.revoked:已撤销}'
+                        value: REVOKED
+                      - label:
+                          '$i18n{platform-user.platform-invite-list.expired:已过期}'
+                        value: EXPIRED
             - type: Field
               props:
-                label: " "
+                label:  
               children:
                 - type: Flex
                   props:
@@ -118,12 +132,12 @@ body:
                   children:
                     - type: Button
                       props:
-                        text: 查询
+                        text: '$i18n{platform-user.platform-invite-list.search:查询}'
                         submit: true
                         htmlType: submit
                     - type: Button
                       props:
-                        text: 重置
+                        text: '$i18n{platform-user.platform-invite-list.reset:重置}'
                       events:
                         onClick:
                           - action: form.setValues
@@ -147,23 +161,33 @@ body:
             loading: ${dataStatus.invites.loading}
             className: mt-4
             columns:
-              - title: 目标联系
+              - title:
+                  '$i18n{platform-user.platform-invite-list.target-contact:目标联系}'
                 cell:
                   type: Text
                   props:
-                    text: "${row.email != null && row.email != '' ? row.email : (row.mobile != null && row.mobile != '' ? row.mobile : '—')}"
-              - title: 登录名
+                    text: "${row.email != null && row.email != '' ? row.email : (row.mobile != null && row.mobile != '' ? row.mobile :
+                      '—')}"
+              - title:
+                  '$i18n{platform-user.platform-invite-list.login-name:登录名}'
                 dataIndex: loginName
-              - title: 角色模板
+              - title:
+                  '$i18n{platform-user.platform-invite-list.role-template:角色模板}'
                 dataIndex: defaultRoleCodes
-              - title: 状态
+              - title:
+                  '$i18n{platform-user.platform-invite-list.status-2:状态}'
                 cell:
                   type: Text
                   props:
-                    text: "${row.status == 'PENDING' ? '待接受' : row.status == 'ACCEPTED' ? '已接受' : row.status == 'REVOKED' ? '已撤销' : row.status == 'EXPIRED' ? '已过期' : row.status}"
-              - title: 过期时间
+                    text: "${row.status == 'PENDING' ? t('platform-user.platform-invite-list.status.pending') : row.status == 'ACCEPTED' ?
+                      t('platform-user.platform-invite-list.status.accepted') : row.status == 'REVOKED' ?
+                      t('platform-user.platform-invite-list.status.revoked') : row.status == 'EXPIRED' ?
+                      t('platform-user.platform-invite-list.status.expired') : row.status}"
+              - title:
+                  '$i18n{platform-user.platform-invite-list.expires-at:过期时间}'
                 dataIndex: expiresAt
-              - title: 操作
+              - title:
+                  '$i18n{platform-user.platform-invite-list.actions:操作}'
                 cell:
                   type: Flex
                   props:
@@ -172,7 +196,7 @@ body:
                     - type: Button
                       when: ${row.status == 'PENDING'}
                       props:
-                        text: 重发
+                        text: '$i18n{platform-user.platform-invite-list.resend:重发}'
                         variant: link
                         size: small
                       events:
@@ -184,14 +208,14 @@ body:
                           - action: message
                             params:
                               messageType: success
-                              text: 邀请已重发
+                              text: '$i18n{platform-user.platform-invite-list.invitation-resent:邀请已重发}'
                           - action: reload
                             params:
                               dataSource: invites
                     - type: Button
                       when: ${row.status == 'PENDING'}
                       props:
-                        text: 撤销
+                        text: '$i18n{platform-user.platform-invite-list.revoke:撤销}'
                         variant: link
                         size: small
                         danger: true
@@ -199,8 +223,8 @@ body:
                         onClick:
                           - action: confirm
                             params:
-                              title: 撤销邀请
-                              content: 未接受的邀请将立即失效，确定撤销吗？
+                              title: '$i18n{platform-user.platform-invite-list.revoke-invitation:撤销邀请}'
+                              content: '$i18n{platform-user.platform-invite-list.pending-invitations-will-expire-immediately-revoke-it:未接受的邀请将立即失效，确定撤销吗？}'
                           - action: request
                             params:
                               method: POST
@@ -208,14 +232,14 @@ body:
                           - action: message
                             params:
                               messageType: success
-                              text: 邀请已撤销
+                              text: '$i18n{platform-user.platform-invite-list.invitation-revoked:邀请已撤销}'
                           - action: reload
                             params:
                               dataSource: invites
                     - type: Button
                       when: ${row.status == 'ACCEPTED' && row.platformUserId != null && row.platformUserId != ''}
                       props:
-                        text: 详情
+                        text: '$i18n{platform-user.platform-invite-list.details:详情}'
                         variant: link
                         size: small
                       events:
@@ -226,7 +250,7 @@ body:
                     - type: Button
                       when: ${!(row.status == 'ACCEPTED' && row.platformUserId != null && row.platformUserId != '')}
                       props:
-                        text: 详情
+                        text: '$i18n{platform-user.platform-invite-list.details-2:详情}'
                         variant: link
                         size: small
                       events:
@@ -241,7 +265,7 @@ body:
                             params:
                               overlay:
                                 type: drawer
-                                title: 邀请详情
+                                title: '$i18n{platform-user.platform-invite-list.invitation-details:邀请详情}'
                                 width: 520
                                 content:
                                   type: Flex
@@ -253,25 +277,45 @@ body:
                                       when: ${data.inviteDetail != null}
                                       props:
                                         items:
-                                          - { label: 邀请 ID, value: "${data.inviteDetail.inviteId}" }
-                                          - label: 联系方式
-                                            value: "${data.inviteDetail.email != null && data.inviteDetail.email != '' ? data.inviteDetail.email : data.inviteDetail.mobile}"
-                                          - { label: 预置登录名, value: "${data.inviteDetail.loginName != null ? data.inviteDetail.loginName : '—'}" }
-                                          - { label: 默认角色, value: "${data.inviteDetail.defaultRoleCodes != null ? data.inviteDetail.defaultRoleCodes : '—'}" }
-                                          - { label: 状态, value: "${data.inviteDetail.status}" }
-                                          - { label: 交付方式, value: "${data.inviteDetail.deliveryMode != null ? data.inviteDetail.deliveryMode : '—'}" }
-                                          - { label: 邀请码, value: "${data.inviteDetail.inviteCode != null ? data.inviteDetail.inviteCode : '—'}" }
-                                          - { label: 邀请链接, value: "${data.inviteDetail.inviteLink != null ? data.inviteDetail.inviteLink : '—'}" }
-                                          - { label: 过期时间, value: "${data.inviteDetail.expiresAt != null ? data.inviteDetail.expiresAt : '—'}" }
-                                          - { label: 创建时间, value: "${data.inviteDetail.createdAt != null ? data.inviteDetail.createdAt : '—'}" }
+                                          - label:
+                                              '$i18n{platform-user.platform-invite-list.invitation-id:邀请 ID}'
+                                            value: ${data.inviteDetail.inviteId}
+                                          - label:
+                                              '$i18n{platform-user.platform-invite-list.contact:联系方式}'
+                                            value: "${data.inviteDetail.email != null && data.inviteDetail.email != '' ? data.inviteDetail.email :
+                                              data.inviteDetail.mobile}"
+                                          - label:
+                                              '$i18n{platform-user.platform-invite-list.preset-login-name:预置登录名}'
+                                            value: "${data.inviteDetail.loginName != null ? data.inviteDetail.loginName : '—'}"
+                                          - label:
+                                              '$i18n{platform-user.platform-invite-list.default-role:默认角色}'
+                                            value: "${data.inviteDetail.defaultRoleCodes != null ? data.inviteDetail.defaultRoleCodes : '—'}"
+                                          - label:
+                                              '$i18n{platform-user.platform-invite-list.status-3:状态}'
+                                            value: ${data.inviteDetail.status}
+                                          - label:
+                                              '$i18n{platform-user.platform-invite-list.provisioning-method:交付方式}'
+                                            value: "${data.inviteDetail.deliveryMode != null ? data.inviteDetail.deliveryMode : '—'}"
+                                          - label:
+                                              '$i18n{platform-user.platform-invite-list.invitation-code:邀请码}'
+                                            value: "${data.inviteDetail.inviteCode != null ? data.inviteDetail.inviteCode : '—'}"
+                                          - label:
+                                              '$i18n{platform-user.platform-invite-list.invitation-link:邀请链接}'
+                                            value: "${data.inviteDetail.inviteLink != null ? data.inviteDetail.inviteLink : '—'}"
+                                          - label:
+                                              '$i18n{platform-user.platform-invite-list.expires-at-2:过期时间}'
+                                            value: "${data.inviteDetail.expiresAt != null ? data.inviteDetail.expiresAt : '—'}"
+                                          - label:
+                                              '$i18n{platform-user.platform-invite-list.created-at:创建时间}'
+                                            value: "${data.inviteDetail.createdAt != null ? data.inviteDetail.createdAt : '—'}"
                                     - type: Button
                                       props:
-                                        text: 关闭
+                                        text: '$i18n{platform-user.platform-invite-list.close:关闭}'
                                       events:
                                         onClick:
                                           - action: overlay.close
         - type: Text
           props:
-            text: 共 ${data.invites.total} 条邀请
+            text: "${t('platform-user.platform-invite-list.summary.count', { count: data.invites.total })}"
             type: secondary
             className: mt-3

@@ -1,36 +1,42 @@
 dsl: "1.0"
 page:
   id: platform-user-create
-  title: 添加平台用户
+  title: '$i18n{platform-user.platform-user-create.title:添加平台用户}'
   name: platformUserCreate
-
+i18n:
+  namespaces:
+    - platform-user
 body:
   type: Page
   children:
     - type: Breadcrumb
       props:
         items:
-          - label: 运营管理
-          - label: 用户列表
+          - label:
+              '$i18n{platform-user.platform-user-create.operations:运营管理}'
+          - label:
+              '$i18n{platform-user.platform-user-create.user-list:用户列表}'
             href: /ops/platform-users
-          - label: 添加用户
+          - label:
+              '$i18n{platform-user.platform-user-create.add-user:添加用户}'
     - type: Button
       props:
-        text: ← 返回用户列表
+        text: '$i18n{platform-user.platform-user-create.back-to-users:← 返回用户列表}'
         variant: link
       events:
         onClick:
           - action: navigate
-            params: { to: /ops/platform-users }
+            params:
+              to: /ops/platform-users
     - type: Typography
       props:
         variant: h3
-        text: 添加平台用户
+        text: '$i18n{platform-user.platform-user-create.add-platform-user:添加平台用户}'
         className: mt-2
     - type: Typography
       props:
         variant: muted
-        text: 默认邀请开通；实施场景可切换为直接创建并设置初始密码。
+        text: '$i18n{platform-user.platform-user-create.invitation-is-the-default-provisioning-method-implementation-scenarios-m:默认邀请开通；实施场景可切换为直接创建并设置初始密码。}'
         className: mb-4
     - type: Card
       children:
@@ -38,12 +44,13 @@ body:
           events:
             onCancel:
               - action: navigate
-                params: { to: /ops/platform-users }
+                params:
+                  to: /ops/platform-users
             onCreated:
               - action: message
                 params:
                   messageType: success
-                  text: 用户已创建
+                  text: '$i18n{platform-user.platform-user-create.user-created:用户已创建}'
               - action: if
                 params:
                   condition: ${event.platformUserId != null && event.platformUserId != ''}

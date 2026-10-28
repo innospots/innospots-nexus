@@ -91,7 +91,7 @@ public final class I18nBundleEndpoint {
             @Parameter(description = "应用发布标识，回显到协议 envelope")
             @QueryParam("release") String release,
             @Parameter(description = "浏览器语言偏好 Cookie")
-            @CookieParam("nexus.locale") String cookieLocale,
+            @CookieParam("locale") String cookieLocale,
             @Parameter(description = "标准 Accept-Language 回退链")
             @HeaderParam("Accept-Language") String acceptLanguage
     ) {

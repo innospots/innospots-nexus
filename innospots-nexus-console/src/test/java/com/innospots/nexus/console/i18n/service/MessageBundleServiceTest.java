@@ -55,6 +55,19 @@ class MessageBundleServiceTest {
     }
 
     @Test
+    void onlyAcceptsExplicitLocaleAliases() {
+        assertThat(service.load(null, "zh_CN", null, null, "common", null).locale())
+                .isEqualTo("zh-CN");
+        assertThat(service.load(null, "en_US", null, null, "common", null).locale())
+                .isEqualTo("en-US");
+        assertThatThrownBy(() -> service.load(
+                "console", "zh-Hans-CN", null, null, "common", null))
+                .isInstanceOf(NexusException.class)
+                .extracting(error -> ((NexusException) error).code())
+                .isEqualTo(I18nStatusCode.LOCALE_NOT_SUPPORTED.fullCode());
+    }
+
+    @Test
     void rejectsUnsupportedExplicitLocale() {
         assertThatThrownBy(() -> service.load(
                 "console", "fr-FR", null, null, null, null))
@@ -92,7 +105,7 @@ class MessageBundleServiceTest {
                 .isEqualTo(second.bundles().get("role").version())
                 .matches("[0-9a-f]{64}");
         assertThat(first.bundles().get("role").messages())
-                .containsKey("role.role-list.body.title");
+                .containsKey("role.role-list.title");
         assertThatThrownBy(() -> first.bundles().put("x", null))
                 .isInstanceOf(UnsupportedOperationException.class);
     }
@@ -126,13 +139,13 @@ class MessageBundleServiceTest {
                 Map.entry("i18n/console/common/messages.properties", "common.action.save=保存\n"),
                 Map.entry("i18n/console/common/messages_en.properties", "common.action.save=Save\n"),
                 Map.entry("i18n/console/role/messages.properties",
-                        "role.role-list.body.title=角色管理\n"),
+                        "role.role-list.title=角色管理\n"),
                 Map.entry("i18n/console/role/messages_en.properties",
-                        "role.role-list.body.title=Roles\n"),
+                        "role.role-list.title=Roles\n"),
                 Map.entry("i18n/console/dictionary/messages.properties",
-                        "dictionary.dictionary-type-list.body.title=数据字典\n"),
+                        "dictionary.dictionary-type-list.title=数据字典\n"),
                 Map.entry("i18n/console/dictionary/messages_en.properties",
-                        "dictionary.dictionary-type-list.body.title=Dictionaries\n")
+                        "dictionary.dictionary-type-list.title=Dictionaries\n")
         );
 
         private BundleClassLoader() {

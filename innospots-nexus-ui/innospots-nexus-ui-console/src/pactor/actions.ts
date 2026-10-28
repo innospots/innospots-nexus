@@ -9,7 +9,6 @@
 
 import type { ActionHandler } from "@pactor-app/runtime";
 
-import { translateUi } from "@/i18n/ui";
 import { collectDictionaryTypeSavePayload } from "./lib/dictionary-type-save-registry";
 
 const TENANT_CODE_PATTERN = /^[a-zA-Z0-9_]+$/;
@@ -22,7 +21,7 @@ export const pactorActions: Record<string, ActionHandler> = {
         if (locale.length === 0) {
             return {
                 ok: false,
-                error: new Error(translateUi(ctx.context.i18n, "修改失败")),
+                error: new Error(ctx.context.i18n.t("common.ui.change-failed")),
             };
         }
         const response = await fetch("/api/i18n/locale", {
@@ -33,7 +32,7 @@ export const pactorActions: Record<string, ActionHandler> = {
         if (!response.ok) {
             return {
                 ok: false,
-                error: new Error(translateUi(ctx.context.i18n, "修改失败")),
+                error: new Error(ctx.context.i18n.t("common.ui.change-failed")),
             };
         }
         window.location.reload();
@@ -48,7 +47,7 @@ export const pactorActions: Record<string, ActionHandler> = {
         if (payload == null) {
             return {
                 ok: false,
-                error: new Error(translateUi(ctx.context.i18n, "请完善字典表单后再保存")),
+                error: new Error(ctx.context.i18n.t("common.ui.complete-the-dictionary-form-before-saving")),
             };
         }
         return { ok: true, data: payload };
@@ -58,7 +57,7 @@ export const pactorActions: Record<string, ActionHandler> = {
         if (payload == null) {
             return {
                 ok: false,
-                error: new Error(translateUi(ctx.context.i18n, "请完善字典表单后再保存")),
+                error: new Error(ctx.context.i18n.t("common.ui.complete-the-dictionary-form-before-saving")),
             };
         }
         const editingTypeId = ctx.context.state.get("editingTypeId");
@@ -67,7 +66,7 @@ export const pactorActions: Record<string, ActionHandler> = {
         if (payload.mode === "edit" && dictionaryTypeId.length === 0) {
             return {
                 ok: false,
-                error: new Error(translateUi(ctx.context.i18n, "缺少字典类型 ID")),
+                error: new Error(ctx.context.i18n.t("common.ui.dictionary-type-id-is-missing")),
             };
         }
         const http = ctx.context.http;
@@ -99,13 +98,13 @@ export const pactorActions: Record<string, ActionHandler> = {
         if (code.length === 0) {
             return {
                 ok: false,
-                error: new Error(translateUi(ctx.context.i18n, "请输入租户编码")),
+                error: new Error(ctx.context.i18n.t("common.ui.enter-a-tenant-code")),
             };
         }
         if (!TENANT_CODE_PATTERN.test(code)) {
             return {
                 ok: false,
-                error: new Error(translateUi(ctx.context.i18n, "租户编码仅支持字母、数字和下划线")),
+                error: new Error(ctx.context.i18n.t("common.ui.tenant-codes-support-only-letters-numbers-and-underscores")),
             };
         }
         return { ok: true };

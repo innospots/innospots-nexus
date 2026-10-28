@@ -1,7 +1,7 @@
 dsl: "1.0"
 page:
   id: platform-access-request-list
-  title: 注册审批
+  title: '$i18n{platform-user.platform-access-request-list.title:注册审批}'
   name: platformAccessRequestList
 
 state:
@@ -22,15 +22,19 @@ dataSources:
         status: ${state.status}
         pageNo: ${state.pageNo}
         pageSize: ${state.pageSize}
-
+i18n:
+  namespaces:
+    - platform-user
 body:
   type: Page
   children:
     - type: Breadcrumb
       props:
         items:
-          - label: 运营管理
-          - label: 注册审批
+          - label:
+              '$i18n{platform-user.platform-access-request-list.operations:运营管理}'
+          - label:
+              '$i18n{platform-user.platform-access-request-list.registration-approval:注册审批}'
     - type: Flex
       props:
         direction: vertical
@@ -40,11 +44,11 @@ body:
         - type: Typography
           props:
             variant: h3
-            text: 注册审批
+            text: '$i18n{platform-user.platform-access-request-list.registration-approval-2:注册审批}'
         - type: Typography
           props:
             variant: muted
-            text: 处理自助注册产生的待审核账号；仅 registration.mode=APPROVAL 时有待办数据。
+            text: '$i18n{platform-user.platform-access-request-list.review-pending-self-registration-accounts-items-appear-only-when-registr:处理自助注册产生的待审核账号；仅 registration.mode=APPROVAL 时有待办数据。}'
     - type: Card
       children:
         - type: Form
@@ -65,24 +69,32 @@ body:
           children:
             - type: Field
               props:
-                label: 状态
+                label: '$i18n{platform-user.platform-access-request-list.status:状态}'
               children:
                 - type: FilterSelect
                   props:
                     name: status
-                    placeholder: 待审批
+                    placeholder: '$i18n{platform-user.platform-access-request-list.pending-approval-2:待审批}'
                     options:
-                      - { label: 待审批, value: PENDING_APPROVAL }
-                      - { label: 已通过, value: APPROVED }
-                      - { label: 已拒绝, value: REJECTED }
-                      - { label: 全部, value: "" }
+                      - label:
+                          '$i18n{platform-user.platform-access-request-list.pending-approval:待审批}'
+                        value: PENDING_APPROVAL
+                      - label:
+                          '$i18n{platform-user.platform-access-request-list.approved:已通过}'
+                        value: APPROVED
+                      - label:
+                          '$i18n{platform-user.platform-access-request-list.rejected:已拒绝}'
+                        value: REJECTED
+                      - label:
+                          '$i18n{platform-user.platform-access-request-list.all:全部}'
+                        value: ""
             - type: Field
               props:
-                label: " "
+                label:  
               children:
                 - type: Button
                   props:
-                    text: 查询
+                    text: '$i18n{platform-user.platform-access-request-list.search:查询}'
                     submit: true
                     htmlType: submit
         - type: Table
@@ -92,25 +104,35 @@ body:
             loading: ${dataStatus.accessRequests.loading}
             className: mt-4
             columns:
-              - title: 登录名
+              - title:
+                  '$i18n{platform-user.platform-access-request-list.login-name:登录名}'
                 dataIndex: loginName
-              - title: 申请人
+              - title:
+                  '$i18n{platform-user.platform-access-request-list.applicant:申请人}'
                 dataIndex: applicantName
-              - title: 邮箱/手机
+              - title:
+                  '$i18n{platform-user.platform-access-request-list.email-mobile:邮箱/手机}'
                 cell:
                   type: Text
                   props:
                     text: "${row.email != null && row.email != '' ? row.email : (row.mobile != null ? row.mobile : '—')}"
-              - title: 注册时间
+              - title:
+                  '$i18n{platform-user.platform-access-request-list.registered-at:注册时间}'
                 dataIndex: createdAt
-              - title: 说明
+              - title:
+                  '$i18n{platform-user.platform-access-request-list.description:说明}'
                 dataIndex: description
-              - title: 状态
+              - title:
+                  '$i18n{platform-user.platform-access-request-list.status-2:状态}'
                 cell:
                   type: Text
                   props:
-                    text: "${row.status == 'PENDING_APPROVAL' ? '待审批' : row.status == 'APPROVED' ? '已通过' : row.status == 'REJECTED' ? '已拒绝' : row.status}"
-              - title: 操作
+                    text: "${row.status == 'PENDING_APPROVAL' ? t('platform-user.platform-access-request-list.status.pending-approval') :
+                      row.status == 'APPROVED' ? t('platform-user.platform-access-request-list.status.approved') :
+                      row.status == 'REJECTED' ? t('platform-user.platform-access-request-list.status.rejected') :
+                      row.status}"
+              - title:
+                  '$i18n{platform-user.platform-access-request-list.actions:操作}'
                 cell:
                   type: Flex
                   props:
@@ -119,7 +141,7 @@ body:
                     - type: Button
                       when: ${row.status == 'PENDING_APPROVAL'}
                       props:
-                        text: 通过
+                        text: '$i18n{platform-user.platform-access-request-list.approve:通过}'
                         variant: link
                         size: small
                       events:
@@ -131,7 +153,7 @@ body:
                             params:
                               overlay:
                                 type: drawer
-                                title: 通过注册申请
+                                title: '$i18n{platform-user.platform-access-request-list.approve-registration-request:通过注册申请}'
                                 width: 480
                                 content:
                                   type: Form
@@ -149,7 +171,7 @@ body:
                                       - action: message
                                         params:
                                           messageType: success
-                                          text: 已通过，账号已启用
+                                          text: '$i18n{platform-user.platform-access-request-list.approved-account-enabled:已通过，账号已启用}'
                                       - action: overlay.close
                                       - action: reload
                                         params:
@@ -157,13 +179,13 @@ body:
                                   children:
                                     - type: Field
                                       props:
-                                        label: 默认角色（可选）
-                                        labelHint: 逗号分隔角色编码
+                                        label: '$i18n{platform-user.platform-access-request-list.default-roles-optional:默认角色（可选）}'
+                                        labelHint: '$i18n{platform-user.platform-access-request-list.comma-separated-role-codes:逗号分隔角色编码}'
                                       children:
                                         - type: Input
                                           props:
                                             name: defaultRoleCodes
-                                            placeholder: 如 PLATFORM_OPERATOR
+                                            placeholder: '$i18n{platform-user.platform-access-request-list.e-g-platform-operator:如 PLATFORM_OPERATOR}'
                                     - type: Flex
                                       props:
                                         justify: end
@@ -172,20 +194,20 @@ body:
                                       children:
                                         - type: Button
                                           props:
-                                            text: 取消
+                                            text: '$i18n{platform-user.platform-access-request-list.cancel:取消}'
                                           events:
                                             onClick:
                                               - action: overlay.close
                                         - type: Button
                                           props:
-                                            text: 确认通过
+                                            text: '$i18n{platform-user.platform-access-request-list.confirm-approval:确认通过}'
                                             variant: primary
                                             submit: true
                                             htmlType: submit
                     - type: Button
                       when: ${row.status == 'PENDING_APPROVAL'}
                       props:
-                        text: 拒绝
+                        text: '$i18n{platform-user.platform-access-request-list.reject:拒绝}'
                         variant: link
                         size: small
                         danger: true
@@ -198,7 +220,7 @@ body:
                             params:
                               overlay:
                                 type: drawer
-                                title: 拒绝注册申请
+                                title: '$i18n{platform-user.platform-access-request-list.reject-registration-request:拒绝注册申请}'
                                 width: 480
                                 content:
                                   type: Form
@@ -216,7 +238,7 @@ body:
                                       - action: message
                                         params:
                                           messageType: success
-                                          text: 已拒绝该申请
+                                          text: '$i18n{platform-user.platform-access-request-list.request-rejected:已拒绝该申请}'
                                       - action: overlay.close
                                       - action: reload
                                         params:
@@ -224,13 +246,13 @@ body:
                                   children:
                                     - type: Field
                                       props:
-                                        label: 拒绝原因
-                                        labelHint: 可选，将通知申请人
+                                        label: '$i18n{platform-user.platform-access-request-list.rejection-reason:拒绝原因}'
+                                        labelHint: '$i18n{platform-user.platform-access-request-list.optional-the-applicant-will-be-notified:可选，将通知申请人}'
                                       children:
                                         - type: Textarea
                                           props:
                                             name: rejectReason
-                                            placeholder: 请填写拒绝原因
+                                            placeholder: '$i18n{platform-user.platform-access-request-list.enter-a-rejection-reason:请填写拒绝原因}'
                                     - type: Flex
                                       props:
                                         justify: end
@@ -239,13 +261,13 @@ body:
                                       children:
                                         - type: Button
                                           props:
-                                            text: 取消
+                                            text: '$i18n{platform-user.platform-access-request-list.cancel-2:取消}'
                                           events:
                                             onClick:
                                               - action: overlay.close
                                         - type: Button
                                           props:
-                                            text: 确认拒绝
+                                            text: '$i18n{platform-user.platform-access-request-list.confirm-rejection:确认拒绝}'
                                             variant: primary
                                             danger: true
                                             submit: true
@@ -253,7 +275,7 @@ body:
                     - type: Button
                       when: ${row.platformUserId != null && row.platformUserId != ''}
                       props:
-                        text: 用户详情
+                        text: '$i18n{platform-user.platform-access-request-list.user-details:用户详情}'
                         variant: link
                         size: small
                       events:
@@ -263,6 +285,6 @@ body:
                               to: /ops/platform-users/${row.platformUserId}
         - type: Text
           props:
-            text: 共 ${data.accessRequests.total} 条申请
+            text: "${t('platform-user.platform-access-request-list.summary.count', { count: data.accessRequests.total })}"
             type: secondary
             className: mt-3

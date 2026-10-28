@@ -17,9 +17,9 @@ export interface SkinOption {
 }
 
 export const SKINS: SkinOption[] = [
-  { value: "chenwunaifu", label: "晨雾奶芙", color: "#c98a5e" },
-  { value: "taijingshenlin", label: "苔径深林", color: "#3f6b4f" },
-  { value: "xuanzhimoyun", label: "宣纸墨韵", color: "#2f3437" },
+  { value: "chenwunaifu", label: "common.ui.morning-mist", color: "#c98a5e" },
+  { value: "taijingshenlin", label: "common.ui.mossy-glen", color: "#3f6b4f" },
+  { value: "xuanzhimoyun", label: "common.ui.ink-on-rice-paper", color: "#2f3437" },
 ];
 
 export const DEFAULT_SKIN = SKINS[0].value;

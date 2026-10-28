@@ -1,7 +1,7 @@
 dsl: "1.0"
 page:
   id: dictionary-type-detail
-  title: 字典类型详情
+  title: '$i18n{dictionary.dictionary-type-detail.title:字典类型详情}'
   name: dictionaryTypeDetail
 
 state:
@@ -23,7 +23,9 @@ dataSources:
       params:
         pageNo: 1
         pageSize: 200
-
+i18n:
+  namespaces:
+    - dictionary
 lifecycle:
   onShow:
     - action: reload
@@ -36,35 +38,41 @@ lifecycle:
           - action: reload
             params:
               dataSource: typeDetailItems
-
 body:
   type: Page
   children:
     - type: Breadcrumb
       props:
         items:
-          - label: 系统管理
-          - label: 数据字典
+          - label:
+              '$i18n{dictionary.dictionary-type-detail.system-management:系统管理}'
+          - label:
+              '$i18n{dictionary.dictionary-type-detail.dictionaries:数据字典}'
             href: /system/dictionaries
-          - label: 字典预览
+          - label:
+              '$i18n{dictionary.dictionary-type-detail.dictionary-preview:字典预览}'
     - type: DrawerBackdrop
       props:
         open: ${state.previewOpen}
       events:
         onClose:
           - action: navigate
-            params: { to: /system/dictionaries }
+            params:
+              to: /system/dictionaries
     - type: Drawer
       props:
         open: ${state.previewOpen}
         placement: right
-        title: 查看字典
+        title: '$i18n{dictionary.dictionary-type-detail.view-dictionary:查看字典}'
         footer: false
-        style: { width: "840px", maxWidth: "840px" }
+        style:
+          width: 840px
+          maxWidth: 840px
       events:
         onClose:
           - action: navigate
-            params: { to: /system/dictionaries }
+            params:
+              to: /system/dictionaries
       children:
         - type: DictionaryTypeViewPanel
           props:

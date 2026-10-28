@@ -7,7 +7,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button, Input } from "@pactor-app/ui/components";
 import { useI18n } from "@pactor-app/runtime";
 
-import { useUiText } from "@/i18n/ui";
 import { reloadAfterAuth } from "../../lib/auth-session";
 import { resolveCaptchaImageSrc } from "../../lib/captcha-image-src";
 import { encryptPasswordForApi } from "../../lib/rsa-password";
@@ -78,14 +77,14 @@ async function platformLogin(body: {
     if (!response.ok || !isLoginSuccess(payload)) {
         throw new Error(
             payload.message
-                ? translate(payload.message)
-                : `${translate("登录失败")} (HTTP ${response.status})`,
+                ? payload.message
+                : `${translate("common.ui.sign-in-failed")} (HTTP ${response.status})`,
         );
     }
 }
 
 function AuthLinks() {
-    const t = useUiText();
+    const { t } = useI18n();
     const [policy, setPolicy] = useState<PublicRegistrationPolicy | null>(null);
     useEffect(() => {
         void fetchPublicRegistrationPolicy()
@@ -95,21 +94,21 @@ function AuthLinks() {
     return (
         <div className="mt-4 flex flex-wrap justify-center gap-x-3 gap-y-1 text-sm">
             <Link className="text-primary hover:underline" href="/password/reset">
-                {t("忘记密码？")}
+                {t("common.ui.forgot-password")}
             </Link>
             {policy?.openRegistrationEnabled ? (
                 <Link className="text-primary hover:underline" href="/register/open">
-                    {t("开放注册")}
+                    {t("common.ui.open-registration")}
                 </Link>
             ) : null}
             {policy?.approvalRegistrationEnabled ? (
                 <Link className="text-primary hover:underline" href="/register/approval">
-                    {t("注册（待审核）")}
+                    {t("common.ui.register-pending-approval")}
                 </Link>
             ) : null}
             {policy?.inviteRegistrationEnabled ? (
                 <Link className="text-primary hover:underline" href="/register/invite">
-                    {t("邀请码注册")}
+                    {t("common.ui.invitation-code-registration")}
                 </Link>
             ) : null}
         </div>
@@ -117,7 +116,7 @@ function AuthLinks() {
 }
 
 export function PlatformLoginForm() {
-    const t = useUiText();
+    const { t } = useI18n();
     const router = useRouter();
     const [login, setLogin] = useState("");
     const [password, setPassword] = useState("");
@@ -168,7 +167,7 @@ export function PlatformLoginForm() {
             reloadAfterAuth("/");
             return;
         } catch (err) {
-            const message = err instanceof Error ? err.message : "登录失败";
+            const message = err instanceof Error ? err.message : "common.ui.sign-in-failed";
             if (message.includes("PENDING_APPROVAL") || message.includes("待审核")) {
                 router.push(`/pending-approval?loginName=${encodeURIComponent(login.trim())}`);
                 return;
@@ -187,16 +186,16 @@ export function PlatformLoginForm() {
 
     return (
         <AuthPageShell
-            title={t("登录到运营管理平台")}
-            subtitle={t("使用平台账号登录")}
+            title={t("common.ui.sign-in-to-operations-platform")}
+            subtitle={t("common.ui.sign-in-with-your-platform-account")}
         >
             <div className="flex flex-col gap-3">
                 <label className="text-sm">
-                    {t("登录名")}
+                    {t("common.ui.login-name")}
                     <Input className="mt-1" value={login} onChange={(v) => setLogin(String(v))} />
                 </label>
                 <label className="text-sm">
-                    {t("密码")}
+                    {t("common.ui.password")}
                     <Input
                         className="mt-1"
                         type="password"
@@ -207,11 +206,11 @@ export function PlatformLoginForm() {
                 {showCaptcha && captchaSrc && (
                     <div className="flex flex-col gap-2">
                         <label className="text-sm">
-                            {t("验证码")}
+                            {t("common.ui.verification-code")}
                             <Input
                                 className="mt-1"
                                 value={captchaCode}
-                                placeholder={t("请输入验证码")}
+                                placeholder={t("common.ui.enter-the-verification-code")}
                                 onChange={(v) => setCaptchaCode(String(v))}
                             />
                         </label>
@@ -220,18 +219,18 @@ export function PlatformLoginForm() {
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                                 src={captchaSrc}
-                                alt={t("验证码")}
+                                alt={t("common.ui.verification-code")}
                                 className="block h-12 w-auto shrink-0 rounded border object-contain"
                             />
                             <Button size="small" onClick={() => void refreshCaptcha()}>
-                                {t("换一张")}
+                                {t("common.ui.refresh")}
                             </Button>
                         </div>
                     </div>
                 )}
                 {error && <p className="text-sm text-destructive">{t(error)}</p>}
                 <Button variant="primary" disabled={loading} onClick={() => void submit()}>
-                    {loading ? t("登录中…") : t("登 录")}
+                    {loading ? t("common.ui.signing-in") : t("common.ui.sign-in")}
                 </Button>
                 <AuthLinks />
             </div>
@@ -240,7 +239,7 @@ export function PlatformLoginForm() {
 }
 
 export function PlatformPasswordResetForm() {
-    const t = useUiText();
+    const { t } = useI18n();
     const router = useRouter();
     const [identity, setIdentity] = useState("");
     const [type, setType] = useState<"EMAIL" | "MOBILE">("EMAIL");
@@ -252,7 +251,7 @@ export function PlatformPasswordResetForm() {
 
     const submit = useCallback(async () => {
         if (password !== confirm) {
-            setError("两次密码不一致");
+            setError("common.ui.passwords-do-not-match");
             return;
         }
         setLoading(true);
@@ -267,31 +266,31 @@ export function PlatformPasswordResetForm() {
             });
             router.push("/login");
         } catch (err) {
-            setError(err instanceof Error ? err.message : "重置失败");
+            setError(err instanceof Error ? err.message : "common.ui.reset-failed");
         } finally {
             setLoading(false);
         }
     }, [confirm, identity, password, router, type, verificationCode]);
 
     return (
-        <AuthPageShell title={t("重置密码")} subtitle={t("验证身份后设置新密码")}>
+        <AuthPageShell title={t("common.ui.reset-password")} subtitle={t("common.ui.verify-your-identity-then-set-a-new-password")}>
             <div className="flex flex-col gap-3">
                 <label className="text-sm">
-                    {t("登录名 / 邮箱 / 手机")}
+                    {t("common.ui.login-name-email-mobile")}
                     <Input className="mt-1" value={identity} onChange={(v) => setIdentity(String(v))} />
                 </label>
                 <div className="flex gap-4 text-sm">
                     <label className="flex items-center gap-2">
                         <input type="radio" checked={type === "EMAIL"} onChange={() => setType("EMAIL")} />
-                        {t("邮箱验证")}
+                        {t("common.ui.email-verification")}
                     </label>
                     <label className="flex items-center gap-2">
                         <input type="radio" checked={type === "MOBILE"} onChange={() => setType("MOBILE")} />
-                        {t("短信验证")}
+                        {t("common.ui.sms-verification")}
                     </label>
                 </div>
                 <label className="text-sm">
-                    {t("验证码")}
+                    {t("common.ui.verification-code")}
                     <Input
                         className="mt-1"
                         value={verificationCode}
@@ -299,7 +298,7 @@ export function PlatformPasswordResetForm() {
                     />
                 </label>
                 <label className="text-sm">
-                    {t("新密码")}
+                    {t("common.ui.new-password")}
                     <Input
                         className="mt-1"
                         type="password"
@@ -308,7 +307,7 @@ export function PlatformPasswordResetForm() {
                     />
                 </label>
                 <label className="text-sm">
-                    {t("确认密码")}
+                    {t("common.ui.confirm-password")}
                     <Input
                         className="mt-1"
                         type="password"
@@ -319,10 +318,10 @@ export function PlatformPasswordResetForm() {
                 {error && <p className="text-sm text-destructive">{t(error)}</p>}
                 <div className="flex gap-2">
                     <Button variant="primary" disabled={loading} onClick={() => void submit()}>
-                        {t("确认重置")}
+                        {t("common.ui.confirm-reset")}
                     </Button>
                     <Link href="/login" className="text-sm leading-9 text-primary hover:underline">
-                        {t("返回登录")}
+                        {t("common.ui.back-to-sign-in")}
                     </Link>
                 </div>
             </div>
@@ -331,7 +330,7 @@ export function PlatformPasswordResetForm() {
 }
 
 export function PlatformPasswordChangeForm() {
-    const t = useUiText();
+    const { t } = useI18n();
     const [oldPassword, setOldPassword] = useState("");
     const [password, setPassword] = useState("");
     const [confirm, setConfirm] = useState("");
@@ -340,7 +339,7 @@ export function PlatformPasswordChangeForm() {
 
     const submit = useCallback(async () => {
         if (password !== confirm) {
-            setError("两次新密码不一致");
+            setError("common.ui.new-passwords-do-not-match");
             return;
         }
         setLoading(true);
@@ -355,7 +354,7 @@ export function PlatformPasswordChangeForm() {
             }).then(async (res) => {
                 if (!res.ok) {
                     const body = (await res.json()) as { message?: string };
-                    throw new Error(body.message ?? "修改失败");
+                    throw new Error(body.message ?? "common.ui.change-failed");
                 }
             });
             setError(null);
@@ -363,7 +362,7 @@ export function PlatformPasswordChangeForm() {
             setPassword("");
             setConfirm("");
         } catch (err) {
-            setError(err instanceof Error ? err.message : "修改失败");
+            setError(err instanceof Error ? err.message : "common.ui.change-failed");
         } finally {
             setLoading(false);
         }
@@ -371,11 +370,11 @@ export function PlatformPasswordChangeForm() {
 
     return (
         <div className="max-w-lg">
-            <h2 className="text-lg font-semibold">{t("修改密码")}</h2>
+            <h2 className="text-lg font-semibold">{t("common.ui.change-password")}</h2>
             <p className="mt-1 text-sm text-muted-foreground">POST /api/d/platform/auth/password/change</p>
             <div className="mt-4 flex flex-col gap-3">
                 <label className="text-sm">
-                    {t("当前密码")}
+                    {t("common.ui.current-password")}
                     <Input
                         className="mt-1"
                         type="password"
@@ -384,7 +383,7 @@ export function PlatformPasswordChangeForm() {
                     />
                 </label>
                 <label className="text-sm">
-                    {t("新密码")}
+                    {t("common.ui.new-password")}
                     <Input
                         className="mt-1"
                         type="password"
@@ -393,7 +392,7 @@ export function PlatformPasswordChangeForm() {
                     />
                 </label>
                 <label className="text-sm">
-                    {t("确认新密码")}
+                    {t("common.ui.confirm-new-password")}
                     <Input
                         className="mt-1"
                         type="password"
@@ -403,7 +402,7 @@ export function PlatformPasswordChangeForm() {
                 </label>
                 {error && <p className="text-sm text-destructive">{t(error)}</p>}
                 <Button variant="primary" disabled={loading} onClick={() => void submit()}>
-                    {t("保存")}
+                    {t("common.ui.save")}
                 </Button>
             </div>
         </div>
@@ -416,26 +415,26 @@ export function PlatformPendingApprovalPage() {
 }
 
 export function PlatformPendingApprovalView({ loginName }: { loginName?: string }) {
-    const t = useUiText();
+    const { t } = useI18n();
     return (
         <AuthPageShell
-            title={t("注册已提交，等待审核")}
+            title={t("common.ui.registration-submitted-pending-approval")}
             subtitle={loginName
-                ? t("您的账号：{{loginName}}", { loginName })
+                ? t("common.ui.your-account-loginname", { loginName })
                 : undefined}
         >
             <p className="text-sm text-muted-foreground">
-                {t("管理员审核通过后，您将收到通知，届时可使用注册时的登录名与密码登录。审核前请勿重复注册。")}
+                {t("common.ui.you-will-be-notified-after-an-administrator-approves-the-registration-th")}
             </p>
             <Link href="/login" className="mt-4 inline-block text-sm text-primary hover:underline">
-                {t("返回登录")}
+                {t("common.ui.back-to-sign-in")}
             </Link>
         </AuthPageShell>
     );
 }
 
 export function PlatformInviteAcceptForm({ token }: { token?: string }) {
-    const t = useUiText();
+    const { t } = useI18n();
     const i18n = useI18n();
     const router = useRouter();
     const [preview, setPreview] = useState<InvitePreview | null>(null);
@@ -471,11 +470,11 @@ export function PlatformInviteAcceptForm({ token }: { token?: string }) {
 
     const submit = useCallback(async () => {
         if (!token) {
-            setError("邀请链接无效");
+            setError("common.ui.invalid-invitation-link");
             return;
         }
         if (password !== confirm) {
-            setError("两次密码不一致");
+            setError("common.ui.passwords-do-not-match");
             return;
         }
         setLoading(true);
@@ -490,7 +489,7 @@ export function PlatformInviteAcceptForm({ token }: { token?: string }) {
             });
             router.push("/login");
         } catch (err) {
-            setError(err instanceof Error ? err.message : "开通失败");
+            setError(err instanceof Error ? err.message : "common.ui.provisioning-failed");
         } finally {
             setLoading(false);
         }
@@ -499,20 +498,20 @@ export function PlatformInviteAcceptForm({ token }: { token?: string }) {
     const contactHint =
         preview?.maskedEmail
         ?? preview?.maskedMobile
-        ?? (token ? t("加载邀请信息…") : t("缺少邀请令牌"));
+        ?? (token ? t("common.ui.loading-invitation") : t("common.ui.invitation-token-is-missing"));
 
     return (
         <AuthPageShell
-            title={t("接受邀请")}
-            subtitle={t("邀请至：{{contact}}", { contact: contactHint })}
+            title={t("common.ui.accept-invitation")}
+            subtitle={t("common.ui.invitation-for-contact", { contact: contactHint })}
         >
             <div className="flex flex-col gap-3">
                 <label className="text-sm">
-                    {t("登录名（可选）")}
+                    {t("common.ui.login-name-optional")}
                     <Input className="mt-1" value={loginName} onChange={(v) => setLoginName(String(v))} />
                 </label>
                 <label className="text-sm">
-                    {t("验证码")}
+                    {t("common.ui.verification-code")}
                     <Input
                         className="mt-1"
                         value={verificationCode}
@@ -520,10 +519,10 @@ export function PlatformInviteAcceptForm({ token }: { token?: string }) {
                     />
                 </label>
                 <Button size="small" onClick={() => void issueOtp()}>
-                    {t("获取验证码")}
+                    {t("common.ui.get-code")}
                 </Button>
                 <label className="text-sm">
-                    {t("密码")}
+                    {t("common.ui.password")}
                     <Input
                         className="mt-1"
                         type="password"
@@ -532,7 +531,7 @@ export function PlatformInviteAcceptForm({ token }: { token?: string }) {
                     />
                 </label>
                 <label className="text-sm">
-                    {t("确认密码")}
+                    {t("common.ui.confirm-password")}
                     <Input
                         className="mt-1"
                         type="password"
@@ -542,10 +541,10 @@ export function PlatformInviteAcceptForm({ token }: { token?: string }) {
                 </label>
                 {error && <p className="text-sm text-destructive">{t(error)}</p>}
                 <Button variant="primary" disabled={loading} onClick={() => void submit()}>
-                    {t("完成开通")}
+                    {t("common.ui.complete-provisioning")}
                 </Button>
                 <Link href="/login" className="text-sm text-primary hover:underline">
-                    {t("返回登录")}
+                    {t("common.ui.back-to-sign-in")}
                 </Link>
             </div>
         </AuthPageShell>
@@ -553,7 +552,7 @@ export function PlatformInviteAcceptForm({ token }: { token?: string }) {
 }
 
 export function PlatformInviteActivateForm() {
-    const t = useUiText();
+    const { t } = useI18n();
     const router = useRouter();
     useEffect(() => {
         void fetchPublicRegistrationPolicy()
@@ -574,7 +573,7 @@ export function PlatformInviteActivateForm() {
 
     const submit = useCallback(async () => {
         if (password !== confirm) {
-            setError("两次密码不一致");
+            setError("common.ui.passwords-do-not-match");
             return;
         }
         setLoading(true);
@@ -589,7 +588,7 @@ export function PlatformInviteActivateForm() {
             });
             router.push("/login");
         } catch (err) {
-            setError(err instanceof Error ? err.message : "注册失败");
+            setError(err instanceof Error ? err.message : "common.ui.registration-failed");
         } finally {
             setLoading(false);
         }
@@ -597,24 +596,24 @@ export function PlatformInviteActivateForm() {
 
     return (
         <AuthPageShell
-            title={t("邀请码注册")}
-            subtitle={t("请输入管理员提供的邀请码与预留联系方式")}
+            title={t("common.ui.invitation-code-registration")}
+            subtitle={t("common.ui.enter-the-invitation-code-and-reserved-contact-provided-by-the-administr")}
         >
             <div className="flex flex-col gap-3">
                 <label className="text-sm">
-                    {t("邀请码 *")}
+                    {t("common.ui.invitation-code")}
                     <Input className="mt-1" value={inviteCode} onChange={(v) => setInviteCode(String(v))} />
                 </label>
                 <label className="text-sm">
-                    {t("邮箱或手机 *")}
+                    {t("common.ui.email-or-mobile")}
                     <Input className="mt-1" value={contact} onChange={(v) => setContact(String(v))} />
                 </label>
                 <label className="text-sm">
-                    {t("登录名")}
+                    {t("common.ui.login-name")}
                     <Input className="mt-1" value={loginName} onChange={(v) => setLoginName(String(v))} />
                 </label>
                 <label className="text-sm">
-                    {t("密码 *")}
+                    {t("common.ui.password-2")}
                     <Input
                         className="mt-1"
                         type="password"
@@ -623,7 +622,7 @@ export function PlatformInviteActivateForm() {
                     />
                 </label>
                 <label className="text-sm">
-                    {t("确认密码 *")}
+                    {t("common.ui.confirm-password-2")}
                     <Input
                         className="mt-1"
                         type="password"
@@ -633,10 +632,10 @@ export function PlatformInviteActivateForm() {
                 </label>
                 {error && <p className="text-sm text-destructive">{t(error)}</p>}
                 <Button variant="primary" disabled={loading} onClick={() => void submit()}>
-                    {t("完成注册")}
+                    {t("common.ui.complete-registration")}
                 </Button>
                 <Link href="/login" className="text-sm text-primary hover:underline">
-                    {t("返回登录")}
+                    {t("common.ui.back-to-sign-in")}
                 </Link>
             </div>
         </AuthPageShell>
@@ -648,7 +647,7 @@ function ContactRegistrationForm({
 }: {
     mode: "open" | "approval";
 }) {
-    const t = useUiText();
+    const { t } = useI18n();
     const i18n = useI18n();
     const router = useRouter();
     const [policy, setPolicy] = useState<PublicRegistrationPolicy | null>(null);
@@ -712,7 +711,7 @@ function ContactRegistrationForm({
 
     const submit = useCallback(async () => {
         if (password !== confirm) {
-            setError("两次密码不一致");
+            setError("common.ui.passwords-do-not-match");
             return;
         }
         setLoading(true);
@@ -743,7 +742,7 @@ function ContactRegistrationForm({
                 router.push("/login");
             }
         } catch (err) {
-            setError(err instanceof Error ? err.message : "提交失败");
+            setError(err instanceof Error ? err.message : "common.ui.submission-failed");
         } finally {
             setLoading(false);
         }
@@ -764,21 +763,23 @@ function ContactRegistrationForm({
         verificationCode,
     ]);
 
-    const title = mode === "open" ? "注册运营管理平台账号" : "注册（待审核）";
+    const title = mode === "open"
+        ? "common.ui.create-an-operations-platform-account"
+        : "common.ui.register-pending-approval";
     const subtitleSource =
         mode === "open"
-            ? "填写信息并验证联系方式后即可登录使用。"
-            : "提交后需管理员审核，通过后方可登录。";
+            ? "common.ui.complete-the-form-and-verify-your-contact-details-to-sign-in-and-use-the"
+            : "common.ui.an-administrator-must-approve-the-submission-before-you-can-sign-in";
 
     return (
         <AuthPageShell title={t(title)} subtitle={t(subtitleSource)}>
             <div className="flex flex-col gap-3">
                 <label className="text-sm">
-                    {t("登录名 *")}
+                    {t("common.ui.login-name-2")}
                     <Input className="mt-1" value={loginName} onChange={(v) => setLoginName(String(v))} />
                 </label>
                 <label className="text-sm">
-                    {t("显示名称")}
+                    {t("common.ui.display-name")}
                     <Input className="mt-1" value={displayName} onChange={(v) => setDisplayName(String(v))} />
                 </label>
                 {otpRequired && policy?.otpVerification !== "EMAIL" && policy?.otpVerification !== "MOBILE" ? (
@@ -789,7 +790,7 @@ function ContactRegistrationForm({
                                 checked={contactType === "email"}
                                 onChange={() => setContactType("email")}
                             />
-                            {t("邮箱")}
+                            {t("common.ui.email")}
                         </label>
                         <label className="flex items-center gap-2">
                             <input
@@ -797,25 +798,25 @@ function ContactRegistrationForm({
                                 checked={contactType === "mobile"}
                                 onChange={() => setContactType("mobile")}
                             />
-                            {t("手机")}
+                            {t("common.ui.mobile")}
                         </label>
                     </div>
                 ) : null}
                 {otpRequired && fixedContactType === "email" ? (
                     <label className="text-sm">
-                        {t("邮箱 *")}
+                        {t("common.ui.email-2")}
                         <Input className="mt-1" value={email} onChange={(v) => setEmail(String(v))} />
                     </label>
                 ) : null}
                 {otpRequired && fixedContactType === "mobile" ? (
                     <label className="text-sm">
-                        {t("手机 *")}
+                        {t("common.ui.mobile-2")}
                         <Input className="mt-1" value={mobile} onChange={(v) => setMobile(String(v))} />
                     </label>
                 ) : null}
                 {mode === "approval" && (
                     <label className="text-sm">
-                        {t("申请说明")}
+                        {t("common.ui.application-notes")}
                         <Input
                             className="mt-1"
                             value={description}
@@ -824,7 +825,7 @@ function ContactRegistrationForm({
                     </label>
                 )}
                 <label className="text-sm">
-                    {t("密码 *")}
+                    {t("common.ui.password-2")}
                     <Input
                         className="mt-1"
                         type="password"
@@ -833,7 +834,7 @@ function ContactRegistrationForm({
                     />
                 </label>
                 <label className="text-sm">
-                    {t("确认密码 *")}
+                    {t("common.ui.confirm-password-2")}
                     <Input
                         className="mt-1"
                         type="password"
@@ -844,7 +845,7 @@ function ContactRegistrationForm({
                 {otpRequired ? (
                     <>
                         <label className="text-sm">
-                            {t("验证码")}
+                            {t("common.ui.verification-code")}
                             <Input
                                 className="mt-1"
                                 value={verificationCode}
@@ -852,16 +853,16 @@ function ContactRegistrationForm({
                             />
                         </label>
                         <Button size="small" onClick={() => void issueOtp()}>
-                            {t("获取验证码")}
+                            {t("common.ui.get-code")}
                         </Button>
                     </>
                 ) : null}
                 {error && <p className="text-sm text-destructive">{t(error)}</p>}
                 <Button variant="primary" disabled={loading} onClick={() => void submit()}>
-                    {mode === "open" ? t("完成注册") : t("提交注册")}
+                    {mode === "open" ? t("common.ui.complete-registration") : t("common.ui.submit-registration")}
                 </Button>
                 <Link href="/login" className="text-sm text-primary hover:underline">
-                    {t("返回登录")}
+                    {t("common.ui.back-to-sign-in")}
                 </Link>
             </div>
         </AuthPageShell>

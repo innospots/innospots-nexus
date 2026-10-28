@@ -1,6 +1,6 @@
 "use client";
 
-import { useUiText } from "@/i18n/ui";
+import { useI18n } from "@pactor-app/runtime";
 
 /**
  * 启停状态徽标（Provider / Model / Route 页面共享的自定义组件）。
@@ -14,21 +14,21 @@ import { useUiText } from "@/i18n/ui";
  * 如 props: { status: "${data.detail.status}" } / { status: "${row.status}" }。
  */
 const STATUS_LABELS: Record<string, string> = {
-  enabled: "● 启用",
-  disabled: "● 停用",
-  expired: "● 已过期",
-  draft: "草稿",
-  启用: "● 启用",
-  停用: "● 停用",
-  已过期: "● 已过期",
-  草稿: "草稿",
+  enabled: "common.ui.enabled",
+  disabled: "common.ui.disabled",
+  expired: "common.ui.expired",
+  draft: "common.ui.draft",
+  启用: "common.ui.enabled",
+  停用: "common.ui.disabled",
+  已过期: "common.ui.expired",
+  草稿: "common.ui.draft",
 };
 
 const BASE =
   "inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-md border px-2 py-0.5 text-xs font-medium whitespace-nowrap";
 
 export function StatusBadge({ status }: { status?: string }) {
-  const t = useUiText();
+  const { t } = useI18n();
   const enabled = status === "enabled" || status === "启用";
   const expired = status === "expired" || status === "已过期";
   const source = STATUS_LABELS[status ?? ""];

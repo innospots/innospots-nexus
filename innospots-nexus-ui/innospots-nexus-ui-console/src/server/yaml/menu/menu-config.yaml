@@ -1,7 +1,7 @@
 dsl: "1.0"
 page:
   id: menu-config
-  title: 自定义导航
+  title: '$i18n{menu.menu-config.title:自定义导航}'
   name: menuConfig
 
 state:
@@ -28,15 +28,19 @@ dataSources:
     request:
       method: GET
       url: /api/d/nexus/console-menus/${state.selectedMenuId}
-
+i18n:
+  namespaces:
+    - menu
 body:
   type: Page
   children:
     - type: Breadcrumb
       props:
         items:
-          - label: 系统管理
-          - label: 菜单管理
+          - label:
+              '$i18n{menu.menu-config.system-management:系统管理}'
+          - label:
+              '$i18n{menu.menu-config.menu-management:菜单管理}'
     - type: Flex
       props:
         justify: space-between
@@ -50,18 +54,18 @@ body:
             - type: Typography
               props:
                 variant: h3
-                text: 自定义导航
+                text: '$i18n{menu.menu-config.custom-navigation:自定义导航}'
             - type: Typography
               props:
                 variant: muted
-                text: 配置侧栏导航结构。菜单显示与资源授权相互独立。
+                text: '$i18n{menu.menu-config.configure-the-sidebar-navigation-structure-menu-visibility-is-independen:配置侧栏导航结构。菜单显示与资源授权相互独立。}'
         - type: Flex
           props:
             gap: small
           children:
             - type: Button
               props:
-                text: + 新建菜单
+                text: '$i18n{menu.menu-config.new-menu:+ 新建菜单}'
                 variant: primary
               events:
                 onClick:
@@ -87,16 +91,18 @@ body:
       children:
         - type: Card
           props:
-            style: { flex: 1, minWidth: 300 }
+            style:
+              flex: 1
+              minWidth: 300
           children:
             - type: Text
               props:
-                text: 自定义菜单
+                text: '$i18n{menu.menu-config.custom-menu:自定义菜单}'
                 strong: true
             - type: Input
               props:
                 value: ${state.treeSearch}
-                placeholder: 搜索菜单
+                placeholder: '$i18n{menu.menu-config.search-menus:搜索菜单}'
                 className: mt-2
               events:
                 onChange:
@@ -122,23 +128,23 @@ body:
               children:
                 - type: Button
                   props:
-                    text: ＋ 同级
+                    text: '$i18n{menu.menu-config.sibling:＋ 同级}'
                     size: small
                 - type: Button
                   props:
-                    text: ＋ 子级
+                    text: '$i18n{menu.menu-config.child:＋ 子级}'
                     size: small
                 - type: Button
                   props:
-                    text: 删除
+                    text: '$i18n{menu.menu-config.delete:删除}'
                     size: small
                     danger: true
                   events:
                     onClick:
                       - action: confirm
                         params:
-                          title: 删除菜单
-                          content: 删除后不可恢复，确定吗？
+                          title: '$i18n{menu.menu-config.delete-menu:删除菜单}'
+                          content: '$i18n{menu.menu-config.this-action-cannot-be-undone-continue:删除后不可恢复，确定吗？}'
                       - action: request
                         params:
                           method: DELETE
@@ -148,16 +154,17 @@ body:
                           dataSource: menuTree
             - type: Text
               props:
-                text: 拖动可排序/调整层级；结构变更后点击底部「保存菜单结构」统一提交。
+                text: '$i18n{menu.menu-config.drag-to-reorder-or-change-hierarchy-after-editing-select-save-menu-struc:拖动可排序/调整层级；结构变更后点击底部「保存菜单结构」统一提交。}'
                 type: secondary
                 className: mt-2
         - type: Card
           props:
-            style: { flex: 2 }
+            style:
+              flex: 2
           children:
             - type: Text
               props:
-                text: 菜单配置
+                text: '$i18n{menu.menu-config.menu-configuration:菜单配置}'
                 strong: true
             - type: Form
               props:
@@ -199,14 +206,14 @@ body:
                   - action: message
                     params:
                       messageType: success
-                      text: 菜单已保存
+                      text: '$i18n{menu.menu-config.menu-saved:菜单已保存}'
                   - action: reload
                     params:
                       dataSource: menuTree
               children:
                 - type: Field
                   props:
-                    label: 菜单名称
+                    label: '$i18n{menu.menu-config.menu-name:菜单名称}'
                     required: true
                   children:
                     - type: Input
@@ -214,38 +221,44 @@ body:
                         name: menuName
                         rules:
                           - required: true
-                            message: 请输入菜单名称
+                            message: '$i18n{menu.menu-config.enter-a-menu-name:请输入菜单名称}'
                 - type: Field
                   props:
-                    label: 菜单类型
+                    label: '$i18n{menu.menu-config.menu-type:菜单类型}'
                     required: true
                   children:
                     - type: RadioGroup
                       props:
                         name: menuType
                         options:
-                          - { label: 目录, value: DIRECTORY }
-                          - { label: 页面入口, value: PAGE }
-                          - { label: 外部链接, value: EXTERNAL_LINK }
+                          - label:
+                              '$i18n{menu.menu-config.catalog:目录}'
+                            value: DIRECTORY
+                          - label:
+                              '$i18n{menu.menu-config.page-entry:页面入口}'
+                            value: PAGE
+                          - label:
+                              '$i18n{menu.menu-config.external-link:外部链接}'
+                            value: EXTERNAL_LINK
                 - type: Field
                   props:
-                    label: 页面入口
-                    labelHint: 页面类型必选
+                    label: '$i18n{menu.menu-config.page-entry-2:页面入口}'
+                    labelHint: '$i18n{menu.menu-config.page-type-is-required:页面类型必选}'
                   children:
                     - type: Select
                       props:
                         name: pageKey
-                        placeholder: 从已注册页面选择
+                        placeholder: '$i18n{menu.menu-config.select-from-registered-pages:从已注册页面选择}'
                         options: ${data.pageOptions}
                 - type: Field
                   props:
-                    label: 上级菜单
+                    label: '$i18n{menu.menu-config.parent-menu:上级菜单}'
                   children:
                     - type: Select
                       props:
                         name: parentMenuId
                         allowClear: true
-                        placeholder: 选择目录节点
+                        placeholder: '$i18n{menu.menu-config.select-a-catalog-node:选择目录节点}'
                 - type: Grid
                   props:
                     columns: 2
@@ -253,7 +266,7 @@ body:
                   children:
                     - type: Field
                       props:
-                        label: 图标
+                        label: '$i18n{menu.menu-config.icon:图标}'
                       children:
                         - type: Input
                           props:
@@ -261,7 +274,7 @@ body:
                             placeholder: shield
                     - type: Field
                       props:
-                        label: 排序
+                        label: '$i18n{menu.menu-config.order:排序}'
                       children:
                         - type: NumberInput
                           props:
@@ -269,7 +282,7 @@ body:
                             min: 0
                 - type: Field
                   props:
-                    label: 显示
+                    label: '$i18n{menu.menu-config.shown:显示}'
                   children:
                     - type: Switch
                       props:
@@ -282,7 +295,7 @@ body:
                   children:
                     - type: Button
                       props:
-                        text: 取消
+                        text: '$i18n{menu.menu-config.cancel:取消}'
                       events:
                         onClick:
                           - action: reload
@@ -290,7 +303,7 @@ body:
                               dataSource: selectedMenu
                     - type: Button
                       props:
-                        text: 保存
+                        text: '$i18n{menu.menu-config.save:保存}'
                         variant: primary
                         submit: true
                         htmlType: submit
@@ -302,7 +315,7 @@ body:
       children:
         - type: Text
           props:
-            text: "${state.structureDirty ? '结构有未保存调整' : ''}"
+            text: "${state.structureDirty ? t('menu.menu-config.unsaved-structure') : ''}"
             type: secondary
         - type: Flex
           props:
@@ -310,11 +323,11 @@ body:
           children:
             - type: Button
               props:
-                text: 撤销调整
+                text: '$i18n{menu.menu-config.discard-changes:撤销调整}'
                 disabled: ${!state.structureDirty}
             - type: Button
               props:
-                text: 保存菜单结构
+                text: '$i18n{menu.menu-config.save-menu-structure:保存菜单结构}'
                 variant: primary
               events:
                 onClick:
@@ -327,7 +340,7 @@ body:
                   - action: message
                     params:
                       messageType: success
-                      text: 菜单结构已保存
+                      text: '$i18n{menu.menu-config.menu-structure-saved:菜单结构已保存}'
                   - action: setState
                     params:
                       structureDirty: false

@@ -1,7 +1,7 @@
 dsl: "1.0"
 page:
   id: tenant-list
-  title: 租户管理
+  title: '$i18n{organization.tenant-list.title:租户管理}'
   name: tenantList
 
 state:
@@ -24,15 +24,19 @@ dataSources:
         status: ${state.status}
         pageNo: ${state.pageNo}
         pageSize: ${state.pageSize}
-
+i18n:
+  namespaces:
+    - organization
 body:
   type: Page
   children:
     - type: Breadcrumb
       props:
         items:
-          - label: 运营管理
-          - label: 租户管理
+          - label:
+              '$i18n{organization.tenant-list.operations:运营管理}'
+          - label:
+              '$i18n{organization.tenant-list.tenant-management:租户管理}'
     - type: Flex
       props:
         justify: space-between
@@ -46,14 +50,14 @@ body:
             - type: Typography
               props:
                 variant: h3
-                text: 租户管理
+                text: '$i18n{organization.tenant-list.tenant-management-2:租户管理}'
             - type: Typography
               props:
                 variant: muted
-                text: 管理租户身份与生命周期状态。
+                text: '$i18n{organization.tenant-list.manage-tenant-identity-and-lifecycle-state:管理租户身份与生命周期状态。}'
         - type: Button
           props:
-            text: + 开通租户
+            text: '$i18n{organization.tenant-list.open-tenant-2:+ 开通租户}'
             variant: primary
           events:
             onClick:
@@ -61,7 +65,7 @@ body:
                 params:
                   overlay:
                     type: modal
-                    title: 开通租户
+                    title: '$i18n{organization.tenant-list.open-tenant:开通租户}'
                     width: 520
                     content:
                       type: Form
@@ -84,7 +88,7 @@ body:
                           - action: message
                             params:
                               messageType: success
-                              text: 租户已开通
+                              text: '$i18n{organization.tenant-list.tenant-opened:租户已开通}'
                           - action: overlay.close
                           - action: reload
                             params:
@@ -92,45 +96,51 @@ body:
                       children:
                         - type: Field
                           props:
-                            label: 租户名称
+                            label: '$i18n{organization.tenant-list.tenant-name:租户名称}'
                             required: true
                           children:
                             - type: Input
                               props:
                                 name: tenantName
-                                placeholder: 请输入租户显示名称
+                                placeholder: '$i18n{organization.tenant-list.enter-a-tenant-display-name:请输入租户显示名称}'
                                 rules:
                                   - required: true
-                                    message: 请输入租户名称
+                                    message: '$i18n{organization.tenant-list.enter-a-tenant-name:请输入租户名称}'
                         - type: Field
                           props:
-                            label: 租户类型
+                            label: '$i18n{organization.tenant-list.tenant-type:租户类型}'
                             required: true
                           children:
                             - type: Select
                               props:
                                 name: tenantType
-                                placeholder: 请选择
+                                placeholder: '$i18n{organization.tenant-list.select:请选择}'
                                 options:
-                                  - { label: 企业客户, value: ENTERPRISE }
-                                  - { label: 团队, value: TEAM }
-                                  - { label: 个人, value: INDIVIDUAL }
+                                  - label:
+                                      '$i18n{organization.tenant-list.enterprise-customer:企业客户}'
+                                    value: ENTERPRISE
+                                  - label:
+                                      '$i18n{organization.tenant-list.team:团队}'
+                                    value: TEAM
+                                  - label:
+                                      '$i18n{organization.tenant-list.individual:个人}'
+                                    value: INDIVIDUAL
                                 rules:
                                   - required: true
-                                    message: 请选择租户类型
+                                    message: '$i18n{organization.tenant-list.select-a-tenant-type:请选择租户类型}'
                         - type: Field
                           props:
-                            label: 唯一编码
+                            label: '$i18n{organization.tenant-list.unique-code:唯一编码}'
                             required: true
-                            labelHint: 字母、数字、下划线；创建后不可修改
+                            labelHint: '$i18n{organization.tenant-list.letters-numbers-and-underscores-immutable-after-creation:字母、数字、下划线；创建后不可修改}'
                           children:
                             - type: Input
                               props:
                                 name: tenantCode
-                                placeholder: 如 acme_corp
+                                placeholder: '$i18n{organization.tenant-list.e-g-acme-corp:如 acme_corp}'
                                 rules:
                                   - required: true
-                                    message: 请输入唯一编码
+                                    message: '$i18n{organization.tenant-list.enter-a-unique-code:请输入唯一编码}'
                         - type: Flex
                           props:
                             justify: end
@@ -139,13 +149,13 @@ body:
                           children:
                             - type: Button
                               props:
-                                text: 取消
+                                text: '$i18n{organization.tenant-list.cancel:取消}'
                               events:
                                 onClick:
                                   - action: overlay.close
                             - type: Button
                               props:
-                                text: 确认开通
+                                text: '$i18n{organization.tenant-list.confirm-provisioning:确认开通}'
                                 variant: primary
                                 submit: true
                                 htmlType: submit
@@ -173,41 +183,57 @@ body:
           children:
             - type: Field
               props:
-                label: 名称/编码
+                label: '$i18n{organization.tenant-list.name-code:名称/编码}'
               children:
                 - type: Input
                   props:
                     name: input
-                    placeholder: 模糊匹配租户名称或编码
+                    placeholder: '$i18n{organization.tenant-list.fuzzy-match-tenant-name-or-code:模糊匹配租户名称或编码}'
             - type: Field
               props:
-                label: 类型
+                label: '$i18n{organization.tenant-list.type:类型}'
               children:
                 - type: FilterSelect
                   props:
                     name: tenantType
-                    placeholder: 全部
+                    placeholder: '$i18n{organization.tenant-list.all-2:全部}'
                     options:
-                      - { label: 全部, value: "" }
-                      - { label: 企业, value: ENTERPRISE }
-                      - { label: 团队, value: TEAM }
-                      - { label: 个人, value: INDIVIDUAL }
+                      - label:
+                          '$i18n{organization.tenant-list.all:全部}'
+                        value: ""
+                      - label:
+                          '$i18n{organization.tenant-list.enterprise:企业}'
+                        value: ENTERPRISE
+                      - label:
+                          '$i18n{organization.tenant-list.team-2:团队}'
+                        value: TEAM
+                      - label:
+                          '$i18n{organization.tenant-list.individual-2:个人}'
+                        value: INDIVIDUAL
             - type: Field
               props:
-                label: 状态
+                label: '$i18n{organization.tenant-list.status:状态}'
               children:
                 - type: FilterSelect
                   props:
                     name: status
-                    placeholder: 全部
+                    placeholder: '$i18n{organization.tenant-list.all-4:全部}'
                     options:
-                      - { label: 全部, value: "" }
-                      - { label: 正常, value: ACTIVE }
-                      - { label: 暂停, value: SUSPENDED }
-                      - { label: 归档, value: ARCHIVED }
+                      - label:
+                          '$i18n{organization.tenant-list.all-3:全部}'
+                        value: ""
+                      - label:
+                          '$i18n{organization.tenant-list.active:正常}'
+                        value: ACTIVE
+                      - label:
+                          '$i18n{organization.tenant-list.suspend:暂停}'
+                        value: SUSPENDED
+                      - label:
+                          '$i18n{organization.tenant-list.archive:归档}'
+                        value: ARCHIVED
             - type: Field
               props:
-                label: " "
+                label:  
               children:
                 - type: Flex
                   props:
@@ -215,12 +241,12 @@ body:
                   children:
                     - type: Button
                       props:
-                        text: 查询
+                        text: '$i18n{organization.tenant-list.search:查询}'
                         submit: true
                         htmlType: submit
                     - type: Button
                       props:
-                        text: 重置
+                        text: '$i18n{organization.tenant-list.reset:重置}'
                       events:
                         onClick:
                           - action: form.setValues
@@ -246,7 +272,8 @@ body:
             loading: ${dataStatus.tenants.loading}
             className: mt-4
             columns:
-              - title: 租户名称
+              - title:
+                  '$i18n{organization.tenant-list.tenant-name-2:租户名称}'
                 cell:
                   type: Button
                   props:
@@ -258,27 +285,37 @@ body:
                       - action: navigate
                         params:
                           to: /ops/organization/tenants/${row.tenantId}
-              - title: 编码
+              - title:
+                  '$i18n{organization.tenant-list.code:编码}'
                 dataIndex: tenantCode
-              - title: 类型
+              - title:
+                  '$i18n{organization.tenant-list.type-2:类型}'
                 cell:
                   type: Text
                   props:
-                    text: "${row.tenantType == 'ENTERPRISE' ? '企业' : row.tenantType == 'TEAM' ? '团队' : row.tenantType == 'INDIVIDUAL' ? '个人' : row.tenantType}"
-              - title: 状态
+                    text: "${row.tenantType == 'ENTERPRISE' ? t('organization.tenant-list.type.enterprise') : row.tenantType == 'TEAM' ?
+                      t('organization.tenant-list.type.team') : row.tenantType == 'INDIVIDUAL' ?
+                      t('organization.tenant-list.type.individual') : row.tenantType}"
+              - title:
+                  '$i18n{organization.tenant-list.status-2:状态}'
                 cell:
                   type: Text
                   props:
-                    text: "${row.status == 'ACTIVE' ? '● 正常' : row.status == 'SUSPENDED' ? '○ 暂停' : row.status == 'ARCHIVED' ? '○ 归档' : row.status}"
-              - title: 套餐
+                    text: "${row.status == 'ACTIVE' ? t('organization.tenant-list.status.active') : row.status == 'SUSPENDED' ?
+                      t('organization.tenant-list.status.suspended') : row.status == 'ARCHIVED' ?
+                      t('organization.tenant-list.status.archived') : row.status}"
+              - title:
+                  '$i18n{organization.tenant-list.plan:套餐}'
                 dataIndex: planCode
-              - title: 法定名称
+              - title:
+                  '$i18n{organization.tenant-list.legal-name:法定名称}'
                 dataIndex: legalName
-              - title: 操作
+              - title:
+                  '$i18n{organization.tenant-list.actions:操作}'
                 cell:
                   type: Button
                   props:
-                    text: 详情
+                    text: '$i18n{organization.tenant-list.details:详情}'
                     variant: link
                     size: small
                   events:
@@ -288,6 +325,6 @@ body:
                           to: /ops/organization/tenants/${row.tenantId}
         - type: Text
           props:
-            text: 共 ${data.tenants.total} 个租户
+            text: "${t('organization.tenant-list.summary.count', { count: data.tenants.total })}"
             type: secondary
             className: mt-3

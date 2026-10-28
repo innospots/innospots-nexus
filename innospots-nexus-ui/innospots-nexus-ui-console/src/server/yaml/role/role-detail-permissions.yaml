@@ -1,19 +1,20 @@
 dsl: "1.0"
 page:
   id: role-detail-permissions
-  title: 角色权限设置
+  title: '$i18n{role.role-detail-permissions.title:角色权限设置}'
   name: roleDetailPermissionsRedirect
-
+i18n:
+  namespaces:
+    - role
 lifecycle:
   onShow:
     - action: navigate
       params:
         to: /system/roles/${params.roleId}?tab=permissions
-
 body:
   type: Page
   children:
     - type: Text
       props:
-        text: 正在打开权限设置…
+        text: '$i18n{role.role-detail-permissions.opening-permissions:正在打开权限设置…}'
         type: secondary

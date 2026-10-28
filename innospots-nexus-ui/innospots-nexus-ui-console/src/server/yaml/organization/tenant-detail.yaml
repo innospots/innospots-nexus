@@ -1,7 +1,7 @@
 dsl: "1.0"
 page:
   id: tenant-detail
-  title: 租户详情
+  title: '$i18n{organization.tenant-detail.title:租户详情}'
   name: tenantDetail
 
 state:
@@ -27,7 +27,9 @@ dataSources:
     request:
       method: GET
       url: /api/d/platform/tenants/${params.tenantId}/enterprise
-
+i18n:
+  namespaces:
+    - organization
 lifecycle:
   onShow:
     - action: reload
@@ -51,26 +53,28 @@ lifecycle:
             params:
               form: enterpriseEditForm
               values: ${data.enterprise}
-
 body:
   type: Page
   children:
     - type: Breadcrumb
       props:
         items:
-          - label: 运营管理
+          - label:
+              '$i18n{organization.tenant-detail.operations:运营管理}'
             href: /ops/organization/tenants
-          - label: 租户管理
+          - label:
+              '$i18n{organization.tenant-detail.tenant-management:租户管理}'
             href: /ops/organization/tenants
           - label: "${data.tenant != null && data.tenant.tenantName != null ? data.tenant.tenantName : params.tenantId}"
     - type: Button
       props:
-        text: ← 返回租户列表
+        text: '$i18n{organization.tenant-detail.back-to-tenants:← 返回租户列表}'
         variant: link
       events:
         onClick:
           - action: navigate
-            params: { to: /ops/organization/tenants }
+            params:
+              to: /ops/organization/tenants
     - type: Flex
       when: ${data.tenant != null}
       props:
@@ -89,13 +93,13 @@ body:
             - type: Button
               when: ${data.tenant.status == 'ACTIVE'}
               props:
-                text: 暂停
+                text: '$i18n{organization.tenant-detail.suspend:暂停}'
               events:
                 onClick:
                   - action: confirm
                     params:
-                      title: 暂停租户
-                      content: 暂停后租户访问将被阻断，确定继续吗？
+                      title: '$i18n{organization.tenant-detail.suspend-tenant:暂停租户}'
+                      content: '$i18n{organization.tenant-detail.suspending-blocks-tenant-access-continue:暂停后租户访问将被阻断，确定继续吗？}'
                   - action: request
                     params:
                       method: PUT
@@ -105,21 +109,21 @@ body:
                   - action: message
                     params:
                       messageType: success
-                      text: 租户已暂停
+                      text: '$i18n{organization.tenant-detail.tenant-suspended:租户已暂停}'
                   - action: reload
                     params:
                       dataSource: tenant
             - type: Button
               when: ${data.tenant.status == 'SUSPENDED'}
               props:
-                text: 恢复
+                text: '$i18n{organization.tenant-detail.restore:恢复}'
                 variant: primary
               events:
                 onClick:
                   - action: confirm
                     params:
-                      title: 恢复租户
-                      content: 确定恢复为正常运营状态吗？
+                      title: '$i18n{organization.tenant-detail.restore-tenant:恢复租户}'
+                      content: '$i18n{organization.tenant-detail.restore-normal-operation:确定恢复为正常运营状态吗？}'
                   - action: request
                     params:
                       method: PUT
@@ -129,21 +133,21 @@ body:
                   - action: message
                     params:
                       messageType: success
-                      text: 租户已恢复
+                      text: '$i18n{organization.tenant-detail.tenant-restored:租户已恢复}'
                   - action: reload
                     params:
                       dataSource: tenant
             - type: Button
               when: ${data.tenant.status == 'ARCHIVED'}
               props:
-                text: 恢复
+                text: '$i18n{organization.tenant-detail.restore-2:恢复}'
                 variant: primary
               events:
                 onClick:
                   - action: confirm
                     params:
-                      title: 恢复租户
-                      content: 确定将归档租户恢复为正常运营状态吗？
+                      title: '$i18n{organization.tenant-detail.restore-tenant-2:恢复租户}'
+                      content: '$i18n{organization.tenant-detail.restore-the-archived-tenant-to-normal-operation:确定将归档租户恢复为正常运营状态吗？}'
                   - action: request
                     params:
                       method: PUT
@@ -153,21 +157,21 @@ body:
                   - action: message
                     params:
                       messageType: success
-                      text: 租户已恢复为正常
+                      text: '$i18n{organization.tenant-detail.tenant-restored-to-active:租户已恢复为正常}'
                   - action: reload
                     params:
                       dataSource: tenant
             - type: Button
               when: ${data.tenant.status != 'ARCHIVED'}
               props:
-                text: 归档
+                text: '$i18n{organization.tenant-detail.archive:归档}'
                 danger: true
               events:
                 onClick:
                   - action: confirm
                     params:
-                      title: 归档租户
-                      content: 归档后租户不再活跃，确定继续吗？
+                      title: '$i18n{organization.tenant-detail.archive-tenant:归档租户}'
+                      content: '$i18n{organization.tenant-detail.archiving-makes-the-tenant-inactive-continue:归档后租户不再活跃，确定继续吗？}'
                   - action: request
                     params:
                       method: PUT
@@ -177,13 +181,14 @@ body:
                   - action: message
                     params:
                       messageType: success
-                      text: 租户已归档
+                      text: '$i18n{organization.tenant-detail.tenant-archived:租户已归档}'
                   - action: reload
                     params:
                       dataSource: tenant
             - type: Button
               props:
-                text: "${state.editingTenant ? '取消编辑' : '编辑租户'}"
+                text: "${state.editingTenant ? t('organization.tenant-detail.cancel-editing') :
+                  t('organization.tenant-detail.edit-tenant')}"
               events:
                 onClick:
                   - action: if
@@ -208,20 +213,32 @@ body:
       children:
         - type: Text
           props:
-            text: 租户信息
+            text: '$i18n{organization.tenant-detail.tenant-information:租户信息}'
             strong: true
         - type: Descriptions
           when: ${!state.editingTenant}
           props:
             className: mt-3
             items:
-              - { label: 租户 ID, value: "${data.tenant.tenantId}" }
-              - { label: 租户编码, value: "${data.tenant.tenantCode}" }
-              - { label: 显示名称, value: "${data.tenant.tenantName}" }
-              - label: 租户类型
-                value: "${data.tenant.tenantType == 'ENTERPRISE' ? '企业' : data.tenant.tenantType == 'TEAM' ? '团队' : data.tenant.tenantType == 'INDIVIDUAL' ? '个人' : data.tenant.tenantType}"
-              - label: 状态
-                value: "${data.tenant.status == 'ACTIVE' ? '正常' : data.tenant.status == 'SUSPENDED' ? '暂停' : data.tenant.status == 'ARCHIVED' ? '归档' : data.tenant.status}"
+              - label:
+                  '$i18n{organization.tenant-detail.tenant-id:租户 ID}'
+                value: ${data.tenant.tenantId}
+              - label:
+                  '$i18n{organization.tenant-detail.tenant-code:租户编码}'
+                value: ${data.tenant.tenantCode}
+              - label:
+                  '$i18n{organization.tenant-detail.display-name:显示名称}'
+                value: ${data.tenant.tenantName}
+              - label:
+                  '$i18n{organization.tenant-detail.tenant-type:租户类型}'
+                value: "${data.tenant.tenantType == 'ENTERPRISE' ? t('organization.tenant-detail.type.enterprise') :
+                  data.tenant.tenantType == 'TEAM' ? t('organization.tenant-detail.type.team') : data.tenant.tenantType
+                  == 'INDIVIDUAL' ? t('organization.tenant-detail.type.individual') : data.tenant.tenantType}"
+              - label:
+                  '$i18n{organization.tenant-detail.status:状态}'
+                value: "${data.tenant.status == 'ACTIVE' ? t('organization.tenant-detail.status.active') : data.tenant.status ==
+                  'SUSPENDED' ? t('organization.tenant-detail.status.suspended') : data.tenant.status == 'ARCHIVED' ?
+                  t('organization.tenant-detail.status.archived') : data.tenant.status}"
         - type: Form
           when: ${state.editingTenant}
           props:
@@ -240,7 +257,7 @@ body:
               - action: message
                 params:
                   messageType: success
-                  text: 租户资料已保存
+                  text: '$i18n{organization.tenant-detail.tenant-profile-saved:租户资料已保存}'
               - action: setState
                 params:
                   editingTenant: false
@@ -250,7 +267,7 @@ body:
           children:
             - type: Field
               props:
-                label: 显示名称
+                label: '$i18n{organization.tenant-detail.display-name-2:显示名称}'
                 required: true
               children:
                 - type: Input
@@ -258,7 +275,7 @@ body:
                     name: tenantName
                     rules:
                       - required: true
-                        message: 请输入显示名称
+                        message: '$i18n{organization.tenant-detail.enter-a-display-name:请输入显示名称}'
             - type: Flex
               props:
                 justify: end
@@ -266,7 +283,7 @@ body:
               children:
                 - type: Button
                   props:
-                    text: 保存修改
+                    text: '$i18n{organization.tenant-detail.save-changes:保存修改}'
                     variant: primary
                     submit: true
                     htmlType: submit
@@ -282,11 +299,11 @@ body:
           children:
             - type: Text
               props:
-                text: 租户管理员
+                text: '$i18n{organization.tenant-detail.tenant-administrator:租户管理员}'
                 strong: true
             - type: Button
               props:
-                text: + 添加管理员
+                text: '$i18n{organization.tenant-detail.add-administrator:+ 添加管理员}'
                 variant: primary
                 size: small
               events:
@@ -295,7 +312,7 @@ body:
                     params:
                       overlay:
                         type: modal
-                        title: 添加租户管理员
+                        title: '$i18n{organization.tenant-detail.add-tenant-administrator:添加租户管理员}'
                         width: 480
                         content:
                           type: Form
@@ -314,7 +331,7 @@ body:
                               - action: message
                                 params:
                                   messageType: success
-                                  text: 已添加
+                                  text: '$i18n{organization.tenant-detail.added:已添加}'
                               - action: overlay.close
                               - action: reload
                                 params:
@@ -322,22 +339,26 @@ body:
                           children:
                             - type: Field
                               props:
-                                label: 角色
+                                label: '$i18n{organization.tenant-detail.role:角色}'
                                 required: true
                               children:
                                 - type: Select
                                   props:
                                     name: adminRole
-                                    placeholder: 请选择
+                                    placeholder: '$i18n{organization.tenant-detail.select:请选择}'
                                     options:
-                                      - { label: 所有者, value: OWNER }
-                                      - { label: 管理员, value: ADMINISTRATOR }
+                                      - label:
+                                          '$i18n{organization.tenant-detail.owner:所有者}'
+                                        value: OWNER
+                                      - label:
+                                          '$i18n{organization.tenant-detail.administrator:管理员}'
+                                        value: ADMINISTRATOR
                                     rules:
                                       - required: true
-                                        message: 请选择角色
+                                        message: '$i18n{organization.tenant-detail.select-a-role:请选择角色}'
                             - type: Field
                               props:
-                                label: 邮箱
+                                label: '$i18n{organization.tenant-detail.email:邮箱}'
                                 required: true
                               children:
                                 - type: Input
@@ -346,7 +367,7 @@ body:
                                     placeholder: admin@example.com
                                     rules:
                                       - required: true
-                                        message: 请输入邮箱
+                                        message: '$i18n{organization.tenant-detail.enter-an-email-address:请输入邮箱}'
                             - type: Flex
                               props:
                                 justify: end
@@ -355,13 +376,13 @@ body:
                               children:
                                 - type: Button
                                   props:
-                                    text: 取消
+                                    text: '$i18n{organization.tenant-detail.cancel:取消}'
                                   events:
                                     onClick:
                                       - action: overlay.close
                                 - type: Button
                                   props:
-                                    text: 确认
+                                    text: '$i18n{organization.tenant-detail.confirm:确认}'
                                     variant: primary
                                     submit: true
                                     htmlType: submit
@@ -372,27 +393,32 @@ body:
             pagination: false
             dataSource: ${data.admins}
             columns:
-              - title: 角色
+              - title:
+                  '$i18n{organization.tenant-detail.role-2:角色}'
                 cell:
                   type: Text
                   props:
-                    text: "${row.adminRole == 'OWNER' ? '所有者' : row.adminRole == 'ADMINISTRATOR' ? '管理员' : row.adminRole}"
-              - title: 用户名
+                    text: "${row.adminRole == 'OWNER' ? t('organization.tenant-detail.role.owner') : row.adminRole == 'ADMINISTRATOR' ?
+                      t('organization.tenant-detail.role.administrator') : row.adminRole}"
+              - title:
+                  '$i18n{organization.tenant-detail.username:用户名}'
                 cell:
                   type: Text
                   props:
                     text: "${row.displayName != null && row.displayName != '' ? row.displayName : '—'}"
-              - title: 用户邮箱
+              - title:
+                  '$i18n{organization.tenant-detail.user-email:用户邮箱}'
                 cell:
                   type: Text
                   props:
                     text: "${row.email != null && row.email != '' ? row.email : '—'}"
-              - title: 操作
+              - title:
+                  '$i18n{organization.tenant-detail.actions:操作}'
                 cell:
                   type: Button
                   when: ${row.email != null && row.email != ''}
                   props:
-                    text: 删除
+                    text: '$i18n{organization.tenant-detail.delete:删除}'
                     variant: link
                     size: small
                     danger: true
@@ -400,8 +426,8 @@ body:
                     onClick:
                       - action: confirm
                         params:
-                          title: 删除管理员
-                          content: 确定从该租户移除该管理员吗？不会删除租户用户账号。
+                          title: '$i18n{organization.tenant-detail.remove-administrator:删除管理员}'
+                          content: '$i18n{organization.tenant-detail.remove-this-administrator-from-the-tenant-the-tenant-user-account-will-n:确定从该租户移除该管理员吗？不会删除租户用户账号。}'
                       - action: request
                         params:
                           method: DELETE
@@ -409,7 +435,7 @@ body:
                       - action: message
                         params:
                           messageType: success
-                          text: 已删除
+                          text: '$i18n{organization.tenant-detail.deleted:已删除}'
                       - action: reload
                         params:
                           dataSource: admins
@@ -425,11 +451,11 @@ body:
           children:
             - type: Text
               props:
-                text: 企业档案
+                text: '$i18n{organization.tenant-detail.enterprise-profile:企业档案}'
                 strong: true
             - type: Button
               props:
-                text: "${state.editingEnterprise ? '取消' : '编辑档案'}"
+                text: "${state.editingEnterprise ? t('common.ui.cancel') : t('organization.tenant-detail.edit-profile')}"
                 variant: link
                 size: small
               events:
@@ -454,13 +480,26 @@ body:
           props:
             className: mt-3
             items:
-              - { label: 企业 ID, value: "${data.enterprise.enterpriseId}" }
-              - { label: 法定名称, value: "${data.enterprise.legalName}" }
-              - { label: 信用代码, value: "${data.enterprise.creditCode != null ? data.enterprise.creditCode : '—'}" }
-              - { label: 行业, value: "${data.enterprise.industry != null ? data.enterprise.industry : '—'}" }
-              - label: 联系人
-                value: "${(data.enterprise.contactName != null ? data.enterprise.contactName : '') + (data.enterprise.contactPhone != null ? ' · ' + data.enterprise.contactPhone : '') + (data.enterprise.contactEmail != null ? ' · ' + data.enterprise.contactEmail : '')}"
-              - { label: 地址, value: "${data.enterprise.address != null ? data.enterprise.address : '—'}" }
+              - label:
+                  '$i18n{organization.tenant-detail.enterprise-id:企业 ID}'
+                value: ${data.enterprise.enterpriseId}
+              - label:
+                  '$i18n{organization.tenant-detail.legal-name:法定名称}'
+                value: ${data.enterprise.legalName}
+              - label:
+                  '$i18n{organization.tenant-detail.credit-code:信用代码}'
+                value: "${data.enterprise.creditCode != null ? data.enterprise.creditCode : '—'}"
+              - label:
+                  '$i18n{organization.tenant-detail.industry:行业}'
+                value: "${data.enterprise.industry != null ? data.enterprise.industry : '—'}"
+              - label:
+                  '$i18n{organization.tenant-detail.contact:联系人}'
+                value: "${(data.enterprise.contactName != null ? data.enterprise.contactName : '') + (data.enterprise.contactPhone !=
+                  null ? ' · ' + data.enterprise.contactPhone : '') + (data.enterprise.contactEmail != null ? ' · ' +
+                  data.enterprise.contactEmail : '')}"
+              - label:
+                  '$i18n{organization.tenant-detail.address:地址}'
+                value: "${data.enterprise.address != null ? data.enterprise.address : '—'}"
         - type: Form
           when: ${state.editingEnterprise}
           props:
@@ -486,7 +525,7 @@ body:
               - action: message
                 params:
                   messageType: success
-                  text: 企业档案已保存
+                  text: '$i18n{organization.tenant-detail.enterprise-profile-saved:企业档案已保存}'
               - action: setState
                 params:
                   editingEnterprise: false
@@ -499,7 +538,7 @@ body:
           children:
             - type: Field
               props:
-                label: 法定名称
+                label: '$i18n{organization.tenant-detail.legal-name-2:法定名称}'
                 required: true
               children:
                 - type: Input
@@ -507,7 +546,7 @@ body:
                     name: legalName
                     rules:
                       - required: true
-                        message: 请输入法定名称
+                        message: '$i18n{organization.tenant-detail.enter-the-legal-name:请输入法定名称}'
             - type: Grid
               props:
                 columns: 2
@@ -515,42 +554,42 @@ body:
               children:
                 - type: Field
                   props:
-                    label: 信用代码
+                    label: '$i18n{organization.tenant-detail.credit-code-2:信用代码}'
                   children:
                     - type: Input
                       props:
                         name: creditCode
                 - type: Field
                   props:
-                    label: 行业
+                    label: '$i18n{organization.tenant-detail.industry-2:行业}'
                   children:
                     - type: Input
                       props:
                         name: industry
                 - type: Field
                   props:
-                    label: 联系人
+                    label: '$i18n{organization.tenant-detail.contact-2:联系人}'
                   children:
                     - type: Input
                       props:
                         name: contactName
                 - type: Field
                   props:
-                    label: 电话
+                    label: '$i18n{organization.tenant-detail.phone:电话}'
                   children:
                     - type: Input
                       props:
                         name: contactPhone
                 - type: Field
                   props:
-                    label: 邮箱
+                    label: '$i18n{organization.tenant-detail.email-2:邮箱}'
                   children:
                     - type: Input
                       props:
                         name: contactEmail
             - type: Field
               props:
-                label: 地址
+                label: '$i18n{organization.tenant-detail.address-2:地址}'
               children:
                 - type: Textarea
                   props:
@@ -562,7 +601,7 @@ body:
               children:
                 - type: Button
                   props:
-                    text: 保存档案
+                    text: '$i18n{organization.tenant-detail.save-profile:保存档案}'
                     variant: primary
                     submit: true
                     htmlType: submit

@@ -14,7 +14,7 @@ import {
   SKINS,
   SKIN_STORAGE_KEY,
 } from "../skin";
-import { useUiText } from "@/i18n/ui";
+import { useI18n } from "@pactor-app/runtime";
 
 /**
  * 外壳 Header 右侧的皮肤切换器：
@@ -52,7 +52,7 @@ const triggerClass =
   "flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground outline-hidden cursor-pointer";
 
 export function ThemeSwitcher() {
-  const t = useUiText();
+  const { t } = useI18n();
   const [skin, setSkin] = useState<SkinValue>(DEFAULT_SKIN);
   const [dark, setDark] = useState(false);
 
@@ -126,7 +126,11 @@ export function ThemeSwitcher() {
       <button
         type="button"
         data-slot="theme-mode-toggle"
-        aria-label={t(dark ? "切换为浅色" : "切换为深色")}
+        aria-label={t(
+          dark
+            ? "common.ui.switch-to-light-mode"
+            : "common.ui.switch-to-dark-mode",
+        )}
         className={triggerClass}
         onClick={toggleMode}
       >

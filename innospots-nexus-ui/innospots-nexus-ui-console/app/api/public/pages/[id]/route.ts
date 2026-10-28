@@ -4,7 +4,6 @@ import { resolveSessionUser } from "@/server/accounts";
 import { corsHeaders, corsPreflight } from "@/server/cors";
 import { getRequestI18n } from "@/server/i18n";
 import { getLazyPage } from "@/server/sitemap";
-import { uiMessageKey } from "@/i18n/message-key";
 
 /**
  * 懒加载页面端点：sitemap 中未内联 pageDsl 的页面按需获取。
@@ -19,11 +18,13 @@ export async function GET(
   const store = await cookies();
   const user = resolveSessionUser(store);
   const i18n = await getRequestI18n(request);
-  const entry = getLazyPage(id, user, i18n.messages);
+  const entry = getLazyPage(id, user, i18n);
   if (!entry) {
-    const source = "页面不存在或无权限";
     return Response.json(
-      { error: i18n.messages[uiMessageKey(source)] ?? source },
+      {
+        error: i18n.messages["common.ui.the-page-does-not-exist-or-you-do-not-have-permission"]
+          ?? "common.ui.the-page-does-not-exist-or-you-do-not-have-permission",
+      },
       { status: 404, headers: corsHeaders(request) },
     );
   }

@@ -1,7 +1,7 @@
 dsl: "1.0"
 page:
   id: audit-log-list
-  title: 审计日志
+  title: '$i18n{audit.audit-log-list.title:审计日志}'
   name: auditLogList
 
 state:
@@ -28,15 +28,19 @@ dataSources:
         keyword: ${state.keyword}
         pageNo: ${state.pageNo}
         pageSize: ${state.pageSize}
-
+i18n:
+  namespaces:
+    - audit
 body:
   type: Page
   children:
     - type: Breadcrumb
       props:
         items:
-          - label: 系统管理
-          - label: 审计日志
+          - label:
+              '$i18n{audit.audit-log-list.system-management:系统管理}'
+          - label:
+              '$i18n{audit.audit-log-list.audit-logs:审计日志}'
     - type: Flex
       props:
         justify: space-between
@@ -50,18 +54,18 @@ body:
             - type: Typography
               props:
                 variant: h3
-                text: 审计日志
+                text: '$i18n{audit.audit-log-list.audit-logs-2:审计日志}'
             - type: Typography
               props:
                 variant: muted
-                text: 查询管理操作轨迹；敏感参数按安全策略脱敏展示。
+                text: '$i18n{audit.audit-log-list.review-management-activity-sensitive-parameters-are-masked-according-to:查询管理操作轨迹；敏感参数按安全策略脱敏展示。}'
         - type: Flex
           props:
             gap: small
           children:
             - type: Button
               props:
-                text: 刷新
+                text: '$i18n{audit.audit-log-list.refresh:刷新}'
               events:
                 onClick:
                   - action: reload
@@ -95,68 +99,106 @@ body:
           children:
             - type: Field
               props:
-                label: 时间范围
+                label: '$i18n{audit.audit-log-list.time-range:时间范围}'
               children:
                 - type: Select
                   props:
                     name: timeRange
-                    placeholder: 最近 7 天
+                    placeholder: '$i18n{audit.audit-log-list.last-7-days-2:最近 7 天}'
                     options:
-                      - { label: 最近 7 天, value: last7d }
-                      - { label: 最近 24 小时, value: last24h }
-                      - { label: 最近 30 天, value: last30d }
+                      - label:
+                          '$i18n{audit.audit-log-list.last-7-days:最近 7 天}'
+                        value: last7d
+                      - label:
+                          '$i18n{audit.audit-log-list.last-24-hours:最近 24 小时}'
+                        value: last24h
+                      - label:
+                          '$i18n{audit.audit-log-list.last-30-days:最近 30 天}'
+                        value: last30d
             - type: Field
               props:
-                label: 操作者
+                label: '$i18n{audit.audit-log-list.actor:操作者}'
               children:
                 - type: Input
                   props:
                     name: operator
             - type: Field
               props:
-                label: 操作类型
+                label: '$i18n{audit.audit-log-list.action-type:操作类型}'
               children:
                 - type: FilterSelect
                   props:
                     name: operationType
-                    placeholder: 全部
+                    placeholder: '$i18n{audit.audit-log-list.all-2:全部}'
                     options:
-                      - { label: 全部, value: "" }
-                      - { label: 查询, value: READ }
-                      - { label: 创建, value: CREATE }
-                      - { label: 更新, value: UPDATE }
-                      - { label: 删除, value: DELETE }
-                      - { label: 状态变更, value: STATUS }
-                      - { label: 全量替换, value: REPLACE }
-                      - { label: 执行, value: EXECUTE }
-                      - { label: 导出, value: EXPORT }
-                      - { label: 导入, value: IMPORT }
-                      - { label: 授权绑定, value: ASSIGN }
-                      - { label: 解除授权, value: REVOKE }
-                      - { label: 写入, value: WRITE }
+                      - label:
+                          '$i18n{audit.audit-log-list.all:全部}'
+                        value: ""
+                      - label:
+                          '$i18n{audit.audit-log-list.search:查询}'
+                        value: READ
+                      - label:
+                          '$i18n{audit.audit-log-list.create:创建}'
+                        value: CREATE
+                      - label:
+                          '$i18n{audit.audit-log-list.update:更新}'
+                        value: UPDATE
+                      - label:
+                          '$i18n{audit.audit-log-list.delete:删除}'
+                        value: DELETE
+                      - label:
+                          '$i18n{audit.audit-log-list.status-change:状态变更}'
+                        value: STATUS
+                      - label:
+                          '$i18n{audit.audit-log-list.replace-all:全量替换}'
+                        value: REPLACE
+                      - label:
+                          '$i18n{audit.audit-log-list.execute:执行}'
+                        value: EXECUTE
+                      - label:
+                          '$i18n{audit.audit-log-list.export:导出}'
+                        value: EXPORT
+                      - label:
+                          '$i18n{audit.audit-log-list.import:导入}'
+                        value: IMPORT
+                      - label:
+                          '$i18n{audit.audit-log-list.authorization-binding:授权绑定}'
+                        value: ASSIGN
+                      - label:
+                          '$i18n{audit.audit-log-list.remove-authorization:解除授权}'
+                        value: REVOKE
+                      - label:
+                          '$i18n{audit.audit-log-list.write:写入}'
+                        value: WRITE
             - type: Field
               props:
-                label: 结果
+                label: '$i18n{audit.audit-log-list.result:结果}'
               children:
                 - type: FilterSelect
                   props:
                     name: result
-                    placeholder: 全部
+                    placeholder: '$i18n{audit.audit-log-list.all-4:全部}'
                     options:
-                      - { label: 全部, value: "" }
-                      - { label: 成功, value: SUCCESS }
-                      - { label: 失败, value: FAILURE }
+                      - label:
+                          '$i18n{audit.audit-log-list.all-3:全部}'
+                        value: ""
+                      - label:
+                          '$i18n{audit.audit-log-list.success:成功}'
+                        value: SUCCESS
+                      - label:
+                          '$i18n{audit.audit-log-list.failed:失败}'
+                        value: FAILURE
             - type: Field
               props:
-                label: 关键字
+                label: '$i18n{audit.audit-log-list.keyword:关键字}'
               children:
                 - type: Input
                   props:
                     name: keyword
-                    placeholder: 操作类型/对象/说明/方法
+                    placeholder: '$i18n{audit.audit-log-list.action-type-target-description-method:操作类型/对象/说明/方法}'
             - type: Field
               props:
-                label: " "
+                label:  
               children:
                 - type: Flex
                   props:
@@ -165,12 +207,12 @@ body:
                   children:
                     - type: Button
                       props:
-                        text: 查询
+                        text: '$i18n{audit.audit-log-list.search-2:查询}'
                         submit: true
                         htmlType: submit
                     - type: Button
                       props:
-                        text: 重置
+                        text: '$i18n{audit.audit-log-list.reset:重置}'
                       events:
                         onClick:
                           - action: form.setValues
@@ -200,28 +242,36 @@ body:
             loading: ${dataStatus.logs.loading}
             className: mt-4
             columns:
-              - title: 时间
+              - title:
+                  '$i18n{audit.audit-log-list.time:时间}'
                 dataIndex: occurredAt
-              - title: 操作类型
+              - title:
+                  '$i18n{audit.audit-log-list.action-type-2:操作类型}'
                 dataIndex: operationType
-              - title: 操作对象
+              - title:
+                  '$i18n{audit.audit-log-list.target:操作对象}'
                 dataIndex: target
-              - title: 操作说明
+              - title:
+                  '$i18n{audit.audit-log-list.action-description:操作说明}'
                 dataIndex: summary
-              - title: 操作者
+              - title:
+                  '$i18n{audit.audit-log-list.actor-2:操作者}'
                 dataIndex: operatorName
-              - title: 结果
+              - title:
+                  '$i18n{audit.audit-log-list.result-2:结果}'
                 dataIndex: result
-              - title: 耗时
+              - title:
+                  '$i18n{audit.audit-log-list.duration:耗时}'
                 cell:
                   type: Text
                   props:
                     text: "${row.durationMs != null ? row.durationMs + ' ms' : '—'}"
-              - title: 详情
+              - title:
+                  '$i18n{audit.audit-log-list.details:详情}'
                 cell:
                   type: Button
                   props:
-                    text: 查看
+                    text: '$i18n{audit.audit-log-list.view:查看}'
                     variant: link
                     size: small
                   events:
@@ -231,6 +281,6 @@ body:
                           to: /system/audit-logs/${row.logId}
         - type: Text
           props:
-            text: 共 ${data.logs.total} 条
+            text: "${t('audit.audit-log-list.summary.count', { count: data.logs.total })}"
             type: secondary
             className: mt-3

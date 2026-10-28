@@ -216,6 +216,9 @@ public final class MessageBundleLoader {
         if ("en-US".equals(locale)) {
             candidates.add(RESOURCE_FILE + "_en" + PROPERTIES_SUFFIX);
             candidates.add(RESOURCE_FILE + "_en_US" + PROPERTIES_SUFFIX);
+        } else if ("zh-CN".equals(locale)) {
+            candidates.add(RESOURCE_FILE + "_zh" + PROPERTIES_SUFFIX);
+            candidates.add(RESOURCE_FILE + "_zh_CN" + PROPERTIES_SUFFIX);
         }
         return candidates;
     }

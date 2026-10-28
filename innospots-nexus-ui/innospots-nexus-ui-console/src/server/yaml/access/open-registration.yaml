@@ -1,8 +1,10 @@
 dsl: "1.0"
 page:
   id: open-registration
-  title: 开放注册
+  title: '$i18n{access.open-registration.title:开放注册}'
   name: openRegistration
-
+i18n:
+  namespaces:
+    - access
 body:
   type: PlatformOpenRegistrationForm

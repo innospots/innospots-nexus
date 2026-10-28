@@ -27,7 +27,7 @@ function unwrap<T>(body: NexusEnvelope<T> | T): T {
     if (body && typeof body === "object" && "data" in body) {
         const envelope = body as NexusEnvelope<T>;
         if (envelope.success === false) {
-            throw new Error(envelope.message ?? `业务错误码 ${String(envelope.code)}`);
+            throw new Error(envelope.message ?? "common.ui.request-failed");
         }
         return envelope.data as T;
     }
@@ -43,7 +43,7 @@ async function platformGet<T>(path: string): Promise<T> {
             body && typeof body === "object" && "message" in body
                 ? String((body as NexusEnvelope<T>).message)
                 : response.statusText;
-        throw new Error(message || "请求失败");
+        throw new Error(message || "common.ui.request-failed");
     }
     return unwrap(body);
 }
@@ -57,7 +57,7 @@ export async function fetchDictionaryTypeBundle(dictionaryTypeId: string): Promi
 }> {
     const id = dictionaryTypeId.trim();
     if (id.length === 0) {
-        throw new Error("缺少字典类型 ID");
+        throw new Error("common.ui.dictionary-type-id-is-missing");
     }
     const type = await platformGet<DictionaryTypeVo & { items?: DictionaryItemVo[] }>(
         `/dictionary-types/${encodeURIComponent(id)}`,

@@ -1,21 +1,33 @@
 "use client";
 
-type I18nValue = string | Record<string, string> | null | undefined;
+import { useI18n } from "@pactor-app/runtime";
 
-const PREFERRED_LOCALES = ["zh-CN", "zh", "en", "en-US"];
+type I18nValue = string | Record<string, string> | null | undefined;
 
 /**
  * 从 API 返回的 I18nObject（或历史纯字符串）解析当前展示文案。
  */
-export function resolveI18nText(value: I18nValue, preferredLocales: string[] = PREFERRED_LOCALES): string {
+export function resolveI18nText(
+  value: I18nValue,
+  locale: string,
+  defaultLocale: string,
+  preferredLocales: readonly string[] = [],
+): string {
   if (value == null) {
     return "";
   }
   if (typeof value === "string") {
     return value;
   }
-  for (const locale of preferredLocales) {
-    const candidate = value[locale];
+  const candidates = [
+    ...preferredLocales,
+    locale,
+    locale.split("-")[0],
+    defaultLocale,
+    defaultLocale.split("-")[0],
+  ];
+  for (const preferredLocale of candidates) {
+    const candidate = value[preferredLocale];
     if (candidate != null && candidate.trim().length > 0) {
       return candidate.trim();
     }
@@ -34,5 +46,6 @@ export interface I18nTextProps {
 
 /** 表格/链接等只读场景下的国际化文案。 */
 export function I18nText({ value }: I18nTextProps) {
-  return <>{resolveI18nText(value)}</>;
+  const { locale, defaultLocale } = useI18n();
+  return <>{resolveI18nText(value, locale, defaultLocale)}</>;
 }

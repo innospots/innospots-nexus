@@ -58,7 +58,7 @@ public final class MessageBundleService {
     /**
      * 加载语言包集合。
      *
-     * <p>显式 query locale 优先，其次为 {@code nexus.locale} cookie、
+     * <p>显式 query locale 优先，其次为 {@code locale} cookie、
      * {@code Accept-Language}，最后回退到 {@link #DEFAULT_LOCALE}。</p>
      *
      * @param appId 应用标识
@@ -145,10 +145,10 @@ public final class MessageBundleService {
         if (normalized.isEmpty()) {
             return java.util.Optional.empty();
         }
-        if (normalized.startsWith("zh")) {
+        if ("zh".equals(normalized) || "zh-cn".equals(normalized)) {
             return java.util.Optional.of(DEFAULT_LOCALE);
         }
-        if (normalized.startsWith("en")) {
+        if ("en".equals(normalized) || "en-us".equals(normalized)) {
             return java.util.Optional.of(ENGLISH_LOCALE);
         }
         return java.util.Optional.empty();

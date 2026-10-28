@@ -105,14 +105,24 @@ layouts:
               props:
                 className: shell-header
                 locales:
-                  - { label: 中文, value: zh-CN }
-                  - { label: English, value: en-US }
+                  - label:
+                      '$i18n{common.layout.admin.chinese:中文}'
+                    value: zh-CN
+                  - label:
+                      '$i18n{common.layout.admin.english:English}'
+                    value: en-US
                 user:
                   name: ${data.session.user.name}
                   username: ${data.session.user.username}
                   items:
-                    - { label: 修改密码, value: password, icon: key }
-                    - { label: 退出登录, value: logout, icon: log-out }
+                    - label:
+                        '$i18n{common.layout.admin.change-password:修改密码}'
+                      value: password
+                      icon: key
+                    - label:
+                        '$i18n{common.layout.admin.sign-out:退出登录}'
+                      value: logout
+                      icon: log-out
               events:
                 onLocaleChange:
                   - action: app.locale
@@ -138,7 +148,7 @@ layouts:
                         - action: message
                           params:
                             messageType: info
-                            text: 个人中心暂未开放
+                            text: '$i18n{common.layout.admin.profile-is-not-available-yet:个人中心暂未开放}'
               children:
                 - type: ThemeSwitcher
             - type: Content

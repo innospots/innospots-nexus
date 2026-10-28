@@ -1,7 +1,9 @@
 package com.innospots.nexus.console.i18n.endpoint;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 
+import jakarta.ws.rs.CookieParam;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 
@@ -45,6 +47,11 @@ class I18nBundleEndpointContractsTest {
                 String.class);
         assertThat(method.getAnnotation(GET.class)).isNotNull();
         assertThat(method.getAnnotation(Operation.class).operationId()).isEqualTo("i18nBundles");
+        assertThat(method.getParameters())
+                .filteredOn(parameter -> parameter.isAnnotationPresent(CookieParam.class))
+                .singleElement()
+                .extracting(I18nBundleEndpointContractsTest::cookieName)
+                .isEqualTo("locale");
 
         EndpointGrant grant = method.getAnnotation(EndpointGrant.class);
         assertThat(grant).isNotNull();
@@ -53,5 +60,9 @@ class I18nBundleEndpointContractsTest {
         assertThat(grant.ignoreAuth()).isTrue();
         assertThat(grant.ignorePermission()).isTrue();
         assertThat(grant.auditLog()).isFalse();
+    }
+
+    private static String cookieName(Parameter parameter) {
+        return parameter.getAnnotation(CookieParam.class).value();
     }
 }

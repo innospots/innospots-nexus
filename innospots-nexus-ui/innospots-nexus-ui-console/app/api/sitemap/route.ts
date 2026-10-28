@@ -14,7 +14,7 @@ export async function GET(request: Request) {
   const store = await cookies();
   const user = resolveSessionUser(store);
   const i18n = await getRequestI18n(request);
-  return Response.json(buildSitemap(user, i18n.messages), {
+  return Response.json(buildSitemap(user, i18n), {
     headers: { "cache-control": "no-store", ...corsHeaders(request) },
   });
 }

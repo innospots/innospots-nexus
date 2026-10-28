@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 
 import { Button, Input } from "@pactor-app/ui/components";
 
-import { useUiText } from "@/i18n/ui";
+import { useI18n } from "@pactor-app/runtime";
 
 import { encryptPasswordForApi } from "../lib/rsa-password";
 
@@ -19,7 +19,7 @@ export function PlatformUserPasswordResetPanel({
     onCancel,
     onSuccess,
 }: PlatformUserPasswordResetPanelProps) {
-    const t = useUiText();
+    const { t } = useI18n();
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [submitting, setSubmitting] = useState(false);
@@ -27,15 +27,15 @@ export function PlatformUserPasswordResetPanel({
 
     const submit = useCallback(async () => {
         if (!platformUserId) {
-            setError("用户 ID 无效");
+            setError("common.ui.invalid-user-id");
             return;
         }
         if (password.length === 0) {
-            setError("请输入新密码");
+            setError("common.ui.enter-a-new-password");
             return;
         }
         if (password !== confirmPassword) {
-            setError("两次密码不一致");
+            setError("common.ui.passwords-do-not-match");
             return;
         }
         setSubmitting(true);
@@ -53,14 +53,14 @@ export function PlatformUserPasswordResetPanel({
             };
             if (!response.ok || envelope.success === false) {
                 throw new Error(
-                    envelope.message ?? `${t("重置失败")} (HTTP ${response.status})`,
+                    envelope.message ?? `${t("common.ui.reset-failed")} (HTTP ${response.status})`,
                 );
             }
             setPassword("");
             setConfirmPassword("");
             onSuccess?.();
         } catch (err) {
-            setError(err instanceof Error ? t(err.message) : t("重置失败"));
+            setError(err instanceof Error ? err.message : "common.ui.reset-failed");
         } finally {
             setSubmitting(false);
         }
@@ -70,16 +70,16 @@ export function PlatformUserPasswordResetPanel({
         <div className="flex flex-col gap-4">
             <div className="grid gap-3">
                 <label className="flex flex-col gap-1 text-sm">
-                    {t("新密码 *")}
+                    {t("common.ui.new-password-2")}
                     <Input
                         type="password"
                         value={password}
                         onChange={(value) => setPassword(String(value))}
-                        placeholder={t("至少 8 位，含大小写字母与数字")}
+                        placeholder={t("common.ui.at-least-8-characters-with-uppercase-lowercase-and-numbers")}
                     />
                 </label>
                 <label className="flex flex-col gap-1 text-sm">
-                    {t("确认密码 *")}
+                    {t("common.ui.confirm-password-2")}
                     <Input
                         type="password"
                         value={confirmPassword}
@@ -89,9 +89,9 @@ export function PlatformUserPasswordResetPanel({
             </div>
             {error && <p className="text-sm text-destructive">{t(error)}</p>}
             <div className="flex justify-end gap-2">
-                <Button onClick={() => onCancel?.()}>{t("取消")}</Button>
+                <Button onClick={() => onCancel?.()}>{t("common.ui.cancel")}</Button>
                 <Button variant="primary" disabled={submitting} onClick={() => void submit()}>
-                    {submitting ? t("提交中…") : t("确认重置")}
+                    {submitting ? t("common.ui.submitting") : t("common.ui.confirm-reset")}
                 </Button>
             </div>
         </div>

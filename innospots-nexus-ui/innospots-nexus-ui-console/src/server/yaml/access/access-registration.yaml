@@ -1,8 +1,10 @@
 dsl: "1.0"
 page:
   id: access-registration
-  title: 注册（待审核）
+  title: '$i18n{access.access-registration.title:注册（待审核）}'
   name: accessRegistration
-
+i18n:
+  namespaces:
+    - access
 body:
   type: PlatformAccessRegistrationForm

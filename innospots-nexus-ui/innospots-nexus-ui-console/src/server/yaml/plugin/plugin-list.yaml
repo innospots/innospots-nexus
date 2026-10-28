@@ -1,7 +1,7 @@
 dsl: "1.0"
 page:
   id: plugin-list
-  title: 插件管理
+  title: '$i18n{plugin.plugin-list.title:插件管理}'
   name: pluginList
 
 state:
@@ -18,15 +18,19 @@ dataSources:
       params:
         keyword: ${state.keyword}
         installed: ${state.installed}
-
+i18n:
+  namespaces:
+    - plugin
 body:
   type: Page
   children:
     - type: Breadcrumb
       props:
         items:
-          - label: 系统管理
-          - label: 插件管理
+          - label:
+              '$i18n{plugin.plugin-list.system-management:系统管理}'
+          - label:
+              '$i18n{plugin.plugin-list.plugin-management:插件管理}'
     - type: Flex
       props:
         justify: space-between
@@ -40,14 +44,14 @@ body:
             - type: Typography
               props:
                 variant: h3
-                text: 插件管理
+                text: '$i18n{plugin.plugin-list.plugin-management-2:插件管理}'
             - type: Typography
               props:
                 variant: muted
-                text: 管理插件安装状态与运行生命周期。
+                text: '$i18n{plugin.plugin-list.manage-plugin-installation-state-and-runtime-lifecycle:管理插件安装状态与运行生命周期。}'
         - type: Button
           props:
-            text: 刷新状态
+            text: '$i18n{plugin.plugin-list.refresh-status:刷新状态}'
           events:
             onClick:
               - action: reload
@@ -74,27 +78,33 @@ body:
           children:
             - type: Field
               props:
-                label: 插件名称
+                label: '$i18n{plugin.plugin-list.plugin-name:插件名称}'
               children:
                 - type: Input
                   props:
                     name: keyword
-                    placeholder: 搜索插件名称或标识
+                    placeholder: '$i18n{plugin.plugin-list.search-plugin-name-or-identifier:搜索插件名称或标识}'
             - type: Field
               props:
-                label: 安装状态
+                label: '$i18n{plugin.plugin-list.installation-status:安装状态}'
               children:
                 - type: FilterSelect
                   props:
                     name: installed
-                    placeholder: 全部
+                    placeholder: '$i18n{plugin.plugin-list.all-2:全部}'
                     options:
-                      - { label: 全部, value: "" }
-                      - { label: 已安装, value: installed }
-                      - { label: 未安装, value: notInstalled }
+                      - label:
+                          '$i18n{plugin.plugin-list.all:全部}'
+                        value: ""
+                      - label:
+                          '$i18n{plugin.plugin-list.installed:已安装}'
+                        value: installed
+                      - label:
+                          '$i18n{plugin.plugin-list.not-installed:未安装}'
+                        value: notInstalled
             - type: Field
               props:
-                label: " "
+                label:  
               children:
                 - type: Flex
                   props:
@@ -103,12 +113,12 @@ body:
                   children:
                     - type: Button
                       props:
-                        text: 查询
+                        text: '$i18n{plugin.plugin-list.search:查询}'
                         submit: true
                         htmlType: submit
                     - type: Button
                       props:
-                        text: 重置
+                        text: '$i18n{plugin.plugin-list.reset:重置}'
                       events:
                         onClick:
                           - action: form.setValues
@@ -131,7 +141,8 @@ body:
             loading: ${dataStatus.plugins.loading}
             className: mt-4
             columns:
-              - title: 插件
+              - title:
+                  '$i18n{plugin.plugin-list.plugin:插件}'
                 cell:
                   type: Button
                   props:
@@ -143,16 +154,20 @@ body:
                       - action: navigate
                         params:
                           to: /system/plugins/${row.pluginId}
-              - title: 版本
+              - title:
+                  '$i18n{plugin.plugin-list.version:版本}'
                 dataIndex: version
-              - title: 已安装
+              - title:
+                  '$i18n{plugin.plugin-list.installed-2:已安装}'
                 cell:
                   type: Text
                   props:
-                    text: "${row.installed ? '已安装' : '未安装'}"
-              - title: 运行状态
+                    text: "${row.installed ? t('plugin.plugin-list.installed') : t('plugin.plugin-list.not-installed')}"
+              - title:
+                  '$i18n{plugin.plugin-list.runtime-status:运行状态}'
                 dataIndex: runtimeState
-              - title: 操作
+              - title:
+                  '$i18n{plugin.plugin-list.actions:操作}'
                 cell:
                   type: Flex
                   props:
@@ -161,15 +176,15 @@ body:
                     - type: Button
                       when: ${!row.installed}
                       props:
-                        text: 安装
+                        text: '$i18n{plugin.plugin-list.install:安装}'
                         variant: link
                         size: small
                       events:
                         onClick:
                           - action: confirm
                             params:
-                              title: 安装插件
-                              content: 安装后可能贡献新的页面与导航，确定安装吗？
+                              title: '$i18n{plugin.plugin-list.install-plugin:安装插件}'
+                              content: '$i18n{plugin.plugin-list.this-plugin-may-contribute-pages-and-navigation-after-installation-insta:安装后可能贡献新的页面与导航，确定安装吗？}'
                           - action: request
                             params:
                               method: POST
@@ -177,22 +192,22 @@ body:
                           - action: message
                             params:
                               messageType: success
-                              text: 安装请求已提交
+                              text: '$i18n{plugin.plugin-list.installation-request-submitted:安装请求已提交}'
                           - action: reload
                             params:
                               dataSource: plugins
                     - type: Button
                       when: ${row.installed && row.desiredEnabled}
                       props:
-                        text: 停用
+                        text: '$i18n{plugin.plugin-list.disable:停用}'
                         variant: link
                         size: small
                       events:
                         onClick:
                           - action: confirm
                             params:
-                              title: 停用插件
-                              content: 停用后相关能力将不可用，确定吗？
+                              title: '$i18n{plugin.plugin-list.disable-plugin:停用插件}'
+                              content: '$i18n{plugin.plugin-list.related-capabilities-become-unavailable-continue:停用后相关能力将不可用，确定吗？}'
                           - action: request
                             params:
                               method: POST
@@ -203,15 +218,15 @@ body:
                     - type: Button
                       when: ${row.installed && !row.desiredEnabled}
                       props:
-                        text: 启用
+                        text: '$i18n{plugin.plugin-list.enable:启用}'
                         variant: link
                         size: small
                       events:
                         onClick:
                           - action: confirm
                             params:
-                              title: 启用插件
-                              content: 确定启用该插件吗？
+                              title: '$i18n{plugin.plugin-list.enable-plugin:启用插件}'
+                              content: '$i18n{plugin.plugin-list.enable-this-plugin:确定启用该插件吗？}'
                           - action: request
                             params:
                               method: POST
@@ -222,15 +237,15 @@ body:
                     - type: Button
                       when: ${row.lastError != null && row.lastError != ''}
                       props:
-                        text: 重试
+                        text: '$i18n{plugin.plugin-list.retry:重试}'
                         variant: link
                         size: small
                       events:
                         onClick:
                           - action: confirm
                             params:
-                              title: 重试启动
-                              content: 将重新尝试启动该插件，确定吗？
+                              title: '$i18n{plugin.plugin-list.retry-start:重试启动}'
+                              content: '$i18n{plugin.plugin-list.retry-starting-this-plugin:将重新尝试启动该插件，确定吗？}'
                           - action: request
                             params:
                               method: POST
@@ -240,6 +255,6 @@ body:
                               dataSource: plugins
         - type: Text
           props:
-            text: 共 ${data.plugins.length} 个插件
+            text: "${t('plugin.plugin-list.summary.count', { count: data.plugins.length })}"
             type: secondary
             className: mt-3

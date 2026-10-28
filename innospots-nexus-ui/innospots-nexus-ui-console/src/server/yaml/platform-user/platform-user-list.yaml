@@ -1,7 +1,7 @@
 dsl: "1.0"
 page:
   id: platform-user-list
-  title: 用户列表
+  title: '$i18n{platform-user.platform-user-list.title:用户列表}'
   name: platformUserList
 
 state:
@@ -22,15 +22,19 @@ dataSources:
         status: ${state.status}
         pageNo: ${state.pageNo}
         pageSize: ${state.pageSize}
-
+i18n:
+  namespaces:
+    - platform-user
 body:
   type: Page
   children:
     - type: Breadcrumb
       props:
         items:
-          - label: 运营管理
-          - label: 用户列表
+          - label:
+              '$i18n{platform-user.platform-user-list.operations:运营管理}'
+          - label:
+              '$i18n{platform-user.platform-user-list.user-list:用户列表}'
     - type: Flex
       props:
         className: mt-2
@@ -45,14 +49,14 @@ body:
             - type: Typography
               props:
                 variant: h3
-                text: 用户列表
+                text: '$i18n{platform-user.platform-user-list.user-list-2:用户列表}'
             - type: Typography
               props:
                 variant: muted
-                text: 查询平台域运营账号并进入详情；待审核用户见状态筛选。
+                text: '$i18n{platform-user.platform-user-list.review-platform-operations-accounts-and-open-details-use-the-status-filt:查询平台域运营账号并进入详情；待审核用户见状态筛选。}'
         - type: Button
           props:
-            text: + 添加用户
+            text: '$i18n{platform-user.platform-user-list.add-user:+ 添加用户}'
             variant: primary
           events:
             onClick:
@@ -81,30 +85,42 @@ body:
           children:
             - type: Field
               props:
-                label: 登录名/姓名
+                label: '$i18n{platform-user.platform-user-list.login-name-display-name:登录名/姓名}'
               children:
                 - type: Input
                   props:
                     name: input
-                    placeholder: 匹配登录名或显示名称
+                    placeholder: '$i18n{platform-user.platform-user-list.match-login-or-display-name:匹配登录名或显示名称}'
             - type: Field
               props:
-                label: 状态
+                label: '$i18n{platform-user.platform-user-list.status:状态}'
               children:
                 - type: FilterSelect
                   props:
                     name: status
-                    placeholder: 全部
+                    placeholder: '$i18n{platform-user.platform-user-list.all-2:全部}'
                     options:
-                      - { label: 全部, value: "" }
-                      - { label: 正常, value: ACTIVE }
-                      - { label: 待审核, value: PENDING_APPROVAL }
-                      - { label: 待激活, value: PENDING_ACTIVATION }
-                      - { label: 禁用, value: DISABLED }
-                      - { label: 锁定, value: LOCKED }
+                      - label:
+                          '$i18n{platform-user.platform-user-list.all:全部}'
+                        value: ""
+                      - label:
+                          '$i18n{platform-user.platform-user-list.active:正常}'
+                        value: ACTIVE
+                      - label:
+                          '$i18n{platform-user.platform-user-list.pending-approval:待审核}'
+                        value: PENDING_APPROVAL
+                      - label:
+                          '$i18n{platform-user.platform-user-list.pending-activation:待激活}'
+                        value: PENDING_ACTIVATION
+                      - label:
+                          '$i18n{platform-user.platform-user-list.disable:禁用}'
+                        value: DISABLED
+                      - label:
+                          '$i18n{platform-user.platform-user-list.locked:锁定}'
+                        value: LOCKED
             - type: Field
               props:
-                label: " "
+                label:  
               children:
                 - type: Flex
                   props:
@@ -112,12 +128,12 @@ body:
                   children:
                     - type: Button
                       props:
-                        text: 查询
+                        text: '$i18n{platform-user.platform-user-list.search:查询}'
                         submit: true
                         htmlType: submit
                     - type: Button
                       props:
-                        text: 重置
+                        text: '$i18n{platform-user.platform-user-list.reset:重置}'
                       events:
                         onClick:
                           - action: form.setValues
@@ -141,20 +157,30 @@ body:
             loading: ${dataStatus.users.loading}
             className: mt-4
             columns:
-              - title: 登录名
+              - title:
+                  '$i18n{platform-user.platform-user-list.login-name:登录名}'
                 dataIndex: loginName
-              - title: 显示名称
+              - title:
+                  '$i18n{platform-user.platform-user-list.display-name:显示名称}'
                 dataIndex: displayName
-              - title: 邮箱
+              - title:
+                  '$i18n{platform-user.platform-user-list.email:邮箱}'
                 dataIndex: email
-              - title: 手机
+              - title:
+                  '$i18n{platform-user.platform-user-list.mobile:手机}'
                 dataIndex: mobile
-              - title: 状态
+              - title:
+                  '$i18n{platform-user.platform-user-list.status-2:状态}'
                 cell:
                   type: Text
                   props:
-                    text: "${row.status == 'ACTIVE' ? '● 正常' : row.status == 'PENDING_APPROVAL' ? '○ 待审核' : row.status == 'PENDING_ACTIVATION' ? '○ 待激活' : row.status == 'DISABLED' ? '○ 禁用' : row.status == 'LOCKED' ? '○ 锁定' : row.status}"
-              - title: 操作
+                    text: "${row.status == 'ACTIVE' ? t('platform-user.platform-user-list.status.active') : row.status == 'PENDING_APPROVAL'
+                      ? t('platform-user.platform-user-list.status.pending-approval') : row.status ==
+                      'PENDING_ACTIVATION' ? t('platform-user.platform-user-list.status.pending-activation') :
+                      row.status == 'DISABLED' ? t('platform-user.platform-user-list.status.disabled') : row.status ==
+                      'LOCKED' ? t('platform-user.platform-user-list.status.locked') : row.status}"
+              - title:
+                  '$i18n{platform-user.platform-user-list.actions:操作}'
                 cell:
                   type: Flex
                   props:
@@ -162,7 +188,7 @@ body:
                   children:
                     - type: Button
                       props:
-                        text: 详情
+                        text: '$i18n{platform-user.platform-user-list.details:详情}'
                         variant: link
                         size: small
                       events:
@@ -173,15 +199,16 @@ body:
                     - type: Button
                       when: ${row.status == 'ACTIVE' || row.status == 'DISABLED'}
                       props:
-                        text: "${row.status == 'ACTIVE' ? '禁用' : '启用'}"
+                        text: "${row.status == 'ACTIVE' ? t('platform-user.platform-user-list.disable') :
+                          t('platform-user.platform-user-list.enable')}"
                         variant: link
                         size: small
                       events:
                         onClick:
                           - action: confirm
                             params:
-                              title: 确认变更状态
-                              content: 确定要变更该用户的启用状态吗？
+                              title: '$i18n{platform-user.platform-user-list.confirm-status-change:确认变更状态}'
+                              content: '$i18n{platform-user.platform-user-list.change-this-user-s-enabled-state:确定要变更该用户的启用状态吗？}'
                           - action: request
                             params:
                               method: PUT
@@ -191,12 +218,12 @@ body:
                           - action: message
                             params:
                               messageType: success
-                              text: 状态已更新
+                              text: '$i18n{platform-user.platform-user-list.status-updated:状态已更新}'
                           - action: reload
                             params:
                               dataSource: users
         - type: Text
           props:
-            text: 共 ${data.users.total} 个用户
+            text: "${t('platform-user.platform-user-list.summary.count', { count: data.users.total })}"
             type: secondary
             className: mt-3

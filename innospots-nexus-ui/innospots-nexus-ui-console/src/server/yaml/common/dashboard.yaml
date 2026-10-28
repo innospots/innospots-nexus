@@ -1,16 +1,19 @@
 dsl: "1.0"
 page:
   id: dashboard
-  title: 工作台
+  title: '$i18n{common.dashboard.title:工作台}'
   name: dashboard
-
+i18n:
+  namespaces:
+    - common
 body:
   type: Page
   children:
     - type: Breadcrumb
       props:
         items:
-          - label: 工作台
+          - label:
+              '$i18n{common.dashboard.dashboard:工作台}'
     - type: Flex
       props:
         direction: vertical
@@ -19,27 +22,29 @@ body:
         - type: Typography
           props:
             variant: h3
-            text: 欢迎使用 Nexus Console
+            text: '$i18n{common.dashboard.welcome-to-nexus-console:欢迎使用 Nexus Console}'
         - type: Typography
           props:
             variant: muted
-            text: 请从左侧「系统管理」进入菜单、角色、字典、审计日志或插件管理。
+            text: '$i18n{common.dashboard.use-system-management-in-the-left-sidebar-to-open-menus-roles-dictionari:请从左侧「系统管理」进入菜单、角色、字典、审计日志或插件管理。}'
         - type: Flex
           props:
             gap: small
           children:
             - type: Button
               props:
-                text: 角色管理
+                text: '$i18n{common.dashboard.role-management:角色管理}'
                 variant: primary
               events:
                 onClick:
                   - action: navigate
-                    params: { to: /system/roles }
+                    params:
+                      to: /system/roles
             - type: Button
               props:
-                text: 插件管理
+                text: '$i18n{common.dashboard.plugin-management:插件管理}'
               events:
                 onClick:
                   - action: navigate
-                    params: { to: /system/plugins }
+                    params:
+                      to: /system/plugins

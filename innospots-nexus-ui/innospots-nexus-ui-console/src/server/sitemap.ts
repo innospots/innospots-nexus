@@ -2,12 +2,14 @@ import { readFileSync, readdirSync, watch } from "node:fs";
 import { join, relative } from "node:path";
 
 import type { PageDsl, PermissionConfig } from "@pactor-app/core";
+import { localizePageDsl, type AuthorPageDsl } from "@pactor-app/i18n";
 import { parseDocument } from "yaml";
 
 import type { LayoutDsl, SitemapResource } from "pactor-app";
 
 import type { DemoUser } from "./accounts";
-import { localizePageDsl, localizeSitemapValue } from "./dsl-i18n";
+import type { RequestI18n } from "./i18n";
+import { consoleTranslatableFields } from "./i18n-registry";
 
 /**
  * Mock sitemap 数据源（design/dynamic-page.md 方案 B 示例实现）。
@@ -94,7 +96,6 @@ function collectPageFiles(dir: string): Map<string, PageFile> {
 }
 
 interface LoadedPage {
-  namespace: string;
   pageDsl: PageDsl;
 }
 
@@ -119,7 +120,6 @@ function loadState(): YamlState {
       site.pages.map((page) => [
         page.id,
         {
-          namespace: pageFiles.get(page.id)?.namespace ?? "common",
           pageDsl: loadPageDsl(page.id),
         },
       ]),
@@ -209,13 +209,39 @@ function sitemapUser(user: DemoUser): DemoUser {
   };
 }
 
+function localizeLayout(
+  layout: LayoutDsl,
+  i18n: RequestI18n,
+): LayoutDsl {
+  // LayoutDsl 没有作者态 i18n 字段；借临时 Page DSL 复用 Pactor 的节点转换。
+  const page: AuthorPageDsl = {
+    dsl: layout.dsl,
+    page: { id: "layout", title: "" },
+    ...(layout.state === undefined ? {} : { state: layout.state }),
+    i18n: { namespaces: ["common"] },
+    body: layout.body,
+  };
+  const localized = localizePageDsl({
+    page,
+    locale: i18n.locale,
+    defaultLocale: i18n.defaultLocale,
+    languageBundles: i18n.languageBundles,
+    registry: consoleTranslatableFields,
+  });
+  return {
+    ...layout,
+    ...(localized.state === undefined ? {} : { state: localized.state }),
+    body: localized.body ?? layout.body,
+  };
+}
+
 function localizeMenus(
   menus: SitemapResource["menus"],
   messages: Readonly<Record<string, string>>,
 ): SitemapResource["menus"] {
   return menus.map((menu) => ({
     ...menu,
-    title: messages[`common.sitemap.menus.${menu.id}.title`] ?? menu.title,
+    title: messages[`common.menu.${menu.id}.title`] ?? menu.title,
     ...(menu.type === "group"
       ? { children: localizeMenus(menu.children ?? [], messages) }
       : {}),
@@ -224,7 +250,7 @@ function localizeMenus(
 
 export function buildSitemap(
   user: DemoUser | null,
-  messages: Readonly<Record<string, string>> = {},
+  i18n: RequestI18n,
 ): SitemapResource {
   const { site, pages: loadedPages } = state();
   const pages: SitemapResource["pages"] = site.pages
@@ -234,16 +260,19 @@ export function buildSitemap(
       return {
         id: p.id,
         path: p.path,
-        title: messages[`common.sitemap.pages.${p.id}.title`] ?? p.title,
+        title: i18n.messages[`common.page.${p.id}.title`] ?? p.title,
         version: p.version,
         ...(p.lazy || !loaded
           ? {}
           : {
               pageDsl: localizePageDsl(
-                loaded.pageDsl,
-                p.id,
-                loaded.namespace,
-                messages,
+                {
+                  page: loaded.pageDsl as AuthorPageDsl,
+                  locale: i18n.locale,
+                  defaultLocale: i18n.defaultLocale,
+                  languageBundles: i18n.languageBundles,
+                  registry: consoleTranslatableFields,
+                },
               ),
             }),
       };
@@ -251,7 +280,7 @@ export function buildSitemap(
   const layouts = Object.fromEntries(
     Object.entries(site.layouts).map(([name, layout]) => [
       name,
-      localizeSitemapValue(layout, ["layouts", name], messages),
+      localizeLayout(layout, i18n),
     ]),
   ) as SitemapFile["layouts"];
 
@@ -268,7 +297,7 @@ export function buildSitemap(
         }
       : {}),
     pages,
-    menus: localizeMenus(filterMenus(site.menus, user), messages),
+    menus: localizeMenus(filterMenus(site.menus, user), i18n.messages),
   };
 }
 
@@ -276,7 +305,7 @@ export function buildSitemap(
 export function getLazyPage(
   pageId: string,
   user: DemoUser | null,
-  messages: Readonly<Record<string, string>> = {},
+  i18n: RequestI18n,
 ): { version: number; pageDsl: PageDsl } | null {
   const { site, pages } = state();
   const entry = site.pages.find((p) => p.id === pageId);
@@ -286,6 +315,12 @@ export function getLazyPage(
   }
   return {
     version: entry.version,
-    pageDsl: localizePageDsl(page.pageDsl, pageId, page.namespace, messages),
+    pageDsl: localizePageDsl({
+      page: page.pageDsl as AuthorPageDsl,
+      locale: i18n.locale,
+      defaultLocale: i18n.defaultLocale,
+      languageBundles: i18n.languageBundles,
+      registry: consoleTranslatableFields,
+    }),
   };
 }

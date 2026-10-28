@@ -1,4 +1,11 @@
-import { DEFAULT_LOCALE, normalizeLocale, resolveRequestLocale } from "@/i18n/locales";
+import { isI18nError, resolveRequestLocale } from "@pactor-app/i18n";
+
+import {
+  DEFAULT_LOCALE,
+  LOCALE_CONFIG,
+  LOCALE_COOKIE,
+  type ConsoleLocale,
+} from "@/pactor/locale";
 import { loadMessageBundleSet } from "@/server/i18n";
 
 export const dynamic = "force-dynamic";
@@ -8,20 +15,27 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(request: Request) {
   const url = new URL(request.url);
-  const locale = resolveRequestLocale({
-    queryLocale: url.searchParams.get("locale"),
-    cookieLocale: request.headers.get("cookie")
-      ?.split(";")
-      .map((part) => part.trim())
-      .find((part) => part.startsWith("nexus.locale="))
-      ?.slice("nexus.locale=".length),
-    acceptLanguage: request.headers.get("accept-language"),
-  });
-  if (normalizeLocale(url.searchParams.get("locale")) === null && url.searchParams.has("locale")) {
-    return Response.json(
-      { error: "Unsupported locale", defaultLocale: DEFAULT_LOCALE },
-      { status: 400 },
-    );
+  const cookieLocale = request.headers.get("cookie")
+    ?.split(";")
+    .map((part) => part.trim())
+    .find((part) => part.startsWith(`${LOCALE_COOKIE}=`))
+    ?.slice(LOCALE_COOKIE.length + 1);
+  const values = url.searchParams.getAll("locale");
+  let locale: ConsoleLocale;
+  try {
+    locale = resolveRequestLocale({
+      queryLocale: values.length > 1 ? values : values[0],
+      cookieLocale,
+      acceptLanguage: request.headers.get("accept-language") ?? undefined,
+    }, LOCALE_CONFIG).locale as ConsoleLocale;
+  } catch (error) {
+    if (isI18nError(error)) {
+      return Response.json(
+        { error: error.code, defaultLocale: DEFAULT_LOCALE },
+        { status: 400 },
+      );
+    }
+    throw error;
   }
   const namespaces = url.searchParams.get("namespaces")
     ?.split(",")

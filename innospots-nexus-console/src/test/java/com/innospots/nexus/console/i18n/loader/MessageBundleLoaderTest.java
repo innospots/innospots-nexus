@@ -51,6 +51,25 @@ class MessageBundleLoaderTest {
     }
 
     @Test
+    void appliesCountrySpecificLocaleAfterLanguageAndBaseFallback() {
+        MessageBundleLoader loader = new MessageBundleLoader(new MapClassLoader(Map.of(
+                "i18n/console/namespaces",
+                "common\n",
+                "i18n/console/common/messages.properties",
+                "common.base=基础\ncommon.language=基础语言\ncommon.country=基础地区\n",
+                "i18n/console/common/messages_en.properties",
+                "common.language=English language\ncommon.country=English country\n",
+                "i18n/console/common/messages_en_US.properties",
+                "common.country=American English\n"
+        )));
+
+        assertThat(loader.load("en-US", "common").messages())
+                .containsEntry("common.base", "基础")
+                .containsEntry("common.language", "English language")
+                .containsEntry("common.country", "American English");
+    }
+
+    @Test
     void readsNamespacesFromClasspathIndexInDeclaredOrder() {
         MessageBundleLoader loader = new MessageBundleLoader(new MapClassLoader(Map.of(
                 "i18n/console/namespaces",
@@ -58,7 +77,7 @@ class MessageBundleLoaderTest {
                 "i18n/console/common/messages.properties",
                 "common.action.save=保存\n",
                 "i18n/console/role/messages.properties",
-                "role.role-list.body.title=角色管理\n"
+                "role.role-list.title=角色管理\n"
         )));
 
         assertThat(loader.namespaces()).containsExactly("common", "role");

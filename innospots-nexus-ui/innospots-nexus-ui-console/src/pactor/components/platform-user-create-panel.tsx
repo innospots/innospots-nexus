@@ -4,7 +4,7 @@ import { useCallback, useMemo, useState } from "react";
 
 import { Button, Input } from "@pactor-app/ui/components";
 
-import { useUiText } from "@/i18n/ui";
+import { useI18n } from "@pactor-app/runtime";
 
 import { encryptPasswordForApi } from "../lib/rsa-password";
 
@@ -17,7 +17,7 @@ export interface PlatformUserCreatePanelProps {
 }
 
 export function PlatformUserCreatePanel({ onCancel, onCreated }: PlatformUserCreatePanelProps) {
-    const t = useUiText();
+    const { t } = useI18n();
     const [mode, setMode] = useState<ProvisionMode>("invite");
     const [contactType, setContactType] = useState<ContactType>("email");
     const [loginName, setLoginName] = useState("");
@@ -55,7 +55,7 @@ export function PlatformUserCreatePanel({ onCancel, onCreated }: PlatformUserCre
 
     const submitDirect = useCallback(async () => {
         if (!canSubmitDirect) {
-            setError("请填写登录名、联系方式，并确保两次密码一致。");
+            setError("common.ui.enter-a-login-name-and-contact-details-and-make-sure-both-passwords-matc");
             return;
         }
         setSubmitting(true);
@@ -89,12 +89,12 @@ export function PlatformUserCreatePanel({ onCancel, onCreated }: PlatformUserCre
             };
             if (!response.ok || envelope.success === false) {
                 throw new Error(
-                    envelope.message ?? `${t("创建失败")} (HTTP ${response.status})`,
+                    envelope.message ?? `${t("common.ui.create-failed")} (HTTP ${response.status})`,
                 );
             }
             onCreated?.(envelope.data ?? {});
         } catch (err) {
-            setError(err instanceof Error ? t(err.message) : t("创建失败"));
+            setError(err instanceof Error ? err.message : "common.ui.create-failed");
         } finally {
             setSubmitting(false);
         }
@@ -114,7 +114,7 @@ export function PlatformUserCreatePanel({ onCancel, onCreated }: PlatformUserCre
     return (
         <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
-                <span className="text-sm font-medium">{t("开通方式 *")}</span>
+                <span className="text-sm font-medium">{t("common.ui.provisioning-method")}</span>
                 <div className="flex flex-wrap gap-4 text-sm">
                     <label className="flex cursor-pointer items-center gap-2">
                         <input
@@ -123,7 +123,7 @@ export function PlatformUserCreatePanel({ onCancel, onCreated }: PlatformUserCre
                             checked={mode === "invite"}
                             onChange={() => resetModeFields("invite")}
                         />
-                        {t("发送邀请（推荐）")}
+                        {t("common.ui.send-invitation-recommended")}
                     </label>
                     <label className="flex cursor-pointer items-center gap-2">
                         <input
@@ -132,37 +132,37 @@ export function PlatformUserCreatePanel({ onCancel, onCreated }: PlatformUserCre
                             checked={mode === "direct"}
                             onChange={() => resetModeFields("direct")}
                         />
-                        {t("直接创建账号（实施权限）")}
+                        {t("common.ui.create-account-directly-implementation-permission")}
                     </label>
                 </div>
             </div>
 
             <div className="rounded-md border border-border p-4">
-                <p className="mb-3 text-sm font-medium">{t("基本信息")}</p>
+                <p className="mb-3 text-sm font-medium">{t("common.ui.basic-information")}</p>
                 <div className="grid gap-3 md:grid-cols-2">
                     <label className="flex flex-col gap-1 text-sm">
-                        {t("登录名")} {mode === "direct" ? "*" : ""}
+                        {t("common.ui.login-name")} {mode === "direct" ? "*" : ""}
                         <Input
                             value={loginName}
                             onChange={(value) => setLoginName(String(value))}
                             placeholder={
                                 mode === "direct"
-                                    ? t("2–64 字符，创建后不可改")
-                                    : t("可选，接受邀请时可修改")
+                                    ? t("common.ui.2-64-characters-immutable-after-creation")
+                                    : t("common.ui.optional-editable-when-accepting-the-invitation")
                             }
                         />
                     </label>
                     <label className="flex flex-col gap-1 text-sm">
-                        {t("显示名称")}
+                        {t("common.ui.display-name")}
                         <Input
                             value={displayName}
                             onChange={(value) => setDisplayName(String(value))}
-                            placeholder={t("在控制台展示的名称")}
+                            placeholder={t("common.ui.name-shown-in-the-console")}
                         />
                     </label>
                 </div>
                 <div className="mt-3 flex flex-col gap-2">
-                    <span className="text-sm font-medium">{t("联系方式 *（二选一）")}</span>
+                    <span className="text-sm font-medium">{t("common.ui.contact-choose-one")}</span>
                     <div className="flex gap-4 text-sm">
                         <label className="flex cursor-pointer items-center gap-2">
                             <input
@@ -170,7 +170,7 @@ export function PlatformUserCreatePanel({ onCancel, onCreated }: PlatformUserCre
                                 checked={contactType === "email"}
                                 onChange={() => setContactType("email")}
                             />
-                            {t("邮箱")}
+                            {t("common.ui.email")}
                         </label>
                         <label className="flex cursor-pointer items-center gap-2">
                             <input
@@ -178,7 +178,7 @@ export function PlatformUserCreatePanel({ onCancel, onCreated }: PlatformUserCre
                                 checked={contactType === "mobile"}
                                 onChange={() => setContactType("mobile")}
                             />
-                            {t("手机号码")}
+                            {t("common.ui.mobile-number")}
                         </label>
                     </div>
                     {contactType === "email" ? (
@@ -191,7 +191,7 @@ export function PlatformUserCreatePanel({ onCancel, onCreated }: PlatformUserCre
                         <Input
                             value={mobile}
                             onChange={(value) => setMobile(String(value))}
-                            placeholder={t("11 位手机号")}
+                            placeholder={t("common.ui.11-digit-mobile-number")}
                         />
                     )}
                 </div>
@@ -199,19 +199,19 @@ export function PlatformUserCreatePanel({ onCancel, onCreated }: PlatformUserCre
 
             {mode === "invite" && (
                 <div className="rounded-md border border-dashed border-amber-500/50 bg-amber-500/5 p-4 text-sm text-muted-foreground">
-                    <p className="font-medium text-foreground">{t("邀请开通")}</p>
+                    <p className="font-medium text-foreground">{t("common.ui.invitation")}</p>
                     <p className="mt-1">
-                        {t("POST /platform/invites 尚未就绪。请切换为「直接创建账号」完成开通，或等待邀请 API 发布后在本页提交邀请单。")}
+                        {t("common.ui.post-platform-invites-is-not-ready-switch-to-create-account-directly-to")}
                     </p>
                 </div>
             )}
 
             {mode === "direct" && (
                 <div className="rounded-md border border-border p-4">
-                    <p className="mb-3 text-sm font-medium">{t("账号与密码")}</p>
+                    <p className="mb-3 text-sm font-medium">{t("common.ui.account-and-password")}</p>
                     <div className="grid gap-3 md:grid-cols-2">
                         <label className="flex flex-col gap-1 text-sm">
-                            {t("初始密码 *")}
+                            {t("common.ui.initial-password")}
                             <Input
                                 type="password"
                                 value={password}
@@ -219,7 +219,7 @@ export function PlatformUserCreatePanel({ onCancel, onCreated }: PlatformUserCre
                             />
                         </label>
                         <label className="flex flex-col gap-1 text-sm">
-                            {t("确认密码 *")}
+                            {t("common.ui.confirm-password-2")}
                             <Input
                                 type="password"
                                 value={confirmPassword}
@@ -228,11 +228,11 @@ export function PlatformUserCreatePanel({ onCancel, onCreated }: PlatformUserCre
                         </label>
                     </div>
                     <label className="mt-3 flex flex-col gap-1 text-sm">
-                        {t("默认角色（可选，逗号分隔角色编码）")}
+                        {t("common.ui.default-roles-optional-comma-separated-role-codes")}
                         <Input
                             value={roleCodes}
                             onChange={(value) => setRoleCodes(String(value))}
-                            placeholder={t("如 PLATFORM_OPERATOR")}
+                            placeholder={t("common.ui.e-g-platform-operator")}
                         />
                     </label>
                 </div>
@@ -242,7 +242,7 @@ export function PlatformUserCreatePanel({ onCancel, onCreated }: PlatformUserCre
 
             <div className="flex justify-end gap-2">
                 <Button onClick={() => onCancel?.()}>
-                    {t("取消")}
+                    {t("common.ui.cancel")}
                 </Button>
                 {mode === "direct" && (
                     <Button
@@ -250,7 +250,7 @@ export function PlatformUserCreatePanel({ onCancel, onCreated }: PlatformUserCre
                         disabled={submitting || !canSubmitDirect}
                         onClick={() => void submitDirect()}
                     >
-                        {submitting ? t("提交中…") : t("提交")}
+                        {submitting ? t("common.ui.submitting") : t("common.ui.submit")}
                     </Button>
                 )}
             </div>

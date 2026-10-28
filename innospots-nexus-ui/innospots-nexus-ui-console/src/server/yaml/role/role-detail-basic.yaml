@@ -1,7 +1,7 @@
 dsl: "1.0"
 page:
   id: role-detail-basic
-  title: 角色详情
+  title: '$i18n{role.role-detail-basic.title:角色详情}'
   name: roleDetail
 
 state:
@@ -45,7 +45,9 @@ dataSources:
         input: ${state.input}
         pageNo: ${state.pageNo}
         pageSize: ${state.pageSize}
-
+i18n:
+  namespaces:
+    - role
 lifecycle:
   onShow:
     - action: setState
@@ -75,14 +77,14 @@ lifecycle:
           - action: reload
             params:
               dataSource: bindings
-
 body:
   type: Page
   children:
     - type: Breadcrumb
       props:
         items:
-          - label: 角色管理
+          - label:
+              '$i18n{role.role-detail-basic.role-management:角色管理}'
             href: /system/roles
           - label: "${data.role != null && data.role.roleName != null ? data.role.roleName : params.roleId}"
     - type: Tabs
@@ -93,7 +95,7 @@ body:
         contentClassName: pt-4
         items:
           - key: basic
-            label: 基本信息
+            label: '$i18n{role.role-detail-basic.basic-information:基本信息}'
             children:
               - type: Flex
                 when: ${data.role != null}
@@ -105,13 +107,13 @@ body:
                   - type: Button
                     when: ${data.role.status == 'ENABLED' || data.role.status == 'DISABLED'}
                     props:
-                      text: "${data.role.status == 'ENABLED' ? '停用' : '启用'}"
+                      text: "${data.role.status == 'ENABLED' ? t('role.role-detail-basic.disable') : t('role.role-detail-basic.enable')}"
                     events:
                       onClick:
                         - action: confirm
                           params:
-                            title: 确认变更状态
-                            content: 确定要变更该角色的启用状态吗？
+                            title: '$i18n{role.role-detail-basic.confirm-status-change:确认变更状态}'
+                            content: '$i18n{role.role-detail-basic.change-this-role-s-enabled-state:确定要变更该角色的启用状态吗？}'
                         - action: request
                           params:
                             method: PUT
@@ -121,13 +123,13 @@ body:
                         - action: message
                           params:
                             messageType: success
-                            text: 状态已更新
+                            text: '$i18n{role.role-detail-basic.status-updated:状态已更新}'
                         - action: reload
                           params:
                             dataSource: role
                   - type: Button
                     props:
-                      text: 修改
+                      text: '$i18n{role.role-detail-basic.edit:修改}'
                       variant: primary
                     events:
                       onClick:
@@ -135,7 +137,7 @@ body:
                           params:
                             overlay:
                               type: modal
-                              title: 修改角色
+                              title: '$i18n{role.role-detail-basic.edit-role:修改角色}'
                               width: 520
                               content:
                                 type: Form
@@ -155,7 +157,7 @@ body:
                                     - action: message
                                       params:
                                         messageType: success
-                                        text: 已保存修改
+                                        text: '$i18n{role.role-detail-basic.changes-saved:已保存修改}'
                                     - action: overlay.close
                                     - action: reload
                                       params:
@@ -163,24 +165,24 @@ body:
                                 children:
                                   - type: Field
                                     props:
-                                      label: 角色名称
+                                      label: '$i18n{role.role-detail-basic.role-name:角色名称}'
                                       required: true
                                     children:
                                       - type: Input
                                         props:
                                           name: roleName
-                                          placeholder: 请输入角色名称
+                                          placeholder: '$i18n{role.role-detail-basic.enter-a-role-name:请输入角色名称}'
                                           rules:
                                             - required: true
-                                              message: 请输入角色名称
+                                              message: '$i18n{role.role-detail-basic.enter-a-role-name-2:请输入角色名称}'
                                   - type: Field
                                     props:
-                                      label: 描述
+                                      label: '$i18n{role.role-detail-basic.description:描述}'
                                     children:
                                       - type: Textarea
                                         props:
                                           name: description
-                                          placeholder: 角色用途说明
+                                          placeholder: '$i18n{role.role-detail-basic.role-purpose:角色用途说明}'
                                   - type: Flex
                                     props:
                                       justify: end
@@ -189,13 +191,13 @@ body:
                                     children:
                                       - type: Button
                                         props:
-                                          text: 取消
+                                          text: '$i18n{role.role-detail-basic.cancel:取消}'
                                         events:
                                           onClick:
                                             - action: overlay.close
                                       - type: Button
                                         props:
-                                          text: 保存
+                                          text: '$i18n{role.role-detail-basic.save:保存}'
                                           variant: primary
                                           submit: true
                                           htmlType: submit
@@ -205,17 +207,27 @@ body:
                   - type: Descriptions
                     props:
                       items:
-                        - { label: 角色名称, value: "${data.role.roleName != null ? data.role.roleName : '—'}" }
-                        - { label: 角色编码, value: "${data.role.roleCode != null ? data.role.roleCode : '—'}" }
-                        - label: 归属层级
+                        - label:
+                            '$i18n{role.role-detail-basic.role-name-2:角色名称}'
+                          value: "${data.role.roleName != null ? data.role.roleName : '—'}"
+                        - label:
+                            '$i18n{role.role-detail-basic.role-code:角色编码}'
+                          value: "${data.role.roleCode != null ? data.role.roleCode : '—'}"
+                        - label:
+                            '$i18n{role.role-detail-basic.ownership-level:归属层级}'
                           value: "${data.role.ownerType != null ? data.role.ownerType : '—'}"
-                        - label: 状态
-                          value: "${data.role.status == 'ENABLED' ? '启用' : data.role.status == 'DISABLED' ? '停用' : data.role.status}"
-                        - { label: 成员数量, value: "${data.role.memberCount != null ? data.role.memberCount : 0}" }
-                        - label: 描述
+                        - label:
+                            '$i18n{role.role-detail-basic.status:状态}'
+                          value: "${data.role.status == 'ENABLED' ? t('role.role-detail-basic.enable') : data.role.status == 'DISABLED' ?
+                            t('role.role-detail-basic.disable') : data.role.status}"
+                        - label:
+                            '$i18n{role.role-detail-basic.member-count:成员数量}'
+                          value: "${data.role.memberCount != null ? data.role.memberCount : 0}"
+                        - label:
+                            '$i18n{role.role-detail-basic.description-2:描述}'
                           value: "${data.role.description != null && data.role.description != '' ? data.role.description : '—'}"
           - key: permissions
-            label: 权限设置
+            label: '$i18n{role.role-detail-basic.permissions:权限设置}'
             children:
               - type: Flex
                 props:
@@ -224,11 +236,11 @@ body:
                 children:
                   - type: Text
                     props:
-                      text: 当前角色已选授权项以保存前草稿为准；保存将全量替换该角色现有授权。
+                      text: '$i18n{role.role-detail-basic.selected-authorization-items-are-a-pre-save-draft-saving-replaces-all-ex:当前角色已选授权项以保存前草稿为准；保存将全量替换该角色现有授权。}'
                   - type: Input
                     props:
                       value: ${state.resourceSearch}
-                      placeholder: 搜索资源名称 / Key
+                      placeholder: '$i18n{role.role-detail-basic.search-resource-name-key:搜索资源名称 / Key}'
                     events:
                       onChange:
                         - action: setState
@@ -242,7 +254,9 @@ body:
                 children:
                   - type: Card
                     props:
-                      style: { flex: 1, minWidth: 280 }
+                      style:
+                        flex: 1
+                        minWidth: 280
                     children:
                       - type: Flex
                         props:
@@ -251,11 +265,11 @@ body:
                         children:
                           - type: Text
                             props:
-                              text: 后台资源目录
+                              text: '$i18n{role.role-detail-basic.backend-resource-catalog:后台资源目录}'
                               strong: true
                           - type: Button
                             props:
-                              text: 同步目录
+                              text: '$i18n{role.role-detail-basic.sync-catalog:同步目录}'
                               size: small
                             events:
                               onClick:
@@ -266,14 +280,14 @@ body:
                                 - action: message
                                   params:
                                     messageType: success
-                                    text: 目录已同步
+                                    text: '$i18n{role.role-detail-basic.catalog-synchronized:目录已同步}'
                                 - action: reload
                                   params:
                                     dataSource: catalog
                       - type: Text
                         when: ${dataStatus.catalog.loading}
                         props:
-                          text: 加载目录中…
+                          text: '$i18n{role.role-detail-basic.loading-catalog:加载目录中…}'
                           type: secondary
                           className: mt-2
                       - type: CatalogTree
@@ -289,16 +303,17 @@ body:
                                 selectedResourceKey: ${event[0]}
                   - type: Card
                     props:
-                      style: { flex: 2 }
+                      style:
+                        flex: 2
                     children:
                       - type: Text
                         props:
-                          text: 当前资源授权
+                          text: '$i18n{role.role-detail-basic.current-resource-authorization:当前资源授权}'
                           strong: true
                       - type: Text
                         when: ${dataStatus.grants.loading}
                         props:
-                          text: 加载授权中…
+                          text: '$i18n{role.role-detail-basic.loading-authorization:加载授权中…}'
                           type: secondary
                           className: mt-2
                       - type: PermissionGrantPanel
@@ -323,7 +338,7 @@ body:
                 children:
                   - type: Text
                     props:
-                      text: "${state.dirty ? '变更尚未保存' : '无未保存变更'}"
+                      text: "${state.dirty ? t('role.role-detail-basic.unsaved-changes') : t('role.role-detail-basic.no-unsaved-changes')}"
                       type: secondary
                   - type: Flex
                     props:
@@ -331,7 +346,7 @@ body:
                     children:
                       - type: Button
                         props:
-                          text: 取消
+                          text: '$i18n{role.role-detail-basic.cancel-2:取消}'
                         events:
                           onClick:
                             - action: reload
@@ -343,15 +358,15 @@ body:
                                 dirty: false
                       - type: Button
                         props:
-                          text: 保存完整授权
+                          text: '$i18n{role.role-detail-basic.save-full-authorization-2:保存完整授权}'
                           variant: primary
                           disabled: ${!state.dirty}
                         events:
                           onClick:
                             - action: confirm
                               params:
-                                title: 保存完整授权
-                                content: 本次提交会替换该角色现有的全部授权，确定继续吗？
+                                title: '$i18n{role.role-detail-basic.save-full-authorization:保存完整授权}'
+                                content: '$i18n{role.role-detail-basic.this-submission-will-replace-all-existing-authorizations-for-this-role-c:本次提交会替换该角色现有的全部授权，确定继续吗？}'
                             - action: request
                               params:
                                 method: PUT
@@ -361,7 +376,7 @@ body:
                             - action: message
                               params:
                                 messageType: success
-                                text: 授权已保存
+                                text: '$i18n{role.role-detail-basic.authorization-saved:授权已保存}'
                             - action: setState
                               params:
                                 dirty: false
@@ -373,7 +388,7 @@ body:
                                 draftGrants: ${data.grants.grants}
                                 dirty: false
           - key: members
-            label: 成员列表
+            label: '$i18n{role.role-detail-basic.member-list:成员列表}'
             children:
               - type: Card
                 children:
@@ -393,19 +408,19 @@ body:
                     children:
                       - type: Field
                         props:
-                          label: 搜索
+                          label: '$i18n{role.role-detail-basic.search:搜索}'
                         children:
                           - type: Input
                             props:
                               name: input
-                              placeholder: 名称 / 账号 / 组织单元
+                              placeholder: '$i18n{role.role-detail-basic.name-account-organization-unit:名称 / 账号 / 组织单元}'
                       - type: Field
                         props:
-                          label: " "
+                          label:  
                         children:
                           - type: Button
                             props:
-                              text: 查询
+                              text: '$i18n{role.role-detail-basic.search-2:查询}'
                               submit: true
                               htmlType: submit
                   - type: Flex
@@ -416,7 +431,7 @@ body:
                     children:
                       - type: Button
                         props:
-                          text: + 添加成员
+                          text: '$i18n{role.role-detail-basic.add-member:+ 添加成员}'
                           variant: primary
                         events:
                           onClick:
@@ -424,12 +439,12 @@ body:
                               params:
                                 overlay:
                                   type: modal
-                                  title: "添加到「${data.role.roleName}」"
+                                  title: "${t('role.role-detail-basic.add-to-role', { roleName: data.role.roleName })}"
                                   width: 720
                                   content:
                                     type: Text
                                     props:
-                                      text: 暂无可添加的成员。
+                                      text: '$i18n{role.role-detail-basic.no-members-available-to-add:暂无可添加的成员。}'
                   - type: Table
                     props:
                       rowKey: bindingId
@@ -437,15 +452,18 @@ body:
                       loading: ${dataStatus.bindings.loading}
                       className: mt-4
                       columns:
-                        - title: 主体类型
+                        - title:
+                            '$i18n{role.role-detail-basic.subject-type:主体类型}'
                           dataIndex: subjectType
-                        - title: 主体 ID
+                        - title:
+                            '$i18n{role.role-detail-basic.subject-id:主体 ID}'
                           dataIndex: subjectId
-                        - title: 操作
+                        - title:
+                            '$i18n{role.role-detail-basic.actions:操作}'
                           cell:
                             type: Button
                             props:
-                              text: 移除
+                              text: '$i18n{role.role-detail-basic.remove:移除}'
                               variant: link
                               size: small
                               danger: true
@@ -453,8 +471,8 @@ body:
                               onClick:
                                 - action: confirm
                                   params:
-                                    title: 移除成员
-                                    content: 仅解除该角色绑定，不删除用户或组织单元。确定移除吗？
+                                    title: '$i18n{role.role-detail-basic.remove-member:移除成员}'
+                                    content: '$i18n{role.role-detail-basic.only-the-role-binding-is-removed-users-and-organization-units-are-retain:仅解除该角色绑定，不删除用户或组织单元。确定移除吗？}'
                                 - action: request
                                   params:
                                     method: DELETE
@@ -462,13 +480,13 @@ body:
                                 - action: message
                                   params:
                                     messageType: success
-                                    text: 已移除
+                                    text: '$i18n{role.role-detail-basic.removed:已移除}'
                                 - action: reload
                                   params:
                                     dataSource: bindings
                   - type: Text
                     props:
-                      text: 共 ${data.bindings.total} 条
+                      text: "${t('role.role-detail-basic.summary.count', { count: data.bindings.total })}"
                       type: secondary
                       className: mt-3
       events:

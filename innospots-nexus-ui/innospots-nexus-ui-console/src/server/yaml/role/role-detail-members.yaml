@@ -1,19 +1,20 @@
 dsl: "1.0"
 page:
   id: role-detail-members
-  title: 角色成员列表
+  title: '$i18n{role.role-detail-members.title:角色成员列表}'
   name: roleDetailMembersRedirect
-
+i18n:
+  namespaces:
+    - role
 lifecycle:
   onShow:
     - action: navigate
       params:
         to: /system/roles/${params.roleId}?tab=members
-
 body:
   type: Page
   children:
     - type: Text
       props:
-        text: 正在打开成员列表…
+        text: '$i18n{role.role-detail-members.opening-members:正在打开成员列表…}'
         type: secondary

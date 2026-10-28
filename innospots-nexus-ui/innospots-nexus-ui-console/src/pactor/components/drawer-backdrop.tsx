@@ -1,6 +1,6 @@
 "use client";
 
-import { useUiText } from "@/i18n/ui";
+import { useI18n } from "@pactor-app/runtime";
 
 export interface DrawerBackdropProps {
     open?: boolean;
@@ -12,14 +12,14 @@ export interface DrawerBackdropProps {
  * 在列表等页面上叠一层可点空白关闭的半透明幕布。
  */
 export function DrawerBackdrop({ open, onClose }: DrawerBackdropProps) {
-    const t = useUiText();
+    const { t } = useI18n();
     if (open !== true) {
         return null;
     }
     return (
         <button
             type="button"
-            aria-label={t("关闭")}
+            aria-label={t("common.ui.close")}
             className="fixed inset-0 z-[45] cursor-default bg-black/40"
             onClick={() => onClose?.()}
         />
