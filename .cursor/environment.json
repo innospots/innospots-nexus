@@ -1,0 +1,5 @@
+{
+  "name": "innospots-nexus",
+  "user": "ubuntu",
+  "install": "bash .cursor/cloud-agent-install.sh"
+}
