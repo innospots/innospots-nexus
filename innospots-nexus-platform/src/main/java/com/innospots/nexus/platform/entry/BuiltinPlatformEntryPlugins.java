@@ -1,15 +1,12 @@
 package com.innospots.nexus.platform.entry;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-
-import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributeNode;
-import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributions;
-import com.innospots.nexus.core.plugin.declaration.Tags;
 
 /**
- * {@code innospots-nexus-platform} 内置 entry 插件 ID、领域键、版本与发现标签。
+ * {@code innospots-nexus-platform} 内置 entry 插件 ID、领域键、版本与发现标签常量。
+ *
+ * <p>控制台 MODULE 树声明见 classpath
+ * {@code META-INF/innos-resources/plugin-declaration.yaml}。</p>
  */
 public final class BuiltinPlatformEntryPlugins {
 
@@ -39,19 +36,5 @@ public final class BuiltinPlatformEntryPlugins {
             return DEVELOPMENT_PLUGIN_VERSION;
         }
         return version;
-    }
-
-    /**
-     * platform 聚合 entry 的发现标签：{@link ConsoleContributions} 通用键 + {@link #TAG_REALM}。
-     */
-    public static Tags discoveryTags(List<ConsoleContributeNode> modules) {
-        List<String> moduleKeys = modules.stream()
-                .map(ConsoleContributeNode::moduleKey)
-                .sorted()
-                .toList();
-        Tags base = ConsoleContributions.discoveryTags(PLATFORM_CONSOLE, DOMAIN_KEY, moduleKeys);
-        Map<String, String> merged = new LinkedHashMap<>(base.asMap());
-        merged.put(TAG_REALM, TAG_REALM_PLATFORM);
-        return Tags.from(merged);
     }
 }

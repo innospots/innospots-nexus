@@ -1,0 +1,198 @@
+apiVersion: nexus.plugin/v1
+kind: Plugin
+metadata:
+  pluginId: com.innospots.nexus.platform.console
+  version: "0.1.0"
+spec:
+  apiVersion: 1
+  displayName:
+    en: Platform Console
+    zh: 运营管理平台
+  description:
+    en: Organizations, platform users, invites, and registration policy.
+    zh: 组织开通、平台用户、邀请与注册策略。
+  tags:
+    kind: entry
+    domain: platform
+    module: console
+    realm: platform
+  contributions:
+    - type: console
+      majorVersion: 2
+      domainKey: platform
+      displayName:
+        en: Platform Console
+        zh: 运营管理平台
+      description:
+        en: Organizations, platform users, invites, and registration policy.
+        zh: 组织开通、平台用户、邀请与注册策略。
+      orderIndex: 0
+      modules:
+        - moduleKey: organization
+          displayName:
+            en: Organizations
+            zh: 组织
+          description:
+            en: Platform organizations (enterprise, team, or individual).
+            zh: 平台组织开通与生命周期（企业、团队或个人形态）。
+          orderIndex: 10
+          entryPageKey: platform-organization-main
+          icon: apartment
+          viewGroups:
+            - group: default
+              label:
+                en: Browse organization pages
+                zh: 浏览组织管理页面
+          operationGroups:
+            - group: default
+              label:
+                en: Operations
+                zh: 操作
+          children: []
+        - moduleKey: menu
+          displayName:
+            en: Menu Management
+            zh: 菜单管理
+          description:
+            en: Platform navigation menu management.
+            zh: 平台导航菜单管理。
+          orderIndex: 10
+          entryPageKey: platform-menu-main
+          icon: menu
+          viewGroups:
+            - group: default
+              label:
+                en: Browse menu management pages
+                zh: 浏览菜单管理页面
+          operationGroups:
+            - group: default
+              label:
+                en: Operations
+                zh: 操作
+          children: []
+        - moduleKey: user
+          displayName:
+            en: Users
+            zh: 用户列表
+          description:
+            en: Platform IAM and onboarding.
+            zh: 平台用户与开通。
+          orderIndex: 20
+          entryPageKey: platform-user-main
+          icon: team
+          viewGroups:
+            - group: default
+              label:
+                en: Browse user management pages
+                zh: 浏览用户管理页面
+          operationGroups:
+            - group: default
+              label:
+                en: Operations
+                zh: 操作
+          children: []
+        - moduleKey: dictionary
+          displayName:
+            en: Dictionary Management
+            zh: 字典管理
+          description:
+            en: Platform dictionary management.
+            zh: 平台字典管理。
+          orderIndex: 20
+          entryPageKey: platform-dictionary-main
+          icon: book
+          viewGroups:
+            - group: default
+              label:
+                en: Browse dictionary management pages
+                zh: 浏览字典管理页面
+          operationGroups:
+            - group: default
+              label:
+                en: Operations
+                zh: 操作
+          children: []
+        - moduleKey: role
+          displayName:
+            en: Role Management
+            zh: 角色管理
+          description:
+            en: Platform role management.
+            zh: 平台角色管理。
+          orderIndex: 30
+          entryPageKey: platform-role-main
+          icon: team
+          viewGroups:
+            - group: default
+              label:
+                en: Browse role management pages
+                zh: 浏览角色管理页面
+          operationGroups:
+            - group: default
+              label:
+                en: Operations
+                zh: 操作
+          children: []
+        - moduleKey: permission
+          displayName:
+            en: Permission Management
+            zh: 权限管理
+          description:
+            en: Platform permission management.
+            zh: 平台权限管理。
+          orderIndex: 40
+          entryPageKey: platform-permission-main
+          icon: lock
+          viewGroups:
+            - group: default
+              label:
+                en: Browse permission management pages
+                zh: 浏览权限管理页面
+          operationGroups:
+            - group: default
+              label:
+                en: Operations
+                zh: 操作
+          children: []
+        - moduleKey: logger
+          displayName:
+            en: Audit Logs
+            zh: 审计日志
+          description:
+            en: Platform audit log management.
+            zh: 平台审计日志管理。
+          orderIndex: 50
+          entryPageKey: platform-logger-main
+          icon: file-text
+          viewGroups:
+            - group: default
+              label:
+                en: Browse audit log pages
+                zh: 浏览审计日志页面
+          operationGroups:
+            - group: default
+              label:
+                en: Operations
+                zh: 操作
+          children: []
+        - moduleKey: settings
+          displayName:
+            en: Registration mode
+            zh: 注册模式
+          description:
+            en: Platform operational settings.
+            zh: 运营平台配置项。
+          orderIndex: 40
+          entryPageKey: platform-settings-registration-mode
+          icon: setting
+          viewGroups:
+            - group: default
+              label:
+                en: Browse registration mode settings
+                zh: 浏览注册模式配置页面
+          operationGroups:
+            - group: default
+              label:
+                en: Operations
+                zh: 操作
+          children: []

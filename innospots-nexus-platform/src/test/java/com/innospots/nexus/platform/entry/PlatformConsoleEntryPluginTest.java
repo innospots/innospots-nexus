@@ -1,31 +1,31 @@
 package com.innospots.nexus.platform.entry;
 
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
 
+import com.innospots.nexus.core.plugin.contribution.PluginContributionDecoderRegistry;
 import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributeNode;
 import com.innospots.nexus.core.plugin.contribution.console.ConsolePluginContribution;
+import com.innospots.nexus.core.plugin.contribution.console.ConsolePluginContributionDecoder;
 import com.innospots.nexus.core.plugin.declaration.PluginDefinition;
+import com.innospots.nexus.core.plugin.discovery.ClasspathPluginDiscovery;
+import com.innospots.nexus.core.plugin.discovery.PluginDiscoveryReport;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class PlatformConsoleEntryPluginTest {
 
     @Test
-    void declaresAggregatedPlatformConsoleContribution() {
-        PluginDefinition definition = new PlatformConsoleEntryPlugin().definition();
+    void declaresAggregatedPlatformConsoleContributionFromYaml() {
+        PluginDefinition definition = platformConsoleDefinition();
 
         assertThat(definition.pluginId()).isEqualTo(BuiltinPlatformEntryPlugins.PLATFORM_CONSOLE);
+        assertThat(definition.version()).isEqualTo("0.1.0");
         assertThat(definition.tags().asMap()).containsEntry(
                 BuiltinPlatformEntryPlugins.TAG_REALM,
                 BuiltinPlatformEntryPlugins.TAG_REALM_PLATFORM);
+        assertThat(definition.tags().asMap()).containsEntry("module", "console");
 
-        ConsolePluginContribution contribution = definition.contributions().stream()
-                .filter(ConsolePluginContribution.class::isInstance)
-                .map(ConsolePluginContribution.class::cast)
-                .findFirst()
-                .orElseThrow();
+        ConsolePluginContribution contribution = consoleContribution(definition);
 
         assertThat(contribution.modules()).extracting(ConsoleContributeNode::moduleKey)
                 .containsExactly(
@@ -42,17 +42,15 @@ class PlatformConsoleEntryPluginTest {
 
     @Test
     void eachModuleDeclaresSinglePageModuleWithEntryPageKey() {
-        ConsolePluginContribution contribution = consoleContribution();
+        ConsolePluginContribution contribution = consoleContribution(platformConsoleDefinition());
         ConsoleContributeNode userModule = contribution.modules().stream()
                 .filter(module -> "user".equals(module.moduleKey()))
                 .findFirst()
                 .orElseThrow();
 
-        assertThat(PlatformModuleDescriptors.USERS.children()).isEmpty();
-        assertThat(PlatformModuleDescriptors.USERS.isModule()).isTrue();
         assertThat(userModule.children()).isEmpty();
-        assertThat(userModule.entryPageKey())
-                .isEqualTo(PlatformModuleDescriptors.USERS.entryPageKey());
+        assertThat(userModule.isModule()).isTrue();
+        assertThat(userModule.entryPageKey()).isEqualTo("platform-user-main");
 
         ConsoleContributeNode organization = contribution.modules().stream()
                 .filter(module -> "organization".equals(module.moduleKey()))
@@ -68,28 +66,48 @@ class PlatformConsoleEntryPluginTest {
                 .filter(module -> "settings".equals(module.moduleKey()))
                 .findFirst()
                 .orElseThrow();
+        assertThat(settings.entryPageKey()).isEqualTo("platform-settings-registration-mode");
         assertThat(settings.viewGroups()).extracting(group -> group.group())
                 .containsExactly(ConsoleContributeNode.DEFAULT_VIEW_GROUP);
     }
 
     @Test
-    void registersThroughSpi() throws Exception {
-        String servicePath = "META-INF/services/com.innospots.nexus.core.plugin.contract.Plugin";
-        String content = new String(getClass().getClassLoader().getResourceAsStream(servicePath).readAllBytes());
-        List<String> pluginClasses = content.lines()
-                .map(String::trim)
-                .filter(line -> !line.isBlank())
-                .toList();
-
-        assertThat(pluginClasses).contains("com.innospots.nexus.platform.entry.PlatformConsoleEntryPlugin");
+    void packagesYamlPluginDeclarationAtStandardPath() {
+        assertThat(getClass().getResource("/" + ClasspathPluginDiscovery.MANIFEST_RESOURCE))
+                .isNotNull();
     }
 
-    private static ConsolePluginContribution consoleContribution() {
-        return new PlatformConsoleEntryPlugin().definition().contributions().stream()
+    @Test
+    void doesNotRegisterPlatformConsoleThroughJavaSpi() throws Exception {
+        String servicePath = "META-INF/services/com.innospots.nexus.core.plugin.contract.Plugin";
+        var stream = getClass().getClassLoader().getResourceAsStream(servicePath);
+        if (stream == null) {
+            return;
+        }
+        String content = new String(stream.readAllBytes());
+        assertThat(content.lines()
+                .map(String::trim)
+                .filter(line -> !line.isBlank() && !line.startsWith("#")))
+                .noneMatch(line -> line.contains("com.innospots.nexus.platform.entry"));
+    }
+
+    private static PluginDefinition platformConsoleDefinition() {
+        PluginDiscoveryReport report = new ClasspathPluginDiscovery(
+                PlatformConsoleEntryPluginTest.class.getClassLoader(),
+                PluginContributionDecoderRegistry.builder()
+                        .register(new ConsolePluginContributionDecoder())
+                        .build()).discoverReport();
+        return report.validCatalog().plugin(BuiltinPlatformEntryPlugins.PLATFORM_CONSOLE)
+                .orElseThrow(() -> new AssertionError(
+                        "platform console plugin not discovered; rejected=" + report.rejectedDefinitions()))
+                .definition();
+    }
+
+    private static ConsolePluginContribution consoleContribution(PluginDefinition definition) {
+        return definition.contributions().stream()
                 .filter(ConsolePluginContribution.class::isInstance)
                 .map(ConsolePluginContribution.class::cast)
                 .findFirst()
                 .orElseThrow();
     }
-
 }

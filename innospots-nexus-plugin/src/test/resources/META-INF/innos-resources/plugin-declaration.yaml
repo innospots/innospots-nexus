@@ -1,0 +1,37 @@
+apiVersion: nexus.plugin/v1
+kind: Plugin
+metadata:
+  pluginId: com.example.yaml-discovery
+  version: "1.0.0"
+spec:
+  apiVersion: 1
+  displayName:
+    en: YAML Discovery Fixture
+  tags:
+    fixture: discovery
+  contributions:
+    - type: console
+      majorVersion: 2
+      domainKey: discovery
+      displayName:
+        en: Discovery
+      orderIndex: 0
+      modules:
+        - moduleKey: main
+          displayName:
+            en: Main
+          orderIndex: 0
+          viewGroups:
+            - group: default
+              label:
+                en: Views
+          operationGroups:
+            - group: default
+              label:
+                en: Ops
+          children:
+            - displayName:
+                en: Menu
+              orderIndex: 0
+              entryPageKey: yaml-discovery-page
+              children: []

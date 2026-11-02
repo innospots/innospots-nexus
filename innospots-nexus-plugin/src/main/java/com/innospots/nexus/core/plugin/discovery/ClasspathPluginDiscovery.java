@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 通过 Java SPI 和全部 plugin.yaml 资源发现插件，并统一编译为 Plugin。
+ * 通过 Java SPI 和全部 plugin-declaration.yaml 资源发现插件，并统一编译为 Plugin。
  * @author Smars
  * @date 2026/09/13
  */
@@ -33,7 +33,7 @@ public final class ClasspathPluginDiscovery {
     private static final Logger logger = LoggerFactory.getLogger(ClasspathPluginDiscovery.class);
 
     /** YAML 资源标准路径。 */
-    public static final String MANIFEST_RESOURCE = "META-INF/nexus/plugin.yaml";
+    public static final String MANIFEST_RESOURCE = "META-INF/innos-resources/plugin-declaration.yaml";
 
     private final ClassLoader classLoader;
     private final PluginContributionDecoderRegistry contributionDecoders;
