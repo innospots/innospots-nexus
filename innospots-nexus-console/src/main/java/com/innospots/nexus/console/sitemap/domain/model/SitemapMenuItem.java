@@ -8,6 +8,8 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import com.innospots.nexus.console.catalog.domain.model.CatalogGrantKeys;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -41,6 +43,15 @@ public final class SitemapMenuItem {
     @Schema(description = "图标标识")
     private String icon;
 
+    @Schema(description = "catalog 领域键（与 plugin console@2 domainKey 一致）", examples = {"platform"})
+    private String domainKey;
+
+    @Schema(description = "catalog 模块键（MODULE moduleKey）", examples = {"user"})
+    private String moduleKey;
+
+    @Schema(description = "浏览分组键（MODULE/MENU viewGroups.group，缺省 default）", examples = {"default"})
+    private String viewGroup;
+
     @Schema(description = "同级排序")
     private Integer order;
 
@@ -59,4 +70,26 @@ public final class SitemapMenuItem {
 
     @Schema(description = "子菜单（type=group）")
     private List<SitemapMenuItem> children = new ArrayList<>();
+
+    /**
+     * 是否声明了 catalog 浏览授权绑定（domain + module）。
+     */
+    public boolean hasCatalogGrantBinding() {
+        return hasText(domainKey) && hasText(moduleKey);
+    }
+
+    /**
+     * 对应 {@link CatalogGrantKeys#viewGroupKey} 的稳定 grant key；无绑定时返回 {@code null}。
+     */
+    public String viewGrantKey() {
+        if (!hasCatalogGrantBinding()) {
+            return null;
+        }
+        String group = hasText(viewGroup) ? viewGroup.trim() : "default";
+        return CatalogGrantKeys.viewGroupKey(domainKey.trim(), moduleKey.trim(), group);
+    }
+
+    private static boolean hasText(String value) {
+        return value != null && !value.isBlank();
+    }
 }

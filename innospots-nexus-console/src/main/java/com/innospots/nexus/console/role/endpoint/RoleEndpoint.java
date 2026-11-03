@@ -24,6 +24,7 @@ import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrant;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
 import com.innospots.nexus.core.endpoint.grant.I18nLiteral;
+import com.innospots.nexus.console.catalog.domain.model.CatalogOperationGroups;
 import com.innospots.nexus.console.role.domain.request.RoleCreateRequest;
 import com.innospots.nexus.console.role.domain.request.RolePageRequest;
 import com.innospots.nexus.console.role.domain.request.RoleStatusUpdateRequest;
@@ -65,6 +66,7 @@ public interface RoleEndpoint {
     @POST
     @EndpointGrant(
             action = EndpointGrantAction.CREATE,
+            group = CatalogOperationGroups.CREATE,
             name = "role.create",
             label = @I18nLiteral(pairs = {"zh-CN", "创建角色", "en", "Create role"}),
             recordArgs = false,
@@ -76,6 +78,7 @@ public interface RoleEndpoint {
     @Path("/{roleId}")
     @EndpointGrant(
             action = EndpointGrantAction.UPDATE,
+            group = CatalogOperationGroups.UPDATE,
             name = "role.update",
             label = @I18nLiteral(pairs = {"zh-CN", "更新角色", "en", "Update role"}),
             recordArgs = false,
@@ -89,6 +92,7 @@ public interface RoleEndpoint {
     @Path("/{roleId}/status")
     @EndpointGrant(
             action = EndpointGrantAction.STATUS,
+            group = CatalogOperationGroups.STATUS,
             name = "role.status.update",
             label = @I18nLiteral(pairs = {"zh-CN", "更新角色状态", "en", "Update role status"}),
             recordArgs = false,
@@ -102,6 +106,7 @@ public interface RoleEndpoint {
     @Path("/{roleId}")
     @EndpointGrant(
             action = EndpointGrantAction.DELETE,
+            group = CatalogOperationGroups.DELETE,
             name = "role.delete",
             label = @I18nLiteral(pairs = {"zh-CN", "删除角色", "en", "Delete role"}),
             recordArgs = false,

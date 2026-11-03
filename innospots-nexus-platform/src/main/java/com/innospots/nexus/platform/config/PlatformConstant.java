@@ -95,6 +95,12 @@ public final class PlatformConstant {
     /** 自助注册模式设置（管理端）：{@value} */
     public static final String SETTINGS_REGISTRATION_MODE_PATH = SETTINGS_PATH + "/registration-mode";
 
+    /** 控制台配色主题（管理端）：{@value} */
+    public static final String SETTINGS_CONSOLE_THEME_PATH = SETTINGS_PATH + "/console-theme";
+
+    /** 控制台导航布局（管理端）：{@value} */
+    public static final String SETTINGS_NAVIGATION_LAYOUT_PATH = SETTINGS_PATH + "/navigation-layout";
+
     private PlatformConstant() {
     }
 

@@ -25,6 +25,7 @@ import com.innospots.nexus.console.credential.password.service.CredentialService
 import com.innospots.nexus.platform.config.PlatformConstant;
 import com.innospots.nexus.platform.entry.BuiltinPlatformEntryPlugins;
 import com.innospots.nexus.sample.spring.platform.SamplePlatformConsoleServer;
+import com.innospots.nexus.sample.spring.platform.catalog.support.CatalogTreeVerificationSupport;
 import com.innospots.nexus.sample.spring.platform.role.support.RoleEndpointHttpClient;
 import com.innospots.nexus.sample.spring.platform.support.PlatformIntegrationTestSupport;
 import com.innospots.nexus.sample.spring.platform.support.PlatformSampleRsaPassword;
@@ -195,13 +196,7 @@ class PlatformPermissionGrantFlowIntegrationTest {
         JsonNode roots = Jsons.mapper().readTree(catalog.body()).path("data");
         assertThat(roots.isArray()).isTrue();
 
-        JsonNode dictionaryModule = null;
-        for (JsonNode node : roots) {
-            if ("dictionary".equals(node.path("moduleKey").asText())) {
-                dictionaryModule = node;
-                break;
-            }
-        }
+        JsonNode dictionaryModule = findCatalogNodeByModuleKey(roots, "dictionary");
         assertThat(dictionaryModule).as("dictionary module in permission-catalog").isNotNull();
         assertThat(dictionaryModule.path("resourceKey").asText()).isEqualTo(DICTIONARY_MODULE_RESOURCE_KEY);
         assertThat(dictionaryModule.path("domainKey").asText())
@@ -223,10 +218,9 @@ class PlatformPermissionGrantFlowIntegrationTest {
     }
 
     private DictionaryGrantKeys requireDictionaryGrantKeysFromService() {
-        CatalogNodeVo module = catalogService.permissionCatalog().stream()
-                .filter(node -> DICTIONARY_MODULE_RESOURCE_KEY.equals(node.resourceKey()))
-                .findFirst()
-                .orElseThrow();
+        CatalogNodeVo module = CatalogTreeVerificationSupport.findModuleByResourceKey(
+                catalogService.permissionCatalog(),
+                DICTIONARY_MODULE_RESOURCE_KEY);
         CatalogPermissionGroupVo viewGroup = module.grants().viewGroups().getFirst();
         String createKey = module.grants().operationGroups().stream()
                 .flatMap(group -> group.items().stream())
@@ -238,10 +232,9 @@ class PlatformPermissionGrantFlowIntegrationTest {
     }
 
     private void assertDictionaryViewGroupInCatalogService(DictionaryGrantKeys dictionary) {
-        CatalogPermissionGroupVo viewGroup = catalogService.permissionCatalog().stream()
-                .filter(node -> DICTIONARY_MODULE_RESOURCE_KEY.equals(node.resourceKey()))
-                .findFirst()
-                .orElseThrow()
+        CatalogPermissionGroupVo viewGroup = CatalogTreeVerificationSupport.findModuleByResourceKey(
+                catalogService.permissionCatalog(),
+                DICTIONARY_MODULE_RESOURCE_KEY)
                 .grants()
                 .viewGroups()
                 .getFirst();
@@ -349,6 +342,31 @@ class PlatformPermissionGrantFlowIntegrationTest {
     private String bearerValue() {
         assertThat(accessToken).as("login must happen before authenticated requests").isNotBlank();
         return "Bearer " + accessToken;
+    }
+
+    private static JsonNode findCatalogNodeByModuleKey(JsonNode roots, String moduleKey) {
+        if (roots == null || !roots.isArray()) {
+            return null;
+        }
+        for (JsonNode node : roots) {
+            JsonNode modules = node.path("modules");
+            if (modules.isArray()) {
+                JsonNode nested = findCatalogNodeByModuleKey(modules, moduleKey);
+                if (nested != null) {
+                    return nested;
+                }
+                continue;
+            }
+            if ("MODULE".equals(node.path("resourceType").asText())
+                    && moduleKey.equals(node.path("moduleKey").asText())) {
+                return node;
+            }
+            JsonNode nested = findCatalogNodeByModuleKey(node.path("children"), moduleKey);
+            if (nested != null) {
+                return nested;
+            }
+        }
+        return null;
     }
 
     private record DictionaryGrantKeys(String viewGroupResourceKey, String createOperationResourceKey) {

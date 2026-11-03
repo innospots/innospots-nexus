@@ -13,6 +13,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.innospots.nexus.base.json.Jsons;
 import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
+import com.innospots.nexus.console.catalog.domain.vo.CatalogDomainVo;
 import com.innospots.nexus.console.catalog.domain.vo.CatalogNodeVo;
 import com.innospots.nexus.console.catalog.domain.vo.CatalogViewItemVo;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
@@ -21,28 +22,46 @@ import com.innospots.nexus.core.endpoint.grant.EndpointGrantManager;
 import com.innospots.nexus.core.endpoint.grant.EndpointModuleGrantCatalog;
 
 /**
- * 权限目录树 HTTP 响应解析与 {@link CatalogNodeVo} / grants 校验辅助。
+ * 权限目录 HTTP 响应解析与 {@link CatalogDomainVo} / {@link CatalogNodeVo} 校验辅助。
  */
 public final class CatalogTreeVerificationSupport {
 
     private CatalogTreeVerificationSupport() {
     }
 
-    public static List<CatalogNodeVo> parseTreeResponse(String responseBody) {
+    public static List<CatalogDomainVo> parsePermissionCatalogResponse(String responseBody) {
         JsonNode data = CatalogTreeJsonSupport.parseDataArray(responseBody);
         if (data == null || data.isNull()) {
             return List.of();
         }
-        return Jsons.mapper().convertValue(data, new TypeReference<List<CatalogNodeVo>>() {
+        return Jsons.mapper().convertValue(data, new TypeReference<List<CatalogDomainVo>>() {
         });
     }
 
-    public static List<CatalogNodeVo> flattenNodes(List<CatalogNodeVo> roots) {
+    public static List<CatalogNodeVo> flattenModuleNodes(List<CatalogDomainVo> domains) {
         List<CatalogNodeVo> flat = new ArrayList<>();
-        for (CatalogNodeVo root : roots) {
-            walk(root, flat);
+        for (CatalogDomainVo domain : domains) {
+            for (CatalogNodeVo module : domain.modules()) {
+                walk(module, flat);
+            }
         }
         return flat;
+    }
+
+    public static CatalogNodeVo findModuleByResourceKey(List<CatalogDomainVo> domains, String resourceKey) {
+        return flattenModuleNodes(domains).stream()
+                .filter(node -> node.resourceType() == CatalogResourceType.MODULE)
+                .filter(node -> resourceKey.equals(node.resourceKey()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("module not found: " + resourceKey));
+    }
+
+    public static CatalogNodeVo findModuleByModuleKey(List<CatalogDomainVo> domains, String moduleKey) {
+        return flattenModuleNodes(domains).stream()
+                .filter(node -> node.resourceType() == CatalogResourceType.MODULE)
+                .filter(node -> moduleKey.equals(node.moduleKey()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("module not found: " + moduleKey));
     }
 
     private static void walk(CatalogNodeVo node, List<CatalogNodeVo> flat) {
@@ -64,12 +83,12 @@ public final class CatalogTreeVerificationSupport {
         return namesByModule;
     }
 
-    public static Map<String, Object> summarizeGrants(List<CatalogNodeVo> roots) {
+    public static Map<String, Object> summarizeGrants(List<CatalogDomainVo> domains) {
         Map<String, Object> summary = new LinkedHashMap<>();
-        summary.put("rootModuleCount", roots.size());
-        summary.put("totalNodeCount", flattenNodes(roots).size());
+        summary.put("domainCount", domains.size());
+        summary.put("totalModuleMenuNodeCount", flattenModuleNodes(domains).size());
         Map<String, Integer> operationCountsByModule = new LinkedHashMap<>();
-        for (CatalogNodeVo node : flattenNodes(roots)) {
+        for (CatalogNodeVo node : flattenModuleNodes(domains)) {
             if (node.resourceType() == CatalogResourceType.MODULE && node.grants() != null) {
                 int count = node.grants().operationGroups().stream()
                         .mapToInt(group -> group.items().size())

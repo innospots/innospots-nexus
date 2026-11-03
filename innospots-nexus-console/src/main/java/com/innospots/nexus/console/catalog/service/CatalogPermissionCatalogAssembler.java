@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 import com.innospots.nexus.base.i18n.I18nObject;
@@ -13,6 +14,7 @@ import com.innospots.nexus.console.catalog.domain.model.CatalogPermissionGroupDe
 import com.innospots.nexus.console.catalog.domain.vo.CatalogModuleGrantVo;
 import com.innospots.nexus.console.catalog.domain.vo.CatalogPermissionGroupVo;
 import com.innospots.nexus.console.catalog.domain.vo.CatalogViewItemVo;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrantDescriptor;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrantManager;
 import com.innospots.nexus.core.endpoint.grant.EndpointModuleGrantCatalog;
@@ -88,6 +90,10 @@ public final class CatalogPermissionCatalogAssembler {
     ) {
         List<ConsolePermissionGroupDeclaration> declarations =
                 CatalogPermissionGroupDeclarations.parseGroups(groupsJson);
+        Set<String> declaredGroups = new java.util.LinkedHashSet<>();
+        for (ConsolePermissionGroupDeclaration declaration : declarations) {
+            declaredGroups.add(declaration.group());
+        }
         EndpointModuleGrantCatalog catalog = endpointGrantManager
                 .moduleCatalog(moduleRow.getModuleKey())
                 .orElse(null);
@@ -97,9 +103,11 @@ public final class CatalogPermissionCatalogAssembler {
         }
         if (catalog != null) {
             for (EndpointGrantDescriptor descriptor : catalog.operable()) {
-                String group = hasText(descriptor.grantGroup()) ? descriptor.grantGroup() : DEFAULT_GROUP;
-                itemsByGroup.computeIfAbsent(group, ignored -> new ArrayList<>())
-                        .add(grantItem(moduleRow, descriptor));
+                String group = resolveOperationGroupKey(descriptor, declaredGroups);
+                if (group == null) {
+                    continue;
+                }
+                itemsByGroup.get(group).add(grantItem(moduleRow, descriptor));
             }
         }
         List<CatalogPermissionGroupVo> groups = new ArrayList<>();
@@ -110,10 +118,60 @@ public final class CatalogPermissionCatalogAssembler {
                     declaration.group(),
                     declaration.label(),
                     null,
-                    null,
+                    CatalogGrantKeys.of(
+                            declaration.group(),
+                            moduleRow.getDomainKey(),
+                            moduleRow.getModuleKey()),
                     List.copyOf(items)));
         }
         return List.copyOf(groups);
+    }
+
+    /**
+     * 将 operable grant 归入 catalog 声明的 {@code operationGroups}；未声明的分组不输出。
+     *
+     * <p>显式 {@link EndpointGrantDescriptor#grantGroup()}（非 {@code default}）优先；否则按
+     * {@link EndpointGrantAction} 映射 {@code create}/{@code update}/{@code delete}/{@code status}
+     * 等；仍无匹配且声明含 {@code default} 时归入 default。</p>
+     */
+    private static String resolveOperationGroupKey(
+            EndpointGrantDescriptor descriptor,
+            Set<String> declaredGroups
+    ) {
+        if (descriptor == null || declaredGroups.isEmpty()) {
+            return null;
+        }
+        if (hasText(descriptor.grantGroup()) && !DEFAULT_GROUP.equals(descriptor.grantGroup())) {
+            String explicit = descriptor.grantGroup();
+            return declaredGroups.contains(explicit) ? explicit : null;
+        }
+        String actionGroup = operationGroupForAction(descriptor.action());
+        if (declaredGroups.contains(actionGroup)) {
+            return actionGroup;
+        }
+        if (declaredGroups.contains(DEFAULT_GROUP)) {
+            return DEFAULT_GROUP;
+        }
+        return null;
+    }
+
+    private static String operationGroupForAction(EndpointGrantAction action) {
+        if (action == null) {
+            return DEFAULT_GROUP;
+        }
+        return switch (action) {
+            case CREATE -> "create";
+            case UPDATE -> "update";
+            case DELETE -> "delete";
+            case STATUS -> "status";
+            case EXECUTE -> "execute";
+            case REPLACE -> "replace";
+            case ASSIGN -> "assign";
+            case REVOKE -> "revoke";
+            case IMPORT -> "import";
+            case WRITE -> "write";
+            case READ, EXPORT -> DEFAULT_GROUP;
+        };
     }
 
     private static CatalogViewItemVo grantItem(

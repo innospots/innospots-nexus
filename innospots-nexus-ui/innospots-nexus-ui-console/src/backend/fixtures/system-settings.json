@@ -1,0 +1,8 @@
+{
+  "siteName": "Nexus Console",
+  "description": "运营管理平台",
+  "timezone": "Asia/Shanghai",
+  "language": "zh-CN",
+  "pageSize": "20",
+  "sessionTimeout": "30"
+}

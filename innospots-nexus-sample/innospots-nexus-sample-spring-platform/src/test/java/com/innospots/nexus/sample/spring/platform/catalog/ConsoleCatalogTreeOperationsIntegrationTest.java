@@ -17,6 +17,7 @@ import org.springframework.test.context.TestPropertySource;
 
 import com.innospots.nexus.base.json.Jsons;
 import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
+import com.innospots.nexus.console.catalog.domain.vo.CatalogDomainVo;
 import com.innospots.nexus.console.catalog.domain.vo.CatalogNodeVo;
 import com.innospots.nexus.console.config.ConsoleConstant;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrantManager;
@@ -55,33 +56,34 @@ class ConsoleCatalogTreeOperationsIntegrationTest {
 
     @Test
     void catalogTreeNodeCountMatchesEnabledModuleAndMenuIndex() throws Exception {
-        List<CatalogNodeVo> tree = fetchCatalogTree();
+        List<CatalogDomainVo> tree = fetchCatalogTree();
 
         long moduleRows = countEnabledResources(CatalogResourceType.MODULE.name());
         long menuRows = countEnabledResources(CatalogResourceType.MENU.name());
-        List<CatalogNodeVo> flat = CatalogTreeVerificationSupport.flattenNodes(tree);
+        long domainRoots = countEnabledContributionRoots();
+        List<CatalogNodeVo> flat = CatalogTreeVerificationSupport.flattenModuleNodes(tree);
 
         LOGGER.info(
-                "Catalog tree nodes: roots={} flat={} dbModule={} dbMenu={} summary={}",
+                "Catalog tree nodes: domains={} flat={} dbModule={} dbMenu={} summary={}",
                 tree.size(),
                 flat.size(),
                 moduleRows,
                 menuRows,
                 Jsons.toJson(CatalogTreeVerificationSupport.summarizeGrants(tree)));
 
-        assertThat(tree).hasSize((int) moduleRows);
+        assertThat(tree).hasSize((int) domainRoots);
         assertThat(flat).hasSize((int) (moduleRows + menuRows));
     }
 
     @Test
     void catalogTreeModuleGrantsMatchOperableEndpointsPerModule() throws Exception {
-        List<CatalogNodeVo> tree = fetchCatalogTree();
+        List<CatalogDomainVo> tree = fetchCatalogTree();
         Map<String, Set<String>> operableByModule =
                 CatalogTreeVerificationSupport.operableGrantNamesByModule(endpointGrantManager);
 
         LOGGER.info("Operable grant names by module: {}", Jsons.toJson(operableByModule));
 
-        for (CatalogNodeVo node : tree) {
+        for (CatalogNodeVo node : CatalogTreeVerificationSupport.flattenModuleNodes(tree)) {
             CatalogTreeVerificationSupport.assertModuleOperationGrantsMatchEndpointCatalog(
                     node, operableByModule);
         }
@@ -89,12 +91,9 @@ class ConsoleCatalogTreeOperationsIntegrationTest {
 
     @Test
     void catalogModuleNodesExposeExpectedOperableSamples() throws Exception {
-        List<CatalogNodeVo> tree = fetchCatalogTree();
+        List<CatalogDomainVo> tree = fetchCatalogTree();
 
-        CatalogNodeVo dictionaryModule = tree.stream()
-                .filter(node -> "dictionary".equals(node.moduleKey()))
-                .findFirst()
-                .orElseThrow();
+        CatalogNodeVo dictionaryModule = CatalogTreeVerificationSupport.findModuleByModuleKey(tree, "dictionary");
         assertThat(dictionaryModule.grants()).isNotNull();
         assertThat(dictionaryModule.grants().operationGroups().stream()
                 .flatMap(group -> group.items().stream())
@@ -102,17 +101,14 @@ class ConsoleCatalogTreeOperationsIntegrationTest {
                 .contains("dictionary.type.create", "dictionary.type.delete")
                 .doesNotContain("dictionary.type.page", "dictionary.type.get");
 
-        CatalogNodeVo userModule = tree.stream()
-                .filter(node -> "user".equals(node.moduleKey()))
-                .findFirst()
-                .orElseThrow();
+        CatalogNodeVo userModule = CatalogTreeVerificationSupport.findModuleByModuleKey(tree, "user");
         assertThat(userModule.grants().operationGroups().stream()
                 .flatMap(group -> group.items().stream())
                 .map(item -> item.grantName()))
                 .contains("platform.user.create")
                 .doesNotContain("platform.user.page");
 
-        for (CatalogNodeVo node : tree) {
+        for (CatalogNodeVo node : CatalogTreeVerificationSupport.flattenModuleNodes(tree)) {
             CatalogTreeVerificationSupport.assertOperationGrantsExcludeReadOnlyActions(
                     node, endpointGrantManager);
         }
@@ -122,12 +118,27 @@ class ConsoleCatalogTreeOperationsIntegrationTest {
                 userModule.grants().operationGroups().stream().mapToInt(g -> g.items().size()).sum());
     }
 
-    private List<CatalogNodeVo> fetchCatalogTree() throws Exception {
+    private List<CatalogDomainVo> fetchCatalogTree() throws Exception {
         RoleEndpointHttpClient http = new RoleEndpointHttpClient(port);
         HttpResponse<String> response = http.get(CATALOG_TREE_PATH);
         LOGGER.info("GET {} status={}", CATALOG_TREE_PATH, response.statusCode());
         assertThat(response.statusCode()).as(response.body()).isEqualTo(200);
-        return CatalogTreeVerificationSupport.parseTreeResponse(response.body());
+        return CatalogTreeVerificationSupport.parsePermissionCatalogResponse(response.body());
+    }
+
+    private long countEnabledContributionRoots() {
+        Long count = jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*) FROM (
+                    SELECT DISTINCT owner_plugin_id, domain_key
+                    FROM nx_console_catalog_resource
+                    WHERE status = 'ENABLED'
+                      AND resource_type = 'MODULE'
+                      AND (parent_resource_id IS NULL OR parent_resource_id = '')
+                ) grouped
+                """,
+                Long.class);
+        return count == null ? 0L : count;
     }
 
     private long countEnabledResources(String resourceType) {

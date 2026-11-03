@@ -1,0 +1,910 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* 外壳与 NavigationShell 样式见本文件 kn-* / account-* / theme-* 段 */
+
+/* ── 核心概览指标牌：Grid 项默认拉伸，卡片撑满网格 → 同高自适应 ── */
+.stat-card {
+  height: 100%;
+}
+
+.stat-card [data-slot="card-content"] {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ── Provider 数据卡：hover 手型 + 阴影过渡；点击主体进详情（ProviderCardLink）── */
+.provider-card {
+  cursor: pointer;
+  transition:
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.provider-card:hover {
+  border-color: color-mix(in srgb, var(--foreground) 20%, transparent);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--foreground) 12%, transparent);
+}
+
+/* 操作按钮组（右上角）：仅 hover 卡片时显示 */
+.provider-card-actions {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.provider-card:hover .provider-card-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── Provider 数据卡：内容区撑满卡片高度，能力标签行（末位区块）钉在底部 ── */
+.provider-card [data-slot="card-content"] {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.provider-card [data-slot="card-content"] > :last-child {
+  margin-top: auto;
+}
+
+/* ── Model 数据卡：hover 手型 + 阴影过渡；点击主体进详情（ModelCardLink）── */
+.model-card {
+  cursor: pointer;
+  transition:
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.model-card:hover {
+  border-color: color-mix(in srgb, var(--foreground) 20%, transparent);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--foreground) 12%, transparent);
+}
+
+/* 操作按钮组（右上角）：仅 hover 卡片时显示 */
+.model-card-actions {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.model-card:hover .model-card-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── Model 数据卡：内容区撑满卡片高度，路由摘要行（末位区块）钉在底部 ── */
+.model-card [data-slot="card-content"] {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.model-card [data-slot="card-content"] > :last-child {
+  margin-top: auto;
+}
+
+/* ── 启用状态徽标：绿色底纹（Badge 的 className 叠加，暗色主题提亮文字）── */
+.badge-enabled {
+  background-color: color-mix(in srgb, #22c55e 15%, transparent);
+  border-color: color-mix(in srgb, #22c55e 45%, transparent);
+  color: #16a34a;
+}
+
+[data-pactor-theme="dark"] .badge-enabled {
+  color: #4ade80;
+}
+
+/* Statistic：标题与数值之间统一 6px 节奏 */
+[data-slot="statistic"] {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* 指标牌右上角图标：弱化处理，避免与主数字争夺视觉层级 */
+.stat-card-icon {
+  color: var(--muted-foreground);
+  opacity: 0.65;
+}
+
+/* ── 调试台（客户端调试 / 模型调试）：左右分栏 ────────────────────
+   ≥64rem 时左对话区 + 右 400px 配置/明细栏，窄屏上下堆叠。
+   不用 Tailwind 响应式工具类（lg:flex-row 等）：pactor 预编译样式
+   加载在本文件之后，同优先级的基础类会覆盖本文件中的响应式规则；
+   分栏容器直接挂在 pactor Flex 上（其自带方向/间距类同为单类
+   选择器），故 .debug-split 以双类选择器提升优先级压过它们。 */
+.debug-split.debug-split {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.debug-split-main {
+  min-width: 0;
+}
+
+.debug-split-side {
+  width: 100%;
+  flex-shrink: 0;
+}
+
+@media (min-width: 64rem) {
+  .debug-split.debug-split {
+    /* 吃掉 page-content 剩余高度；交叉轴默认 stretch → 双列等高 */
+    flex: 1;
+    min-height: 0;
+    flex-direction: row;
+  }
+
+  .debug-split-main {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .debug-split-side {
+    width: 400px;
+    min-height: 0;
+    /* 右列内容超出时列内滚动（不产生页面级滚动条） */
+    overflow-y: auto;
+  }
+
+  /* 右列等高：末位卡片吃掉剩余高度，与左列卡片底边对齐 */
+  .debug-split-side > [data-slot="card"]:last-child {
+    flex: 1;
+    min-height: 0;
+  }
+}
+
+/* ── 调试台：双列等高、撑满标题以下区域、页面不出滚动条 ──────────
+   高度链：Page 根（撑满 Content）→ page-content（flex 列）→
+   .debug-split（行模式 flex:1）→ 左列 Card / 对话面板（flex:1 传递高度）→
+   消息列表列内滚动。以下为未分层自定义规则，优先于 Tailwind 分层工具类。 */
+.debug-page {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.debug-page [data-slot="page-content"] {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.debug-chat-card,
+.debug-chat-card [data-slot="card-content"] {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 64rem) {
+  /* 行模式下锁死页面高度（而非 min-height），高度链硬约束：
+     内容超出时由列内滚动吸收，页面级不出滚动条 */
+  .debug-page {
+    height: 100%;
+  }
+
+  .debug-chat-card,
+  .debug-chat-card [data-slot="card-content"],
+  .debug-chat-root {
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* 行模式下列高确定：消息列表吃掉剩余高度并内部滚动（覆盖组件
+     内 h-[52vh] 兜底——窄屏上下堆叠时仍按 52vh 展示） */
+  .debug-chat-list {
+    flex: 1;
+    height: auto;
+    min-height: 0;
+  }
+}
+
+html,
+body {
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+}
+
+body .shell-root {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  flex: 1 1 0%;
+  overflow: hidden;
+}
+
+.shell-root .shell-main,
+.kn-shell,
+.kn-main {
+  min-height: 0;
+}
+.kn-shell {
+  display: flex;
+  width: 100%;
+  min-height: 0;
+  flex: 1;
+}
+
+.kn-rail {
+  display: flex;
+  width: 52px;
+  flex: 0 0 52px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  padding: 16px 7px;
+  overflow: visible;
+  background: var(--rail-background, #172033);
+  color: var(--rail-foreground, #9daec4);
+  transition: width 200ms ease, flex-basis 200ms ease;
+}
+
+.kn-rail-expandable:hover,
+.kn-rail-expandable:has(.kn-rail-button:focus-visible) {
+  width: 150px;
+  flex-basis: 150px;
+}
+
+.kn-mark {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  margin-bottom: 20px;
+  align-self: center;
+  flex: none;
+  border-radius: 10px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-weight: 700;
+}
+
+.kn-rail-button {
+  display: flex;
+  width: 38px;
+  height: 38px;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 0 10px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: width 200ms ease, gap 200ms ease, background-color 150ms ease;
+}
+
+.kn-rail-button:hover,
+.kn-rail-button.is-active {
+  background: color-mix(in srgb, var(--rail-foreground, #9daec4) 19%, transparent);
+  color: var(--rail-foreground, #fff);
+}
+
+.kn-rail-expandable:hover .kn-rail-button,
+.kn-rail-expandable:has(.kn-rail-button:focus-visible) .kn-rail-button {
+  width: 100%;
+  justify-content: flex-start;
+  gap: 10px;
+}
+
+.kn-rail-button svg,
+.account-trigger-avatar {
+  flex: none;
+}
+
+.kn-rail-label {
+  display: block;
+  max-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  transition: max-width 200ms ease, opacity 150ms ease;
+}
+
+.kn-rail-expandable:hover .kn-rail-label,
+.kn-rail-expandable:has(.kn-rail-button:focus-visible) .kn-rail-label {
+  max-width: 110px;
+  opacity: 1;
+}
+
+.kn-sidebar {
+  width: 200px;
+  flex: 0 0 200px;
+  min-height: 0;
+  padding: 24px 12px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-right: 1px solid var(--border);
+  background: var(--background);
+}
+
+.kn-sidebar-title {
+  margin: 3px 12px 24px;
+  font-size: 16px;
+  font-weight: 650;
+}
+
+.kn-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.kn-menu-item {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: var(--foreground);
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.kn-menu-item:hover {
+  background: var(--muted);
+}
+
+.kn-menu-item.is-active {
+  background: var(--accent);
+  color: var(--accent-foreground);
+  font-weight: 600;
+}
+
+.kn-rail-button:focus-visible,
+.kn-menu-item:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.kn-main {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.kn-main .shell-content {
+  min-height: 0;
+  flex: 1;
+  overflow: auto;
+}
+
+@media (max-width: 640px) {
+  .kn-rail {
+    width: 48px;
+    flex-basis: 48px;
+    padding-inline: 5px;
+  }
+
+  .kn-rail-expandable:hover,
+  .kn-rail-expandable:has(.kn-rail-button:focus-visible) {
+    width: 150px;
+    flex-basis: 150px;
+  }
+
+  .kn-sidebar {
+    width: 130px;
+    flex-basis: 130px;
+    padding-inline: 6px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kn-rail,
+  .kn-rail-button,
+  .kn-rail-label,
+  .account-trigger,
+  .account-trigger-label {
+    transition: none;
+  }
+}
+.account-menu-wrap {
+  position: relative;
+  margin-top: auto;
+}
+
+.account-trigger {
+  display: flex;
+  width: 36px;
+  height: 38px;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  transition: width 200ms ease;
+}
+
+.account-trigger-avatar,
+.account-avatar {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-foreground);
+  font-weight: 700;
+}
+
+.account-trigger-label {
+  max-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  white-space: nowrap;
+  font-size: 14px;
+  transition: max-width 200ms ease, opacity 150ms ease;
+}
+
+.kn-rail-expandable:hover .account-trigger,
+.kn-rail-expandable:has(:focus-visible) .account-trigger {
+  width: 100%;
+  gap: 10px;
+}
+
+.kn-rail-expandable:hover .account-trigger-label,
+.kn-rail-expandable:has(:focus-visible) .account-trigger-label {
+  max-width: 100px;
+  opacity: 1;
+}
+
+.account-popover {
+  position: absolute;
+  z-index: 100;
+  bottom: 0;
+  left: calc(100% + 12px);
+  width: min(280px, calc(100vw - 75px));
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--popover);
+  color: var(--popover-foreground);
+  box-shadow: 0 12px 40px #0003;
+}
+
+.account-identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.account-avatar {
+  width: 42px;
+  height: 42px;
+}
+
+.account-identity strong,
+.account-identity small {
+  display: block;
+}
+
+.account-identity small {
+  margin-top: 4px;
+  color: var(--muted-foreground);
+  font-size: 13px;
+}
+
+.account-row {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  color: var(--foreground);
+  font-size: 14px;
+}
+
+.account-row > svg {
+  flex: none;
+  color: var(--muted-foreground);
+}
+
+.account-row > span {
+  flex: 1;
+  text-align: left;
+}
+
+.account-action {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.account-action:hover {
+  background: var(--accent);
+}
+
+.account-preferences {
+  display: grid;
+  gap: 4px;
+  padding: 8px 14px;
+  border-block: 1px solid var(--border);
+}
+
+.account-preferences .account-row {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) minmax(0, 122px);
+  align-items: center;
+  gap: 9px;
+  min-height: 38px;
+  padding: 0;
+  font-size: 13px;
+}
+
+.account-row select {
+  grid-column: 3;
+  width: 100%;
+  min-width: 0;
+  height: 34px;
+  padding: 0 28px 0 10px;
+  appearance: none;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: var(--foreground);
+  background-color: var(--muted);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23748291' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  font: inherit;
+  font-size: 13px;
+  line-height: normal;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.account-row select:hover {
+  border-color: var(--border);
+}
+
+.account-mode {
+  display: flex;
+  grid-column: 3;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 8px;
+  background: var(--muted);
+}
+
+.account-mode button {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  height: 28px;
+  place-items: center;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+}
+
+.account-mode button[aria-pressed="true"] {
+  background: var(--card);
+  color: var(--foreground);
+  box-shadow: 0 1px 4px #0002;
+}
+
+.account-error {
+  margin: 0;
+  padding: 0 18px 12px;
+  color: var(--destructive);
+  font-size: 12px;
+}
+
+.account-trigger:focus-visible,
+.account-popover button:focus-visible,
+.account-popover select:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+.theme-page,
+.system-page,
+.audit-page,
+.dictionary-page,
+.system-settings-page {
+  padding: 28px 32px;
+}
+
+.theme-eyebrow {
+  margin: 0 0 10px;
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.theme-section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 32px 0 20px;
+}
+
+.theme-section-heading h2,
+.theme-section-heading h4 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 650;
+}
+
+.theme-section-heading p,
+.theme-section-heading > span {
+  margin: 9px 0 0;
+  color: var(--muted-foreground);
+  font-size: 13px;
+}
+
+.theme-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr));
+  gap: 18px;
+}
+
+.theme-card {
+  display: block;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--card-foreground);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+
+.theme-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px #00000014;
+}
+
+.theme-card.is-selected {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px var(--primary);
+}
+
+.theme-preview {
+  position: relative;
+  height: 122px;
+  padding: 24px 30px 0;
+  overflow: hidden;
+}
+
+.theme-preview-window {
+  display: flex;
+  height: 110px;
+  overflow: hidden;
+  border-radius: 8px 8px 0 0;
+  background: #fff;
+  box-shadow: 0 8px 24px #0002;
+}
+
+.theme-preview-window > span {
+  width: 24%;
+  opacity: 0.85;
+}
+
+.theme-preview-window > div {
+  flex: 1;
+  padding: 17px 13px;
+}
+
+.theme-preview-window i {
+  display: block;
+  width: 78%;
+  height: 6px;
+  margin-bottom: 9px;
+  border-radius: 4px;
+  background: #e8eaed;
+}
+
+.theme-preview-window i:nth-child(2) {
+  width: 55%;
+}
+
+.theme-preview-window i:nth-child(3) {
+  width: 90%;
+  height: 26px;
+  background: #f2f3f5;
+}
+
+.theme-selected {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 8px;
+  border-radius: 20px;
+  background: #fff;
+  color: #25282b;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.theme-card-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 16px;
+}
+
+.theme-card-body strong {
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.theme-card-body p,
+.theme-hex {
+  margin: 6px 0 0;
+  color: var(--muted-foreground);
+  font-size: 12px;
+}
+
+.theme-hex {
+  margin: 0;
+  font-family: monospace;
+}
+.system-settings-group h2 {
+  margin: 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: 16px;
+}
+
+.system-setting {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(260px, 1fr);
+  align-items: center;
+  gap: 24px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.system-setting strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.system-setting p {
+  margin: 6px 0 0;
+  color: var(--muted-foreground);
+  font-size: 13px;
+}
+
+.system-setting-display {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+}
+
+.system-setting-display > span {
+  overflow-wrap: anywhere;
+  color: var(--muted-foreground);
+  font-size: 14px;
+}
+
+.kn-layout-single-group {
+  flex-direction: row;
+}
+
+.kn-sidebar-stacked {
+  display: flex;
+  width: 240px;
+  flex: 0 0 240px;
+  flex-direction: column;
+  border-right: 1px solid var(--border);
+  background: var(--sidebar, var(--background));
+  padding: 12px 0 8px;
+}
+
+.kn-mark-sidebar {
+  margin: 0 16px 8px;
+}
+
+.kn-menu-grouped {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 8px 12px;
+}
+
+.kn-menu-group {
+  margin-bottom: 16px;
+}
+
+.kn-menu-group-title {
+  padding: 4px 12px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  text-transform: none;
+}
+
+.account-menu-stacked {
+  margin-top: auto;
+  padding: 8px 12px 0;
+  border-top: 1px solid var(--border);
+}
+
+.navigation-layout-setting {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.navigation-layout-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.navigation-layout-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.navigation-layout-error {
+  color: var(--destructive, #dc2626);
+  font-size: 13px;
+}
+
+.system-setting-hint {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--muted-foreground);
+}

@@ -11,6 +11,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
+import com.innospots.nexus.console.permission.domain.enums.PermissionGrantKeyType;
 import com.innospots.nexus.core.persistence.entity.OwnershipEntity;
 
 /**
@@ -46,6 +47,12 @@ public class PermissionGrantEntity extends OwnershipEntity {
 
     @Column(name = "grant_key", length = 256, nullable = false)
     private String grantKey;
+
+    /**
+     * catalog 授权项层级：{@link PermissionGrantKeyType#MODULE} / {@link PermissionGrantKeyType#MENU} 的 {@link PermissionGrantKeyType#code()}。
+     */
+    @Column(name = "grant_key_type", length = 16, nullable = false)
+    private String grantKeyType;
 
     @Column(columnDefinition = "text")
     private String constraintDefinition;

@@ -7,7 +7,11 @@ import org.springframework.context.annotation.Lazy;
 
 import com.innospots.nexus.core.setting.service.SystemSettingService;
 import com.innospots.nexus.platform.settings.domain.enums.PlatformRegistrationMode;
+import com.innospots.nexus.platform.settings.endpoint.PlatformConsoleThemeSettingEndpoint;
+import com.innospots.nexus.platform.settings.endpoint.PlatformNavigationLayoutSettingEndpoint;
 import com.innospots.nexus.platform.settings.endpoint.PlatformRegistrationModeSettingEndpoint;
+import com.innospots.nexus.platform.settings.service.PlatformConsoleThemeSettingService;
+import com.innospots.nexus.platform.settings.service.PlatformNavigationLayoutSettingService;
 import com.innospots.nexus.platform.settings.service.PlatformRegistrationModeSettingService;
 
 @Configuration
@@ -27,5 +31,37 @@ public class PlatformSettingsConfiguration {
     PlatformRegistrationModeSettingEndpoint platformRegistrationModeSettingEndpoint(
             PlatformRegistrationModeSettingService registrationModeSettingService) {
         return new PlatformRegistrationModeSettingEndpoint(registrationModeSettingService);
+    }
+
+    @Bean
+    PlatformConsoleThemeSettingService platformConsoleThemeSettingService(
+            SystemSettingService systemSettingService,
+            @Value("${nexus.platform.console.theme:CHENWUNAIFU}") String deploymentConsoleTheme) {
+        return new PlatformConsoleThemeSettingService(
+                systemSettingService,
+                PlatformConsoleThemeSettingService.parseDeploymentDefault(deploymentConsoleTheme));
+    }
+
+    @Bean
+    PlatformNavigationLayoutSettingService platformNavigationLayoutSettingService(
+            SystemSettingService systemSettingService,
+            @Value("${nexus.platform.console.navigation-layout:RAIL_DUAL}") String deploymentNavigationLayout) {
+        return new PlatformNavigationLayoutSettingService(
+                systemSettingService,
+                PlatformNavigationLayoutSettingService.parseDeploymentDefault(deploymentNavigationLayout));
+    }
+
+    @Bean
+    @Lazy
+    PlatformConsoleThemeSettingEndpoint platformConsoleThemeSettingEndpoint(
+            PlatformConsoleThemeSettingService consoleThemeSettingService) {
+        return new PlatformConsoleThemeSettingEndpoint(consoleThemeSettingService);
+    }
+
+    @Bean
+    @Lazy
+    PlatformNavigationLayoutSettingEndpoint platformNavigationLayoutSettingEndpoint(
+            PlatformNavigationLayoutSettingService navigationLayoutSettingService) {
+        return new PlatformNavigationLayoutSettingEndpoint(navigationLayoutSettingService);
     }
 }

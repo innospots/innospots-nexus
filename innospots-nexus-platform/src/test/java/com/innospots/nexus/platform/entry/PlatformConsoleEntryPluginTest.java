@@ -60,7 +60,13 @@ class PlatformConsoleEntryPluginTest {
         assertThat(organization.viewGroups()).extracting(group -> group.group())
                 .containsExactly(ConsoleContributeNode.DEFAULT_VIEW_GROUP);
         assertThat(organization.operationGroups()).extracting(group -> group.group())
-                .containsExactly(ConsoleContributeNode.DEFAULT_VIEW_GROUP);
+                .contains(
+                        ConsoleContributeNode.DEFAULT_VIEW_GROUP,
+                        "create",
+                        "update",
+                        "status",
+                        "assign",
+                        "revoke");
 
         ConsoleContributeNode settings = contribution.modules().stream()
                 .filter(module -> "settings".equals(module.moduleKey()))

@@ -52,8 +52,10 @@ public class ConsoleCatalogBeans {
      */
     @Produces
     @Singleton
-    SitemapService sitemapService(SitemapConfigLoader sitemapConfigLoader) {
-        return new SitemapService(sitemapConfigLoader);
+    SitemapService sitemapService(
+            SitemapConfigLoader sitemapConfigLoader,
+            ConsoleCatalogService catalogService) {
+        return new SitemapService(sitemapConfigLoader, catalogService);
     }
 
     /**
@@ -83,8 +85,9 @@ public class ConsoleCatalogBeans {
     @Singleton
     ConsoleCatalogService consoleCatalogService(
             ConsoleCatalogResourceDao resourceDao,
-            EndpointGrantManager endpointGrantManager) {
-        return new ConsoleCatalogService(resourceDao, endpointGrantManager);
+            EndpointGrantManager endpointGrantManager,
+            ConsoleContributionCatalog contributionCatalog) {
+        return new ConsoleCatalogService(resourceDao, endpointGrantManager, contributionCatalog);
     }
 
     /**

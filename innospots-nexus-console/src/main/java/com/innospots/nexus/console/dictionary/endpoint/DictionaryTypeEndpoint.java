@@ -20,6 +20,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import com.innospots.nexus.base.domain.enums.BasicStatus;
 import com.innospots.nexus.base.domain.response.PageResult;
 import com.innospots.nexus.base.domain.response.R;
+import com.innospots.nexus.console.catalog.domain.model.CatalogOperationGroups;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeCreateRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypePageRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeStatusUpdateRequest;
@@ -64,6 +65,7 @@ public interface DictionaryTypeEndpoint {
     @POST
     @EndpointGrant(
             action = EndpointGrantAction.CREATE,
+            group = CatalogOperationGroups.CREATE,
             name = "dictionary.type.create",
             label = @I18nLiteral(pairs = {"zh-CN", "创建字典类型", "en", "Create dictionary type"}),
             recordArgs = false,
@@ -75,6 +77,7 @@ public interface DictionaryTypeEndpoint {
     @Path("/{dictionaryTypeId}")
     @EndpointGrant(
             action = EndpointGrantAction.UPDATE,
+            group = CatalogOperationGroups.UPDATE,
             name = "dictionary.type.update",
             label = @I18nLiteral(pairs = {"zh-CN", "更新字典类型", "en", "Update dictionary type"}),
             recordArgs = false,
@@ -89,6 +92,7 @@ public interface DictionaryTypeEndpoint {
     @Path("/{dictionaryTypeId}/status")
     @EndpointGrant(
             action = EndpointGrantAction.STATUS,
+            group = CatalogOperationGroups.STATUS,
             name = "dictionary.type.status.update",
             label = @I18nLiteral(pairs = {"zh-CN", "更新字典类型状态", "en", "Update dictionary type status"}),
             recordArgs = false,
@@ -103,6 +107,7 @@ public interface DictionaryTypeEndpoint {
     @Path("/{dictionaryTypeId}")
     @EndpointGrant(
             action = EndpointGrantAction.DELETE,
+            group = CatalogOperationGroups.DELETE,
             name = "dictionary.type.delete",
             label = @I18nLiteral(pairs = {"zh-CN", "删除字典类型", "en", "Delete dictionary type"}),
             recordArgs = false,

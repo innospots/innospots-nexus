@@ -57,18 +57,20 @@ public final class NavigationMenuComposer {
      * 持久化菜单 + meta-sitemap 默认项（持久化菜单优先）。
      *
      * <p>请求侧安全关闭时返回全部启用菜单，不执行权限或角色过滤；安全开启时分别按
-     * 菜单授权与 meta-sitemap {@code roles} 裁剪。</p>
+     * 菜单授权与 meta-sitemap catalog 浏览授权、{@code roles} 裁剪。</p>
      */
     public List<NavigationMenuVo> compose(ConsoleOwnership ownership, AuthorizationSubject subject) {
         boolean securityEnabled = securitySettings.isEnabled();
         List<NavigationMenuVo> persistedMenus = securityEnabled
                 ? menuAssembler.navigationMenus(ownership, subject)
                 : menuAssembler.allNavigationMenus(ownership);
-        List<SitemapMenuItem> configuredMenus = sitemapService.load().getMenus();
+        List<SitemapMenuItem> configuredMenus = metaSitemapMenuFilter.withoutHiddenMenus(
+                sitemapService.load().getMenus());
+        List<SitemapMenuItem> filteredMenus = securityEnabled
+                ? metaSitemapMenuFilter.filterVisibleMenus(configuredMenus, ownership, subject)
+                : configuredMenus;
         List<NavigationMenuVo> configMenus = metaSitemapNavigationConverter.toNavigationMenus(
-                securityEnabled
-                        ? metaSitemapMenuFilter.filterVisibleMenus(configuredMenus, subject)
-                        : configuredMenus);
+                filteredMenus);
         if (persistedMenus.isEmpty()) {
             return configMenus;
         }

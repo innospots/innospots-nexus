@@ -17,6 +17,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.console.support.ConsoleExceptions;
+import com.innospots.nexus.console.catalog.domain.model.CatalogOperationGroups;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogSyncService;
 import com.innospots.nexus.console.config.ConsoleConstant;
 import com.innospots.nexus.console.entry.ConsolePageRoutes;
@@ -149,6 +150,7 @@ public final class PluginManagementEndpoint {
     @Path("/{pluginId}/install")
     @EndpointGrant(
             action = EndpointGrantAction.EXECUTE,
+            group = CatalogOperationGroups.EXECUTE,
             name = "plugin.install",
             label = @I18nLiteral(pairs = {"zh-CN", "安装并启动插件", "en", "Install and start plugin"}),
             recordArgs = false,
@@ -162,6 +164,7 @@ public final class PluginManagementEndpoint {
     @Path("/{pluginId}/enable")
     @EndpointGrant(
             action = EndpointGrantAction.STATUS,
+            group = CatalogOperationGroups.STATUS,
             name = "plugin.enable",
             label = @I18nLiteral(pairs = {"zh-CN", "启用插件", "en", "Enable plugin"}),
             recordArgs = false,
@@ -177,6 +180,7 @@ public final class PluginManagementEndpoint {
     @Path("/{pluginId}/disable")
     @EndpointGrant(
             action = EndpointGrantAction.STATUS,
+            group = CatalogOperationGroups.STATUS,
             name = "plugin.disable",
             label = @I18nLiteral(pairs = {"zh-CN", "停用插件", "en", "Disable plugin"}),
             recordArgs = false,
@@ -192,6 +196,7 @@ public final class PluginManagementEndpoint {
     @Path("/{pluginId}/retry")
     @EndpointGrant(
             action = EndpointGrantAction.EXECUTE,
+            group = CatalogOperationGroups.EXECUTE,
             name = "plugin.retry",
             label = @I18nLiteral(pairs = {"zh-CN", "重试失败插件", "en", "Retry failed plugin"}),
             recordArgs = false,

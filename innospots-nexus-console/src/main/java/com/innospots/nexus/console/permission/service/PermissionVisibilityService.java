@@ -182,7 +182,20 @@ public final class PermissionVisibilityService {
         return List.copyOf(visible);
     }
 
-    private Set<String> grantedGrantKeys(ConsoleOwnership ownership, AuthorizationSubject subject) {
+    /**
+     * 返回主体在指定归属下已授予的 catalog grant key 集合（角色与组织单元并集）。
+     */
+    public Set<String> grantedGrantKeys(ConsoleOwnership ownership, AuthorizationSubject subject) {
+        if (ownership == null || subject == null) {
+            return Set.of();
+        }
+        if (subject.administrator()) {
+            return Set.of("*");
+        }
+        return grantedGrantKeysInternal(ownership, subject);
+    }
+
+    private Set<String> grantedGrantKeysInternal(ConsoleOwnership ownership, AuthorizationSubject subject) {
         List<PermissionGrantEntity> grants = new ArrayList<>();
         if (!subject.roleIds().isEmpty()) {
             grants.addAll(grantDao.selectList(scopeGrantQuery(ownership)

@@ -23,7 +23,11 @@ import com.innospots.nexus.platform.invite.endpoint.PlatformInviteEndpoint;
 import com.innospots.nexus.platform.invite.endpoint.PlatformPublicInviteEndpoint;
 import com.innospots.nexus.platform.invite.service.PlatformInviteService;
 import com.innospots.nexus.platform.invite.service.PlatformPublicInviteService;
+import com.innospots.nexus.platform.settings.endpoint.PlatformConsoleThemeSettingEndpoint;
+import com.innospots.nexus.platform.settings.endpoint.PlatformNavigationLayoutSettingEndpoint;
 import com.innospots.nexus.platform.settings.endpoint.PlatformRegistrationModeSettingEndpoint;
+import com.innospots.nexus.platform.settings.service.PlatformConsoleThemeSettingService;
+import com.innospots.nexus.platform.settings.service.PlatformNavigationLayoutSettingService;
 import com.innospots.nexus.platform.settings.service.PlatformRegistrationModeSettingService;
 import com.innospots.nexus.platform.organization.endpoint.TenantEndpoint;
 import com.innospots.nexus.platform.organization.endpoint.EnterpriseProfileEndpoint;
@@ -46,6 +50,8 @@ public class PlatformResourceProducers {
     private final PlatformAccessRequestService platformAccessRequestService;
     private final PlatformOpenRegistrationService platformOpenRegistrationService;
     private final PlatformRegistrationModeSettingService platformRegistrationModeSettingService;
+    private final PlatformConsoleThemeSettingService platformConsoleThemeSettingService;
+    private final PlatformNavigationLayoutSettingService platformNavigationLayoutSettingService;
     private final RegistrationPolicyService registrationPolicyService;
     private final PlatformTenantService platformTenantService;
     private final PlatformEnterpriseProfileService platformEnterpriseProfileService;
@@ -60,6 +66,8 @@ public class PlatformResourceProducers {
             PlatformAccessRequestService platformAccessRequestService,
             PlatformOpenRegistrationService platformOpenRegistrationService,
             PlatformRegistrationModeSettingService platformRegistrationModeSettingService,
+            PlatformConsoleThemeSettingService platformConsoleThemeSettingService,
+            PlatformNavigationLayoutSettingService platformNavigationLayoutSettingService,
             RegistrationPolicyService registrationPolicyService,
             PlatformTenantService platformTenantService,
             PlatformEnterpriseProfileService platformEnterpriseProfileService) {
@@ -71,6 +79,8 @@ public class PlatformResourceProducers {
         this.platformAccessRequestService = platformAccessRequestService;
         this.platformOpenRegistrationService = platformOpenRegistrationService;
         this.platformRegistrationModeSettingService = platformRegistrationModeSettingService;
+        this.platformConsoleThemeSettingService = platformConsoleThemeSettingService;
+        this.platformNavigationLayoutSettingService = platformNavigationLayoutSettingService;
         this.registrationPolicyService = registrationPolicyService;
         this.platformTenantService = platformTenantService;
         this.platformEnterpriseProfileService = platformEnterpriseProfileService;
@@ -165,5 +175,19 @@ public class PlatformResourceProducers {
     @Unremovable
     PlatformRegistrationModeSettingEndpoint platformRegistrationModeSettingEndpoint() {
         return new PlatformRegistrationModeSettingEndpoint(platformRegistrationModeSettingService);
+    }
+
+    @Produces
+    @Dependent
+    @Unremovable
+    PlatformConsoleThemeSettingEndpoint platformConsoleThemeSettingEndpoint() {
+        return new PlatformConsoleThemeSettingEndpoint(platformConsoleThemeSettingService);
+    }
+
+    @Produces
+    @Dependent
+    @Unremovable
+    PlatformNavigationLayoutSettingEndpoint platformNavigationLayoutSettingEndpoint() {
+        return new PlatformNavigationLayoutSettingEndpoint(platformNavigationLayoutSettingService);
     }
 }

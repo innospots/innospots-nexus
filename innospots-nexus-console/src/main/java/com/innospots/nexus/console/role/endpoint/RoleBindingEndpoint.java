@@ -18,6 +18,7 @@ import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrant;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
 import com.innospots.nexus.core.endpoint.grant.I18nLiteral;
+import com.innospots.nexus.console.catalog.domain.model.CatalogOperationGroups;
 import com.innospots.nexus.console.role.domain.request.RoleBindingAddRequest;
 import com.innospots.nexus.console.role.domain.request.RoleBindingPageRequest;
 import com.innospots.nexus.console.role.domain.vo.RoleBindingVo;
@@ -47,6 +48,7 @@ public interface RoleBindingEndpoint {
     @POST
     @EndpointGrant(
             action = EndpointGrantAction.ASSIGN,
+            group = CatalogOperationGroups.ASSIGN,
             name = "role.binding.add",
             label = @I18nLiteral(pairs = {"zh-CN", "新增角色绑定", "en", "Add role bindings"}),
             recordArgs = false,
@@ -60,6 +62,7 @@ public interface RoleBindingEndpoint {
     @Path("/{bindingId}")
     @EndpointGrant(
             action = EndpointGrantAction.REVOKE,
+            group = CatalogOperationGroups.REVOKE,
             name = "role.binding.remove",
             label = @I18nLiteral(pairs = {"zh-CN", "移除角色绑定", "en", "Remove role binding"}),
             recordArgs = false,

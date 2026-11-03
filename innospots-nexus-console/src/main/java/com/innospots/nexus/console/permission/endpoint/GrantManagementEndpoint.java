@@ -15,6 +15,7 @@ import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrant;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
 import com.innospots.nexus.core.endpoint.grant.I18nLiteral;
+import com.innospots.nexus.console.catalog.domain.model.CatalogOperationGroups;
 import com.innospots.nexus.console.permission.domain.request.PermissionGrantReplaceRequest;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 
@@ -38,6 +39,7 @@ public interface GrantManagementEndpoint {
     @PUT
     @EndpointGrant(
             action = EndpointGrantAction.REPLACE,
+            group = CatalogOperationGroups.REPLACE,
             name = "permission.grant.role.replace",
             label = @I18nLiteral(pairs = {"zh-CN", "全量替换角色授权", "en", "Replace role permissions"}),
             recordArgs = false,

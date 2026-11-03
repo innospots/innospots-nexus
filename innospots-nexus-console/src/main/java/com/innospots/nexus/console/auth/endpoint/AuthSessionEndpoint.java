@@ -11,6 +11,7 @@ import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import com.innospots.nexus.base.domain.response.R;
+import com.innospots.nexus.console.catalog.domain.model.CatalogOperationGroups;
 import com.innospots.nexus.console.auth.domain.request.PasswordChangeRequest;
 import com.innospots.nexus.console.auth.domain.request.TokenRefreshRequest;
 import com.innospots.nexus.console.auth.domain.vo.AuthTokenVo;
@@ -33,6 +34,7 @@ public interface AuthSessionEndpoint {
     @Path("/refresh")
     @EndpointGrant(
             action = EndpointGrantAction.EXECUTE,
+            group = CatalogOperationGroups.EXECUTE,
             name = "auth.token.refresh",
             label = @I18nLiteral(pairs = {"zh-CN", "刷新访问令牌", "en", "Refresh access token"}),
             recordArgs = false,
@@ -44,6 +46,7 @@ public interface AuthSessionEndpoint {
     @Path("/logout")
     @EndpointGrant(
             action = EndpointGrantAction.EXECUTE,
+            group = CatalogOperationGroups.EXECUTE,
             name = "auth.logout",
             label = @I18nLiteral(pairs = {"zh-CN", "登出当前会话", "en", "Logout"}),
             recordArgs = false,
@@ -56,6 +59,7 @@ public interface AuthSessionEndpoint {
     @Path("/password/change")
     @EndpointGrant(
             action = EndpointGrantAction.UPDATE,
+            group = CatalogOperationGroups.UPDATE,
             name = "auth.password.change",
             label = @I18nLiteral(pairs = {"zh-CN", "修改当前用户密码", "en", "Change password"}),
             recordArgs = false,

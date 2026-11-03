@@ -11,6 +11,7 @@ import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import com.innospots.nexus.base.domain.response.R;
+import com.innospots.nexus.console.catalog.domain.model.CatalogOperationGroups;
 import com.innospots.nexus.console.auth.domain.request.AuthCaptchaIssueRequest;
 import com.innospots.nexus.console.auth.domain.request.AuthLoginRequest;
 import com.innospots.nexus.console.auth.domain.vo.AuthCaptchaVo;
@@ -43,6 +44,7 @@ public interface PublicAuthEndpoint {
     @Path("/captcha/issue")
     @EndpointGrant(
             action = EndpointGrantAction.EXECUTE,
+            group = CatalogOperationGroups.EXECUTE,
             name = "auth.captcha.issue",
             label = @I18nLiteral(pairs = {"zh-CN", "签发登录验证码", "en", "Issue login captcha"}),
             recordArgs = false)
@@ -53,6 +55,7 @@ public interface PublicAuthEndpoint {
     @Path("/login")
     @EndpointGrant(
             action = EndpointGrantAction.EXECUTE,
+            group = CatalogOperationGroups.EXECUTE,
             name = "auth.login",
             label = @I18nLiteral(pairs = {"zh-CN", "密码登录", "en", "Password login"}),
             recordArgs = false,

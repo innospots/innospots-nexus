@@ -4,7 +4,7 @@
  * API_BASE_URLS：各环境默认的外部接口基准地址（SitemapApp baseUrl）。
  * - 环境由构建命令注入（scripts/build.mjs 设置 APP_ENV：
  *   build / build:dev / build:test → production / development / test）；
- * - 解析结果经 env 配置内联进客户端包（src/pactor/config.ts 消费）；
+ * - 解析结果经 env 配置内联进客户端包（src/frontend/config.ts 消费）；
  * - test / production 为占位域名，接入真实环境时替换；
  * - 构建环境可设 NEXT_PUBLIC_API_BASE_URL 显式覆盖（域名不符合约定时）。
  */

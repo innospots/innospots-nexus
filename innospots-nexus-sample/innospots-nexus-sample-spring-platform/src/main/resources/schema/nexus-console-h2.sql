@@ -202,6 +202,7 @@ CREATE TABLE IF NOT EXISTS nx_permission_grant (
     subject_type           VARCHAR(32) NOT NULL,
     subject_id             VARCHAR(32) NOT NULL,
     grant_key              VARCHAR(256) NOT NULL,
+    grant_key_type         VARCHAR(16) NOT NULL,
     resource_id            VARCHAR(32),
     constraint_definition  TEXT,
     owner_type             VARCHAR(32) NOT NULL,
@@ -227,6 +228,12 @@ WHERE g.grant_key IS NULL AND g.resource_id IS NOT NULL;
 DELETE FROM nx_permission_grant WHERE grant_key IS NULL;
 
 ALTER TABLE nx_permission_grant ALTER COLUMN grant_key SET NOT NULL;
+
+ALTER TABLE nx_permission_grant ADD COLUMN IF NOT EXISTS grant_key_type VARCHAR(16);
+
+UPDATE nx_permission_grant SET grant_key_type = 'module' WHERE grant_key_type IS NULL;
+
+ALTER TABLE nx_permission_grant ALTER COLUMN grant_key_type SET NOT NULL;
 
 ALTER TABLE nx_permission_grant ALTER COLUMN resource_id DROP NOT NULL;
 

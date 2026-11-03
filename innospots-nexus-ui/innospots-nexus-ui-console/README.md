@@ -7,7 +7,32 @@ Next.js + Pactor 控制台：**同一套源码**支持两种交付方式，互�
 | **独立应用** | 单独域名/进程运行完整控制台 | `npm run build:app`（或 `npm run build`） | `.next/` + `public/` + `node_modules`（或 standalone 镜像） |
 | **UI 模块** | 装配进 InnoSpots Web Shell | `npm run build:module` | 仅 `dist-module/`（npm pack / 私有 registry） |
 
-设计原则：**`app/`、`.next/` 永不进入 npm 模块包**；`build:module` **不会**执行 `next build`，也不会改动 `.next`。
+设计原则：**`src/app/`、`.next/` 永不进入 npm 模块包**；`build:module` **不会**执行 `next build`，也不会改动 `.next`。
+
+工程分层与 `next-app-starter` 一致：
+
+```text
+innospots-nexus-ui-console/
+├── public/skins/              主题 CSS
+├── scripts/                   build.mjs、build-module.mjs
+├── src/
+│   ├── app/                   Next 入口（[[...slug]]、api、layout、globals.css）
+│   ├── backend/
+│   │   ├── auth/              会话 cookie / 用户解析
+│   │   ├── mock/              本地占位接口（如 system-settings）
+│   │   ├── config.ts、cors.ts
+│   │   └── pages/
+│   │       ├── i18n/          服务端 i18n 与 DSL 字段注册
+│   │       ├── sitemap.ts
+│   │       └── yaml/          sitemap + 业务页面 DSL（内容不变）
+│   └── frontend/
+│       ├── App.tsx、config.ts、skin.ts、locale.tsx
+│       ├── components/        auth、layout、platform、settings、shared
+│       ├── i18n/messages.ts   宿主壳文案
+│       ├── lib/                 业务辅助（加密、平台 API 等）
+│       └── types/session.ts
+└── module/                    UI 模块 manifest 与 client 入口
+```
 
 ---
 
@@ -22,11 +47,11 @@ npm install
 npm run dev          # http://localhost:9011
 ```
 
-- 页面 DSL：`src/server/yaml/`
-- Sitemap / 会话裁剪：`src/server/sitemap.ts` → `GET /api/sitemap`
+- 页面 DSL：`src/backend/pages/yaml/`
+- Sitemap / 会话裁剪：`src/backend/pages/sitemap.ts` → `GET /api/sitemap`
 - 懒加载页：`GET /api/public/pages/{id}`
-- 数据转发：`app/api/d/[...parts]` → `NEXT_PUBLIC_API_BASE_URL`
-- 客户端入口：`app/layout.tsx` 内 `PactorApp`（`src/pactor/App.tsx`）
+- 数据转发：`src/app/api/d/[...parts]` → `NEXT_PUBLIC_API_BASE_URL`（转发目标见 `src/backend/config.ts`）
+- 客户端入口：`src/app/layout.tsx` 内 `PactorApp`（`src/frontend/App.tsx`）
 
 ### 生产构建与启动
 
@@ -48,7 +73,7 @@ npm run build:app:test
 - `package.json` 中 `"files": ["dist-module"]` **只限制 npm 模块包**体积，不影响 Docker/K8s 对 `next build` 产物的部署。
 - 接真实后端：调整 `next.config.js` 的 `API_BASE_URLS` / 环境变量，**无需**为 Shell 改 YAML 路径（独立模式下 URL 仍为 `/api/d/*` 等同源路径）。
 
-演示账号见 `src/server/accounts.ts`。
+演示账号见 `src/backend/accounts.ts`。
 
 ---
 
@@ -76,7 +101,7 @@ npm run publish:module
 ```text
 dist-module/
 ├── manifest.json
-├── dsl/                 # 自 src/server/yaml 复制
+├── dsl/                 # 自 src/backend/pages/yaml 复制
 ├── assets/              # 自 public/ 复制
 ├── client/index.js      # extensions（components + actions）
 ├── styles.css
@@ -105,11 +130,11 @@ Shell 侧 URL 带 `basePath` 前缀（如 `/console/system/roles`）；模块内
 
 | 资产 | 独立应用 | UI 模块 |
 | --- | --- | --- |
-| 页面 YAML | `src/server/yaml/**` | `build:module` → `dist-module/dsl/**` |
-| 自定义组件 / Actions | `src/pactor/components`、`actions.ts` | `module/client.ts` → esbuild → `dist-module/client/` |
+| 页面 YAML | `src/backend/pages/yaml/**` | `build:module` → `dist-module/dsl/**` |
+| 自定义组件 / Actions | `src/frontend/components`、`actions.ts` | `module/client.ts` → esbuild → `dist-module/client/` |
 | 静态资源 | `public/` | `dist-module/assets/` |
-| 运行时接线 | `src/pactor/App.tsx` + `app/api/*` | **由 Shell** 提供 Runtime API 与 `PactorHost` |
-| Next 路由 | `app/[[...slug]]` + layout 挂 PactorApp | 不打进模块包 |
+| 运行时接线 | `src/frontend/App.tsx` + `src/app/api/*` | **由 Shell** 提供 Runtime API 与 `PactorHost` |
+| Next 路由 | `src/app/[[...slug]]` + layout 挂 PactorApp | 不打进模块包 |
 
 **开发建议**：日常功能在独立应用下 `npm run dev` 验证；合入 Shell 前执行 `build:module` 并在 Shell 中 `assemble:modules` 做集成验证。
 
@@ -117,16 +142,16 @@ Shell 侧 URL 带 `basePath` 前缀（如 `/console/system/roles`）；模块内
 
 ## 工程内容（独立应用）
 
-- **公共与业务页面**：`src/server/yaml/`（含 `sitemap.yaml`）
-- **接线**：`src/pactor/`（SitemapApp、组件、动作、HTTP 钩子）
-- **服务端**：`src/server/sitemap.ts`、会话与 yaml 加载
+- **公共与业务页面**：`src/backend/pages/yaml/`（含 `sitemap.yaml`）
+- **接线**：`src/frontend/`（SitemapApp、组件、动作、HTTP 钩子）
+- **服务端**：`src/backend/pages/sitemap.ts`、会话与 yaml 加载
 - **API**：`app/api/sitemap`、`public/pages`、`d` 转发、`auth` 等
 - **皮肤**：`public/skins/`
 
 ## 新建业务时
 
-1. 在 `src/server/yaml/` 按域新增 `{pageId}.yaml`，并在 `sitemap.yaml` 注册 `pages` / `menus`
-2. 若 DSL 引用新组件，在 `src/pactor/components/index.ts` 注册
+1. 在 `src/backend/pages/yaml/` 按域新增 `{pageId}.yaml`，并在 `sitemap.yaml` 注册 `pages` / `menus`
+2. 若 DSL 引用新组件，在 `src/frontend/components/index.ts` 注册
 3. 独立应用 `npm run dev` 验证后，需要进 Shell 时执行 `npm run build:module`
 
 ---

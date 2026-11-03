@@ -14,6 +14,9 @@ importers:
       '@pactor-app/i18n':
         specifier: 1.58.0
         version: 1.58.0(yaml@2.9.1)
+      '@pactor-app/router':
+        specifier: 1.58.0
+        version: 1.58.0(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
       '@pactor-app/runtime':
         specifier: ^1.58.0
         version: 1.58.0(react@19.2.8)

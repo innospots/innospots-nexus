@@ -29,6 +29,7 @@ import com.innospots.nexus.console.catalog.service.ConsoleCatalogService;
 import com.innospots.nexus.console.credential.password.service.CredentialService;
 import com.innospots.nexus.platform.config.PlatformConstant;
 import com.innospots.nexus.sample.spring.platform.SamplePlatformConsoleServer;
+import com.innospots.nexus.sample.spring.platform.catalog.support.CatalogTreeVerificationSupport;
 import com.innospots.nexus.sample.spring.platform.permission.support.PermissionGrantDatabaseJsonSnapshot;
 import com.innospots.nexus.sample.spring.platform.permission.support.SyncedCatalogResourceIds;
 import com.innospots.nexus.sample.spring.platform.permission.support.SyncedCatalogResourceIds.UserAndRoleMenus;
@@ -455,10 +456,9 @@ class PlatformNavigationMenuEndpointIntegrationTest {
     }
 
     private String requireOperationGrantKey(String moduleResourceKey, String grantName) {
-        CatalogNodeVo module = catalogService.permissionCatalog().stream()
-                .filter(node -> moduleResourceKey.equals(node.resourceKey()))
-                .findFirst()
-                .orElseThrow();
+        CatalogNodeVo module = CatalogTreeVerificationSupport.findModuleByResourceKey(
+                catalogService.permissionCatalog(),
+                moduleResourceKey);
         return module.grants().operationGroups().stream()
                 .flatMap(group -> group.items().stream())
                 .filter(item -> grantName.equals(item.grantName()))

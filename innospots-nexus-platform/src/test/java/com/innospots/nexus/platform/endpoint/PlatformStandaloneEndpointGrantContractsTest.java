@@ -38,6 +38,8 @@ import com.innospots.nexus.platform.permission.endpoint.PlatformOrganizationUnit
 import com.innospots.nexus.platform.permission.endpoint.PlatformPageAccessEndpoint;
 import com.innospots.nexus.platform.role.endpoint.PlatformRoleBindingEndpoint;
 import com.innospots.nexus.platform.role.endpoint.PlatformRoleEndpoint;
+import com.innospots.nexus.platform.settings.endpoint.PlatformConsoleThemeSettingEndpoint;
+import com.innospots.nexus.platform.settings.endpoint.PlatformNavigationLayoutSettingEndpoint;
 import com.innospots.nexus.platform.settings.endpoint.PlatformRegistrationModeSettingEndpoint;
 import com.innospots.nexus.platform.user.endpoint.PlatformUserEndpoint;
 
@@ -60,7 +62,9 @@ class PlatformStandaloneEndpointGrantContractsTest {
             PlatformPublicAccessRegistrationEndpoint.class,
             PlatformPublicOpenRegistrationEndpoint.class,
             PlatformPublicRegistrationPolicyEndpoint.class,
-            PlatformRegistrationModeSettingEndpoint.class);
+            PlatformRegistrationModeSettingEndpoint.class,
+            PlatformConsoleThemeSettingEndpoint.class,
+            PlatformNavigationLayoutSettingEndpoint.class);
 
     private static final List<Class<?>> CONSOLE_CONTRACT_IMPLEMENTATIONS = List.of(
             PlatformDictionaryTypeEndpoint.class,
@@ -170,7 +174,9 @@ class PlatformStandaloneEndpointGrantContractsTest {
                 "PlatformPublicAccessRegistrationEndpoint",
                 "PlatformPublicOpenRegistrationEndpoint",
                 "PlatformPublicRegistrationPolicyEndpoint",
-                "PlatformRegistrationModeSettingEndpoint");
+                "PlatformRegistrationModeSettingEndpoint",
+                "PlatformConsoleThemeSettingEndpoint",
+                "PlatformNavigationLayoutSettingEndpoint");
         assertThat(actual).isEqualTo(expected);
     }
 

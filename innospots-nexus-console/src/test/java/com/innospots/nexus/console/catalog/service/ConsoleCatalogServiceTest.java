@@ -21,6 +21,7 @@ import com.innospots.nexus.base.json.Jsons;
 import com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao;
 import com.innospots.nexus.console.catalog.domain.entity.ConsoleCatalogResourceEntity;
 import com.innospots.nexus.console.catalog.domain.enums.CatalogResourceType;
+import com.innospots.nexus.console.catalog.domain.vo.CatalogDomainVo;
 import com.innospots.nexus.console.catalog.domain.vo.CatalogNodeVo;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeCreateRequest;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypePageRequest;
@@ -43,9 +44,12 @@ class ConsoleCatalogServiceTest {
         module.setViewGroups(Jsons.toJson(List.of(Map.of(
                 "group", "default",
                 "label", Map.of("zh-CN", "字典管理", "en", "Dictionary Management")))));
-        module.setOperationGroups(Jsons.toJson(List.of(Map.of(
-                "group", "default",
-                "label", Map.of("zh-CN", "操作", "en", "Operations")))));
+        module.setOperationGroups(Jsons.toJson(List.of(
+                Map.of("group", "default", "label", Map.of("en", "Other", "zh", "其他")),
+                Map.of("group", "create", "label", Map.of("en", "Create", "zh", "创建")),
+                Map.of("group", "update", "label", Map.of("en", "Update", "zh", "更新")),
+                Map.of("group", "delete", "label", Map.of("en", "Delete", "zh", "删除")),
+                Map.of("group", "status", "label", Map.of("en", "Status", "zh", "状态")))));
 
         ConsoleCatalogResourceDao dao = mock(ConsoleCatalogResourceDao.class);
         when(dao.selectList(any())).thenReturn(List.of(module));
@@ -55,16 +59,19 @@ class ConsoleCatalogServiceTest {
 
         ConsoleCatalogService service = new ConsoleCatalogService(dao, grantManager);
 
-        List<CatalogNodeVo> roots = service.permissionCatalog();
+        List<CatalogDomainVo> roots = service.permissionCatalog();
         assertThat(roots).hasSize(1);
-        assertThat(roots.getFirst().grants()).isNotNull();
-        assertThat(roots.getFirst().grants().viewGroups()).hasSize(1);
-        assertThat(roots.getFirst().grants().viewGroups().getFirst().group()).isEqualTo("default");
-        assertThat(roots.getFirst().grants().viewGroups().getFirst().resourceKey())
+        CatalogNodeVo moduleNode = roots.getFirst().modules().getFirst();
+        assertThat(moduleNode.grants()).isNotNull();
+        assertThat(moduleNode.grants().viewGroups()).hasSize(1);
+        assertThat(moduleNode.grants().viewGroups().getFirst().group()).isEqualTo("default");
+        assertThat(moduleNode.grants().viewGroups().getFirst().resourceKey())
                 .isEqualTo("platform.dictionary:default");
-        assertThat(roots.getFirst().grants().viewGroups().getFirst().items()).isEmpty();
-        assertThat(roots.getFirst().grants().operationGroups().getFirst().items())
-                .extracting(item -> item.grantName())
+        assertThat(moduleNode.grants().viewGroups().getFirst().items()).isEmpty();
+        assertThat(moduleNode.grants().operationGroups().stream()
+                .filter(group -> "create".equals(group.group()))
+                .flatMap(group -> group.items().stream())
+                .map(item -> item.grantName()))
                 .contains("dictionary.type.create")
                 .doesNotContain("dictionary.type.page");
     }
@@ -85,13 +92,36 @@ class ConsoleCatalogServiceTest {
 
         ConsoleCatalogService service = new ConsoleCatalogService(dao, new EndpointGrantManager());
 
-        List<CatalogNodeVo> roots = service.permissionCatalog();
+        List<CatalogDomainVo> roots = service.permissionCatalog();
         assertThat(roots).hasSize(1);
-        assertThat(roots.getFirst().grants().viewGroups()).hasSize(1);
-        assertThat(roots.getFirst().grants().viewGroups().getFirst().resourceKey())
+        CatalogNodeVo moduleNode = roots.getFirst().modules().getFirst();
+        assertThat(moduleNode.grants().viewGroups()).hasSize(1);
+        assertThat(moduleNode.grants().viewGroups().getFirst().resourceKey())
                 .isEqualTo("nexus.demo:default");
-        assertThat(roots.getFirst().grants().viewGroups().getFirst().items()).isEmpty();
-        assertThat(roots.getFirst().grants().operationGroups().getFirst().items()).isEmpty();
+        assertThat(moduleNode.grants().viewGroups().getFirst().items()).isEmpty();
+        assertThat(moduleNode.grants().operationGroups().getFirst().items()).isEmpty();
+    }
+
+    @Test
+    void permissionCatalogGroupsMultipleModulesUnderSameContribution() {
+        ConsoleCatalogResourceEntity first = entity(
+                "m1", null, CatalogResourceType.MODULE, "module:alpha", "alpha", "alpha-main");
+        ConsoleCatalogResourceEntity second = entity(
+                "m2", null, CatalogResourceType.MODULE, "module:beta", "beta", "beta-main");
+        first.setSortOrder(10);
+        second.setSortOrder(20);
+
+        ConsoleCatalogResourceDao dao = mock(ConsoleCatalogResourceDao.class);
+        when(dao.selectList(any())).thenReturn(List.of(first, second));
+
+        ConsoleCatalogService service = new ConsoleCatalogService(dao, new EndpointGrantManager());
+
+        List<CatalogDomainVo> roots = service.permissionCatalog();
+        assertThat(roots).hasSize(1);
+        assertThat(roots.getFirst().domainKey()).isEqualTo("nexus");
+        assertThat(roots.getFirst().ownerPluginId()).isEqualTo("com.innospots.nexus.test-plugin");
+        assertThat(roots.getFirst().modules()).extracting(CatalogNodeVo::moduleKey)
+                .containsExactly("alpha", "beta");
     }
 
     private static ConsoleCatalogResourceEntity entity(

@@ -29,6 +29,8 @@ class OpenApiBuildContractsTest {
         assertThat(yaml).contains(PlatformConstant.PUBLIC_INVITES_PATH);
         assertThat(yaml).contains(PlatformConstant.PUBLIC_OPEN_REGISTRATION_PATH);
         assertThat(yaml).contains(PlatformConstant.SETTINGS_REGISTRATION_MODE_PATH);
+        assertThat(yaml).contains(PlatformConstant.SETTINGS_CONSOLE_THEME_PATH);
+        assertThat(yaml).contains(PlatformConstant.SETTINGS_NAVIGATION_LAYOUT_PATH);
         assertThat(yaml).contains(PlatformConstant.ROLES_PATH);
         assertThat(yaml).contains(PlatformConstant.DICTIONARY_TYPES_PATH);
         assertThat(yaml).contains(PlatformConstant.ROLE_PERMISSIONS_PATH);

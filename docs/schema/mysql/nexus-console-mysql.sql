@@ -183,6 +183,7 @@ CREATE TABLE IF NOT EXISTS nx_permission_grant (
     subject_type           VARCHAR(32) NOT NULL,
     subject_id             VARCHAR(32) NOT NULL,
     grant_key              VARCHAR(256) NOT NULL,
+    grant_key_type         VARCHAR(16) NOT NULL,
     constraint_definition  TEXT,
     owner_type             VARCHAR(32) NOT NULL,
     owner_id               VARCHAR(32),

@@ -24,8 +24,8 @@ public class ConsoleNavigationConfiguration {
     }
 
     @Bean
-    MetaSitemapMenuFilter metaSitemapMenuFilter() {
-        return new MetaSitemapMenuFilter();
+    MetaSitemapMenuFilter metaSitemapMenuFilter(PermissionVisibilityService visibilityService) {
+        return new MetaSitemapMenuFilter(visibilityService);
     }
 
     @Bean

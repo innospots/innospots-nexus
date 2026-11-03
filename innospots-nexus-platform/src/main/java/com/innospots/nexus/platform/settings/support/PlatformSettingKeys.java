@@ -3,6 +3,8 @@ package com.innospots.nexus.platform.settings.support;
 import com.innospots.nexus.core.setting.domain.enums.SettingScope;
 import com.innospots.nexus.core.setting.domain.enums.SettingValueType;
 import com.innospots.nexus.core.setting.support.SettingKey;
+import com.innospots.nexus.platform.settings.domain.enums.PlatformConsoleTheme;
+import com.innospots.nexus.platform.settings.domain.enums.PlatformNavigationLayoutMode;
 import com.innospots.nexus.platform.settings.domain.enums.PlatformRegistrationMode;
 
 /**
@@ -23,6 +25,22 @@ public final class PlatformSettingKeys {
             SettingScope.GLOBAL,
             SettingValueType.STRING,
             raw -> PlatformRegistrationMode.valueOf(raw.trim().toUpperCase()));
+
+    /** 控制台配色主题：{@code console.theme}。 */
+    public static final SettingKey<PlatformConsoleTheme> CONSOLE_THEME = new SettingKey<>(
+            DOMAIN,
+            "console.theme",
+            SettingScope.GLOBAL,
+            SettingValueType.STRING,
+            raw -> PlatformConsoleTheme.valueOf(raw.trim().toUpperCase()));
+
+    /** 控制台导航布局：{@code console.navigation.layout}。 */
+    public static final SettingKey<PlatformNavigationLayoutMode> NAVIGATION_LAYOUT = new SettingKey<>(
+            DOMAIN,
+            "console.navigation.layout",
+            SettingScope.GLOBAL,
+            SettingValueType.STRING,
+            raw -> PlatformNavigationLayoutMode.valueOf(raw.trim().toUpperCase()));
 
     private PlatformSettingKeys() {
     }

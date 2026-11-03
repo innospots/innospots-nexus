@@ -10,6 +10,7 @@ import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import com.innospots.nexus.base.domain.response.R;
+import com.innospots.nexus.console.catalog.domain.model.CatalogOperationGroups;
 import com.innospots.nexus.console.auth.domain.request.PasswordResetRequest;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrant;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
@@ -29,6 +30,7 @@ public interface PublicPasswordResetEndpoint {
     @Path("/reset")
     @EndpointGrant(
             action = EndpointGrantAction.EXECUTE,
+            group = CatalogOperationGroups.EXECUTE,
             name = "auth.password.reset",
             label = @I18nLiteral(pairs = {"zh-CN", "凭验证码重置密码", "en", "Reset password with verification"}),
             recordArgs = false,

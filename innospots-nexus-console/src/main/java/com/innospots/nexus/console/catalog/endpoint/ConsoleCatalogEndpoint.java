@@ -19,7 +19,9 @@ import com.innospots.nexus.core.endpoint.grant.EndpointGrant;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
 import com.innospots.nexus.core.endpoint.grant.EndpointModule;
 import com.innospots.nexus.core.endpoint.grant.I18nLiteral;
+import com.innospots.nexus.console.catalog.domain.model.CatalogOperationGroups;
 import com.innospots.nexus.console.catalog.domain.model.CatalogSyncResult;
+import com.innospots.nexus.console.catalog.domain.vo.CatalogDomainVo;
 import com.innospots.nexus.console.catalog.domain.vo.CatalogNodeVo;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogService;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogSyncService;
@@ -55,7 +57,7 @@ public final class ConsoleCatalogEndpoint {
             name = "catalog.permission-catalog",
             label = @I18nLiteral(pairs = {"zh-CN", "权限目录", "en", "Permission catalog"}))
     @Operation(operationId = "catalogPermissionCatalog", summary = "权限配置目录")
-    public R<List<CatalogNodeVo>> permissionCatalog() {
+    public R<List<CatalogDomainVo>> permissionCatalog() {
         return R.ok(catalogService.permissionCatalog());
     }
 
@@ -67,7 +69,7 @@ public final class ConsoleCatalogEndpoint {
             name = "catalog.tree",
             label = @I18nLiteral(pairs = {"zh-CN", "目录资源树", "en", "Catalog resource tree"}))
     @Operation(operationId = "catalogTree", summary = "目录资源树（已废弃，请用 permission-catalog）")
-    public R<List<CatalogNodeVo>> tree() {
+    public R<List<CatalogDomainVo>> tree() {
         return R.ok(catalogService.permissionCatalog());
     }
 
@@ -75,6 +77,7 @@ public final class ConsoleCatalogEndpoint {
     @Path("/sync")
     @EndpointGrant(
             action = EndpointGrantAction.EXECUTE,
+            group = CatalogOperationGroups.EXECUTE,
             name = "catalog.sync",
             label = @I18nLiteral(pairs = {"zh-CN", "同步插件贡献到目录索引", "en", "Sync plugin contributions to catalog"}),
             recordArgs = false,

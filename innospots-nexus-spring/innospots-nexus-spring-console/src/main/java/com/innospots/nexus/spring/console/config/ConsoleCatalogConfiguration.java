@@ -40,8 +40,10 @@ public class ConsoleCatalogConfiguration {
     }
 
     @Bean
-    SitemapService sitemapService(SitemapConfigLoader sitemapConfigLoader) {
-        return new SitemapService(sitemapConfigLoader);
+    SitemapService sitemapService(
+            SitemapConfigLoader sitemapConfigLoader,
+            ConsoleCatalogService catalogService) {
+        return new SitemapService(sitemapConfigLoader, catalogService);
     }
 
     @Bean
@@ -54,8 +56,9 @@ public class ConsoleCatalogConfiguration {
     @Bean
     ConsoleCatalogService consoleCatalogService(
             ConsoleCatalogResourceDao resourceDao,
-            EndpointGrantManager endpointGrantManager) {
-        return new ConsoleCatalogService(resourceDao, endpointGrantManager);
+            EndpointGrantManager endpointGrantManager,
+            ConsoleContributionCatalog contributionCatalog) {
+        return new ConsoleCatalogService(resourceDao, endpointGrantManager, contributionCatalog);
     }
 
     @Bean

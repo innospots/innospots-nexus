@@ -13,6 +13,7 @@ import com.innospots.nexus.console.jaxrs.web.ConsoleWebSecuritySettings;
 import com.innospots.nexus.console.menu.domain.enums.MenuOpenMode;
 import com.innospots.nexus.console.menu.domain.vo.NavigationMenuVo;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubject;
+import com.innospots.nexus.console.permission.service.PermissionVisibilityService;
 import com.innospots.nexus.console.scope.ConsoleOwnership;
 import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
 import com.innospots.nexus.console.sitemap.domain.config.SitemapConfig;
@@ -20,6 +21,42 @@ import com.innospots.nexus.console.sitemap.domain.model.SitemapMenuItem;
 import com.innospots.nexus.console.sitemap.service.SitemapService;
 
 class NavigationMenuComposerTest {
+
+    @Test
+    void disabledSecurityStillOmitsHiddenMetaSitemapMenus() {
+        ConsoleOwnership ownership = ConsoleOwnershipScope.workspaceOwnership("ws-1", "TENANT");
+        AuthorizationSubject subject = new AuthorizationSubject("u1", Set.of(), Set.of(), false);
+        NavigationMenuAssembler assembler = mock(NavigationMenuAssembler.class);
+        when(assembler.allNavigationMenus(ownership)).thenReturn(List.of());
+
+        SitemapService sitemapService = mock(SitemapService.class);
+        SitemapConfig sitemap = new SitemapConfig();
+        SitemapMenuItem visible = sitemapMenu();
+        visible.setId("configured");
+        visible.setRoles(List.of());
+        SitemapMenuItem hidden = sitemapMenu();
+        hidden.setId("hidden-page");
+        hidden.setHidden(true);
+        sitemap.setMenus(List.of(visible, hidden));
+        when(sitemapService.load()).thenReturn(sitemap);
+
+        NavigationMenuComposer composer = new NavigationMenuComposer(
+                assembler,
+                sitemapService,
+                metaFilter(ownership, subject, Set.of()),
+                new MetaSitemapNavigationConverter(),
+                disabledSecurity());
+
+        assertThat(composer.compose(ownership, subject))
+                .extracting(NavigationMenuVo::menuKey)
+                .containsExactly("configured");
+    }
+
+    private static ConsoleWebSecuritySettings disabledSecurity() {
+        ConsoleWebSecuritySettings security = new ConsoleWebSecuritySettings();
+        security.setEnabled(false);
+        return security;
+    }
 
     @Test
     void disabledSecurityReturnsAllMenuSourcesWithoutRoleFiltering() {
@@ -34,12 +71,11 @@ class NavigationMenuComposerTest {
         sitemap.setMenus(List.of(sitemapMenu()));
         when(sitemapService.load()).thenReturn(sitemap);
 
-        ConsoleWebSecuritySettings security = new ConsoleWebSecuritySettings();
-        security.setEnabled(false);
+        ConsoleWebSecuritySettings security = disabledSecurity();
         NavigationMenuComposer composer = new NavigationMenuComposer(
                 assembler,
                 sitemapService,
-                new MetaSitemapMenuFilter(),
+                metaFilter(ownership, subject, Set.of()),
                 new MetaSitemapNavigationConverter(),
                 security);
 
@@ -64,7 +100,7 @@ class NavigationMenuComposerTest {
         NavigationMenuComposer composer = new NavigationMenuComposer(
                 assembler,
                 sitemapService,
-                new MetaSitemapMenuFilter(),
+                metaFilter(ownership, subject, Set.of()),
                 new MetaSitemapNavigationConverter(),
                 new ConsoleWebSecuritySettings());
 
@@ -89,13 +125,23 @@ class NavigationMenuComposerTest {
         NavigationMenuComposer composer = new NavigationMenuComposer(
                 assembler,
                 sitemapService,
-                new MetaSitemapMenuFilter(),
+                metaFilter(ownership, subject, Set.of()),
                 new MetaSitemapNavigationConverter(),
                 new ConsoleWebSecuritySettings());
 
         assertThat(composer.compose(ownership, subject))
                 .extracting(NavigationMenuVo::menuKey)
                 .containsExactly("configured");
+    }
+
+    private static MetaSitemapMenuFilter metaFilter(
+            ConsoleOwnership ownership,
+            AuthorizationSubject subject,
+            Set<String> grantedKeys
+    ) {
+        PermissionVisibilityService visibilityService = mock(PermissionVisibilityService.class);
+        when(visibilityService.grantedGrantKeys(ownership, subject)).thenReturn(grantedKeys);
+        return new MetaSitemapMenuFilter(visibilityService);
     }
 
     private static SitemapMenuItem sitemapMenu() {

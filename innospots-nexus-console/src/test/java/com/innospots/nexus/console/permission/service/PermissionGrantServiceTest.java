@@ -1,7 +1,9 @@
 package com.innospots.nexus.console.permission.service;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.AfterEach;
@@ -17,6 +19,7 @@ import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogService;
 import com.innospots.nexus.console.permission.dao.PermissionGrantDao;
 import com.innospots.nexus.console.permission.domain.entity.PermissionGrantEntity;
+import com.innospots.nexus.console.permission.domain.enums.PermissionGrantKeyType;
 import com.innospots.nexus.console.permission.domain.enums.PermissionSubjectType;
 import com.innospots.nexus.console.role.domain.enums.RoleOwnerType;
 import com.innospots.nexus.console.permission.domain.request.PermissionGrantItemRequest;
@@ -192,6 +195,7 @@ class PermissionGrantServiceTest {
         assertThat(inserted.get(0).getSubjectType()).isEqualTo(PermissionSubjectType.ROLE.name());
         assertThat(inserted.get(0).getSubjectId()).isEqualTo("rol-9");
         assertThat(inserted.get(0).getGrantKey()).isEqualTo("sales.orders:sales-orders");
+        assertThat(inserted.get(0).getGrantKeyType()).isEqualTo(PermissionGrantKeyType.MODULE.code());
         assertThat(inserted.get(0).getOwnerId()).isEqualTo("wks-1");
         verify(grantSubjectAccess).ensureSubjectInScope(
                 PermissionSubjectType.ROLE, "rol-9", ownership, "tnt-1", "wks-1");
@@ -227,7 +231,12 @@ class PermissionGrantServiceTest {
 
     private static ConsoleCatalogService catalogService(String... grantKeys) {
         ConsoleCatalogService service = mock(ConsoleCatalogService.class);
-        when(service.grantResourceKeys()).thenReturn(Set.of(grantKeys));
+        Map<String, PermissionGrantKeyType> types = new LinkedHashMap<>();
+        for (String grantKey : grantKeys) {
+            types.put(grantKey, PermissionGrantKeyType.MODULE);
+        }
+        when(service.grantKeyTypes()).thenReturn(types);
+        when(service.grantResourceKeys()).thenReturn(Set.copyOf(types.keySet()));
         return service;
     }
 

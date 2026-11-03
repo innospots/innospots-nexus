@@ -1,0 +1,33 @@
+dsl: "1.0"
+page:
+  id: themes
+  title: "$i18n{page.themes.title:主题选择}"
+i18n: { namespaces: [common] }
+dataSources:
+  consoleTheme:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/platform/settings/console-theme
+body:
+  type: Page
+  props: { className: theme-page }
+  children:
+    - type: Typography
+      props: { variant: h3, className: system-page-title, text: "$i18n{page.themes.title:主题选择}" }
+    - type: Typography
+      props: { variant: muted, className: system-page-description, text: "$i18n{themePage.subtitle:从中国传统色中，选择适合你的工作空间色彩。}" }
+    - type: Flex
+      props: { className: theme-section-heading, justify: space-between, align: end }
+      children:
+        - type: Flex
+          props: { direction: vertical, gap: 4 }
+          children:
+            - type: Typography
+              props: { variant: h4, text: "$i18n{themePage.sectionTitle:配色主题}" }
+            - type: Typography
+              props: { variant: muted, text: "$i18n{themePage.sectionDescription:选用后立即应用，明暗模式可在账户菜单切换。}" }
+        - type: Text
+          props: { text: "$i18n{themePage.count:3 套主题}" }
+    - type: ThemeGallery

@@ -2,6 +2,7 @@ package com.innospots.nexus.console.permission.service;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -15,6 +16,7 @@ import com.innospots.nexus.base.util.Checks;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogService;
 import com.innospots.nexus.console.permission.dao.PermissionGrantDao;
 import com.innospots.nexus.console.permission.domain.entity.PermissionGrantEntity;
+import com.innospots.nexus.console.permission.domain.enums.PermissionGrantKeyType;
 import com.innospots.nexus.console.permission.domain.enums.PermissionSubjectType;
 import com.innospots.nexus.console.permission.domain.request.PermissionGrantItemRequest;
 import com.innospots.nexus.console.permission.domain.request.PermissionGrantReplaceRequest;
@@ -97,12 +99,18 @@ public class PermissionGrantService {
     ) {
         // 全量替换保证撤销的资源不会残留，同时事务保证删除和新增一起提交。
         grantDao.delete(grantScopeQuery(subjectType, subjectId, ownership));
+        Map<String, PermissionGrantKeyType> grantKeyTypes = catalogService.grantKeyTypes();
         for (PermissionGrantItemRequest item : request.grants()) {
+            PermissionGrantKeyType keyType = grantKeyTypes.get(item.resourceKey());
+            if (keyType == null) {
+                invalid("Unknown permission resource: " + item.resourceKey());
+            }
             PermissionGrantEntity grant = new PermissionGrantEntity();
             ConsoleOwnershipScope.stamp(grant, ownership);
             grant.setSubjectType(subjectType.name());
             grant.setSubjectId(subjectId);
             grant.setGrantKey(item.resourceKey());
+            grant.setGrantKeyType(keyType.code());
             grant.setConstraintDefinition(normalizeConstraint(item.constraintDefinition()));
             grantDao.insert(grant);
         }
@@ -176,7 +184,7 @@ public class PermissionGrantService {
         if (request == null) {
             return;
         }
-        Set<String> grantKeys = catalogService.grantResourceKeys();
+        Set<String> grantKeys = catalogService.grantKeyTypes().keySet();
         Set<String> requestKeys = new HashSet<>();
         for (PermissionGrantItemRequest item : request.grants()) {
             if (item == null || item.resourceKey() == null || item.resourceKey().isBlank()
