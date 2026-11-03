@@ -38,7 +38,7 @@ function loadYaml<T>(file: string): T {
   return doc.toJS() as T;
 }
 
-/** sitemap.yaml 中的页面声明：可见性标记（public / permission）+ DSL 加载方式（lazy） */
+/** sitemap.yaml 中的页面声明：可见性标记（public / permission）+ DSL 加载方式（lazy）+ catalog 归属（domain/module/group，group 缺省 view） */
 interface PageEntry {
   id: string;
   path: string;
@@ -46,6 +46,12 @@ interface PageEntry {
   version: number;
   public?: boolean;
   permission?: string;
+  /** catalog 领域键（与 plugin-declaration domainKey 一致） */
+  domain?: string;
+  /** catalog 模块键（与 plugin-declaration moduleKey 一致） */
+  module?: string;
+  /** 浏览分组键；缺省 view */
+  group?: string;
   /** 不随 sitemap 内联 pageDsl，客户端经 /api/public/pages/{id} 懒加载 */
   lazy?: boolean;
 }
@@ -352,4 +358,102 @@ export function getLazyPage(
       registry: consoleTranslatableFields,
     }),
   };
+}
+
+/* ---------------- 页面访问校验辅助（page-access.ts / 懒加载页 API） ---------------- */
+
+export type { PageEntry };
+
+interface RouteRef {
+  pattern: string;
+  pageId: string;
+}
+
+type RawMenuItem = SitemapResource["menus"][number] & {
+  path?: string;
+  pageId?: string;
+  children?: RawMenuItem[];
+};
+
+export function getLoginPath(): string {
+  return state().site.auth.loginPath ?? "/login";
+}
+
+export function findPageEntryById(pageId: string): PageEntry | undefined {
+  return state().site.pages.find((page) => page.id === pageId);
+}
+
+export function findPageDslById(pageId: string): PageDsl | undefined {
+  return state().pages.get(pageId)?.pageDsl;
+}
+
+export function listPageEntries(): PageEntry[] {
+  return state().site.pages;
+}
+
+export function findPageEntryByPath(pathname: string): PageEntry | null {
+  const { site } = state();
+  const refs: RouteRef[] = [];
+  const walk = (items: RawMenuItem[]): void => {
+    for (const item of items) {
+      if (item.pageId !== undefined && item.path !== undefined) {
+        refs.push({ pattern: item.path, pageId: item.pageId });
+      }
+      if (item.children !== undefined) {
+        walk(item.children);
+      }
+    }
+  };
+  walk(site.menus as RawMenuItem[]);
+  for (const page of site.pages) {
+    refs.push({ pattern: page.path, pageId: page.id });
+  }
+
+  const path = normalizeRoutePath(pathname);
+  const matched = refs
+    .map((ref, index) => ({ ref, index }))
+    .filter(({ ref }) => matchRoutePath(ref.pattern, path))
+    .sort(
+      (a, b) =>
+        staticSegmentCount(b.ref.pattern) - staticSegmentCount(a.ref.pattern) ||
+        a.index - b.index,
+    )[0];
+  if (matched === undefined) {
+    return null;
+  }
+  return site.pages.find((page) => page.id === matched.ref.pageId) ?? null;
+}
+
+function splitPath(value: string): string[] {
+  return normalizeRoutePath(value)
+    .split("/")
+    .filter(Boolean)
+    .map((segment) => {
+      try {
+        return decodeURIComponent(segment);
+      } catch {
+        return segment;
+      }
+    });
+}
+
+function matchRoutePath(pattern: string, pathname: string): boolean {
+  const patternSegments = splitPath(pattern);
+  const pathSegments = splitPath(pathname);
+  return (
+    patternSegments.length === pathSegments.length &&
+    patternSegments.every(
+      (segment, index) =>
+        segment.startsWith(":") || segment === pathSegments[index],
+    )
+  );
+}
+
+function staticSegmentCount(pattern: string): number {
+  return splitPath(pattern).filter((segment) => !segment.startsWith(":")).length;
+}
+
+function normalizeRoutePath(pathname: string): string {
+  const path = pathname.split("?")[0] ?? pathname;
+  return path === "/" ? "/" : path.replace(/\/+$/, "");
 }

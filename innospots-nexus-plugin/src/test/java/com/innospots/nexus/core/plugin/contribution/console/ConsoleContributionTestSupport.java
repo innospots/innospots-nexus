@@ -41,13 +41,13 @@ final class ConsoleContributionTestSupport {
 
     private static List<ConsolePermissionGroupDeclaration> defaultViewGroups() {
         return List.of(new ConsolePermissionGroupDeclaration(
-                "default",
+                "view",
                 I18nObject.of(Map.of("en", "Views"))));
     }
 
     private static List<ConsolePermissionGroupDeclaration> defaultOperationGroups() {
         return List.of(new ConsolePermissionGroupDeclaration(
-                "default",
+                "operate",
                 I18nObject.of(Map.of("en", "Ops"))));
     }
 }

@@ -221,10 +221,10 @@ class ClasspathPluginDiscoveryTest {
                           displayName: {en: Main}
                           orderIndex: 0
                           viewGroups:
-                            - group: default
+                            - group: view
                               label: {en: Views}
                           operationGroups:
-                            - group: default
+                            - group: operate
                               label: {en: Ops}
                           children:
                             - displayName: {en: Menu}
@@ -290,9 +290,9 @@ class ClasspathPluginDiscoveryTest {
                 null,
                 null,
                 List.of(new ConsolePermissionGroupDeclaration(
-                        "default", I18nObject.of(Map.of("en", "Views")))),
+                        "view", I18nObject.of(Map.of("en", "Views")))),
                 List.of(new ConsolePermissionGroupDeclaration(
-                        "default", I18nObject.of(Map.of("en", "Ops")))),
+                        "operate", I18nObject.of(Map.of("en", "Ops")))),
                 List.of(menu));
         return PluginDefinition.builder(id)
                 .name("Discovery Fixture")

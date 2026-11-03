@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { PactorApp } from "@/frontend/App";
 import { getRequestI18n } from "@/backend/pages/i18n";
-// 顺序约定：globals（含 NavigationShell）→ ui 预建样式。主题令牌由 public/skins/<skin>.css
+import { DEFAULT_SKIN, SKINS } from "@/frontend/skin";
+// 顺序约定：globals（含 NavigationShell）→ ui 预建样式。主题令牌由 public/themes/<skin>.css
 import "./globals.css";
 import "@pactor-app/ui/styles.css";
 
@@ -16,6 +17,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const i18n = await getRequestI18n();
+  const allowedSkins = JSON.stringify(SKINS.map((skin) => skin.value));
   return (
     <html
       lang={i18n.locale}
@@ -25,13 +27,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       <head>
         <script
           dangerouslySetInnerHTML={{
-            // 首屏渲染前加载皮肤 link（data-pactor-skin 标记，对应 public/skins/，
-            // 由 Theme Studio 生成；运行时换肤见 src/frontend/skin.ts）并应用明暗
-            //（data-pactor-theme），避免闪烁。皮肤与明暗偏好持久化在
-            // localStorage（mc-skin / mc-mode），由账户菜单（AccountMenu）写入；
-            // mc-mode 缺省时跟随系统并监听变化。
-            // suppressHydrationWarning 容忍 data-pactor-theme 造成的 hydration 差异。
-            __html: `(function(){var root=document.documentElement;var skin=localStorage.getItem("mc-skin")||"chenwunaifu";var link=document.createElement("link");link.rel="stylesheet";link.href="/skins/"+skin+".css";link.setAttribute("data-pactor-skin",skin);document.head.appendChild(link);var m=window.matchMedia("(prefers-color-scheme: dark)");function apply(){var mode=localStorage.getItem("mc-mode");var dark=mode?mode==="dark":m.matches;if(dark){root.setAttribute("data-pactor-theme","dark")}else{root.removeAttribute("data-pactor-theme")}}apply();m.addEventListener("change",apply)})()`,
+            // 首屏渲染前加载十二色系主题 link（public/themes/；运行时换肤见 skin.ts）
+            // 并应用明暗（data-pactor-theme）。偏好键 mc-skin / mc-mode。
+            __html: `(function(){var root=document.documentElement;var legacy={"chenwunaifu":"qing-ming","taijingshenlin":"bi-shan","xuanzhimoyun":"jin-yu"};var allowed=${allowedSkins};var skin=localStorage.getItem("mc-skin");if(legacy[skin]){skin=legacy[skin]}if(allowed.indexOf(skin)<0){skin=${JSON.stringify(DEFAULT_SKIN)}}var link=document.createElement("link");link.rel="stylesheet";link.href="/themes/"+skin+".css";link.setAttribute("data-pactor-skin",skin);document.head.appendChild(link);var m=window.matchMedia("(prefers-color-scheme: dark)");function apply(){var mode=localStorage.getItem("mc-mode");var dark=mode?mode==="dark":m.matches;if(dark){root.setAttribute("data-pactor-theme","dark")}else{root.removeAttribute("data-pactor-theme")}}apply();m.addEventListener("change",apply)})()`,
           }}
         />
       </head>

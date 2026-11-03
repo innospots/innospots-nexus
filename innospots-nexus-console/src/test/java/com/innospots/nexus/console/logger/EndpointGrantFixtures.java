@@ -13,7 +13,7 @@ public final class EndpointGrantFixtures {
         return new ResolvedEndpointGrant(
                 "dictionary",
                 "platform",
-                ResolvedEndpointGrant.DEFAULT_GRANT_GROUP,
+                ResolvedEndpointGrant.OPERATE_GRANT_GROUP,
                 EndpointGrantAction.CREATE,
                 "dictionary.type.create",
                 dictionaryTypeCreateLabel(),

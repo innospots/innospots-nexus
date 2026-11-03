@@ -42,10 +42,10 @@ class ConsoleCatalogServiceTest {
                 "m1", null, CatalogResourceType.MODULE, "module:dictionary", "dictionary", "platform-dictionary-main");
         module.setDomainKey("platform");
         module.setViewGroups(Jsons.toJson(List.of(Map.of(
-                "group", "default",
+                "group", "view",
                 "label", Map.of("zh-CN", "字典管理", "en", "Dictionary Management")))));
         module.setOperationGroups(Jsons.toJson(List.of(
-                Map.of("group", "default", "label", Map.of("en", "Other", "zh", "其他")),
+                Map.of("group", "operate", "label", Map.of("en", "Operations", "zh", "操作")),
                 Map.of("group", "create", "label", Map.of("en", "Create", "zh", "创建")),
                 Map.of("group", "update", "label", Map.of("en", "Update", "zh", "更新")),
                 Map.of("group", "delete", "label", Map.of("en", "Delete", "zh", "删除")),
@@ -64,9 +64,9 @@ class ConsoleCatalogServiceTest {
         CatalogNodeVo moduleNode = roots.getFirst().modules().getFirst();
         assertThat(moduleNode.grants()).isNotNull();
         assertThat(moduleNode.grants().viewGroups()).hasSize(1);
-        assertThat(moduleNode.grants().viewGroups().getFirst().group()).isEqualTo("default");
+        assertThat(moduleNode.grants().viewGroups().getFirst().group()).isEqualTo("view");
         assertThat(moduleNode.grants().viewGroups().getFirst().resourceKey())
-                .isEqualTo("platform.dictionary:default");
+                .isEqualTo("platform.dictionary:view");
         assertThat(moduleNode.grants().viewGroups().getFirst().items()).isEmpty();
         assertThat(moduleNode.grants().operationGroups().stream()
                 .filter(group -> "create".equals(group.group()))
@@ -81,10 +81,10 @@ class ConsoleCatalogServiceTest {
         ConsoleCatalogResourceEntity module = entity(
                 "m1", null, CatalogResourceType.MODULE, "module:demo", "demo", "demo-main");
         module.setViewGroups(Jsons.toJson(List.of(Map.of(
-                "group", "default",
+                "group", "view",
                 "label", Map.of("en", "View")))));
         module.setOperationGroups(Jsons.toJson(List.of(Map.of(
-                "group", "default",
+                "group", "operate",
                 "label", Map.of("en", "Operations")))));
 
         ConsoleCatalogResourceDao dao = mock(ConsoleCatalogResourceDao.class);
@@ -97,7 +97,7 @@ class ConsoleCatalogServiceTest {
         CatalogNodeVo moduleNode = roots.getFirst().modules().getFirst();
         assertThat(moduleNode.grants().viewGroups()).hasSize(1);
         assertThat(moduleNode.grants().viewGroups().getFirst().resourceKey())
-                .isEqualTo("nexus.demo:default");
+                .isEqualTo("nexus.demo:view");
         assertThat(moduleNode.grants().viewGroups().getFirst().items()).isEmpty();
         assertThat(moduleNode.grants().operationGroups().getFirst().items()).isEmpty();
     }

@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class PlatformConsoleEntryPluginTest {
 
     @Test
-    void declaresAggregatedPlatformConsoleContributionFromYaml() {
+    void declaresSystemAndOperationConsoleContributionsFromYaml() {
         PluginDefinition definition = platformConsoleDefinition();
 
         assertThat(definition.pluginId()).isEqualTo(BuiltinPlatformEntryPlugins.PLATFORM_CONSOLE);
@@ -25,56 +25,30 @@ class PlatformConsoleEntryPluginTest {
                 BuiltinPlatformEntryPlugins.TAG_REALM_PLATFORM);
         assertThat(definition.tags().asMap()).containsEntry("module", "console");
 
-        ConsolePluginContribution contribution = consoleContribution(definition);
+        assertThat(definition.contributions()).hasSize(2);
+        ConsolePluginContribution system = contribution(definition, "system");
+        ConsolePluginContribution operation = contribution(definition, "operation");
 
-        assertThat(contribution.modules()).extracting(ConsoleContributeNode::moduleKey)
-                .containsExactly(
-                        "organization",
-                        "menu",
-                        "user",
-                        "dictionary",
-                        "role",
-                        "permission",
-                        "logger",
-                        "settings");
-        assertThat(definition.contributions()).isNotEmpty();
+        assertThat(system.modules()).extracting(ConsoleContributeNode::moduleKey)
+                .containsExactly("settings", "theme", "logger", "dictionary");
+        assertThat(operation.modules()).extracting(ConsoleContributeNode::moduleKey)
+                .containsExactly("role", "user", "organization");
     }
 
     @Test
-    void eachModuleDeclaresSinglePageModuleWithEntryPageKey() {
-        ConsolePluginContribution contribution = consoleContribution(platformConsoleDefinition());
-        ConsoleContributeNode userModule = contribution.modules().stream()
-                .filter(module -> "user".equals(module.moduleKey()))
-                .findFirst()
-                .orElseThrow();
+    void systemAndOperationModulesDeclareEntryPageKeys() {
+        ConsolePluginContribution system = contribution(platformConsoleDefinition(), "system");
+        ConsolePluginContribution operation = contribution(platformConsoleDefinition(), "operation");
 
-        assertThat(userModule.children()).isEmpty();
-        assertThat(userModule.isModule()).isTrue();
-        assertThat(userModule.entryPageKey()).isEqualTo("platform-user-main");
+        ConsoleContributeNode settings = module(system, "settings");
+        assertThat(settings.entryPageKey()).isEqualTo("system-settings");
 
-        ConsoleContributeNode organization = contribution.modules().stream()
-                .filter(module -> "organization".equals(module.moduleKey()))
-                .findFirst()
-                .orElseThrow();
-        assertThat(organization.children()).isEmpty();
-        assertThat(organization.viewGroups()).extracting(group -> group.group())
-                .containsExactly(ConsoleContributeNode.DEFAULT_VIEW_GROUP);
-        assertThat(organization.operationGroups()).extracting(group -> group.group())
-                .contains(
-                        ConsoleContributeNode.DEFAULT_VIEW_GROUP,
-                        "create",
-                        "update",
-                        "status",
-                        "assign",
-                        "revoke");
+        ConsoleContributeNode theme = module(system, "theme");
+        assertThat(theme.entryPageKey()).isEqualTo("themes");
 
-        ConsoleContributeNode settings = contribution.modules().stream()
-                .filter(module -> "settings".equals(module.moduleKey()))
-                .findFirst()
-                .orElseThrow();
-        assertThat(settings.entryPageKey()).isEqualTo("platform-settings-registration-mode");
-        assertThat(settings.viewGroups()).extracting(group -> group.group())
-                .containsExactly(ConsoleContributeNode.DEFAULT_VIEW_GROUP);
+        ConsoleContributeNode user = module(operation, "user");
+        assertThat(user.entryPageKey()).isEqualTo("platform-user-main");
+        assertThat(user.children()).isEmpty();
     }
 
     @Test
@@ -97,6 +71,22 @@ class PlatformConsoleEntryPluginTest {
                 .noneMatch(line -> line.contains("com.innospots.nexus.platform.entry"));
     }
 
+    private static ConsoleContributeNode module(ConsolePluginContribution contribution, String moduleKey) {
+        return contribution.modules().stream()
+                .filter(module -> moduleKey.equals(module.moduleKey()))
+                .findFirst()
+                .orElseThrow();
+    }
+
+    private static ConsolePluginContribution contribution(PluginDefinition definition, String domainKey) {
+        return definition.contributions().stream()
+                .filter(ConsolePluginContribution.class::isInstance)
+                .map(ConsolePluginContribution.class::cast)
+                .filter(contribution -> domainKey.equals(contribution.domainKey()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("missing console contribution for domain " + domainKey));
+    }
+
     private static PluginDefinition platformConsoleDefinition() {
         PluginDiscoveryReport report = new ClasspathPluginDiscovery(
                 PlatformConsoleEntryPluginTest.class.getClassLoader(),
@@ -107,13 +97,5 @@ class PlatformConsoleEntryPluginTest {
                 .orElseThrow(() -> new AssertionError(
                         "platform console plugin not discovered; rejected=" + report.rejectedDefinitions()))
                 .definition();
-    }
-
-    private static ConsolePluginContribution consoleContribution(PluginDefinition definition) {
-        return definition.contributions().stream()
-                .filter(ConsolePluginContribution.class::isInstance)
-                .map(ConsolePluginContribution.class::cast)
-                .findFirst()
-                .orElseThrow();
     }
 }

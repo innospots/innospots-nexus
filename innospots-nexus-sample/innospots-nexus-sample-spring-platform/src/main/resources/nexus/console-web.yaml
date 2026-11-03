@@ -18,7 +18,7 @@ nexus:
       security:
         # 请求侧安全总开关（Bearer 鉴权 + ConsoleResourcePermissionFilter）；默认 true。
         # 关闭后不做鉴权与资源 permission 判定；登录/令牌仍由 console-auth.yaml 配置（仅建议本地调试）。
-        enabled: false
+        enabled: true
 
         # dev-session：仅当 security.enabled=false 时生效；注入固定 SessionContext（本地调试）。
         # 本模块为运营平台（platform）示例：realm 须为 PLATFORM，与平台登录令牌域一致。

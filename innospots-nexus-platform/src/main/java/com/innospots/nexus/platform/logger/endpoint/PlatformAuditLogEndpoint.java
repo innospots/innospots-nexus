@@ -19,7 +19,7 @@ import com.innospots.nexus.platform.config.PlatformConstant;
 import com.innospots.nexus.platform.entry.BuiltinPlatformEntryPlugins;
 import com.innospots.nexus.platform.logger.service.PlatformAuditLogService;
 
-@EndpointModule(value = "logger", domain = BuiltinPlatformEntryPlugins.DOMAIN_KEY)
+@EndpointModule(value = "logger", domain = BuiltinPlatformEntryPlugins.SYSTEM_DOMAIN_KEY)
 @Path(PlatformConstant.AUDIT_LOGS_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)

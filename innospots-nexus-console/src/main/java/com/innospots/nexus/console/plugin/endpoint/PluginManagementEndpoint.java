@@ -34,7 +34,7 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 /**
  * 管理端插件查询、安装、启停和失败重试接口；不提供 JAR 删除或卸载操作。
  */
-@EndpointModule(value = "plugin", domain = ConsolePageRoutes.BUILTIN_DOMAIN_KEY)
+@EndpointModule(value = "plugin", domain = ConsolePageRoutes.SYSTEM_DOMAIN_KEY)
 @Path(ConsoleConstant.API_PREFIX + "/plugins")
 @Produces(MediaType.APPLICATION_JSON)
 @Tag(name = "Plugin", description = "插件生命周期")

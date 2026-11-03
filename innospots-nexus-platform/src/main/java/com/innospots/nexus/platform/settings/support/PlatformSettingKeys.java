@@ -42,6 +42,22 @@ public final class PlatformSettingKeys {
             SettingValueType.STRING,
             raw -> PlatformNavigationLayoutMode.valueOf(raw.trim().toUpperCase()));
 
+    /** 控制台系统名称：{@code console.site.name}。 */
+    public static final SettingKey<String> CONSOLE_SITE_NAME = SettingKey.ofString(
+            DOMAIN, "console.site.name", SettingScope.GLOBAL);
+
+    /** 控制台系统简介：{@code console.site.description}。 */
+    public static final SettingKey<String> CONSOLE_SITE_DESCRIPTION = SettingKey.ofString(
+            DOMAIN, "console.site.description", SettingScope.GLOBAL);
+
+    /** 控制台界面语言：{@code console.display.language}。 */
+    public static final SettingKey<String> CONSOLE_DISPLAY_LANGUAGE = SettingKey.ofString(
+            DOMAIN, "console.display.language", SettingScope.GLOBAL);
+
+    /** 控制台默认时区：{@code console.timezone}。 */
+    public static final SettingKey<String> CONSOLE_TIMEZONE = SettingKey.ofString(
+            DOMAIN, "console.timezone", SettingScope.GLOBAL);
+
     private PlatformSettingKeys() {
     }
 }

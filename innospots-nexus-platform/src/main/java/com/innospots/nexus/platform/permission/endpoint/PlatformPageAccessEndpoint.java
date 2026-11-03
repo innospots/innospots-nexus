@@ -19,7 +19,7 @@ import com.innospots.nexus.platform.permission.service.PlatformPageAccessService
 
 @EndpointModule(
         value = "permission",
-        domain = BuiltinPlatformEntryPlugins.DOMAIN_KEY,
+        domain = BuiltinPlatformEntryPlugins.OPERATION_DOMAIN_KEY,
         ignorePermission = true)
 @Path(ConsoleConstant.PUBLIC_API_PREFIX + "/page-access")
 @Produces(MediaType.APPLICATION_JSON)

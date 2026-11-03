@@ -5,7 +5,15 @@ package com.innospots.nexus.console.catalog.domain.model;
  */
 public final class CatalogOperationGroups {
 
-    public static final String DEFAULT = "default";
+    /** 浏览分组键（viewGroups.group）。 */
+    public static final String VIEW = "view";
+
+    /** 未显式 {@code @EndpointGrant#group()} 的可变更操作缺省分组键（operationGroups.group）。 */
+    public static final String OPERATE = "operate";
+
+    /** @deprecated 使用 {@link #OPERATE} */
+    @Deprecated
+    public static final String DEFAULT = OPERATE;
 
     public static final String CREATE = "create";
 

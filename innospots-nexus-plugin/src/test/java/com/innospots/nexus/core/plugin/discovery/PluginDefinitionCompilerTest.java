@@ -38,10 +38,10 @@ class PluginDefinitionCompilerTest {
                           displayName: {en: Main}
                           orderIndex: 0
                           viewGroups:
-                            - group: default
+                            - group: view
                               label: {en: Views}
                           operationGroups:
-                            - group: default
+                            - group: operate
                               label: {en: Ops}
                           children:
                             - displayName: {en: Menu}
@@ -49,7 +49,6 @@ class PluginDefinitionCompilerTest {
                               entryPageKey: compiler-page
                               children: []
                 """), PluginSource.yaml("memory:test", Instant.now()));
-
         assertThat(definition.pluginId()).isEqualTo("com.example.compiler");
         assertThat(definition.contributions()).hasSize(1);
     }
@@ -99,10 +98,10 @@ class PluginDefinitionCompilerTest {
                           displayName: {en: Main}
                           orderIndex: 0
                           viewGroups:
-                            - group: default
+                            - group: view
                               label: {en: Views}
                           operationGroups:
-                            - group: default
+                            - group: operate
                               label: {en: Ops}
                           children:
                             - displayName: {en: Menu}
@@ -110,7 +109,6 @@ class PluginDefinitionCompilerTest {
                               entryPageKey: compiler-page
                               children: []
                 """), PluginSource.yaml("memory:config-types", Instant.now()));
-
         assertThat(definition.config().items()).hasSize(3);
     }
 

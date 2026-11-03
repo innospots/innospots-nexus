@@ -1,5 +1,6 @@
 package com.innospots.nexus.console.scope.service;
 
+import com.innospots.nexus.base.domain.identity.UserSnapshot;
 import com.innospots.nexus.base.thread.SessionContext;
 import com.innospots.nexus.base.thread.TLC;
 import com.innospots.nexus.base.util.StringUtils;
@@ -35,8 +36,10 @@ public final class SessionScopeTlc {
 
     public static void bindAuthUser(AuthUser user) {
         TLC.securityRealm(user.realm().name());
-        TLC.userName(user.loginName());
-        TLC.put(TLC.USER_ID, user.userId());
+        SessionContext.bindUser(UserSnapshot.simple(
+                ConsoleSessionUserIds.resolveNumericUserId(user.userId()),
+                user.loginName(),
+                null));
         if (user.realm() == SecurityRealm.PLATFORM) {
             TLC.platformUserId(user.userId());
             putSessionScope(ConsoleSessionScope.PLATFORM);
@@ -45,7 +48,10 @@ public final class SessionScopeTlc {
 
     public static void applyClaimsIdentity(TokenClaims claims) {
         TLC.securityRealm(claims.realm().name());
-        TLC.put(TLC.USER_ID, claims.userId());
+        SessionContext.bindUser(UserSnapshot.simple(
+                ConsoleSessionUserIds.resolveNumericUserId(claims.userId()),
+                claims.userId(),
+                null));
         if (claims.realm() == SecurityRealm.PLATFORM) {
             TLC.platformUserId(claims.userId());
             putSessionScope(ConsoleSessionScope.PLATFORM);

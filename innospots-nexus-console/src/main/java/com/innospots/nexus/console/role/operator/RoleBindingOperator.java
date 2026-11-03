@@ -1,5 +1,6 @@
 package com.innospots.nexus.console.role.operator;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -39,9 +40,24 @@ public class RoleBindingOperator {
             RoleBindingPageRequest request,
             ConsoleOwnership ownership
     ) {
+        return pageRoleBindings(roleId, request, ownership, null);
+    }
+
+    /**
+     * @param subjectIdFilter 非 null 时仅返回 subjectId 在该集合内的绑定；空集合表示无匹配
+     */
+    public PageResult<RoleBindingVo> pageRoleBindings(
+            String roleId,
+            RoleBindingPageRequest request,
+            ConsoleOwnership ownership,
+            Collection<String> subjectIdFilter
+    ) {
         Objects.requireNonNull(ownership, "ownership");
         roleOperator.requireEntity(roleId, ownership);
         RoleBindingPageRequest pageRequest = request == null ? new RoleBindingPageRequest() : request;
+        if (subjectIdFilter != null && subjectIdFilter.isEmpty()) {
+            return PageResult.of(List.of(), pageRequest.pageNo(), pageRequest.pageSize(), 0L);
+        }
         LambdaQueryWrapper<RoleBindingEntity> query = ConsoleOwnershipScope.apply(
                 new LambdaQueryWrapper<RoleBindingEntity>(), ownership)
                 .eq(RoleBindingEntity::getRoleId, roleId)
@@ -49,7 +65,9 @@ public class RoleBindingOperator {
         if (pageRequest.subjectType() != null) {
             query.eq(RoleBindingEntity::getSubjectType, pageRequest.subjectType().name());
         }
-        if (RoleOperator.hasText(pageRequest.input())) {
+        if (subjectIdFilter != null) {
+            query.in(RoleBindingEntity::getSubjectId, subjectIdFilter);
+        } else if (RoleOperator.hasText(pageRequest.input())) {
             query.like(RoleBindingEntity::getSubjectId, pageRequest.input().trim());
         }
         IPage<RoleBindingEntity> selectedPage = roleBindingDao.selectPage(

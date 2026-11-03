@@ -28,7 +28,8 @@ class OpenApiBuildContractsTest {
         assertThat(yaml).contains(PlatformConstant.REGISTRATION_ACCESS_REQUESTS_PATH);
         assertThat(yaml).contains(PlatformConstant.PUBLIC_INVITES_PATH);
         assertThat(yaml).contains(PlatformConstant.PUBLIC_OPEN_REGISTRATION_PATH);
-        assertThat(yaml).contains(PlatformConstant.SETTINGS_REGISTRATION_MODE_PATH);
+        assertThat(yaml).contains(PlatformConstant.SETTINGS_CONSOLE_GENERAL_PATH);
+        assertThat(yaml).contains(PlatformConstant.SETTINGS_CONSOLE_SITE_NAME_PATH);
         assertThat(yaml).contains(PlatformConstant.SETTINGS_CONSOLE_THEME_PATH);
         assertThat(yaml).contains(PlatformConstant.SETTINGS_NAVIGATION_LAYOUT_PATH);
         assertThat(yaml).contains(PlatformConstant.ROLES_PATH);
@@ -36,7 +37,8 @@ class OpenApiBuildContractsTest {
         assertThat(yaml).contains(PlatformConstant.ROLE_PERMISSIONS_PATH);
         assertThat(yaml).contains(PlatformConstant.AUDIT_LOGS_PATH);
         assertThat(yaml).contains(PlatformConstant.NAVIGATION_MENUS_PATH);
-        assertThat(yaml).contains("operationId: platformRegistrationSettingsGet");
+        assertThat(yaml).contains("operationId: platformConsoleGeneralSettingsGet");
+        assertThat(yaml).contains("operationId: platformConsoleSiteNameSettingsUpdate");
         assertThat(yaml).doesNotContain(PlatformConstant.PUBLIC_PREFIX + "/settings/registration-mode");
         assertThat(yaml).doesNotContain("operationId: platformPublicRegistrationSettingsGet");
         assertThat(yaml).doesNotContain(PlatformConstant.AUTH_PATH + "/onboarding");

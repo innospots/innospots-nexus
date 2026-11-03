@@ -85,7 +85,7 @@ public final class PlatformIntegrationTestSupport {
     public static final String H2_URL_PERMISSION_GRANT_FLOW_IT =
             "jdbc:h2:mem:nexus-sample-platform-permission-grant-flow-it" + H2_SUFFIX;
 
-    private static final String PLATFORM_IT_ADMIN_ROLE_ID = "ROLITPLATFORMADMIN0001";
+    private static final String PLATFORM_IT_ADMIN_ROLE_ID = "ROL0000000099";
 
     private static final String PLATFORM_IT_ADMIN_ROLE_CODE = "it-platform-admin";
 
@@ -159,6 +159,29 @@ public final class PlatformIntegrationTestSupport {
 
     public static void cleanRegistrationSettings(JdbcTemplate jdbcTemplate) {
         jdbcTemplate.execute("DELETE FROM nx_system_setting WHERE setting_domain = 'platform'");
+    }
+
+    /**
+     * 写入平台自助注册模式（管理端 HTTP 已移除，集成测试通过库内种子切换模式）。
+     */
+    public static void seedPlatformRegistrationMode(JdbcTemplate jdbcTemplate, String modeValue) {
+        jdbcTemplate.update(
+                """
+                DELETE FROM nx_system_setting
+                WHERE setting_domain = 'platform' AND setting_key = 'registration.mode'
+                """);
+        jdbcTemplate.update(
+                """
+                INSERT INTO nx_system_setting (
+                    setting_id, setting_domain, setting_scope, scope_id, setting_key,
+                    value_type, setting_value, created_at, updated_at
+                ) VALUES (
+                    ?, 'platform', 'GLOBAL', '', 'registration.mode', 'STRING', ?,
+                    CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+                )
+                """,
+                "SETITREGMODE000000000000001",
+                modeValue);
     }
 
     public static void cleanPlatformUsers(JdbcTemplate jdbcTemplate) {

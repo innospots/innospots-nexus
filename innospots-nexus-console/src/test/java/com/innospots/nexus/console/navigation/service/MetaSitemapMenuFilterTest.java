@@ -56,11 +56,11 @@ class MetaSitemapMenuFilterTest {
         PermissionVisibilityService visibilityService = mock(PermissionVisibilityService.class);
         AuthorizationSubject subject = subject("role-a");
         when(visibilityService.grantedGrantKeys(ownership, subject))
-                .thenReturn(Set.of("platform.user:default"));
+                .thenReturn(Set.of("platform.user:view"));
         MetaSitemapMenuFilter filter = new MetaSitemapMenuFilter(visibilityService);
 
-        SitemapMenuItem granted = menu("users", List.of(), "platform", "user", "default");
-        SitemapMenuItem denied = menu("roles", List.of(), "platform", "role", "default");
+        SitemapMenuItem granted = menu("users", List.of(), "platform", "user", "view");
+        SitemapMenuItem denied = menu("roles", List.of(), "platform", "role", "view");
 
         List<SitemapMenuItem> visible = filter.filterVisibleMenus(
                 List.of(granted, denied), ownership, subject);

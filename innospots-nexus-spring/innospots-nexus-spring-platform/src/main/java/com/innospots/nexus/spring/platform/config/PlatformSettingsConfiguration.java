@@ -7,9 +7,14 @@ import org.springframework.context.annotation.Lazy;
 
 import com.innospots.nexus.core.setting.service.SystemSettingService;
 import com.innospots.nexus.platform.settings.domain.enums.PlatformRegistrationMode;
+import com.innospots.nexus.platform.settings.endpoint.PlatformConsoleDisplayLanguageSettingEndpoint;
+import com.innospots.nexus.platform.settings.endpoint.PlatformConsoleGeneralSettingsEndpoint;
+import com.innospots.nexus.platform.settings.endpoint.PlatformConsoleSiteDescriptionSettingEndpoint;
+import com.innospots.nexus.platform.settings.endpoint.PlatformConsoleSiteNameSettingEndpoint;
 import com.innospots.nexus.platform.settings.endpoint.PlatformConsoleThemeSettingEndpoint;
+import com.innospots.nexus.platform.settings.endpoint.PlatformConsoleTimezoneSettingEndpoint;
 import com.innospots.nexus.platform.settings.endpoint.PlatformNavigationLayoutSettingEndpoint;
-import com.innospots.nexus.platform.settings.endpoint.PlatformRegistrationModeSettingEndpoint;
+import com.innospots.nexus.platform.settings.service.PlatformConsoleGeneralSettingService;
 import com.innospots.nexus.platform.settings.service.PlatformConsoleThemeSettingService;
 import com.innospots.nexus.platform.settings.service.PlatformNavigationLayoutSettingService;
 import com.innospots.nexus.platform.settings.service.PlatformRegistrationModeSettingService;
@@ -27,10 +32,18 @@ public class PlatformSettingsConfiguration {
     }
 
     @Bean
-    @Lazy
-    PlatformRegistrationModeSettingEndpoint platformRegistrationModeSettingEndpoint(
-            PlatformRegistrationModeSettingService registrationModeSettingService) {
-        return new PlatformRegistrationModeSettingEndpoint(registrationModeSettingService);
+    PlatformConsoleGeneralSettingService platformConsoleGeneralSettingService(
+            SystemSettingService systemSettingService,
+            @Value("${nexus.platform.console.site-name:Nexus Console}") String deploymentSiteName,
+            @Value("${nexus.platform.console.site-description:运营管理平台}") String deploymentSiteDescription,
+            @Value("${nexus.platform.console.display-language:zh-CN}") String deploymentDisplayLanguage,
+            @Value("${nexus.platform.console.timezone:Asia/Shanghai}") String deploymentTimezone) {
+        return new PlatformConsoleGeneralSettingService(
+                systemSettingService,
+                PlatformConsoleGeneralSettingService.parseDeploymentSiteName(deploymentSiteName),
+                PlatformConsoleGeneralSettingService.parseDeploymentSiteDescription(deploymentSiteDescription),
+                PlatformConsoleGeneralSettingService.parseDeploymentDisplayLanguage(deploymentDisplayLanguage),
+                PlatformConsoleGeneralSettingService.parseDeploymentTimezone(deploymentTimezone));
     }
 
     @Bean
@@ -49,6 +62,41 @@ public class PlatformSettingsConfiguration {
         return new PlatformNavigationLayoutSettingService(
                 systemSettingService,
                 PlatformNavigationLayoutSettingService.parseDeploymentDefault(deploymentNavigationLayout));
+    }
+
+    @Bean
+    @Lazy
+    PlatformConsoleGeneralSettingsEndpoint platformConsoleGeneralSettingsEndpoint(
+            PlatformConsoleGeneralSettingService consoleGeneralSettingService) {
+        return new PlatformConsoleGeneralSettingsEndpoint(consoleGeneralSettingService);
+    }
+
+    @Bean
+    @Lazy
+    PlatformConsoleSiteNameSettingEndpoint platformConsoleSiteNameSettingEndpoint(
+            PlatformConsoleGeneralSettingService consoleGeneralSettingService) {
+        return new PlatformConsoleSiteNameSettingEndpoint(consoleGeneralSettingService);
+    }
+
+    @Bean
+    @Lazy
+    PlatformConsoleSiteDescriptionSettingEndpoint platformConsoleSiteDescriptionSettingEndpoint(
+            PlatformConsoleGeneralSettingService consoleGeneralSettingService) {
+        return new PlatformConsoleSiteDescriptionSettingEndpoint(consoleGeneralSettingService);
+    }
+
+    @Bean
+    @Lazy
+    PlatformConsoleDisplayLanguageSettingEndpoint platformConsoleDisplayLanguageSettingEndpoint(
+            PlatformConsoleGeneralSettingService consoleGeneralSettingService) {
+        return new PlatformConsoleDisplayLanguageSettingEndpoint(consoleGeneralSettingService);
+    }
+
+    @Bean
+    @Lazy
+    PlatformConsoleTimezoneSettingEndpoint platformConsoleTimezoneSettingEndpoint(
+            PlatformConsoleGeneralSettingService consoleGeneralSettingService) {
+        return new PlatformConsoleTimezoneSettingEndpoint(consoleGeneralSettingService);
     }
 
     @Bean

@@ -60,9 +60,9 @@ class PluginDefinitionSnapshotMapperTest {
                 null,
                 null,
                 List.of(new ConsolePermissionGroupDeclaration(
-                        "default", I18nObject.of(Map.of("en", "Views")))),
+                        "view", I18nObject.of(Map.of("en", "Views")))),
                 List.of(new ConsolePermissionGroupDeclaration(
-                        "default", I18nObject.of(Map.of("en", "Ops")))),
+                        "operate", I18nObject.of(Map.of("en", "Ops")))),
                 List.of(menu));
         return new ConsolePluginContribution(
                 "nexus",

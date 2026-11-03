@@ -28,8 +28,9 @@ class SessionAuthorizationSubjectResolverTest {
     @Test
     void resolveUsesPlatformOwnershipWhenSessionScopeIsPlatform() {
         TLC.put(TLC.SECURITY_REALM, SecurityRealm.PLATFORM.name());
+        TLC.platformUserId("PUS00000000001");
         ConsoleSessionContext.bindScope(ConsoleSessionScope.PLATFORM);
-        SessionContext.bindUser(UserSnapshot.simple(1L, "dev", "Dev"));
+        SessionContext.bindUser(UserSnapshot.simple(1L, "admin", "Admin"));
 
         RoleBindingEntity binding = new RoleBindingEntity();
         binding.setRoleId("rol-1");
@@ -41,7 +42,7 @@ class SessionAuthorizationSubjectResolverTest {
 
         AuthorizationSubject subject = resolver.resolve().orElseThrow();
 
-        assertThat(subject.userId()).isEqualTo("1");
+        assertThat(subject.userId()).isEqualTo("PUS00000000001");
         assertThat(subject.roleIds()).containsExactly("rol-1");
     }
 }

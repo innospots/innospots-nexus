@@ -52,9 +52,10 @@ class PlatformSettingsEndpointIntegrationTest {
     }
 
     @Test
-    void registrationModeSettingGetAndPutPersistSystemSetting() throws Exception {
-        HttpResponse<String> initial = http.get(PlatformConstant.SETTINGS_REGISTRATION_MODE_PATH);
+    void consoleGeneralSettingsGetAndSiteNamePutPersistSystemSetting() throws Exception {
+        HttpResponse<String> initial = http.get(PlatformConstant.SETTINGS_CONSOLE_GENERAL_PATH);
         assertThat(initial.statusCode()).as(initial.body()).isEqualTo(200);
+        assertThat(initial.body()).contains("Nexus Console");
         PlatformDatabaseJsonSnapshot.logAndPersist(
                 jdbcTemplate,
                 OUTPUT_DIR,
@@ -63,12 +64,13 @@ class PlatformSettingsEndpointIntegrationTest {
 
         String updateBody = """
                 {
-                  "registrationMode": "APPROVAL"
+                  "siteName": "Acme Console"
                 }
                 """;
-        HttpResponse<String> updated = http.putJson(PlatformConstant.SETTINGS_REGISTRATION_MODE_PATH, updateBody);
+        HttpResponse<String> updated =
+                http.putJson(PlatformConstant.SETTINGS_CONSOLE_SITE_NAME_PATH, updateBody);
         assertThat(updated.statusCode()).as(updated.body()).isEqualTo(200);
-        assertThat(updated.body()).contains("APPROVAL");
+        assertThat(updated.body()).contains("Acme Console");
         PlatformDatabaseJsonSnapshot.logAndPersist(
                 jdbcTemplate,
                 OUTPUT_DIR,
@@ -79,13 +81,13 @@ class PlatformSettingsEndpointIntegrationTest {
                 """
                 SELECT setting_value FROM nx_system_setting
                 WHERE setting_domain = 'platform' AND setting_scope = 'GLOBAL'
-                  AND scope_id = '' AND setting_key = 'registration.mode'
+                  AND scope_id = '' AND setting_key = 'console.site.name'
                 """,
                 String.class);
-        assertThat(stored).isEqualTo("APPROVAL");
+        assertThat(stored).isEqualTo("Acme Console");
 
-        HttpResponse<String> afterGet = http.get(PlatformConstant.SETTINGS_REGISTRATION_MODE_PATH);
+        HttpResponse<String> afterGet = http.get(PlatformConstant.SETTINGS_CONSOLE_GENERAL_PATH);
         assertThat(afterGet.statusCode()).isEqualTo(200);
-        assertThat(afterGet.body()).contains("APPROVAL");
+        assertThat(afterGet.body()).contains("Acme Console");
     }
 }

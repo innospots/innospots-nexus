@@ -26,7 +26,7 @@ import com.innospots.nexus.platform.settings.service.PlatformNavigationLayoutSet
 /**
  * 运营平台设置 — 控制台导航布局（左轨双栏 / 单栏分组）。
  */
-@EndpointModule(value = "settings", domain = BuiltinPlatformEntryPlugins.DOMAIN_KEY)
+@EndpointModule(value = "settings", domain = BuiltinPlatformEntryPlugins.SYSTEM_DOMAIN_KEY)
 @Path(PlatformConstant.SETTINGS_NAVIGATION_LAYOUT_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)

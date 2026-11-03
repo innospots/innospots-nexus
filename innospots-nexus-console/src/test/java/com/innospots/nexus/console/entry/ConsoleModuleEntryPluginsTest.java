@@ -26,6 +26,7 @@ class ConsoleModuleEntryPluginsTest {
                 .map(ConsolePluginContribution.class::cast)
                 .findFirst()
                 .orElseThrow();
+        assertThat(contribution.domainKey()).isEqualTo(ConsolePageRoutes.SYSTEM_DOMAIN_KEY);
 
         ConsoleContributeNode module = contribution.modules().getFirst();
         String entryPageKey = module.entryPageKey();

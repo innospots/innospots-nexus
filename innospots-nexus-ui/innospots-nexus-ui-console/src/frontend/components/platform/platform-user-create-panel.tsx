@@ -7,6 +7,7 @@ import { Button, Input } from "@pactor-app/ui/components";
 import { useI18n } from "@pactor-app/runtime";
 
 import { encryptPasswordForApi } from "../../lib/rsa-password";
+import { platformJson } from "../../lib/platform-api";
 
 type ProvisionMode = "invite" | "direct";
 type ContactType = "email" | "mobile";
@@ -16,8 +17,15 @@ export interface PlatformUserCreatePanelProps {
     onCreated?: (user: { platformUserId?: string; loginName?: string }) => void;
 }
 
+function formatErrorMessage(message: string, translate: (key: string) => string): string {
+    if (message.startsWith("common.")) {
+        return translate(message);
+    }
+    return message;
+}
+
 export function PlatformUserCreatePanel({ onCancel, onCreated }: PlatformUserCreatePanelProps) {
-    const { t } = useI18n();
+    const { t, locale, defaultLocale } = useI18n();
     const [mode, setMode] = useState<ProvisionMode>("invite");
     const [contactType, setContactType] = useState<ContactType>("email");
     const [loginName, setLoginName] = useState("");
@@ -55,7 +63,7 @@ export function PlatformUserCreatePanel({ onCancel, onCreated }: PlatformUserCre
 
     const submitDirect = useCallback(async () => {
         if (!canSubmitDirect) {
-            setError("common.ui.enter-a-login-name-and-contact-details-and-make-sure-both-passwords-matc");
+            setError(t("common.ui.enter-a-login-name-and-contact-details-and-make-sure-both-passwords-matc"));
             return;
         }
         setSubmitting(true);
@@ -77,24 +85,19 @@ export function PlatformUserCreatePanel({ onCancel, onCreated }: PlatformUserCre
             if (roleCodes.trim()) {
                 body.roleCodes = roleCodes.trim();
             }
-            const response = await fetch("/api/d/platform/users", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body),
-            });
-            const envelope = (await response.json()) as {
-                success?: boolean;
-                message?: string;
-                data?: { platformUserId?: string; loginName?: string };
-            };
-            if (!response.ok || envelope.success === false) {
-                throw new Error(
-                    envelope.message ?? `${t("common.ui.create-failed")} (HTTP ${response.status})`,
-                );
-            }
-            onCreated?.(envelope.data ?? {});
+            const data = await platformJson<{ platformUserId?: string; loginName?: string }>(
+                "/users",
+                {
+                    method: "POST",
+                    body: JSON.stringify(body),
+                },
+                locale,
+                defaultLocale,
+            );
+            onCreated?.(data);
         } catch (err) {
-            setError(err instanceof Error ? err.message : "common.ui.create-failed");
+            const raw = err instanceof Error ? err.message : "common.ui.create-failed";
+            setError(formatErrorMessage(raw, t));
         } finally {
             setSubmitting(false);
         }
@@ -108,6 +111,8 @@ export function PlatformUserCreatePanel({ onCancel, onCreated }: PlatformUserCre
         onCreated,
         password,
         roleCodes,
+        locale,
+        defaultLocale,
         t,
     ]);
 
@@ -238,7 +243,7 @@ export function PlatformUserCreatePanel({ onCancel, onCreated }: PlatformUserCre
                 </div>
             )}
 
-            {error && <p className="text-sm text-destructive">{t(error)}</p>}
+            {error && <p className="text-sm text-destructive">{error}</p>}
 
             <div className="flex justify-end gap-2">
                 <Button onClick={() => onCancel?.()}>

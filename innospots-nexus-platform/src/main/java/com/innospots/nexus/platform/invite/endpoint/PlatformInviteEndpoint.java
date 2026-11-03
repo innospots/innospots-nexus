@@ -36,7 +36,7 @@ import com.innospots.nexus.platform.invite.service.PlatformInviteService;
  * @date 2026/10/06
  * @see com.innospots.nexus.platform.invite.service.PlatformInviteService
  */
-@EndpointModule(value = "user", domain = BuiltinPlatformEntryPlugins.DOMAIN_KEY)
+@EndpointModule(value = "user", domain = BuiltinPlatformEntryPlugins.OPERATION_DOMAIN_KEY)
 @Path(PlatformConstant.INVITES_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)

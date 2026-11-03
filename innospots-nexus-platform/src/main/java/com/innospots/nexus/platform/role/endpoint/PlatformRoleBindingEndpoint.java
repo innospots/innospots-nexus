@@ -23,7 +23,7 @@ import com.innospots.nexus.platform.role.service.PlatformRoleBindingService;
 /**
  * 运营平台角色绑定 REST 实现。
  */
-@EndpointModule(value = "role", domain = BuiltinPlatformEntryPlugins.DOMAIN_KEY)
+@EndpointModule(value = "role", domain = BuiltinPlatformEntryPlugins.OPERATION_DOMAIN_KEY)
 @Path(PlatformConstant.ROLE_BINDINGS_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)

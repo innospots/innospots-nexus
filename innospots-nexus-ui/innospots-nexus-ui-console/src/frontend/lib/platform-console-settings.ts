@@ -2,12 +2,32 @@
  * 平台控制台界面设置 API（/api/d/platform/settings/*）。
  */
 
+import { resolveSkin, selectSkin, type SkinValue } from "../skin";
+
 export type PlatformNavigationLayoutMode = "RAIL_DUAL" | "SINGLE_GROUP";
 
 export type PlatformConsoleTheme =
+  | "ZHU_CAO"
+  | "JIN_YUN"
+  | "QIU_XIANG"
+  | "BI_SHAN"
+  | "TIAN_SHUI"
+  | "QING_MING"
+  | "NING_YE"
+  | "LIAN_HONG"
+  | "LI_KE"
+  | "WAN_YAN"
+  | "YUE_PO"
+  | "JIN_YU"
   | "CHENWUNAIFU"
   | "TAIJINGSHENLIN"
   | "XUANZHIMOYUN";
+
+const DEPRECATED_PLATFORM_THEMES = new Set<PlatformConsoleTheme>([
+  "CHENWUNAIFU",
+  "TAIJINGSHENLIN",
+  "XUANZHIMOYUN",
+]);
 
 type NexusEnvelope<T> = {
   success?: boolean;
@@ -61,10 +81,30 @@ export async function saveConsoleTheme(theme: PlatformConsoleTheme): Promise<voi
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ theme }),
   });
+  const body = (await response.json()) as NexusEnvelope<unknown>;
   if (!response.ok) {
-    throw new Error("保存主题失败");
+    throw new Error(body.message ?? "保存主题失败");
   }
-  unwrap(await response.json());
+  unwrap(body);
+  notifyConsoleSettingsChange();
+}
+
+/** 将平台返回的主题应用到当前会话（localStorage + CSS link）。 */
+export function applyConsoleThemeFromRemote(payload: {
+  theme?: PlatformConsoleTheme | string;
+  skinKey?: string;
+}): void {
+  if (payload.skinKey && payload.skinKey.trim().length > 0) {
+    selectSkin(resolveSkin(payload.skinKey));
+    return;
+  }
+  if (payload.theme && typeof payload.theme === "string") {
+    const theme = payload.theme as PlatformConsoleTheme;
+    const skin = THEME_TO_SKIN[theme] as SkinValue;
+    if (skin) {
+      selectSkin(skin);
+    }
+  }
 }
 
 export async function saveNavigationLayoutMode(
@@ -81,13 +121,77 @@ export async function saveNavigationLayoutMode(
   unwrap(await response.json());
 }
 
+export async function saveConsoleTimezone(timezone: string): Promise<void> {
+  const response = await fetch("/api/d/platform/settings/console-timezone", {
+    method: "PUT",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ timezone: timezone.trim() }),
+  });
+  if (!response.ok) {
+    throw new Error("保存时区失败");
+  }
+  unwrap(await response.json());
+  notifyConsoleSettingsChange();
+}
+
+export const DEFAULT_CONSOLE_SITE_NAME = "Nexus Console";
+
+export const CONSOLE_SETTINGS_CHANGE_EVENT = "pactor-console-settings-change";
+
+export async function fetchConsoleSiteName(): Promise<string> {
+  const response = await fetch("/api/d/platform/settings/console-general", {
+    cache: "no-store",
+  });
+  if (!response.ok) {
+    return DEFAULT_CONSOLE_SITE_NAME;
+  }
+  const payload = unwrap<{ siteName?: string }>(
+    (await response.json()) as NexusEnvelope<{ siteName?: string }>,
+  );
+  const name = payload.siteName?.trim();
+  return name && name.length > 0 ? name : DEFAULT_CONSOLE_SITE_NAME;
+}
+
+/** 保存系统名称等控制台设置后通知 NavigationShell 等壳层刷新。 */
+export function notifyConsoleSettingsChange(detail?: { siteName?: string }): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+  if (detail?.siteName) {
+    window.dispatchEvent(
+      new CustomEvent("nexus-console-site-name-sync", {
+        detail: detail.siteName.trim(),
+      }),
+    );
+  }
+  window.dispatchEvent(new Event(CONSOLE_SETTINGS_CHANGE_EVENT));
+}
+
 export const THEME_TO_SKIN: Record<PlatformConsoleTheme, string> = {
-  CHENWUNAIFU: "chenwunaifu",
-  TAIJINGSHENLIN: "taijingshenlin",
-  XUANZHIMOYUN: "xuanzhimoyun",
+  ZHU_CAO: "zhu-cao",
+  JIN_YUN: "jin-yun",
+  QIU_XIANG: "qiu-xiang",
+  BI_SHAN: "bi-shan",
+  TIAN_SHUI: "tian-shui",
+  QING_MING: "qing-ming",
+  NING_YE: "ning-ye",
+  LIAN_HONG: "lian-hong",
+  LI_KE: "li-ke",
+  WAN_YAN: "wan-yan",
+  YUE_PO: "yue-po",
+  JIN_YU: "jin-yu",
+  CHENWUNAIFU: "qing-ming",
+  TAIJINGSHENLIN: "bi-shan",
+  XUANZHIMOYUN: "jin-yu",
 };
 
 export function skinToPlatformTheme(skin: string): PlatformConsoleTheme | null {
-  const entry = Object.entries(THEME_TO_SKIN).find(([, value]) => value === skin);
-  return entry ? (entry[0] as PlatformConsoleTheme) : null;
+  const normalized = skin.trim().toLowerCase();
+  const matches = Object.entries(THEME_TO_SKIN).filter(([, value]) => value === normalized);
+  if (matches.length === 0) {
+    return null;
+  }
+  const canonical = matches.find(([key]) => !DEPRECATED_PLATFORM_THEMES.has(key as PlatformConsoleTheme));
+  const chosen = canonical ?? matches[0];
+  return chosen[0] as PlatformConsoleTheme;
 }

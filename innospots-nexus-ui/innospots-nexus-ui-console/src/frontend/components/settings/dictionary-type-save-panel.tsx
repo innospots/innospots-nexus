@@ -414,15 +414,18 @@ export function DictionaryTypeSavePanel({
                 <tr className="border-b border-border text-left text-muted-foreground">
                   <th className="py-2 pr-2 font-medium">{t("common.ui.value")}</th>
                   <th className="py-2 pr-2 font-medium">{t("common.ui.name")}</th>
-                  <th className="py-2 font-medium">{t("common.ui.actions")}</th>
+                  <th className="w-[1%] whitespace-nowrap py-2 pl-2 text-center font-medium">
+                    {t("common.ui.actions")}
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {items.map((row, index) => (
                   <tr key={`${row.itemValue}-${index}`} className="border-b border-border/60">
-                    <td className="py-2 pr-2 font-mono text-xs">{row.itemValue}</td>
-                    <td className="py-2 pr-2">{row.itemName}</td>
-                    <td className="py-2">
+                    <td className="py-2 pr-2 font-mono text-xs align-middle">{row.itemValue}</td>
+                    <td className="py-2 pr-2 align-middle">{row.itemName}</td>
+                    <td className="py-2 pl-2 text-center align-middle">
+                      <div className="inline-flex items-center justify-center">
                       <Button
                         variant="link"
                         size="small"
@@ -431,6 +434,7 @@ export function DictionaryTypeSavePanel({
                       >
                         {t("common.ui.remove")}
                       </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}

@@ -7,11 +7,9 @@ import {
   LogOut,
   Monitor,
   Moon,
-  Palette,
   Sun,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useI18n } from "@pactor-app/runtime";
 
 import { useHostI18n } from "../../i18n/messages";
 import {
@@ -19,10 +17,7 @@ import {
   DEFAULT_SKIN,
   PREFERENCES_CHANGE_EVENT,
   resolveSkin,
-  selectSkin,
-  SKINS,
   SKIN_STORAGE_KEY,
-  type SkinValue,
 } from "../../skin";
 import type { SessionUser } from "../../types/session";
 
@@ -72,7 +67,6 @@ export function AccountMenu({
   const ref = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const { locale, changeLocale, t } = useHostI18n();
-  const { t: tCommon } = useI18n();
   const skin = useSyncExternalStore(subscribe, skinSnapshot, () => DEFAULT_SKIN);
   const mode = useSyncExternalStore(subscribe, modeSnapshot, () => "system" as Mode);
   const systemDark = useSyncExternalStore(systemSubscribe, systemSnapshot, () => false);
@@ -186,21 +180,6 @@ export function AccountMenu({
               >
                 <option value="zh-CN">{t("account.languageZh")}</option>
                 <option value="en-US">{t("account.languageEn")}</option>
-              </select>
-            </label>
-            <label className="account-row">
-              <Palette size={19} />
-              <span>{t("account.colorTheme")}</span>
-              <select
-                aria-label={t("account.colorTheme")}
-                value={skin}
-                onChange={(event) => selectSkin(event.target.value as SkinValue)}
-              >
-                {SKINS.map((theme) => (
-                  <option key={theme.value} value={theme.value}>
-                    {tCommon(theme.label)}
-                  </option>
-                ))}
               </select>
             </label>
             <div className="account-row">

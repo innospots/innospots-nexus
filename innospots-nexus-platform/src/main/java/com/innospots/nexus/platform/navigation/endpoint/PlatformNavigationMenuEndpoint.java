@@ -19,7 +19,7 @@ import com.innospots.nexus.platform.config.PlatformConstant;
 import com.innospots.nexus.platform.entry.BuiltinPlatformEntryPlugins;
 import com.innospots.nexus.platform.navigation.service.PlatformNavigationService;
 
-@EndpointModule(value = "menu", domain = BuiltinPlatformEntryPlugins.DOMAIN_KEY)
+@EndpointModule(value = "menu", domain = BuiltinPlatformEntryPlugins.OPERATION_DOMAIN_KEY)
 @Path(PlatformConstant.NAVIGATION_MENUS_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)

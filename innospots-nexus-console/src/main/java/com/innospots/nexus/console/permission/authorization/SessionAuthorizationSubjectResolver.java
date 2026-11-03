@@ -11,6 +11,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 
 import com.innospots.nexus.base.domain.identity.UserSnapshot;
 import com.innospots.nexus.base.thread.SessionContext;
+import com.innospots.nexus.base.thread.TLC;
 import com.innospots.nexus.console.role.dao.RoleBindingDao;
 import com.innospots.nexus.console.role.dao.RoleDao;
 import com.innospots.nexus.console.role.domain.entity.RoleBindingEntity;
@@ -47,18 +48,18 @@ public final class SessionAuthorizationSubjectResolver implements AuthorizationS
         }
         try {
             ConsoleOwnership ownership = resolveSessionOwnership();
-            String userId = String.valueOf(user.get().userId());
+            String bindingSubjectId = resolveBindingSubjectId(user.get());
             List<RoleBindingEntity> bindings = roleBindingDao.selectList(
                     ConsoleOwnershipScope.apply(
                             Wrappers.<RoleBindingEntity>lambdaQuery()
                                     .eq(RoleBindingEntity::getSubjectType, RoleBindingSubjectType.USER.name())
-                                    .eq(RoleBindingEntity::getSubjectId, userId),
+                                    .eq(RoleBindingEntity::getSubjectId, bindingSubjectId),
                             ownership));
             Set<String> roleIds = bindings.stream()
                     .map(RoleBindingEntity::getRoleId)
                     .collect(Collectors.toCollection(HashSet::new));
             boolean administrator = resolveAdministrator(roleIds, ownership);
-            return Optional.of(new AuthorizationSubject(userId, roleIds, Set.of(), administrator));
+            return Optional.of(new AuthorizationSubject(bindingSubjectId, roleIds, Set.of(), administrator));
         } catch (RuntimeException ex) {
             return Optional.empty();
         }
@@ -69,6 +70,24 @@ public final class SessionAuthorizationSubjectResolver implements AuthorizationS
             return ConsoleOwnershipGuard.requirePlatformScope();
         }
         return ConsoleOwnershipGuard.requireWorkspaceScope();
+    }
+
+    /**
+     * 角色绑定表的 {@code subject_id} 为平台/租户用户主键（opaque 字符串），
+     * 而非 {@link UserSnapshot#userId()} 的数值 TLC 形态。
+     */
+    private static String resolveBindingSubjectId(UserSnapshot user) {
+        String platformUserId = TLC.platformUserId();
+        if (platformUserId != null && !platformUserId.isBlank()) {
+            return platformUserId;
+        }
+        if (ConsoleSessionContext.scope() == ConsoleSessionScope.PLATFORM) {
+            String opaqueUserId = user.userName();
+            if (opaqueUserId != null && !opaqueUserId.isBlank()) {
+                return opaqueUserId;
+            }
+        }
+        return String.valueOf(user.userId());
     }
 
     private boolean resolveAdministrator(Set<String> roleIds, ConsoleOwnership ownership) {

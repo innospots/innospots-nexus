@@ -34,10 +34,10 @@ class ResolvedEndpointGrantTest {
 
         assertThat(grant.moduleKey()).isEmpty();
         assertThat(grant.domainKey()).isEmpty();
-        assertThat(grant.grantGroup()).isEqualTo(ResolvedEndpointGrant.DEFAULT_GRANT_GROUP);
+        assertThat(grant.grantGroup()).isEqualTo(ResolvedEndpointGrant.VIEW_GRANT_GROUP);
         assertThat(grant.name()).isEmpty();
         assertThat(grant.action()).isEqualTo(EndpointGrantAction.READ);
-        assertThat(grant.permissionGrantName()).isEqualTo(ResolvedEndpointGrant.DEFAULT_GRANT_GROUP);
+        assertThat(grant.permissionGrantName()).isEqualTo(ResolvedEndpointGrant.VIEW_GRANT_GROUP);
         assertThat(AuditLogMessages.toI18nObject(grant.label()).isEmpty()).isTrue();
         assertThat(grant.recordArgs()).isTrue();
         assertThat(grant.auditLog()).isFalse();
@@ -72,6 +72,24 @@ class ResolvedEndpointGrantTest {
         assertThat(grant.ignorePermission()).isTrue();
         assertThat(grant.ignoreAuth()).isTrue();
         assertThat(AuditLogMessages.toI18nObject(grant.label()).cnValue()).isEqualTo("创建字典类型");
+    }
+
+    @Test
+    void mutatingActionWithBlankGroupDefaultsToOperate() {
+        ResolvedEndpointGrant grant = new ResolvedEndpointGrant(
+                "dictionary",
+                "platform",
+                "",
+                EndpointGrantAction.UPDATE,
+                "dictionary.type.update",
+                GrantLabelFixtures.emptyLabel(),
+                false,
+                false,
+                false,
+                false);
+
+        assertThat(grant.grantGroup()).isEqualTo(ResolvedEndpointGrant.OPERATE_GRANT_GROUP);
+        assertThat(grant.permissionGrantName()).isEqualTo("dictionary.type.update");
     }
 
     /**

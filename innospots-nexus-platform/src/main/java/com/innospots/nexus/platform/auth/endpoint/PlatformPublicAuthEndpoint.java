@@ -25,7 +25,7 @@ import com.innospots.nexus.platform.entry.BuiltinPlatformEntryPlugins;
  */
 @EndpointModule(
         value = "auth",
-        domain = BuiltinPlatformEntryPlugins.DOMAIN_KEY,
+        domain = BuiltinPlatformEntryPlugins.OPERATION_DOMAIN_KEY,
         ignoreAuth = true)
 @Path(PlatformConstant.PUBLIC_AUTH_PATH)
 @Produces(MediaType.APPLICATION_JSON)

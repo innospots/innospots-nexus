@@ -18,6 +18,7 @@ import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrantDescriptor;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrantManager;
 import com.innospots.nexus.core.endpoint.grant.EndpointModuleGrantCatalog;
+import com.innospots.nexus.core.endpoint.grant.support.ResolvedEndpointGrant;
 import com.innospots.nexus.core.plugin.contribution.console.ConsolePermissionGroupDeclaration;
 
 /**
@@ -28,7 +29,8 @@ import com.innospots.nexus.core.plugin.contribution.console.ConsolePermissionGro
  */
 public final class CatalogPermissionCatalogAssembler {
 
-    private static final String DEFAULT_GROUP = "default";
+    private static final String OPERATE_GROUP = ResolvedEndpointGrant.OPERATE_GRANT_GROUP;
+    private static final String VIEW_GROUP = ResolvedEndpointGrant.VIEW_GRANT_GROUP;
 
     private final EndpointGrantManager endpointGrantManager;
 
@@ -130,9 +132,9 @@ public final class CatalogPermissionCatalogAssembler {
     /**
      * 将 operable grant 归入 catalog 声明的 {@code operationGroups}；未声明的分组不输出。
      *
-     * <p>显式 {@link EndpointGrantDescriptor#grantGroup()}（非 {@code default}）优先；否则按
+     * <p>显式 {@link EndpointGrantDescriptor#grantGroup()}（非 {@code operate} 缺省）优先；否则按
      * {@link EndpointGrantAction} 映射 {@code create}/{@code update}/{@code delete}/{@code status}
-     * 等；仍无匹配且声明含 {@code default} 时归入 default。</p>
+     * 等；仍无匹配且声明含 {@code operate} 时归入 operate。</p>
      */
     private static String resolveOperationGroupKey(
             EndpointGrantDescriptor descriptor,
@@ -141,7 +143,7 @@ public final class CatalogPermissionCatalogAssembler {
         if (descriptor == null || declaredGroups.isEmpty()) {
             return null;
         }
-        if (hasText(descriptor.grantGroup()) && !DEFAULT_GROUP.equals(descriptor.grantGroup())) {
+        if (hasText(descriptor.grantGroup()) && !OPERATE_GROUP.equals(descriptor.grantGroup())) {
             String explicit = descriptor.grantGroup();
             return declaredGroups.contains(explicit) ? explicit : null;
         }
@@ -149,15 +151,15 @@ public final class CatalogPermissionCatalogAssembler {
         if (declaredGroups.contains(actionGroup)) {
             return actionGroup;
         }
-        if (declaredGroups.contains(DEFAULT_GROUP)) {
-            return DEFAULT_GROUP;
+        if (declaredGroups.contains(OPERATE_GROUP)) {
+            return OPERATE_GROUP;
         }
         return null;
     }
 
     private static String operationGroupForAction(EndpointGrantAction action) {
         if (action == null) {
-            return DEFAULT_GROUP;
+            return OPERATE_GROUP;
         }
         return switch (action) {
             case CREATE -> "create";
@@ -170,7 +172,7 @@ public final class CatalogPermissionCatalogAssembler {
             case REVOKE -> "revoke";
             case IMPORT -> "import";
             case WRITE -> "write";
-            case READ, EXPORT -> DEFAULT_GROUP;
+            case READ, EXPORT -> VIEW_GROUP;
         };
     }
 

@@ -41,9 +41,7 @@ public record EndpointGrantDescriptor(
     public EndpointGrantDescriptor {
         moduleKey = moduleKey == null ? "" : moduleKey;
         domainKey = domainKey == null ? "" : domainKey;
-        grantGroup = grantGroup == null || grantGroup.isBlank()
-                ? ResolvedEndpointGrant.DEFAULT_GRANT_GROUP
-                : grantGroup;
+        grantGroup = ResolvedEndpointGrant.resolveGrantGroup(grantGroup, action);
         httpMethod = httpMethod == null ? "" : httpMethod;
         path = path == null ? "" : path;
         name = name == null ? "" : name;

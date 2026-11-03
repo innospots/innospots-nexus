@@ -18,6 +18,26 @@ public enum PlatformConsoleUiSettingStatusCode implements StatusCode {
             "0011",
             StatusCategory.INPUT_VALIDATION,
             "Navigation layout mode is invalid",
+            400),
+    CONSOLE_SITE_NAME_INVALID(
+            "0012",
+            StatusCategory.INPUT_VALIDATION,
+            "Console site name is invalid",
+            400),
+    CONSOLE_SITE_DESCRIPTION_INVALID(
+            "0013",
+            StatusCategory.INPUT_VALIDATION,
+            "Console site description is invalid",
+            400),
+    CONSOLE_DISPLAY_LANGUAGE_INVALID(
+            "0014",
+            StatusCategory.INPUT_VALIDATION,
+            "Console display language is invalid",
+            400),
+    CONSOLE_TIMEZONE_INVALID(
+            "0015",
+            StatusCategory.INPUT_VALIDATION,
+            "Console timezone is invalid",
             400);
 
     private static final String MODULE = "PRG";

@@ -23,6 +23,15 @@ const zhCN = {
   "account.languageZh": "中文",
   "account.languageEn": "English",
   "theme.applied": "已应用",
+  "gate.checking": "正在校验页面访问权限…",
+  "gate.redirecting": "正在跳转登录页…",
+  "gate.denied.title": "无访问权限",
+  "gate.denied.retry": "重新校验",
+  "gate.denied.back": "返回上一页",
+  "gate.denied.home": "回到首页",
+  "gate.denied.noAccess": "无页面访问权限",
+  "gate.error.http": "页面权限校验失败：HTTP {{status}}",
+  "gate.error.unavailable": "页面权限校验服务不可用：{{message}}",
 } as const;
 
 type MessageKey = keyof typeof zhCN;
@@ -46,6 +55,15 @@ const enUS: Record<MessageKey, string> = {
   "account.languageZh": "中文",
   "account.languageEn": "English",
   "theme.applied": "Applied",
+  "gate.checking": "Checking page access…",
+  "gate.redirecting": "Redirecting to sign in…",
+  "gate.denied.title": "Access denied",
+  "gate.denied.retry": "Retry",
+  "gate.denied.back": "Back",
+  "gate.denied.home": "Home",
+  "gate.denied.noAccess": "No permission to access this page",
+  "gate.error.http": "Page access check failed: HTTP {{status}}",
+  "gate.error.unavailable": "Page access service unavailable: {{message}}",
 };
 
 const tables: Record<ConsoleLocale, Record<MessageKey, string>> = {
@@ -96,4 +114,17 @@ export function useHostI18n(): {
     t: (key, params) =>
       interpolate(tables[locale][key] ?? tables["zh-CN"][key] ?? key, params),
   };
+}
+
+/** 页面访问门禁文案（不依赖 Pactor Provider）。 */
+export function translateGate(
+  locale: ConsoleLocale | null | undefined,
+  key: MessageKey,
+  params?: Record<string, string | number>,
+): string {
+  const resolved: ConsoleLocale = locale === "en-US" ? "en-US" : "zh-CN";
+  return interpolate(
+    tables[resolved][key] ?? tables["zh-CN"][key] ?? key,
+    params,
+  );
 }

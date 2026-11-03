@@ -32,6 +32,9 @@ public interface RoleConverter {
     RoleOptionVo toOption(RoleEntity entity);
 
     @Mapping(target = "subjectType", source = "subjectType")
+    @Mapping(target = "loginName", ignore = true)
+    @Mapping(target = "displayName", ignore = true)
+    @Mapping(target = "email", ignore = true)
     RoleBindingVo toBindingVo(RoleBindingEntity entity);
 
     default RoleOwnerType mapOwnerType(String ownerType) {

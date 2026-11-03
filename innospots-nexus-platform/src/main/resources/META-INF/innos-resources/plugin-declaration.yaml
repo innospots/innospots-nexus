@@ -19,35 +19,106 @@ spec:
   contributions:
     - type: console
       majorVersion: 2
-      domainKey: platform
+      domainKey: system
       displayName:
-        en: Platform Console
-        zh: 运营管理平台
+        en: System Management
+        zh: 系统管理
       description:
-        en: Organizations, platform users, invites, and registration policy.
-        zh: 组织开通、平台用户、邀请与注册策略。
+        en: Console theme, settings, audit logs, and dictionaries. Plugin MODULE is contributed by console plugin-management entry (same system domain).
+        zh: 主题、系统设置、审计日志与数据字典。插件 MODULE 由 console 内置 plugin-management 贡献（同属 system 领域）。
       orderIndex: 0
       modules:
-        - moduleKey: organization
+        - moduleKey: settings
           displayName:
-            en: Organizations
-            zh: 组织
+            en: System settings
+            zh: 系统设置
           description:
-            en: Platform organizations (enterprise, team, or individual).
-            zh: 平台组织开通与生命周期（企业、团队或个人形态）。
+            en: Site name, description, language, timezone, and navigation layout.
+            zh: 系统名称、描述、语言、时区与导航布局等基础配置。
           orderIndex: 10
-          entryPageKey: platform-organization-main
-          icon: apartment
+          entryPageKey: system-settings
+          icon: setting
           viewGroups:
-            - group: default
+            - group: view
               label:
-                en: Browse organization pages
-                zh: 浏览组织管理页面
+                en: Browse system settings pages
+                zh: 浏览系统设置页面
           operationGroups:
-            - group: default
+            - group: operate
               label:
-                en: Other operations
-                zh: 其他操作
+                en: Operations
+                zh: 操作
+            - group: update
+              label:
+                en: Update
+                zh: 更新
+          children: []
+        - moduleKey: theme
+          displayName:
+            en: Theme selection
+            zh: 主题选择
+          description:
+            en: Console color theme and skin selection.
+            zh: 控制台配色主题与皮肤选择。
+          orderIndex: 20
+          entryPageKey: themes
+          icon: bg-colors
+          viewGroups:
+            - group: view
+              label:
+                en: Browse theme pages
+                zh: 浏览主题选择页面
+          operationGroups:
+            - group: operate
+              label:
+                en: Operations
+                zh: 操作
+            - group: update
+              label:
+                en: Update
+                zh: 更新
+          children: []
+        - moduleKey: logger
+          displayName:
+            en: Audit logs
+            zh: 审计日志
+          description:
+            en: Platform audit log management.
+            zh: 平台审计日志管理。
+          orderIndex: 30
+          entryPageKey: platform-logger-main
+          icon: file-text
+          viewGroups:
+            - group: view
+              label:
+                en: Browse audit log pages
+                zh: 浏览审计日志页面
+          operationGroups:
+            - group: operate
+              label:
+                en: Operations
+                zh: 操作
+          children: []
+        - moduleKey: dictionary
+          displayName:
+            en: Data dictionary
+            zh: 数据字典
+          description:
+            en: Platform dictionary types and items.
+            zh: 平台字典类型与字典项。
+          orderIndex: 40
+          entryPageKey: platform-dictionary-main
+          icon: book
+          viewGroups:
+            - group: view
+              label:
+                en: Browse dictionary pages
+                zh: 浏览数据字典页面
+          operationGroups:
+            - group: operate
+              label:
+                en: Operations
+                zh: 操作
             - group: create
               label:
                 en: Create
@@ -56,60 +127,83 @@ spec:
               label:
                 en: Update
                 zh: 更新
+            - group: delete
+              label:
+                en: Delete
+                zh: 删除
             - group: status
               label:
                 en: Status change
                 zh: 状态变更
-            - group: assign
-              label:
-                en: Assign
-                zh: 授权分配
-            - group: revoke
-              label:
-                en: Revoke
-                zh: 授权回收
           children: []
-        - moduleKey: menu
+    - type: console
+      majorVersion: 2
+      domainKey: operation
+      displayName:
+        en: Operations Management
+        zh: 运营管理
+      description:
+        en: Roles, platform users, tenants, invites, and registration approval.
+        zh: 角色、平台用户、租户、邀请与注册审批。
+      orderIndex: 1
+      modules:
+        - moduleKey: role
           displayName:
-            en: Menu Management
-            zh: 菜单管理
+            en: Role management
+            zh: 角色管理
           description:
-            en: Platform navigation menu management.
-            zh: 平台导航菜单管理。
+            en: Platform role management.
+            zh: 平台角色管理。
           orderIndex: 10
-          entryPageKey: platform-menu-main
-          icon: menu
+          entryPageKey: platform-role-main
+          icon: team
           viewGroups:
-            - group: default
+            - group: view
               label:
-                en: Browse menu management pages
-                zh: 浏览菜单管理页面
+                en: Browse role management pages
+                zh: 浏览角色管理页面
           operationGroups:
-            - group: default
+            - group: operate
               label:
-                en: Other operations
-                zh: 其他操作
+                en: Operations
+                zh: 操作
+            - group: create
+              label:
+                en: Create
+                zh: 创建
+            - group: update
+              label:
+                en: Update
+                zh: 更新
+            - group: delete
+              label:
+                en: Delete
+                zh: 删除
+            - group: status
+              label:
+                en: Status change
+                zh: 状态变更
           children: []
         - moduleKey: user
           displayName:
-            en: Users
-            zh: 用户列表
+            en: User management
+            zh: 用户管理
           description:
-            en: Platform IAM and onboarding.
-            zh: 平台用户与开通。
+            en: Platform users, invites, and registration approval.
+            zh: 平台用户列表、邀请与注册审批。
           orderIndex: 20
           entryPageKey: platform-user-main
           icon: team
           viewGroups:
-            - group: default
+            - group: view
               label:
                 en: Browse user management pages
                 zh: 浏览用户管理页面
           operationGroups:
-            - group: default
+            - group: operate
               label:
-                en: Other operations
-                zh: 其他操作
+                en: Operations
+                zh: 操作
             - group: create
               label:
                 en: Create
@@ -131,63 +225,26 @@ spec:
                 en: Execute
                 zh: 执行操作
           children: []
-        - moduleKey: dictionary
+        - moduleKey: organization
           displayName:
-            en: Dictionary Management
-            zh: 字典管理
+            en: Tenant management
+            zh: 租户管理
           description:
-            en: Platform dictionary management.
-            zh: 平台字典管理。
-          orderIndex: 20
-          entryPageKey: platform-dictionary-main
-          icon: book
-          viewGroups:
-            - group: default
-              label:
-                en: Browse dictionary management pages
-                zh: 浏览字典管理页面
-          operationGroups:
-            - group: default
-              label:
-                en: Other operations
-                zh: 其他操作
-            - group: create
-              label:
-                en: Create
-                zh: 创建
-            - group: update
-              label:
-                en: Update
-                zh: 更新
-            - group: delete
-              label:
-                en: Delete
-                zh: 删除
-            - group: status
-              label:
-                en: Status change
-                zh: 状态变更
-          children: []
-        - moduleKey: role
-          displayName:
-            en: Role Management
-            zh: 角色管理
-          description:
-            en: Platform role management.
-            zh: 平台角色管理。
+            en: Platform tenants and enterprise profiles.
+            zh: 平台租户开通与生命周期。
           orderIndex: 30
-          entryPageKey: platform-role-main
-          icon: team
+          entryPageKey: platform-organization-main
+          icon: apartment
           viewGroups:
-            - group: default
+            - group: view
               label:
-                en: Browse role management pages
-                zh: 浏览角色管理页面
+                en: Browse tenant management pages
+                zh: 浏览租户管理页面
           operationGroups:
-            - group: default
+            - group: operate
               label:
-                en: Other operations
-                zh: 其他操作
+                en: Operations
+                zh: 操作
             - group: create
               label:
                 en: Create
@@ -196,83 +253,16 @@ spec:
               label:
                 en: Update
                 zh: 更新
-            - group: delete
-              label:
-                en: Delete
-                zh: 删除
             - group: status
               label:
                 en: Status change
                 zh: 状态变更
-          children: []
-        - moduleKey: permission
-          displayName:
-            en: Permission Management
-            zh: 权限管理
-          description:
-            en: Platform permission management.
-            zh: 平台权限管理。
-          orderIndex: 40
-          entryPageKey: platform-permission-main
-          icon: lock
-          viewGroups:
-            - group: default
+            - group: assign
               label:
-                en: Browse permission management pages
-                zh: 浏览权限管理页面
-          operationGroups:
-            - group: default
+                en: Assign
+                zh: 授权分配
+            - group: revoke
               label:
-                en: Other operations
-                zh: 其他操作
-            - group: replace
-              label:
-                en: Replace grants
-                zh: 全量替换授权
-          children: []
-        - moduleKey: logger
-          displayName:
-            en: Audit Logs
-            zh: 审计日志
-          description:
-            en: Platform audit log management.
-            zh: 平台审计日志管理。
-          orderIndex: 50
-          entryPageKey: platform-logger-main
-          icon: file-text
-          viewGroups:
-            - group: default
-              label:
-                en: Browse audit log pages
-                zh: 浏览审计日志页面
-          operationGroups:
-            - group: default
-              label:
-                en: Other operations
-                zh: 其他操作
-          children: []
-        - moduleKey: settings
-          displayName:
-            en: Platform settings
-            zh: 平台设置
-          description:
-            en: Console theme, navigation layout, and registration mode.
-            zh: 控制台主题、导航布局与注册模式等平台配置。
-          orderIndex: 40
-          entryPageKey: platform-settings-registration-mode
-          icon: setting
-          viewGroups:
-            - group: default
-              label:
-                en: Browse platform settings pages
-                zh: 浏览平台设置页面
-          operationGroups:
-            - group: default
-              label:
-                en: Other operations
-                zh: 其他操作
-            - group: update
-              label:
-                en: Update
-                zh: 更新
+                en: Revoke
+                zh: 授权回收
           children: []

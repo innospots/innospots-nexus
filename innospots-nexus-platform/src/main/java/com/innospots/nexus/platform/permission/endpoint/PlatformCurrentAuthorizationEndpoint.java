@@ -18,7 +18,7 @@ import com.innospots.nexus.platform.config.PlatformConstant;
 import com.innospots.nexus.platform.entry.BuiltinPlatformEntryPlugins;
 import com.innospots.nexus.platform.permission.service.PlatformPermissionService;
 
-@EndpointModule(value = "permission", domain = BuiltinPlatformEntryPlugins.DOMAIN_KEY)
+@EndpointModule(value = "permission", domain = BuiltinPlatformEntryPlugins.OPERATION_DOMAIN_KEY)
 @Path(PlatformConstant.ME_PERMISSIONS_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Tag(name = "PlatformPermission", description = "运营平台授权")

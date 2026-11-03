@@ -23,12 +23,16 @@ import com.innospots.nexus.platform.invite.endpoint.PlatformInviteEndpoint;
 import com.innospots.nexus.platform.invite.endpoint.PlatformPublicInviteEndpoint;
 import com.innospots.nexus.platform.invite.service.PlatformInviteService;
 import com.innospots.nexus.platform.invite.service.PlatformPublicInviteService;
+import com.innospots.nexus.platform.settings.endpoint.PlatformConsoleDisplayLanguageSettingEndpoint;
+import com.innospots.nexus.platform.settings.endpoint.PlatformConsoleGeneralSettingsEndpoint;
+import com.innospots.nexus.platform.settings.endpoint.PlatformConsoleSiteDescriptionSettingEndpoint;
+import com.innospots.nexus.platform.settings.endpoint.PlatformConsoleSiteNameSettingEndpoint;
 import com.innospots.nexus.platform.settings.endpoint.PlatformConsoleThemeSettingEndpoint;
+import com.innospots.nexus.platform.settings.endpoint.PlatformConsoleTimezoneSettingEndpoint;
 import com.innospots.nexus.platform.settings.endpoint.PlatformNavigationLayoutSettingEndpoint;
-import com.innospots.nexus.platform.settings.endpoint.PlatformRegistrationModeSettingEndpoint;
+import com.innospots.nexus.platform.settings.service.PlatformConsoleGeneralSettingService;
 import com.innospots.nexus.platform.settings.service.PlatformConsoleThemeSettingService;
 import com.innospots.nexus.platform.settings.service.PlatformNavigationLayoutSettingService;
-import com.innospots.nexus.platform.settings.service.PlatformRegistrationModeSettingService;
 import com.innospots.nexus.platform.organization.endpoint.TenantEndpoint;
 import com.innospots.nexus.platform.organization.endpoint.EnterpriseProfileEndpoint;
 import com.innospots.nexus.platform.organization.service.PlatformEnterpriseProfileService;
@@ -49,7 +53,7 @@ public class PlatformResourceProducers {
     private final PlatformPublicInviteService platformPublicInviteService;
     private final PlatformAccessRequestService platformAccessRequestService;
     private final PlatformOpenRegistrationService platformOpenRegistrationService;
-    private final PlatformRegistrationModeSettingService platformRegistrationModeSettingService;
+    private final PlatformConsoleGeneralSettingService platformConsoleGeneralSettingService;
     private final PlatformConsoleThemeSettingService platformConsoleThemeSettingService;
     private final PlatformNavigationLayoutSettingService platformNavigationLayoutSettingService;
     private final RegistrationPolicyService registrationPolicyService;
@@ -65,7 +69,7 @@ public class PlatformResourceProducers {
             PlatformPublicInviteService platformPublicInviteService,
             PlatformAccessRequestService platformAccessRequestService,
             PlatformOpenRegistrationService platformOpenRegistrationService,
-            PlatformRegistrationModeSettingService platformRegistrationModeSettingService,
+            PlatformConsoleGeneralSettingService platformConsoleGeneralSettingService,
             PlatformConsoleThemeSettingService platformConsoleThemeSettingService,
             PlatformNavigationLayoutSettingService platformNavigationLayoutSettingService,
             RegistrationPolicyService registrationPolicyService,
@@ -78,7 +82,7 @@ public class PlatformResourceProducers {
         this.platformPublicInviteService = platformPublicInviteService;
         this.platformAccessRequestService = platformAccessRequestService;
         this.platformOpenRegistrationService = platformOpenRegistrationService;
-        this.platformRegistrationModeSettingService = platformRegistrationModeSettingService;
+        this.platformConsoleGeneralSettingService = platformConsoleGeneralSettingService;
         this.platformConsoleThemeSettingService = platformConsoleThemeSettingService;
         this.platformNavigationLayoutSettingService = platformNavigationLayoutSettingService;
         this.registrationPolicyService = registrationPolicyService;
@@ -173,8 +177,36 @@ public class PlatformResourceProducers {
     @Produces
     @Dependent
     @Unremovable
-    PlatformRegistrationModeSettingEndpoint platformRegistrationModeSettingEndpoint() {
-        return new PlatformRegistrationModeSettingEndpoint(platformRegistrationModeSettingService);
+    PlatformConsoleGeneralSettingsEndpoint platformConsoleGeneralSettingsEndpoint() {
+        return new PlatformConsoleGeneralSettingsEndpoint(platformConsoleGeneralSettingService);
+    }
+
+    @Produces
+    @Dependent
+    @Unremovable
+    PlatformConsoleSiteNameSettingEndpoint platformConsoleSiteNameSettingEndpoint() {
+        return new PlatformConsoleSiteNameSettingEndpoint(platformConsoleGeneralSettingService);
+    }
+
+    @Produces
+    @Dependent
+    @Unremovable
+    PlatformConsoleSiteDescriptionSettingEndpoint platformConsoleSiteDescriptionSettingEndpoint() {
+        return new PlatformConsoleSiteDescriptionSettingEndpoint(platformConsoleGeneralSettingService);
+    }
+
+    @Produces
+    @Dependent
+    @Unremovable
+    PlatformConsoleDisplayLanguageSettingEndpoint platformConsoleDisplayLanguageSettingEndpoint() {
+        return new PlatformConsoleDisplayLanguageSettingEndpoint(platformConsoleGeneralSettingService);
+    }
+
+    @Produces
+    @Dependent
+    @Unremovable
+    PlatformConsoleTimezoneSettingEndpoint platformConsoleTimezoneSettingEndpoint() {
+        return new PlatformConsoleTimezoneSettingEndpoint(platformConsoleGeneralSettingService);
     }
 
     @Produces

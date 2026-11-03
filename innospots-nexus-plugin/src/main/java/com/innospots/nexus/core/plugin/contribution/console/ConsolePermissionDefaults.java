@@ -22,7 +22,7 @@ final class ConsolePermissionDefaults {
 
     static List<ConsolePermissionGroupDeclaration> defaultOperationGroups() {
         return List.of(group(
-                ConsoleContributeNode.DEFAULT_VIEW_GROUP,
+                ConsoleContributeNode.DEFAULT_OPERATE_GROUP,
                 I18nObject.of(Map.of("zh-CN", "操作", "en", "Operations"))));
     }
 

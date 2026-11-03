@@ -149,7 +149,7 @@ class PlatformNavigationMenuEndpointIntegrationTest {
         assertThat(userMenu).as("granted catalog menu must be visible").isNotNull();
         assertThat(userMenu.get("menuName").asText()).contains("用户列表");
         assertThat(userMenu.get("routePath").asText())
-                .isEqualTo("/page/platform/user/platform-user-main");
+                .isEqualTo("/page/operation/user/platform-user-main");
         assertThat(userMenu.get("componentKey").asText()).isEqualTo("platform/user/index");
         assertThat(userMenu.get("openMode").asText()).isEqualTo("INTERNAL");
         assertThat(userMenu.get("children").isArray()).as("children must be an array").isTrue();
@@ -280,6 +280,7 @@ class PlatformNavigationMenuEndpointIntegrationTest {
         assertThat(menuKeys(operations.path("children")))
                 .as("operations children")
                 .containsExactly(
+                        "nav-roles",
                         "nav-organization-tenants",
                         "nav-platform-users",
                         "nav-platform-invites",
@@ -290,11 +291,11 @@ class PlatformNavigationMenuEndpointIntegrationTest {
         assertThat(menuKeys(system.path("children")))
                 .as("system children")
                 .containsExactly(
-                        "nav-menus",
-                        "nav-dictionaries",
-                        "nav-roles",
+                        "nav-system-settings",
+                        "nav-themes",
+                        "nav-plugins",
                         "nav-audit",
-                        "nav-plugins");
+                        "nav-dictionaries");
     }
 
     private void assertMenuTreeShape(JsonNode menus, Set<String> visitedKeys) {
@@ -482,7 +483,7 @@ class PlatformNavigationMenuEndpointIntegrationTest {
                     security_realm, created_at, updated_at
                 ) VALUES (
                     'MNUNAVUSERMAIN', NULL, 'platform-user-main', '用户列表', 'PAGE',
-                    '/page/platform/user/platform-user-main', 'platform/user/index',
+                    '/page/operation/user/platform-user-main', 'platform/user/index',
                     NULL, NULL, 'users', 'INTERNAL', TRUE, 'ENABLED', 0, FALSE,
                     'PLATFORM', NULL, 'PLATFORM', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
                 )

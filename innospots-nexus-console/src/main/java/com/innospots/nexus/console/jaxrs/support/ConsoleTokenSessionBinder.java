@@ -13,10 +13,12 @@ import com.innospots.nexus.console.support.ConsoleExceptions;
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.base.thread.SessionContext;
 import com.innospots.nexus.base.thread.TLC;
+import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
 import com.innospots.nexus.console.auth.domain.model.TokenClaims;
 import com.innospots.nexus.console.auth.service.TokenIssuer;
 import com.innospots.nexus.console.scope.ConsoleSessionContext;
 import com.innospots.nexus.console.scope.ConsoleSessionScope;
+import com.innospots.nexus.console.scope.service.ConsoleSessionUserIds;
 
 /**
  * 将访问令牌声明绑定到 {@link SessionContext}。
@@ -36,10 +38,16 @@ public final class ConsoleTokenSessionBinder {
         if (claims.expiresAt() <= Instant.now().getEpochSecond()) {
             throw ConsoleExceptions.build(NexusStatusCode.AUTHENTICATION_FAILED);
         }
-        UserSnapshot user = UserSnapshot.simple(resolveUserId(claims.userId()), claims.userId(), null);
+        UserSnapshot user = UserSnapshot.simple(
+                ConsoleSessionUserIds.resolveNumericUserId(claims.userId()),
+                claims.userId(),
+                null);
         SessionContext.bindUser(user);
         if (claims.realm() != null) {
             TLC.put(TLC.SECURITY_REALM, claims.realm().name());
+        }
+        if (claims.realm() == SecurityRealm.PLATFORM) {
+            TLC.platformUserId(claims.userId());
         }
         if (claims.tenantMemberId() != null && !claims.tenantMemberId().isBlank()) {
             TLC.tenantMemberId(claims.tenantMemberId());
@@ -92,14 +100,4 @@ public final class ConsoleTokenSessionBinder {
         TLC.clear();
     }
 
-    private static Long resolveUserId(String userId) {
-        if (userId == null || userId.isBlank()) {
-            throw ConsoleExceptions.build(NexusStatusCode.AUTHENTICATION_FAILED);
-        }
-        try {
-            return Long.parseLong(userId);
-        } catch (NumberFormatException ex) {
-            return (long) userId.hashCode();
-        }
-    }
 }

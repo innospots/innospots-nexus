@@ -6,6 +6,7 @@ import java.util.Set;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogService;
 import com.innospots.nexus.console.sitemap.domain.config.SitemapConfig;
 import com.innospots.nexus.console.sitemap.domain.model.SitemapMenuItem;
+import com.innospots.nexus.core.plugin.contribution.console.ConsoleContributeNode;
 
 /**
  * 加载 meta-sitemap 后按 catalog 授权目录规范化菜单节点的模块绑定。
@@ -37,7 +38,7 @@ final class SitemapMenuGrantBinding {
             return;
         }
         if (menu.hasCatalogGrantBinding() && !hasText(menu.getViewGroup())) {
-            menu.setViewGroup("default");
+            menu.setViewGroup(ConsoleContributeNode.DEFAULT_VIEW_GROUP);
         }
         String viewGrantKey = menu.viewGrantKey();
         if (viewGrantKey != null && !grantKeys.contains(viewGrantKey)) {

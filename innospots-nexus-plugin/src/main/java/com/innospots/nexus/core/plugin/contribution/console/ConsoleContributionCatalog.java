@@ -18,8 +18,12 @@ import com.innospots.nexus.core.plugin.status.PluginStatusCode;
  */
 public final class ConsoleContributionCatalog {
 
-    /** 按 ownerPluginId 索引；与 {@link PluginAvailability} 共同决定对外可见性。 */
+    /** 按 ownerPluginId 与 contribution domainKey 索引；与 {@link PluginAvailability} 共同决定对外可见性。 */
     private final Map<String, ActiveEntry> active = new LinkedHashMap<>();
+
+    private static String entryKey(String ownerPluginId, String domainKey) {
+        return ownerPluginId + "\u0000" + domainKey;
+    }
 
     /** 返回当前已通过共享 availability 门控的活动贡献。 */
     public synchronized List<ActiveConsoleContribution> activeContributions() {
@@ -30,14 +34,15 @@ public final class ConsoleContributionCatalog {
                 .toList();
     }
 
-    /** 返回当前插件的活动贡献；不可用或未提交时返回空。 */
+    /** 返回当前插件的唯一活动贡献；多 domain 贡献时返回空。 */
     public synchronized java.util.Optional<ActiveConsoleContribution> activeContribution(String pluginId) {
-        ActiveEntry entry = active.get(pluginId);
-        if (entry == null || !entry.availability().isActive()) {
-            return java.util.Optional.empty();
+        List<ActiveConsoleContribution> matches = activeContributions().stream()
+                .filter(entry -> pluginId.equals(entry.ownerPluginId()))
+                .toList();
+        if (matches.size() == 1) {
+            return java.util.Optional.of(matches.getFirst());
         }
-        return java.util.Optional.of(new ActiveConsoleContribution(
-                entry.ownerPluginId(), entry.contribution(), entry.generation()));
+        return java.util.Optional.empty();
     }
 
     /** 为一个插件创建可回滚的目录提交句柄。 */
@@ -86,12 +91,14 @@ public final class ConsoleContributionCatalog {
                         "console contribution must be staged before commit");
             }
             synchronized (ConsoleContributionCatalog.this) {
-                ActiveEntry current = active.get(owner.pluginId());
+                String key = entryKey(owner.pluginId(), contribution.domainKey());
+                ActiveEntry current = active.get(key);
                 if (current != null && !current.contribution().equals(contribution)) {
                     throw NexusException.build(PluginStatusCode.RESOURCE_CONFLICT,
-                            "active console contribution already exists for plugin: " + owner.pluginId());
+                            "active console contribution already exists for plugin: "
+                                    + owner.pluginId() + " domain=" + contribution.domainKey());
                 }
-                active.put(owner.pluginId(), new ActiveEntry(
+                active.put(key, new ActiveEntry(
                         owner.pluginId(), contribution, availability.generation() + 1, availability));
             }
             // generation 递增供权限同步识别替换提交，而非原地覆盖不可变 contribution。
@@ -104,9 +111,10 @@ public final class ConsoleContributionCatalog {
                 return;
             }
             synchronized (ConsoleContributionCatalog.this) {
-                ActiveEntry current = active.get(owner.pluginId());
+                String key = entryKey(owner.pluginId(), contribution.domainKey());
+                ActiveEntry current = active.get(key);
                 if (current != null && current.contribution().equals(contribution)) {
-                    active.remove(owner.pluginId());
+                    active.remove(key);
                 }
             }
             committed = false;

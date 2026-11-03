@@ -15,7 +15,7 @@ import com.innospots.nexus.core.plugin.declaration.PluginDefinition;
  */
 public final class PluginManagementEntryPlugin implements Plugin {
 
-    private static final String DOMAIN_KEY = ConsolePageRoutes.BUILTIN_DOMAIN_KEY;
+    private static final String DOMAIN_KEY = ConsolePageRoutes.SYSTEM_DOMAIN_KEY;
     private static final String ENTRY_PAGE_KEY = "nexus-plugin-main";
 
     private static final PluginDefinition DEFINITION = ConsoleContributions.entryPlugin(

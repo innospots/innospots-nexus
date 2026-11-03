@@ -29,7 +29,7 @@ import com.innospots.nexus.platform.role.service.PlatformRoleService;
 /**
  * 运营平台角色 REST 实现：路径挂在 {@link PlatformConstant#ROLES_PATH}，归属由 {@link PlatformRoleService} 固化为 PLATFORM。
  */
-@EndpointModule(value = "role", domain = BuiltinPlatformEntryPlugins.DOMAIN_KEY)
+@EndpointModule(value = "role", domain = BuiltinPlatformEntryPlugins.OPERATION_DOMAIN_KEY)
 @Path(PlatformConstant.ROLES_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)

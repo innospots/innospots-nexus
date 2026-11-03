@@ -21,3 +21,6 @@ spring:
         - classpath:schema/nexus-plugin-h2.sql
         - classpath:schema/nexus-console-h2.sql
         - classpath:schema/nexus-platform-h2.sql
+      data-locations:
+        - classpath:data/nexus-platform-seed-h2.sql
+        - classpath:data/nexus-platform-seed-permission-grants-h2.sql

@@ -1,8 +1,9 @@
 import { cookies } from "next/headers";
 
-import { resolveSessionUser } from "@/backend/auth/accounts";
+import { resolveSessionUser, readPlatformAccessToken } from "@/backend/auth/accounts";
 import { corsHeaders, corsPreflight } from "@/backend/cors";
 import { getRequestI18n } from "@/backend/pages/i18n";
+import { verifyPageAccess } from "@/backend/pages/page-access";
 import { getLazyPage } from "@/backend/pages/sitemap";
 
 /**
@@ -18,6 +19,22 @@ export async function GET(
   const store = await cookies();
   const user = resolveSessionUser(store);
   const i18n = await getRequestI18n(request);
+  const access = await verifyPageAccess({
+    pageId: id,
+    user,
+    accessToken: readPlatformAccessToken(store),
+    cookie: request.headers.get("cookie"),
+  });
+  if (!access.allowed) {
+    return Response.json(
+      {
+        error: access.reason,
+        reason: access.reason,
+        redirectTo: access.redirectTo,
+      },
+      { status: 403, headers: corsHeaders(request) },
+    );
+  }
   const entry = getLazyPage(id, user, i18n);
   if (!entry) {
     return Response.json(

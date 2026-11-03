@@ -94,13 +94,13 @@ public final class ConsolePluginContributionDecoder
 
     private static List<ConsolePermissionGroupDeclaration> defaultViewGroups() {
         return List.of(new ConsolePermissionGroupDeclaration(
-                "default",
+                ConsoleContributeNode.DEFAULT_VIEW_GROUP,
                 I18nObject.of(Map.of("zh-CN", "页面访问", "en", "Page access"))));
     }
 
     private static List<ConsolePermissionGroupDeclaration> defaultOperationGroups() {
         return List.of(new ConsolePermissionGroupDeclaration(
-                "default",
+                ConsoleContributeNode.DEFAULT_OPERATE_GROUP,
                 I18nObject.of(Map.of("zh-CN", "操作", "en", "Operations"))));
     }
 

@@ -35,7 +35,7 @@ import com.innospots.nexus.platform.invite.service.PlatformPublicInviteService;
  */
 @EndpointModule(
         value = "user",
-        domain = BuiltinPlatformEntryPlugins.DOMAIN_KEY,
+        domain = BuiltinPlatformEntryPlugins.OPERATION_DOMAIN_KEY,
         ignoreAuth = true)
 @Path(PlatformConstant.PUBLIC_INVITES_PATH)
 @Produces(MediaType.APPLICATION_JSON)

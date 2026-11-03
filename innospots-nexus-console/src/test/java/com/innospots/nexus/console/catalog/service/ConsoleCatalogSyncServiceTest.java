@@ -48,9 +48,9 @@ class ConsoleCatalogSyncServiceTest {
                 null,
                 null,
                 List.of(new ConsolePermissionGroupDeclaration(
-                        "default", I18nObject.of(Map.of("en", "Views")))),
+                        "view", I18nObject.of(Map.of("en", "Views")))),
                 List.of(new ConsolePermissionGroupDeclaration(
-                        "default", I18nObject.of(Map.of("en", "Ops")))),
+                        "operate", I18nObject.of(Map.of("en", "Ops")))),
                 List.of(menu));
         ConsolePluginContribution contribution = new ConsolePluginContribution(
                 "nexus",
@@ -116,9 +116,9 @@ class ConsoleCatalogSyncServiceTest {
                 I18nObject.of(Map.of("zh-CN", "演示", "en", "Demo")),
                 I18nObject.of(Map.of("zh-CN", "演示模块", "en", "Demo module")),
                 List.of(new ConsolePermissionGroupDeclaration(
-                        "default", I18nObject.of(Map.of("en", "Views")))),
+                        "view", I18nObject.of(Map.of("en", "Views")))),
                 List.of(new ConsolePermissionGroupDeclaration(
-                        "default", I18nObject.of(Map.of("en", "Ops")))),
+                        "operate", I18nObject.of(Map.of("en", "Ops")))),
                 List.of(ConsoleContributeNode.menu(
                         I18nObject.of(Map.of("zh-CN", "演示页", "en", "Demo page")),
                         3,

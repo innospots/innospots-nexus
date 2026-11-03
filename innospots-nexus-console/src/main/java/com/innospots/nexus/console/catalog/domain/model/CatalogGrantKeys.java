@@ -6,7 +6,7 @@ import com.innospots.nexus.console.catalog.domain.entity.ConsoleCatalogResourceE
  * Console catalog 授权项的稳定键。
  *
  * <p>统一格式为 {@code domainKey.moduleKey:grantName}；浏览分组 {@code grantName} 为
- * {@code viewGroups} 声明中的 {@code group}（通常为 {@code default}）。</p>
+ * {@code viewGroups} 声明中的 {@code group}（通常为 {@code view}）。</p>
  */
 public final class CatalogGrantKeys {
 

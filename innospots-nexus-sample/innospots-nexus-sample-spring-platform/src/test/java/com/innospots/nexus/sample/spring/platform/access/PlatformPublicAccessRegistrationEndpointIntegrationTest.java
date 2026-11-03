@@ -55,10 +55,7 @@ class PlatformPublicAccessRegistrationEndpointIntegrationTest {
         PlatformIntegrationTestSupport.cleanAccessRequests(jdbcTemplate);
         http = new PlatformEndpointHttpClient(port);
         otpCapture = new PlatformOtpTestCapture();
-        HttpResponse<String> mode = http.putJson(
-                PlatformConstant.SETTINGS_REGISTRATION_MODE_PATH,
-                "{\"registrationMode\":\"APPROVAL\"}");
-        assertThat(mode.statusCode()).as(mode.body()).isEqualTo(200);
+        PlatformIntegrationTestSupport.seedPlatformRegistrationMode(jdbcTemplate, "APPROVAL");
         PlatformDatabaseJsonSnapshot.logAndPersist(
                 jdbcTemplate,
                 OUTPUT_DIR,

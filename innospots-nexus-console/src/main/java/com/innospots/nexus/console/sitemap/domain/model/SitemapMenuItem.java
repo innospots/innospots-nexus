@@ -49,7 +49,7 @@ public final class SitemapMenuItem {
     @Schema(description = "catalog 模块键（MODULE moduleKey）", examples = {"user"})
     private String moduleKey;
 
-    @Schema(description = "浏览分组键（MODULE/MENU viewGroups.group，缺省 default）", examples = {"default"})
+    @Schema(description = "浏览分组键（MODULE/MENU viewGroups.group，缺省 view）", examples = {"view"})
     private String viewGroup;
 
     @Schema(description = "同级排序")
@@ -85,7 +85,7 @@ public final class SitemapMenuItem {
         if (!hasCatalogGrantBinding()) {
             return null;
         }
-        String group = hasText(viewGroup) ? viewGroup.trim() : "default";
+        String group = hasText(viewGroup) ? viewGroup.trim() : "view";
         return CatalogGrantKeys.viewGroupKey(domainKey.trim(), moduleKey.trim(), group);
     }
 

@@ -41,7 +41,7 @@ import com.innospots.nexus.platform.organization.service.PlatformTenantService;
  * @see com.innospots.nexus.platform.organization.service.PlatformTenantService
  * @see EnterpriseProfileEndpoint
  */
-@EndpointModule(value = "organization", domain = BuiltinPlatformEntryPlugins.DOMAIN_KEY)
+@EndpointModule(value = "organization", domain = BuiltinPlatformEntryPlugins.OPERATION_DOMAIN_KEY)
 @Path(PlatformConstant.TENANTS_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)

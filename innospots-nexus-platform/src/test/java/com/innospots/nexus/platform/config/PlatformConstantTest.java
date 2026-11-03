@@ -37,8 +37,10 @@ class PlatformConstantTest {
                 .isEqualTo("/api/d/platform/public/registration/access-requests");
         assertThat(PlatformConstant.REGISTRATION_ACCESS_REQUESTS_PATH)
                 .isEqualTo("/api/d/platform/registration/access-requests");
-        assertThat(PlatformConstant.SETTINGS_REGISTRATION_MODE_PATH)
-                .isEqualTo("/api/d/platform/settings/registration-mode");
+        assertThat(PlatformConstant.SETTINGS_CONSOLE_GENERAL_PATH)
+                .isEqualTo("/api/d/platform/settings/console-general");
+        assertThat(PlatformConstant.SETTINGS_CONSOLE_SITE_NAME_PATH)
+                .isEqualTo("/api/d/platform/settings/console-site-name");
         assertThat(PlatformConstant.SETTINGS_CONSOLE_THEME_PATH)
                 .isEqualTo("/api/d/platform/settings/console-theme");
         assertThat(PlatformConstant.SETTINGS_NAVIGATION_LAYOUT_PATH)

@@ -5,8 +5,16 @@ package com.innospots.nexus.console.entry;
  */
 public final class ConsolePageRoutes {
 
-    /** 随 {@code innospots-nexus-console} 发布的内置 entry 沿用的领域键。 */
+    /** 控制台基础设施 catalog 领域（catalog、i18n、根路径等）。 */
     public static final String BUILTIN_DOMAIN_KEY = "nexus";
+
+    /**
+     * 系统管理类 catalog 领域（设置、插件等 MODULE）。
+     *
+     * <p>与 platform {@code plugin-declaration.yaml} 中 {@code domainKey: system} 对齐；
+     * 授权键格式 {@code system.{moduleKey}:{grantName}}。</p>
+     */
+    public static final String SYSTEM_DOMAIN_KEY = "system";
 
     public static final String PAGE_ROUTE_PREFIX = "/page";
 

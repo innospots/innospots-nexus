@@ -22,7 +22,7 @@ import com.innospots.nexus.platform.entry.BuiltinPlatformEntryPlugins;
 /**
  * 运营管理平台已登录会话 REST（刷新、登出、改密）。
  */
-@EndpointModule(value = "auth", domain = BuiltinPlatformEntryPlugins.DOMAIN_KEY)
+@EndpointModule(value = "auth", domain = BuiltinPlatformEntryPlugins.OPERATION_DOMAIN_KEY)
 @Path(PlatformConstant.AUTH_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)

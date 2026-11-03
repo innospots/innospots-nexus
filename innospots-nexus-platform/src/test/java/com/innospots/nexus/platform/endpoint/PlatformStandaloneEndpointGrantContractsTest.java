@@ -38,9 +38,13 @@ import com.innospots.nexus.platform.permission.endpoint.PlatformOrganizationUnit
 import com.innospots.nexus.platform.permission.endpoint.PlatformPageAccessEndpoint;
 import com.innospots.nexus.platform.role.endpoint.PlatformRoleBindingEndpoint;
 import com.innospots.nexus.platform.role.endpoint.PlatformRoleEndpoint;
+import com.innospots.nexus.platform.settings.endpoint.PlatformConsoleDisplayLanguageSettingEndpoint;
+import com.innospots.nexus.platform.settings.endpoint.PlatformConsoleGeneralSettingsEndpoint;
+import com.innospots.nexus.platform.settings.endpoint.PlatformConsoleSiteDescriptionSettingEndpoint;
+import com.innospots.nexus.platform.settings.endpoint.PlatformConsoleSiteNameSettingEndpoint;
 import com.innospots.nexus.platform.settings.endpoint.PlatformConsoleThemeSettingEndpoint;
+import com.innospots.nexus.platform.settings.endpoint.PlatformConsoleTimezoneSettingEndpoint;
 import com.innospots.nexus.platform.settings.endpoint.PlatformNavigationLayoutSettingEndpoint;
-import com.innospots.nexus.platform.settings.endpoint.PlatformRegistrationModeSettingEndpoint;
 import com.innospots.nexus.platform.user.endpoint.PlatformUserEndpoint;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -62,7 +66,11 @@ class PlatformStandaloneEndpointGrantContractsTest {
             PlatformPublicAccessRegistrationEndpoint.class,
             PlatformPublicOpenRegistrationEndpoint.class,
             PlatformPublicRegistrationPolicyEndpoint.class,
-            PlatformRegistrationModeSettingEndpoint.class,
+            PlatformConsoleGeneralSettingsEndpoint.class,
+            PlatformConsoleSiteNameSettingEndpoint.class,
+            PlatformConsoleSiteDescriptionSettingEndpoint.class,
+            PlatformConsoleDisplayLanguageSettingEndpoint.class,
+            PlatformConsoleTimezoneSettingEndpoint.class,
             PlatformConsoleThemeSettingEndpoint.class,
             PlatformNavigationLayoutSettingEndpoint.class);
 
@@ -174,7 +182,11 @@ class PlatformStandaloneEndpointGrantContractsTest {
                 "PlatformPublicAccessRegistrationEndpoint",
                 "PlatformPublicOpenRegistrationEndpoint",
                 "PlatformPublicRegistrationPolicyEndpoint",
-                "PlatformRegistrationModeSettingEndpoint",
+                "PlatformConsoleGeneralSettingsEndpoint",
+                "PlatformConsoleSiteNameSettingEndpoint",
+                "PlatformConsoleSiteDescriptionSettingEndpoint",
+                "PlatformConsoleDisplayLanguageSettingEndpoint",
+                "PlatformConsoleTimezoneSettingEndpoint",
                 "PlatformConsoleThemeSettingEndpoint",
                 "PlatformNavigationLayoutSettingEndpoint");
         assertThat(actual).isEqualTo(expected);

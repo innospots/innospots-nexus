@@ -1,32 +1,26 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useCallback, useMemo } from "react";
 import { SitemapApp } from "pactor-app";
 
 import { apiBaseUrl, pageEndpoint, sitemapSources } from "./config";
 import { pactorActions } from "./actions";
 import { pactorComponents } from "./components";
 import { nexusHttpHooks } from "./http-hooks";
+import { translateGate } from "./i18n/messages";
 import type { ConsoleLocale } from "./locale";
+import { NavigationLayoutProvider } from "./navigation-layout-context";
+import {
+  PageAccessDenied,
+  PageAccessGateLoading,
+  PageAccessPending,
+  usePageAccessGate,
+} from "./page-access";
 
 /**
- * 动态页面应用（design/dynamic-page.md）：框架 SitemapApp + 宿主接线。
- * 路由解析 / 访问守卫 / DSL 布局（NavigationShell + PageOutlet）/ 页面加载 /
- * session.context 桥 / 缺省动作（app.reload / service.call）全部由
- * @pactor-app/app 内置；此处只提供：sitemap 源、宿主路由
- * （pathname / navigate）、HTTP 钩子，以及页面 DSL 依赖的运行时支撑层——
- * 自定义组件（components/）与调试台自定义动作（actions.ts）。
- * 页面数据全部走 http 数据源（/api/d/*），经转发层
- *（src/app/api/d/[...parts]/route.ts）原样转发到 serverBaseUrl（见 src/backend/config.ts）；
- * 没有服务层接口时转发层返回空数据，页面按空态渲染。
- *
- * 登录 / 登出是普通 HTTP 调用，由 DSL 中的内置 request 动作直接表达
- *（见 src/backend/pages/yaml/ 的登录页 / 布局 DSL），无需客户端注册服务。
- *
- * 挂载在 app/layout.tsx（Next layout 跨导航常驻，切换导航只刷新内容区）。
- *
- * HTTP 钩子使用 {@link nexusHttpHooks} 拆包 Innospots {@code R<T>}（code=OK / success）。
+ * SitemapApp + catalog 页面访问门禁：路由变化先 POST /api/page-access/verify；
+ * 懒加载 YAML 页 GET /api/public/pages/{id} 在服务端同样校验（403）。
  */
 
 export function PactorApp({
@@ -58,23 +52,86 @@ function PactorAppInner({
   defaultLocale: ConsoleLocale;
   messages: Record<string, string>;
 }) {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "/";
   const searchParams = useSearchParams();
+  const search = searchParams.toString();
   const router = useRouter();
+  const replace = useCallback((to: string) => router.replace(to), [router]);
+  const navigate = useCallback((to: string) => router.push(to), [router]);
+
+  const { committed, status, retry } = usePageAccessGate(
+    pathname,
+    search,
+    replace,
+    locale,
+  );
+
+  const committedQuery = useMemo(
+    () => Object.fromEntries(new URLSearchParams(committed?.search ?? "")),
+    [committed?.search],
+  );
+
+  const denied = status.status === "denied";
+  const redirecting = denied && status.redirectTo !== undefined;
+
+  if (committed === null) {
+    if (denied && !redirecting) {
+      return (
+        <PageAccessDenied
+          locale={locale}
+          reason={status.reason}
+          onRetry={retry}
+          onHome={() => router.replace("/")}
+        />
+      );
+    }
+    return (
+      <PageAccessGateLoading
+        text={translateGate(
+          locale,
+          redirecting ? "gate.redirecting" : "gate.checking",
+        )}
+      />
+    );
+  }
+
+  const backToCommitted = () => {
+    replace(
+      `${committed.pathname}${committed.search === "" ? "" : `?${committed.search}`}`,
+    );
+  };
+
   return (
-    <SitemapApp
-      sources={sitemapSources}
-      baseUrl={apiBaseUrl}
-      pathname={pathname}
-      query={Object.fromEntries(searchParams.entries())}
-      navigate={(to) => router.push(to)}
-      components={pactorComponents}
-      actions={pactorActions}
-      pageEndpoint={pageEndpoint}
-      httpAdapter={nexusHttpHooks}
-      locale={locale}
-      defaultLocale={defaultLocale}
-      messages={messages}
-    />
+    <NavigationLayoutProvider>
+      <div style={{ display: denied ? "none" : "contents" }}>
+        <SitemapApp
+          sources={sitemapSources}
+          baseUrl={apiBaseUrl}
+          pathname={committed.pathname}
+          query={committedQuery}
+          navigate={navigate}
+          components={pactorComponents}
+          actions={pactorActions}
+          pageEndpoint={pageEndpoint}
+          httpAdapter={nexusHttpHooks}
+          locale={locale}
+          defaultLocale={defaultLocale}
+          messages={messages}
+        />
+      </div>
+      {status.status === "checking" ? <PageAccessPending locale={locale} /> : null}
+      {redirecting ? (
+        <PageAccessGateLoading text={translateGate(locale, "gate.redirecting")} />
+      ) : null}
+      {denied && !redirecting ? (
+        <PageAccessDenied
+          locale={locale}
+          reason={status.reason}
+          onRetry={retry}
+          onBack={backToCommitted}
+          onHome={() => router.replace("/")}
+        />
+      ) : null}
+    </NavigationLayoutProvider>
   );
 }

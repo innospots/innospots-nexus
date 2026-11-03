@@ -30,7 +30,7 @@ import com.innospots.nexus.platform.entry.BuiltinPlatformEntryPlugins;
  */
 @EndpointModule(
         value = "user",
-        domain = BuiltinPlatformEntryPlugins.DOMAIN_KEY,
+        domain = BuiltinPlatformEntryPlugins.OPERATION_DOMAIN_KEY,
         ignoreAuth = true)
 @Path(PlatformConstant.PUBLIC_OPEN_REGISTRATION_PATH)
 @Produces(MediaType.APPLICATION_JSON)

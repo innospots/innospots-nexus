@@ -22,11 +22,11 @@ spec:
             en: Main
           orderIndex: 0
           viewGroups:
-            - group: default
+            - group: view
               label:
                 en: Views
           operationGroups:
-            - group: default
+            - group: operate
               label:
                 en: Ops
           children:

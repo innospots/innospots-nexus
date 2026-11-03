@@ -14,6 +14,7 @@ import com.innospots.nexus.base.i18n.I18nObject;
 import com.innospots.nexus.core.plugin.config.ConfigDefinition;
 import com.innospots.nexus.core.plugin.config.ConfigItemDefinition;
 import com.innospots.nexus.core.plugin.contribution.PluginContribution;
+import com.innospots.nexus.core.plugin.contribution.console.ConsolePluginContribution;
 import com.innospots.nexus.core.plugin.status.PluginStatusCode;
 
 /**
@@ -176,11 +177,19 @@ public record PluginDefinition(
             if (contribution == null || contribution.type() == null) {
                 invalid("plugin contribution must not be null");
             }
-            if (!types.add(contribution.type())) {
-                invalid("duplicate plugin contribution type: " + contribution.type());
+            Object identity = contributionIdentity(contribution);
+            if (!types.add(identity)) {
+                invalid("duplicate plugin contribution: " + identity);
             }
         }
         return List.copyOf(source);
+    }
+
+    private static Object contributionIdentity(PluginContribution contribution) {
+        if (contribution instanceof ConsolePluginContribution console) {
+            return contribution.type() + ":" + console.domainKey();
+        }
+        return contribution.type();
     }
 
     private static ConfigDefinition snapshotConfig(ConfigDefinition source) {

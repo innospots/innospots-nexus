@@ -37,7 +37,7 @@ class ConsoleContributionsTest {
         assertThat(module.viewGroups()).extracting(ConsolePermissionGroupDeclaration::group)
                 .containsExactly(ConsoleContributeNode.DEFAULT_VIEW_GROUP);
         assertThat(module.operationGroups()).extracting(ConsolePermissionGroupDeclaration::group)
-                .containsExactly(ConsoleContributeNode.DEFAULT_VIEW_GROUP);
+                .containsExactly(ConsoleContributeNode.DEFAULT_OPERATE_GROUP);
         assertThat(declared.children()).isEmpty();
         assertThat(declared.entryPageKey()).isEqualTo("reports-home");
     }

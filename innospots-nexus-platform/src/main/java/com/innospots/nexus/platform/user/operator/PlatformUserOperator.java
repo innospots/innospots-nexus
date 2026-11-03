@@ -1,7 +1,12 @@
 package com.innospots.nexus.platform.user.operator;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -43,6 +48,57 @@ public class PlatformUserOperator {
             return Optional.empty();
         }
         return Optional.ofNullable(platformUserDao.selectById(platformUserId));
+    }
+
+    /**
+     * 按平台用户 ID 批量加载（顺序不保证与入参一致）。
+     */
+    public Map<String, PlatformUserEntity> findByIds(Collection<String> platformUserIds) {
+        if (platformUserIds == null || platformUserIds.isEmpty()) {
+            return Map.of();
+        }
+        List<String> ids = platformUserIds.stream()
+                .filter(id -> id != null && !id.isBlank())
+                .distinct()
+                .toList();
+        if (ids.isEmpty()) {
+            return Map.of();
+        }
+        List<PlatformUserEntity> rows = platformUserDao.selectBatchIds(ids);
+        if (rows == null || rows.isEmpty()) {
+            return Map.of();
+        }
+        return rows.stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toMap(PlatformUserEntity::getPlatformUserId, Function.identity(), (a, b) -> a));
+    }
+
+    /**
+     * 按登录名、显示名或邮箱模糊匹配，返回有限数量的用户 ID（用于角色成员筛选）。
+     */
+    public List<String> findPlatformUserIdsByKeyword(String keyword, int limit) {
+        if (keyword == null || keyword.isBlank()) {
+            return List.of();
+        }
+        int capped = Math.min(Math.max(limit, 1), 500);
+        String trimmed = keyword.trim();
+        LambdaQueryWrapper<PlatformUserEntity> query = new LambdaQueryWrapper<>();
+        query.select(PlatformUserEntity::getPlatformUserId);
+        query.and(wrapper -> wrapper
+                .like(PlatformUserEntity::getLoginName, trimmed)
+                .or()
+                .like(PlatformUserEntity::getDisplayName, trimmed)
+                .or()
+                .like(PlatformUserEntity::getEmail, trimmed));
+        query.last("LIMIT " + capped);
+        List<PlatformUserEntity> rows = platformUserDao.selectList(query);
+        if (rows == null || rows.isEmpty()) {
+            return List.of();
+        }
+        return rows.stream()
+                .map(PlatformUserEntity::getPlatformUserId)
+                .filter(id -> id != null && !id.isBlank())
+                .toList();
     }
 
     public PlatformUserEntity requireById(String platformUserId) {

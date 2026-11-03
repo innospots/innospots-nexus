@@ -32,7 +32,7 @@ import com.innospots.nexus.platform.entry.BuiltinPlatformEntryPlugins;
  * <p>类级 {@code @Path} 绑定 platform 路由；方法级 JAX-RS / OpenAPI / {@code @EndpointGrant}
  * 继承 {@link DictionaryTypeEndpoint}。</p>
  */
-@EndpointModule(value = "dictionary", domain = BuiltinPlatformEntryPlugins.DOMAIN_KEY)
+@EndpointModule(value = "dictionary", domain = BuiltinPlatformEntryPlugins.SYSTEM_DOMAIN_KEY)
 @Path(PlatformConstant.DICTIONARY_TYPES_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)

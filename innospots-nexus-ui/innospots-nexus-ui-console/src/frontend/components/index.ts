@@ -7,6 +7,7 @@
 import { NavigationShell } from "./layout/navigation-shell";
 import { ThemeGallery } from "./settings/theme-settings";
 import { NavigationLayoutSettingPanel } from "./settings/navigation-layout-setting-panel";
+import { ConsoleTimezoneSettingRow } from "./settings/console-timezone-setting-row";
 import { CatalogTree } from "./settings/catalog-tree";
 import { ConsoleMenuTree } from "./settings/console-menu-tree";
 import { PermissionGrantPanel } from "./settings/permission-grant-panel";
@@ -14,6 +15,7 @@ import { DictionaryTypeSavePanel } from "./settings/dictionary-type-save-panel";
 import { DictionaryTypeViewPanel } from "./settings/dictionary-type-view-panel";
 import { PlatformUserCreatePanel } from "./platform/platform-user-create-panel";
 import { PlatformUserPasswordResetPanel } from "./platform/platform-user-password-reset-panel";
+import { RoleMemberAddPanel } from "./role/role-member-add-panel";
 import { FilterSelect } from "./shared/filter-select";
 import { DrawerBackdrop } from "./shared/drawer-backdrop";
 import { I18nText } from "./shared/i18n-text";
@@ -42,6 +44,7 @@ export const pactorComponents: Record<string, unknown> = {
   DictionaryTypeViewPanel,
   PlatformUserCreatePanel,
   PlatformUserPasswordResetPanel,
+  RoleMemberAddPanel,
   PlatformLoginForm,
   PlatformPasswordResetForm,
   PlatformPasswordChangeForm,
@@ -63,4 +66,5 @@ export const pactorComponents: Record<string, unknown> = {
   NavigationShell,
   ThemeGallery,
   NavigationLayoutSettingPanel,
+  ConsoleTimezoneSettingRow,
 };

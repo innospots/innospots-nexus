@@ -10,6 +10,7 @@
 import type { ActionHandler } from "@pactor-app/runtime";
 
 import { collectDictionaryTypeSavePayload } from "./lib/dictionary-type-save-registry";
+import { notifyConsoleSettingsChange } from "./lib/platform-console-settings";
 
 const TENANT_CODE_PATTERN = /^[a-zA-Z0-9_]+$/;
 
@@ -107,6 +108,14 @@ export const pactorActions: Record<string, ActionHandler> = {
                 error: new Error(ctx.context.i18n.t("common.ui.tenant-codes-support-only-letters-numbers-and-underscores")),
             };
         }
+        return { ok: true };
+    },
+    "console.notifySettingsChange": (action) => {
+        const raw = action.params?.siteName;
+        const siteName = typeof raw === "string" ? raw.trim() : undefined;
+        notifyConsoleSettingsChange(
+            siteName && siteName.length > 0 ? { siteName } : undefined,
+        );
         return { ok: true };
     },
 };

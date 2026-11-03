@@ -55,7 +55,7 @@ public @interface EndpointGrant {
     boolean ignoreAuth() default false;
 
     /**
-     * READ/EXPORT：目标 {@code grantName}；可变更类：{@code operationGroups.group}（缺省 {@code default}）。
+     * READ/EXPORT：目标 {@code grantName} 段为分组键；可变更类：{@code operationGroups.group}（缺省按 action 为 view/operate）。
      */
     String group() default "";
 }

@@ -30,7 +30,10 @@ public record ConsoleContributeNode(
 ) {
 
     /** MODULE {@code viewGroups} / {@code operationGroups} 须包含的分组键。 */
-    public static final String DEFAULT_VIEW_GROUP = "default";
+    public static final String DEFAULT_VIEW_GROUP = "view";
+
+    /** 未声明 operationGroups 时的缺省操作分组键。 */
+    public static final String DEFAULT_OPERATE_GROUP = "operate";
 
     private static final Pattern KEY_PATTERN = Pattern.compile("[a-z][a-z0-9]*(?:-[a-z0-9]+)*");
     private static final Pattern GROUP_PATTERN = Pattern.compile("[a-z][a-z0-9]*(?:-[a-z0-9]+)*");
@@ -64,7 +67,9 @@ public record ConsoleContributeNode(
                 operationGroups = ConsolePermissionDefaults.defaultOperationGroups();
             }
             requireNonEmptyGroups(viewGroups, "viewGroups");
-            requireDefaultGroup(operationGroups, "operationGroups");
+            requireGroup(viewGroups, "viewGroups", DEFAULT_VIEW_GROUP);
+            requireNonEmptyGroups(operationGroups, "operationGroups");
+            requireGroup(operationGroups, "operationGroups", DEFAULT_OPERATE_GROUP);
         } else if (menuNode) {
             if (moduleKey != null) {
                 invalid("MENU node must not set moduleKey");
@@ -214,22 +219,23 @@ public record ConsoleContributeNode(
         }
     }
 
-    private static void requireDefaultGroup(
+    private static void requireGroup(
             List<ConsolePermissionGroupDeclaration> groups,
-            String field
+            String field,
+            String requiredGroup
     ) {
         if (groups.isEmpty()) {
-            invalid(field + " must be non-empty and include group 'default'");
+            invalid(field + " must be non-empty and include group '" + requiredGroup + "'");
         }
-        boolean hasDefault = false;
+        boolean hasRequired = false;
         for (ConsolePermissionGroupDeclaration group : groups) {
-            if (DEFAULT_VIEW_GROUP.equals(group.group())) {
-                hasDefault = true;
+            if (requiredGroup.equals(group.group())) {
+                hasRequired = true;
                 break;
             }
         }
-        if (!hasDefault) {
-            invalid(field + " must include group 'default'");
+        if (!hasRequired) {
+            invalid(field + " must include group '" + requiredGroup + "'");
         }
     }
 

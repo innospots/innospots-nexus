@@ -25,7 +25,7 @@ class BuiltinConsoleEntryPluginsTest {
         assertThat(definition.tags().get(ConsoleContributions.DISCOVERY_TAG_KIND))
                 .contains(ConsoleContributions.DISCOVERY_TAG_KIND_ENTRY);
         assertThat(definition.tags().get(ConsoleContributions.DISCOVERY_TAG_DOMAIN))
-                .contains("nexus");
+                .contains("system");
         assertThat(definition.tags().get(ConsoleContributions.DISCOVERY_TAG_MODULE))
                 .contains("plugin");
         assertThat(definition.tags().get("scope")).isEmpty();
@@ -42,7 +42,7 @@ class BuiltinConsoleEntryPluginsTest {
 
         assertThat(BuiltinConsoleEntryPlugins.tagsFor(definition.pluginId(), contribution)
                 .get(ConsoleContributions.DISCOVERY_TAG_DOMAIN))
-                .contains("nexus");
+                .contains("system");
         assertThat(BuiltinConsoleEntryPlugins.tagsFor(definition.pluginId(), contribution)
                 .get(ConsoleContributions.DISCOVERY_TAG_MODULE))
                 .contains("plugin");

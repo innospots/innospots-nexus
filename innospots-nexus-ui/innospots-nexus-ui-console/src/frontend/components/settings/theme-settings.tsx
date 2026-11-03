@@ -1,15 +1,15 @@
 "use client";
 
-import { useEffect, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { Check } from "lucide-react";
+
 import { useI18n } from "@pactor-app/runtime";
 
 import { useHostI18n } from "../../i18n/messages";
 import {
-  fetchConsoleTheme,
+  applyConsoleThemeFromRemote,
   saveConsoleTheme,
   skinToPlatformTheme,
-  THEME_TO_SKIN,
   type PlatformConsoleTheme,
 } from "../../lib/platform-console-settings";
 import {
@@ -21,6 +21,7 @@ import {
   SKIN_STORAGE_KEY,
   type SkinValue,
 } from "../../skin";
+import { themeText } from "../../themes";
 
 function subscribe(onChange: () => void) {
   window.addEventListener("storage", onChange);
@@ -35,79 +36,126 @@ function snapshot() {
   return resolveSkin(localStorage.getItem(SKIN_STORAGE_KEY));
 }
 
-function applyPlatformTheme(theme: PlatformConsoleTheme) {
-  const skin = THEME_TO_SKIN[theme] as SkinValue;
-  selectSkin(skin);
+export interface ThemeGalleryProps {
+  theme?: PlatformConsoleTheme | string;
+  skinKey?: string;
+  loading?: boolean | string;
 }
 
-export function ThemeGallery() {
+function isLoadingFlag(value: boolean | string | undefined): boolean {
+  if (value === true) {
+    return true;
+  }
+  if (typeof value === "string") {
+    return value === "true" || value === "1";
+  }
+  return false;
+}
+
+export function ThemeGallery({
+  theme: remoteTheme,
+  skinKey: remoteSkinKey,
+  loading: loadingProp,
+}: ThemeGalleryProps) {
   const selected = useSyncExternalStore(subscribe, snapshot, () => DEFAULT_SKIN);
-  const { t: tCommon } = useI18n();
-  const { t } = useHostI18n();
+  const { locale, t: tHost } = useHostI18n();
+  const { t } = useI18n();
+  const loading = isLoadingFlag(loadingProp);
+  const [savingSkin, setSavingSkin] = useState<SkinValue | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
-    let cancelled = false;
-    fetchConsoleTheme()
-      .then((remote) => {
-        if (cancelled || remote == null) {
-          return;
-        }
-        applyPlatformTheme(remote.theme);
-      })
-      .catch(() => {
-        // 无后端时保留本地 mc-skin
+    if (loading) {
+      return;
+    }
+    if (
+      (remoteSkinKey && remoteSkinKey.trim().length > 0) ||
+      (remoteTheme && String(remoteTheme).trim().length > 0)
+    ) {
+      applyConsoleThemeFromRemote({
+        skinKey: remoteSkinKey,
+        theme: remoteTheme,
       });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    }
+  }, [loading, remoteSkinKey, remoteTheme]);
 
   async function onSelect(skin: SkinValue) {
+    setSaveError(null);
     selectSkin(skin);
     const theme = skinToPlatformTheme(skin);
     if (theme == null) {
       return;
     }
+    setSavingSkin(skin);
     try {
       await saveConsoleTheme(theme);
-    } catch {
-      // 本地已应用；后端不可达时不阻断
+    } catch (error) {
+      setSaveError(
+        error instanceof Error ? error.message : t("common.themePage.saveError"),
+      );
+    } finally {
+      setSavingSkin(null);
     }
   }
 
+  if (loading) {
+    return (
+      <p className="theme-gallery-status" role="status">
+        {t("common.themePage.loading")}
+      </p>
+    );
+  }
+
   return (
-    <div className="theme-grid">
-      {SKINS.map((theme) => (
-        <button
-          type="button"
-          key={theme.value}
-          className={`theme-card${selected === theme.value ? " is-selected" : ""}`}
-          onClick={() => onSelect(theme.value as SkinValue)}
-          aria-pressed={selected === theme.value}
-        >
-          <div className="theme-preview" style={{ backgroundColor: theme.color }}>
-            <div className="theme-preview-window">
-              <span style={{ backgroundColor: theme.color }} />
-              <div>
-                <i />
-                <i />
-                <i />
+    <>
+      {saveError ? (
+        <p className="theme-gallery-error" role="alert">
+          {saveError}
+        </p>
+      ) : null}
+      <div className="theme-grid">
+        {SKINS.map((theme) => {
+          const text = themeText(theme, locale);
+          const isSelected = selected === theme.value;
+          const isSaving = savingSkin === theme.value;
+          return (
+            <button
+              type="button"
+              key={theme.value}
+              className={`theme-card${isSelected ? " is-selected" : ""}${isSaving ? " is-saving" : ""}`}
+              disabled={savingSkin != null}
+              onClick={() => void onSelect(theme.value)}
+              aria-pressed={isSelected}
+              aria-busy={isSaving}
+            >
+              <div className="theme-preview" style={{ backgroundColor: theme.color }}>
+                <div className="theme-preview-window">
+                  <span style={{ backgroundColor: theme.color }} />
+                  <div>
+                    <i />
+                    <i />
+                    <i />
+                  </div>
+                </div>
+                {isSelected ? (
+                  <span className="theme-selected">
+                    <Check size={14} aria-hidden="true" /> {tHost("theme.applied")}
+                  </span>
+                ) : null}
               </div>
-            </div>
-            {selected === theme.value ? (
-              <span className="theme-selected">
-                <Check size={14} aria-hidden="true" /> {t("theme.applied")}
-              </span>
-            ) : null}
-          </div>
-          <div className="theme-card-body">
-            <div>
-              <strong>{tCommon(theme.label)}</strong>
-            </div>
-            <span className="theme-hex">{theme.color}</span>
-          </div>
-        </button>
-      ))}
-    </div>
+              <div className="theme-card-body">
+                <div>
+                  <strong>{text.label}</strong>
+                  <p>
+                    {text.family} · {text.source}
+                  </p>
+                </div>
+                <span className="theme-hex">{theme.color}</span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </>
   );
 }

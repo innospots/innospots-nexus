@@ -68,7 +68,7 @@ class ConsoleResourcePermissionAuthorizerTest {
 
     @Test
     void allowsWhenAnyCandidateKeyMatchesGrant() {
-        PermissionGrantDao grantDao = grantDaoForKey("platform.dictionary:default", true);
+        PermissionGrantDao grantDao = grantDaoForKey("platform.dictionary:view", true);
         ConsoleResourcePermissionAuthorizer authorizer = new ConsoleResourcePermissionAuthorizer(
                 mock(ConsoleCatalogResourceDao.class), grantDao);
 
@@ -76,11 +76,11 @@ class ConsoleResourcePermissionAuthorizerTest {
                 "ws-1",
                 List.of(
                         "platform.dictionary:dictionary.type.create",
-                        "platform.dictionary:default"),
+                        "platform.dictionary:view"),
                 new AuthorizationSubject("u1", Set.of("role-1"), Set.of(), false)));
 
         assertThat(decision.allowed()).isTrue();
-        assertThat(decision.context().resourceKey()).isEqualTo("platform.dictionary:default");
+        assertThat(decision.context().resourceKey()).isEqualTo("platform.dictionary:view");
     }
 
     @Test
@@ -106,13 +106,13 @@ class ConsoleResourcePermissionAuthorizerTest {
     void authorizeEndpointAllowsWhenOnlyGroupGrantMatches() {
         ConsoleCatalogResourceDao resourceDao = mock(ConsoleCatalogResourceDao.class);
         when(resourceDao.selectList(any())).thenReturn(List.of(dictionaryModule()));
-        PermissionGrantDao grantDao = grantDaoForKey("platform.dictionary:default", true);
+        PermissionGrantDao grantDao = grantDaoForKey("platform.dictionary:view", true);
         ConsoleResourcePermissionAuthorizer authorizer = new ConsoleResourcePermissionAuthorizer(
                 resourceDao, grantDao);
         ResolvedEndpointGrant grant = new ResolvedEndpointGrant(
                 "dictionary",
                 "platform",
-                ResolvedEndpointGrant.DEFAULT_GRANT_GROUP,
+                ResolvedEndpointGrant.VIEW_GRANT_GROUP,
                 EndpointGrantAction.READ,
                 "dictionary.type.page",
                 emptyLabel(),
@@ -127,7 +127,7 @@ class ConsoleResourcePermissionAuthorizerTest {
                 new AuthorizationSubject("u1", Set.of("role-1"), Set.of(), false));
 
         assertThat(decision.allowed()).isTrue();
-        assertThat(decision.context().resourceKey()).isEqualTo("platform.dictionary:default");
+        assertThat(decision.context().resourceKey()).isEqualTo("platform.dictionary:view");
     }
 
     @Test

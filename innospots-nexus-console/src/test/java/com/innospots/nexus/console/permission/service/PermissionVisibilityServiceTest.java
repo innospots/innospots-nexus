@@ -50,13 +50,13 @@ class PermissionVisibilityServiceTest {
         ConsoleCatalogResourceEntity leafModule = resource(
                 "module", CatalogResourceType.MODULE, "module-1", null);
         leafModule.setEntryPageKey("demo-main");
-        leafModule.setViewGroups("[{\"group\":\"default\",\"label\":{\"en\":\"View\"}}]");
+        leafModule.setViewGroups("[{\"group\":\"view\",\"label\":{\"en\":\"View\"}}]");
 
         ConsoleCatalogResourceDao resourceDao = mock(ConsoleCatalogResourceDao.class);
         when(resourceDao.selectList(any())).thenReturn(List.of(leafModule));
 
         PermissionGrantEntity grant = new PermissionGrantEntity();
-        grant.setGrantKey("nexus.demo:default");
+        grant.setGrantKey("nexus.demo:view");
         PermissionGrantDao grantDao = mock(PermissionGrantDao.class);
         when(grantDao.selectList(any())).thenReturn(List.of(grant));
 
@@ -106,12 +106,12 @@ class PermissionVisibilityServiceTest {
         ConsoleCatalogResourceEntity resource = resource(
                 "module", CatalogResourceType.MODULE, "module-1", null);
         resource.setEntryPageKey("platform-user-main");
-        resource.setViewGroups("[{\"group\":\"default\",\"label\":{\"en\":\"View\"}}]");
+        resource.setViewGroups("[{\"group\":\"view\",\"label\":{\"en\":\"View\"}}]");
         ConsoleCatalogResourceDao resourceDao = mock(ConsoleCatalogResourceDao.class);
         when(resourceDao.selectList(any())).thenReturn(List.of(resource));
 
         PermissionGrantEntity grant = new PermissionGrantEntity();
-        grant.setGrantKey("nexus.demo:default");
+        grant.setGrantKey("nexus.demo:view");
         PermissionGrantDao grantDao = mock(PermissionGrantDao.class);
         when(grantDao.selectList(any())).thenReturn(List.of(grant));
 

@@ -200,15 +200,15 @@ class PlatformPermissionGrantFlowIntegrationTest {
         assertThat(dictionaryModule).as("dictionary module in permission-catalog").isNotNull();
         assertThat(dictionaryModule.path("resourceKey").asText()).isEqualTo(DICTIONARY_MODULE_RESOURCE_KEY);
         assertThat(dictionaryModule.path("domainKey").asText())
-                .isEqualTo(BuiltinPlatformEntryPlugins.DOMAIN_KEY);
+                .isEqualTo(BuiltinPlatformEntryPlugins.SYSTEM_DOMAIN_KEY);
 
         JsonNode viewGroups = dictionaryModule.path("grants").path("viewGroups");
         assertThat(viewGroups.isArray()).as("dictionary viewGroups").isTrue();
         assertThat(viewGroups).hasSize(1);
         JsonNode defaultGroup = viewGroups.get(0);
-        assertThat(defaultGroup.path("group").asText()).isEqualTo("default");
+        assertThat(defaultGroup.path("group").asText()).isEqualTo("view");
         String viewGroupResourceKey = defaultGroup.path("resourceKey").asText();
-        assertThat(viewGroupResourceKey).isEqualTo("platform.dictionary:default");
+        assertThat(viewGroupResourceKey).isEqualTo("system.dictionary:view");
         assertThat(defaultGroup.path("items").isArray()).isTrue();
         assertThat(defaultGroup.path("items")).isEmpty();
 
@@ -239,7 +239,7 @@ class PlatformPermissionGrantFlowIntegrationTest {
                 .viewGroups()
                 .getFirst();
         assertThat(viewGroup.resourceKey()).isEqualTo(dictionary.viewGroupResourceKey());
-        assertThat(viewGroup.group()).isEqualTo("default");
+        assertThat(viewGroup.group()).isEqualTo("view");
     }
 
     private void assertPageAccess(DictionaryGrantKeys dictionary, boolean allowed) throws Exception {
@@ -248,9 +248,9 @@ class PlatformPermissionGrantFlowIntegrationTest {
                   "domainKey": "%s",
                   "moduleKey": "dictionary",
                   "pageKey": "%s",
-                  "grantGroup": "default"
+                  "grantGroup": "view"
                 }
-                """.formatted(BuiltinPlatformEntryPlugins.DOMAIN_KEY, DICTIONARY_PAGE_KEY);
+                """.formatted(BuiltinPlatformEntryPlugins.SYSTEM_DOMAIN_KEY, DICTIONARY_PAGE_KEY);
         HttpResponse<String> response = http.exchange(
                 "POST",
                 PAGE_ACCESS_VERIFY_PATH,

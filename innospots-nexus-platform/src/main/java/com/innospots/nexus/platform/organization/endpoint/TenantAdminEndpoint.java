@@ -31,7 +31,7 @@ import com.innospots.nexus.platform.organization.service.PlatformTenantAdminServ
 /**
  * 租户管理员列表、按邮箱添加与移除。
  */
-@EndpointModule(value = "organization", domain = BuiltinPlatformEntryPlugins.DOMAIN_KEY)
+@EndpointModule(value = "organization", domain = BuiltinPlatformEntryPlugins.OPERATION_DOMAIN_KEY)
 @Path(PlatformConstant.TENANT_ADMINS_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Tag(name = "PlatformOrganization", description = "组织开通与生命周期")

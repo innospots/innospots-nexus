@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ChevronRight,
   Home,
   Settings,
   Users,
@@ -9,15 +10,12 @@ import {
 import Link from "next/link";
 import { MenuRegistry, type MenuItem } from "@pactor-app/router";
 import { usePathname, useRouter } from "next/navigation";
-import type { ReactNode } from "react";
+import type { ReactNode, RefObject } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { navigationConfig } from "../../config";
 import { useHostI18n } from "../../i18n/messages";
-import {
-  fetchNavigationLayoutMode,
-  type PlatformNavigationLayoutMode,
-} from "../../lib/platform-console-settings";
+import { useNavigationLayoutMode, useConsoleSiteName } from "../../navigation-layout-context";
 import type { SessionUser } from "../../types/session";
 import { AccountMenu } from "./account-menu";
 
@@ -145,29 +143,10 @@ export function NavigationShell({ menus = [], user, children }: NavigationShellP
   const router = useRouter();
   const { t } = useHostI18n();
   const mainRef = useRef<HTMLDivElement>(null);
-  const [layoutMode, setLayoutMode] = useState<PlatformNavigationLayoutMode>("RAIL_DUAL");
-
-  useEffect(() => {
-    let cancelled = false;
-    fetchNavigationLayoutMode().then((mode) => {
-      if (!cancelled) {
-        setLayoutMode(mode);
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  useEffect(() => {
-    const onPreferences = () => {
-      fetchNavigationLayoutMode().then(setLayoutMode);
-    };
-    window.addEventListener("pactor-console-settings-change", onPreferences);
-    return () => {
-      window.removeEventListener("pactor-console-settings-change", onPreferences);
-    };
-  }, []);
+  const layoutMode = useNavigationLayoutMode();
+  const consoleSiteName = useConsoleSiteName();
+  const consoleSiteInitial =
+    consoleSiteName.trim().charAt(0).toUpperCase() || "N";
 
   const topLevelMenus = useMemo(
     () =>
@@ -212,41 +191,18 @@ export function NavigationShell({ menus = [], user, children }: NavigationShellP
 
   if (layoutMode === "SINGLE_GROUP") {
     return (
-      <div className={shellClass}>
-        <aside className="kn-sidebar kn-sidebar-stacked" aria-label={t("nav.main")}>
-          <div className="kn-mark kn-mark-sidebar" aria-hidden="true">
-            N
-          </div>
-          <div className="kn-sidebar-title">Nexus Console</div>
-          <nav className="kn-menu kn-menu-grouped">
-            {topLevelMenus.map((item) => {
-              if (isGroup(item)) {
-                return (
-                  <div key={navId(item)} className="kn-menu-group">
-                    <div className="kn-menu-group-title">{menuTitle(item)}</div>
-                    {visibleChildren(item).map((child) =>
-                      menuLink(child, currentMenuId, "kn-menu-item"),
-                    )}
-                  </div>
-                );
-              }
-              const path = navPath(item);
-              if (!path) {
-                return null;
-              }
-              return (
-                <div key={navId(item)} className="kn-menu-group">
-                  {menuLink(item, currentMenuId, "kn-menu-item kn-menu-item-top")}
-                </div>
-              );
-            })}
-          </nav>
-          <AccountMenu user={user} className="account-menu-stacked" />
-        </aside>
-        <div className="kn-main" ref={mainRef}>
-          {children}
-        </div>
-      </div>
+      <SingleGroupNavigationShell
+        shellClass={shellClass}
+        topLevelMenus={topLevelMenus}
+        currentMenuId={currentMenuId}
+        user={user}
+        mainRef={mainRef}
+        t={t}
+        consoleSiteName={consoleSiteName}
+        consoleSiteInitial={consoleSiteInitial}
+      >
+        {children}
+      </SingleGroupNavigationShell>
     );
   }
 
@@ -261,7 +217,7 @@ export function NavigationShell({ menus = [], user, children }: NavigationShellP
         aria-label={t("nav.main")}
       >
         <div className="kn-mark" aria-hidden="true">
-          N
+          {consoleSiteInitial}
         </div>
         {topLevelMenus.map((item) => {
           const Icon = iconFor(item.icon);
@@ -318,6 +274,153 @@ export function NavigationShell({ menus = [], user, children }: NavigationShellP
         </aside>
       ) : null}
 
+      <div className="kn-main" ref={mainRef}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function SingleGroupNavigationShell({
+  shellClass,
+  topLevelMenus,
+  currentMenuId,
+  user,
+  mainRef,
+  t,
+  consoleSiteName,
+  consoleSiteInitial,
+  children,
+}: {
+  shellClass: string;
+  topLevelMenus: NavMenu[];
+  currentMenuId: string | undefined;
+  user?: SessionUser;
+  mainRef: RefObject<HTMLDivElement | null>;
+  t: ReturnType<typeof useHostI18n>["t"];
+  consoleSiteName: string;
+  consoleSiteInitial: string;
+  children?: ReactNode;
+}) {
+  const [expandedDirs, setExpandedDirs] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    setExpandedDirs((prev) => {
+      let changed = false;
+      const next = { ...prev };
+      for (const item of topLevelMenus) {
+        if (!isGroup(item)) {
+          continue;
+        }
+        const id = navId(item);
+        if (!id) {
+          continue;
+        }
+        if (next[id] !== true) {
+          next[id] = true;
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [topLevelMenus]);
+
+  useEffect(() => {
+    setExpandedDirs((prev) => {
+      let changed = false;
+      const next = { ...prev };
+      for (const item of topLevelMenus) {
+        if (!isGroup(item)) {
+          continue;
+        }
+        const id = navId(item);
+        if (id && groupContains(item, currentMenuId) && next[id] !== true) {
+          next[id] = true;
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [topLevelMenus, currentMenuId]);
+
+  function toggleDir(id: string, currentlyOpen: boolean) {
+    setExpandedDirs((prev) => ({
+      ...prev,
+      [id]: !currentlyOpen,
+    }));
+  }
+
+  function isDirOpen(item: NavMenu): boolean {
+    const id = navId(item);
+    if (!id) {
+      return false;
+    }
+    if (expandedDirs[id] !== undefined) {
+      return expandedDirs[id];
+    }
+    return groupContains(item, currentMenuId);
+  }
+
+  return (
+    <div className={shellClass}>
+      <aside className="kn-sidebar kn-sidebar-stacked" aria-label={t("nav.main")}>
+        <div className="kn-sidebar-brand">
+          <div className="kn-mark kn-mark-sidebar" aria-hidden="true">
+            {consoleSiteInitial}
+          </div>
+          <div className="kn-sidebar-title">{consoleSiteName}</div>
+        </div>
+        <div className="kn-sidebar-body">
+          <nav className="kn-menu kn-menu-tree">
+            {topLevelMenus.map((item) => {
+            if (!isGroup(item)) {
+              const path = navPath(item);
+              if (!path) {
+                return null;
+              }
+              return (
+                <div key={navId(item)} className="kn-menu-tree-root">
+                  {menuLink(item, currentMenuId, "kn-menu-item kn-menu-tree-leaf")}
+                </div>
+              );
+            }
+            const id = navId(item);
+            if (!id) {
+              return null;
+            }
+            const open = isDirOpen(item);
+            const childrenItems = visibleChildren(item);
+            if (childrenItems.length === 0) {
+              return null;
+            }
+            return (
+              <div key={id} className="kn-menu-tree-node">
+                <button
+                  type="button"
+                  className={`kn-menu-tree-dir${open ? " is-open" : ""}`}
+                  aria-expanded={open}
+                  onClick={() => toggleDir(id, open)}
+                >
+                  <ChevronRight className="kn-menu-tree-chevron" size={16} aria-hidden="true" />
+                  <span>{menuTitle(item)}</span>
+                </button>
+                <div
+                  className="kn-menu-tree-children"
+                  role="group"
+                  aria-label={menuTitle(item)}
+                  hidden={!open}
+                >
+                  {childrenItems.map((child) =>
+                    menuLink(child, currentMenuId, "kn-menu-item kn-menu-tree-item"),
+                  )}
+                </div>
+              </div>
+            );
+            })}
+          </nav>
+        </div>
+        <AccountMenu user={user} className="account-menu-stacked" />
+      </aside>
       <div className="kn-main" ref={mainRef}>
         {children}
       </div>

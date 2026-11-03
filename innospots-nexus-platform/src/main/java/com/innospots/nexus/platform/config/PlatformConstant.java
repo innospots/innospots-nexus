@@ -9,7 +9,6 @@ package com.innospots.nexus.platform.config;
  *
  * @author Smars
  * @date 2026/09/29
- * @see com.innospots.nexus.platform.settings.endpoint.PlatformRegistrationModeSettingEndpoint
  */
 public final class PlatformConstant {
 
@@ -92,8 +91,20 @@ public final class PlatformConstant {
     /** 运营平台设置（管理端根路径）：{@value} */
     public static final String SETTINGS_PATH = API_PREFIX + "/settings";
 
-    /** 自助注册模式设置（管理端）：{@value} */
-    public static final String SETTINGS_REGISTRATION_MODE_PATH = SETTINGS_PATH + "/registration-mode";
+    /** 控制台基础系统设置（聚合读）：{@value} */
+    public static final String SETTINGS_CONSOLE_GENERAL_PATH = SETTINGS_PATH + "/console-general";
+
+    /** 系统名称（管理端）：{@value} */
+    public static final String SETTINGS_CONSOLE_SITE_NAME_PATH = SETTINGS_PATH + "/console-site-name";
+
+    /** 系统简介（管理端）：{@value} */
+    public static final String SETTINGS_CONSOLE_SITE_DESCRIPTION_PATH = SETTINGS_PATH + "/console-site-description";
+
+    /** 控制台界面语言（管理端）：{@value} */
+    public static final String SETTINGS_CONSOLE_DISPLAY_LANGUAGE_PATH = SETTINGS_PATH + "/console-display-language";
+
+    /** 控制台默认时区（管理端）：{@value} */
+    public static final String SETTINGS_CONSOLE_TIMEZONE_PATH = SETTINGS_PATH + "/console-timezone";
 
     /** 控制台配色主题（管理端）：{@value} */
     public static final String SETTINGS_CONSOLE_THEME_PATH = SETTINGS_PATH + "/console-theme";

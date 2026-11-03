@@ -18,7 +18,7 @@ public final class SyncedCatalogResourceIds {
 
     private static final String ROLE_MENU_KEY = "module:role";
 
-    private static final String DEFAULT_VIEW_GROUP = "default";
+    private static final String DEFAULT_VIEW_GROUP = "view";
 
     private SyncedCatalogResourceIds() {
     }

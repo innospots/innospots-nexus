@@ -21,7 +21,7 @@ class GrantGroupPageAccessVerifierTest {
         PageAccessVerifier verifier = new GrantGroupPageAccessVerifier(mock(PermissionGrantDao.class));
 
         PageAccessVerifyResult result = verifier.verify(
-                new PageAccessVerifyRequest("platform", "user", "platform-user-main", "default"),
+                new PageAccessVerifyRequest("platform", "user", "platform-user-main", "view"),
                 "wks01",
                 new AuthorizationSubject("u1", Set.of(), Set.of(), true));
 
@@ -32,12 +32,12 @@ class GrantGroupPageAccessVerifierTest {
     void allowsWhenSubjectHasModuleScopedGrant() {
         PermissionGrantDao grantDao = mock(PermissionGrantDao.class);
         PermissionGrantEntity grant = new PermissionGrantEntity();
-        grant.setGrantKey("platform.user:default");
+        grant.setGrantKey("platform.user:view");
         when(grantDao.selectList(any())).thenReturn(List.of(grant));
         PageAccessVerifier verifier = new GrantGroupPageAccessVerifier(grantDao);
 
         PageAccessVerifyResult result = verifier.verify(
-                new PageAccessVerifyRequest("platform", "user", "platform-user-main", "default"),
+                new PageAccessVerifyRequest("platform", "user", "platform-user-main", "view"),
                 "wks01",
                 new AuthorizationSubject("u1", Set.of("role-1"), Set.of(), false));
 
@@ -51,7 +51,7 @@ class GrantGroupPageAccessVerifierTest {
         PageAccessVerifier verifier = new GrantGroupPageAccessVerifier(grantDao);
 
         PageAccessVerifyResult result = verifier.verify(
-                new PageAccessVerifyRequest("platform", "user", "platform-user-main", "default"),
+                new PageAccessVerifyRequest("platform", "user", "platform-user-main", "view"),
                 "wks01",
                 new AuthorizationSubject("u1", Set.of("role-1"), Set.of(), false));
 

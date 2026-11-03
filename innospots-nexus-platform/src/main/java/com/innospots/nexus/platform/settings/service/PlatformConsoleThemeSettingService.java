@@ -62,7 +62,7 @@ public class PlatformConsoleThemeSettingService {
 
     public static PlatformConsoleTheme parseDeploymentDefault(String raw) {
         if (raw == null || raw.isBlank()) {
-            return PlatformConsoleTheme.CHENWUNAIFU;
+            return PlatformConsoleTheme.QING_MING;
         }
         PlatformConsoleTheme fromSkin = PlatformConsoleTheme.fromSkinKey(raw);
         if (fromSkin != null) {

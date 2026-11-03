@@ -21,7 +21,7 @@ import com.innospots.nexus.platform.support.PlatformMutationLog;
  *
  * @author Smars
  * @date 2026/10/06
- * @see com.innospots.nexus.platform.settings.endpoint.PlatformRegistrationModeSettingEndpoint
+ * @see com.innospots.nexus.platform.access.endpoint.PlatformPublicRegistrationPolicyEndpoint
  */
 @Slf4j
 @RequiredArgsConstructor

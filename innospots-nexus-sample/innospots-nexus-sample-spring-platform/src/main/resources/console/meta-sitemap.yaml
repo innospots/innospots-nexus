@@ -1,10 +1,10 @@
 # 运营平台默认菜单（meta-sitemap）；menus 结构与前端 sitemap.yaml 对齐。
-# domainKey / moduleKey / viewGroup 对应 catalog 浏览分组授权（grant key = domain.module:viewGroup）。
+# catalog 浏览授权：grant key = {domainKey}.{moduleKey}:{viewGroup}（viewGroup 缺省 view）
 id: platform-console
 title: Innospots Platform Console
 description: 运营管理平台
 version: 1
-updatedAt: "2026-10-21T00:00:00Z"
+updatedAt: "2026-11-03T00:00:00Z"
 
 menus:
   - id: home
@@ -14,27 +14,44 @@ menus:
     icon: home
     layout: admin
     order: 1
-    domainKey: platform
-    moduleKey: settings
-    viewGroup: default
+    domainKey: operation
+    moduleKey: user
+    viewGroup: view
   - id: operations
     type: group
     title: 运营管理
     icon: users
     order: 2
+    domainKey: operation
+    moduleKey: user
+    viewGroup: view
     children:
-      - { id: nav-organization-tenants, type: page, pageId: tenant-list, title: 租户管理, layout: admin, domainKey: platform, moduleKey: organization, viewGroup: default }
-      - { id: nav-platform-users, type: page, pageId: platform-user-list, title: 用户列表, layout: admin, domainKey: platform, moduleKey: user, viewGroup: default }
-      - { id: nav-platform-invites, type: page, pageId: platform-invite-list, title: 邀请, layout: admin, domainKey: platform, moduleKey: user, viewGroup: default }
-      - { id: nav-platform-access-requests, type: page, pageId: platform-access-request-list, title: 注册审批, layout: admin, domainKey: platform, moduleKey: user, viewGroup: default }
+      - { id: nav-roles, type: page, pageId: role-list, title: 角色管理, layout: admin, domainKey: operation, moduleKey: role, viewGroup: view }
+      - { id: nav-organization-tenants, type: page, pageId: tenant-list, title: 租户管理, layout: admin, domainKey: operation, moduleKey: organization, viewGroup: view }
+      - { id: nav-platform-users, type: page, pageId: platform-user-list, title: 用户列表, layout: admin, domainKey: operation, moduleKey: user, viewGroup: view }
+      - { id: nav-platform-invites, type: page, pageId: platform-invite-list, title: 邀请, layout: admin, domainKey: operation, moduleKey: user, viewGroup: view }
+      - { id: nav-platform-access-requests, type: page, pageId: platform-access-request-list, title: 注册审批, layout: admin, domainKey: operation, moduleKey: user, viewGroup: view }
   - id: system
     type: group
     title: 系统管理
     icon: settings
     order: 3
+    domainKey: system
+    moduleKey: settings
+    viewGroup: view
     children:
-      - { id: nav-menus, type: page, pageId: menu-config, title: 菜单管理, layout: admin, domainKey: platform, moduleKey: menu, viewGroup: default }
-      - { id: nav-dictionaries, type: page, pageId: dictionary-type-list, title: 数据字典, layout: admin, domainKey: platform, moduleKey: dictionary, viewGroup: default }
-      - { id: nav-roles, type: page, pageId: role-list, title: 角色管理, layout: admin, domainKey: platform, moduleKey: role, viewGroup: default }
-      - { id: nav-audit, type: page, pageId: audit-log-list, title: 审计日志, layout: admin, domainKey: platform, moduleKey: logger, viewGroup: default }
-      - { id: nav-plugins, type: page, pageId: plugin-list, title: 插件管理, layout: admin, domainKey: platform, moduleKey: permission, viewGroup: default }
+      - { id: nav-system-settings, type: page, pageId: system-settings, title: 系统设置, layout: admin, domainKey: system, moduleKey: settings, viewGroup: view }
+      - { id: nav-themes, type: page, pageId: themes, title: 主题选择, layout: admin, domainKey: system, moduleKey: theme, viewGroup: view }
+      - { id: nav-plugins, type: page, pageId: plugin-list, title: 插件管理, layout: admin, domainKey: system, moduleKey: plugin, viewGroup: view }
+      - { id: nav-audit, type: page, pageId: audit-log-list, title: 审计日志, layout: admin, domainKey: system, moduleKey: logger, viewGroup: view }
+      - { id: nav-dictionaries, type: page, pageId: dictionary-type-list, title: 数据字典, layout: admin, domainKey: system, moduleKey: dictionary, viewGroup: view }
+  - { id: role-detail-basic, type: page, pageId: role-detail-basic, layout: admin, hidden: true, activeMenu: nav-roles, domainKey: operation, moduleKey: role, viewGroup: view }
+  - { id: role-detail-permissions, type: page, pageId: role-detail-permissions, layout: admin, hidden: true, activeMenu: nav-roles, domainKey: operation, moduleKey: role, viewGroup: view }
+  - { id: role-detail-members, type: page, pageId: role-detail-members, layout: admin, hidden: true, activeMenu: nav-roles, domainKey: operation, moduleKey: role, viewGroup: view }
+  - { id: dictionary-type-create, type: page, pageId: dictionary-type-create, layout: admin, hidden: true, activeMenu: nav-dictionaries, domainKey: system, moduleKey: dictionary, viewGroup: view }
+  - { id: dictionary-type-detail, type: page, pageId: dictionary-type-detail, layout: admin, hidden: true, activeMenu: nav-dictionaries, domainKey: system, moduleKey: dictionary, viewGroup: view }
+  - { id: audit-log-detail, type: page, pageId: audit-log-detail, layout: admin, hidden: true, activeMenu: nav-audit, domainKey: system, moduleKey: logger, viewGroup: view }
+  - { id: plugin-detail, type: page, pageId: plugin-detail, layout: admin, hidden: true, activeMenu: nav-plugins, domainKey: system, moduleKey: plugin, viewGroup: view }
+  - { id: platform-user-create, type: page, pageId: platform-user-create, layout: admin, hidden: true, activeMenu: nav-platform-users, domainKey: operation, moduleKey: user, viewGroup: view }
+  - { id: platform-user-detail, type: page, pageId: platform-user-detail, layout: admin, hidden: true, activeMenu: nav-platform-users, domainKey: operation, moduleKey: user, viewGroup: view }
+  - { id: tenant-detail, type: page, pageId: tenant-detail, layout: admin, hidden: true, activeMenu: nav-organization-tenants, domainKey: operation, moduleKey: organization, viewGroup: view }

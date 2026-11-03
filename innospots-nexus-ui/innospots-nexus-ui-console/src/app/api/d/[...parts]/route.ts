@@ -6,7 +6,6 @@ import {
   resolveSessionUser,
 } from "@/backend/auth/accounts";
 import { corsHeaders, corsPreflight } from "@/backend/cors";
-import * as systemSettings from "@/backend/mock/system-settings";
 
 /**
  * 页面数据接口统一入口（纯转发）：页面 DSL 的 http 数据源（如
@@ -20,12 +19,31 @@ import * as systemSettings from "@/backend/mock/system-settings";
  * next.config.js 的 API_BASE_URLS 换成真实地址，页面 yaml 与本路由零改动。
  */
 
-/** 无服务层接口时的空数据（GET → 空对象，POST → 成功占位） */
+function isReadMethod(method: string): boolean {
+  return method === "GET" || method === "HEAD";
+}
+
+/** 无服务层接口时的空数据（仅读请求）；写请求返回明确失败，避免误报成功。 */
 function emptyData(request: Request): Response {
-  const isGet = request.method === "GET" || request.method === "HEAD";
-  return Response.json(isGet ? {} : { ok: true }, {
-    headers: { "cache-control": "no-store", ...corsHeaders(request) },
-  });
+  if (!isReadMethod(request.method)) {
+    return Response.json(
+      {
+        success: false,
+        code: "UPSTREAM_UNAVAILABLE",
+        message: "后端接口不可用，请确认 API 已启动且地址配置正确",
+      },
+      {
+        status: 502,
+        headers: { "cache-control": "no-store", ...corsHeaders(request) },
+      },
+    );
+  }
+  return Response.json(
+    {},
+    {
+      headers: { "cache-control": "no-store", ...corsHeaders(request) },
+    },
+  );
 }
 
 /** 原样转发：同路径、同方法、同查询、同请求体，携带会话 cookie */
@@ -61,7 +79,11 @@ async function forward(
     ...corsHeaders(request),
   };
   if (upstream.status === 404) {
-    return emptyData(request); // 接口不存在 → 空数据（本地无后端占位）
+    if (upstreamType.includes("json") && body.byteLength > 0) {
+      resHeaders["content-type"] = upstreamType;
+      return new Response(body, { status: upstream.status, headers: resHeaders });
+    }
+    return emptyData(request);
   }
   if (!upstreamType.includes("json")) {
     if (upstream.status >= 400) {
@@ -100,15 +122,6 @@ async function handle(
         { error: "未登录" },
         { status: 401, headers: corsHeaders(request) },
       );
-    }
-  }
-
-  if (parts.length === 1 && parts[0] === "system-settings") {
-    if (request.method === "GET") {
-      return systemSettings.GET();
-    }
-    if (request.method === "PATCH") {
-      return systemSettings.PATCH(request);
     }
   }
 

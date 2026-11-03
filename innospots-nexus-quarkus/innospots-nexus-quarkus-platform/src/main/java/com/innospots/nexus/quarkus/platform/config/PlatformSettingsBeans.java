@@ -10,6 +10,7 @@ import com.innospots.nexus.core.setting.service.SystemSettingService;
 import com.innospots.nexus.platform.settings.domain.enums.PlatformConsoleTheme;
 import com.innospots.nexus.platform.settings.domain.enums.PlatformNavigationLayoutMode;
 import com.innospots.nexus.platform.settings.domain.enums.PlatformRegistrationMode;
+import com.innospots.nexus.platform.settings.service.PlatformConsoleGeneralSettingService;
 import com.innospots.nexus.platform.settings.service.PlatformConsoleThemeSettingService;
 import com.innospots.nexus.platform.settings.service.PlatformNavigationLayoutSettingService;
 import com.innospots.nexus.platform.settings.service.PlatformRegistrationModeSettingService;
@@ -26,6 +27,26 @@ public class PlatformSettingsBeans {
         PlatformRegistrationMode defaultMode =
                 PlatformRegistrationModeSettingService.parseDeploymentDefault(deploymentRegistrationMode);
         return new PlatformRegistrationModeSettingService(systemSettingService, defaultMode);
+    }
+
+    @Produces
+    @Singleton
+    PlatformConsoleGeneralSettingService platformConsoleGeneralSettingService(
+            SystemSettingService systemSettingService,
+            @ConfigProperty(name = "nexus.platform.console.site-name", defaultValue = "Nexus Console")
+                    String deploymentSiteName,
+            @ConfigProperty(name = "nexus.platform.console.site-description", defaultValue = "运营管理平台")
+                    String deploymentSiteDescription,
+            @ConfigProperty(name = "nexus.platform.console.display-language", defaultValue = "zh-CN")
+                    String deploymentDisplayLanguage,
+            @ConfigProperty(name = "nexus.platform.console.timezone", defaultValue = "Asia/Shanghai")
+                    String deploymentTimezone) {
+        return new PlatformConsoleGeneralSettingService(
+                systemSettingService,
+                PlatformConsoleGeneralSettingService.parseDeploymentSiteName(deploymentSiteName),
+                PlatformConsoleGeneralSettingService.parseDeploymentSiteDescription(deploymentSiteDescription),
+                PlatformConsoleGeneralSettingService.parseDeploymentDisplayLanguage(deploymentDisplayLanguage),
+                PlatformConsoleGeneralSettingService.parseDeploymentTimezone(deploymentTimezone));
     }
 
     @Produces

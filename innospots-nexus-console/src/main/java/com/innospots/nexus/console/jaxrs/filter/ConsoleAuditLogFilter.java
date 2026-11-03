@@ -8,8 +8,9 @@ import jakarta.ws.rs.container.ContainerResponseContext;
 import jakarta.ws.rs.container.ContainerResponseFilter;
 import jakarta.ws.rs.ext.Provider;
 
-import com.innospots.nexus.base.domain.identity.UserSnapshot;
 import com.innospots.nexus.base.thread.SessionContext;
+import com.innospots.nexus.base.thread.TLC;
+import com.innospots.nexus.base.util.StringUtils;
 import com.innospots.nexus.console.jaxrs.support.ConsoleRequestGrants;
 import com.innospots.nexus.console.jaxrs.support.ConsoleRequestProperties;
 import com.innospots.nexus.console.jaxrs.support.ResolvedEndpointBinding;
@@ -67,10 +68,7 @@ public final class ConsoleAuditLogFilter implements ContainerRequestFilter, Cont
                     requestContext.getMethod(),
                     path.startsWith("/") ? path : "/" + path,
                     startTime instanceof Long millis ? millis : System.currentTimeMillis());
-            String actor = SessionContext.user()
-                    .map(UserSnapshot::userName)
-                    .filter(name -> !name.isBlank())
-                    .orElse("");
+            String actor = resolveAuditActor();
             Object failure = requestContext.getProperty(RequestProperties.FAILURE_CAUSE);
             recorder.record(
                     state,
@@ -81,5 +79,20 @@ public final class ConsoleAuditLogFilter implements ContainerRequestFilter, Cont
         } finally {
             requestContext.removeProperty(ConsoleRequestProperties.RESOLVED_ENDPOINT_BINDING);
         }
+    }
+
+    private static String resolveAuditActor() {
+        try {
+            return SessionContext.user()
+                    .map(user -> user.userName())
+                    .filter(name -> !name.isBlank())
+                    .orElseGet(ConsoleAuditLogFilter::fallbackAuditActor);
+        } catch (RuntimeException ex) {
+            return fallbackAuditActor();
+        }
+    }
+
+    private static String fallbackAuditActor() {
+        return StringUtils.defaultIfBlank(TLC.userName(), "");
     }
 }
