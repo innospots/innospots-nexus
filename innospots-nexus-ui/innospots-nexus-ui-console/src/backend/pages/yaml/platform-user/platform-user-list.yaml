@@ -183,9 +183,12 @@ body:
                       'LOCKED' ? t('platform-user.platform-user-list.status.locked') : row.status}"
               - title:
                   '$i18n{platform-user.platform-user-list.actions:操作}'
+                align: center
+                fixed: right
                 cell:
                   type: Flex
                   props:
+                    justify: center
                     gap: small
                   children:
                     - type: Button

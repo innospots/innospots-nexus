@@ -443,6 +443,8 @@ body:
                                   type: modal
                                   title: "${t('role.role-detail-basic.add-to-role', { roleName: data.role.roleName })}"
                                   width: 720
+                                  params:
+                                    roleId: ${params.roleId}
                                   content:
                                     type: RoleMemberAddPanel
                                     props:
@@ -478,6 +480,8 @@ body:
                           dataIndex: email
                         - title:
                             '$i18n{role.role-detail-basic.actions:操作}'
+                          align: center
+                          fixed: right
                           cell:
                             type: Button
                             props:
@@ -487,21 +491,37 @@ body:
                               danger: true
                             events:
                               onClick:
-                                - action: confirm
+                                - id: confirmRemoveMember
+                                  action: confirm
                                   params:
                                     title: '$i18n{role.role-detail-basic.remove-member:移除成员}'
                                     content: '$i18n{role.role-detail-basic.only-the-role-binding-is-removed-users-and-organization-units-are-retain:仅解除该角色绑定，不删除用户或组织单元。确定移除吗？}'
-                                - action: request
+                                - id: removeMemberResult
+                                  action: if
                                   params:
-                                    method: DELETE
-                                    url: /api/d/platform/roles/${params.roleId}/bindings/${row.bindingId}
-                                - action: message
+                                    condition: ${actions.confirmRemoveMember == true}
+                                    then:
+                                      - action: request
+                                        params:
+                                          method: DELETE
+                                          url: /api/d/platform/roles/${params.roleId}/bindings/${row.bindingId}
+                                          headers:
+                                            Content-Type: application/json
+                                      - action: message
+                                        params:
+                                          messageType: success
+                                          text: '$i18n{role.role-detail-basic.removed:已移除}'
+                                      - action: reload
+                                        params:
+                                          dataSource: bindings
+                                - action: if
                                   params:
-                                    messageType: success
-                                    text: '$i18n{role.role-detail-basic.removed:已移除}'
-                                - action: reload
-                                  params:
-                                    dataSource: bindings
+                                    condition: ${actions.confirmRemoveMember == true && actions.removeMemberResult != null && actions.removeMemberResult.ok == false}
+                                    then:
+                                      - action: message
+                                        params:
+                                          messageType: error
+                                          text: '$i18n{common.ui.request-failed:请求失败}'
                   - type: Text
                     props:
                       text: "${t('role.role-detail-basic.summary.count', { count: data.bindings.total })}"

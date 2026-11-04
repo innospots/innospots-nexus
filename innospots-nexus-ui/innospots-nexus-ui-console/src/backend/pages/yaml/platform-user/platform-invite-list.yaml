@@ -190,9 +190,12 @@ body:
                 dataIndex: expiresAt
               - title:
                   '$i18n{platform-user.platform-invite-list.actions:操作}'
+                align: center
+                fixed: right
                 cell:
                   type: Flex
                   props:
+                    justify: center
                     gap: small
                   children:
                     - type: Button

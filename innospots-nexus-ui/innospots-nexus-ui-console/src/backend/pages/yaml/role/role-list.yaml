@@ -256,9 +256,12 @@ body:
                     text: "${row.status == 'ENABLED' ? t('role.role-list.enable') : t('role.role-list.disable')}"
               - title:
                   '$i18n{role.role-list.actions:操作}'
+                align: center
+                fixed: right
                 cell:
                   type: Flex
                   props:
+                    justify: center
                     gap: small
                   children:
                     - type: Button

@@ -42,3 +42,4 @@ node_modules/
 .next/
 next-env.d.ts
 /.pnpm-store/
+node_modules.pactor-backup/

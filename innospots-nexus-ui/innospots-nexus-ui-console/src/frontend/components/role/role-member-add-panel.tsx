@@ -206,8 +206,8 @@ export function RoleMemberAddPanel({ roleId, roleName, onCancel, onSuccess }: Ro
                     <Input
                         value={searchInput}
                         placeholder={t("role.role-detail-basic.add-member-search-login-name")}
-                        onChange={(event) => {
-                            setSearchInput(event.target.value);
+                        onChange={(value) => {
+                            setSearchInput(value);
                         }}
                     />
                     {showInitialLoading ? (
