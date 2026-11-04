@@ -75,6 +75,24 @@ function platformOk(code: string | number | undefined): boolean {
   return code === 0 || code === "0" || code === "OK";
 }
 
+/** 平台英文 reason → 控制台可读文案 */
+function normalizeDenyReason(reason: string | undefined): string {
+  if (reason === undefined || reason.trim() === "") {
+    return "无页面访问权限";
+  }
+  const trimmed = reason.trim();
+  if (trimmed === "Page permission is required") {
+    return "无页面访问权限";
+  }
+  if (trimmed === "Authentication is required") {
+    return "未登录";
+  }
+  if (trimmed === "Workspace is required") {
+    return "缺少工作区上下文";
+  }
+  return trimmed;
+}
+
 function readPageMeta(dsl: PageDsl | undefined): NexusPageMeta | undefined {
   if (dsl?.page === undefined || typeof dsl.page !== "object") {
     return undefined;
@@ -194,10 +212,11 @@ async function verifyWithPlatform(
       && payload.data?.allowed === true;
     return {
       allowed,
-      reason:
+      reason: normalizeDenyReason(
         payload.data?.reason
         ?? payload.message
         ?? (allowed ? "OK" : `页面权限校验失败：HTTP ${response.status}`),
+      ),
     };
   } catch (error) {
     return {

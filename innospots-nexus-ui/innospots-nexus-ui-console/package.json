@@ -27,7 +27,8 @@
     "build:test": "npm run build:app:test",
     "build:module": "node scripts/build-module.mjs",
     "pack:module": "npm run build:module && npm pack --dry-run && npm pack",
-    "publish:module": "npm run build:module && npm publish --access restricted"
+    "publish:module": "npm run build:module && npm publish --access restricted",
+    "link:pactor-local": "npm link @pactor-app/core @pactor-app/i18n @pactor-app/runtime @pactor-app/router @pactor-app/schema @pactor-app/ui pactor-app"
   },
   "peerDependencies": {
     "@pactor-app/core": "^1.48.0",

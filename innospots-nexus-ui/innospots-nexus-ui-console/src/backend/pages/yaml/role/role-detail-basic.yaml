@@ -415,7 +415,7 @@ body:
                           - type: Input
                             props:
                               name: input
-                              placeholder: '$i18n{role.role-detail-basic.name-account-organization-unit:名称 / 账号 / 组织单元}'
+                              placeholder: '$i18n{role.role-detail-basic.member-search-login-name:用户名 / 显示名 / 邮箱}'
                       - type: Field
                         props:
                           label:  
@@ -444,9 +444,22 @@ body:
                                   title: "${t('role.role-detail-basic.add-to-role', { roleName: data.role.roleName })}"
                                   width: 720
                                   content:
-                                    type: Text
+                                    type: RoleMemberAddPanel
                                     props:
-                                      text: '$i18n{role.role-detail-basic.no-members-available-to-add:暂无可添加的成员。}'
+                                      roleId: ${params.roleId}
+                                      roleName: ${data.role.roleName}
+                                    events:
+                                      onCancel:
+                                        - action: overlay.close
+                                      onSuccess:
+                                        - action: message
+                                          params:
+                                            messageType: success
+                                            text: '$i18n{role.role-detail-basic.add-member-success:成员已添加}'
+                                        - action: overlay.close
+                                        - action: reload
+                                          params:
+                                            dataSource: bindings
                   - type: Table
                     props:
                       rowKey: bindingId
@@ -455,11 +468,14 @@ body:
                       className: mt-4
                       columns:
                         - title:
-                            '$i18n{role.role-detail-basic.subject-type:主体类型}'
-                          dataIndex: subjectType
+                            '$i18n{role.role-detail-basic.member-login-name:用户名}'
+                          dataIndex: loginName
                         - title:
-                            '$i18n{role.role-detail-basic.subject-id:主体 ID}'
-                          dataIndex: subjectId
+                            '$i18n{role.role-detail-basic.member-display-name:显示名}'
+                          dataIndex: displayName
+                        - title:
+                            '$i18n{role.role-detail-basic.member-email:邮箱}'
+                          dataIndex: email
                         - title:
                             '$i18n{role.role-detail-basic.actions:操作}'
                           cell:

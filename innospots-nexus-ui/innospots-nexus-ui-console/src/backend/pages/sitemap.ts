@@ -243,13 +243,30 @@ function localizeLayout(
   };
 }
 
+function resolveMenuTitle(
+  menu: SitemapResource["menus"][number],
+  messages: Readonly<Record<string, string>>,
+): string {
+  const byMenuId = messages[`common.menu.${menu.id}.title`];
+  if (byMenuId !== undefined && byMenuId !== "") {
+    return byMenuId;
+  }
+  if (menu.pageId) {
+    const byPageId = messages[`common.page.${menu.pageId}.title`];
+    if (byPageId !== undefined && byPageId !== "") {
+      return byPageId;
+    }
+  }
+  return menu.title;
+}
+
 function localizeMenus(
   menus: SitemapResource["menus"],
   messages: Readonly<Record<string, string>>,
 ): SitemapResource["menus"] {
   return menus.map((menu) => ({
     ...menu,
-    title: messages[`common.menu.${menu.id}.title`] ?? menu.title,
+    title: resolveMenuTitle(menu, messages),
     ...(menu.type === "group"
       ? { children: localizeMenus(menu.children ?? [], messages) }
       : {}),

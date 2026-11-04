@@ -99,7 +99,7 @@ pages:
       id: role-detail-basic,
       path: /system/roles/:roleId,
       title: 角色详情,
-      version: 1,
+      version: 2,
       lazy: true,
       domain: operation,
       module: role

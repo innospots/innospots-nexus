@@ -59,6 +59,15 @@ function PactorAppInner({
   const replace = useCallback((to: string) => router.replace(to), [router]);
   const navigate = useCallback((to: string) => router.push(to), [router]);
 
+  const signOutAndLogin = useCallback(async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+    } catch {
+      // 仍跳转登录页，避免留在无权限页
+    }
+    replace("/login");
+  }, [replace]);
+
   const { committed, status, retry } = usePageAccessGate(
     pathname,
     search,
@@ -81,6 +90,8 @@ function PactorAppInner({
           locale={locale}
           reason={status.reason}
           onRetry={retry}
+          onBack={() => router.back()}
+          onSignOut={() => void signOutAndLogin()}
           onHome={() => router.replace("/")}
         />
       );
@@ -129,6 +140,7 @@ function PactorAppInner({
           reason={status.reason}
           onRetry={retry}
           onBack={backToCommitted}
+          onSignOut={() => void signOutAndLogin()}
           onHome={() => router.replace("/")}
         />
       ) : null}

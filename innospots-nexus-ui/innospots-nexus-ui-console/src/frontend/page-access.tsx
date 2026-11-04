@@ -28,6 +28,20 @@ interface Denial {
   redirectTo?: string;
 }
 
+function normalizeClientReason(reason: string | undefined): string | undefined {
+  if (reason === undefined || reason.trim() === "") {
+    return undefined;
+  }
+  const trimmed = reason.trim();
+  if (trimmed === "Page permission is required") {
+    return undefined;
+  }
+  if (trimmed === "Authentication is required") {
+    return undefined;
+  }
+  return trimmed;
+}
+
 export async function verifyPageAccess(
   pathname: string,
   locale?: ConsoleLocale | null,
@@ -89,9 +103,12 @@ export function usePageAccessGate(
         setCommittedSearch(targetSearch);
         return;
       }
+      const reason =
+        normalizeClientReason(result.reason)
+        ?? translateGate(locale, "gate.denied.noAccess");
       setDenial({
         pathname: targetPathname,
-        reason: result.reason ?? translateGate(locale, "gate.denied.noAccess"),
+        reason,
         redirectTo: result.redirectTo,
       });
       if (
@@ -222,12 +239,14 @@ export function PageAccessDenied({
   onRetry,
   onBack,
   onHome,
+  onSignOut,
   locale,
 }: {
   reason: string;
   onRetry: () => void;
   onBack?: () => void;
   onHome: () => void;
+  onSignOut?: () => void;
   locale?: ConsoleLocale | null;
 }) {
   return (
@@ -254,6 +273,11 @@ export function PageAccessDenied({
         {onBack !== undefined ? (
           <button type="button" style={buttonStyle} onClick={onBack}>
             {translateGate(locale, "gate.denied.back")}
+          </button>
+        ) : null}
+        {onSignOut !== undefined ? (
+          <button type="button" style={buttonStyle} onClick={onSignOut}>
+            {translateGate(locale, "gate.denied.signOut")}
           </button>
         ) : null}
         <button type="button" style={buttonStyle} onClick={onHome}>

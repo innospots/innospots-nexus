@@ -28,17 +28,29 @@ export async function POST(request: Request) {
 
   const store = await cookies();
   const user = resolveSessionUser(store);
-  const result = await verifyPageAccess({
-    pathname,
-    pageId,
-    user,
-    accessToken: readPlatformAccessToken(store),
-    cookie: request.headers.get("cookie"),
-  });
+  try {
+    const result = await verifyPageAccess({
+      pathname,
+      pageId,
+      user,
+      accessToken: readPlatformAccessToken(store),
+      cookie: request.headers.get("cookie"),
+    });
 
-  return Response.json(result, {
-    headers: { "cache-control": "no-store", ...corsHeaders(request) },
-  });
+    return Response.json(result, {
+      headers: { "cache-control": "no-store", ...corsHeaders(request) },
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "页面访问校验失败";
+    return Response.json(
+      { allowed: false, reason: message },
+      {
+        status: 200,
+        headers: { "cache-control": "no-store", ...corsHeaders(request) },
+      },
+    );
+  }
 }
 
 export const OPTIONS = corsPreflight;

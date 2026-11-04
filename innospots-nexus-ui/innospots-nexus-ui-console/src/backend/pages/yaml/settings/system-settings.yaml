@@ -1,7 +1,10 @@
 dsl: "1.0"
 page:
   id: system-settings
-  title: "$i18n{page.system-settings.title:系统设置}"
+  title: "$i18n{common.page.system-settings.title:系统设置}"
+  name: system-settings
+  domain: system
+  module: settings
 i18n: { namespaces: [common] }
 dataSources:
   settings:
@@ -13,20 +16,20 @@ body:
   props: { className: system-settings-page }
   children:
     - type: Typography
-      props: { variant: h3, className: system-page-title, text: "$i18n{page.system-settings.title:系统设置}" }
+      props: { variant: h3, className: system-page-title, text: "$i18n{common.page.system-settings.title:系统设置}" }
     - type: Typography
-      props: { variant: muted, className: system-page-description, text: "$i18n{systemSettings.subtitle:管理系统的常用配置}" }
+      props: { variant: muted, className: system-page-description, text: "$i18n{common.systemSettings.subtitle:管理系统的常用配置}" }
     - type: Alert
-      props: { variant: info, message: "$i18n{systemSettings.note:示例设置仅保存在当前服务进程中。}", style: { marginTop: 20 } }
+      props: { variant: info, message: "$i18n{common.systemSettings.note:示例设置仅保存在当前服务进程中。}", style: { marginTop: 20 } }
     - type: Card
-      props: { title: "$i18n{systemSettings.group.navigation:界面与导航}", style: { marginTop: 20 } }
+      props: { title: "$i18n{common.systemSettings.group.navigation:界面与导航}", style: { marginTop: 20 } }
       children:
         - type: NavigationLayoutSettingPanel
     - type: Alert
       when: ${dataStatus.settings.error != null}
-      props: { variant: error, message: "$i18n{systemSettings.loadError:无法加载系统设置，请刷新重试。}" }
+      props: { variant: error, message: "$i18n{common.systemSettings.loadError:无法加载系统设置，请刷新重试。}" }
     - type: Card
-      props: { title: "$i18n{systemSettings.group.basic:basic}", style: { marginTop: 20 } }
+      props: { title: "$i18n{common.systemSettings.group.basic:基本信息}", style: { marginTop: 20 } }
       children:
         - type: Flex
           props: { className: system-setting, justify: space-between, align: center }
@@ -35,23 +38,23 @@ body:
               props: { direction: vertical, gap: 4 }
               children:
                 - type: Text
-                  props: { strong: true, text: "$i18n{systemSettings.siteName.label:siteName}" }
+                  props: { strong: true, text: "$i18n{common.systemSettings.siteName.label:系统名称}" }
                 - type: Typography
-                  props: { variant: muted, text: "$i18n{systemSettings.siteName.description:siteName}" }
+                  props: { variant: muted, text: "$i18n{common.systemSettings.siteName.description:设置系统对外显示的名称。}" }
             - type: Flex
               props: { className: system-setting-display, align: center }
               children:
                 - type: Text
                   props: { text: "${data.settings.siteName}" }
                 - type: Button
-                  props: { text: "$i18n{settingsPage.edit:修改}", variant: link, disabled: "${dataStatus.settings.loading}" }
+                  props: { text: "$i18n{common.settingsPage.edit:修改}", variant: link, disabled: "${dataStatus.settings.loading}" }
                   events:
                     onClick:
                       - action: overlay.open
                         params:
                           overlay:
                             type: modal
-                            title: "$i18n{systemSettings.siteName.label:siteName}"
+                            title: "$i18n{common.systemSettings.siteName.label:系统名称}"
                             width: 440
                             content:
                               type: Form
@@ -70,23 +73,23 @@ body:
                                           params: { dataSource: settings }
                                       else:
                                         - action: message
-                                          params: { messageType: error, text: "$i18n{systemSettings.saveError:保存失败，请重试。}" }
+                                          params: { messageType: error, text: "$i18n{common.systemSettings.saveError:保存失败，请重试。}" }
                               children:
                                 - type: Field
-                                  props: { label: "$i18n{systemSettings.siteName.label:siteName}", required: true }
+                                  props: { label: "$i18n{common.systemSettings.siteName.label:系统名称}", required: true }
                                   children:
                                     - type: Input
-                                      props: { name: value, maxLength: 80, rules: [{ required: true, message: "$i18n{settingsPage.required:请输入系统名称}" }] }
+                                      props: { name: value, maxLength: 80, rules: [{ required: true, message: "$i18n{common.settingsPage.required:请输入系统名称}" }] }
                                 - type: Flex
                                   props: { justify: end, gap: small }
                                   children:
                                     - type: Button
-                                      props: { text: "$i18n{settingsPage.cancel:取消}" }
+                                      props: { text: "$i18n{common.settingsPage.cancel:取消}" }
                                       events:
                                         onClick:
                                           - action: overlay.close
                                     - type: Button
-                                      props: { text: "$i18n{settingsPage.save:保存}", variant: primary, submit: true }
+                                      props: { text: "$i18n{common.settingsPage.save:保存}", variant: primary, submit: true }
         - type: Flex
           props: { className: system-setting, justify: space-between, align: center }
           children:
@@ -94,23 +97,23 @@ body:
               props: { direction: vertical, gap: 4 }
               children:
                 - type: Text
-                  props: { strong: true, text: "$i18n{systemSettings.systemDescription.label:description}" }
+                  props: { strong: true, text: "$i18n{common.systemSettings.systemDescription.label:系统简介}" }
                 - type: Typography
-                  props: { variant: muted, text: "$i18n{systemSettings.systemDescription.description:description}" }
+                  props: { variant: muted, text: "$i18n{common.systemSettings.systemDescription.description:描述系统的用途。}" }
             - type: Flex
               props: { className: system-setting-display, align: center }
               children:
                 - type: Text
                   props: { text: "${data.settings.description}" }
                 - type: Button
-                  props: { text: "$i18n{settingsPage.edit:修改}", variant: link, disabled: "${dataStatus.settings.loading}" }
+                  props: { text: "$i18n{common.settingsPage.edit:修改}", variant: link, disabled: "${dataStatus.settings.loading}" }
                   events:
                     onClick:
                       - action: overlay.open
                         params:
                           overlay:
                             type: modal
-                            title: "$i18n{systemSettings.systemDescription.label:description}"
+                            title: "$i18n{common.systemSettings.systemDescription.label:系统简介}"
                             width: 440
                             content:
                               type: Form
@@ -129,10 +132,10 @@ body:
                                           params: { dataSource: settings }
                                       else:
                                         - action: message
-                                          params: { messageType: error, text: "$i18n{systemSettings.saveError:保存失败，请重试。}" }
+                                          params: { messageType: error, text: "$i18n{common.systemSettings.saveError:保存失败，请重试。}" }
                               children:
                                 - type: Field
-                                  props: { label: "$i18n{systemSettings.systemDescription.label:description}" }
+                                  props: { label: "$i18n{common.systemSettings.systemDescription.label:系统简介}" }
                                   children:
                                     - type: Input
                                       props: { name: value, maxLength: 200 }
@@ -140,14 +143,14 @@ body:
                                   props: { justify: end, gap: small }
                                   children:
                                     - type: Button
-                                      props: { text: "$i18n{settingsPage.cancel:取消}" }
+                                      props: { text: "$i18n{common.settingsPage.cancel:取消}" }
                                       events:
                                         onClick:
                                           - action: overlay.close
                                     - type: Button
-                                      props: { text: "$i18n{settingsPage.save:保存}", variant: primary, submit: true }
+                                      props: { text: "$i18n{common.settingsPage.save:保存}", variant: primary, submit: true }
     - type: Card
-      props: { title: "$i18n{systemSettings.group.display:display}", style: { marginTop: 20 } }
+      props: { title: "$i18n{common.systemSettings.group.display:显示与区域}", style: { marginTop: 20 } }
       children:
         - type: Flex
           props: { className: system-setting, justify: space-between, align: center }
@@ -156,23 +159,23 @@ body:
               props: { direction: vertical, gap: 4 }
               children:
                 - type: Text
-                  props: { strong: true, text: "$i18n{systemSettings.language.label:language}" }
+                  props: { strong: true, text: "$i18n{common.systemSettings.language.label:显示语言}" }
                 - type: Typography
-                  props: { variant: muted, text: "$i18n{systemSettings.language.description:language}" }
+                  props: { variant: muted, text: "$i18n{common.systemSettings.language.description:设置系统默认显示语言。}" }
             - type: Flex
               props: { className: system-setting-display, align: center }
               children:
                 - type: Text
-                  props: { text: "${data.settings.language == 'zh-CN' ? t('systemSettings.language.zh') : data.settings.language == 'en-US' ? t('systemSettings.language.en') : data.settings.language}" }
+                  props: { text: "${data.settings.language == 'zh-CN' ? t('common.systemSettings.language.zh') : data.settings.language == 'en-US' ? t('common.systemSettings.language.en') : data.settings.language}" }
                 - type: Button
-                  props: { text: "$i18n{settingsPage.edit:修改}", variant: link, disabled: "${dataStatus.settings.loading}" }
+                  props: { text: "$i18n{common.settingsPage.edit:修改}", variant: link, disabled: "${dataStatus.settings.loading}" }
                   events:
                     onClick:
                       - action: overlay.open
                         params:
                           overlay:
                             type: modal
-                            title: "$i18n{systemSettings.language.label:language}"
+                            title: "$i18n{common.systemSettings.language.label:显示语言}"
                             width: 440
                             content:
                               type: Form
@@ -191,29 +194,27 @@ body:
                                           params: { dataSource: settings }
                                       else:
                                         - action: message
-                                          params: { messageType: error, text: "$i18n{systemSettings.saveError:保存失败，请重试。}" }
+                                          params: { messageType: error, text: "$i18n{common.systemSettings.saveError:保存失败，请重试。}" }
                               children:
                                 - type: Field
-                                  props: { label: "$i18n{systemSettings.language.label:language}" }
+                                  props: { label: "$i18n{common.systemSettings.language.label:显示语言}" }
                                   children:
                                     - type: Select
                                       props:
                                         name: value
-  domain: system
-  module: settings
                                         options:
-                                          - { value: "zh-CN", label: "$i18n{systemSettings.language.zh:zh-CN}" }
-                                          - { value: "en-US", label: "$i18n{systemSettings.language.en:en-US}" }
+                                          - { value: "zh-CN", label: "$i18n{common.systemSettings.language.zh:简体中文}" }
+                                          - { value: "en-US", label: "$i18n{common.systemSettings.language.en:English}" }
                                 - type: Flex
                                   props: { justify: end, gap: small }
                                   children:
                                     - type: Button
-                                      props: { text: "$i18n{settingsPage.cancel:取消}" }
+                                      props: { text: "$i18n{common.settingsPage.cancel:取消}" }
                                       events:
                                         onClick:
                                           - action: overlay.close
                                     - type: Button
-                                      props: { text: "$i18n{settingsPage.save:保存}", variant: primary, submit: true }
+                                      props: { text: "$i18n{common.settingsPage.save:保存}", variant: primary, submit: true }
         - type: Flex
           props: { className: system-setting, justify: space-between, align: center }
           children:
@@ -221,23 +222,23 @@ body:
               props: { direction: vertical, gap: 4 }
               children:
                 - type: Text
-                  props: { strong: true, text: "$i18n{systemSettings.timezone.label:timezone}" }
+                  props: { strong: true, text: "$i18n{common.systemSettings.timezone.label:默认时区}" }
                 - type: Typography
-                  props: { variant: muted, text: "$i18n{systemSettings.timezone.description:timezone}" }
+                  props: { variant: muted, text: "$i18n{common.systemSettings.timezone.description:设置系统默认使用的时区。}" }
             - type: Flex
               props: { className: system-setting-display, align: center }
               children:
                 - type: Text
-                  props: { text: "${data.settings.timezone == 'Asia/Shanghai' ? t('systemSettings.timezone.shanghai') : data.settings.timezone == 'UTC' ? t('systemSettings.timezone.utc') : data.settings.timezone == 'America/New_York' ? t('systemSettings.timezone.newYork') : data.settings.timezone}" }
+                  props: { text: "${data.settings.timezone == 'Asia/Shanghai' ? t('common.systemSettings.timezone.shanghai') : data.settings.timezone == 'UTC' ? t('common.systemSettings.timezone.utc') : data.settings.timezone == 'America/New_York' ? t('common.systemSettings.timezone.newYork') : data.settings.timezone}" }
                 - type: Button
-                  props: { text: "$i18n{settingsPage.edit:修改}", variant: link, disabled: "${dataStatus.settings.loading}" }
+                  props: { text: "$i18n{common.settingsPage.edit:修改}", variant: link, disabled: "${dataStatus.settings.loading}" }
                   events:
                     onClick:
                       - action: overlay.open
                         params:
                           overlay:
                             type: modal
-                            title: "$i18n{systemSettings.timezone.label:timezone}"
+                            title: "$i18n{common.systemSettings.timezone.label:默认时区}"
                             width: 440
                             content:
                               type: Form
@@ -256,28 +257,28 @@ body:
                                           params: { dataSource: settings }
                                       else:
                                         - action: message
-                                          params: { messageType: error, text: "$i18n{systemSettings.saveError:保存失败，请重试。}" }
+                                          params: { messageType: error, text: "$i18n{common.systemSettings.saveError:保存失败，请重试。}" }
                               children:
                                 - type: Field
-                                  props: { label: "$i18n{systemSettings.timezone.label:timezone}" }
+                                  props: { label: "$i18n{common.systemSettings.timezone.label:默认时区}" }
                                   children:
                                     - type: Select
                                       props:
                                         name: value
                                         options:
-                                          - { value: "Asia/Shanghai", label: "$i18n{systemSettings.timezone.shanghai:Asia/Shanghai}" }
-                                          - { value: "UTC", label: "$i18n{systemSettings.timezone.utc:UTC}" }
-                                          - { value: "America/New_York", label: "$i18n{systemSettings.timezone.newYork:America/New_York}" }
+                                          - { value: "Asia/Shanghai", label: "$i18n{common.systemSettings.timezone.shanghai:中国标准时间（UTC+8）}" }
+                                          - { value: "UTC", label: "$i18n{common.systemSettings.timezone.utc:协调世界时（UTC）}" }
+                                          - { value: "America/New_York", label: "$i18n{common.systemSettings.timezone.newYork:美国东部时间}" }
                                 - type: Flex
                                   props: { justify: end, gap: small }
                                   children:
                                     - type: Button
-                                      props: { text: "$i18n{settingsPage.cancel:取消}" }
+                                      props: { text: "$i18n{common.settingsPage.cancel:取消}" }
                                       events:
                                         onClick:
                                           - action: overlay.close
                                     - type: Button
-                                      props: { text: "$i18n{settingsPage.save:保存}", variant: primary, submit: true }
+                                      props: { text: "$i18n{common.settingsPage.save:保存}", variant: primary, submit: true }
         - type: Flex
           props: { className: system-setting, justify: space-between, align: center }
           children:
@@ -285,23 +286,23 @@ body:
               props: { direction: vertical, gap: 4 }
               children:
                 - type: Text
-                  props: { strong: true, text: "$i18n{systemSettings.pageSize.label:pageSize}" }
+                  props: { strong: true, text: "$i18n{common.systemSettings.pageSize.label:默认每页条数}" }
                 - type: Typography
-                  props: { variant: muted, text: "$i18n{systemSettings.pageSize.description:pageSize}" }
+                  props: { variant: muted, text: "$i18n{common.systemSettings.pageSize.description:设置列表默认的分页大小。}" }
             - type: Flex
               props: { className: system-setting-display, align: center }
               children:
                 - type: Text
-                  props: { text: "${t('systemSettings.pageSize.option', { value: data.settings.pageSize })}" }
+                  props: { text: "${t('common.systemSettings.pageSize.option', { value: data.settings.pageSize })}" }
                 - type: Button
-                  props: { text: "$i18n{settingsPage.edit:修改}", variant: link, disabled: "${dataStatus.settings.loading}" }
+                  props: { text: "$i18n{common.settingsPage.edit:修改}", variant: link, disabled: "${dataStatus.settings.loading}" }
                   events:
                     onClick:
                       - action: overlay.open
                         params:
                           overlay:
                             type: modal
-                            title: "$i18n{systemSettings.pageSize.label:pageSize}"
+                            title: "$i18n{common.systemSettings.pageSize.label:默认每页条数}"
                             width: 440
                             content:
                               type: Form
@@ -320,10 +321,10 @@ body:
                                           params: { dataSource: settings }
                                       else:
                                         - action: message
-                                          params: { messageType: error, text: "$i18n{systemSettings.saveError:保存失败，请重试。}" }
+                                          params: { messageType: error, text: "$i18n{common.systemSettings.saveError:保存失败，请重试。}" }
                               children:
                                 - type: Field
-                                  props: { label: "$i18n{systemSettings.pageSize.label:pageSize}" }
+                                  props: { label: "$i18n{common.systemSettings.pageSize.label:默认每页条数}" }
                                   children:
                                     - type: Select
                                       props:
@@ -336,14 +337,14 @@ body:
                                   props: { justify: end, gap: small }
                                   children:
                                     - type: Button
-                                      props: { text: "$i18n{settingsPage.cancel:取消}" }
+                                      props: { text: "$i18n{common.settingsPage.cancel:取消}" }
                                       events:
                                         onClick:
                                           - action: overlay.close
                                     - type: Button
-                                      props: { text: "$i18n{settingsPage.save:保存}", variant: primary, submit: true }
+                                      props: { text: "$i18n{common.settingsPage.save:保存}", variant: primary, submit: true }
     - type: Card
-      props: { title: "$i18n{systemSettings.group.session:session}", style: { marginTop: 20 } }
+      props: { title: "$i18n{common.systemSettings.group.session:会话}", style: { marginTop: 20 } }
       children:
         - type: Flex
           props: { className: system-setting, justify: space-between, align: center }
@@ -352,23 +353,23 @@ body:
               props: { direction: vertical, gap: 4 }
               children:
                 - type: Text
-                  props: { strong: true, text: "$i18n{systemSettings.sessionTimeout.label:sessionTimeout}" }
+                  props: { strong: true, text: "$i18n{common.systemSettings.sessionTimeout.label:会话超时时间}" }
                 - type: Typography
-                  props: { variant: muted, text: "$i18n{systemSettings.sessionTimeout.description:sessionTimeout}" }
+                  props: { variant: muted, text: "$i18n{common.systemSettings.sessionTimeout.description:设置闲置会话的超时时间。}" }
             - type: Flex
               props: { className: system-setting-display, align: center }
               children:
                 - type: Text
-                  props: { text: "${t('systemSettings.sessionTimeout.option', { value: data.settings.sessionTimeout })}" }
+                  props: { text: "${t('common.systemSettings.sessionTimeout.option', { value: data.settings.sessionTimeout })}" }
                 - type: Button
-                  props: { text: "$i18n{settingsPage.edit:修改}", variant: link, disabled: "${dataStatus.settings.loading}" }
+                  props: { text: "$i18n{common.settingsPage.edit:修改}", variant: link, disabled: "${dataStatus.settings.loading}" }
                   events:
                     onClick:
                       - action: overlay.open
                         params:
                           overlay:
                             type: modal
-                            title: "$i18n{systemSettings.sessionTimeout.label:sessionTimeout}"
+                            title: "$i18n{common.systemSettings.sessionTimeout.label:会话超时时间}"
                             width: 440
                             content:
                               type: Form
@@ -387,10 +388,10 @@ body:
                                           params: { dataSource: settings }
                                       else:
                                         - action: message
-                                          params: { messageType: error, text: "$i18n{systemSettings.saveError:保存失败，请重试。}" }
+                                          params: { messageType: error, text: "$i18n{common.systemSettings.saveError:保存失败，请重试。}" }
                               children:
                                 - type: Field
-                                  props: { label: "$i18n{systemSettings.sessionTimeout.label:sessionTimeout}" }
+                                  props: { label: "$i18n{common.systemSettings.sessionTimeout.label:会话超时时间}" }
                                   children:
                                     - type: Select
                                       props:
@@ -404,9 +405,9 @@ body:
                                   props: { justify: end, gap: small }
                                   children:
                                     - type: Button
-                                      props: { text: "$i18n{settingsPage.cancel:取消}" }
+                                      props: { text: "$i18n{common.settingsPage.cancel:取消}" }
                                       events:
                                         onClick:
                                           - action: overlay.close
                                     - type: Button
-                                      props: { text: "$i18n{settingsPage.save:保存}", variant: primary, submit: true }
+                                      props: { text: "$i18n{common.settingsPage.save:保存}", variant: primary, submit: true }
