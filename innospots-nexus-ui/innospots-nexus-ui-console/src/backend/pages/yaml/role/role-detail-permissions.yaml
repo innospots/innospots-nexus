@@ -3,6 +3,8 @@ page:
   id: role-detail-permissions
   title: '$i18n{role.role-detail-permissions.title:角色权限设置}'
   name: roleDetailPermissionsRedirect
+  domain: operation
+  module: role
 i18n:
   namespaces:
     - role

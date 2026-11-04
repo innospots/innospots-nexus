@@ -3,6 +3,8 @@ page:
   id: dictionary-type-detail
   title: '$i18n{dictionary.dictionary-type-detail.title:字典类型详情}'
   name: dictionaryTypeDetail
+  domain: system
+  module: dictionary
 
 state:
   previewOpen: true

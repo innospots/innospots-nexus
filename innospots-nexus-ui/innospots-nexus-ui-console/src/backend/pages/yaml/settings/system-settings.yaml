@@ -199,6 +199,8 @@ body:
                                     - type: Select
                                       props:
                                         name: value
+  domain: system
+  module: settings
                                         options:
                                           - { value: "zh-CN", label: "$i18n{systemSettings.language.zh:zh-CN}" }
                                           - { value: "en-US", label: "$i18n{systemSettings.language.en:en-US}" }

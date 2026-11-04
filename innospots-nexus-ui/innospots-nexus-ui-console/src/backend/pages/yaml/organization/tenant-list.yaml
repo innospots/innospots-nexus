@@ -3,6 +3,8 @@ page:
   id: tenant-list
   title: '$i18n{organization.tenant-list.title:租户管理}'
   name: tenantList
+  domain: operation
+  module: organization
 
 state:
   input: ""

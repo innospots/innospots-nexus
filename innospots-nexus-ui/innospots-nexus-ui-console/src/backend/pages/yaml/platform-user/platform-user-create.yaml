@@ -3,6 +3,9 @@ page:
   id: platform-user-create
   title: '$i18n{platform-user.platform-user-create.title:添加平台用户}'
   name: platformUserCreate
+  domain: operation
+  module: user
+  group: create
 i18n:
   namespaces:
     - platform-user

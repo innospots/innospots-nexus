@@ -3,6 +3,8 @@ page:
   id: platform-access-request-list
   title: '$i18n{platform-user.platform-access-request-list.title:注册审批}'
   name: platformAccessRequestList
+  domain: operation
+  module: user
 
 state:
   status: PENDING_APPROVAL

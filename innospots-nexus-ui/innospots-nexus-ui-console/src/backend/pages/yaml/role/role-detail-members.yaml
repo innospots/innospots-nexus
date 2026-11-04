@@ -3,6 +3,8 @@ page:
   id: role-detail-members
   title: '$i18n{role.role-detail-members.title:角色成员列表}'
   name: roleDetailMembersRedirect
+  domain: operation
+  module: role
 i18n:
   namespaces:
     - role

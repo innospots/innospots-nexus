@@ -2,6 +2,8 @@ dsl: "1.0"
 page:
   id: themes
   title: "$i18n{page.themes.title:主题选择}"
+  domain: system
+  module: theme
 i18n: { namespaces: [common] }
 dataSources:
   consoleTheme:

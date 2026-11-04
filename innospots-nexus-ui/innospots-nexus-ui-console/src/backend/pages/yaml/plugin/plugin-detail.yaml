@@ -3,6 +3,8 @@ page:
   id: plugin-detail
   title: '$i18n{plugin.plugin-detail.title:插件详情}'
   name: pluginDetail
+  domain: system
+  module: plugin
 
 dataSources:
   pluginInfo:

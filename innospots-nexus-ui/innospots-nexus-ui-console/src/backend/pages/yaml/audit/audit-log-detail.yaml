@@ -3,6 +3,8 @@ page:
   id: audit-log-detail
   title: '$i18n{audit.audit-log-detail.title:审计日志详情}'
   name: auditLogDetail
+  domain: system
+  module: logger
 
 dataSources:
   log:

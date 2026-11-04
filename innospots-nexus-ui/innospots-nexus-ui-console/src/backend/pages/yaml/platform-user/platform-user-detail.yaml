@@ -3,6 +3,8 @@ page:
   id: platform-user-detail
   title: '$i18n{platform-user.platform-user-detail.title:平台用户详情}'
   name: platformUserDetail
+  domain: operation
+  module: user
 
 state:
   editing: false

@@ -3,6 +3,8 @@ page:
   id: audit-log-list
   title: '$i18n{audit.audit-log-list.title:审计日志}'
   name: auditLogList
+  domain: system
+  module: logger
 
 state:
   timeRange: last7d

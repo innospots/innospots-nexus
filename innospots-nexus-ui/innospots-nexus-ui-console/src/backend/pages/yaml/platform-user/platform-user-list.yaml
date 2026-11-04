@@ -3,6 +3,8 @@ page:
   id: platform-user-list
   title: '$i18n{platform-user.platform-user-list.title:用户列表}'
   name: platformUserList
+  domain: operation
+  module: user
 
 state:
   input: ""

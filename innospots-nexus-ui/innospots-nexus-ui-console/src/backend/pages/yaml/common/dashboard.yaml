@@ -3,6 +3,8 @@ page:
   id: dashboard
   title: '$i18n{common.dashboard.title:工作台}'
   name: dashboard
+  domain: operation
+  module: user
 i18n:
   namespaces:
     - common

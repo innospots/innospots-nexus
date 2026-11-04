@@ -3,6 +3,9 @@ page:
   id: dictionary-type-create
   title: '$i18n{dictionary.dictionary-type-create.title:新建字典}'
   name: dictionaryTypeCreate
+  domain: system
+  module: dictionary
+  group: create
 
 # 新建已在列表页侧滑完成；旧链接重定向回列表（请在列表点「+ 新建类型」）。
 i18n:

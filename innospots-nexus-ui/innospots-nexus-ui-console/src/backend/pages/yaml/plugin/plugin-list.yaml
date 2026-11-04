@@ -3,6 +3,8 @@ page:
   id: plugin-list
   title: '$i18n{plugin.plugin-list.title:插件管理}'
   name: pluginList
+  domain: system
+  module: plugin
 
 state:
   installed: ""

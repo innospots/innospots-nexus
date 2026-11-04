@@ -3,6 +3,8 @@ page:
   id: platform-invite-list
   title: '$i18n{platform-user.platform-invite-list.title:邀请列表}'
   name: platformInviteList
+  domain: operation
+  module: user
 
 state:
   input: ""

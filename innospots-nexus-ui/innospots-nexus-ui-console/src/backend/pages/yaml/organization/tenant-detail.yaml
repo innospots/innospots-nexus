@@ -3,6 +3,8 @@ page:
   id: tenant-detail
   title: '$i18n{organization.tenant-detail.title:租户详情}'
   name: tenantDetail
+  domain: operation
+  module: organization
 
 state:
   editingTenant: false

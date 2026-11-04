@@ -3,6 +3,8 @@ page:
   id: role-list
   title: '$i18n{role.role-list.title:角色管理}'
   name: roleList
+  domain: operation
+  module: role
 
 state:
   input: ""

@@ -3,6 +3,8 @@ page:
   id: dictionary-type-list
   title: '$i18n{dictionary.dictionary-type-list.title:数据字典}'
   name: dictionaryTypeList
+  domain: system
+  module: dictionary
 
 state:
   input: ""

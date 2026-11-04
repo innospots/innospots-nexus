@@ -3,6 +3,8 @@ page:
   id: role-detail-basic
   title: '$i18n{role.role-detail-basic.title:角色详情}'
   name: roleDetail
+  domain: operation
+  module: role
 
 state:
   activeTab: basic
