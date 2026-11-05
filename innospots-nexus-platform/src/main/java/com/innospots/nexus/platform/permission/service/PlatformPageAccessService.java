@@ -6,6 +6,7 @@ import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 
 import com.innospots.nexus.base.thread.SessionContext;
+import com.innospots.nexus.console.jaxrs.web.ConsoleWebSecuritySettings;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubjectResolver;
 import com.innospots.nexus.console.permission.pageaccess.PageAccessVerifier;
 import com.innospots.nexus.console.permission.pageaccess.PageAccessVerifyRequest;
@@ -25,9 +26,13 @@ public class PlatformPageAccessService {
     private final PageAccessVerifier pageAccessVerifier;
     private final AuthorizationSubjectResolver subjectResolver;
     private final PlatformActionAccessService actionAccessService;
+    private final ConsoleWebSecuritySettings securitySettings;
 
     /** 校验页面和页面所需请求，使用当前会话而不是调用方指定的主体。 */
     public PageAccessVerifyResult verify(PageAccessVerifyRequest request) {
+        if (!securitySettings.isEnabled()) {
+            return PageAccessVerifyResult.allowIgnoringGrantGroup();
+        }
         if (request == null || (!"authenticated".equals(request.accessMode())
                 && !"grant".equals(request.accessMode()))) {
             return PageAccessVerifyResult.deny("Invalid access mode");
@@ -62,6 +67,6 @@ public class PlatformPageAccessService {
                 .toList();
         ActionAccessVo actions = actionAccessService.verify(
                 new ActionAccessRequest(request.domainKey(), request.moduleKey(), requests));
-        return new PageAccessVerifyResult(true, null, actions.allowed(), actions.grantGroups());
+        return new PageAccessVerifyResult(true, null, actions.allowed(), actions.grantGroups(), false);
     }
 }

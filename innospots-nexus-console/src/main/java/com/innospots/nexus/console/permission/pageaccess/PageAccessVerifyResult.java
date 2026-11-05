@@ -17,7 +17,9 @@ public record PageAccessVerifyResult(
         @Schema(description = "每项请求的授权结果，键为 method:url")
         Map<String, Boolean> requestPermissions,
         @Schema(description = "页面模块当前主体可用的授权组")
-        List<String> grantGroups
+        List<String> grantGroups,
+        @Schema(description = "是否跳过页面授权的 DSL 过滤（鉴权关闭的调试状态）")
+        boolean ignoreGrantGroup
 ) {
 
     public PageAccessVerifyResult {
@@ -26,11 +28,15 @@ public record PageAccessVerifyResult(
     }
 
     public PageAccessVerifyResult(boolean allowed, String reason) {
-        this(allowed, reason, Map.of(), List.of());
+        this(allowed, reason, Map.of(), List.of(), false);
     }
 
     public static PageAccessVerifyResult allow() {
         return new PageAccessVerifyResult(true, null);
+    }
+
+    public static PageAccessVerifyResult allowIgnoringGrantGroup() {
+        return new PageAccessVerifyResult(true, null, Map.of(), List.of(), true);
     }
 
     public static PageAccessVerifyResult deny(String reason) {

@@ -57,7 +57,8 @@ export async function GET(
   const groups = access.grantGroups ?? [];
   const incomplete = requests.some(({ method, url }) => typeof permissions[`${method}:${url}`] !== "boolean")
     || !Array.isArray(access.grantGroups);
-  const pageDsl = access.publicPage ? stripAccessDeclarations(entry.pageDsl) as PageDsl
+  const bypassActionAccess = access.publicPage === true || access.ignoreGrantGroup === true;
+  const pageDsl = bypassActionAccess ? stripAccessDeclarations(entry.pageDsl) as PageDsl
     : applyActionAccess(entry.pageDsl, { allowed: permissions, grantGroups: groups }, incomplete, failureMessage);
   return Response.json(
     {

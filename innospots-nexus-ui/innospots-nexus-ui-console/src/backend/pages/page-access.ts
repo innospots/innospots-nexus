@@ -40,13 +40,20 @@ export interface PageAccessResult {
   requestPermissions?: Record<string, boolean>;
   grantGroups?: string[];
   publicPage?: boolean;
+  ignoreGrantGroup?: boolean;
 }
 
 interface PlatformVerifyResponse {
   success?: boolean;
   code?: string | number;
   message?: string;
-  data?: { allowed?: boolean; reason?: string; requestPermissions?: Record<string, boolean>; grantGroups?: string[] };
+  data?: {
+    allowed?: boolean;
+    reason?: string;
+    requestPermissions?: Record<string, boolean>;
+    grantGroups?: string[];
+    ignoreGrantGroup?: boolean;
+  };
 }
 
 function platformOk(code: string | number | undefined): boolean {
@@ -187,7 +194,8 @@ async function verifyWithPlatform(
       response.ok
       && platformOk(payload.code)
       && payload.data?.allowed === true;
-    if (allowed && (!payload.data?.requestPermissions
+    const ignoreGrantGroup = payload.data?.ignoreGrantGroup === true;
+    if (allowed && !ignoreGrantGroup && (!payload.data?.requestPermissions
       || typeof payload.data.requestPermissions !== "object"
       || Array.isArray(payload.data.requestPermissions)
       || !Array.isArray(payload.data.grantGroups)
@@ -198,6 +206,7 @@ async function verifyWithPlatform(
       allowed,
       requestPermissions: payload.data?.requestPermissions,
       grantGroups: payload.data?.grantGroups,
+      ignoreGrantGroup,
       reason: normalizeDenyReason(
         payload.data?.reason
         ?? payload.message

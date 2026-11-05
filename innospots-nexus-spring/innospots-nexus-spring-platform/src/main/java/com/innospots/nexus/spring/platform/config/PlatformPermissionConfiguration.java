@@ -18,6 +18,7 @@ import com.innospots.nexus.platform.permission.endpoint.PlatformPageAccessEndpoi
 import com.innospots.nexus.platform.permission.service.PlatformActionAccessService;
 import com.innospots.nexus.platform.permission.service.PlatformPageAccessService;
 import com.innospots.nexus.platform.permission.service.PlatformPermissionService;
+import com.innospots.nexus.spring.console.config.ConsoleWebProperties;
 
 @Configuration
 public class PlatformPermissionConfiguration {
@@ -65,8 +66,10 @@ public class PlatformPermissionConfiguration {
     PlatformPageAccessService platformPageAccessService(
             PageAccessVerifier pageAccessVerifier,
             AuthorizationSubjectResolver authorizationSubjectResolver,
-            PlatformActionAccessService actionAccessService) {
-        return new PlatformPageAccessService(pageAccessVerifier, authorizationSubjectResolver, actionAccessService);
+            PlatformActionAccessService actionAccessService,
+            ConsoleWebProperties consoleWebProperties) {
+        return new PlatformPageAccessService(pageAccessVerifier, authorizationSubjectResolver,
+                actionAccessService, consoleWebProperties.getSecurity());
     }
 
     @Bean

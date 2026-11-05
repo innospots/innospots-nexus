@@ -47,3 +47,38 @@ test("authenticated page calls backend and incomplete response is rejected", asy
   assert.equal(result.allowed, false);
   assert.equal(calls, 1);
 });
+
+test("disabled security returns the debug grant-group bypass flag", async () => {
+  globalThis.fetch = async () =>
+    Response.json({
+      code: "OK",
+      data: {
+        allowed: true,
+        ignoreGrantGroup: true,
+        requestPermissions: {},
+        grantGroups: [],
+      },
+    });
+  const result = await verifyPageAccess({
+    pageId: "role-list",
+    user: null,
+    requests: [{ method: "POST", url: "/api/d/platform/roles" }],
+  });
+  assert.equal(result.allowed, true);
+  assert.equal(result.ignoreGrantGroup, true);
+});
+
+test("ignoreGrantGroup only accepts a boolean true", async () => {
+  globalThis.fetch = async () =>
+    Response.json({
+      code: "OK",
+      data: {
+        allowed: true,
+        ignoreGrantGroup: "true",
+        requestPermissions: {},
+        grantGroups: [],
+      },
+    });
+  const result = await verifyPageAccess({ pageId: "role-list", user: null });
+  assert.equal(result.ignoreGrantGroup, false);
+});
