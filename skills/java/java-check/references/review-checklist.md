@@ -187,6 +187,13 @@
 | 不用 `@Data` | 领域/持久化类型使用了 `@Data` |
 | 校验完整 | 只依赖数据库约束做应用层可表达的校验 |
 | 未知失败兜底 | 未记录、未映射，或直接把内部信息抛给调用方 |
+| endpoint grant 完整 | `/api/d/**` 资源遗漏 `@EndpointGrant`，或 module/domain 与 catalog 不一致 |
+| 权限组对齐 | YAML 细分 `operationGroups` 与 `@EndpointGrant.group` 不同名，出现勾选后 403 |
+| 页面/导航鉴权 | `meta-sitemap`、page `access-mode`、`grantGroup` 与 catalog 不一致 |
+| UI 非安全边界 | 仅隐藏菜单或按钮就认为未授权用户无法直接调用 API |
+
+鉴权排查矩阵见 `java-reference` →
+[authorization-and-permissions.md](../../java-reference/references/authorization-and-permissions.md)。
 
 ---
 

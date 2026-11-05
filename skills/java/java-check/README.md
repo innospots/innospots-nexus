@@ -78,3 +78,4 @@ java:check（L0 → L5）
 - [verification-commands.md](references/verification-commands.md) — 命令矩阵与判读
 - [review-checklist.md](references/review-checklist.md) — 分组评审清单
 - [quick-constraints.md](../java-reference/references/quick-constraints.md) — 硬性红线
+- [authorization-and-permissions.md](../java-reference/references/authorization-and-permissions.md) — 鉴权、权限组、导航、页面访问与排查

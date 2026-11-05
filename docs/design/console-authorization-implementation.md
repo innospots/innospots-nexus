@@ -74,6 +74,15 @@ flowchart LR
     DB --> AUTHZ
 ```
 
+### 1.1 实现边界与职责归属
+
+- 平台权限端点及页面统一访问检查的编排归 `innospots-nexus-platform`。
+- console 提供通用 catalog、角色授权、请求授权判定、导航组合和 JAX-RS 过滤器；core 的 `EndpointGrantManager` 负责 endpoint grant 注册与匹配。
+- 示例 Spring 应用只负责装配配置和 Bean，不承载通用授权规则；页面 DSL 的收集、转换和组件过滤在 console UI 的 Next.js 服务端完成。
+- 实现遵循现有的 `base -> core -> console -> platform` 依赖方向，不新增模块、数据库表或基础库公开契约。
+- 不新增权限实体、枚举或状态码；拒绝和异常继续使用现有 `NexusException`、状态码及响应契约。
+- 页面统一检查保留原四参数 Java 请求构造器以兼容既有消费者；旧的 `/api/d/platform/permissions/action-access` HTTP 入口已移除。
+
 ## 2. 授权键与主体模型
 
 ### 2.1 稳定资源键
@@ -735,3 +744,12 @@ state.grantGroupsAll   // 当前主体是否拥有 "*"
 | Sitemap 加载 | `SitemapYamlLoadTest`、`SitemapYamlConfigTest`、`SitemapConfigLoaderTest` |
 | 前端 page-access 协议 | `page-access.test.ts` |
 | 串行 action 不自动短路 | `../pactor/packages/runtime/src/action/engine.test.ts` |
+
+### 9.4 当前实现验收矩阵
+
+| 层次 | 必须验证的场景 | 通过标准 |
+|---|---|---|
+| 后端请求授权 | `POST` 角色创建、`GET` 角色列表；公开接口、仅登录接口、未知接口；静态路径与动态路径模板；主体与 ownership 作用域；管理员和普通用户 | 允许与拒绝分别来自真实 endpoint grant、会话主体和 ownership 判定，不能只依赖按钮是否显示 |
+| 页面访问 | `public`、`authenticated`、`grant`；页面 catalog 定位；匿名、有效会话、授权拒绝 | public 不调用 page-access；另外两种模式在 Next.js 装载 DSL 时调用一次统一接口，拒绝时不返回业务 DSL |
+| DSL 操作过滤 | 嵌套 overlay/modal、表格、表单、Button、多请求事件链、自定义组件显式 `access`、`when` grantGroup、服务失败和结果缺失 | 任一必要请求被拒绝时移除 Button 或禁用 Form/可禁用组件；失败关闭；保留原有 `when` 逻辑；权限检查结果不能替代后端请求鉴权 |
+| 端到端 | 分别使用 `admin`、`opt01`、`user01` 登录，检查导航、页面可访问性、可见操作和直接调用 API | 三种角色呈现符合各自授权，越权页面和操作不可用，直接调用越权 endpoint 仍返回拒绝 |

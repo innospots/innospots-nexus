@@ -7,10 +7,11 @@ description: |
   检查 AGENTS.md 是否符合仓库规范、或在提交/合入前做最终核验时使用。是
   java:develop / java:design / java:project 两个升级技能的统一出口。
   触发词：编译验证、跑测试、代码检查、代码评审、规范检查、质量检查、
-  依赖检查、安全审查、性能风险、回归验证、提交前检查、AGENTS 检查、
-  冗余代码、死代码、过度抽象、结构简化评审。
+  依赖检查、安全审查、鉴权检查、权限排查、EndpointGrant、meta-sitemap、
+  性能风险、回归验证、提交前检查、AGENTS 检查、冗余代码、死代码、
+  过度抽象、结构简化评审。
 category: java
-version: 1.2.0
+version: 1.3.0
 ---
 
 # 编译、测试、规范、质量、依赖、安全与性能检查
@@ -23,6 +24,8 @@ version: 1.2.0
 规范核对通过 `java:reference` → `quick-constraints.md` 与 `review-checklist.md`，
 结构简化与防过度设计通过 `java:reference` →
 [code-quality-constraints.md](../java-reference/references/code-quality-constraints.md)（清单 §O），
+鉴权、权限组、导航与页面访问通过
+[authorization-and-permissions.md](../java-reference/references/authorization-and-permissions.md)，
 **AGENTS 合规**通过 [agents-compliance-checklist.md](references/agents-compliance-checklist.md)，
 不在本技能正文重复规范条文。
 
@@ -138,6 +141,29 @@ mvn versions:display-property-updates        # 属性升级候选
 | 中断与取消 | 未静默吞掉 `InterruptedException` |
 | 未知失败兜底 | 外层记录关联上下文并映射为通用内部状态，不暴露实现细节 |
 
+### 4.1 鉴权与权限
+
+当 diff 涉及 console domain/module、角色授权、`@EndpointModule` /
+`@EndpointGrant`、`plugin-declaration.yaml`、`meta-sitemap.yaml` 或页面
+`access-mode` 时，按
+[authorization-and-permissions.md](../java-reference/references/authorization-and-permissions.md)
+专项检查：
+
+- [ ] 每个受保护 HTTP 方法都有 `@EndpointGrant`；`module` / `domain` 与
+  console@2 MODULE 一致，`name` 稳定且模块内唯一
+- [ ] `@EndpointGrant.action` 使用具体动作；READ/EXPORT 缺省组为 `view`，
+  其他动作缺省组为 `operate`
+- [ ] 使用 `create`、`update`、`delete` 等细分 `operationGroups` 时，endpoint
+  显式声明同名 `group`；文档和测试不得仍宣称只使用 `default`
+- [ ] 公共、仅登录和资源权限要求分别验证 `ignoreAuth` /
+  `ignorePermission`，且没有用过宽跳过配置掩盖遗漏 grant
+- [ ] catalog 同步后 resource key、角色全量替换、ownership 隔离和事务回滚正确
+- [ ] `meta-sitemap` 的 `pageId`、`domainKey`、`moduleKey`、`viewGroup`、
+  `roles`、`hidden` 与 catalog/page YAML 对齐
+- [ ] page YAML 的 `access-mode`、`domain/module/pageKey/grantGroup` 正确；
+  public 页跳过 page-access，authenticated/grant 页由 Next.js 服务端检查
+- [ ] 直接以普通角色调用受保护 API 返回 403；菜单/按钮隐藏未被当作安全边界
+
 ### 5. 性能与并发风险
 
 | 风险 | 检查点 |
@@ -230,4 +256,5 @@ mvn versions:display-property-updates        # 属性升级候选
 - [verification-commands.md](references/verification-commands.md) — 完整命令矩阵与结果判读
 - [review-checklist.md](references/review-checklist.md) — 分组评审清单（含 §O 结构冗余）
 - [code-quality-constraints.md](../java-reference/references/code-quality-constraints.md) — 简化、去冗余、防过度设计
+- [authorization-and-permissions.md](../java-reference/references/authorization-and-permissions.md) — 鉴权、权限组、导航、页面访问与排查矩阵
 - [agents-compliance-checklist.md](references/agents-compliance-checklist.md) — AGENTS.md 结构、内容与工程一致性

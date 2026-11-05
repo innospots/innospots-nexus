@@ -98,9 +98,10 @@ public class RoleEndpoint {
 
 ### console 契约接口 + platform/portal 实现
 
-当 console 声明 `interface *Endpoint`、业务模块提供实现类时，SmallRye 的构建期 JAX-RS
-扫描器**不会继承接口方法注解**。接口保留 `@EndpointModule` / `@EndpointGrant` 作为运行时
-授权单一事实源；实现类必须重复传输契约：
+当前 console 契约模式把方法级 JAX-RS / OpenAPI 与 `@EndpointGrant` 集中在
+`interface *Endpoint`；portal/platform 实现类声明类级 `@Path` / `@Produces` /
+`@Consumes` / `@NexusAuthenticatedApi` 和 `@EndpointModule`，再直接覆盖接口方法。
+`EndpointGrantHttpIntrospection` 会从实现类及其直接接口解析路由：
 
 ```java
 // console：契约与 grant 单一事实源
@@ -112,7 +113,8 @@ public interface RoleEndpoint {
     R<PageResult<RoleVo>> pageRoles(@BeanParam RolePageRequest request);
 }
 
-// platform/portal：供 JAX-RS 与 OpenAPI 构建期扫描
+// platform/portal：实现类声明模块和具体根路径
+@EndpointModule(value = "role", domain = "operation")
 @Path(PlatformConstant.ROLES_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -120,15 +122,13 @@ public interface RoleEndpoint {
 public class PlatformRoleEndpoint implements RoleEndpoint {
 
     @Override
-    @GET
-    @Operation(operationId = "platformRolePage", summary = "分页查询角色")
     public R<PageResult<RoleVo>> pageRoles(@BeanParam RolePageRequest request) {
         // ...
     }
 }
 ```
 
-不得在实现类重复 `@EndpointModule` / `@EndpointGrant`；它们仍由 console 接口解析。
+不得在实现类重复接口方法上的传输注解或 `@EndpointGrant`；两者漂移会产生两份契约。
 
 ---
 
@@ -245,7 +245,8 @@ portal 当前通过 console auth 契约暴露登录、验证码、令牌刷新�
 - [ ] 路径参数有 `@Parameter(description, required = true)`
 - [ ] 新建/修改的 request/vo record（或 BeanParam 类）有类级与字段级 `@Schema`
 - [ ] 需认证资源类有 `@NexusAuthenticatedApi`
-- [ ] console 契约实现类重复类级与方法级 JAX-RS / OpenAPI 传输注解，但不重复 grant
+- [ ] console 契约接口保留方法级 JAX-RS / OpenAPI / grant；实现类声明类级传输元数据、
+  `@EndpointModule`，且不重复方法级契约
 - [ ] 构建期 `scanPackages` 覆盖方法签名引用的依赖契约类型
 - [ ] `mvn -pl <module> clean compile`
 - [ ] `mvn -pl <module> package` 后检查 `META-INF/nexus-openapi/*.yaml` 是否包含新 operation

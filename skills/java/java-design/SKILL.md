@@ -7,9 +7,9 @@ description: |
   NexusException 异常语义、HTTP/Java 接口与 REST 契约。新设计前必经 grill-me，
   并对照 AGENTS.md。触发词：架构设计、方案设计、领域建模、模块划分、包结构、
   Entity 设计、枚举设计、状态码、异常契约、接口设计、API 设计、DDD 边界、
-  技术选型、设计评审。
+  鉴权设计、权限组、EndpointGrant、meta-sitemap、技术选型、设计评审。
 category: java
-version: 2.1.0
+version: 2.2.0
 ---
 
 # 架构、模块、接口与类设计
@@ -49,6 +49,7 @@ version: 2.1.0
 | **DDD 规则** | 领域概念与基础设施分离；ports and adapters |
 | **编码规范入口** | 契约细节回查 `skills/java/java-reference/standards/` |
 | **控制台插件配置 / Entry** | `console@2`、`ModuleDescriptors` 与 `EntryPluginDescriptor` 见 [console-entry-and-configuration.md](../java-reference/references/console-entry-and-configuration.md) |
+| **控制台鉴权 / 权限目录** | domain/module/grantGroup、EndpointGrant、角色授权、meta-sitemap 与页面鉴权见 [authorization-and-permissions.md](../java-reference/references/authorization-and-permissions.md) |
 | **REST OpenAPI** | 端点表含 `operationId` / Tag；条文 [openapi.md](../java-reference/standards/openapi.md)、[openapi-contract.md](../java-reference/references/openapi-contract.md) |
 | **Agent 工作流** | 新需求/新设计须先 grill-me；Java 任务按 AGENTS.md 技能路由表选用对应 `java:*` 技能 |
 
@@ -89,7 +90,8 @@ npx skills use "https://github.com/mattpocock/skills" --skill "grill-me"
 2. 建词汇  →  命名 + 枚举语义 + 状态码 module 前缀（naming、exception-status-code）
 3. 划边界  →  包结构、DDD 表、Entity 基类与作用域（package-structure、domain-modeling、scope-hierarchy）
 4. 定契约  →  实体/枚举/端点/接口/失败矩阵（structural-design-blueprint §3–§7、
-               api-contract、exception-contract、persistence-contract、test-scope）
+               api-contract、exception-contract、persistence-contract、test-scope；
+               管理台资源另含 endpoint grant、导航和页面访问矩阵）
 ```
 
 每一步出口门禁未通过不得进入下一步，也不得进入 `java:develop`。
@@ -123,6 +125,9 @@ npx skills use "https://github.com/mattpocock/skills" --skill "grill-me"
 - [ ] 方案预估实现体量合理；若只能靠大量转发类满足需求，回到 ③ 划边界
 - [ ] 持久化：一表一 Dao、无 join/XML/properties；配置 yaml + Java config（见 persistence-contract.md）
 - [ ] 领域事件（若有）符合 event-contract.md
+- [ ] 若新增管理台 module、权限组、endpoint、导航或页面：domain/module/group、
+  `@EndpointGrant`、`meta-sitemap`、页面 `access-mode` 与测试矩阵已定义（见
+  [authorization-and-permissions.md](../java-reference/references/authorization-and-permissions.md)）
 - [ ] 测试范围已定义（契约测试 + 行为单测；见 test-scope.md），实现由 `java:develop` 测试先行交付
 - [ ] 四步法分步门禁已勾选（design-four-steps.md）
 - [ ] [structural-design-blueprint.md](references/structural-design-blueprint.md) §1–§7 设计门禁已对照
@@ -143,6 +148,7 @@ npx skills use "https://github.com/mattpocock/skills" --skill "grill-me"
 - [agents-template.md](../java-reference/references/agents-template.md) — L2 AGENTS 对齐节与根 AGENTS 增补片段
 - [code-quality-constraints.md](../java-reference/references/code-quality-constraints.md) — 防过度设计、结构 owner、双轨与投机分层
 - [sample-extension-design.md](references/sample-extension-design.md) — sample-platform 扩展设计补充（归属、交付面、路径）
+- [authorization-and-permissions.md](../java-reference/references/authorization-and-permissions.md) — 管理台鉴权、权限组、导航和页面访问设计门禁
 
 ### 规范复用（`java:reference`，不在此重复）
 

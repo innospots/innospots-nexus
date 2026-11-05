@@ -212,6 +212,7 @@ java:check            与升级前基线对比
 | 领域建模 | `java-reference/references/domain-modeling.md` |
 | API 契约 | `java-reference/references/api-contract.md` |
 | 六阶段 checklist | `java-reference/references/domain-initialization-checklist.md` |
+| 鉴权、权限组、EndpointGrant、meta-sitemap | `java-reference/references/authorization-and-permissions.md` |
 | 单元测试规约 | `java-develop/references/test-conventions.md` |
 | 契约测试写法 | `java-develop/references/contract-tests.md` |
 | 测试范围（设计） | `java-design/references/test-scope.md` |

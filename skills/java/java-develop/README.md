@@ -122,3 +122,4 @@ java:check
 - [change-workflow.md](references/change-workflow.md) — 加功能 / Bug / 重构
 - [endpoint-grants.md](references/endpoint-grants.md) — REST 授权/审计注解、Filter 行为与测试
 - [plugin-entry-and-configuration.md](references/plugin-entry-and-configuration.md) — 插件配置、entry 组装与平台多模块描述符
+- [authorization-and-permissions.md](../java-reference/references/authorization-and-permissions.md) — 权限目录、角色授权、meta-sitemap、页面与操作鉴权

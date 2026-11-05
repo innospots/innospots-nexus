@@ -81,5 +81,6 @@ java:develop → java:check
 - [exception-contract.md](references/exception-contract.md) — 失败与状态码
 - [test-scope.md](references/test-scope.md) — 测试范围
 - [architecture-decision.md](references/architecture-decision.md) — ADR
+- [authorization-and-permissions.md](../java-reference/references/authorization-and-permissions.md) — 管理台模块、权限组、导航与页面访问设计
 
 规范原文：`java-reference/references/`、`standards/`（**勿停在本目录 api-contract 存根**）。

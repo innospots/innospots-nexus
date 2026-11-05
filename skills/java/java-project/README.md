@@ -104,3 +104,4 @@ java:develop → java:check
 - [build-config.md](references/build-config.md) — POM 模板与排错
 - [develop-deliverables.md](../java-develop/references/develop-deliverables.md) — 实现侧包结构
 - [spring-dependencies.md](../java-spring/references/spring-dependencies.md) — Spring 模块
+- [authorization-and-permissions.md](../java-reference/references/authorization-and-permissions.md) — 新模块的管理台权限、导航与页面访问

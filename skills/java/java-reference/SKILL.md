@@ -8,9 +8,9 @@ description: |
   冲突裁决顺序、8 个 java:* 技能的路由表、AGENTS.md 生成模板，以及跨技能的
   `grill-me` 调用时机。其他 java:* 技能通过本技能复用规范，不得在各自正文中重复规范条文。
   触发词：Java 规范、编码规范、命名规范、代码风格、注释规范、API 设计、
-  异常规范、状态码、java 标准、standards。
+  异常规范、状态码、鉴权、权限组、EndpointGrant、meta-sitemap、java 标准、standards。
 category: java
-version: 1.10.0
+version: 1.11.0
 ---
 
 # Java 通用规范与标准
@@ -56,6 +56,7 @@ version: 1.10.0
 | 规范章节地图 | [standards-index.md](references/standards-index.md) | 定位规则在哪份 standards 文件的哪一节 |
 | 模块归属 | [module-ownership.md](references/module-ownership.md) | Maven 模块与业务域判定 |
 | 控制台 entry、插件配置与 ModuleDescriptors | [console-entry-and-configuration.md](references/console-entry-and-configuration.md) | `console@2`、配置接入、稳定 `entryPageKey`、ModuleDescriptors / EntryPluginDescriptor 与 catalog 分工 |
+| 控制台鉴权与权限资源 | [authorization-and-permissions.md](references/authorization-and-permissions.md) | domain/module/grantGroup、EndpointGrant、角色授权、Filter、meta-sitemap、页面 DSL 过滤与排查 |
 | REST 授权与审计 | `java:develop` → [endpoint-grants.md](../java-develop/references/endpoint-grants.md) | `@EndpointModule` / `@EndpointGrant`、Filter 链路与契约测试 |
 | 插件 Entry 与配置实施 | `java:develop` → [plugin-entry-and-configuration.md](../java-develop/references/plugin-entry-and-configuration.md) | schema、来源优先级、`SecretValue`、platform 聚合 |
 | 包结构（领域优先） | [package-structure.md](references/package-structure.md) | 领域 → 技术模块 → 按需功能子包；禁止 service 堆积；单包 ≤15 类 |
@@ -91,6 +92,7 @@ version: 1.10.0
 | 做架构/模块/实体/枚举/状态码/异常/接口/包结构/技术方案设计 | `java:design` | 动的是**设计决策**（见 design → structural-design-blueprint） |
 | 写功能、改功能、修 Bug、重构、单元/契约测试 | `java:develop` | 动的是**实现与配套测试代码** |
 | 编译、跑测试、规范/质量/依赖/安全检查 | `java:check` | 动的是**验证动作** |
+| 新增/调整管理台模块、权限组、EndpointGrant、导航或页面鉴权 | `java:design` → `java:develop` → `java:check` | 先读 [authorization-and-permissions.md](references/authorization-and-permissions.md)，契约清晰的小修可走 L0 |
 | Spring / Spring Boot 专项能力 | `java:spring` | 涉及 **Spring 生态** |
 | 工程 `${revision}` 升版、发版、避免手改各模块 version | `java:project-upgrade` | 改变**自身产物版本号** |
 | JDK、依赖、Spring/Jakarta、构建插件、第三方与内部 SDK 升级 | `java:dependency-upgrade` | 改变**外部技术栈** |
@@ -145,6 +147,7 @@ version: 1.10.0
 
 - [quick-constraints.md](references/quick-constraints.md)
 - [code-quality-constraints.md](references/code-quality-constraints.md)
+- [authorization-and-permissions.md](references/authorization-and-permissions.md)
 - [standards-index.md](references/standards-index.md)
 - [module-ownership.md](references/module-ownership.md)
 - [package-structure.md](references/package-structure.md)

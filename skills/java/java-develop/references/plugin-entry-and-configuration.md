@@ -6,6 +6,9 @@
 2. 怎样把 console MODULE/MENU 声明组装成 `PluginDefinition`。
 3. 多模块插件怎样通过 `ModuleDescriptors` 与 `EntryPluginDescriptor` 集中管理。
 
+console@2 contribution 对权限目录、角色授权、`meta-sitemap` 和页面访问的完整影响见
+[authorization-and-permissions.md](../../java-reference/references/authorization-and-permissions.md)。
+
 ## 1. 三层模型
 
 | 层 | 声明内容 | 当前类型 | 不应包含 |
@@ -76,6 +79,20 @@ spec:
             zh-CN: 报表管理。
           entryPageKey: reports-reports-main
           icon: chart
+          viewGroups:
+            - group: view
+              label:
+                en: Browse reports
+                zh-CN: 浏览报表页面
+          operationGroups:
+            - group: operate
+              label:
+                en: Operations
+                zh-CN: 操作
+            - group: create
+              label:
+                en: Create
+                zh-CN: 创建
 ```
 
 当前编译器拒绝 `spec.capabilities` 与 `spec.requirements`；新插件使用
@@ -206,7 +223,11 @@ ConsoleContributeNode module = ConsoleContributeNode.module(
 - MODULE 必须有 `moduleKey`，并且有 `entryPageKey` 或非空 `children`，二者不能同时存在。
 - MENU 没有 `moduleKey`，必须有 `entryPageKey`；当前叶子 MENU 不再挂子节点。
 - `domainKey` / `moduleKey` / `group` / `entryPageKey` 使用小写 kebab-case。
-- 默认 `viewGroups` / `operationGroups` 为 `default`，自定义时必须显式包含 `default`。
+- 省略 `viewGroups` / `operationGroups` 时分别默认为 `view` / `operate`。
+- 显式声明分组时，`viewGroups` 必须包含 `view`，`operationGroups` 必须包含
+  `operate`；每个 group 都必须有非空 i18n `label`。
+- 自定义 `operationGroups` 只有与 endpoint 的 `@EndpointGrant.group` 同名时，才能让
+  角色页勾选的组命中运行时请求。
 - `entryPageKey` 是稳定不透明键；推荐 `{domainKey}-{moduleKey}-{pageSuffix}` 字面量，
   但运行时不得依赖字符串拆分。
 
@@ -307,8 +328,10 @@ platform 还会追加 `realm=platform`。标签只用于发现与路由，不替
 | 配置优先级测试 | default → host → source → env → system → runtime |
 | 拒绝路径测试 | 未知键、缺失必填、非法 URI/ENUM、环境变量冲突 |
 | 密文测试 | `toString()` 不泄漏，`use()` 后可关闭 |
-| entry 结构测试 | MODULE/MENU 形态、排序、默认分组 |
+| entry 结构测试 | MODULE/MENU 形态、排序、`view`/`operate` 默认分组与 i18n label |
 | entry 身份测试 | `entryPageKey` 稳定、唯一且符合小写 kebab-case |
+| 权限组测试 | `viewGroups` 含 `view`、`operationGroups` 含 `operate`，分组键无重复 |
+| endpoint 对齐测试 | 自定义 operation group 与 `@EndpointGrant.group` 同名 |
 | SPI 注册测试 | `META-INF/services` 包含入口类 |
 | 多模块聚合测试 | `CONSOLE_MODULES` 顺序与插件贡献一致 |
 
@@ -321,5 +344,6 @@ platform 还会追加 `realm=platform`。标签只用于发现与路由，不替
 | 用 `System.getenv()` 在插件内自行读配置 | 统一走 `PluginContext.config()` |
 | 每个 MODULE 新建一个插件 | 同一领域优先用一个聚合 entry |
 | 使用已移除的历史 Entry 门面或旧描述符类型 | 继续使用当前 `ConsoleContributions`、`ConsoleContributeNode`、`PlatformModuleDescriptors` 与 `PlatformEntryPluginDescriptor` |
-| 依赖 `EndpointGrant.group()` 分组 | 当前运行时只使用 `default` 组 |
+| YAML 声明细分操作组但不设置同名 `EndpointGrant.group()` | 运行时请求仍按 `operate` 校验，可能导致勾选后 403 |
+| 把菜单隐藏或按钮过滤当作权限边界 | 服务端 endpoint/catalog 鉴权仍是最终安全边界 |
 | 只在 `REQUIRED_PLUGIN_IDS` 增加 ID | 同时实现 `Plugin` 并注册 ServiceLoader |

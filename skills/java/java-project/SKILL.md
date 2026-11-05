@@ -10,9 +10,10 @@ description: |
   修改 innospots-nexus 仓库内的平台库模块时，以根 AGENTS.md 与 module-layout.md 为准，
   本技能仅作 parent/BOM/最小依赖引用补充。新建外部工程前必经 grill-me。
   触发词：外部工程、产品工程、nexmux、新建仓库、*-console、*-service、客户项目、
-  Maven、BOM、parent、依赖引用、spring、quarkus、构建配置。
+  Maven、BOM、parent、依赖引用、新增模块、新增权限资源、spring、quarkus、
+  构建配置。
 category: java
-version: 1.5.0
+version: 1.6.0
 ---
 
 # 工程创建、结构、构建与项目配置
@@ -33,6 +34,9 @@ Nexus 平台库（`console`、`portal`、`service` 等）。
 
 交付物见 [project-deliverables.md](references/project-deliverables.md)。
 不负责类与接口设计（`java:design`）与业务实现（`java:develop`）。
+若新模块暴露管理控制台能力，模块、POM 完成后仍须按
+[authorization-and-permissions.md](../java-reference/references/authorization-and-permissions.md)
+补齐 console@2 domain/module/group、endpoint grant、导航和页面访问资源。
 
 **外部产品 — 新建：** 先问 **仅管理 / 仅对外 / 两者**；纯对外则 **不要** console、ui。
 模块类型含 bom、core、按需 console/service/ui；**spring 或 quarkus 二选一**（须问用户）。
@@ -145,9 +149,13 @@ innospots-nexus-spring / innospots-nexus-quarkus
 6. 按 [dependency-conventions.md](references/dependency-conventions.md) 只声明**最小**直接依赖，不写 `<version>`。
 7. 若新模块要被其他模块依赖，在 **`innospots-nexus-bom`** 的 `dependencyManagement` 中登记。
 8. 建 `src/main/java`、`src/test/java` 与**包根 only**（外部产品：`com.<vendor>.<product>.<module>`；本仓库：`com.innospots.nexus.<module>`，不预建领域子包）。
-9. `mvn validate` → `mvn -pl <module> -am clean compile` → `mvn -q help:effective-pom` → `dependency:tree`。
-10. 按 [agents-template.md](../java-reference/references/agents-template.md) **增补根 `AGENTS.md`**（模块职责 + 依赖规则）。
-11. 交 **`java:design`**（领域包与契约），再 `java:develop` → **`java:check`**（含 AGENTS 合规）。
+9. 若模块暴露管理台能力，登记 console@2 contribution、`viewGroups` /
+   `operationGroups`、endpoint grant、`meta-sitemap` 与页面访问配置，并纳入
+   design/develop 的测试矩阵（见
+   [authorization-and-permissions.md](../java-reference/references/authorization-and-permissions.md)）。
+10. `mvn validate` → `mvn -pl <module> -am clean compile` → `mvn -q help:effective-pom` → `dependency:tree`。
+11. 按 [agents-template.md](../java-reference/references/agents-template.md) **增补根 `AGENTS.md`**（模块职责 + 依赖规则）。
+12. 交 **`java:design`**（领域包与契约），再 `java:develop` → **`java:check`**（含 AGENTS 与鉴权合规）。
 
 ### parent 与 relativePath
 
@@ -190,3 +198,4 @@ mvn versions:display-dependency-updates   # 依赖升级候选（需人工评估
 - [module-layout.md](references/module-layout.md) — **innospots-nexus 平台库**模块职责
 - [sample-extension-layout.md](../java-reference/references/sample-extension-layout.md) — **innospots-nexus-sample** reactor 与扩展库边界
 - [agents-template.md](../java-reference/references/agents-template.md) — 新建模块时根 AGENTS.md 增补片段
+- [authorization-and-permissions.md](../java-reference/references/authorization-and-permissions.md) — 新模块的管理台权限、导航、页面访问与排查

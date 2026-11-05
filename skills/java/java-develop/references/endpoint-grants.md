@@ -5,6 +5,9 @@
 注解，也不替代 service 中的业务校验；它只描述“这个 HTTP 方法属于哪个模块、是什么操作、
 是否需要登录/权限、是否写审计”。
 
+完整的 console@2、权限目录、角色授权、导航和页面访问链路见
+[authorization-and-permissions.md](../../java-reference/references/authorization-and-permissions.md)。
+
 **模块 API 索引：**
 [`endpoint.grant`](../../java-reference/references/modules/innospots-nexus-core/references/endpoint-grant.md)
 与
@@ -15,8 +18,8 @@
 
 | 资源形态 | `@EndpointModule` | `@EndpointGrant` |
 |----------|-------------------|------------------|
-| console 契约接口 | 声明在接口类上 | 声明在每个 HTTP 方法上 |
-| 实现 console 契约的 platform/portal 类 | **不得重复** | **不得重复** |
+| console 契约接口 | 当前标准不在接口上声明 | 声明在每个 HTTP 方法上 |
+| 实现 console 契约的 platform/portal 类 | 在实现类声明一次 | **不得重复**接口方法注解 |
 | platform/portal 自有 REST 类 | 声明在实现类上 | 声明在实现类每个 HTTP 方法上 |
 | 公共 API 资源 | 模块上可设 `ignoreAuth = true` | 方法上按需设 `ignorePermission = true` |
 
@@ -26,26 +29,27 @@
 2. 实现方法自身的 `@EndpointGrant`；没有时读取同名同参数的直接接口方法。
 3. 模块级 `ignoreAuth` / `ignorePermission` 与方法级值按 **OR** 合并。
 
-因此不要为了“保险”在实现类上复制接口注解。复制会形成第二份可漂移的契约。
+因此 `@EndpointModule` 放在实际 JAX-RS 资源实现类上，`@EndpointGrant` 放在 console
+契约方法或独立资源方法上。不要为了“保险”在实现类复制接口 grant。复制会形成第二份
+可漂移的契约。
 
-`@EndpointModule` / `@EndpointGrant` 的“不重复”只约束授权与审计元数据。实现 console
-契约的业务类仍必须重复以下内容：
+实现 console 契约的业务类负责资源实现侧的类型级传输元数据：
 
 - 类级 `@Path`、`@Produces`、`@Consumes` 与 `@NexusAuthenticatedApi`
-- 每个 HTTP 方法的动词、子路径、`@PathParam` / `@BeanParam` / `@QueryParam`
-- `@Operation`、`@Parameter` 与必要的 `@SecurityRequirement`
 
-原因是 SmallRye 构建期 JAX-RS 扫描器不会把接口方法上的 JAX-RS / OpenAPI 注解投影到
-实现类。只保留接口注解会导致运行时 grant 正常，但 OpenAPI 缺失路径、请求体或 schema。
-实现类重复的是**传输契约**，授权单一事实源仍是 console 接口。
+契约接口保留方法级 HTTP 动词、子路径、`@PathParam` / `@BeanParam` / `@QueryParam`、
+`@Operation` / `@Parameter` 与 `@EndpointGrant`。实现方法按当前代码模式直接 `@Override`，
+不复制这些方法级注解；`EndpointGrantHttpIntrospection` 会从实现类及其直接接口解析
+HTTP 路由。授权与审计元数据仍以 console 契约为单一事实源。
 
 ## 2. 最小示例
 
 ### console 契约接口
 
 ```java
-@EndpointModule("dictionary")
-@Path("/api/d/nexus/dictionary-types")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
+@NexusAuthenticatedApi
 public interface DictionaryTypeEndpoint {
 
     @GET
@@ -70,6 +74,19 @@ public interface DictionaryTypeEndpoint {
             recordArgs = false,
             auditLog = true)
     R<DictionaryTypeVo> createDictionaryType(DictionaryTypeCreateRequest request);
+}
+```
+
+宿主实现类声明模块与具体根路径：
+
+```java
+@EndpointModule(value = "dictionary", domain = "system")
+@Path("/api/d/platform/dictionary-types")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
+@NexusAuthenticatedApi
+public class PlatformDictionaryTypeEndpoint implements DictionaryTypeEndpoint {
+    // 直接 @Override 契约方法；不重复 @EndpointGrant。
 }
 ```
 
@@ -128,15 +145,19 @@ public class PlatformPublicInviteEndpoint {
 | `auditLog` | 否 | 默认 `false`；只对需要长期审计的管理动作开启 |
 | `ignorePermission` | 否 | 与模块级值 OR 合并；公共读取、登录前操作等按需使用 |
 | `ignoreAuth` | 否 | 与模块级值 OR 合并；登录、注册、邀请、健康检查等按需使用 |
-| `group` | 否 | 当前 `ResolvedEndpointGrant` 尚未消费该字段，目录实际仍归入 `default` 组 |
+| `group` | 否 | READ/EXPORT 缺省为 `view`，其他动作缺省为 `operate`；细分操作组必须显式填写 |
 
-`name` 会进入 catalog 授权键：
+请求鉴权会同时构造操作项键和分组键，命中任一授权即可：
 
 ```text
-<EndpointGrant.name>:<domainKey>.<moduleKey>
+{domainKey}.{moduleKey}:{EndpointGrant.name}
+{domainKey}.{moduleKey}:{EndpointGrant.group}
 ```
 
 页面访问项则使用 MENU/MODULE 的 `entryPageKey` 作为 `grantName`。不要把两者混用。
+角色页当前保存的是分组键，因此自定义 `operationGroups` 必须与
+`@EndpointGrant.group` 同名。只改插件 YAML、不改注解时，目录可能展示该组，但运行时
+仍使用 `operate`，最终表现为“已勾选却 403”。
 
 ## 4. Action 选择
 
@@ -155,7 +176,15 @@ public class PlatformPublicInviteEndpoint {
 | `REVOKE` | 解绑、回收、撤销 |
 | `WRITE` | 仅存量无法细分的写操作兜底 |
 
-目录分组中 `READ` 与 `EXPORT` 进入 `readOnly`，其余进入 `operable`。
+目录分组中 `READ` 与 `EXPORT` 进入 `readOnly`，其余进入 `operable`。运行时缺省组：
+
+| Action | 缺省 group | 资源组约束 |
+|--------|------------|------------|
+| READ / EXPORT | `view` | 自定义时与 MODULE `viewGroups` 对齐 |
+| 其他全部动作 | `operate` | 使用 `create`、`update` 等细分 UI 组时，必须声明同名 `group` 并与 `operationGroups` 对齐 |
+
+`CatalogPermissionCatalogAssembler` 还会优先使用显式 group；显式 group 未在 MODULE
+`operationGroups` 声明时，该操作项不会出现在对应角色目录中。
 
 ## 5. 运行时链路
 
@@ -196,10 +225,11 @@ ConsoleAuditLogFilter                @Priority(USER + 100)
 | 测试 | 断言 |
 |------|------|
 | 契约注解测试 | 每个 HTTP 方法都有 `@EndpointGrant`，`name` 唯一且稳定 |
-| 模块归属测试 | 契约接口或独立资源的 `@EndpointModule.value()` 与 MODULE `moduleKey` 一致 |
+| 模块归属测试 | 契约实现类或独立资源的 `@EndpointModule.value()` 与 MODULE `moduleKey` 一致 |
 | 实现类防重复测试 | 实现 console 契约的类不得重复声明模块或方法 grant |
-| 实现类 OpenAPI 测试 | 每个实现 HTTP 方法都有 `@Operation`，参数绑定与接口一致 |
-| 目录测试 | `EndpointGrantManager.moduleCatalog()` 的只读/可操作分类正确 |
+| 实现类 OpenAPI 测试 | console 契约每个 HTTP 方法都有 `@Operation`，实现类不复制方法级契约 |
+| 目录测试 | `EndpointGrantManager.moduleCatalog()` 的只读/可操作分类与 grant group 正确 |
+| 组对齐测试 | 细分 `operationGroups` 与 `@EndpointGrant.group` 同名，目录不丢操作项 |
 | 路径测试 | 类路径 + 方法路径 + `{param}` 匹配正确，错误 HTTP 动词不匹配 |
 | Filter 测试 | `ignoreAuth` / `ignorePermission` / `auditLog` 分别生效 |
 | 审计安全测试 | `recordArgs = false` 时不记录敏感请求体或路径秘密 |
@@ -215,8 +245,9 @@ platform 的聚合契约测试可参考
 | 每个方法都写 `WRITE` | 权限目录无法区分创建、状态、绑定等操作 |
 | 使用 Java 方法名作为 `name` | 重构方法名会破坏已持久化授权键 |
 | 在实现类复制接口 grant | 两份元数据漂移，测试与运行时可能各读一份 |
-| 实现类只写运行逻辑、不重复 JAX-RS / OpenAPI 注解 | 构建期 OpenAPI 缺失路径或 schema |
+| 实现类重复 `@EndpointGrant` 或方法级 JAX-RS / OpenAPI 注解 | 两份契约漂移，授权或 OpenAPI 难以判断真源 |
 | 登录接口只设 `ignoreAuth` | 仍可能被资源权限过滤器拦截 |
 | 审计请求参数包含密码/令牌 | 敏感信息落库 |
 | 缺少 `label` 却开启审计 | 审计展示退化为空或不稳定文本 |
-| 依赖 `group` 做分组 | 当前运行时尚未消费该字段，操作项仍进入 `default` |
+| YAML 声明 `create` 组但 grant 不写 `group = "create"` | 运行时仍按 `operate` 校验，勾选后可能 403 |
+| grant group 与 `viewGroups` / `operationGroups` 不一致 | 目录缺项或角色无法命中接口 |
