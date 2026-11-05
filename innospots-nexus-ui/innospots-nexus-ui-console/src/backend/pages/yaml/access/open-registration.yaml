@@ -1,5 +1,6 @@
 dsl: "1.0"
 page:
+  access-mode: public
   id: open-registration
   title: '$i18n{access.open-registration.title:开放注册}'
   name: openRegistration

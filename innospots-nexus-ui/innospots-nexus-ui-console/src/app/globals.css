@@ -130,6 +130,20 @@ body {
   gap: 6px;
 }
 
+/* 修改密码页：把 Content 的确定高度传递到 Page，表单区占据剩余空间后居中。 */
+.password-change-page {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+}
+
+.password-change-page [data-slot="page-content"] {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
 /* 指标牌右上角图标：弱化处理，避免与主数字争夺视觉层级 */
 .stat-card-icon {
   color: var(--muted-foreground);

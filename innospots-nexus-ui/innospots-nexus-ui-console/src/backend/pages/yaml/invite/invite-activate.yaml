@@ -1,5 +1,6 @@
 dsl: "1.0"
 page:
+  access-mode: public
   id: invite-activate
   title: '$i18n{invite.invite-activate.title:邀请码注册}'
   name: inviteActivate

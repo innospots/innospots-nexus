@@ -3,6 +3,7 @@ package com.innospots.nexus.platform.endpoint;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -190,6 +191,35 @@ class PlatformStandaloneEndpointGrantContractsTest {
                 "PlatformConsoleThemeSettingEndpoint",
                 "PlatformNavigationLayoutSettingEndpoint");
         assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void consoleSettingUpdateGrantsUseUpdateCatalogGroup() {
+        Map<Class<?>, String> updateMethods = Map.of(
+                PlatformConsoleSiteNameSettingEndpoint.class, "updateSiteNameSetting",
+                PlatformConsoleSiteDescriptionSettingEndpoint.class, "updateSiteDescriptionSetting",
+                PlatformConsoleDisplayLanguageSettingEndpoint.class, "updateDisplayLanguageSetting",
+                PlatformConsoleTimezoneSettingEndpoint.class, "updateTimezoneSetting",
+                PlatformConsoleThemeSettingEndpoint.class, "updateConsoleThemeSetting",
+                PlatformNavigationLayoutSettingEndpoint.class, "updateNavigationLayoutSetting");
+
+        updateMethods.forEach((endpointType, methodName) -> {
+            Method updateMethod = java.util.Arrays.stream(endpointType.getDeclaredMethods())
+                    .filter(method -> method.getName().equals(methodName))
+                    .findFirst()
+                    .orElseThrow();
+            EndpointGrant grant = updateMethod.getAnnotation(EndpointGrant.class);
+
+            assertThat(grant)
+                    .as("%s#%s", endpointType.getSimpleName(), methodName)
+                    .isNotNull();
+            assertThat(grant.action())
+                    .as("%s#%s action", endpointType.getSimpleName(), methodName)
+                    .isEqualTo(com.innospots.nexus.core.endpoint.grant.EndpointGrantAction.UPDATE);
+            assertThat(grant.group())
+                    .as("%s#%s group", endpointType.getSimpleName(), methodName)
+                    .isEqualTo("update");
+        });
     }
 
     private static boolean declaresHttpVerb(Method method) {

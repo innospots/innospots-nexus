@@ -15,6 +15,15 @@ import { notifyConsoleSettingsChange } from "./lib/platform-console-settings";
 const TENANT_CODE_PATTERN = /^[a-zA-Z0-9_]+$/;
 
 export const pactorActions: Record<string, ActionHandler> = {
+    "request.errorMessage": (action, ctx) => {
+        const message = typeof action.params?.message === "string" ? action.params.message : "";
+        return {
+            ok: true,
+            data: /http request failed: 403\b/.test(message)
+                ? ctx.context.i18n.t("common.ui.not-signed-in-or-no-permission")
+                : message || ctx.context.i18n.t("common.ui.request-failed"),
+        };
+    },
     "app.locale": async (action, ctx) => {
         const locale = typeof action.params?.locale === "string"
             ? action.params.locale.trim()

@@ -7,6 +7,8 @@ import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
 import com.baomidou.mybatisplus.core.incrementer.IdentifierGenerator;
+import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.innospots.nexus.core.persistence.id.DbPrimaryGenerator;
 import com.innospots.nexus.core.resource.domain.entity.MetaResourceEntity;
 
@@ -25,6 +27,16 @@ class NexusPersistenceIdentifierGeneratorTest {
             assertThat(context.getBean(IdentifierGenerator.class)).isInstanceOf(DbPrimaryGenerator.class);
             IdentifierGenerator generator = context.getBean(IdentifierGenerator.class);
             assertThat(generator.nextUUID(new MetaResourceEntity())).startsWith("RES");
+        });
+    }
+
+    @Test
+    void registersDatabasePaginationInterceptor() {
+        contextRunner.run(context -> {
+            assertThat(context).hasSingleBean(MybatisPlusInterceptor.class);
+            assertThat(context.getBean(MybatisPlusInterceptor.class).getInterceptors())
+                    .singleElement()
+                    .isInstanceOf(PaginationInnerInterceptor.class);
         });
     }
 }

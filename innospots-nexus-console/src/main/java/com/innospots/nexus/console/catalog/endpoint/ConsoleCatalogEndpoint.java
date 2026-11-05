@@ -55,7 +55,8 @@ public final class ConsoleCatalogEndpoint {
     @EndpointGrant(
             action = EndpointGrantAction.READ,
             name = "catalog.permission-catalog",
-            label = @I18nLiteral(pairs = {"zh-CN", "权限目录", "en", "Permission catalog"}))
+            label = @I18nLiteral(pairs = {"zh-CN", "权限目录", "en", "Permission catalog"}),
+            ignorePermission = true)
     @Operation(operationId = "catalogPermissionCatalog", summary = "权限配置目录")
     public R<List<CatalogDomainVo>> permissionCatalog() {
         return R.ok(catalogService.permissionCatalog());
@@ -67,7 +68,8 @@ public final class ConsoleCatalogEndpoint {
     @EndpointGrant(
             action = EndpointGrantAction.READ,
             name = "catalog.tree",
-            label = @I18nLiteral(pairs = {"zh-CN", "目录资源树", "en", "Catalog resource tree"}))
+            label = @I18nLiteral(pairs = {"zh-CN", "目录资源树", "en", "Catalog resource tree"}),
+            ignorePermission = true)
     @Operation(operationId = "catalogTree", summary = "目录资源树（已废弃，请用 permission-catalog）")
     public R<List<CatalogDomainVo>> tree() {
         return R.ok(catalogService.permissionCatalog());

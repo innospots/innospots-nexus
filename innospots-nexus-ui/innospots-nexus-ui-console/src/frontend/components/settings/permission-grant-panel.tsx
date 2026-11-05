@@ -258,6 +258,7 @@ export interface PermissionGrantPanelProps {
   grants?: unknown;
   draftGrants?: unknown;
   className?: string;
+  disabled?: boolean;
   onChange?: (event: { grants: PermissionGrant[]; dirty: boolean }) => void;
 }
 
@@ -270,6 +271,7 @@ export function PermissionGrantPanel({
   grants,
   draftGrants,
   className,
+  disabled = false,
   onChange,
 }: PermissionGrantPanelProps) {
   const i18n = useI18n();
@@ -389,7 +391,7 @@ export function PermissionGrantPanel({
   const operationGroupCount = operationSelectableKeys.length;
 
   return (
-    <div className={`flex flex-col gap-4 ${className ?? ""}`}>
+    <fieldset disabled={disabled} className={`flex flex-col gap-4 ${className ?? ""}`}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="text-base font-semibold text-foreground">{moduleName}</div>
@@ -497,6 +499,6 @@ export function PermissionGrantPanel({
           </div>
         )}
       </section>
-    </div>
+    </fieldset>
   );
 }

@@ -1,6 +1,8 @@
 dsl: "1.0"
 page:
+  access-mode: grant
   id: themes
+  pageKey: themes
   title: "$i18n{common.page.themes.title:主题选择}"
   domain: system
   module: theme
@@ -33,3 +35,7 @@ body:
         - type: Text
           props: { text: "$i18n{common.themePage.count:12 套主题}" }
     - type: ThemeGallery
+      access:
+        mode: disable
+        requests:
+          - { method: PUT, url: /api/d/platform/settings/console-theme }

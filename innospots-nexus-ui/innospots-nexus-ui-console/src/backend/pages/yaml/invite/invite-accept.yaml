@@ -1,5 +1,6 @@
 dsl: "1.0"
 page:
+  access-mode: public
   id: invite-accept
   title: '$i18n{invite.invite-accept.title:接受邀请}'
   name: inviteAccept

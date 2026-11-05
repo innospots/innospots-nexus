@@ -63,7 +63,8 @@ public interface AuthSessionEndpoint {
             name = "auth.password.change",
             label = @I18nLiteral(pairs = {"zh-CN", "修改当前用户密码", "en", "Change password"}),
             recordArgs = false,
-            auditLog = true)
+            auditLog = true,
+            ignorePermission = true)
     @Operation(operationId = "authPasswordChange", summary = "修改当前用户密码")
     @SecurityRequirement(name = NexusOpenApiSecurityNames.BEARER_AUTH)
     R<Void> changePassword(PasswordChangeRequest request);

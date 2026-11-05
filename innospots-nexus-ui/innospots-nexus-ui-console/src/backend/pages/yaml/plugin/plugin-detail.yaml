@@ -1,6 +1,8 @@
 dsl: "1.0"
 page:
+  access-mode: grant
   id: plugin-detail
+  pageKey: nexus-plugin-main
   title: '$i18n{plugin.plugin-detail.title:插件详情}'
   name: pluginDetail
   domain: system

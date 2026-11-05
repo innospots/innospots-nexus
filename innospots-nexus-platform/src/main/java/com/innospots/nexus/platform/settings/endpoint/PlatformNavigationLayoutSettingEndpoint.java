@@ -50,6 +50,7 @@ public class PlatformNavigationLayoutSettingEndpoint {
     @PUT
     @EndpointGrant(
             action = EndpointGrantAction.UPDATE,
+            group = "update",
             name = "platform.settings.navigation-layout.update",
             label = @I18nLiteral(pairs = {"zh-CN", "更新控制台导航布局", "en", "Update navigation layout setting"}),
             recordArgs = false,

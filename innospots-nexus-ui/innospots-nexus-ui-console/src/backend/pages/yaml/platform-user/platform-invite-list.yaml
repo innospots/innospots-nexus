@@ -1,6 +1,8 @@
 dsl: "1.0"
 page:
+  access-mode: grant
   id: platform-invite-list
+  pageKey: platform-user-main
   title: '$i18n{platform-user.platform-invite-list.title:邀请列表}'
   name: platformInviteList
   domain: operation
@@ -64,6 +66,9 @@ body:
                 variant: muted
                 text: '$i18n{platform-user.platform-invite-list.view-resend-or-revoke-platform-user-invitations-accepted-invitations-can:查看、重发或撤销平台用户邀请；已接受的可进入用户详情。}'
         - type: Button
+          access:
+            requests:
+              - { method: POST, url: /api/d/platform/users }
           props:
             text: '$i18n{platform-user.platform-invite-list.add-user:+ 添加用户}'
             variant: primary
@@ -161,6 +166,7 @@ body:
             rowKey: inviteId
             dataSource: ${data.invites.records}
             loading: ${dataStatus.invites.loading}
+            pagination: false
             className: mt-4
             columns:
               - title:
@@ -319,8 +325,23 @@ body:
                                       events:
                                         onClick:
                                           - action: overlay.close
-        - type: Text
+        - type: Pagination
           props:
-            text: "${t('platform-user.platform-invite-list.summary.count', { count: data.invites.total })}"
-            type: secondary
+            total: ${data.invites.total}
+            page: ${state.pageNo}
+            pageSize: ${state.pageSize}
+            pageSizeOptions: [10, 20, 50]
+            align: right
             className: mt-3
+          events:
+            onChange:
+              - action: setState
+                params:
+                  pageNo: ${event}
+              - action: reload
+                params:
+                  dataSource: invites
+            onPageSizeChange:
+              - action: setState
+                params:
+                  pageSize: ${event}

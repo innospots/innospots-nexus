@@ -12,63 +12,64 @@ pages:
       path: /login,
       title: 登录,
       version: 1,
-      public: true,
-      lazy: true
+      lazy: true,
+      layout: login
     }
   - {
       id: password-reset,
       path: /password/reset,
       title: 找回密码,
       version: 1,
-      public: true,
-      lazy: true
+      lazy: true,
+      layout: login
     }
   - {
       id: pending-approval,
       path: /pending-approval,
       title: 注册待审核,
       version: 1,
-      public: true,
-      lazy: true
+      lazy: true,
+      layout: login
     }
   - {
       id: password-change,
       path: /account/password,
       title: 修改密码,
       version: 1,
-      lazy: true
+      lazy: true,
+      layout: admin
     }
   - {
       id: invite-accept,
       path: /invite/:token,
       title: 接受邀请,
       version: 1,
-      public: true,
-      lazy: true
+      lazy: true,
+      layout: login
     }
   - {
       id: invite-activate,
       path: /register/invite,
       title: 邀请码注册,
       version: 1,
-      public: true,
-      lazy: true
+      lazy: true,
+      layout: login
     }
   - {
       id: open-registration,
       path: /register/open,
       title: 开放注册,
       version: 1,
-      public: true,
-      lazy: true
+      lazy: true,
+      layout: login
     }
   - {
       id: access-registration,
       path: /register/approval,
       title: 注册待审核,
       version: 1,
-      public: true,
-      lazy: true
+      lazy: true,
+      layout: login
     }
   - {
       id: dashboard,
@@ -76,8 +77,8 @@ pages:
       title: 工作台,
       version: 1,
       lazy: true,
-      domain: operation,
-      module: user
+
+
     }
   - {
       id: role-list,
@@ -85,8 +86,8 @@ pages:
       title: 角色管理,
       version: 1,
       lazy: true,
-      domain: operation,
-      module: role
+
+
     }
   - {
       id: role-detail-basic,
@@ -94,8 +95,10 @@ pages:
       title: 角色详情,
       version: 2,
       lazy: true,
-      domain: operation,
-      module: role
+      layout: admin,
+      activeMenu: nav-roles,
+
+
     }
   - {
       id: role-detail-permissions,
@@ -103,8 +106,10 @@ pages:
       title: 角色权限设置,
       version: 1,
       lazy: true,
-      domain: operation,
-      module: role
+      layout: admin,
+      activeMenu: nav-roles,
+
+
     }
   - {
       id: role-detail-members,
@@ -112,8 +117,10 @@ pages:
       title: 角色成员列表,
       version: 1,
       lazy: true,
-      domain: operation,
-      module: role
+      layout: admin,
+      activeMenu: nav-roles,
+
+
     }
   - {
       id: dictionary-type-list,
@@ -121,8 +128,8 @@ pages:
       title: 数据字典,
       version: 1,
       lazy: true,
-      domain: system,
-      module: dictionary
+
+
     }
   - {
       id: dictionary-type-create,
@@ -130,9 +137,11 @@ pages:
       title: 新建字典,
       version: 1,
       lazy: true,
-      domain: system,
-      module: dictionary,
-      group: create
+      layout: admin,
+      activeMenu: nav-dictionaries,
+
+
+
     }
   - {
       id: dictionary-type-detail,
@@ -140,8 +149,10 @@ pages:
       title: 字典详情,
       version: 1,
       lazy: true,
-      domain: system,
-      module: dictionary
+      layout: admin,
+      activeMenu: nav-dictionaries,
+
+
     }
   - {
       id: audit-log-list,
@@ -149,8 +160,8 @@ pages:
       title: 审计日志,
       version: 1,
       lazy: true,
-      domain: system,
-      module: logger
+
+
     }
   - {
       id: audit-log-detail,
@@ -158,8 +169,10 @@ pages:
       title: 审计日志详情,
       version: 1,
       lazy: true,
-      domain: system,
-      module: logger
+      layout: admin,
+      activeMenu: nav-audit,
+
+
     }
   - {
       id: plugin-list,
@@ -167,8 +180,8 @@ pages:
       title: 插件管理,
       version: 1,
       lazy: true,
-      domain: system,
-      module: plugin
+
+
     }
   - {
       id: plugin-detail,
@@ -176,8 +189,10 @@ pages:
       title: 插件详情,
       version: 1,
       lazy: true,
-      domain: system,
-      module: plugin
+      layout: admin,
+      activeMenu: nav-plugins,
+
+
     }
   - {
       id: platform-user-list,
@@ -185,8 +200,8 @@ pages:
       title: 用户列表,
       version: 1,
       lazy: true,
-      domain: operation,
-      module: user
+
+
     }
   - {
       id: platform-user-create,
@@ -194,9 +209,11 @@ pages:
       title: 添加平台用户,
       version: 1,
       lazy: true,
-      domain: operation,
-      module: user,
-      group: create
+      layout: admin,
+      activeMenu: nav-platform-users,
+
+
+
     }
   - {
       id: platform-user-detail,
@@ -204,8 +221,10 @@ pages:
       title: 平台用户详情,
       version: 1,
       lazy: true,
-      domain: operation,
-      module: user
+      layout: admin,
+      activeMenu: nav-platform-users,
+
+
     }
   - {
       id: platform-invite-list,
@@ -213,8 +232,8 @@ pages:
       title: 邀请列表,
       version: 1,
       lazy: true,
-      domain: operation,
-      module: user
+
+
     }
   - {
       id: platform-access-request-list,
@@ -222,8 +241,8 @@ pages:
       title: 注册审批,
       version: 1,
       lazy: true,
-      domain: operation,
-      module: user
+
+
     }
   - {
       id: tenant-list,
@@ -231,8 +250,8 @@ pages:
       title: 租户管理,
       version: 1,
       lazy: true,
-      domain: operation,
-      module: organization
+
+
     }
   - {
       id: tenant-detail,
@@ -240,8 +259,10 @@ pages:
       title: 租户详情,
       version: 1,
       lazy: true,
-      domain: operation,
-      module: organization
+      layout: admin,
+      activeMenu: nav-organization-tenants,
+
+
     }
   - {
       id: system-settings,
@@ -249,8 +270,8 @@ pages:
       title: 系统设置,
       version: 1,
       lazy: true,
-      domain: system,
-      module: settings
+
+
     }
   - {
       id: themes,
@@ -258,289 +279,8 @@ pages:
       title: 主题选择,
       version: 1,
       lazy: true,
-      domain: system,
-      module: theme
-    }
 
-menus:
-  - {
-      id: login,
-      type: page,
-      pageId: login,
-      title: 登录,
-      layout: login,
-      public: true,
-      hidden: true
-    }
-  - {
-      id: password-reset,
-      type: page,
-      pageId: password-reset,
-      layout: login,
-      public: true,
-      hidden: true
-    }
-  - {
-      id: pending-approval,
-      type: page,
-      pageId: pending-approval,
-      layout: login,
-      public: true,
-      hidden: true
-    }
-  - {
-      id: invite-accept,
-      type: page,
-      pageId: invite-accept,
-      layout: login,
-      public: true,
-      hidden: true
-    }
-  - {
-      id: invite-activate,
-      type: page,
-      pageId: invite-activate,
-      layout: login,
-      public: true,
-      hidden: true
-    }
-  - {
-      id: open-registration,
-      type: page,
-      pageId: open-registration,
-      layout: login,
-      public: true,
-      hidden: true
-    }
-  - {
-      id: access-registration,
-      type: page,
-      pageId: access-registration,
-      layout: login,
-      public: true,
-      hidden: true
-    }
-  - {
-      id: password-change,
-      type: page,
-      pageId: password-change,
-      layout: admin,
-      hidden: true
-    }
-  - {
-      id: home,
-      type: page,
-      pageId: dashboard,
-      title: 工作台,
-      icon: home,
-      layout: admin,
-      order: 1,
-      domain: operation,
-      module: user
-    }
-  - id: operations
-    type: group
-    title: 运营管理
-    icon: users
-    order: 2
-    children:
-      - {
-          id: nav-organization-tenants,
-          type: page,
-          pageId: tenant-list,
-          title: 租户管理,
-          layout: admin,
-          domain: operation,
-          module: organization
-        }
-      - {
-          id: nav-platform-users,
-          type: page,
-          pageId: platform-user-list,
-          title: 用户列表,
-          layout: admin,
-          domain: operation,
-          module: user
-        }
-      - {
-          id: nav-platform-invites,
-          type: page,
-          pageId: platform-invite-list,
-          title: 邀请,
-          layout: admin,
-          domain: operation,
-          module: user
-        }
-      - {
-          id: nav-platform-access-requests,
-          type: page,
-          pageId: platform-access-request-list,
-          title: 注册审批,
-          layout: admin,
-          domain: operation,
-          module: user
-        }
-  - id: system
-    type: group
-    title: 系统管理
-    icon: settings
-    order: 3
-    children:
-      - {
-          id: nav-dictionaries,
-          type: page,
-          pageId: dictionary-type-list,
-          title: 数据字典,
-          layout: admin,
-          domain: system,
-          module: dictionary
-        }
-      - {
-          id: nav-roles,
-          type: page,
-          pageId: role-list,
-          title: 角色管理,
-          layout: admin,
-          domain: operation,
-          module: role
-        }
-      - {
-          id: nav-audit,
-          type: page,
-          pageId: audit-log-list,
-          title: 审计日志,
-          layout: admin,
-          domain: system,
-          module: logger
-        }
-      - {
-          id: nav-plugins,
-          type: page,
-          pageId: plugin-list,
-          title: 插件管理,
-          layout: admin,
-          domain: system,
-          module: plugin
-        }
-      - {
-          id: nav-system-settings,
-          type: page,
-          pageId: system-settings,
-          title: 系统设置,
-          layout: admin,
-          domain: system,
-          module: settings
-        }
-      - {
-          id: nav-themes,
-          type: page,
-          pageId: themes,
-          title: 主题选择,
-          layout: admin,
-          domain: system,
-          module: theme
-        }
-  - {
-      id: role-detail-basic,
-      type: page,
-      pageId: role-detail-basic,
-      layout: admin,
-      hidden: true,
-      activeMenu: nav-roles,
-      domain: operation,
-      module: role
-    }
-  - {
-      id: role-detail-permissions,
-      type: page,
-      pageId: role-detail-permissions,
-      layout: admin,
-      hidden: true,
-      activeMenu: nav-roles,
-      domain: operation,
-      module: role
-    }
-  - {
-      id: role-detail-members,
-      type: page,
-      pageId: role-detail-members,
-      layout: admin,
-      hidden: true,
-      activeMenu: nav-roles,
-      domain: operation,
-      module: role
-    }
-  - {
-      id: dictionary-type-create,
-      type: page,
-      pageId: dictionary-type-create,
-      layout: admin,
-      hidden: true,
-      activeMenu: nav-dictionaries,
-      domain: system,
-      module: dictionary,
-      group: create
-    }
-  - {
-      id: dictionary-type-detail,
-      type: page,
-      pageId: dictionary-type-detail,
-      layout: admin,
-      hidden: true,
-      activeMenu: nav-dictionaries,
-      domain: system,
-      module: dictionary
-    }
-  - {
-      id: audit-log-detail,
-      type: page,
-      pageId: audit-log-detail,
-      layout: admin,
-      hidden: true,
-      activeMenu: nav-audit,
-      domain: system,
-      module: logger
-    }
-  - {
-      id: plugin-detail,
-      type: page,
-      pageId: plugin-detail,
-      layout: admin,
-      hidden: true,
-      activeMenu: nav-plugins,
-      domain: system,
-      module: plugin
-    }
-  - {
-      id: platform-user-create,
-      type: page,
-      pageId: platform-user-create,
-      layout: admin,
-      hidden: true,
-      activeMenu: nav-platform-users,
-      domain: operation,
-      module: user,
-      group: create
-    }
-  - {
-      id: platform-user-detail,
-      type: page,
-      pageId: platform-user-detail,
-      layout: admin,
-      hidden: true,
-      activeMenu: nav-platform-users,
-      domain: operation,
-      module: user
-    }
-  - {
-      id: tenant-detail,
-      type: page,
-      pageId: tenant-detail,
-      layout: admin,
-      hidden: true,
-      activeMenu: nav-organization-tenants,
-      domain: operation,
-      module: organization
+
     }
 
 layouts:

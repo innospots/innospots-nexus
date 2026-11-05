@@ -1,5 +1,6 @@
 dsl: "1.0"
 page:
+  access-mode: public
   id: login
   title: '$i18n{auth.login.title:登录}'
   name: login

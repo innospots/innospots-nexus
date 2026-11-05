@@ -40,6 +40,7 @@ export interface ThemeGalleryProps {
   theme?: PlatformConsoleTheme | string;
   skinKey?: string;
   loading?: boolean | string;
+  disabled?: boolean;
 }
 
 function isLoadingFlag(value: boolean | string | undefined): boolean {
@@ -56,6 +57,7 @@ export function ThemeGallery({
   theme: remoteTheme,
   skinKey: remoteSkinKey,
   loading: loadingProp,
+  disabled = false,
 }: ThemeGalleryProps) {
   const selected = useSyncExternalStore(subscribe, snapshot, () => DEFAULT_SKIN);
   const { locale, t: tHost } = useHostI18n();
@@ -80,6 +82,7 @@ export function ThemeGallery({
   }, [loading, remoteSkinKey, remoteTheme]);
 
   async function onSelect(skin: SkinValue) {
+    if (disabled) return;
     setSaveError(null);
     selectSkin(skin);
     const theme = skinToPlatformTheme(skin);
@@ -123,7 +126,7 @@ export function ThemeGallery({
               type="button"
               key={theme.value}
               className={`theme-card${isSelected ? " is-selected" : ""}${isSaving ? " is-saving" : ""}`}
-              disabled={savingSkin != null}
+              disabled={disabled || savingSkin != null}
               onClick={() => void onSelect(theme.value)}
               aria-pressed={isSelected}
               aria-busy={isSaving}

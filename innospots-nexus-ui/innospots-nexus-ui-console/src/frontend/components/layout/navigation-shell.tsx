@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { MenuRegistry, type MenuItem } from "@pactor-app/router";
+import { RailTooltip } from "@pactor-app/ui/components";
 import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode, RefObject } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -232,29 +233,30 @@ export function NavigationShell({ menus = [], user, children }: NavigationShellP
             </>
           );
 
-          return isGroup(item) ? (
+          const trigger = isGroup(item) ? (
             <button
-              key={itemId}
               type="button"
               className={active ? "kn-rail-button is-active" : "kn-rail-button"}
               aria-label={title}
               aria-pressed={active}
-              title={title}
               onClick={() => selectGroup(item)}
             >
               {content}
             </button>
           ) : (
             <Link
-              key={itemId}
               href={navPath(item) ?? "/"}
               className={active ? "kn-rail-button is-active" : "kn-rail-button"}
               aria-label={title}
               aria-current={active ? "page" : undefined}
-              title={title}
             >
               {content}
             </Link>
+          );
+          return navigationConfig.expandRailOnHover ? (
+            <span key={itemId}>{trigger}</span>
+          ) : (
+            <RailTooltip key={itemId} label={title}>{trigger}</RailTooltip>
           );
         })}
         <AccountMenu user={user} />

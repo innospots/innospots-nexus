@@ -1,6 +1,8 @@
 dsl: "1.0"
 page:
+  access-mode: grant
   id: system-settings
+  pageKey: system-settings
   title: "$i18n{common.page.system-settings.title:系统设置}"
   name: system-settings
   domain: system
@@ -10,7 +12,7 @@ dataSources:
   settings:
     type: http
     autoLoad: true
-    request: { method: GET, url: /api/d/system-settings }
+    request: { method: GET, url: /api/d/platform/settings/console-general }
 body:
   type: Page
   props: { className: system-settings-page }
@@ -19,12 +21,14 @@ body:
       props: { variant: h3, className: system-page-title, text: "$i18n{common.page.system-settings.title:系统设置}" }
     - type: Typography
       props: { variant: muted, className: system-page-description, text: "$i18n{common.systemSettings.subtitle:管理系统的常用配置}" }
-    - type: Alert
-      props: { variant: info, message: "$i18n{common.systemSettings.note:示例设置仅保存在当前服务进程中。}", style: { marginTop: 20 } }
     - type: Card
       props: { title: "$i18n{common.systemSettings.group.navigation:界面与导航}", style: { marginTop: 20 } }
       children:
         - type: NavigationLayoutSettingPanel
+          access:
+            mode: disable
+            requests:
+              - { method: PUT, url: /api/d/platform/settings/navigation-layout }
     - type: Alert
       when: ${dataStatus.settings.error != null}
       props: { variant: error, message: "$i18n{common.systemSettings.loadError:无法加载系统设置，请刷新重试。}" }
@@ -63,7 +67,7 @@ body:
                                 onSubmit:
                                   - id: saveResult
                                     action: request
-                                    params: { method: PATCH, url: /api/d/system-settings, body: { key: siteName, value: "${event.value}" } }
+                                    params: { method: PUT, url: /api/d/platform/settings/console-site-name, body: { siteName: "${event.value}" } }
                                   - action: if
                                     params:
                                       condition: ${actions.saveResult != null && actions.saveResult.ok != false}
@@ -122,7 +126,7 @@ body:
                                 onSubmit:
                                   - id: saveResult
                                     action: request
-                                    params: { method: PATCH, url: /api/d/system-settings, body: { key: description, value: "${event.value}" } }
+                                    params: { method: PUT, url: /api/d/platform/settings/console-site-description, body: { description: "${event.value}" } }
                                   - action: if
                                     params:
                                       condition: ${actions.saveResult != null && actions.saveResult.ok != false}
@@ -184,7 +188,7 @@ body:
                                 onSubmit:
                                   - id: saveResult
                                     action: request
-                                    params: { method: PATCH, url: /api/d/system-settings, body: { key: language, value: "${event.value}" } }
+                                    params: { method: PUT, url: /api/d/platform/settings/console-display-language, body: { language: "${event.value}" } }
                                   - action: if
                                     params:
                                       condition: ${actions.saveResult != null && actions.saveResult.ok != false}
@@ -247,7 +251,7 @@ body:
                                 onSubmit:
                                   - id: saveResult
                                     action: request
-                                    params: { method: PATCH, url: /api/d/system-settings, body: { key: timezone, value: "${event.value}" } }
+                                    params: { method: PUT, url: /api/d/platform/settings/console-timezone, body: { timezone: "${event.value}" } }
                                   - action: if
                                     params:
                                       condition: ${actions.saveResult != null && actions.saveResult.ok != false}
@@ -269,138 +273,6 @@ body:
                                           - { value: "Asia/Shanghai", label: "$i18n{common.systemSettings.timezone.shanghai:中国标准时间（UTC+8）}" }
                                           - { value: "UTC", label: "$i18n{common.systemSettings.timezone.utc:协调世界时（UTC）}" }
                                           - { value: "America/New_York", label: "$i18n{common.systemSettings.timezone.newYork:美国东部时间}" }
-                                - type: Flex
-                                  props: { justify: end, gap: small }
-                                  children:
-                                    - type: Button
-                                      props: { text: "$i18n{common.settingsPage.cancel:取消}" }
-                                      events:
-                                        onClick:
-                                          - action: overlay.close
-                                    - type: Button
-                                      props: { text: "$i18n{common.settingsPage.save:保存}", variant: primary, submit: true }
-        - type: Flex
-          props: { className: system-setting, justify: space-between, align: center }
-          children:
-            - type: Flex
-              props: { direction: vertical, gap: 4 }
-              children:
-                - type: Text
-                  props: { strong: true, text: "$i18n{common.systemSettings.pageSize.label:默认每页条数}" }
-                - type: Typography
-                  props: { variant: muted, text: "$i18n{common.systemSettings.pageSize.description:设置列表默认的分页大小。}" }
-            - type: Flex
-              props: { className: system-setting-display, align: center }
-              children:
-                - type: Text
-                  props: { text: "${t('common.systemSettings.pageSize.option', { value: data.settings.pageSize })}" }
-                - type: Button
-                  props: { text: "$i18n{common.settingsPage.edit:修改}", variant: link, disabled: "${dataStatus.settings.loading}" }
-                  events:
-                    onClick:
-                      - action: overlay.open
-                        params:
-                          overlay:
-                            type: modal
-                            title: "$i18n{common.systemSettings.pageSize.label:默认每页条数}"
-                            width: 440
-                            content:
-                              type: Form
-                              props: { layout: vertical, initialValues: { value: "${data.settings.pageSize}" } }
-                              events:
-                                onSubmit:
-                                  - id: saveResult
-                                    action: request
-                                    params: { method: PATCH, url: /api/d/system-settings, body: { key: pageSize, value: "${event.value}" } }
-                                  - action: if
-                                    params:
-                                      condition: ${actions.saveResult != null && actions.saveResult.ok != false}
-                                      then:
-                                        - action: overlay.close
-                                        - action: reload
-                                          params: { dataSource: settings }
-                                      else:
-                                        - action: message
-                                          params: { messageType: error, text: "$i18n{common.systemSettings.saveError:保存失败，请重试。}" }
-                              children:
-                                - type: Field
-                                  props: { label: "$i18n{common.systemSettings.pageSize.label:默认每页条数}" }
-                                  children:
-                                    - type: Select
-                                      props:
-                                        name: value
-                                        options:
-                                          - { value: "10", label: "10" }
-                                          - { value: "20", label: "20" }
-                                          - { value: "50", label: "50" }
-                                - type: Flex
-                                  props: { justify: end, gap: small }
-                                  children:
-                                    - type: Button
-                                      props: { text: "$i18n{common.settingsPage.cancel:取消}" }
-                                      events:
-                                        onClick:
-                                          - action: overlay.close
-                                    - type: Button
-                                      props: { text: "$i18n{common.settingsPage.save:保存}", variant: primary, submit: true }
-    - type: Card
-      props: { title: "$i18n{common.systemSettings.group.session:会话}", style: { marginTop: 20 } }
-      children:
-        - type: Flex
-          props: { className: system-setting, justify: space-between, align: center }
-          children:
-            - type: Flex
-              props: { direction: vertical, gap: 4 }
-              children:
-                - type: Text
-                  props: { strong: true, text: "$i18n{common.systemSettings.sessionTimeout.label:会话超时时间}" }
-                - type: Typography
-                  props: { variant: muted, text: "$i18n{common.systemSettings.sessionTimeout.description:设置闲置会话的超时时间。}" }
-            - type: Flex
-              props: { className: system-setting-display, align: center }
-              children:
-                - type: Text
-                  props: { text: "${t('common.systemSettings.sessionTimeout.option', { value: data.settings.sessionTimeout })}" }
-                - type: Button
-                  props: { text: "$i18n{common.settingsPage.edit:修改}", variant: link, disabled: "${dataStatus.settings.loading}" }
-                  events:
-                    onClick:
-                      - action: overlay.open
-                        params:
-                          overlay:
-                            type: modal
-                            title: "$i18n{common.systemSettings.sessionTimeout.label:会话超时时间}"
-                            width: 440
-                            content:
-                              type: Form
-                              props: { layout: vertical, initialValues: { value: "${data.settings.sessionTimeout}" } }
-                              events:
-                                onSubmit:
-                                  - id: saveResult
-                                    action: request
-                                    params: { method: PATCH, url: /api/d/system-settings, body: { key: sessionTimeout, value: "${event.value}" } }
-                                  - action: if
-                                    params:
-                                      condition: ${actions.saveResult != null && actions.saveResult.ok != false}
-                                      then:
-                                        - action: overlay.close
-                                        - action: reload
-                                          params: { dataSource: settings }
-                                      else:
-                                        - action: message
-                                          params: { messageType: error, text: "$i18n{common.systemSettings.saveError:保存失败，请重试。}" }
-                              children:
-                                - type: Field
-                                  props: { label: "$i18n{common.systemSettings.sessionTimeout.label:会话超时时间}" }
-                                  children:
-                                    - type: Select
-                                      props:
-                                        name: value
-                                        options:
-                                          - { value: "15", label: "15" }
-                                          - { value: "30", label: "30" }
-                                          - { value: "60", label: "60" }
-                                          - { value: "120", label: "120" }
                                 - type: Flex
                                   props: { justify: end, gap: small }
                                   children:

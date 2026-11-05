@@ -4,19 +4,30 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
+import com.innospots.nexus.console.catalog.service.ConsoleCatalogService;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubjectResolver;
+import com.innospots.nexus.console.permission.authorization.ConsoleResourcePermissionAuthorizer;
+import com.innospots.nexus.console.permission.pageaccess.PageAccessVerifier;
 import com.innospots.nexus.console.permission.service.PermissionGrantService;
 import com.innospots.nexus.console.permission.service.PermissionVisibilityService;
-import com.innospots.nexus.console.permission.pageaccess.PageAccessVerifier;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrantManager;
 import com.innospots.nexus.platform.permission.endpoint.PlatformCurrentAuthorizationEndpoint;
 import com.innospots.nexus.platform.permission.endpoint.PlatformGrantManagementEndpoint;
 import com.innospots.nexus.platform.permission.endpoint.PlatformOrganizationUnitGrantManagementEndpoint;
 import com.innospots.nexus.platform.permission.endpoint.PlatformPageAccessEndpoint;
+import com.innospots.nexus.platform.permission.service.PlatformActionAccessService;
 import com.innospots.nexus.platform.permission.service.PlatformPageAccessService;
 import com.innospots.nexus.platform.permission.service.PlatformPermissionService;
 
 @Configuration
 public class PlatformPermissionConfiguration {
+
+    @Bean
+    PlatformActionAccessService platformActionAccessService(EndpointGrantManager manager,
+            ConsoleResourcePermissionAuthorizer authorizer, AuthorizationSubjectResolver subjects,
+            PermissionVisibilityService visibility, ConsoleCatalogService catalog) {
+        return new PlatformActionAccessService(manager, authorizer, subjects, visibility, catalog);
+    }
 
     @Bean
     PlatformPermissionService platformPermissionService(
@@ -53,8 +64,9 @@ public class PlatformPermissionConfiguration {
     @Bean
     PlatformPageAccessService platformPageAccessService(
             PageAccessVerifier pageAccessVerifier,
-            AuthorizationSubjectResolver authorizationSubjectResolver) {
-        return new PlatformPageAccessService(pageAccessVerifier, authorizationSubjectResolver);
+            AuthorizationSubjectResolver authorizationSubjectResolver,
+            PlatformActionAccessService actionAccessService) {
+        return new PlatformPageAccessService(pageAccessVerifier, authorizationSubjectResolver, actionAccessService);
     }
 
     @Bean

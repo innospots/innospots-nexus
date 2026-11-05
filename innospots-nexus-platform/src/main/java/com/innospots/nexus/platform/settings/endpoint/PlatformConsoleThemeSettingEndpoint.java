@@ -50,6 +50,7 @@ public class PlatformConsoleThemeSettingEndpoint {
     @PUT
     @EndpointGrant(
             action = EndpointGrantAction.UPDATE,
+            group = "update",
             name = "platform.settings.console-theme.update",
             label = @I18nLiteral(pairs = {"zh-CN", "更新控制台配色主题", "en", "Update console theme setting"}),
             recordArgs = false,

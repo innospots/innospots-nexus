@@ -76,7 +76,7 @@ const OPTIONS: {
 /**
  * 系统设置页 — 导航布局（平台持久化 + 保存后刷新 NavigationShell）。
  */
-export function NavigationLayoutSettingPanel() {
+export function NavigationLayoutSettingPanel({ disabled = false }: { disabled?: boolean }) {
   const { t } = useI18n();
   const [mode, setMode] = useState<PlatformNavigationLayoutMode>("RAIL_DUAL");
   const [loading, setLoading] = useState(true);
@@ -102,7 +102,7 @@ export function NavigationLayoutSettingPanel() {
   }, []);
 
   async function onSelect(next: PlatformNavigationLayoutMode) {
-    if (next === mode || loading || saving) {
+    if (disabled || next === mode || loading || saving) {
       return;
     }
     setSaving(true);
@@ -143,7 +143,7 @@ export function NavigationLayoutSettingPanel() {
               key={option.value}
               className={`navigation-layout-card${selected ? " is-selected" : ""}`}
               aria-pressed={selected}
-              disabled={loading || saving}
+              disabled={disabled || loading || saving}
               onClick={() => onSelect(option.value)}
             >
               <div className="navigation-layout-card-preview">

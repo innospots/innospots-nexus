@@ -50,6 +50,7 @@ public class PlatformConsoleTimezoneSettingEndpoint {
     @PUT
     @EndpointGrant(
             action = EndpointGrantAction.UPDATE,
+            group = "update",
             name = "platform.settings.console-timezone.update",
             label = @I18nLiteral(pairs = {"zh-CN", "更新默认时区", "en", "Update console timezone setting"}),
             recordArgs = false,

@@ -50,6 +50,7 @@ public class PlatformConsoleSiteNameSettingEndpoint {
     @PUT
     @EndpointGrant(
             action = EndpointGrantAction.UPDATE,
+            group = "update",
             name = "platform.settings.console-site-name.update",
             label = @I18nLiteral(pairs = {"zh-CN", "更新系统名称", "en", "Update console site name setting"}),
             recordArgs = false,

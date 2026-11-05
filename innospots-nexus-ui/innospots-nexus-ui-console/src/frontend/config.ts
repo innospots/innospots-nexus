@@ -18,9 +18,6 @@ export const sitemapSources: string[] = ["/api/sitemap"];
 export const pageEndpoint = (pageId: string) =>
   `/api/public/pages/${pageId}`;
 
-/** 页面切换前 catalog 访问校验（BFF → 平台 page-access/verify） */
-export const pageAccessEndpoint = "/api/page-access/verify";
-
 /**
  * 客户端接口基准地址（SitemapApp baseUrl）。
  * 数据接口全部同源经转发层（src/app/api/d/[...parts]）调用，故为空字符串

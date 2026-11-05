@@ -39,9 +39,7 @@ export async function PATCH(request: Request): Promise<Response> {
       (key === "siteName" && value.length > 0 && value.length <= 80) ||
       (key === "description" && value.length <= 200) ||
       (key === "timezone" && ["Asia/Shanghai", "UTC", "America/New_York"].includes(value)) ||
-      (key === "language" && ["zh-CN", "en-US"].includes(value)) ||
-      (key === "pageSize" && ["10", "20", "50"].includes(value)) ||
-      (key === "sessionTimeout" && ["15", "30", "60", "120"].includes(value));
+      (key === "language" && ["zh-CN", "en-US"].includes(value));
   if (!valid) {
     return Response.json({ error: "设置值无效" }, { status: 400 });
   }

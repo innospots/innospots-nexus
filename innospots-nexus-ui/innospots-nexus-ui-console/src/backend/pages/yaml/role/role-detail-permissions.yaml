@@ -1,6 +1,8 @@
 dsl: "1.0"
 page:
+  access-mode: grant
   id: role-detail-permissions
+  pageKey: platform-role-main
   title: '$i18n{role.role-detail-permissions.title:角色权限设置}'
   name: roleDetailPermissionsRedirect
   domain: operation

@@ -16,6 +16,8 @@ import com.baomidou.mybatisplus.autoconfigure.MybatisPlusProperties;
 import com.baomidou.mybatisplus.autoconfigure.MybatisPlusPropertiesCustomizer;
 import com.baomidou.mybatisplus.core.config.GlobalConfig;
 import com.baomidou.mybatisplus.core.incrementer.IdentifierGenerator;
+import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.innospots.nexus.core.persistence.handler.AuditMetaObjectHandler;
 import com.innospots.nexus.core.persistence.id.DbPrimaryGenerator;
 
@@ -48,6 +50,22 @@ public class NexusPersistenceConfiguration {
     @Bean
     AuditMetaObjectHandler auditMetaObjectHandler() {
         return new AuditMetaObjectHandler();
+    }
+
+    /**
+     * 启用数据库分页查询，使 {@code IPage} 同时返回当前页记录和总记录数。
+     *
+     * <p>数据库方言由 MyBatis-Plus 根据当前数据源自动识别。宿主可注册自己的
+     * {@link MybatisPlusInterceptor} 覆盖默认分页策略。</p>
+     */
+    @Bean
+    @ConditionalOnMissingBean(MybatisPlusInterceptor.class)
+    MybatisPlusInterceptor nexusMybatisPlusInterceptor() {
+        PaginationInnerInterceptor pagination = new PaginationInnerInterceptor();
+        pagination.setMaxLimit(500L);
+        MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
+        interceptor.addInnerInterceptor(pagination);
+        return interceptor;
     }
 
     /**

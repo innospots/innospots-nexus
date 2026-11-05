@@ -50,6 +50,7 @@ public class PlatformConsoleDisplayLanguageSettingEndpoint {
     @PUT
     @EndpointGrant(
             action = EndpointGrantAction.UPDATE,
+            group = "update",
             name = "platform.settings.console-display-language.update",
             label = @I18nLiteral(pairs = {"zh-CN", "更新界面语言", "en", "Update console display language setting"}),
             recordArgs = false,

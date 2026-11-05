@@ -1,6 +1,8 @@
 dsl: "1.0"
 page:
+  access-mode: grant
   id: tenant-detail
+  pageKey: platform-organization-main
   title: '$i18n{organization.tenant-detail.title:租户详情}'
   name: tenantDetail
   domain: operation
@@ -188,6 +190,9 @@ body:
                     params:
                       dataSource: tenant
             - type: Button
+              access:
+                requests:
+                  - { method: PUT, url: '/api/d/platform/tenants/${params.tenantId}' }
               props:
                 text: "${state.editingTenant ? t('organization.tenant-detail.cancel-editing') :
                   t('organization.tenant-detail.edit-tenant')}"
@@ -456,6 +461,9 @@ body:
                 text: '$i18n{organization.tenant-detail.enterprise-profile:企业档案}'
                 strong: true
             - type: Button
+              access:
+                requests:
+                  - { method: PUT, url: '/api/d/platform/tenants/${params.tenantId}/enterprise' }
               props:
                 text: "${state.editingEnterprise ? t('common.ui.cancel') : t('organization.tenant-detail.edit-profile')}"
                 variant: link

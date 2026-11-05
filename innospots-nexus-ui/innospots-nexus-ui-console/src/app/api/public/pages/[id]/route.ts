@@ -4,7 +4,9 @@ import { resolveSessionUser, readPlatformAccessToken } from "@/backend/auth/acco
 import { corsHeaders, corsPreflight } from "@/backend/cors";
 import { getRequestI18n } from "@/backend/pages/i18n";
 import { verifyPageAccess } from "@/backend/pages/page-access";
-import { getLazyPage } from "@/backend/pages/sitemap";
+import { findPageDslById, getLazyPage } from "@/backend/pages/sitemap";
+import { applyActionAccess, collectActionRequests, stripAccessDeclarations } from "@/backend/pages/action-access";
+import type { PageDsl } from "@pactor-app/core";
 
 /**
  * 懒加载页面端点：sitemap 中未内联 pageDsl 的页面按需获取。
@@ -19,11 +21,14 @@ export async function GET(
   const store = await cookies();
   const user = resolveSessionUser(store);
   const i18n = await getRequestI18n(request);
+  const source = findPageDslById(id);
+  const requests = source ? collectActionRequests(source, source.actions ?? {}) : [];
   const access = await verifyPageAccess({
     pageId: id,
     user,
     accessToken: readPlatformAccessToken(store),
     cookie: request.headers.get("cookie"),
+    requests,
   });
   if (!access.allowed) {
     return Response.json(
@@ -45,6 +50,15 @@ export async function GET(
       { status: 404, headers: corsHeaders(request) },
     );
   }
+  const failureMessage = i18n.locale === "en-US"
+    ? "Permission check failed; affected actions are unavailable."
+    : undefined;
+  const permissions = access.requestPermissions ?? {};
+  const groups = access.grantGroups ?? [];
+  const incomplete = requests.some(({ method, url }) => typeof permissions[`${method}:${url}`] !== "boolean")
+    || !Array.isArray(access.grantGroups);
+  const pageDsl = access.publicPage ? stripAccessDeclarations(entry.pageDsl) as PageDsl
+    : applyActionAccess(entry.pageDsl, { allowed: permissions, grantGroups: groups }, incomplete, failureMessage);
   return Response.json(
     {
       id,
@@ -57,7 +71,7 @@ export async function GET(
         defaultLocale: i18n.defaultLocale,
         release: i18n.release,
       },
-      schema: entry.pageDsl,
+      schema: pageDsl,
       updatedAt: new Date().toISOString(),
     },
     { headers: { "cache-control": "no-store", ...corsHeaders(request) } },

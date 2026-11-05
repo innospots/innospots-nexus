@@ -13,6 +13,7 @@ import jakarta.ws.rs.Path;
 import org.junit.jupiter.api.Test;
 
 import com.innospots.nexus.base.domain.enums.BasicStatus;
+import com.innospots.nexus.console.catalog.domain.model.CatalogOperationGroups;
 import com.innospots.nexus.console.role.domain.enums.RoleBindingSubjectType;
 import com.innospots.nexus.console.role.domain.request.RoleBindingAddRequest;
 import com.innospots.nexus.console.role.domain.request.RoleBindingPageRequest;
@@ -23,6 +24,7 @@ import com.innospots.nexus.console.role.domain.request.RoleUpdateRequest;
 import com.innospots.nexus.console.role.domain.vo.RoleBindingVo;
 import com.innospots.nexus.console.role.domain.vo.RoleOptionVo;
 import com.innospots.nexus.console.role.domain.vo.RoleVo;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -52,6 +54,14 @@ class RoleEndpointContractsTest {
                 POST.class, String.class, RoleBindingAddRequest.class);
         assertHttpMethod(RoleBindingEndpoint.class, "removeRoleBinding",
                 DELETE.class, String.class, String.class);
+    }
+
+    @Test
+    void roleBindingMutationsUseTheDeclaredOperateGroup() throws NoSuchMethodException {
+        assertGroup("addRoleBindings", CatalogOperationGroups.OPERATE,
+                String.class, RoleBindingAddRequest.class);
+        assertGroup("removeRoleBinding", CatalogOperationGroups.OPERATE,
+                String.class, String.class);
     }
 
     @Test
@@ -91,5 +101,14 @@ class RoleEndpointContractsTest {
         assertThat(Arrays.stream(recordType.getRecordComponents())
                 .map(RecordComponent::getName))
                 .containsExactly(names);
+    }
+
+    private static void assertGroup(String methodName, String expected, Class<?>... parameterTypes)
+            throws NoSuchMethodException {
+        Method method = RoleBindingEndpoint.class.getMethod(methodName, parameterTypes);
+        EndpointGrant grant = method.getAnnotation(EndpointGrant.class);
+
+        assertThat(grant).isNotNull();
+        assertThat(grant.group()).isEqualTo(expected);
     }
 }

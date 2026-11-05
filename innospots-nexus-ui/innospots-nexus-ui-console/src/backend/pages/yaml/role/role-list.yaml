@@ -1,6 +1,8 @@
 dsl: "1.0"
 page:
+  access-mode: grant
   id: role-list
+  pageKey: platform-role-main
   title: '$i18n{role.role-list.title:角色管理}'
   name: roleList
   domain: operation
@@ -74,7 +76,8 @@ body:
                         layout: vertical
                       events:
                         onSubmit:
-                          - action: request
+                          - id: createRoleResult
+                            action: request
                             params:
                               method: POST
                               url: /api/d/platform/roles
@@ -82,14 +85,27 @@ body:
                                 roleName: ${event.roleName}
                                 roleCode: ${event.roleCode}
                                 description: ${event.description}
-                          - action: message
+                          - action: if
                             params:
-                              messageType: success
-                              text: '$i18n{role.role-list.role-created:角色已创建}'
-                          - action: overlay.close
-                          - action: reload
-                            params:
-                              dataSource: roles
+                              condition: ${actions.createRoleResult != null && actions.createRoleResult.ok == false}
+                              then:
+                                - id: createRoleErrorMessage
+                                  action: request.errorMessage
+                                  params:
+                                    message: ${actions.createRoleResult.error.message}
+                                - action: message
+                                  params:
+                                    messageType: error
+                                    text: ${actions.createRoleErrorMessage}
+                              else:
+                                - action: message
+                                  params:
+                                    messageType: success
+                                    text: '$i18n{role.role-list.role-created:角色已创建}'
+                                - action: overlay.close
+                                - action: reload
+                                  params:
+                                    dataSource: roles
                       children:
                         - type: Field
                           props:
@@ -224,6 +240,7 @@ body:
             rowKey: roleId
             dataSource: ${data.roles.records}
             loading: ${dataStatus.roles.loading}
+            pagination: false
             className: mt-4
             columns:
               - title:
@@ -321,8 +338,23 @@ body:
                           - action: reload
                             params:
                               dataSource: roles
-        - type: Text
+        - type: Pagination
           props:
-            text: "${t('role.role-list.summary.count', { count: data.roles.total })}"
-            type: secondary
+            total: ${data.roles.total}
+            page: ${state.pageNo}
+            pageSize: ${state.pageSize}
+            pageSizeOptions: [10, 20, 50]
+            align: right
             className: mt-3
+          events:
+            onChange:
+              - action: setState
+                params:
+                  pageNo: ${event}
+              - action: reload
+                params:
+                  dataSource: roles
+            onPageSizeChange:
+              - action: setState
+                params:
+                  pageSize: ${event}

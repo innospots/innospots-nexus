@@ -118,7 +118,9 @@ public final class CredentialService {
             throw ConsoleExceptions.build(NexusStatusCode.PASSWORD_ERROR);
         }
         credentialOperator.enrollPassword(CredentialOwnershipResolver.ownershipForRealm(realm), subjectId, newPassword);
-        credentialOperator.saveState(realm, withAttempts(current, 0, null));
+        CredentialRecord rotated = credentialOperator.findPassword(realm, subjectId)
+                .orElseThrow(() -> new IllegalStateException("Credential not found after password rotation: " + subjectId));
+        credentialOperator.saveState(realm, withAttempts(rotated, 0, null));
     }
 
     /**

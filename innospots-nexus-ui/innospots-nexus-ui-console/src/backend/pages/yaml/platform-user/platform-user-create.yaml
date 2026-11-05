@@ -1,6 +1,8 @@
 dsl: "1.0"
 page:
+  access-mode: grant
   id: platform-user-create
+  pageKey: platform-user-main
   title: '$i18n{platform-user.platform-user-create.title:添加平台用户}'
   name: platformUserCreate
   domain: operation
@@ -44,6 +46,9 @@ body:
     - type: Card
       children:
         - type: PlatformUserCreatePanel
+          access:
+            requests:
+              - { method: POST, url: /api/d/platform/users }
           events:
             onCancel:
               - action: navigate

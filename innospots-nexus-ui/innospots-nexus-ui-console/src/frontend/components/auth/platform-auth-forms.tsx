@@ -336,6 +336,7 @@ export function PlatformPasswordChangeForm() {
     const [confirm, setConfirm] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [passwordChanged, setPasswordChanged] = useState(false);
 
     const submit = useCallback(async () => {
         if (password !== confirm) {
@@ -344,11 +345,13 @@ export function PlatformPasswordChangeForm() {
         }
         setLoading(true);
         setError(null);
+        let passwordWasChanged = false;
         try {
             const oldEncryptedPassword = await encryptPasswordForApi(oldPassword);
             const newEncryptedPassword = await encryptPasswordForApi(password);
             await fetch("/api/d/platform/auth/password/change", {
                 method: "POST",
+                credentials: "include",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ oldEncryptedPassword, newEncryptedPassword }),
             }).then(async (res) => {
@@ -357,53 +360,103 @@ export function PlatformPasswordChangeForm() {
                     throw new Error(body.message ?? "common.ui.change-failed");
                 }
             });
-            setError(null);
+            passwordWasChanged = true;
             setOldPassword("");
             setPassword("");
             setConfirm("");
+
+            const logoutResponse = await fetch("/api/auth/logout", {
+                method: "POST",
+                credentials: "include",
+            });
+            if (!logoutResponse.ok) {
+                throw new Error("common.ui.password-changed-session-clear-failed");
+            }
+            setPasswordChanged(true);
         } catch (err) {
-            setError(err instanceof Error ? err.message : "common.ui.change-failed");
+            const fallback = passwordWasChanged
+                ? "common.ui.password-changed-session-clear-failed"
+                : "common.ui.change-failed";
+            setError(err instanceof Error ? err.message : fallback);
         } finally {
             setLoading(false);
         }
     }, [confirm, oldPassword, password]);
 
+    if (passwordChanged) {
+        return (
+            <div className="mx-auto flex min-h-0 w-full max-w-lg flex-1 items-center justify-center py-6">
+                <div
+                    className="w-full rounded-xl border border-border bg-card p-8 text-center shadow-sm"
+                    role="status"
+                    aria-live="polite"
+                >
+                    <div
+                        className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-2xl font-semibold text-primary"
+                        aria-hidden="true"
+                    >
+                        ✓
+                    </div>
+                    <h2 className="mt-4 text-lg font-semibold">
+                        {t("common.ui.password-changed")}
+                    </h2>
+                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                        {t("common.ui.password-changed-description")}
+                    </p>
+                    <Button
+                        className="mt-6 w-full"
+                        variant="primary"
+                        onClick={() => reloadAfterAuth("/login")}
+                    >
+                        {t("common.ui.sign-in-again")}
+                    </Button>
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <div className="max-w-lg">
-            <h2 className="text-lg font-semibold">{t("common.ui.change-password")}</h2>
-            <p className="mt-1 text-sm text-muted-foreground">POST /api/d/platform/auth/password/change</p>
-            <div className="mt-4 flex flex-col gap-3">
-                <label className="text-sm">
-                    {t("common.ui.current-password")}
-                    <Input
-                        className="mt-1"
-                        type="password"
-                        value={oldPassword}
-                        onChange={(v) => setOldPassword(String(v))}
-                    />
-                </label>
-                <label className="text-sm">
-                    {t("common.ui.new-password")}
-                    <Input
-                        className="mt-1"
-                        type="password"
-                        value={password}
-                        onChange={(v) => setPassword(String(v))}
-                    />
-                </label>
-                <label className="text-sm">
-                    {t("common.ui.confirm-new-password")}
-                    <Input
-                        className="mt-1"
-                        type="password"
-                        value={confirm}
-                        onChange={(v) => setConfirm(String(v))}
-                    />
-                </label>
-                {error && <p className="text-sm text-destructive">{t(error)}</p>}
-                <Button variant="primary" disabled={loading} onClick={() => void submit()}>
-                    {t("common.ui.save")}
-                </Button>
+        <div className="mx-auto flex min-h-0 w-full max-w-lg flex-1 items-center justify-center py-6">
+            <div className="w-full rounded-xl border border-border bg-card p-6 shadow-sm">
+                <div className="mb-5">
+                    <h2 className="text-lg font-semibold">{t("common.ui.change-password")}</h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                        {t("common.ui.change-password-description")}
+                    </p>
+                </div>
+                <div className="flex flex-col gap-4">
+                    <label className="text-sm">
+                        {t("common.ui.current-password")}
+                        <Input
+                            className="mt-1"
+                            type="password"
+                            value={oldPassword}
+                            onChange={(v) => setOldPassword(String(v))}
+                        />
+                    </label>
+                    <label className="text-sm">
+                        {t("common.ui.new-password")}
+                        <Input
+                            className="mt-1"
+                            type="password"
+                            value={password}
+                            onChange={(v) => setPassword(String(v))}
+                        />
+                    </label>
+                    <label className="text-sm">
+                        {t("common.ui.confirm-new-password")}
+                        <Input
+                            className="mt-1"
+                            type="password"
+                            value={confirm}
+                            onChange={(v) => setConfirm(String(v))}
+                        />
+                    </label>
+                    {error && <p className="text-sm text-destructive">{t(error)}</p>}
+                    <Button variant="primary" disabled={loading} onClick={() => void submit()}>
+                        {t("common.ui.save")}
+                    </Button>
+                </div>
             </div>
         </div>
     );

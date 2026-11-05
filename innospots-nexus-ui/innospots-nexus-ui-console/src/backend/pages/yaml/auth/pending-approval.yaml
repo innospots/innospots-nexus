@@ -1,5 +1,6 @@
 dsl: "1.0"
 page:
+  access-mode: public
   id: pending-approval
   title: '$i18n{auth.pending-approval.title:注册待审核}'
   name: pendingApproval

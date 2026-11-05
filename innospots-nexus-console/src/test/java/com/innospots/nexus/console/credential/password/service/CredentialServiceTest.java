@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.i18n.I18nConverter;
@@ -87,6 +88,35 @@ class CredentialServiceTest {
                 null,
                 record.forceReset(),
                 record.expiredAt()));
+    }
+
+    @Test
+    void changePasswordClearsFailuresWithoutRestoringThePreviousVerifier() {
+        UserCredentialOperator operator = mock(UserCredentialOperator.class);
+        CredentialRecord current = passwordRecord("user-1", "Secret123", 2, LocalDateTime.now().plusMinutes(5));
+        CredentialRecord rotated = new CredentialRecord(
+                current.subjectId(),
+                current.credentialKind(),
+                current.algorithm(),
+                "rotated-verifier",
+                current.verifierParams(),
+                current.credentialVersion() + 1,
+                current.failedAttempts(),
+                current.lockedUntil(),
+                current.forceReset(),
+                current.expiredAt());
+        when(operator.findPassword(SecurityRealm.TENANT, "user-1"))
+                .thenReturn(Optional.of(current), Optional.of(rotated));
+        when(operator.verify(current, "Secret123")).thenReturn(true);
+        CredentialService service = new CredentialService(operator, new PasswordValidator(), LoginLockPolicy.DEFAULT);
+
+        service.changePassword(SecurityRealm.TENANT, "user-1", "Secret123", "NewSecret123");
+
+        ArgumentCaptor<CredentialRecord> state = ArgumentCaptor.forClass(CredentialRecord.class);
+        verify(operator).saveState(eq(SecurityRealm.TENANT), state.capture());
+        assertThat(state.getValue().verifier()).isEqualTo("rotated-verifier");
+        assertThat(state.getValue().failedAttempts()).isZero();
+        assertThat(state.getValue().lockedUntil()).isNull();
     }
 
     private static CredentialRecord passwordRecord(

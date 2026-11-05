@@ -1,6 +1,8 @@
 dsl: "1.0"
 page:
+  access-mode: grant
   id: role-detail-members
+  pageKey: platform-role-main
   title: '$i18n{role.role-detail-members.title:角色成员列表}'
   name: roleDetailMembersRedirect
   domain: operation

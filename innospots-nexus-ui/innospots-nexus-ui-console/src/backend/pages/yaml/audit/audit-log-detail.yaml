@@ -1,6 +1,8 @@
 dsl: "1.0"
 page:
+  access-mode: grant
   id: audit-log-detail
+  pageKey: platform-logger-main
   title: '$i18n{audit.audit-log-detail.title:审计日志详情}'
   name: auditLogDetail
   domain: system

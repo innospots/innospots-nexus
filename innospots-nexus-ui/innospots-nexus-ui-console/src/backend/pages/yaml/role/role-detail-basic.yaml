@@ -1,6 +1,8 @@
 dsl: "1.0"
 page:
+  access-mode: grant
   id: role-detail-basic
+  pageKey: platform-role-main
   title: '$i18n{role.role-detail-basic.title:角色详情}'
   name: roleDetail
   domain: operation
@@ -29,7 +31,7 @@ dataSources:
     autoLoad: false
     request:
       method: GET
-      url: /api/d/nexus/catalog/tree
+      url: /api/d/nexus/catalog/permission-catalog
   grants:
     type: http
     autoLoad: false
@@ -319,6 +321,10 @@ body:
                           type: secondary
                           className: mt-2
                       - type: PermissionGrantPanel
+                        access:
+                          mode: disable
+                          requests:
+                            - { method: PUT, url: '/api/d/platform/roles/${params.roleId}/permissions' }
                         when: ${!dataStatus.grants.loading}
                         props:
                           className: mt-3
@@ -432,6 +438,11 @@ body:
                       className: mt-4
                     children:
                       - type: Button
+                        access:
+                          requests:
+                            - { method: GET, url: /api/d/platform/users }
+                            - { method: GET, url: '/api/d/platform/roles/${params.roleId}/bindings' }
+                            - { method: POST, url: '/api/d/platform/roles/${params.roleId}/bindings' }
                         props:
                           text: '$i18n{role.role-detail-basic.add-member:+ 添加成员}'
                           variant: primary
@@ -447,6 +458,11 @@ body:
                                     roleId: ${params.roleId}
                                   content:
                                     type: RoleMemberAddPanel
+                                    access:
+                                      requests:
+                                        - { method: GET, url: /api/d/platform/users }
+                                        - { method: GET, url: '/api/d/platform/roles/${params.roleId}/bindings' }
+                                        - { method: POST, url: '/api/d/platform/roles/${params.roleId}/bindings' }
                                     props:
                                       roleId: ${params.roleId}
                                       roleName: ${data.role.roleName}
@@ -484,6 +500,10 @@ body:
                           fixed: right
                           cell:
                             type: Button
+                            access:
+                              requests:
+                                - method: DELETE
+                                  url: /api/d/platform/roles/${params.roleId}/bindings/${row.bindingId}
                             props:
                               text: '$i18n{role.role-detail-basic.remove:移除}'
                               variant: link

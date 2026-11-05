@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import com.innospots.nexus.console.auth.domain.request.PasswordChangeRequest;
 import com.innospots.nexus.console.auth.domain.request.TokenRefreshRequest;
 import com.innospots.nexus.console.auth.endpoint.AuthSessionEndpoint;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrant;
 import com.innospots.nexus.platform.config.PlatformConstant;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,22 +42,33 @@ class PlatformAuthSessionEndpointContractsTest {
                         .getAnnotation(POST.class))
                 .isNotNull();
         assertThat(PlatformConstant.AUTH_REFRESH_PATH).isEqualTo("/api/d/platform/auth/refresh");
-        assertThat(PlatformAuthSessionEndpoint.class.getMethod("refresh", TokenRefreshRequest.class)
+        assertThat(AuthSessionEndpoint.class.getMethod("refresh", TokenRefreshRequest.class)
                         .getAnnotation(Operation.class)
                         .operationId())
-                .isEqualTo("platformAuthRefresh");
-        assertThat(PlatformAuthSessionEndpoint.class.getMethod("logout")
+                .isEqualTo("authRefresh");
+        assertThat(AuthSessionEndpoint.class.getMethod("logout")
                         .getAnnotation(Operation.class)
                         .operationId())
-                .isEqualTo("platformAuthLogout");
-        assertThat(PlatformAuthSessionEndpoint.class.getMethod("changePassword", PasswordChangeRequest.class)
+                .isEqualTo("authLogout");
+        assertThat(AuthSessionEndpoint.class.getMethod("changePassword", PasswordChangeRequest.class)
                         .getAnnotation(Operation.class)
                         .operationId())
-                .isEqualTo("platformAuthPasswordChange");
+                .isEqualTo("authPasswordChange");
         assertThat(AuthSessionEndpoint.class.getMethod("logout").getAnnotation(POST.class))
                 .isNotNull();
         assertThat(AuthSessionEndpoint.class.getMethod("changePassword", PasswordChangeRequest.class)
                         .getAnnotation(POST.class))
                 .isNotNull();
+    }
+
+    @Test
+    void changePasswordRequiresAuthenticationWithoutCatalogPermission() throws NoSuchMethodException {
+        EndpointGrant grant = AuthSessionEndpoint.class
+                .getMethod("changePassword", PasswordChangeRequest.class)
+                .getAnnotation(EndpointGrant.class);
+
+        assertThat(grant).isNotNull();
+        assertThat(grant.ignoreAuth()).isFalse();
+        assertThat(grant.ignorePermission()).isTrue();
     }
 }

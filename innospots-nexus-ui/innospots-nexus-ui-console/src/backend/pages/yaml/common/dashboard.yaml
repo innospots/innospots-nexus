@@ -1,6 +1,8 @@
 dsl: "1.0"
 page:
+  access-mode: grant
   id: dashboard
+  pageKey: platform-user-main
   title: '$i18n{common.dashboard.title:工作台}'
   name: dashboard
   domain: operation

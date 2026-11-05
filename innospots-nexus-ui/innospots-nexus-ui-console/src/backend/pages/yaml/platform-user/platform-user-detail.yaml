@@ -1,6 +1,8 @@
 dsl: "1.0"
 page:
+  access-mode: grant
   id: platform-user-detail
+  pageKey: platform-user-main
   title: '$i18n{platform-user.platform-user-detail.title:平台用户详情}'
   name: platformUserDetail
   domain: operation
@@ -124,6 +126,9 @@ body:
                         width: 480
                         content:
                           type: PlatformUserPasswordResetPanel
+                          access:
+                            requests:
+                              - { method: PUT, url: '/api/d/platform/users/${params.platformUserId}/password' }
                           props:
                             platformUserId: ${data.user.platformUserId}
                           events:
@@ -136,6 +141,9 @@ body:
                                   text: '$i18n{platform-user.platform-user-detail.password-reset:密码已重置}'
                               - action: overlay.close
             - type: Button
+              access:
+                requests:
+                  - { method: PUT, url: '/api/d/platform/users/${params.platformUserId}' }
               props:
                 text: "${state.editing ? t('platform-user.platform-user-detail.cancel-editing') :
                   t('platform-user.platform-user-detail.edit')}"

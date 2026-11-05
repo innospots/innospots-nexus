@@ -48,7 +48,7 @@ public interface RoleBindingEndpoint {
     @POST
     @EndpointGrant(
             action = EndpointGrantAction.ASSIGN,
-            group = CatalogOperationGroups.ASSIGN,
+            group = CatalogOperationGroups.OPERATE,
             name = "role.binding.add",
             label = @I18nLiteral(pairs = {"zh-CN", "新增角色绑定", "en", "Add role bindings"}),
             recordArgs = false,
@@ -62,7 +62,7 @@ public interface RoleBindingEndpoint {
     @Path("/{bindingId}")
     @EndpointGrant(
             action = EndpointGrantAction.REVOKE,
-            group = CatalogOperationGroups.REVOKE,
+            group = CatalogOperationGroups.OPERATE,
             name = "role.binding.remove",
             label = @I18nLiteral(pairs = {"zh-CN", "移除角色绑定", "en", "Remove role binding"}),
             recordArgs = false,

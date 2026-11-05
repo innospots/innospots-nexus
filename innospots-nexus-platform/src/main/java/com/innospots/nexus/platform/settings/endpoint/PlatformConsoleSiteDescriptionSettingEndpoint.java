@@ -50,6 +50,7 @@ public class PlatformConsoleSiteDescriptionSettingEndpoint {
     @PUT
     @EndpointGrant(
             action = EndpointGrantAction.UPDATE,
+            group = "update",
             name = "platform.settings.console-site-description.update",
             label = @I18nLiteral(pairs = {"zh-CN", "更新系统简介", "en", "Update console site description setting"}),
             recordArgs = false,

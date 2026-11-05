@@ -11,17 +11,7 @@ import type { DemoUser } from "@/backend/auth/accounts";
 import type { RequestI18n } from "@/backend/pages/i18n";
 import { consoleTranslatableFields } from "@/backend/pages/i18n";
 
-/**
- * Mock sitemap 数据源（design/dynamic-page.md 方案 B 示例实现）。
- * 真实项目由后端接口返回同构对象——端点按会话裁剪：
- * 匿名 → public 页（登录/注册）；登录后 → 该角色可见的 menus / pages / permissions。
- *
- * 入口数据（元数据 / layouts / pages / menus 全量）在 yaml/sitemap.yaml，
- * 页面 DSL 在 yaml/<域>/<id>.yaml（route / provider / audit / model /
- * 等，按 PRD 模块树划分）；本文件只负责：
- * 加载 YAML、按会话裁剪可见性（public / permission / 需登录）、注入会话
- * 动态字段（updatedAt / user / permissions）。
- */
+/** 页面清单与布局来自本地 YAML；可见导航来自后端，非菜单页面生成隐藏路由。 */
 
 /* ---------------- YAML DSL 文件加载（src/backend/pages/yaml/，缓存 + dev 下 fs.watch 失效重读） ---------------- */
 
@@ -38,7 +28,7 @@ function loadYaml<T>(file: string): T {
   return doc.toJS() as T;
 }
 
-/** sitemap.yaml 中的页面声明：可见性标记（public / permission）+ DSL 加载方式（lazy）+ catalog 归属（domain/module/group，group 缺省 view） */
+/** sitemap 中的路由及布局信息；授权归属从页面 DSL 读取。 */
 interface PageEntry {
   id: string;
   path: string;
@@ -46,14 +36,10 @@ interface PageEntry {
   version: number;
   public?: boolean;
   permission?: string;
-  /** catalog 领域键（与 plugin-declaration domainKey 一致） */
-  domain?: string;
-  /** catalog 模块键（与 plugin-declaration moduleKey 一致） */
-  module?: string;
-  /** 浏览分组键；缺省 view */
-  group?: string;
   /** 不随 sitemap 内联 pageDsl，客户端经 /api/public/pages/{id} 懒加载 */
   lazy?: boolean;
+  layout?: string;
+  activeMenu?: string;
 }
 
 interface SitemapFile {
@@ -66,7 +52,6 @@ interface SitemapFile {
   auth: { loginPath: string };
   layouts: Record<string, LayoutDsl>;
   pages: PageEntry[];
-  menus: SitemapResource["menus"];
 }
 
 interface PageFile {
@@ -120,17 +105,27 @@ function loadState(): YamlState {
     return loadYaml<PageDsl>(file.path);
   }
 
-  return {
-    site,
-    pages: new Map(
-      site.pages.map((page) => [
-        page.id,
-        {
-          pageDsl: loadPageDsl(page.id),
-        },
-      ]),
-    ),
-  };
+  const pages = new Map<string, LoadedPage>();
+  for (const entry of site.pages) {
+    const pageDsl = loadPageDsl(entry.id);
+    const page = pageDsl.page as unknown as Record<string, unknown>;
+    const mode = page["access-mode"];
+    if (page.id !== entry.id || !["public", "authenticated", "grant"].includes(String(mode))) {
+      throw new Error(`页面 ${entry.id} 的 id 或 access-mode 无效`);
+    }
+    if (!entry.lazy) {
+      throw new Error(`页面 ${entry.id} 必须通过懒加载端点进行访问检查`);
+    }
+    if (mode === "grant" && [page.domain, page.module, page.pageKey].some(
+      (value) => typeof value !== "string" || value.trim() === "",
+    )) {
+      throw new Error(`页面 ${entry.id} 的 domain、module 或 pageKey 缺失`);
+    }
+    entry.public = page["access-mode"] === "public";
+    pages.set(entry.id, { pageDsl });
+  }
+
+  return { site, pages };
 }
 
 let stateCache: YamlState | null = null;
@@ -184,31 +179,7 @@ function canSee(entry: Visibility, user: DemoUser | null): boolean {
   return true;
 }
 
-/** 菜单按会话过滤；group 无可见子项时整组隐藏。hidden 仍保留在 sitemap 中供路由匹配，侧栏由 MenuRegistry / NavigationShell 再过滤。 */
-function filterMenus(
-  menus: SitemapResource["menus"],
-  user: DemoUser | null,
-): SitemapResource["menus"] {
-  const out: SitemapResource["menus"] = [];
-  for (const item of menus) {
-    if (!canSee(item, user)) {
-      continue;
-    }
-    if (item.type === "group") {
-      const children = filterMenus(item.children ?? [], user);
-      if (children.length === 0) continue;
-      out.push({ ...item, children });
-    } else {
-      out.push(item);
-    }
-  }
-  return out;
-}
-
-/**
- * 按会话构建 sitemap：同一 URL，不同用户拿到不同内容。
- * 匿名 → 仅 public 页；guest → + 首页；admin → + 用户列表 / 报表组。
- */
+/** 将当前会话与后端导航组合为 Pactor sitemap。 */
 function sitemapUser(user: DemoUser): DemoUser {
   const name = user.name?.trim();
   return {
@@ -300,10 +271,10 @@ function enrichMenusWithPaths(
 export function buildSitemap(
   user: DemoUser | null,
   i18n: RequestI18n,
+  navigationMenus: SitemapResource["menus"],
 ): SitemapResource {
   const { site, pages: loadedPages } = state();
   const pages: SitemapResource["pages"] = site.pages
-    .filter((p) => canSee(p, user))
     .map((p) => {
       const loaded = loadedPages.get(p.id);
       return {
@@ -333,8 +304,27 @@ export function buildSitemap(
     ]),
   ) as SitemapFile["layouts"];
 
-  // sitemap.yaml 原样透传，仅覆盖会话相关部分：pages / menus 按可见性过滤，
-  // updatedAt / user / permissions 按会话注入
+  // 页面路由和布局由本地清单提供，导航由后端按当前用户过滤。
+  const visiblePageIds = new Set<string>();
+  const collect = (items: SitemapResource["menus"]) => {
+    for (const item of items) {
+      if (item.pageId) visiblePageIds.add(item.pageId);
+      if (item.children) collect(item.children);
+    }
+  };
+  collect(navigationMenus);
+  const routeEntries: SitemapResource["menus"] = site.pages
+    .filter((page) => !visiblePageIds.has(page.id))
+    .map((page) => ({
+      id: page.id,
+      type: "page" as const,
+      pageId: page.id,
+      title: page.title,
+      layout: page.layout ?? "admin",
+      hidden: true,
+      ...(page.public ? { public: true } : {}),
+      ...(page.activeMenu ? { activeMenu: page.activeMenu } : {}),
+    }));
   return {
     ...site,
     layouts,
@@ -347,7 +337,7 @@ export function buildSitemap(
       : {}),
     pages,
     menus: localizeMenus(
-      enrichMenusWithPaths(filterMenus(site.menus, user), site.pages),
+      enrichMenusWithPaths([...navigationMenus, ...routeEntries], site.pages),
       i18n.messages,
     ),
   };
@@ -386,12 +376,6 @@ interface RouteRef {
   pageId: string;
 }
 
-type RawMenuItem = SitemapResource["menus"][number] & {
-  path?: string;
-  pageId?: string;
-  children?: RawMenuItem[];
-};
-
 export function getLoginPath(): string {
   return state().site.auth.loginPath ?? "/login";
 }
@@ -411,17 +395,6 @@ export function listPageEntries(): PageEntry[] {
 export function findPageEntryByPath(pathname: string): PageEntry | null {
   const { site } = state();
   const refs: RouteRef[] = [];
-  const walk = (items: RawMenuItem[]): void => {
-    for (const item of items) {
-      if (item.pageId !== undefined && item.path !== undefined) {
-        refs.push({ pattern: item.path, pageId: item.pageId });
-      }
-      if (item.children !== undefined) {
-        walk(item.children);
-      }
-    }
-  };
-  walk(site.menus as RawMenuItem[]);
   for (const page of site.pages) {
     refs.push({ pattern: page.path, pageId: page.id });
   }

@@ -1,6 +1,8 @@
 dsl: "1.0"
 page:
+  access-mode: grant
   id: dictionary-type-detail
+  pageKey: platform-dictionary-main
   title: '$i18n{dictionary.dictionary-type-detail.title:字典类型详情}'
   name: dictionaryTypeDetail
   domain: system

@@ -1,6 +1,8 @@
 dsl: "1.0"
 page:
+  access-mode: grant
   id: platform-access-request-list
+  pageKey: platform-user-main
   title: '$i18n{platform-user.platform-access-request-list.title:注册审批}'
   name: platformAccessRequestList
   domain: operation
@@ -104,6 +106,7 @@ body:
             rowKey: accessRequestId
             dataSource: ${data.accessRequests.records}
             loading: ${dataStatus.accessRequests.loading}
+            pagination: false
             className: mt-4
             columns:
               - title:
@@ -288,8 +291,23 @@ body:
                           - action: navigate
                             params:
                               to: /ops/platform-users/${row.platformUserId}
-        - type: Text
+        - type: Pagination
           props:
-            text: "${t('platform-user.platform-access-request-list.summary.count', { count: data.accessRequests.total })}"
-            type: secondary
+            total: ${data.accessRequests.total}
+            page: ${state.pageNo}
+            pageSize: ${state.pageSize}
+            pageSizeOptions: [10, 20, 50]
+            align: right
             className: mt-3
+          events:
+            onChange:
+              - action: setState
+                params:
+                  pageNo: ${event}
+              - action: reload
+                params:
+                  dataSource: accessRequests
+            onPageSizeChange:
+              - action: setState
+                params:
+                  pageSize: ${event}

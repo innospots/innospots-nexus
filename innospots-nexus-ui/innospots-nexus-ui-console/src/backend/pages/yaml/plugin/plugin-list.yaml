@@ -1,6 +1,8 @@
 dsl: "1.0"
 page:
+  access-mode: grant
   id: plugin-list
+  pageKey: nexus-plugin-main
   title: '$i18n{plugin.plugin-list.title:插件管理}'
   name: pluginList
   domain: system
@@ -141,6 +143,8 @@ body:
             rowKey: pluginId
             dataSource: ${data.plugins}
             loading: ${dataStatus.plugins.loading}
+            pagination:
+              pageSize: 20
             className: mt-4
             columns:
               - title:
@@ -258,8 +262,3 @@ body:
                           - action: reload
                             params:
                               dataSource: plugins
-        - type: Text
-          props:
-            text: "${t('plugin.plugin-list.summary.count', { count: data.plugins.length })}"
-            type: secondary
-            className: mt-3

@@ -1,6 +1,8 @@
 dsl: "1.0"
 page:
+  access-mode: grant
   id: dictionary-type-create
+  pageKey: platform-dictionary-main
   title: '$i18n{dictionary.dictionary-type-create.title:新建字典}'
   name: dictionaryTypeCreate
   domain: system

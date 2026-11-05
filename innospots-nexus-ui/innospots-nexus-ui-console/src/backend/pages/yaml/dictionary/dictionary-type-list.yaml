@@ -1,6 +1,8 @@
 dsl: "1.0"
 page:
+  access-mode: grant
   id: dictionary-type-list
+  pageKey: platform-dictionary-main
   title: '$i18n{dictionary.dictionary-type-list.title:数据字典}'
   name: dictionaryTypeList
   domain: system
@@ -76,6 +78,9 @@ body:
                 variant: muted
                 text: '$i18n{dictionary.dictionary-type-list.maintain-reusable-dictionary-types-and-values-for-business-use:维护业务可复用的字典类型和对应的值。}'
         - type: Button
+          access:
+            requests:
+              - { method: POST, url: /api/d/platform/dictionary-types }
           props:
             text: '$i18n{dictionary.dictionary-type-list.new-type:+ 新建类型}'
             variant: primary
@@ -171,6 +176,7 @@ body:
             rowKey: dictionaryTypeId
             dataSource: ${data.types.records}
             loading: ${dataStatus.types.loading}
+            pagination: false
             className: mt-4
             columns:
               - title:
@@ -220,6 +226,9 @@ body:
                       events:
                         onClick: *a1
                     - type: Button
+                      access:
+                        requests:
+                          - { method: PUT, url: '/api/d/platform/dictionary-types/${row.dictionaryTypeId}' }
                       props:
                         text: '$i18n{dictionary.dictionary-type-list.edit:编辑}'
                         variant: link
@@ -241,11 +250,26 @@ body:
                           - action: setState
                             params:
                               typeDrawerOpen: true
-        - type: Text
+        - type: Pagination
           props:
-            text: "${t('dictionary.dictionary-type-list.summary.count', { count: data.types.total })}"
-            type: secondary
+            total: ${data.types.total}
+            page: ${state.pageNo}
+            pageSize: ${state.pageSize}
+            pageSizeOptions: [10, 20, 50]
+            align: right
             className: mt-3
+          events:
+            onChange:
+              - action: setState
+                params:
+                  pageNo: ${event}
+              - action: reload
+                params:
+                  dataSource: types
+            onPageSizeChange:
+              - action: setState
+                params:
+                  pageSize: ${event}
     - type: DrawerBackdrop
       props:
         open: ${state.viewDrawerOpen || state.typeDrawerOpen}
@@ -273,6 +297,7 @@ body:
             typeData: ${data.editing}
             itemsData: ${data.typeItems.records}
     - type: Drawer
+      when: ${state.drawerMode == 'create'}
       props:
         open: ${state.typeDrawerOpen}
         placement: right
@@ -285,19 +310,88 @@ body:
           maxWidth: 840px
       events:
         onOk:
-          - action: dictionaryType.persist
-          - action: message
+          - id: dictionarySaveResult
+            action: dictionaryType.persist
+            access:
+              requests:
+                - { method: POST, url: /api/d/platform/dictionary-types }
+          - action: if
             params:
-              messageType: success
-              text: "${state.drawerMode == 'create' ? t('dictionary.dictionary-type-list.created') :
-                t('dictionary.dictionary-type-list.saved')}"
-          - action: setState
+              condition: ${actions.dictionarySaveResult != null && actions.dictionarySaveResult.ok == false}
+              then:
+                - id: dictionarySaveError
+                  action: request.errorMessage
+                  params:
+                    message: ${actions.dictionarySaveResult.error.message}
+                - action: message
+                  params:
+                    messageType: error
+                    text: ${actions.dictionarySaveError}
+              else:
+                - action: message
+                  params:
+                    messageType: success
+                    text: "${state.drawerMode == 'create' ? t('dictionary.dictionary-type-list.created') :
+                      t('dictionary.dictionary-type-list.saved')}"
+                - action: setState
+                  params:
+                    viewDrawerOpen: false
+                    typeDrawerOpen: false
+                - action: reload
+                  params:
+                    dataSource: types
+        onClose: *a2
+      children:
+        - type: DictionaryTypeSavePanel
+          props:
+            hideFooter: true
+            mode: ${state.drawerMode}
+            typeData: "${state.drawerMode == 'edit' ? data.editing : null}"
+            itemsData: "${state.drawerMode == 'edit' ? data.typeItems.records : null}"
+    - type: Drawer
+      when: ${state.drawerMode == 'edit'}
+      props:
+        open: ${state.typeDrawerOpen}
+        placement: right
+        title: "${state.drawerMode == 'create' ? t('dictionary.dictionary-type-list.new-dictionary') :
+          t('dictionary.dictionary-type-list.edit-dictionary')}"
+        okText: '$i18n{dictionary.dictionary-type-list.save-all:保存全部}'
+        cancelText: '$i18n{dictionary.dictionary-type-list.cancel:取消}'
+        style:
+          width: 840px
+          maxWidth: 840px
+      events:
+        onOk:
+          - id: dictionarySaveResult
+            action: dictionaryType.persist
+            access:
+              requests:
+                - { method: PUT, url: '/api/d/platform/dictionary-types/${state.editingTypeId}' }
+          - action: if
             params:
-              viewDrawerOpen: false
-              typeDrawerOpen: false
-          - action: reload
-            params:
-              dataSource: types
+              condition: ${actions.dictionarySaveResult != null && actions.dictionarySaveResult.ok == false}
+              then:
+                - id: dictionarySaveError
+                  action: request.errorMessage
+                  params:
+                    message: ${actions.dictionarySaveResult.error.message}
+                - action: message
+                  params:
+                    messageType: error
+                    text: ${actions.dictionarySaveError}
+              else:
+                - action: message
+                  params:
+                    messageType: success
+                    text: "${state.drawerMode == 'create' ? t('dictionary.dictionary-type-list.created') :
+                      t('dictionary.dictionary-type-list.saved')}"
+                - action: setState
+                  params:
+                    viewDrawerOpen: false
+                    typeDrawerOpen: false
+                - action: reload
+                  params:
+                    dataSource: types
         onClose: *a2
       children:
         - type: DictionaryTypeSavePanel

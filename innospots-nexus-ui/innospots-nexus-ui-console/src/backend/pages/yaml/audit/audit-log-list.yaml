@@ -1,6 +1,8 @@
 dsl: "1.0"
 page:
+  access-mode: grant
   id: audit-log-list
+  pageKey: platform-logger-main
   title: '$i18n{audit.audit-log-list.title:审计日志}'
   name: auditLogList
   domain: system
@@ -242,6 +244,7 @@ body:
             rowKey: logId
             dataSource: ${data.logs.records}
             loading: ${dataStatus.logs.loading}
+            pagination: false
             className: mt-4
             columns:
               - title:
@@ -281,8 +284,23 @@ body:
                       - action: navigate
                         params:
                           to: /system/audit-logs/${row.logId}
-        - type: Text
+        - type: Pagination
           props:
-            text: "${t('audit.audit-log-list.summary.count', { count: data.logs.total })}"
-            type: secondary
+            total: ${data.logs.total}
+            page: ${state.pageNo}
+            pageSize: ${state.pageSize}
+            pageSizeOptions: [10, 20, 50]
+            align: right
             className: mt-3
+          events:
+            onChange:
+              - action: setState
+                params:
+                  pageNo: ${event}
+              - action: reload
+                params:
+                  dataSource: logs
+            onPageSizeChange:
+              - action: setState
+                params:
+                  pageSize: ${event}

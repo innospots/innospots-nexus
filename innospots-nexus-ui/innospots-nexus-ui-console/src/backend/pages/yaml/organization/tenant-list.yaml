@@ -1,6 +1,8 @@
 dsl: "1.0"
 page:
+  access-mode: grant
   id: tenant-list
+  pageKey: platform-organization-main
   title: '$i18n{organization.tenant-list.title:租户管理}'
   name: tenantList
   domain: operation
@@ -272,6 +274,7 @@ body:
             rowKey: tenantId
             dataSource: ${data.tenants.records}
             loading: ${dataStatus.tenants.loading}
+            pagination: false
             className: mt-4
             columns:
               - title:
@@ -325,8 +328,23 @@ body:
                       - action: navigate
                         params:
                           to: /ops/organization/tenants/${row.tenantId}
-        - type: Text
+        - type: Pagination
           props:
-            text: "${t('organization.tenant-list.summary.count', { count: data.tenants.total })}"
-            type: secondary
+            total: ${data.tenants.total}
+            page: ${state.pageNo}
+            pageSize: ${state.pageSize}
+            pageSizeOptions: [10, 20, 50]
+            align: right
             className: mt-3
+          events:
+            onChange:
+              - action: setState
+                params:
+                  pageNo: ${event}
+              - action: reload
+                params:
+                  dataSource: tenants
+            onPageSizeChange:
+              - action: setState
+                params:
+                  pageSize: ${event}

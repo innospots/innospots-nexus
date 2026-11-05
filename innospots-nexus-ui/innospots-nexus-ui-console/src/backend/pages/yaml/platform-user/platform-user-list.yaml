@@ -1,6 +1,8 @@
 dsl: "1.0"
 page:
+  access-mode: grant
   id: platform-user-list
+  pageKey: platform-user-main
   title: '$i18n{platform-user.platform-user-list.title:用户列表}'
   name: platformUserList
   domain: operation
@@ -57,6 +59,9 @@ body:
                 variant: muted
                 text: '$i18n{platform-user.platform-user-list.review-platform-operations-accounts-and-open-details-use-the-status-filt:查询平台域运营账号并进入详情；待审核用户见状态筛选。}'
         - type: Button
+          access:
+            requests:
+              - { method: POST, url: /api/d/platform/users }
           props:
             text: '$i18n{platform-user.platform-user-list.add-user:+ 添加用户}'
             variant: primary
@@ -157,6 +162,7 @@ body:
             rowKey: platformUserId
             dataSource: ${data.users.records}
             loading: ${dataStatus.users.loading}
+            pagination: false
             className: mt-4
             columns:
               - title:
@@ -227,8 +233,23 @@ body:
                           - action: reload
                             params:
                               dataSource: users
-        - type: Text
+        - type: Pagination
           props:
-            text: "${t('platform-user.platform-user-list.summary.count', { count: data.users.total })}"
-            type: secondary
+            total: ${data.users.total}
+            page: ${state.pageNo}
+            pageSize: ${state.pageSize}
+            pageSizeOptions: [10, 20, 50]
+            align: right
             className: mt-3
+          events:
+            onChange:
+              - action: setState
+                params:
+                  pageNo: ${event}
+              - action: reload
+                params:
+                  dataSource: users
+            onPageSizeChange:
+              - action: setState
+                params:
+                  pageSize: ${event}

@@ -1,5 +1,6 @@
 dsl: "1.0"
 page:
+  access-mode: public
   id: access-registration
   title: '$i18n{access.access-registration.title:注册（待审核）}'
   name: accessRegistration
