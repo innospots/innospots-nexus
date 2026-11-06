@@ -488,8 +488,10 @@ Pactor 页面 Schema 对 `page` 只强制已知必需字段，并允许额外业
 | 模式 | 页面访问判定 | 是否调用 page-access | 操作过滤 |
 |---|---|---|---|
 | `public` | 匿名可访问 | 否 | 不执行操作权限过滤，只移除服务端 `access` 声明 |
-| `authenticated` | 必须存在有效会话 | 是，由 Next.js 服务端调用 | 根据当前请求权限过滤 DSL 操作 |
+| `authenticated` | 必须存在有效会话 | 是，由 Next.js 服务端调用 | 不做页面与操作 grant 过滤（返回 `ignoreGrantGroup=true`，仅移除 `access` 声明） |
 | `grant` | 必须有会话并持有指定页面 grantGroup | 是，由 Next.js 服务端调用 | 根据当前请求权限过滤 DSL 操作，并注入授权组 |
+
+`authenticated` 的语义是「登录即可使用」：它不要求页面级 `domain`/`module`/`pageKey`，也不对页面内声明的操作请求做 grant 判定。端点自身的鉴权与业务校验仍然生效，因此按钮可见不等于后端放行。
 
 公开页面不是“所有操作都公开”。公开页面的操作请求仍需在真正请求后端时经过 JAX-RS 鉴权；`public` 只表示打开页面不需要页面访问授权。
 

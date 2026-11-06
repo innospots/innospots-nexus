@@ -37,17 +37,19 @@ public class PlatformPageAccessService {
                 && !"grant".equals(request.accessMode()))) {
             return PageAccessVerifyResult.deny("Invalid access mode");
         }
-        if ("grant".equals(request.accessMode())
-                && (request.pageKey() == null || request.pageKey().isBlank()
+        if ("authenticated".equals(request.accessMode())) {
+            // 仅要求登录：不做页面级 grant，也不做按钮级 grant 过滤。
+            return subjectResolver.resolve()
+                    .map(subject -> PageAccessVerifyResult.allowIgnoringGrantGroup())
+                    .orElseGet(() -> PageAccessVerifyResult.deny("Authentication is required"));
+        }
+        if (request.pageKey() == null || request.pageKey().isBlank()
                 || !actionAccessService.hasPageGrant(request.domainKey(), request.moduleKey(),
-                        request.pageKey(), request.grantGroup()))) {
+                        request.pageKey(), request.grantGroup())) {
             return PageAccessVerifyResult.deny("Invalid page grant configuration");
         }
         PageAccessVerifyResult page = subjectResolver.resolve()
                 .map(subject -> {
-                    if ("authenticated".equals(request.accessMode())) {
-                        return PageAccessVerifyResult.allow();
-                    }
                     if (ConsoleSessionContext.scope() == ConsoleSessionScope.PLATFORM) {
                         return pageAccessVerifier.verify(request, null, subject);
                     }

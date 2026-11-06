@@ -3,6 +3,8 @@ package com.innospots.nexus.platform.permission.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
@@ -39,7 +41,7 @@ class PlatformPageAccessServiceTest {
     }
 
     @Test
-    void includesActionResultsForAuthenticatedPage() {
+    void authenticatedPageSkipsActionGrantFiltering() {
         PlatformActionAccessService actions = mock(PlatformActionAccessService.class);
         when(actions.verify(any())).thenReturn(new ActionAccessVo(Map.of("POST:/api/test", false), List.of()));
         AuthorizationSubject subject = new AuthorizationSubject("user", Set.of(), Set.of(), false);
@@ -49,7 +51,10 @@ class PlatformPageAccessServiceTest {
         var result = service.verify(new PageAccessVerifyRequest("", "", "password-change", "view",
                 "authenticated", List.of(new PageAccessVerifyRequest.RequestItem("POST", "/api/test"))));
         assertThat(result.allowed()).isTrue();
-        assertThat(result.requestPermissions()).containsEntry("POST:/api/test", false);
+        // authenticated 仅要求登录，不做按钮级 grant 过滤。
+        assertThat(result.ignoreGrantGroup()).isTrue();
+        assertThat(result.requestPermissions()).isEmpty();
+        verify(actions, never()).verify(any());
     }
 
     @Test

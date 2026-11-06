@@ -357,6 +357,10 @@ Next.js 服务端读取页面 DSL、递归收集请求。`public` 页直接加�
 POST /api/public/page-access/verify
 ```
 
+`authenticated` 只校验会话有效性，不要求 `domain`/`module`/`pageKey`，也不做页面与
+操作 grant 判定（返回 `ignoreGrantGroup=true`，服务端仅移除 `access` 声明）。
+`grant` 才执行页面授权组校验与逐请求的 grant 过滤。
+
 返回 `allowed/reason/requestPermissions/grantGroups`，不返回或授予业务 API 权限。
 浏览器不要再直接调用 page-access。
 
@@ -366,6 +370,9 @@ POST /api/public/page-access/verify
 - `action: call` 引用的命名 action 内部请求。
 - overlay/modal 中的嵌套请求。
 - 自定义组件/action 显式声明的 `access.requests[]`。
+
+上述过滤只对 `grant` 页生效；`authenticated` 页返回 `ignoreGrantGroup=true`，
+服务端剥离 `access` 声明后直接下发，不做逐请求判定。
 
 无权限时的默认表现：
 
