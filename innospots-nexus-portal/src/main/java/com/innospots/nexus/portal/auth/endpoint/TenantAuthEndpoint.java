@@ -26,9 +26,9 @@ import com.innospots.nexus.portal.auth.domain.request.SelectTenantRequest;
 import com.innospots.nexus.portal.auth.domain.request.TenantRegisterRequest;
 import com.innospots.nexus.portal.auth.service.TenantAuthFacade;
 import com.innospots.nexus.console.credential.password.PasswordDecryptor;
-import com.innospots.nexus.portal.user.domain.request.UserPasswordRegisterRequest;
-import com.innospots.nexus.portal.user.operator.PasswordOperator;
-import com.innospots.nexus.portal.user.operator.UserOperator;
+import com.innospots.nexus.console.user.portal.domain.request.PortalUserPasswordRegisterRequest;
+import com.innospots.nexus.console.user.portal.service.PortalPasswordService;
+import com.innospots.nexus.console.user.portal.service.PortalUserService;
 
 /**
  * 租户域认证与身份注册 REST 资源。
@@ -41,8 +41,8 @@ import com.innospots.nexus.portal.user.operator.UserOperator;
 public class TenantAuthEndpoint {
 
     private final TenantAuthFacade tenantAuthFacade;
-    private final UserOperator userOperator;
-    private final PasswordOperator passwordOperator;
+    private final PortalUserService userOperator;
+    private final PortalPasswordService passwordOperator;
     private final PasswordDecryptor passwordDecryptor;
 
     @POST
@@ -50,7 +50,7 @@ public class TenantAuthEndpoint {
     @Operation(operationId = "tenantAuthRegister", summary = "注册租户域身份")
     public R<AuthTokenVo> register(TenantRegisterRequest request) {
         Checks.notNull(request, "request");
-        userOperator.registerWithPassword(new UserPasswordRegisterRequest(
+        userOperator.registerWithPassword(new PortalUserPasswordRegisterRequest(
                 request.userName(),
                 request.displayName(),
                 request.email(),
@@ -86,8 +86,8 @@ public class TenantAuthEndpoint {
     @Path("/select-tenant")
     @Operation(operationId = "tenantAuthSelectTenant", summary = "选择租户")
     public R<AuthTokenVo> selectTenant(SelectTenantRequest request) {
-        String tenantUserId = requireAuthenticatedUserId();
-        return R.ok(tenantAuthFacade.selectTenant(tenantUserId, request));
+        String portalUserId = requireAuthenticatedUserId();
+        return R.ok(tenantAuthFacade.selectTenant(portalUserId, request));
     }
 
     @POST

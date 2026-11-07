@@ -27,13 +27,13 @@ class PortalModuleBoundaryTest {
     @Test
     void portalKeepsTenantDomainsWithoutPermissionCatalogSync() throws ClassNotFoundException {
         assertTypeAbsent("com.innospots.nexus.portal.permission.service.PermissionResourceSyncService");
-        assertThat(Class.forName("com.innospots.nexus.portal.user.operator.UserOperator"))
+        assertThat(Class.forName("com.innospots.nexus.console.user.portal.service.PortalUserService"))
                 .isNotInterface();
-        assertThat(Class.forName("com.innospots.nexus.portal.member.domain.entity.TenantMemberEntity"))
+        assertThat(Class.forName("com.innospots.nexus.console.scope.tenant.domain.entity.TenantMemberEntity"))
                 .isNotInterface();
         assertThat(Class.forName("com.innospots.nexus.portal.organization.domain.entity.OrganizationUnitEntity"))
                 .isNotInterface();
-        assertThat(Class.forName("com.innospots.nexus.portal.workspace.domain.entity.WorkspaceEntity"))
+        assertThat(Class.forName("com.innospots.nexus.console.scope.workspace.domain.entity.WorkspaceEntity"))
                 .isNotInterface();
     }
 

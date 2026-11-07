@@ -24,8 +24,8 @@ import com.innospots.nexus.platform.invite.service.PlatformInviteService;
 import com.innospots.nexus.platform.invite.service.PlatformPublicInviteService;
 import com.innospots.nexus.platform.invite.support.PlatformInviteLinkBuilder;
 import com.innospots.nexus.platform.invite.support.PlatformInviteOtpNotifier;
-import com.innospots.nexus.platform.user.service.PlatformUserService;
-import com.innospots.nexus.platform.user.support.PlatformUserRoleProvisioner;
+import com.innospots.nexus.console.user.admin.service.AdminUserService;
+import com.innospots.nexus.console.user.admin.support.AdminUserRoleProvisioner;
 import com.innospots.nexus.platform.settings.service.PlatformRegistrationModeSettingService;
 
 @Configuration
@@ -58,11 +58,11 @@ public class PlatformProvisioningConfiguration {
     @Bean
     PlatformPublicInviteService platformPublicInviteService(
             PlatformInviteOperator platformInviteOperator,
-            PlatformUserService platformUserService,
+            AdminUserService platformUserService,
             OtpChallengeService otpChallengeService,
             PasswordDecryptor passwordDecryptor,
             RegistrationPolicyService registrationPolicyService,
-            PlatformUserRoleProvisioner platformUserRoleProvisioner) {
+            AdminUserRoleProvisioner platformUserRoleProvisioner) {
         return new PlatformPublicInviteService(
                 platformInviteOperator,
                 platformUserService,
@@ -80,7 +80,7 @@ public class PlatformProvisioningConfiguration {
     @Bean
     PlatformAccessRequestService platformAccessRequestService(
             PlatformAccessRequestOperator platformAccessRequestOperator,
-            PlatformUserService platformUserService,
+            AdminUserService platformUserService,
             OtpChallengeService otpChallengeService,
             PasswordDecryptor passwordDecryptor,
             RegistrationPolicyService registrationPolicyService) {
@@ -94,7 +94,7 @@ public class PlatformProvisioningConfiguration {
 
     @Bean
     PlatformOpenRegistrationService platformOpenRegistrationService(
-            PlatformUserService platformUserService,
+            AdminUserService platformUserService,
             OtpChallengeService otpChallengeService,
             PasswordDecryptor passwordDecryptor,
             RegistrationPolicyService registrationPolicyService) {

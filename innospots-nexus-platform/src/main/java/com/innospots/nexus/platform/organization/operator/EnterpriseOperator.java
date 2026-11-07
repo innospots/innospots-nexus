@@ -15,7 +15,7 @@ import com.innospots.nexus.platform.organization.domain.entity.EnterpriseEntity;
 import com.innospots.nexus.platform.organization.status.PlatformOrganizationStatusCode;
 
 /**
- * {@code nx_pl_enterprise} 的按租户查询与插入/更新（与 {@code nx_pl_tenant} 一对一）。
+ * {@code nx_pl_enterprise} 的按租户查询与插入/更新（与 {@code nx_tenant} 一对一）。
  *
  * @author Smars
  * @date 2026/09/13

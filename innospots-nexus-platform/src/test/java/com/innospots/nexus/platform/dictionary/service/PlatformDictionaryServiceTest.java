@@ -9,9 +9,9 @@ import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
 import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeCreateRequest;
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeVo;
 import com.innospots.nexus.console.dictionary.operator.DictionaryTypeOperator;
-import com.innospots.nexus.console.scope.ConsoleOwnership;
-import com.innospots.nexus.console.scope.ConsoleSessionContext;
-import com.innospots.nexus.console.scope.ConsoleSessionScope;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnership;
+import com.innospots.nexus.console.scope.domain.session.ConsoleSessionContext;
+import com.innospots.nexus.console.scope.domain.session.ConsoleSessionScope;
 import com.innospots.nexus.base.thread.TLC;
 
 import static org.assertj.core.api.Assertions.assertThat;

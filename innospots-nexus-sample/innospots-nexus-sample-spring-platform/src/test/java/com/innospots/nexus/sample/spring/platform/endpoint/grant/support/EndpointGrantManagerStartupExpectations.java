@@ -25,7 +25,7 @@ import com.innospots.nexus.core.endpoint.grant.support.ResolvedEndpointGrant;
 import com.innospots.nexus.console.endpoint.MainRootEndpoint;
 import com.innospots.nexus.console.plugin.endpoint.PluginManagementEndpoint;
 import com.innospots.nexus.platform.dictionary.endpoint.PlatformDictionaryTypeEndpoint;
-import com.innospots.nexus.platform.user.endpoint.PlatformUserEndpoint;
+import com.innospots.nexus.console.user.admin.endpoint.AdminUserEndpoint;
 
 /**
  * 与 {@link com.innospots.nexus.spring.console.config.ConsoleEndpointGrantConfiguration}
@@ -35,7 +35,7 @@ public final class EndpointGrantManagerStartupExpectations {
 
     public static final Set<Class<?>> REQUIRED_RESOURCE_TYPES = Set.of(
             PlatformDictionaryTypeEndpoint.class,
-            PlatformUserEndpoint.class,
+            AdminUserEndpoint.class,
             ConsoleCatalogEndpoint.class,
             MainRootEndpoint.class,
             PluginManagementEndpoint.class);

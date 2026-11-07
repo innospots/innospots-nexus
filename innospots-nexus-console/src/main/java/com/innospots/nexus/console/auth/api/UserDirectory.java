@@ -23,7 +23,7 @@ public interface UserDirectory {
     /**
      * 按域用户主键加载仍可用于认证的用户（通常为 {@code ACTIVE}）。
      *
-     * @param userId platform_user_id 或 tenant_user_id
+     * @param userId platform_user_id 或 portal_user_id
      * @return 找到且仍有效时返回
      */
     Optional<AuthUser> findById(String userId);

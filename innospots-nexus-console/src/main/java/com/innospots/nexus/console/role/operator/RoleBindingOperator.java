@@ -21,8 +21,8 @@ import com.innospots.nexus.console.role.domain.request.RoleBindingPageRequest;
 import com.innospots.nexus.console.role.domain.vo.RoleBindingVo;
 import com.innospots.nexus.console.role.converter.RoleConverter;
 import com.innospots.nexus.console.role.status.RoleStatusCode;
-import com.innospots.nexus.console.scope.ConsoleOwnership;
-import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnership;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnershipScope;
 
 /**
  * 角色绑定基础持久化；会话归属由上层 service 解析后传入。

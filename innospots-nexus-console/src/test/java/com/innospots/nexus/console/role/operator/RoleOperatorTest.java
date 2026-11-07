@@ -17,7 +17,7 @@ import com.innospots.nexus.console.role.domain.request.RolePageRequest;
 import com.innospots.nexus.console.role.domain.request.RoleStatusUpdateRequest;
 import com.innospots.nexus.console.role.domain.vo.RoleVo;
 import com.innospots.nexus.console.role.status.RoleStatusCode;
-import com.innospots.nexus.console.scope.ConsoleOwnership;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnership;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

@@ -22,9 +22,9 @@ import com.innospots.nexus.platform.access.domain.request.PlatformRegistrationOt
 import com.innospots.nexus.platform.access.support.PlatformRegistrationContactSupport;
 import com.innospots.nexus.platform.access.support.PlatformRegistrationOtpSupport;
 import com.innospots.nexus.platform.access.support.PlatformRegistrationOtpVerificationSupport;
-import com.innospots.nexus.platform.support.PlatformRequestTrace;
-import com.innospots.nexus.platform.user.domain.vo.PlatformUserVo;
-import com.innospots.nexus.platform.user.service.PlatformUserService;
+import com.innospots.nexus.console.support.RequestTrace;
+import com.innospots.nexus.console.user.admin.domain.vo.AdminUserVo;
+import com.innospots.nexus.console.user.admin.service.AdminUserService;
 
 /**
  * OPEN 模式完全开放注册：在 {@link RegistrationMode#OPEN} 下签发 OTP（若配置需要）并创建 {@code ACTIVE} 用户。
@@ -39,7 +39,7 @@ import com.innospots.nexus.platform.user.service.PlatformUserService;
 public class PlatformOpenRegistrationService {
 
     /** 平台用户创建与密码写入。 */
-    private final PlatformUserService platformUserService;
+    private final AdminUserService platformUserService;
 
     /** OTP 挑战发放与校验。 */
     private final OtpChallengeService otpChallengeService;
@@ -57,8 +57,8 @@ public class PlatformOpenRegistrationService {
         PlatformRegistrationOtpVerificationSupport.requireOtpAllowed(registrationConfig);
         log.info(
                 "traceId={} platform OPEN registration OTP issue contact={}",
-                PlatformRequestTrace.currentTraceId(),
-                PlatformRequestTrace.describeContact(request.email(), request.mobile()));
+                RequestTrace.currentTraceId(),
+                RequestTrace.describeContact(request.email(), request.mobile()));
         PlatformRegistrationOtpVerificationSupport.requireContactForVerification(
                 registrationConfig,
                 request.email(),
@@ -83,12 +83,12 @@ public class PlatformOpenRegistrationService {
         registrationPolicyService.requireSelfServiceMode(RegistrationMode.OPEN);
         Objects.requireNonNull(request, "request");
         RegistrationConfig registrationConfig = registrationPolicyService.registrationConfig();
-        String traceId = PlatformRequestTrace.currentTraceId();
+        String traceId = RequestTrace.currentTraceId();
         log.info(
                 "traceId={} platform OPEN registration submit login={} contact={}",
                 traceId,
-                PlatformRequestTrace.safeLogin(request.loginName()),
-                PlatformRequestTrace.describeContact(request.email(), request.mobile()));
+                RequestTrace.safeLogin(request.loginName()),
+                RequestTrace.describeContact(request.email(), request.mobile()));
         Checks.notBlank(request.encryptedPassword(), "encryptedPassword");
         if (registrationConfig.isOtpRequired()) {
             PlatformRegistrationOtpVerificationSupport.requireContactForVerification(
@@ -110,7 +110,7 @@ public class PlatformOpenRegistrationService {
                 request.email(),
                 request.mobile());
         String rawPassword = passwordDecryptor.decrypt(request.encryptedPassword());
-        PlatformUserVo user = platformUserService.createActiveUserWithPassword(
+        AdminUserVo user = platformUserService.createActiveUserWithPassword(
                 loginName,
                 request.displayName(),
                 request.email(),
@@ -120,7 +120,7 @@ public class PlatformOpenRegistrationService {
                 "traceId={} platform OPEN registration completed platformUserId={} login={}",
                 traceId,
                 user.platformUserId(),
-                PlatformRequestTrace.safeLogin(user.loginName()));
+                RequestTrace.safeLogin(user.loginName()));
         return user.platformUserId();
     }
 

@@ -24,8 +24,8 @@ import com.innospots.nexus.console.permission.domain.enums.PermissionSubjectType
 import com.innospots.nexus.console.role.domain.enums.RoleOwnerType;
 import com.innospots.nexus.console.permission.domain.request.PermissionGrantItemRequest;
 import com.innospots.nexus.console.permission.domain.request.PermissionGrantReplaceRequest;
-import com.innospots.nexus.console.scope.ConsoleOwnership;
-import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnership;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnershipScope;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

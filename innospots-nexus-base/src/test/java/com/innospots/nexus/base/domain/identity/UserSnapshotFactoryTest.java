@@ -19,12 +19,12 @@ class UserSnapshotFactoryTest {
 
     @Test
     void buildsSnapshotFromTlcIdentityKeys() {
-        TLC.userId(42L);
+        TLC.userId("42");
         TLC.userName("yxy");
 
         UserSnapshot user = UserSnapshot.fromContext();
 
-        assertThat(user.userId()).isEqualTo(42L);
+        assertThat(user.userId()).isEqualTo("42");
         assertThat(user.userName()).isEqualTo("yxy");
     }
 
@@ -37,7 +37,7 @@ class UserSnapshotFactoryTest {
                 UserSnapshot.CLAIM_EMAIL, "demo@example.com"
         ));
 
-        assertThat(user.userId()).isEqualTo(15L);
+        assertThat(user.userId()).isEqualTo("15");
         assertThat(user.userName()).isEqualTo("demo");
         assertThat(user.realName()).isEqualTo("Demo User");
         assertThat(user.email()).isEqualTo("demo@example.com");

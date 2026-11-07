@@ -9,14 +9,14 @@ import lombok.extern.slf4j.Slf4j;
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.util.Checks;
 import com.innospots.nexus.platform.organization.domain.entity.EnterpriseEntity;
-import com.innospots.nexus.platform.organization.domain.entity.TenantEntity;
-import com.innospots.nexus.platform.organization.domain.enums.TenantType;
+import com.innospots.nexus.console.scope.tenant.domain.entity.TenantEntity;
+import com.innospots.nexus.console.scope.tenant.domain.enums.TenantType;
 import com.innospots.nexus.platform.organization.status.PlatformOrganizationStatusCode;
 import com.innospots.nexus.platform.organization.domain.request.EnterpriseProfileUpsertRequest;
 import com.innospots.nexus.platform.organization.domain.vo.EnterpriseProfileVo;
 import com.innospots.nexus.platform.organization.operator.EnterpriseOperator;
-import com.innospots.nexus.platform.organization.operator.TenantOperator;
-import com.innospots.nexus.platform.support.PlatformMutationLog;
+import com.innospots.nexus.console.scope.tenant.operator.TenantOperator;
+import com.innospots.nexus.console.support.MutationLog;
 
 /**
  * 租户下企业法定档案（{@code nx_pl_enterprise}）的查询与 upsert 编排。
@@ -72,7 +72,7 @@ public class PlatformEnterpriseProfileService {
         enterprise.setTenantId(tenantId);
         applyProfileFields(enterprise, request);
         enterpriseOperator.insert(enterprise);
-        PlatformMutationLog.info(
+        MutationLog.info(
                 log,
                 "enterprise profile created tenantId={} enterpriseId={}",
                 tenantId,
@@ -83,7 +83,7 @@ public class PlatformEnterpriseProfileService {
     private EnterpriseProfileVo updateExisting(EnterpriseEntity existing, EnterpriseProfileUpsertRequest request) {
         applyProfileFields(existing, request);
         enterpriseOperator.update(existing);
-        PlatformMutationLog.info(
+        MutationLog.info(
                 log,
                 "enterprise profile updated tenantId={} enterpriseId={}",
                 existing.getTenantId(),

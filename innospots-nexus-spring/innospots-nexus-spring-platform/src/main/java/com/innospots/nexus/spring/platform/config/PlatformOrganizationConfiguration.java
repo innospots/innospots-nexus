@@ -6,28 +6,27 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.innospots.nexus.platform.organization.port.TenantUserResolver;
+import com.innospots.nexus.console.scope.tenant.dao.TenantDao;
+import com.innospots.nexus.console.scope.tenant.operator.TenantOperator;
 import com.innospots.nexus.platform.organization.dao.EnterpriseDao;
-import com.innospots.nexus.platform.organization.dao.TenantDao;
-import com.innospots.nexus.platform.organization.dao.TenantAdminDao;
-import com.innospots.nexus.platform.organization.endpoint.TenantEndpoint;
 import com.innospots.nexus.platform.organization.endpoint.EnterpriseProfileEndpoint;
-import com.innospots.nexus.platform.organization.endpoint.TenantAdminEndpoint;
+import com.innospots.nexus.platform.organization.endpoint.TenantEndpoint;
 import com.innospots.nexus.platform.organization.operator.EnterpriseOperator;
-import com.innospots.nexus.platform.organization.operator.TenantOperator;
-import com.innospots.nexus.platform.organization.operator.TenantAdminOperator;
 import com.innospots.nexus.platform.organization.service.PlatformEnterpriseProfileService;
-import com.innospots.nexus.platform.organization.service.PlatformTenantAdminService;
 import com.innospots.nexus.platform.organization.service.PlatformTenantService;
 
 /**
  * 运营管理平台组织域 Spring 装配。
+ *
+ * <p>租户实体与 DAO 由 console 的 {@code tenant} 包提供，本类只装配运营侧的企业档案
+ * 与租户管理端点。</p>
  */
 @Configuration
 @MapperScan(
-        basePackages = "com.innospots.nexus.platform.organization.dao",
+        basePackages = {
+            "com.innospots.nexus.platform.organization.dao",
+            "com.innospots.nexus.console.scope.tenant.dao"
+        },
         annotationClass = Mapper.class,
         sqlSessionFactoryRef = "sqlSessionFactory")
 public class PlatformOrganizationConfiguration {
@@ -40,19 +39,6 @@ public class PlatformOrganizationConfiguration {
     @Bean
     EnterpriseOperator enterpriseOperator(EnterpriseDao enterpriseDao) {
         return new EnterpriseOperator(enterpriseDao);
-    }
-
-    @Bean
-    TenantAdminOperator tenantAdminOperator(TenantAdminDao tenantAdminDao) {
-        return new TenantAdminOperator(tenantAdminDao);
-    }
-
-    @Bean
-    PlatformTenantAdminService platformTenantAdminService(
-            TenantOperator tenantOperator,
-            TenantAdminOperator tenantAdminOperator,
-            @Autowired(required = false) TenantUserResolver tenantUserResolver) {
-        return new PlatformTenantAdminService(tenantOperator, tenantAdminOperator, tenantUserResolver);
     }
 
     @Bean
@@ -80,11 +66,5 @@ public class PlatformOrganizationConfiguration {
     EnterpriseProfileEndpoint enterpriseProfileEndpoint(
             PlatformEnterpriseProfileService platformEnterpriseProfileService) {
         return new EnterpriseProfileEndpoint(platformEnterpriseProfileService);
-    }
-
-    @Bean
-    @Lazy
-    TenantAdminEndpoint tenantAdminEndpoint(PlatformTenantAdminService platformTenantAdminService) {
-        return new TenantAdminEndpoint(platformTenantAdminService);
     }
 }

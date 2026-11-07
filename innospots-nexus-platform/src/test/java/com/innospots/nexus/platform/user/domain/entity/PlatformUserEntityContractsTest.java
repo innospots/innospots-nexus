@@ -1,4 +1,4 @@
-package com.innospots.nexus.platform.user.domain.entity;
+package com.innospots.nexus.console.user.admin.domain.entity;
 
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
@@ -14,56 +14,56 @@ import jakarta.persistence.Table;
 import org.junit.jupiter.api.Test;
 
 import com.innospots.nexus.core.persistence.entity.BaseEntity;
-import com.innospots.nexus.platform.user.domain.enums.PlatformUserStatus;
+import com.innospots.nexus.console.user.admin.domain.enums.AdminUserStatus;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class PlatformUserEntityContractsTest {
+class AdminUserEntityContractsTest {
 
     @Test
     void platformUserEntitiesExposeOpsRealmPersistenceTables() {
-        assertPersistenceTable(PlatformUserEntity.class, "nx_pl_user");
-        assertPersistenceTable(PlatformUserOauthEntity.class, "nx_pl_user_oauth");
-        assertThat(PlatformUserEntity.class.getSuperclass()).isEqualTo(BaseEntity.class);
-        assertThat(new PlatformUserEntity().idPrefix()).isEqualTo("PUS");
-        assertThat(new PlatformUserOauthEntity().idPrefix()).isEqualTo("POI");
+        assertPersistenceTable(AdminUserEntity.class, "nx_admin_user");
+        assertPersistenceTable(AdminUserOauthEntity.class, "nx_admin_user_oauth");
+        assertThat(AdminUserEntity.class.getSuperclass()).isEqualTo(BaseEntity.class);
+        assertThat(new AdminUserEntity().idPrefix()).isEqualTo("PUS");
+        assertThat(new AdminUserOauthEntity().idPrefix()).isEqualTo("POI");
     }
 
     @Test
     void platformUserEntityContainsOpsIdentityFields() throws NoSuchFieldException {
-        assertPersistenceId(PlatformUserEntity.class.getDeclaredField("platformUserId"));
-        assertField(PlatformUserEntity.class, "platformUserId", String.class, 32, false);
-        assertField(PlatformUserEntity.class, "loginName", String.class, 64, false);
-        assertField(PlatformUserEntity.class, "displayName", String.class, 128, true);
-        assertField(PlatformUserEntity.class, "email", String.class, 128, true);
-        assertField(PlatformUserEntity.class, "mobile", String.class, 32, true);
-        assertField(PlatformUserEntity.class, "employeeNo", String.class, 64, true);
-        assertField(PlatformUserEntity.class, "status", String.class, 32, false);
-        assertField(PlatformUserEntity.class, "lastLoginTime", LocalDateTime.class, 255, true);
-        assertField(PlatformUserEntity.class, "lastLoginIp", String.class, 64, true);
+        assertPersistenceId(AdminUserEntity.class.getDeclaredField("platformUserId"));
+        assertField(AdminUserEntity.class, "platformUserId", String.class, 32, false);
+        assertField(AdminUserEntity.class, "loginName", String.class, 64, false);
+        assertField(AdminUserEntity.class, "displayName", String.class, 128, true);
+        assertField(AdminUserEntity.class, "email", String.class, 128, true);
+        assertField(AdminUserEntity.class, "mobile", String.class, 32, true);
+        assertField(AdminUserEntity.class, "employeeNo", String.class, 64, true);
+        assertField(AdminUserEntity.class, "status", String.class, 32, false);
+        assertField(AdminUserEntity.class, "lastLoginTime", LocalDateTime.class, 255, true);
+        assertField(AdminUserEntity.class, "lastLoginIp", String.class, 64, true);
     }
 
     @Test
     void platformUserOauthBindsPlatformUserId() throws NoSuchFieldException {
-        assertField(PlatformUserOauthEntity.class, "platformUserId", String.class, 32, false);
-        assertIndex(PlatformUserOauthEntity.class, "idx_nx_pl_user_oauth_user",
+        assertField(AdminUserOauthEntity.class, "platformUserId", String.class, 32, false);
+        assertIndex(AdminUserOauthEntity.class, "idx_nx_admin_user_oauth_user",
                 "platform_user_id", false);
     }
 
     @Test
     void platformUserEntityDeclaresLoginNameUniqueIndex() {
-        assertIndex(PlatformUserEntity.class, "uk_nx_pl_user_login_name", "login_name", true);
-        assertIndex(PlatformUserEntity.class, "idx_nx_pl_user_status", "status", false);
+        assertIndex(AdminUserEntity.class, "uk_nx_admin_user_login_name", "login_name", true);
+        assertIndex(AdminUserEntity.class, "idx_nx_admin_user_status", "status", false);
     }
 
     @Test
     void platformUserStatusEnumeratesOpsLifecycle() {
-        assertThat(PlatformUserStatus.values()).containsExactly(
-                PlatformUserStatus.PENDING_ACTIVATION,
-                PlatformUserStatus.PENDING_APPROVAL,
-                PlatformUserStatus.ACTIVE,
-                PlatformUserStatus.DISABLED,
-                PlatformUserStatus.LOCKED);
+        assertThat(AdminUserStatus.values()).containsExactly(
+                AdminUserStatus.PENDING_ACTIVATION,
+                AdminUserStatus.PENDING_APPROVAL,
+                AdminUserStatus.ACTIVE,
+                AdminUserStatus.DISABLED,
+                AdminUserStatus.LOCKED);
     }
 
     private static void assertPersistenceTable(Class<?> entityType, String tableName) {

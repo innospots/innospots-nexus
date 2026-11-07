@@ -21,7 +21,7 @@ import com.innospots.nexus.platform.access.domain.enums.PlatformAccessRequestSta
  *
  * @author Smars
  * @date 2026/10/06
- * @see com.innospots.nexus.platform.user.domain.enums.PlatformUserStatus#PENDING_APPROVAL
+ * @see com.innospots.nexus.console.user.admin.domain.enums.AdminUserStatus#PENDING_APPROVAL
  */
 @Getter
 @Setter

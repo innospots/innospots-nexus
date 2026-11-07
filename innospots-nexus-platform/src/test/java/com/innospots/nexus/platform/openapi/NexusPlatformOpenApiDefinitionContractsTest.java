@@ -33,7 +33,7 @@ class NexusPlatformOpenApiDefinitionContractsTest {
                         "PlatformAuthSession",
                         "PlatformOrganization",
                         "PlatformEnterpriseProfile",
-                        "PlatformUser",
+                        "AdminUser",
                         "PlatformInvite",
                         "PlatformAccessRegistration",
                         "PlatformSettingsRegistrationMode",

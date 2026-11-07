@@ -28,8 +28,8 @@ import com.innospots.nexus.console.role.domain.vo.RoleOptionVo;
 import com.innospots.nexus.console.role.domain.vo.RoleVo;
 import com.innospots.nexus.console.role.converter.RoleConverter;
 import com.innospots.nexus.console.role.status.RoleStatusCode;
-import com.innospots.nexus.console.scope.ConsoleOwnership;
-import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnership;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnershipScope;
 
 /**
  * 角色持久化基础操作：创建、查询、更新、删除；会话归属与参数适配由上层 service 负责。

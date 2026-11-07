@@ -16,8 +16,8 @@ import com.innospots.nexus.console.menu.domain.enums.MenuOpenMode;
 import com.innospots.nexus.console.menu.domain.vo.NavigationMenuVo;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubject;
 import com.innospots.nexus.console.permission.service.PermissionVisibilityService;
-import com.innospots.nexus.console.scope.ConsoleOwnership;
-import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnership;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnershipScope;
 
 /**
  * 从持久化菜单记录组装当前用户可见的导航菜单树。

@@ -13,7 +13,7 @@ class IdentityContractsTest {
     void definesUserRoleAndGroupModels() {
         RoleSnapshot role = RoleSnapshot.of("r1", "Admin", "admin", BasicStatus.ENABLED);
         UserGroupSnapshot group = new UserGroupSnapshot(10L, "AI Team", "ai-team", null, 1L, List.of(2L, 3L), BasicStatus.ENABLED);
-        UserSnapshot user = UserSnapshot.simple(7L, "yxy", "YXY")
+        UserSnapshot user = UserSnapshot.simple("7", "yxy", "YXY")
                 .email("yxy@example.com")
                 .role(role)
                 .group(group);

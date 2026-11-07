@@ -23,7 +23,7 @@ import com.innospots.nexus.platform.settings.domain.vo.PlatformConsoleSiteNameSe
 import com.innospots.nexus.platform.settings.domain.vo.PlatformConsoleTimezoneSettingVo;
 import com.innospots.nexus.platform.settings.status.PlatformConsoleUiSettingStatusCode;
 import com.innospots.nexus.platform.settings.support.PlatformSettingKeys;
-import com.innospots.nexus.platform.support.PlatformMutationLog;
+import com.innospots.nexus.console.support.MutationLog;
 
 /**
  * 控制台基础系统设置：名称、简介、界面语言与默认时区。
@@ -68,7 +68,7 @@ public class PlatformConsoleGeneralSettingService {
                 PlatformSettingKeys.CONSOLE_SITE_NAME,
                 null,
                 normalized);
-        PlatformMutationLog.info(log, "console site name updated");
+        MutationLog.info(log, "console site name updated");
         return toSiteNameVo(updated);
     }
 
@@ -85,7 +85,7 @@ public class PlatformConsoleGeneralSettingService {
                 PlatformSettingKeys.CONSOLE_SITE_DESCRIPTION,
                 null,
                 normalized);
-        PlatformMutationLog.info(log, "console site description updated");
+        MutationLog.info(log, "console site description updated");
         return toSiteDescriptionVo(updated);
     }
 
@@ -103,7 +103,7 @@ public class PlatformConsoleGeneralSettingService {
                 PlatformSettingKeys.CONSOLE_DISPLAY_LANGUAGE,
                 null,
                 normalized);
-        PlatformMutationLog.info(log, "console display language updated language={}", updated);
+        MutationLog.info(log, "console display language updated language={}", updated);
         return toDisplayLanguageVo(updated);
     }
 
@@ -120,7 +120,7 @@ public class PlatformConsoleGeneralSettingService {
                 PlatformSettingKeys.CONSOLE_TIMEZONE,
                 null,
                 normalized);
-        PlatformMutationLog.info(log, "console timezone updated timezone={}", updated);
+        MutationLog.info(log, "console timezone updated timezone={}", updated);
         return toTimezoneVo(updated);
     }
 

@@ -14,7 +14,7 @@ import lombok.Setter;
 import com.innospots.nexus.core.persistence.entity.BaseEntity;
 
 /**
- * 企业形态组织的法定档案（{@code nx_pl_enterprise}），与 {@code nx_pl_tenant} 一对一。
+ * 企业形态组织的法定档案（{@code nx_pl_enterprise}），与 {@code nx_tenant} 一对一。
  *
  * @author Smars
  * @date 2026/09/13

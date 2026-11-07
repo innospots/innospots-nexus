@@ -7,7 +7,7 @@ import java.util.Set;
 
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubject;
 import com.innospots.nexus.console.permission.service.PermissionVisibilityService;
-import com.innospots.nexus.console.scope.ConsoleOwnership;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnership;
 import com.innospots.nexus.console.sitemap.domain.model.SitemapMenuItem;
 
 /**

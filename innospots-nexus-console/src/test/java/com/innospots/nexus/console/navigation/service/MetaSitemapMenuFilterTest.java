@@ -13,7 +13,7 @@ import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubject;
 import com.innospots.nexus.console.permission.service.PermissionVisibilityService;
 import com.innospots.nexus.console.role.domain.enums.RoleOwnerType;
-import com.innospots.nexus.console.scope.ConsoleOwnership;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnership;
 import com.innospots.nexus.console.sitemap.domain.model.SitemapMenuItem;
 
 class MetaSitemapMenuFilterTest {

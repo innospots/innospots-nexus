@@ -9,8 +9,8 @@ import com.innospots.nexus.base.domain.workspace.WorkspaceSnapshot;
 import com.innospots.nexus.base.thread.SessionContext;
 import com.innospots.nexus.base.thread.TLC;
 import com.innospots.nexus.console.jaxrs.web.ConsoleWebDevSessionSettings;
-import com.innospots.nexus.console.scope.ConsoleSessionContext;
-import com.innospots.nexus.console.scope.ConsoleSessionScope;
+import com.innospots.nexus.console.scope.domain.session.ConsoleSessionContext;
+import com.innospots.nexus.console.scope.domain.session.ConsoleSessionScope;
 
 /**
  * 在关闭请求侧安全时，将配置的 dev 身份绑定到 {@link SessionContext}。
@@ -25,7 +25,7 @@ public final class ConsoleDevSessionBinder {
             return;
         }
         String userId = devSession.getUserId();
-        UserSnapshot user = UserSnapshot.simple(resolveUserId(userId), userId, null);
+        UserSnapshot user = UserSnapshot.simple(userId, userId, null);
         SessionContext.bindUser(user);
         if (devSession.getRealm() != null && !devSession.getRealm().isBlank()) {
             TLC.put(TLC.SECURITY_REALM, devSession.getRealm());
@@ -76,14 +76,4 @@ public final class ConsoleDevSessionBinder {
         ConsoleSessionContext.bindScope(sessionScope);
     }
 
-    private static Long resolveUserId(String userId) {
-        if (userId == null || userId.isBlank()) {
-            return 1L;
-        }
-        try {
-            return Long.parseLong(userId);
-        } catch (NumberFormatException ex) {
-            return (long) userId.hashCode();
-        }
-    }
 }

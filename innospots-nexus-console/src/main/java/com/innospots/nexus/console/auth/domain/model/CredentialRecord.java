@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 /**
  * 域用户的鉴权凭据快照（opaque verifier，由 {@code algorithm} 解释）。
  *
- * @param subjectId         用户主体 ID（platform_user_id 或 tenant_user_id）
+ * @param subjectId         用户主体 ID（platform_user_id 或 portal_user_id）
  * @param credentialKind    凭据类型 name（如 PASSWORD）
  * @param algorithm         可插拔算法 ID
  * @param verifier          不透明验证材料

@@ -21,7 +21,7 @@ import com.innospots.nexus.console.credential.otp.service.OtpPasswordVerificatio
 import com.innospots.nexus.console.credential.password.PasswordDecryptor;
 import com.innospots.nexus.console.credential.password.PasswordVerificationOperator;
 import com.innospots.nexus.console.credential.password.service.CredentialService;
-import com.innospots.nexus.console.scope.service.SessionScopeBinder;
+import com.innospots.nexus.console.scope.domain.session.SessionScopeBinder;
 import com.innospots.nexus.platform.auth.adapter.PlatformUserDirectory;
 import com.innospots.nexus.platform.auth.support.PlatformUserIdentityResolver;
 import com.innospots.nexus.platform.auth.endpoint.PlatformAuthSessionEndpoint;
@@ -30,8 +30,8 @@ import com.innospots.nexus.platform.auth.endpoint.PlatformPublicPasswordResetEnd
 import com.innospots.nexus.platform.auth.service.PlatformAuthService;
 import com.innospots.nexus.platform.auth.service.PlatformPasswordService;
 import com.innospots.nexus.platform.scope.PlatformSessionScopeBinder;
-import com.innospots.nexus.platform.user.dao.PlatformUserDao;
-import com.innospots.nexus.platform.user.operator.PlatformUserOperator;
+import com.innospots.nexus.console.user.admin.dao.AdminUserDao;
+import com.innospots.nexus.console.user.admin.operator.AdminUserOperator;
 
 /**
  * 运营管理平台认证与用户相关 Spring 装配。
@@ -44,7 +44,7 @@ import com.innospots.nexus.platform.user.operator.PlatformUserOperator;
 @Configuration
 @MapperScan(
         basePackages = {
-            "com.innospots.nexus.platform.user.dao",
+            "com.innospots.nexus.console.user.admin.dao",
             "com.innospots.nexus.platform.invite.dao",
             "com.innospots.nexus.platform.access.dao"
         },
@@ -54,13 +54,13 @@ import com.innospots.nexus.platform.user.operator.PlatformUserOperator;
 public class PlatformAuthConfiguration {
 
     @Bean
-    PlatformUserIdentityResolver platformUserIdentityResolver(PlatformUserDao platformUserDao) {
+    PlatformUserIdentityResolver platformUserIdentityResolver(AdminUserDao platformUserDao) {
         return new PlatformUserIdentityResolver(platformUserDao);
     }
 
     @Bean
     PlatformUserDirectory platformUserDirectory(
-            PlatformUserDao platformUserDao,
+            AdminUserDao platformUserDao,
             PlatformUserIdentityResolver platformUserIdentityResolver) {
         return new PlatformUserDirectory(platformUserDao, platformUserIdentityResolver);
     }
@@ -114,7 +114,7 @@ public class PlatformAuthConfiguration {
 
     @Bean
     PlatformPasswordService platformPasswordService(
-            PlatformUserOperator platformUserOperator,
+            AdminUserOperator platformUserOperator,
             PlatformUserIdentityResolver platformUserIdentityResolver,
             CredentialService credentialService,
             OtpChallengeService otpChallengeService,

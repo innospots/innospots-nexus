@@ -18,11 +18,11 @@ import com.innospots.nexus.console.role.domain.entity.RoleBindingEntity;
 import com.innospots.nexus.console.role.domain.entity.RoleEntity;
 import com.innospots.nexus.console.role.domain.enums.RoleBindingSubjectType;
 import com.innospots.nexus.console.role.domain.enums.RoleOwnerType;
-import com.innospots.nexus.console.scope.ConsoleOwnership;
-import com.innospots.nexus.console.scope.ConsoleOwnershipGuard;
-import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
-import com.innospots.nexus.console.scope.ConsoleSessionContext;
-import com.innospots.nexus.console.scope.ConsoleSessionScope;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnership;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnershipGuard;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnershipScope;
+import com.innospots.nexus.console.scope.domain.session.ConsoleSessionContext;
+import com.innospots.nexus.console.scope.domain.session.ConsoleSessionScope;
 
 /**
  * 从 {@link SessionContext} 与角色绑定表解析当前鉴权主体。

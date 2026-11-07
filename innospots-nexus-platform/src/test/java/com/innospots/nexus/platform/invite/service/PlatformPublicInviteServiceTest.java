@@ -21,10 +21,10 @@ import com.innospots.nexus.platform.invite.status.PlatformInviteStatusCode;
 import com.innospots.nexus.console.auth.service.RegistrationPolicyService;
 import com.innospots.nexus.console.auth.status.RegistrationPolicyStatusCode;
 import com.innospots.nexus.console.config.RegistrationMode;
-import com.innospots.nexus.platform.user.domain.enums.PlatformUserStatus;
-import com.innospots.nexus.platform.user.domain.vo.PlatformUserVo;
-import com.innospots.nexus.platform.user.service.PlatformUserService;
-import com.innospots.nexus.platform.user.support.PlatformUserRoleProvisioner;
+import com.innospots.nexus.console.user.admin.domain.enums.AdminUserStatus;
+import com.innospots.nexus.console.user.admin.domain.vo.AdminUserVo;
+import com.innospots.nexus.console.user.admin.service.AdminUserService;
+import com.innospots.nexus.console.user.admin.support.AdminUserRoleProvisioner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -40,11 +40,11 @@ class PlatformPublicInviteServiceTest {
     @Test
     void acceptInviteOfflineSkipsOtpAndAssignsRoles() {
         PlatformInviteOperator inviteOperator = mock(PlatformInviteOperator.class);
-        PlatformUserService userService = mock(PlatformUserService.class);
+        AdminUserService userService = mock(AdminUserService.class);
         OtpChallengeService otpChallengeService = mock(OtpChallengeService.class);
         PasswordDecryptor passwordDecryptor = mock(PasswordDecryptor.class);
         RegistrationPolicyService registrationPolicyService = mock(RegistrationPolicyService.class);
-        PlatformUserRoleProvisioner roleProvisioner = mock(PlatformUserRoleProvisioner.class);
+        AdminUserRoleProvisioner roleProvisioner = mock(AdminUserRoleProvisioner.class);
 
         PlatformInviteEntity invite = pendingInvite(PlatformInviteDeliveryMode.OFFLINE, "ops,viewer");
         when(inviteOperator.requirePendingByToken("tok")).thenReturn(invite);
@@ -54,13 +54,13 @@ class PlatformPublicInviteServiceTest {
                 eq("alice@example.com"),
                 eq(null),
                 eq("raw-pass")))
-                .thenReturn(new PlatformUserVo(
+                .thenReturn(new AdminUserVo(
                         "usr-1",
                         "alice",
                         null,
                         "alice@example.com",
                         null,
-                        PlatformUserStatus.ACTIVE.name(),
+                        AdminUserStatus.ACTIVE.name(),
                         null,
                         null,
                         null));
@@ -84,24 +84,24 @@ class PlatformPublicInviteServiceTest {
     @Test
     void acceptInviteOnlineRequiresOtpVerification() {
         PlatformInviteOperator inviteOperator = mock(PlatformInviteOperator.class);
-        PlatformUserService userService = mock(PlatformUserService.class);
+        AdminUserService userService = mock(AdminUserService.class);
         OtpChallengeService otpChallengeService = mock(OtpChallengeService.class);
         PasswordDecryptor passwordDecryptor = mock(PasswordDecryptor.class);
         RegistrationPolicyService registrationPolicyService = mock(RegistrationPolicyService.class);
-        PlatformUserRoleProvisioner roleProvisioner = mock(PlatformUserRoleProvisioner.class);
+        AdminUserRoleProvisioner roleProvisioner = mock(AdminUserRoleProvisioner.class);
 
         PlatformInviteEntity invite = pendingInvite(PlatformInviteDeliveryMode.ONLINE, null);
         invite.setEmail("bob@example.com");
         when(inviteOperator.requirePendingByToken("tok")).thenReturn(invite);
         when(passwordDecryptor.decrypt("enc")).thenReturn("raw-pass");
         when(userService.createActiveUserWithPassword(any(), any(), any(), any()))
-                .thenReturn(new PlatformUserVo(
+                .thenReturn(new AdminUserVo(
                         "usr-2",
                         "bob",
                         null,
                         "bob@example.com",
                         null,
-                        PlatformUserStatus.ACTIVE.name(),
+                        AdminUserStatus.ACTIVE.name(),
                         null,
                         null,
                         null));
@@ -126,11 +126,11 @@ class PlatformPublicInviteServiceTest {
     @Test
     void activateByInviteCodeRequiresInviteRegistrationMode() {
         PlatformInviteOperator inviteOperator = mock(PlatformInviteOperator.class);
-        PlatformUserService userService = mock(PlatformUserService.class);
+        AdminUserService userService = mock(AdminUserService.class);
         OtpChallengeService otpChallengeService = mock(OtpChallengeService.class);
         PasswordDecryptor passwordDecryptor = mock(PasswordDecryptor.class);
         RegistrationPolicyService registrationPolicyService = mock(RegistrationPolicyService.class);
-        PlatformUserRoleProvisioner roleProvisioner = mock(PlatformUserRoleProvisioner.class);
+        AdminUserRoleProvisioner roleProvisioner = mock(AdminUserRoleProvisioner.class);
 
         org.mockito.Mockito.doThrow(NexusException.build(
                         RegistrationPolicyStatusCode.REGISTRATION_MODE_DISABLED))
@@ -157,11 +157,11 @@ class PlatformPublicInviteServiceTest {
     @Test
     void activateByInviteCodeRejectsContactMismatch() {
         PlatformInviteOperator inviteOperator = mock(PlatformInviteOperator.class);
-        PlatformUserService userService = mock(PlatformUserService.class);
+        AdminUserService userService = mock(AdminUserService.class);
         OtpChallengeService otpChallengeService = mock(OtpChallengeService.class);
         PasswordDecryptor passwordDecryptor = mock(PasswordDecryptor.class);
         RegistrationPolicyService registrationPolicyService = mock(RegistrationPolicyService.class);
-        PlatformUserRoleProvisioner roleProvisioner = mock(PlatformUserRoleProvisioner.class);
+        AdminUserRoleProvisioner roleProvisioner = mock(AdminUserRoleProvisioner.class);
 
         PlatformInviteEntity invite = pendingInvite(PlatformInviteDeliveryMode.OFFLINE, null);
         invite.setEmail("alice@example.com");

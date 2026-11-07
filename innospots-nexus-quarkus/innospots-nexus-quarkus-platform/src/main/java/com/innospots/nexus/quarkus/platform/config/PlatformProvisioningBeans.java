@@ -19,8 +19,8 @@ import com.innospots.nexus.platform.invite.service.PlatformPublicInviteService;
 import com.innospots.nexus.platform.invite.support.PlatformInviteLinkBuilder;
 import com.innospots.nexus.platform.invite.support.PlatformInviteOtpNotifier;
 import com.innospots.nexus.console.auth.service.RegistrationPolicyService;
-import com.innospots.nexus.platform.user.service.PlatformUserService;
-import com.innospots.nexus.platform.user.support.PlatformUserRoleProvisioner;
+import com.innospots.nexus.console.user.admin.service.AdminUserService;
+import com.innospots.nexus.console.user.admin.support.AdminUserRoleProvisioner;
 
 @ApplicationScoped
 public class PlatformProvisioningBeans {
@@ -57,11 +57,11 @@ public class PlatformProvisioningBeans {
     @Singleton
     PlatformPublicInviteService platformPublicInviteService(
             PlatformInviteOperator platformInviteOperator,
-            PlatformUserService platformUserService,
+            AdminUserService platformUserService,
             OtpChallengeService otpChallengeService,
             PasswordDecryptor passwordDecryptor,
             RegistrationPolicyService registrationPolicyService,
-            PlatformUserRoleProvisioner platformUserRoleProvisioner) {
+            AdminUserRoleProvisioner platformUserRoleProvisioner) {
         return new PlatformPublicInviteService(
                 platformInviteOperator,
                 platformUserService,
@@ -81,7 +81,7 @@ public class PlatformProvisioningBeans {
     @Singleton
     PlatformAccessRequestService platformAccessRequestService(
             PlatformAccessRequestOperator platformAccessRequestOperator,
-            PlatformUserService platformUserService,
+            AdminUserService platformUserService,
             OtpChallengeService otpChallengeService,
             PasswordDecryptor passwordDecryptor,
             RegistrationPolicyService registrationPolicyService) {
@@ -96,7 +96,7 @@ public class PlatformProvisioningBeans {
     @Produces
     @Singleton
     PlatformOpenRegistrationService platformOpenRegistrationService(
-            PlatformUserService platformUserService,
+            AdminUserService platformUserService,
             OtpChallengeService otpChallengeService,
             PasswordDecryptor passwordDecryptor,
             RegistrationPolicyService registrationPolicyService) {

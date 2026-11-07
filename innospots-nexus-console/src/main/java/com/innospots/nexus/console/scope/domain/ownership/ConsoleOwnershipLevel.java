@@ -1,0 +1,22 @@
+package com.innospots.nexus.console.scope.domain.ownership;
+
+/**
+ * 控制台数据默认归属层级（业务可见性与会话要求）。
+ */
+public enum ConsoleOwnershipLevel {
+
+    /**
+     * 运营管理平台级数据；会话安全域为 PLATFORM，不依赖租户或工作区。
+     */
+    PLATFORM,
+
+    /**
+     * 租户级数据（如字典）；需要已选租户，不要求工作区。
+     */
+    TENANT,
+
+    /**
+     * 工作区级数据（如角色、菜单、授权）；需要已选工作区。
+     */
+    WORKSPACE
+}

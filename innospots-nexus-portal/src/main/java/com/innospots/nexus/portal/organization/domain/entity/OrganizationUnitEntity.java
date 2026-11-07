@@ -11,7 +11,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-import com.innospots.nexus.portal.persistence.entity.TenantBaseEntity;
+import com.innospots.nexus.console.scope.tenant.domain.entity.base.TenantBaseEntity;
 import com.innospots.nexus.portal.organization.domain.enums.OrganizationUnitType;
 
 /**

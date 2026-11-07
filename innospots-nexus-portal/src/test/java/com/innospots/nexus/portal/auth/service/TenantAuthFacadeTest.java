@@ -35,10 +35,11 @@ import com.innospots.nexus.console.credential.otp.service.CaptchaChallengeServic
 import com.innospots.nexus.console.credential.password.CredentialKind;
 import com.innospots.nexus.console.credential.password.algorithm.CredentialAlgorithms;
 import com.innospots.nexus.console.credential.password.service.CredentialService;
-import com.innospots.nexus.console.scope.service.SessionScopeBinder;
-import com.innospots.nexus.console.scope.service.SessionScopeTlc;
-import com.innospots.nexus.portal.auth.api.MembershipDirectory;
-import com.innospots.nexus.portal.auth.domain.model.TenantMembership;
+import com.innospots.nexus.console.scope.domain.session.SessionScopeBinder;
+import com.innospots.nexus.console.scope.domain.session.SessionScopeTlc;
+import com.innospots.nexus.console.scope.tenant.dao.TenantMemberDao;
+import com.innospots.nexus.console.scope.tenant.domain.entity.TenantMemberEntity;
+import com.innospots.nexus.console.scope.tenant.domain.enums.TenantMemberStatus;
 import com.innospots.nexus.portal.auth.domain.request.SelectTenantRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -59,7 +60,7 @@ class TenantAuthFacadeTest {
         AuthHarness harness = AuthHarness.tenantUser(
                 "alice",
                 "Secret123",
-                List.of(new TenantMembership("tnt-a", "tmb-a"), new TenantMembership("tnt-b", "tmb-b")));
+                List.of(membership("tnt-a", "tmb-a"), membership("tnt-b", "tmb-b")));
 
         AuthTokenVo token = harness.facade().login(loginRequest("alice", "Secret123"));
 
@@ -75,7 +76,7 @@ class TenantAuthFacadeTest {
         AuthHarness harness = AuthHarness.tenantUser(
                 "bob",
                 "Secret123",
-                List.of(new TenantMembership("tnt-a", "tmb-a")));
+                List.of(membership("tnt-a", "tmb-a")));
 
         AuthTokenVo token = harness.facade().login(loginRequest("bob", "Secret123"));
 
@@ -88,7 +89,7 @@ class TenantAuthFacadeTest {
         AuthHarness harness = AuthHarness.tenantUser(
                 "bob",
                 "Secret123",
-                List.of(new TenantMembership("tnt-a", "tmb-a")));
+                List.of(membership("tnt-a", "tmb-a")));
         harness.facade().login(loginRequest("bob", "Secret123"));
 
         harness.facade().logout();
@@ -105,7 +106,7 @@ class TenantAuthFacadeTest {
         private static AuthHarness tenantUser(
                 String login,
                 String password,
-                List<TenantMembership> memberships
+                List<TenantMemberEntity> memberships
         ) {
             InMemoryDirectory directory = new InMemoryDirectory();
             directory.addUser(new AuthUser("tus-" + login, login, "ACTIVE", SecurityRealm.TENANT));
@@ -124,11 +125,17 @@ class TenantAuthFacadeTest {
             TokenIssuer issuer = new TokenIssuer(config);
             AuthTokenPairIssuer tokenPairIssuer = new AuthTokenPairIssuer(issuer);
             SessionScopeBinder sessionScopeBinder = new TestSessionScopeBinder(directory);
+            TenantMemberDao tenantMemberDao = mock(TenantMemberDao.class);
+            doAnswer(invocation -> directory.membershipsOf(invocation.getArgument(0)))
+                    .when(tenantMemberDao).listActiveMemberships(anyString());
+            doAnswer(invocation -> directory.findMembership(
+                            invocation.getArgument(0), invocation.getArgument(1)))
+                    .when(tenantMemberDao).findActiveMembership(anyString(), anyString());
             TenantAuthFacade facade = new TenantAuthFacade(
                     directory,
                     credentialService,
                     captchaGate,
-                    directory,
+                    tenantMemberDao,
                     encrypted -> encrypted,
                     issuer,
                     tokenPairIssuer,
@@ -179,9 +186,7 @@ class TenantAuthFacadeTest {
             bindScope(new AuthSessionScope(
                     claims.tokenType(),
                     claims.tenantId(),
-                    claims.tenantMemberId(),
-                    claims.workspaceId(),
-                    claims.projectId()));
+                    claims.tenantMemberId()));
         }
 
         @Override
@@ -190,12 +195,12 @@ class TenantAuthFacadeTest {
         }
     }
 
-    private static final class InMemoryDirectory implements UserDirectory, MembershipDirectory {
+    private static final class InMemoryDirectory implements UserDirectory {
 
         private final Map<String, AuthUser> usersByLogin = new HashMap<>();
         private final Map<String, AuthUser> usersById = new HashMap<>();
         private final Map<String, CredentialRecord> passwords = new HashMap<>();
-        private final Map<String, List<TenantMembership>> memberships = new HashMap<>();
+        private final Map<String, List<TenantMemberEntity>> memberships = new HashMap<>();
 
         private void addUser(AuthUser user) {
             usersByLogin.put(user.realm() + ":" + user.loginName(), user);
@@ -216,8 +221,8 @@ class TenantAuthFacadeTest {
                     null));
         }
 
-        private void addMemberships(String tenantUserId, List<TenantMembership> values) {
-            memberships.put(tenantUserId, List.copyOf(values));
+        private void addMemberships(String portalUserId, List<TenantMemberEntity> values) {
+            memberships.put(portalUserId, List.copyOf(values));
         }
 
         @Override
@@ -232,9 +237,15 @@ class TenantAuthFacadeTest {
             return Optional.ofNullable(usersById.get(userId));
         }
 
-        @Override
-        public List<TenantMembership> listActiveMemberships(String tenantUserId) {
-            return new ArrayList<>(memberships.getOrDefault(tenantUserId, List.of()));
+        private List<TenantMemberEntity> membershipsOf(String portalUserId) {
+            return new ArrayList<>(memberships.getOrDefault(portalUserId, List.of()));
+        }
+
+        private TenantMemberEntity findMembership(String portalUserId, String tenantId) {
+            return membershipsOf(portalUserId).stream()
+                    .filter(item -> tenantId.equals(item.getTenantId()))
+                    .findFirst()
+                    .orElse(null);
         }
 
         public Optional<TenantScope> findByTenantId(String tenantId) {
@@ -246,5 +257,15 @@ class TenantAuthFacadeTest {
                     tenantId, tenantId, tenantId, null, null, null, BasicStatus.ENABLED);
             return Optional.of(new TenantScope(tenant, organization));
         }
+    }
+
+    private static TenantMemberEntity membership(String tenantId, String tenantMemberId) {
+        TenantMemberEntity entity = new TenantMemberEntity();
+        entity.setTenantId(tenantId);
+        entity.setTenantMemberId(tenantMemberId);
+        entity.setPortalUserId("tus-alice");
+        entity.setStatus(TenantMemberStatus.ACTIVE.name());
+        entity.setJoinedAt(java.time.LocalDateTime.now());
+        return entity;
     }
 }

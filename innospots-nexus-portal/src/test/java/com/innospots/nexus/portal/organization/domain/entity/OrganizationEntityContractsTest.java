@@ -12,7 +12,7 @@ import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import org.junit.jupiter.api.Test;
 
-import com.innospots.nexus.portal.persistence.entity.TenantBaseEntity;
+import com.innospots.nexus.console.scope.tenant.domain.entity.base.TenantBaseEntity;
 import com.innospots.nexus.portal.organization.domain.enums.OrganizationUnitType;
 
 import static org.assertj.core.api.Assertions.assertThat;

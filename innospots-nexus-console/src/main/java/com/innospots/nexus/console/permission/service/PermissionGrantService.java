@@ -20,8 +20,8 @@ import com.innospots.nexus.console.permission.domain.enums.PermissionGrantKeyTyp
 import com.innospots.nexus.console.permission.domain.enums.PermissionSubjectType;
 import com.innospots.nexus.console.permission.domain.request.PermissionGrantItemRequest;
 import com.innospots.nexus.console.permission.domain.request.PermissionGrantReplaceRequest;
-import com.innospots.nexus.console.scope.ConsoleOwnership;
-import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnership;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnershipScope;
 
 /**
  * 管理角色和组织单元授权，并以全量替换方式保存授权结果。

@@ -108,7 +108,7 @@ class PlatformAccessRegistrationApprovalE2EIntegrationTest {
                 jdbcTemplate,
                 OUTPUT_DIR,
                 "01-after-public-submit",
-                Map.of("nx_pl_access_request", "access_request_id", "nx_pl_user", "login_name"));
+                Map.of("nx_pl_access_request", "access_request_id", "nx_admin_user", "login_name"));
 
         String adminListPath = PlatformConstant.REGISTRATION_ACCESS_REQUESTS_PATH
                 + "?pageNo=1&pageSize=20&input="
@@ -143,7 +143,7 @@ class PlatformAccessRegistrationApprovalE2EIntegrationTest {
                 jdbcTemplate,
                 OUTPUT_DIR,
                 "02-after-approve-and-user-get",
-                Map.of("nx_pl_access_request", "access_request_id", "nx_pl_user", "login_name"));
+                Map.of("nx_pl_access_request", "access_request_id", "nx_admin_user", "login_name"));
 
         String loginBody = """
                 {
@@ -158,7 +158,7 @@ class PlatformAccessRegistrationApprovalE2EIntegrationTest {
                 jdbcTemplate,
                 OUTPUT_DIR,
                 "03-after-public-login",
-                Map.of("nx_pl_user", "login_name"));
+                Map.of("nx_admin_user", "login_name"));
     }
 
     private static String extractJsonStringField(String json, String fieldName) {

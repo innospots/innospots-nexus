@@ -63,7 +63,7 @@ class PlatformPublicAccessRegistrationEndpointIntegrationTest {
                 Map.of(
                         "nx_pl_access_request",
                         "access_request_id",
-                        "nx_pl_user",
+                        "nx_admin_user",
                         "login_name"));
     }
 
@@ -104,7 +104,7 @@ class PlatformPublicAccessRegistrationEndpointIntegrationTest {
         assertThat(submitted.body()).contains("PENDING_APPROVAL");
 
         Long pendingUsers = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM nx_pl_user WHERE login_name = ? AND status = 'PENDING_APPROVAL'",
+                "SELECT COUNT(*) FROM nx_admin_user WHERE login_name = ? AND status = 'PENDING_APPROVAL'",
                 Long.class,
                 "it.access.reg");
         assertThat(pendingUsers).isEqualTo(1L);
@@ -121,6 +121,6 @@ class PlatformPublicAccessRegistrationEndpointIntegrationTest {
                 jdbcTemplate,
                 OUTPUT_DIR,
                 "01-after-submit",
-                Map.of("nx_pl_access_request", "access_request_id", "nx_pl_user", "login_name"));
+                Map.of("nx_pl_access_request", "access_request_id", "nx_admin_user", "login_name"));
     }
 }

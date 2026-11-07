@@ -42,16 +42,16 @@ class TLCTest {
     void exposesWorkspaceAndUserIdentityKeys() {
         TLC.workspaceId("wks01");
         TLC.tenantId("tnt01");
-        TLC.userId(2002L);
+        TLC.userId("2002");
         TLC.userName("alice");
 
         assertThat(TLC.workspaceId()).isEqualTo("wks01");
         assertThat(TLC.tenantId()).isEqualTo("tnt01");
-        assertThat(TLC.userId()).isEqualTo(2002L);
+        assertThat(TLC.userId()).isEqualTo("2002");
         assertThat(TLC.userName()).isEqualTo("alice");
         assertThat(TLC.snapshot()).containsEntry(TLC.WORKSPACE_ID, "wks01")
                 .containsEntry(TLC.TENANT_ID, "tnt01")
-                .containsEntry(TLC.USER_ID, 2002L)
+                .containsEntry(TLC.USER_ID, "2002")
                 .containsEntry(TLC.USER_NAME, "alice");
     }
 

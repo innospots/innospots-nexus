@@ -13,7 +13,7 @@ import com.innospots.nexus.platform.access.domain.request.PlatformRegistrationOt
 import com.innospots.nexus.platform.access.operator.PlatformAccessRequestOperator;
 import com.innospots.nexus.platform.access.status.PlatformAccessStatusCode;
 import com.innospots.nexus.platform.settings.service.PlatformRegistrationModeSettingService;
-import com.innospots.nexus.platform.user.service.PlatformUserService;
+import com.innospots.nexus.console.user.admin.service.AdminUserService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -57,7 +57,7 @@ class PlatformAccessRequestServiceTest {
     private static PlatformAccessRequestService newService(OtpChallengeService otpChallengeService) {
         return new PlatformAccessRequestService(
                 mock(PlatformAccessRequestOperator.class),
-                mock(PlatformUserService.class),
+                mock(AdminUserService.class),
                 otpChallengeService,
                 mock(PasswordDecryptor.class),
                 mock(com.innospots.nexus.console.auth.service.RegistrationPolicyService.class));

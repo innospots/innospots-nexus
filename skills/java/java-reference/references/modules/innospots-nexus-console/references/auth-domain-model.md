@@ -10,7 +10,7 @@
 
 | 名称 | 类型 | 说明 |
 |------|------|------|
-| `userId` | `String` | platform_user_id 或 tenant_user_id |
+| `userId` | `String` | platform_user_id 或 portal_user_id |
 | `loginName` | `String` | 匹配到的登录名、邮箱或手机号 |
 | `status` | `String` | 生命周期状态 name |
 | `realm` | `SecurityRealm` | 所属安全域 |
@@ -26,7 +26,7 @@
 
 | 名称 | 类型 | 说明 |
 |------|------|------|
-| `subjectId` | `String` | 用户主体 ID（platform_user_id 或 tenant_user_id） |
+| `subjectId` | `String` | 用户主体 ID（platform_user_id 或 portal_user_id） |
 | `credentialKind` | `String` | 凭据类型 name（如 PASSWORD） |
 | `algorithm` | `String` | 可插拔算法 ID |
 | `verifier` | `String` | 不透明验证材料 |

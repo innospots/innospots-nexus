@@ -57,8 +57,8 @@ public class AuditMetaObjectHandler implements MetaObjectHandler {
         if (userName != null && !userName.isBlank()) {
             return userName;
         }
-        Long userId = TLC.userId();
-        return userId == null ? null : String.valueOf(userId);
+        String userId = TLC.userId();
+        return userId == null || userId.isBlank() ? null : userId;
     }
 
     private void fillScope(MetaObject metaObject, boolean insert) {

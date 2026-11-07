@@ -6,7 +6,7 @@ import java.util.List;
 import com.innospots.nexus.console.jaxrs.web.ConsoleWebSecuritySettings;
 import com.innospots.nexus.console.menu.domain.vo.NavigationMenuVo;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubject;
-import com.innospots.nexus.console.scope.ConsoleOwnership;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnership;
 import com.innospots.nexus.console.sitemap.domain.model.SitemapMenuItem;
 import com.innospots.nexus.console.sitemap.service.SitemapService;
 

@@ -14,7 +14,7 @@ import com.innospots.nexus.platform.settings.domain.request.PlatformConsoleTheme
 import com.innospots.nexus.platform.settings.domain.vo.PlatformConsoleThemeSettingVo;
 import com.innospots.nexus.platform.settings.status.PlatformConsoleUiSettingStatusCode;
 import com.innospots.nexus.platform.settings.support.PlatformSettingKeys;
-import com.innospots.nexus.platform.support.PlatformMutationLog;
+import com.innospots.nexus.console.support.MutationLog;
 
 /**
  * 控制台配色主题：{@link PlatformSettingKeys#CONSOLE_THEME}。
@@ -39,7 +39,7 @@ public class PlatformConsoleThemeSettingService {
                 PlatformSettingKeys.CONSOLE_THEME,
                 null,
                 request.theme());
-        PlatformMutationLog.info(log, "console theme updated theme={}", updated);
+        MutationLog.info(log, "console theme updated theme={}", updated);
         return toVo(updated);
     }
 

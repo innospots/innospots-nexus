@@ -58,7 +58,7 @@ class PlatformAuthSessionEndpointIntegrationTest {
                 jdbcTemplate,
                 OUTPUT_DIR,
                 "00-dev-user-seeded",
-                Map.of("nx_pl_user", "platform_user_id", "nx_user_credential", "subject_id"));
+                Map.of("nx_admin_user", "platform_user_id", "nx_user_credential", "subject_id"));
     }
 
     @Test
@@ -96,6 +96,6 @@ class PlatformAuthSessionEndpointIntegrationTest {
                 jdbcTemplate,
                 OUTPUT_DIR,
                 "02-after-logout",
-                Map.of("nx_pl_user", "platform_user_id"));
+                Map.of("nx_admin_user", "platform_user_id"));
     }
 }

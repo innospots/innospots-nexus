@@ -20,40 +20,40 @@ CREATE TABLE IF NOT EXISTS nx_pl_enterprise (
     CONSTRAINT uk_nx_pl_enterprise_tenant UNIQUE (tenant_id)
 );
 
-CREATE TABLE IF NOT EXISTS nx_pl_tenant (
+CREATE TABLE IF NOT EXISTS nx_tenant (
     tenant_id             VARCHAR(32)  NOT NULL,
     tenant_name           VARCHAR(128) NOT NULL,
     tenant_code           VARCHAR(64)  NOT NULL,
     tenant_type           VARCHAR(32)  NOT NULL,
     status                VARCHAR(32)  NOT NULL,
     plan_code             VARCHAR(64),
-    owner_tenant_user_id  VARCHAR(32),
+    owner_portal_user_id  VARCHAR(32),
     created_at            TIMESTAMP,
     updated_at            TIMESTAMP,
     created_by            VARCHAR(64),
     updated_by            VARCHAR(64),
     PRIMARY KEY (tenant_id),
-    CONSTRAINT uk_nx_pl_tenant_code UNIQUE (tenant_code)
+    CONSTRAINT uk_nx_tenant_code UNIQUE (tenant_code)
 );
 
-CREATE TABLE IF NOT EXISTS nx_pl_tenant_admin (
+CREATE TABLE IF NOT EXISTS nx_tenant_admin (
     tenant_admin_id  VARCHAR(32)   NOT NULL,
     tenant_id        VARCHAR(32)   NOT NULL,
     email            VARCHAR(128)  NOT NULL,
     admin_role       VARCHAR(32)   NOT NULL,
-    tenant_user_id   VARCHAR(32),
+    portal_user_id   VARCHAR(32),
     display_name     VARCHAR(128),
     created_at       TIMESTAMP,
     updated_at       TIMESTAMP,
     created_by       VARCHAR(64),
     updated_by       VARCHAR(64),
     PRIMARY KEY (tenant_admin_id),
-    CONSTRAINT uk_nx_pl_tenant_admin_email UNIQUE (tenant_id, email)
+    CONSTRAINT uk_nx_tenant_admin_email UNIQUE (tenant_id, email)
 );
 
-CREATE INDEX IF NOT EXISTS idx_nx_pl_tenant_admin_tenant ON nx_pl_tenant_admin (tenant_id);
+CREATE INDEX IF NOT EXISTS idx_nx_tenant_admin_tenant ON nx_tenant_admin (tenant_id);
 
-CREATE TABLE IF NOT EXISTS nx_pl_user (
+CREATE TABLE IF NOT EXISTS nx_admin_user (
     platform_user_id  VARCHAR(32)  NOT NULL,
     login_name        VARCHAR(64)  NOT NULL,
     display_name      VARCHAR(128),
@@ -68,12 +68,12 @@ CREATE TABLE IF NOT EXISTS nx_pl_user (
     created_by        VARCHAR(64),
     updated_by        VARCHAR(64),
     PRIMARY KEY (platform_user_id),
-    CONSTRAINT uk_nx_pl_user_login_name UNIQUE (login_name)
+    CONSTRAINT uk_nx_admin_user_login_name UNIQUE (login_name)
 );
 
-CREATE INDEX IF NOT EXISTS idx_nx_pl_user_status ON nx_pl_user (status);
+CREATE INDEX IF NOT EXISTS idx_nx_admin_user_status ON nx_admin_user (status);
 
-CREATE TABLE IF NOT EXISTS nx_pl_user_oauth (
+CREATE TABLE IF NOT EXISTS nx_admin_user_oauth (
     identity_id           VARCHAR(32)  NOT NULL,
     platform_user_id      VARCHAR(32)  NOT NULL,
     provider              VARCHAR(64)  NOT NULL,
@@ -90,10 +90,10 @@ CREATE TABLE IF NOT EXISTS nx_pl_user_oauth (
     created_by            VARCHAR(64),
     updated_by            VARCHAR(64),
     PRIMARY KEY (identity_id),
-    CONSTRAINT uk_nx_pl_user_oauth_provider_subject UNIQUE (provider, provider_subject)
+    CONSTRAINT uk_nx_admin_user_oauth_provider_subject UNIQUE (provider, provider_subject)
 );
 
-CREATE INDEX IF NOT EXISTS idx_nx_pl_user_oauth_user ON nx_pl_user_oauth (platform_user_id);
+CREATE INDEX IF NOT EXISTS idx_nx_admin_user_oauth_user ON nx_admin_user_oauth (platform_user_id);
 
 CREATE TABLE IF NOT EXISTS nx_pl_invite (
     invite_id            VARCHAR(32)   NOT NULL,

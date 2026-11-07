@@ -12,7 +12,7 @@ import com.innospots.nexus.console.permission.authorization.AuthorizationSubject
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubjectResolver;
 import com.innospots.nexus.console.permission.authorization.ConsoleResourcePermissionAuthorizer;
 import com.innospots.nexus.console.permission.service.PermissionVisibilityService;
-import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnershipScope;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrantDescriptor;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrantManager;
 import com.innospots.nexus.core.endpoint.grant.support.EndpointGrantPathMatcher;

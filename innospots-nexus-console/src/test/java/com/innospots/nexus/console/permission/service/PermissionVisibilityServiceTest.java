@@ -18,7 +18,7 @@ import com.innospots.nexus.console.menu.domain.entity.MenuEntity;
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubject;
 import com.innospots.nexus.console.permission.dao.PermissionGrantDao;
 import com.innospots.nexus.console.permission.domain.entity.PermissionGrantEntity;
-import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnershipScope;
 
 class PermissionVisibilityServiceTest {
 

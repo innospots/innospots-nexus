@@ -12,15 +12,15 @@ import com.innospots.nexus.console.role.domain.enums.RoleOwnerType;
 import com.innospots.nexus.console.role.domain.request.RoleCreateRequest;
 import com.innospots.nexus.console.role.domain.vo.RoleVo;
 import com.innospots.nexus.console.role.operator.RoleOperator;
-import com.innospots.nexus.console.scope.ConsoleSessionContext;
-import com.innospots.nexus.console.scope.ConsoleSessionScope;
+import com.innospots.nexus.console.scope.domain.session.ConsoleSessionContext;
+import com.innospots.nexus.console.scope.domain.session.ConsoleSessionScope;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
-import com.innospots.nexus.console.scope.ConsoleOwnership;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnership;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;

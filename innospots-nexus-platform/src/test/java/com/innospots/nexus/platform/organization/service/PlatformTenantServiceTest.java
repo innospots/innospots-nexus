@@ -6,12 +6,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import com.innospots.nexus.base.events.EventBus;
-import com.innospots.nexus.platform.organization.domain.entity.TenantEntity;
-import com.innospots.nexus.platform.organization.domain.enums.TenantType;
-import com.innospots.nexus.platform.organization.domain.event.TenantCreatedEvent;
-import com.innospots.nexus.platform.organization.domain.request.TenantCreateRequest;
+import com.innospots.nexus.console.scope.tenant.domain.entity.TenantEntity;
+import com.innospots.nexus.console.scope.tenant.domain.enums.TenantType;
+import com.innospots.nexus.console.scope.tenant.domain.event.TenantCreatedEvent;
+import com.innospots.nexus.console.scope.tenant.domain.request.TenantCreateRequest;
 import com.innospots.nexus.platform.organization.operator.EnterpriseOperator;
-import com.innospots.nexus.platform.organization.operator.TenantOperator;
+import com.innospots.nexus.console.scope.tenant.operator.TenantOperator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;

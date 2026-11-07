@@ -17,7 +17,7 @@ import com.innospots.nexus.console.credential.ownership.CredentialOwnershipResol
 import com.innospots.nexus.console.credential.password.PasswordValidator;
 import com.innospots.nexus.console.credential.password.operator.UserCredentialOperator;
 import com.innospots.nexus.console.credential.password.policy.LoginLockPolicy;
-import com.innospots.nexus.console.scope.ConsoleOwnership;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnership;
 
 /**
  * 租户/平台用户密码生命周期：注册、修改、重置；校验强度后委托 {@link UserCredentialOperator}。
@@ -125,7 +125,7 @@ public final class CredentialService {
 
     /**
      * 在身份已验证（如 OTP）后强制设置新密码。
-     * <p>调用场景：{@link com.innospots.nexus.portal.user.operator.PasswordOperator} 忘记密码流程，
+     * <p>调用场景：{@link com.innospots.nexus.console.user.portal.service.PortalPasswordService} 忘记密码流程，
      * 验证码通过后由 portal 调用。</p>
      *
      * @param realm       安全域

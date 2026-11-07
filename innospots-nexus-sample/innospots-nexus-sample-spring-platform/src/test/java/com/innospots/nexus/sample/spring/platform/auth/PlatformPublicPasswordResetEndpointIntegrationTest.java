@@ -72,7 +72,7 @@ class PlatformPublicPasswordResetEndpointIntegrationTest {
         otpCapture = new PlatformOtpTestCapture();
         jdbcTemplate.update(
                 """
-                INSERT INTO nx_pl_user (
+                INSERT INTO nx_admin_user (
                     platform_user_id, login_name, display_name, email, status, created_at, updated_at
                 ) VALUES (?, 'it.reset.user', 'IT Reset User', ?, 'ACTIVE',
                     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
@@ -84,7 +84,7 @@ class PlatformPublicPasswordResetEndpointIntegrationTest {
                 jdbcTemplate,
                 OUTPUT_DIR,
                 "00-user-seeded",
-                Map.of("nx_pl_user", "login_name", "nx_user_credential", "subject_id"));
+                Map.of("nx_admin_user", "login_name", "nx_user_credential", "subject_id"));
     }
 
     @AfterEach

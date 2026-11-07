@@ -48,7 +48,7 @@ class PlatformOrganizationEndpointIntegrationTest {
                 jdbcTemplate,
                 OUTPUT_DIR,
                 "00-clean",
-                Map.of("nx_pl_tenant", "tenant_code", "nx_pl_enterprise", "tenant_id"));
+                Map.of("nx_tenant", "tenant_code", "nx_pl_enterprise", "tenant_id"));
     }
 
     @Test
@@ -67,10 +67,10 @@ class PlatformOrganizationEndpointIntegrationTest {
                 jdbcTemplate,
                 OUTPUT_DIR,
                 "01-tenant-created",
-                Map.of("nx_pl_tenant", "tenant_code"));
+                Map.of("nx_tenant", "tenant_code"));
 
         String tenantId = jdbcTemplate.queryForObject(
-                "SELECT tenant_id FROM nx_pl_tenant WHERE tenant_code = ?",
+                "SELECT tenant_id FROM nx_tenant WHERE tenant_code = ?",
                 String.class,
                 "it_ent_tenant");
 
@@ -93,7 +93,7 @@ class PlatformOrganizationEndpointIntegrationTest {
                 jdbcTemplate,
                 OUTPUT_DIR,
                 "02-enterprise-upserted",
-                Map.of("nx_pl_tenant", "tenant_code", "nx_pl_enterprise", "tenant_id"));
+                Map.of("nx_tenant", "tenant_code", "nx_pl_enterprise", "tenant_id"));
 
         HttpResponse<String> gotEnterprise = http.get(enterprisePath);
         assertThat(gotEnterprise.statusCode()).isEqualTo(200);

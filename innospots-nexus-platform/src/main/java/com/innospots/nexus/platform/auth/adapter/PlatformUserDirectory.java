@@ -8,9 +8,9 @@ import com.innospots.nexus.console.auth.api.UserDirectory;
 import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
 import com.innospots.nexus.console.auth.domain.model.AuthUser;
 import com.innospots.nexus.platform.auth.support.PlatformUserIdentityResolver;
-import com.innospots.nexus.platform.user.dao.PlatformUserDao;
-import com.innospots.nexus.platform.user.domain.entity.PlatformUserEntity;
-import com.innospots.nexus.platform.user.domain.enums.PlatformUserStatus;
+import com.innospots.nexus.console.user.admin.dao.AdminUserDao;
+import com.innospots.nexus.console.user.admin.domain.entity.AdminUserEntity;
+import com.innospots.nexus.console.user.admin.domain.enums.AdminUserStatus;
 
 /**
  * 平台域 {@link UserDirectory} 实现。
@@ -18,7 +18,7 @@ import com.innospots.nexus.platform.user.domain.enums.PlatformUserStatus;
 @RequiredArgsConstructor
 public class PlatformUserDirectory implements UserDirectory {
 
-    private final PlatformUserDao platformUserDao;
+    private final AdminUserDao platformUserDao;
     private final PlatformUserIdentityResolver identityResolver;
 
     @Override
@@ -26,8 +26,8 @@ public class PlatformUserDirectory implements UserDirectory {
         if (identity == null || identity.isBlank()) {
             return Optional.empty();
         }
-        PlatformUserEntity user = identityResolver.findByIdentity(identity);
-        if (user == null || !PlatformUserStatus.ACTIVE.name().equals(user.getStatus())) {
+        AdminUserEntity user = identityResolver.findByIdentity(identity);
+        if (user == null || !AdminUserStatus.ACTIVE.name().equals(user.getStatus())) {
             return Optional.empty();
         }
         return Optional.of(toAuthUser(user, identity));
@@ -38,14 +38,14 @@ public class PlatformUserDirectory implements UserDirectory {
         if (userId == null || userId.isBlank()) {
             return Optional.empty();
         }
-        PlatformUserEntity user = platformUserDao.selectById(userId);
-        if (user == null || !PlatformUserStatus.ACTIVE.name().equals(user.getStatus())) {
+        AdminUserEntity user = platformUserDao.selectById(userId);
+        if (user == null || !AdminUserStatus.ACTIVE.name().equals(user.getStatus())) {
             return Optional.empty();
         }
         return Optional.of(toAuthUser(user, user.getLoginName()));
     }
 
-    private static AuthUser toAuthUser(PlatformUserEntity user, String loginName) {
+    private static AuthUser toAuthUser(AdminUserEntity user, String loginName) {
         return new AuthUser(
                 user.getPlatformUserId(),
                 loginName,

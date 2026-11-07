@@ -11,23 +11,34 @@ import com.innospots.nexus.console.config.AuthConfig;
 import com.innospots.nexus.console.credential.otp.service.CaptchaChallengeService;
 import com.innospots.nexus.console.credential.password.PasswordDecryptor;
 import com.innospots.nexus.console.credential.password.service.CredentialService;
-import com.innospots.nexus.console.scope.service.SessionScopeBinder;
-import com.innospots.nexus.portal.auth.adapter.PortalMembershipDirectory;
+import com.innospots.nexus.console.jaxrs.filter.WorkspaceScopeResolver;
+import com.innospots.nexus.console.jaxrs.filter.WorkspaceScopeSessionFilter;
+import com.innospots.nexus.console.role.dao.RoleBindingDao;
+import com.innospots.nexus.console.role.dao.RoleDao;
+import com.innospots.nexus.console.scope.cookie.WorkspaceCookieNames;
+import com.innospots.nexus.console.scope.domain.session.SessionScopeBinder;
+import com.innospots.nexus.console.scope.service.ConsoleTenantContextService;
+import com.innospots.nexus.console.scope.service.DefaultSessionScopeBinder;
+import com.innospots.nexus.console.scope.service.ConsoleWorkspaceContextService;
+import com.innospots.nexus.console.scope.service.ConsoleWorkspaceScopeResolver;
+import com.innospots.nexus.console.scope.workspace.dao.WorkspaceMemberDao;
 import com.innospots.nexus.portal.auth.adapter.PortalUserDirectory;
 import com.innospots.nexus.portal.auth.service.TenantAuthFacade;
-import com.innospots.nexus.portal.member.dao.TenantMemberDao;
-import com.innospots.nexus.portal.organization.dao.OrganizationUnitDao;
-import com.innospots.nexus.portal.project.dao.ProjectDao;
-import com.innospots.nexus.portal.project.operator.ProjectOperator;
-import com.innospots.nexus.portal.scope.PortalProjectScopeDirectory;
-import com.innospots.nexus.portal.scope.PortalTenantScopeDirectory;
-import com.innospots.nexus.portal.scope.PortalWorkspaceScopeDirectory;
-import com.innospots.nexus.portal.scope.service.PortalSessionScopeBinder;
-import com.innospots.nexus.portal.user.dao.UserDao;
-import com.innospots.nexus.portal.user.operator.PasswordOperator;
-import com.innospots.nexus.portal.user.operator.UserOperator;
-import com.innospots.nexus.portal.workspace.dao.WorkspaceDao;
-import com.innospots.nexus.portal.workspace.operator.WorkspaceOperator;
+import com.innospots.nexus.console.scope.tenant.dao.TenantMemberDao;
+import com.innospots.nexus.console.scope.tenant.dao.TenantDao;
+import com.innospots.nexus.console.scope.project.dao.ProjectDao;
+import com.innospots.nexus.console.scope.project.operator.ProjectOperator;
+import com.innospots.nexus.console.scope.directory.PortalProjectScopeDirectory;
+import com.innospots.nexus.console.scope.directory.PortalTenantScopeDirectory;
+import com.innospots.nexus.console.scope.directory.PortalWorkspaceScopeDirectory;
+import com.innospots.nexus.console.user.portal.dao.PortalUserDao;
+import com.innospots.nexus.console.credential.password.PasswordVerificationOperator;
+import com.innospots.nexus.console.user.portal.dao.PortalUserOauthIdentityDao;
+import com.innospots.nexus.console.user.portal.operator.PortalUserOauthOperator;
+import com.innospots.nexus.console.user.portal.service.PortalPasswordService;
+import com.innospots.nexus.console.user.portal.service.PortalUserService;
+import com.innospots.nexus.console.scope.workspace.dao.WorkspaceDao;
+import com.innospots.nexus.console.scope.workspace.operator.WorkspaceOperator;
 
 /**
  * portal 租户认证、作用域与用户相关 Quarkus CDI 装配。
@@ -37,7 +48,7 @@ public class PortalAuthBeans {
 
     @Produces
     @Singleton
-    PortalUserDirectory portalUserDirectory(UserDao userDao) {
+    PortalUserDirectory portalUserDirectory(PortalUserDao userDao) {
         return new PortalUserDirectory(userDao);
     }
 
@@ -45,12 +56,6 @@ public class PortalAuthBeans {
     @Singleton
     LoginCaptchaGate loginCaptchaGate(AuthConfig authConfig, CaptchaChallengeService captchaChallengeService) {
         return new LoginCaptchaGate(authConfig, captchaChallengeService);
-    }
-
-    @Produces
-    @Singleton
-    PortalMembershipDirectory portalMembershipDirectory(TenantMemberDao tenantMemberDao) {
-        return new PortalMembershipDirectory(tenantMemberDao);
     }
 
     @Produces
@@ -67,8 +72,8 @@ public class PortalAuthBeans {
 
     @Produces
     @Singleton
-    PortalTenantScopeDirectory tenantScopeDirectory(OrganizationUnitDao organizationUnitDao) {
-        return new PortalTenantScopeDirectory(organizationUnitDao);
+    PortalTenantScopeDirectory tenantScopeDirectory(TenantDao tenantDao) {
+        return new PortalTenantScopeDirectory(tenantDao);
     }
 
     @Produces
@@ -85,11 +90,54 @@ public class PortalAuthBeans {
 
     @Produces
     @Singleton
-    SessionScopeBinder sessionScopeBinder(
-            PortalTenantScopeDirectory tenantScopeDirectory,
-            PortalWorkspaceScopeDirectory workspaceScopeDirectory,
-            PortalProjectScopeDirectory projectScopeDirectory) {
-        return new PortalSessionScopeBinder(tenantScopeDirectory, workspaceScopeDirectory, projectScopeDirectory);
+    SessionScopeBinder sessionScopeBinder(PortalTenantScopeDirectory tenantScopeDirectory) {
+        return new DefaultSessionScopeBinder(tenantScopeDirectory);
+    }
+
+
+    @Produces
+    @Singleton
+    ConsoleTenantContextService consoleTenantContextService(
+            TenantDao tenantDao,
+            TenantMemberDao tenantMemberDao,
+            RoleBindingDao roleBindingDao,
+            RoleDao roleDao) {
+        return new ConsoleTenantContextService(
+                tenantDao, tenantMemberDao, roleBindingDao, roleDao);
+    }
+
+    @Produces
+    @Singleton
+    ConsoleWorkspaceContextService consoleWorkspaceContextService(
+            WorkspaceOperator workspaceOperator,
+            WorkspaceMemberDao workspaceMemberDao,
+            RoleBindingDao roleBindingDao,
+            RoleDao roleDao) {
+        return new ConsoleWorkspaceContextService(
+                workspaceOperator, workspaceMemberDao, roleBindingDao, roleDao);
+    }
+
+    @Produces
+    @Singleton
+    WorkspaceScopeResolver workspaceScopeResolver(
+            ConsoleTenantContextService tenantContextService,
+            ConsoleWorkspaceContextService workspaceContextService,
+            ProjectOperator projectOperator) {
+        return new ConsoleWorkspaceScopeResolver(
+                tenantContextService,
+                workspaceContextService,
+                projectOperator::findSnapshot,
+                new ConsoleWorkspaceScopeResolver.Names(
+                        WorkspaceCookieNames.TENANT,
+                        WorkspaceCookieNames.WORKSPACE,
+                        WorkspaceCookieNames.PROJECT));
+    }
+
+    @Produces
+    @Singleton
+    WorkspaceScopeSessionFilter workspaceScopeSessionFilter(
+            WorkspaceScopeResolver workspaceScopeResolver) {
+        return new WorkspaceScopeSessionFilter(workspaceScopeResolver);
     }
 
     @Produces
@@ -110,7 +158,7 @@ public class PortalAuthBeans {
             PortalUserDirectory portalUserDirectory,
             CredentialService credentialService,
             LoginCaptchaGate loginCaptchaGate,
-            PortalMembershipDirectory membershipDirectory,
+            TenantMemberDao tenantMemberDao,
             PasswordDecryptor passwordDecryptor,
             TokenIssuer tokenIssuer,
             AuthTokenPairIssuer authTokenPairIssuer,
@@ -119,7 +167,7 @@ public class PortalAuthBeans {
                 portalUserDirectory,
                 credentialService,
                 loginCaptchaGate,
-                membershipDirectory,
+                tenantMemberDao,
                 passwordDecryptor,
                 tokenIssuer,
                 authTokenPairIssuer,
@@ -128,19 +176,28 @@ public class PortalAuthBeans {
 
     @Produces
     @Singleton
-    UserOperator userOperator(
-            UserDao userDao,
+    PortalUserService portalUserService(
+            PortalUserDao portalUserDao,
             CredentialService credentialService,
             PasswordDecryptor passwordDecryptor) {
-        return new UserOperator(userDao, credentialService, passwordDecryptor);
+        return new PortalUserService(portalUserDao, credentialService, passwordDecryptor);
     }
 
     @Produces
     @Singleton
-    PasswordOperator passwordOperator(
-            UserDao userDao,
+    PortalPasswordService portalPasswordService(
+            PortalUserDao portalUserDao,
             CredentialService credentialService,
-            com.innospots.nexus.console.credential.password.PasswordVerificationOperator passwordVerificationOperator) {
-        return new PasswordOperator(userDao, credentialService, passwordVerificationOperator);
+            PasswordVerificationOperator passwordVerificationOperator) {
+        return new PortalPasswordService(
+                portalUserDao, credentialService, passwordVerificationOperator);
+    }
+
+    @Produces
+    @Singleton
+    PortalUserOauthOperator portalUserOauthOperator(
+            PortalUserDao portalUserDao,
+            PortalUserOauthIdentityDao portalUserOauthIdentityDao) {
+        return new PortalUserOauthOperator(portalUserDao, portalUserOauthIdentityDao);
     }
 }

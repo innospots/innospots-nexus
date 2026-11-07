@@ -13,7 +13,7 @@ import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
 import com.innospots.nexus.console.role.domain.enums.RoleOwnerType;
 import com.innospots.nexus.console.role.domain.vo.RoleVo;
 import com.innospots.nexus.console.role.operator.RoleOperator;
-import com.innospots.nexus.console.scope.ConsoleOwnership;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnership;
 import com.innospots.nexus.spring.console.role.support.RoleEndpointH2Support;
 import com.innospots.nexus.spring.console.role.support.RoleEndpointIntegrationTestApplication;
 import com.innospots.nexus.spring.console.role.support.RoleEndpointIntegrationTestProperties;

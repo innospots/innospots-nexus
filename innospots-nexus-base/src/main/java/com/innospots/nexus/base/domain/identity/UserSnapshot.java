@@ -24,7 +24,7 @@ public class UserSnapshot {
     public static final String CLAIM_REAL_NAME = "realName";
     public static final String CLAIM_EMAIL = "email";
 
-    private final Long userId;
+    private final String userId;
     private final String userName;
     private final String realName;
     private String email;
@@ -34,13 +34,13 @@ public class UserSnapshot {
     private UserGroupSnapshot group;
     private final List<RoleSnapshot> roles = new ArrayList<>();
 
-    private UserSnapshot(Long userId, String userName, String realName) {
+    private UserSnapshot(String userId, String userName, String realName) {
         this.userId = userId;
         this.userName = userName;
         this.realName = realName;
     }
 
-    public static UserSnapshot simple(Long userId, String userName, String realName) {
+    public static UserSnapshot simple(String userId, String userName, String realName) {
         return new UserSnapshot(userId, userName, realName);
     }
 
@@ -50,8 +50,8 @@ public class UserSnapshot {
      * @return 快照可选值，无用户 ID 时为空
      */
     public static Optional<UserSnapshot> fromContextOptional() {
-        Long userId = TLC.userId();
-        if (userId == null) {
+        String userId = TLC.userId();
+        if (userId == null || userId.isBlank()) {
             return Optional.empty();
         }
         return Optional.of(simple(userId, TLC.userName(), null));
@@ -74,9 +74,9 @@ public class UserSnapshot {
      */
     public static UserSnapshot fromClaims(Map<String, ?> claims) {
         Checks.notNull(claims, "claims");
-        Long userId = parseUserId(claims.get(TLC.USER_ID));
+        String userId = stringValue(claims.get(TLC.USER_ID));
         String userName = stringValue(claims.get(TLC.USER_NAME));
-        Checks.notNull(userId, "userId");
+        Checks.notBlank(userId, "userId");
         Checks.notBlank(userName, "userName");
         UserSnapshot user = simple(userId, userName, stringValue(claims.get(CLAIM_REAL_NAME)));
         String email = stringValue(claims.get(CLAIM_EMAIL));
@@ -86,7 +86,7 @@ public class UserSnapshot {
         return user;
     }
 
-    public Long userId() {
+    public String userId() {
         return userId;
     }
 
@@ -158,21 +158,6 @@ public class UserSnapshot {
         return this;
     }
 
-    private static Long parseUserId(Object value) {
-        if (value == null) {
-            return null;
-        }
-        if (value instanceof Long longValue) {
-            return longValue;
-        }
-        if (value instanceof Number number) {
-            return number.longValue();
-        }
-        if (value instanceof String text && !text.isBlank()) {
-            return Long.parseLong(text);
-        }
-        return null;
-    }
 
     private static String stringValue(Object value) {
         return value == null ? null : String.valueOf(value);

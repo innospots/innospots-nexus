@@ -24,9 +24,9 @@ import com.innospots.nexus.console.permission.authorization.AuthorizationDecisio
 import com.innospots.nexus.console.permission.authorization.AuthorizationSubject;
 import com.innospots.nexus.console.permission.authorization.ConsoleResourcePermissionAuthorizer;
 import com.innospots.nexus.console.permission.service.PermissionVisibilityService;
-import com.innospots.nexus.console.scope.ConsoleSessionContext;
-import com.innospots.nexus.console.scope.ConsoleSessionScope;
-import com.innospots.nexus.console.scope.service.SessionScopeTlc;
+import com.innospots.nexus.console.scope.domain.session.ConsoleSessionContext;
+import com.innospots.nexus.console.scope.domain.session.ConsoleSessionScope;
+import com.innospots.nexus.console.scope.domain.session.SessionScopeTlc;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrant;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrantManager;

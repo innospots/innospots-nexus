@@ -10,7 +10,7 @@ import com.innospots.nexus.platform.role.endpoint.PlatformRoleBindingEndpoint;
 import com.innospots.nexus.platform.role.endpoint.PlatformRoleEndpoint;
 import com.innospots.nexus.platform.role.service.PlatformRoleBindingService;
 import com.innospots.nexus.platform.role.service.PlatformRoleService;
-import com.innospots.nexus.platform.user.operator.PlatformUserOperator;
+import com.innospots.nexus.console.user.admin.operator.AdminUserOperator;
 
 /**
  * 运营平台角色 Spring 装配：生命周期与绑定 REST。
@@ -26,7 +26,7 @@ public class PlatformRoleConfiguration {
     @Bean
     PlatformRoleBindingService platformRoleBindingService(
             RoleBindingOperator roleBindingOperator,
-            PlatformUserOperator platformUserOperator) {
+            AdminUserOperator platformUserOperator) {
         return new PlatformRoleBindingService(roleBindingOperator, platformUserOperator);
     }
 

@@ -10,10 +10,10 @@ import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
 import com.innospots.nexus.console.role.domain.enums.RoleBindingSubjectType;
 import com.innospots.nexus.console.role.domain.request.RoleBindingAddRequest;
 import com.innospots.nexus.console.role.operator.RoleBindingOperator;
-import com.innospots.nexus.platform.user.operator.PlatformUserOperator;
-import com.innospots.nexus.console.scope.ConsoleOwnership;
-import com.innospots.nexus.console.scope.ConsoleSessionContext;
-import com.innospots.nexus.console.scope.ConsoleSessionScope;
+import com.innospots.nexus.console.user.admin.operator.AdminUserOperator;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnership;
+import com.innospots.nexus.console.scope.domain.session.ConsoleSessionContext;
+import com.innospots.nexus.console.scope.domain.session.ConsoleSessionScope;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,7 +33,7 @@ class PlatformRoleBindingServiceTest {
         bindPlatformSession();
         RoleBindingOperator operator = mock(RoleBindingOperator.class);
         PlatformRoleBindingService service = new PlatformRoleBindingService(
-                operator, mock(PlatformUserOperator.class));
+                operator, mock(AdminUserOperator.class));
         RoleBindingAddRequest request = new RoleBindingAddRequest(
                 RoleBindingSubjectType.USER, java.util.List.of("u-1"));
 
@@ -47,7 +47,7 @@ class PlatformRoleBindingServiceTest {
         ConsoleSessionContext.bindScope(ConsoleSessionScope.TENANT);
         TLC.put(TLC.SECURITY_REALM, SecurityRealm.TENANT.name());
         PlatformRoleBindingService service = new PlatformRoleBindingService(
-                mock(RoleBindingOperator.class), mock(PlatformUserOperator.class));
+                mock(RoleBindingOperator.class), mock(AdminUserOperator.class));
 
         assertThatThrownBy(() -> service.pageRoleBindings("rol-1", null))
                 .isInstanceOf(NexusException.class)

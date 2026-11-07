@@ -30,8 +30,8 @@ import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeOptionVo;
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeVo;
 import com.innospots.nexus.console.dictionary.status.DictionaryStatusCode;
 import com.innospots.nexus.console.dictionary.support.DictionaryTypeNames;
-import com.innospots.nexus.console.scope.ConsoleOwnership;
-import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnership;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnershipScope;
 import com.innospots.nexus.console.support.ConsoleExceptions;
 
 /**

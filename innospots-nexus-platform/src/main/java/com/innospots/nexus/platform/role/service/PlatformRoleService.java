@@ -17,9 +17,9 @@ import com.innospots.nexus.console.role.domain.request.RoleUpdateRequest;
 import com.innospots.nexus.console.role.domain.vo.RoleOptionVo;
 import com.innospots.nexus.console.role.domain.vo.RoleVo;
 import com.innospots.nexus.console.role.operator.RoleOperator;
-import com.innospots.nexus.console.scope.ConsoleOwnership;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnership;
 import com.innospots.nexus.platform.scope.PlatformConsoleSession;
-import com.innospots.nexus.platform.support.PlatformMutationLog;
+import com.innospots.nexus.console.support.MutationLog;
 
 /**
  * 运营平台角色服务：参数校验、PLATFORM 归属固化与会话边界，委托 {@link RoleOperator} 做基础持久化。
@@ -52,7 +52,7 @@ public class PlatformRoleService {
                 request.description(),
                 RoleOwnerType.PLATFORM,
                 null);
-        PlatformMutationLog.info(
+        MutationLog.info(
                 log,
                 "role created roleId={} roleCode={}",
                 created.roleId(),
@@ -65,7 +65,7 @@ public class PlatformRoleService {
         Objects.requireNonNull(request, "request");
         ConsoleOwnership ownership = PlatformConsoleSession.requireOwnership();
         RoleVo updated = roleOperator.updateRole(roleId, request, ownership);
-        PlatformMutationLog.info(log, "role updated roleId={} roleCode={}", updated.roleId(), updated.roleCode());
+        MutationLog.info(log, "role updated roleId={} roleCode={}", updated.roleId(), updated.roleCode());
         return updated;
     }
 
@@ -74,7 +74,7 @@ public class PlatformRoleService {
         Objects.requireNonNull(request, "request");
         ConsoleOwnership ownership = PlatformConsoleSession.requireOwnership();
         roleOperator.updateRoleStatus(roleId, request, ownership);
-        PlatformMutationLog.info(
+        MutationLog.info(
                 log,
                 "role status updated roleId={} status={}",
                 roleId,
@@ -85,7 +85,7 @@ public class PlatformRoleService {
         Checks.notBlank(roleId, "roleId");
         ConsoleOwnership ownership = PlatformConsoleSession.requireOwnership();
         roleOperator.deleteRole(roleId, ownership);
-        PlatformMutationLog.info(log, "role deleted roleId={}", roleId);
+        MutationLog.info(log, "role deleted roleId={}", roleId);
     }
 
     public List<RoleOptionVo> listRoleOptions(BasicStatus status) {

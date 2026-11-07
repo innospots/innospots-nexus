@@ -15,8 +15,8 @@ import com.innospots.nexus.console.permission.domain.enums.PermissionSubjectType
 import com.innospots.nexus.console.role.dao.RoleDao;
 import com.innospots.nexus.console.role.domain.entity.RoleEntity;
 import com.innospots.nexus.console.role.domain.enums.RoleOwnerType;
-import com.innospots.nexus.console.scope.ConsoleOwnership;
-import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnership;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnershipScope;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;

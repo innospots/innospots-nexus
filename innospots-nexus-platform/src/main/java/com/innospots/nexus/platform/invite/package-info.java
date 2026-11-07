@@ -1,7 +1,7 @@
 /**
  * 平台用户邀请：管理端发邀请与公开链接/邀请码激活（INVITE 自助注册模式）。
  *
- * <p>本域仅服务<strong>平台 IAM 用户</strong>（{@code nx_pl_user}），与 portal 租户成员邀请无关。</p>
+ * <p>本域仅服务<strong>平台 IAM 用户</strong>（{@code nx_admin_user}），与 portal 租户成员邀请无关。</p>
  *
  * <p>管理员邀请（{@code POST /api/platform/invites}）可在任意注册模式下使用；
  * 注册页邀请码激活受 {@link com.innospots.nexus.platform.settings.domain.enums.PlatformRegistrationMode#INVITE} 约束，

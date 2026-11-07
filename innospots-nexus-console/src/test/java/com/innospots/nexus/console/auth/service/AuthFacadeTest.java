@@ -24,7 +24,7 @@ import com.innospots.nexus.console.credential.otp.service.CaptchaChallengeServic
 import com.innospots.nexus.console.credential.password.CredentialKind;
 import com.innospots.nexus.console.credential.password.algorithm.CredentialAlgorithms;
 import com.innospots.nexus.console.credential.password.service.CredentialService;
-import com.innospots.nexus.console.scope.service.SessionScopeBinder;
+import com.innospots.nexus.console.scope.domain.session.SessionScopeBinder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

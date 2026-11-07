@@ -219,7 +219,7 @@ grill-me  →  java:project（需新建/改模块时）  →  java:design  →  
 ### `innospots-nexus-platform`
 
 - 基于 console foundation 构建的**运营管理平台**，与 portal 并行。
-- 拥有 tenant lifecycle（`nx_pl_tenant`）、enterprise legal profile
+- 拥有 tenant lifecycle（`nx_tenant`）、enterprise legal profile
   （`nx_pl_enterprise`），以及后续的 platform users、support access、platform
   audit。
 - 暴露 `/platform/**` 契约。不得提供公开 self-registration。

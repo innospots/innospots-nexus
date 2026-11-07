@@ -25,8 +25,8 @@ import com.innospots.nexus.console.credential.otp.domain.enums.OtpPurpose;
 import com.innospots.nexus.console.credential.otp.event.OtpSendRequestedEvent;
 import com.innospots.nexus.console.credential.otp.policy.OtpPolicy;
 import com.innospots.nexus.console.credential.otp.status.OtpStatusCode;
-import com.innospots.nexus.console.scope.ConsoleOwnership;
-import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnership;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnershipScope;
 
 /**
  * OTP 挑战的唯一样式入口：发放、校验、作废，并在发放后发布 {@link OtpSendRequestedEvent}。

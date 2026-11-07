@@ -82,7 +82,7 @@ class CoreEntityContractsTest {
     @Test
     void auditMetaObjectHandlerFillsCreatedByAndUpdatedByWithUserName() {
         try {
-            TLC.userId(1001L);
+            TLC.userId("1001");
             TLC.userName("alice");
             MetaResourceEntity entity = new MetaResourceEntity();
 

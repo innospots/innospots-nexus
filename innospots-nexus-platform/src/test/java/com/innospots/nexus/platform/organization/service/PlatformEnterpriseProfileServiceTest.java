@@ -3,11 +3,11 @@ package com.innospots.nexus.platform.organization.service;
 import org.junit.jupiter.api.Test;
 
 import com.innospots.nexus.base.exception.NexusException;
-import com.innospots.nexus.platform.organization.domain.entity.TenantEntity;
-import com.innospots.nexus.platform.organization.domain.enums.TenantType;
+import com.innospots.nexus.console.scope.tenant.domain.entity.TenantEntity;
+import com.innospots.nexus.console.scope.tenant.domain.enums.TenantType;
 import com.innospots.nexus.platform.organization.domain.request.EnterpriseProfileUpsertRequest;
 import com.innospots.nexus.platform.organization.operator.EnterpriseOperator;
-import com.innospots.nexus.platform.organization.operator.TenantOperator;
+import com.innospots.nexus.console.scope.tenant.operator.TenantOperator;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;

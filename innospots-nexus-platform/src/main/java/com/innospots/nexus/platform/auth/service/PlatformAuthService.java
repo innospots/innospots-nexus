@@ -10,7 +10,7 @@ import com.innospots.nexus.console.auth.domain.vo.AuthRsaPublicKeyVo;
 import com.innospots.nexus.console.auth.domain.vo.AuthTokenVo;
 import com.innospots.nexus.console.auth.service.AuthFacade;
 import com.innospots.nexus.console.auth.service.AuthRsaKeyService;
-import com.innospots.nexus.platform.support.PlatformRequestTrace;
+import com.innospots.nexus.console.support.RequestTrace;
 
 /**
  * 运营管理平台登录与会话令牌编排。
@@ -44,7 +44,7 @@ public class PlatformAuthService {
         String clientKey = request == null ? null : request.clientKey();
         log.info(
                 "traceId={} platform auth captcha issue clientKeyPresent={}",
-                PlatformRequestTrace.currentTraceId(),
+                RequestTrace.currentTraceId(),
                 clientKey != null && !clientKey.isBlank());
         return authFacade.issueLoginCaptcha(clientKey);
     }
@@ -55,7 +55,7 @@ public class PlatformAuthService {
      * @return SPKI 公钥 Base64
      */
     public AuthRsaPublicKeyVo getPasswordEncryptionPublicKey() {
-        log.debug("traceId={} platform auth RSA public key requested", PlatformRequestTrace.currentTraceId());
+        log.debug("traceId={} platform auth RSA public key requested", RequestTrace.currentTraceId());
         return authRsaKeyService.getPasswordEncryptionPublicKey();
     }
 
@@ -67,21 +67,21 @@ public class PlatformAuthService {
      */
     public AuthTokenVo login(AuthLoginRequest request) {
         String login = request == null ? null : request.login();
-        String traceId = PlatformRequestTrace.currentTraceId();
-        log.info("traceId={} platform auth login attempt login={}", traceId, PlatformRequestTrace.safeLogin(login));
+        String traceId = RequestTrace.currentTraceId();
+        log.info("traceId={} platform auth login attempt login={}", traceId, RequestTrace.safeLogin(login));
         try {
             AuthTokenVo token = authFacade.login(request);
             log.info(
                     "traceId={} platform auth login succeeded login={} tokenType={}",
                     traceId,
-                    PlatformRequestTrace.safeLogin(login),
+                    RequestTrace.safeLogin(login),
                     token.tokenType());
             return token;
         } catch (RuntimeException ex) {
             log.warn(
                     "traceId={} platform auth login failed login={} reason={}",
                     traceId,
-                    PlatformRequestTrace.safeLogin(login),
+                    RequestTrace.safeLogin(login),
                     ex.getMessage());
             throw ex;
         }
@@ -94,7 +94,7 @@ public class PlatformAuthService {
      * @return 新令牌对
      */
     public AuthTokenVo refresh(TokenRefreshRequest request) {
-        String traceId = PlatformRequestTrace.currentTraceId();
+        String traceId = RequestTrace.currentTraceId();
         log.info("traceId={} platform auth token refresh attempt", traceId);
         try {
             AuthTokenVo token = authFacade.refresh(request);
@@ -110,7 +110,7 @@ public class PlatformAuthService {
      * 登出当前会话（MVP：清理服务端会话上下文，不吊销 refresh token）。
      */
     public void logout() {
-        log.info("traceId={} platform auth logout", PlatformRequestTrace.currentTraceId());
+        log.info("traceId={} platform auth logout", RequestTrace.currentTraceId());
         authFacade.logout();
     }
 }

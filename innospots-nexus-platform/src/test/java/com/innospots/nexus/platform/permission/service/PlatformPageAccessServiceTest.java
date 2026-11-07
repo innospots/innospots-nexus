@@ -22,9 +22,9 @@ import com.innospots.nexus.console.permission.authorization.AuthorizationSubject
 import com.innospots.nexus.console.permission.pageaccess.PageAccessVerifier;
 import com.innospots.nexus.console.permission.pageaccess.PageAccessVerifyRequest;
 import com.innospots.nexus.console.permission.pageaccess.PageAccessVerifyResult;
-import com.innospots.nexus.console.scope.ConsoleSessionContext;
-import com.innospots.nexus.console.scope.ConsoleSessionScope;
-import com.innospots.nexus.console.scope.service.SessionScopeTlc;
+import com.innospots.nexus.console.scope.domain.session.ConsoleSessionContext;
+import com.innospots.nexus.console.scope.domain.session.ConsoleSessionScope;
+import com.innospots.nexus.console.scope.domain.session.SessionScopeTlc;
 import com.innospots.nexus.platform.permission.domain.vo.ActionAccessVo;
 
 class PlatformPageAccessServiceTest {

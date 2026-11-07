@@ -1,14 +1,14 @@
-package com.innospots.nexus.platform.user.operator;
+package com.innospots.nexus.console.user.admin.operator;
 
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 
 import com.innospots.nexus.base.exception.NexusException;
-import com.innospots.nexus.platform.user.dao.PlatformUserDao;
-import com.innospots.nexus.platform.user.domain.entity.PlatformUserEntity;
-import com.innospots.nexus.platform.user.domain.enums.PlatformUserStatus;
-import com.innospots.nexus.platform.user.status.PlatformUserStatusCode;
+import com.innospots.nexus.console.user.admin.dao.AdminUserDao;
+import com.innospots.nexus.console.user.admin.domain.entity.AdminUserEntity;
+import com.innospots.nexus.console.user.admin.domain.enums.AdminUserStatus;
+import com.innospots.nexus.console.user.admin.status.AdminUserStatusCode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -17,62 +17,62 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-class PlatformUserOperatorTest {
+class AdminUserOperatorTest {
 
     @Test
     void ensureLoginNameAvailableRejectsDuplicate() {
-        PlatformUserDao userDao = mock(PlatformUserDao.class);
+        AdminUserDao userDao = mock(AdminUserDao.class);
         when(userDao.selectCount(any())).thenReturn(1L);
-        PlatformUserOperator operator = new PlatformUserOperator(userDao);
+        AdminUserOperator operator = new AdminUserOperator(userDao);
 
         assertThatThrownBy(() -> operator.ensureLoginNameAvailable("ops.alice"))
                 .isInstanceOf(NexusException.class)
                 .extracting(ex -> ((NexusException) ex).code())
-                .isEqualTo(PlatformUserStatusCode.LOGIN_NAME_DUPLICATED.fullCode());
+                .isEqualTo(AdminUserStatusCode.LOGIN_NAME_DUPLICATED.fullCode());
     }
 
     @Test
     void ensureEmailAvailableRejectsDuplicateIgnoringCase() {
-        PlatformUserDao userDao = mock(PlatformUserDao.class);
+        AdminUserDao userDao = mock(AdminUserDao.class);
         when(userDao.selectCount(any())).thenReturn(1L);
-        PlatformUserOperator operator = new PlatformUserOperator(userDao);
+        AdminUserOperator operator = new AdminUserOperator(userDao);
 
         assertThatThrownBy(() -> operator.ensureEmailAvailable("Alice@Example.com", null))
                 .isInstanceOf(NexusException.class)
                 .extracting(ex -> ((NexusException) ex).code())
-                .isEqualTo(PlatformUserStatusCode.EMAIL_DUPLICATED.fullCode());
+                .isEqualTo(AdminUserStatusCode.EMAIL_DUPLICATED.fullCode());
     }
 
     @Test
     void updateStatusPersistsTargetStatus() {
-        PlatformUserDao userDao = mock(PlatformUserDao.class);
-        PlatformUserEntity entity = new PlatformUserEntity();
+        AdminUserDao userDao = mock(AdminUserDao.class);
+        AdminUserEntity entity = new AdminUserEntity();
         entity.setPlatformUserId("pus_test");
-        entity.setStatus(PlatformUserStatus.ACTIVE.name());
+        entity.setStatus(AdminUserStatus.ACTIVE.name());
         when(userDao.selectById("pus_test")).thenReturn(entity);
-        PlatformUserOperator operator = new PlatformUserOperator(userDao);
+        AdminUserOperator operator = new AdminUserOperator(userDao);
 
-        operator.updateStatus(entity, PlatformUserStatus.PENDING_ACTIVATION);
+        operator.updateStatus(entity, AdminUserStatus.PENDING_ACTIVATION);
 
-        assertThat(entity.getStatus()).isEqualTo(PlatformUserStatus.PENDING_ACTIVATION.name());
+        assertThat(entity.getStatus()).isEqualTo(AdminUserStatus.PENDING_ACTIVATION.name());
         verify(userDao).updateById(entity);
     }
 
     @Test
     void requireByIdThrowsWhenMissing() {
-        PlatformUserOperator operator = new PlatformUserOperator(mock(PlatformUserDao.class));
+        AdminUserOperator operator = new AdminUserOperator(mock(AdminUserDao.class));
 
         assertThatThrownBy(() -> operator.requireById("missing"))
                 .isInstanceOf(NexusException.class)
                 .extracting(ex -> ((NexusException) ex).code())
-                .isEqualTo(PlatformUserStatusCode.PLATFORM_USER_NOT_FOUND.fullCode());
+                .isEqualTo(AdminUserStatusCode.PLATFORM_USER_NOT_FOUND.fullCode());
     }
 
     @Test
     void activatePendingApprovalDeclaresTransactionalBoundaryAndLogger() throws Exception {
-        assertThat(PlatformUserOperator.class
-                .getDeclaredMethod("activatePendingApproval", PlatformUserEntity.class)
+        assertThat(AdminUserOperator.class
+                .getDeclaredMethod("activatePendingApproval", AdminUserEntity.class)
                 .getAnnotation(Transactional.class)).isNotNull();
-        assertThat(PlatformUserOperator.class.getDeclaredField("log").getType()).isEqualTo(Logger.class);
+        assertThat(AdminUserOperator.class.getDeclaredField("log").getType()).isEqualTo(Logger.class);
     }
 }

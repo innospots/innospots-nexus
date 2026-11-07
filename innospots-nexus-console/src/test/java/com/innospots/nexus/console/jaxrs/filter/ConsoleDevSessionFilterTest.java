@@ -66,7 +66,7 @@ class ConsoleDevSessionFilterTest {
         ConsoleWebSecuritySettings security = new ConsoleWebSecuritySettings();
         security.setEnabled(false);
         security.getDevSession().setEnabled(true);
-        SessionContext.bindUser(UserSnapshot.simple(99L, "existing", null));
+        SessionContext.bindUser(UserSnapshot.simple("99", "existing", null));
 
         ConsoleDevSessionFilter filter = new ConsoleDevSessionFilter(security);
         filter.filter(JaxRsFilterTestSupport.mockRequest("/api/d/nexus/status"));

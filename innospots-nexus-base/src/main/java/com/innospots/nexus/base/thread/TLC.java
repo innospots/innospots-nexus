@@ -77,9 +77,12 @@ public final class TLC {
     /**
      * 在上下文中设置用户 ID。传入 null 时移除该条目。
      *
+     * <p>用户标识是 opaque 字符串（如 {@code PUS…} / {@code TUS…}），
+     * 不做数值化转换，避免哈希碰撞与精度丢失。</p>
+     *
      * @param userId 用户 ID
      */
-    public static void userId(Long userId) {
+    public static void userId(String userId) {
         put(USER_ID, userId);
     }
 
@@ -88,8 +91,8 @@ public final class TLC {
      *
      * @return 用户 ID，不存在时返回 null
      */
-    public static Long userId() {
-        return getLong(USER_ID);
+    public static String userId() {
+        return getString(USER_ID);
     }
 
     /**

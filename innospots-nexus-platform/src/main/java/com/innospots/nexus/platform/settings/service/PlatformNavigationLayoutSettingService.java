@@ -14,7 +14,7 @@ import com.innospots.nexus.platform.settings.domain.request.PlatformNavigationLa
 import com.innospots.nexus.platform.settings.domain.vo.PlatformNavigationLayoutSettingVo;
 import com.innospots.nexus.platform.settings.status.PlatformConsoleUiSettingStatusCode;
 import com.innospots.nexus.platform.settings.support.PlatformSettingKeys;
-import com.innospots.nexus.platform.support.PlatformMutationLog;
+import com.innospots.nexus.console.support.MutationLog;
 
 /**
  * 控制台导航布局：{@link PlatformSettingKeys#NAVIGATION_LAYOUT}。
@@ -39,7 +39,7 @@ public class PlatformNavigationLayoutSettingService {
                 PlatformSettingKeys.NAVIGATION_LAYOUT,
                 null,
                 request.navigationLayoutMode());
-        PlatformMutationLog.info(log, "navigation layout updated mode={}", updated);
+        MutationLog.info(log, "navigation layout updated mode={}", updated);
         return toVo(updated);
     }
 

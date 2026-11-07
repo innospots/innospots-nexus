@@ -31,7 +31,6 @@ import com.innospots.nexus.platform.invite.endpoint.PlatformPublicInviteEndpoint
 import com.innospots.nexus.platform.logger.endpoint.PlatformAuditLogEndpoint;
 import com.innospots.nexus.platform.navigation.endpoint.PlatformNavigationMenuEndpoint;
 import com.innospots.nexus.platform.organization.endpoint.EnterpriseProfileEndpoint;
-import com.innospots.nexus.platform.organization.endpoint.TenantAdminEndpoint;
 import com.innospots.nexus.platform.organization.endpoint.TenantEndpoint;
 import com.innospots.nexus.platform.permission.endpoint.PlatformCurrentAuthorizationEndpoint;
 import com.innospots.nexus.platform.permission.endpoint.PlatformGrantManagementEndpoint;
@@ -46,7 +45,7 @@ import com.innospots.nexus.platform.settings.endpoint.PlatformConsoleSiteNameSet
 import com.innospots.nexus.platform.settings.endpoint.PlatformConsoleThemeSettingEndpoint;
 import com.innospots.nexus.platform.settings.endpoint.PlatformConsoleTimezoneSettingEndpoint;
 import com.innospots.nexus.platform.settings.endpoint.PlatformNavigationLayoutSettingEndpoint;
-import com.innospots.nexus.platform.user.endpoint.PlatformUserEndpoint;
+import com.innospots.nexus.platform.user.endpoint.PlatformAdminUserEndpoint;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -58,9 +57,8 @@ class PlatformStandaloneEndpointGrantContractsTest {
 
     private static final List<Class<?>> STANDALONE_PLATFORM_ENDPOINTS = List.of(
             TenantEndpoint.class,
-            TenantAdminEndpoint.class,
             EnterpriseProfileEndpoint.class,
-            PlatformUserEndpoint.class,
+            PlatformAdminUserEndpoint.class,
             PlatformInviteEndpoint.class,
             PlatformPublicInviteEndpoint.class,
             PlatformAccessRequestEndpoint.class,
@@ -174,9 +172,8 @@ class PlatformStandaloneEndpointGrantContractsTest {
                 .collect(Collectors.toSet());
         Set<String> actual = Set.of(
                 "TenantEndpoint",
-                "TenantAdminEndpoint",
                 "EnterpriseProfileEndpoint",
-                "PlatformUserEndpoint",
+                "PlatformAdminUserEndpoint",
                 "PlatformInviteEndpoint",
                 "PlatformPublicInviteEndpoint",
                 "PlatformAccessRequestEndpoint",

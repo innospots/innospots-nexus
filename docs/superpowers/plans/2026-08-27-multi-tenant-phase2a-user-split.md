@@ -4,7 +4,7 @@
 
 **目标：** 将 user 拆分为 platform 与 tenant 表，将 password credential SPI 迁入 console，并声明双 realm auth/register JAX-RS 契约。Console 仍不持久化 users。
 
-**架构：** console 拥有 decrypt/hash/validation SPI、`UserDirectory` / `CredentialStore` port，以及 `/platform/auth/**` + `/tenant/auth/**` 契约。platform 存储 `nx_platform_user*`。portal 存储 `nx_tenant_user*`（由 `nx_user` 演进）。Portal/platform 稍后实现 port；本 slice 落地 entity、operator 与契约。
+**架构：** console 拥有 decrypt/hash/validation SPI、`UserDirectory` / `CredentialStore` port，以及 `/platform/auth/**` + `/tenant/auth/**` 契约。platform 存储 `nx_platform_user*`。portal 存储 `nx_portal_user*`（由 `nx_user` 演进）。Portal/platform 稍后实现 port；本 slice 落地 entity、operator 与契约。
 
 **技术栈：** Java 25、Maven、Jakarta Persistence + MyBatis-Plus、Jakarta REST、JUnit 5 + AssertJ、Lombok。
 
@@ -56,7 +56,7 @@
 - Create: `console/auth/UserDirectory.java` — `Optional<AuthUser> findByLogin(SecurityRealm realm, String identity)`
 - Create: `console/auth/CredentialRecord.java` record `(String userId, String passwordHash, String passwordSalt, String passwordAlgorithm, Integer failedAttempts, java.time.LocalDateTime lockedUntil, Boolean forceReset)`
 - Create: `console/auth/CredentialStore.java` — `Optional<CredentialRecord> findPassword(SecurityRealm realm, String userId)` 与 `void updatePassword(SecurityRealm realm, CredentialRecord credential)`
-- Create: `console/auth/MembershipDirectory.java` — `List<String> listActiveTenantIds(String tenantUserId)`
+- Create: `console/auth/MembershipDirectory.java` — `List<String> listActiveTenantIds(String portalUserId)`
 - Create: request/vo + `PlatformAuthEndpoint` `@Path("/platform/auth")` login/refresh/logout/password change+reset；**无 register**
 - Create: `TenantAuthEndpoint` `@Path("/tenant/auth")` register/login/select-tenant/refresh/logout/password change+reset
 - Tests: path 与 record component 的契约测试
@@ -75,13 +75,13 @@ Token vo: `realm`, `tokenType`（`IDENTITY` | `BUSINESS`）, `accessToken`, `ref
 
 | 旧 | 新 |
 |-----|-----|
-| `nx_user` / `userId` prefix `USR` | `nx_tenant_user` / `tenantUserId` prefix `TUS` |
-| `nx_user_password` / `userId` | `nx_tenant_user_password` / `tenantUserId` |
-| `nx_user_oauth` / `userId` | `nx_tenant_user_oauth` / `tenantUserId` |
+| `nx_user` / `userId` prefix `USR` | `nx_portal_user` / `portalUserId` prefix `TUS` |
+| `nx_user_password` / `userId` | `nx_portal_user_password` / `portalUserId` |
+| `nx_user_oauth` / `userId` | `nx_portal_user_oauth` / `portalUserId` |
 
 `TenantUserEntity` 字段按规格：`userName` 64 not null unique, `displayName` 128, `email` 128 unique, `mobile` 32 unique, `region` 32, `timeZone` 64, `language` 32, `avatarKey` 256, `registerSource` 32 not null, `status` 32 not null, `emailVerified`/`mobileVerified` Boolean not null, `lastLoginTime`, `lastLoginIp` 64。**无 `realName`。** 删除 `locale`。
 
-本 slice 中 Java 类型名仍为 `UserEntity` / `UserOperator` / `UserProfileVo`；表与 PK 字段符合规格（`nx_tenant_user`, `tenantUserId`, prefix `TUS`）。更新 register request（删除 `realName`；添加 `region`, `timeZone`, `language`）。
+本 slice 中 Java 类型名仍为 `UserEntity` / `UserOperator` / `UserProfileVo`；表与 PK 字段符合规格（`nx_portal_user`, `portalUserId`, prefix `TUS`）。更新 register request（删除 `realName`；添加 `region`, `timeZone`, `language`）。
 
 - [x] **Step 1：** 重写 `UserEntityContractsTest` 以适配 tenant-user 表（将失败）。
 - [x] **Step 2：** 确认 RED。

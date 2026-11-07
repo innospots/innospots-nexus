@@ -10,9 +10,9 @@ import com.innospots.nexus.console.permission.domain.enums.PermissionSubjectType
 import com.innospots.nexus.console.permission.domain.request.PermissionGrantReplaceRequest;
 import com.innospots.nexus.console.permission.service.PermissionGrantService;
 import com.innospots.nexus.console.permission.service.PermissionVisibilityService;
-import com.innospots.nexus.console.scope.ConsoleOwnership;
-import com.innospots.nexus.console.scope.ConsoleSessionContext;
-import com.innospots.nexus.console.scope.ConsoleSessionScope;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnership;
+import com.innospots.nexus.console.scope.domain.session.ConsoleSessionContext;
+import com.innospots.nexus.console.scope.domain.session.ConsoleSessionScope;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;

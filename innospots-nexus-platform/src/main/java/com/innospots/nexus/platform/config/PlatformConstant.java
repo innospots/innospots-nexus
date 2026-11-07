@@ -37,7 +37,6 @@ public final class PlatformConstant {
     public static final String TENANT_ENTERPRISE_PATH = TENANTS_PATH + "/{tenantId}/enterprise";
 
     /** 指定租户下管理员：{@value} */
-    public static final String TENANT_ADMINS_PATH = TENANTS_PATH + "/{tenantId}/admins";
 
     /** 运营管理平台用户：{@value} */
     public static final String USERS_PATH = API_PREFIX + "/users";

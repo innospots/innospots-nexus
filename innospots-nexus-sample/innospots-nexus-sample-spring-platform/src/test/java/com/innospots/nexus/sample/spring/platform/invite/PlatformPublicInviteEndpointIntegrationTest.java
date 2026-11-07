@@ -50,7 +50,7 @@ class PlatformPublicInviteEndpointIntegrationTest {
                 jdbcTemplate,
                 OUTPUT_DIR,
                 "00-clean",
-                Map.of("nx_pl_invite", "invite_id", "nx_pl_user", "login_name"));
+                Map.of("nx_pl_invite", "invite_id", "nx_admin_user", "login_name"));
     }
 
     @Test
@@ -92,7 +92,7 @@ class PlatformPublicInviteEndpointIntegrationTest {
         assertThat(accepted.statusCode()).as(accepted.body()).isEqualTo(200);
 
         Long users = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM nx_pl_user WHERE login_name = ? AND status = 'ACTIVE'",
+                "SELECT COUNT(*) FROM nx_admin_user WHERE login_name = ? AND status = 'ACTIVE'",
                 Long.class,
                 "it.public.invited");
         assertThat(users).isEqualTo(1L);
@@ -106,6 +106,6 @@ class PlatformPublicInviteEndpointIntegrationTest {
                 jdbcTemplate,
                 OUTPUT_DIR,
                 "02-after-accept",
-                Map.of("nx_pl_invite", "invite_id", "nx_pl_user", "login_name"));
+                Map.of("nx_pl_invite", "invite_id", "nx_admin_user", "login_name"));
     }
 }

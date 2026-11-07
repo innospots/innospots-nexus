@@ -1,0 +1,24 @@
+package com.innospots.nexus.console.scope.domain.ownership;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnership;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnershipLevel;
+
+/**
+ * 控制台 API 入口校验会话是否满足数据归属层级要求。
+ */
+public final class ConsoleOwnershipGuard {
+
+    private ConsoleOwnershipGuard() {
+    }
+
+    public static ConsoleOwnership requirePlatformScope() {
+        return ConsoleOwnershipScope.requireOwnership(ConsoleOwnershipLevel.PLATFORM);
+    }
+
+    public static ConsoleOwnership requireTenantScope() {
+        return ConsoleOwnershipScope.requireOwnership(ConsoleOwnershipLevel.TENANT);
+    }
+
+    public static ConsoleOwnership requireWorkspaceScope() {
+        return ConsoleOwnershipScope.requireOwnership(ConsoleOwnershipLevel.WORKSPACE);
+    }
+}

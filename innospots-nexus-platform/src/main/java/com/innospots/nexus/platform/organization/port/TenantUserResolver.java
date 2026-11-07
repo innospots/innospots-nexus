@@ -3,7 +3,7 @@ package com.innospots.nexus.platform.organization.port;
 import java.util.Optional;
 
 /**
- * 按邮箱解析租户域用户（{@code nx_tenant_user}）。由 portal 装配实现；platform 登记租户管理员时可选注入。
+ * 按邮箱解析租户域用户（{@code nx_portal_user}）。由 portal 装配实现；platform 登记租户管理员时可选注入。
  */
 public interface TenantUserResolver {
 
@@ -18,10 +18,10 @@ public interface TenantUserResolver {
     /**
      * 租户用户解析结果。
      *
-     * @param tenantUserId 租户用户主键
+     * @param portalUserId 租户用户主键
      * @param email        邮箱
      * @param displayName  展示名
      */
-    record ResolvedTenantUser(String tenantUserId, String email, String displayName) {
+    record ResolvedTenantUser(String portalUserId, String email, String displayName) {
     }
 }

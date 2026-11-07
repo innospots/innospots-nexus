@@ -9,12 +9,12 @@ import com.innospots.nexus.base.status.StatusCode;
  *
  * @author Smars
  * @date 2026/10/06
- * @see com.innospots.nexus.platform.organization.operator.TenantOperator
+ * @see com.innospots.nexus.console.scope.tenant.operator.TenantOperator
  * @see com.innospots.nexus.platform.organization.operator.EnterpriseOperator
  */
 public enum PlatformOrganizationStatusCode implements StatusCode {
 
-    /** 请求的租户 ID 在 {@code nx_pl_tenant} 中不存在。 */
+    /** 请求的租户 ID 在 {@code nx_tenant} 中不存在。 */
     PLATFORM_TENANT_NOT_FOUND("0001", StatusCategory.RESOURCE_DATA, "Platform tenant was not found", 404),
 
     /** 租户下尚未配置企业法定档案。 */

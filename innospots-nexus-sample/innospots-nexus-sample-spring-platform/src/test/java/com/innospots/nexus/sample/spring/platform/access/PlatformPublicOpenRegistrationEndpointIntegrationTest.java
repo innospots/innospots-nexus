@@ -60,7 +60,7 @@ class PlatformPublicOpenRegistrationEndpointIntegrationTest {
                 jdbcTemplate,
                 OUTPUT_DIR,
                 "00-open-mode",
-                Map.of("nx_system_setting", "setting_key", "nx_pl_user", "login_name"));
+                Map.of("nx_system_setting", "setting_key", "nx_admin_user", "login_name"));
     }
 
     @AfterEach
@@ -95,7 +95,7 @@ class PlatformPublicOpenRegistrationEndpointIntegrationTest {
         assertThat(registered.body()).contains("\"success\":true");
 
         Long activeUsers = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM nx_pl_user WHERE login_name = ? AND status = 'ACTIVE'",
+                "SELECT COUNT(*) FROM nx_admin_user WHERE login_name = ? AND status = 'ACTIVE'",
                 Long.class,
                 "it.open.reg");
         assertThat(activeUsers).isEqualTo(1L);
@@ -103,6 +103,6 @@ class PlatformPublicOpenRegistrationEndpointIntegrationTest {
                 jdbcTemplate,
                 OUTPUT_DIR,
                 "01-after-register",
-                Map.of("nx_pl_user", "login_name", "nx_user_credential", "subject_id"));
+                Map.of("nx_admin_user", "login_name", "nx_user_credential", "subject_id"));
     }
 }

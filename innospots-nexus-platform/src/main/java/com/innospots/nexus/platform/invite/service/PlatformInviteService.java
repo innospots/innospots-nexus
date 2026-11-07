@@ -19,7 +19,7 @@ import com.innospots.nexus.platform.invite.operator.PlatformInviteOperator;
 import com.innospots.nexus.platform.invite.status.PlatformInviteStatusCode;
 import com.innospots.nexus.platform.invite.support.PlatformInviteLinkBuilder;
 import com.innospots.nexus.platform.invite.support.PlatformInviteOtpNotifier;
-import com.innospots.nexus.platform.support.PlatformMutationLog;
+import com.innospots.nexus.console.support.MutationLog;
 
 /**
  * 管理端邀请单生命周期：创建、分页、重发、撤销。
@@ -61,7 +61,7 @@ public class PlatformInviteService {
         if (deliveryMode == PlatformInviteDeliveryMode.ONLINE) {
             inviteOtpNotifier.deliverInvite(entity, OtpPurpose.PLATFORM_INVITE_DELIVERY, request.locale());
         }
-        PlatformMutationLog.info(log, "platform invite created inviteId={}", entity.getInviteId());
+        MutationLog.info(log, "platform invite created inviteId={}", entity.getInviteId());
         return toVo(entity);
     }
 
@@ -103,7 +103,7 @@ public class PlatformInviteService {
         if (entity.deliveryModeEnum() == PlatformInviteDeliveryMode.ONLINE) {
             inviteOtpNotifier.deliverInvite(entity, OtpPurpose.PLATFORM_INVITE_DELIVERY, locale);
         }
-        PlatformMutationLog.info(log, "platform invite resent inviteId={}", inviteId);
+        MutationLog.info(log, "platform invite resent inviteId={}", inviteId);
         return toVo(entity);
     }
 
@@ -115,7 +115,7 @@ public class PlatformInviteService {
     @Transactional
     public void revokeInvite(String inviteId) {
         inviteOperator.markRevoked(inviteOperator.requireById(inviteId));
-        PlatformMutationLog.info(log, "platform invite revoked inviteId={}", inviteId);
+        MutationLog.info(log, "platform invite revoked inviteId={}", inviteId);
     }
 
     PlatformInviteVo toVo(PlatformInviteEntity entity) {

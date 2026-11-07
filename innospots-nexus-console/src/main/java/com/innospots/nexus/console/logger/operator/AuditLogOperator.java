@@ -17,8 +17,8 @@ import com.innospots.nexus.console.logger.domain.entity.AuditLogEntity;
 import com.innospots.nexus.console.logger.domain.request.AuditLogPageRequest;
 import com.innospots.nexus.console.logger.domain.vo.AuditLogVo;
 import com.innospots.nexus.console.logger.status.AuditLogStatusCode;
-import com.innospots.nexus.console.scope.ConsoleOwnership;
-import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnership;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnershipScope;
 import com.innospots.nexus.console.support.ConsoleExceptions;
 
 /**

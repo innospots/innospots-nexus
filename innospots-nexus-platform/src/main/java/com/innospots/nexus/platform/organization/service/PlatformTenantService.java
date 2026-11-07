@@ -9,17 +9,17 @@ import lombok.extern.slf4j.Slf4j;
 import com.innospots.nexus.base.domain.response.PageResult;
 import com.innospots.nexus.base.events.EventBus;
 import com.innospots.nexus.base.util.Checks;
-import com.innospots.nexus.platform.organization.domain.event.TenantCreatedEvent;
-import com.innospots.nexus.platform.organization.domain.entity.TenantEntity;
-import com.innospots.nexus.platform.organization.domain.request.TenantCreateRequest;
-import com.innospots.nexus.platform.organization.domain.request.TenantPageRequest;
-import com.innospots.nexus.platform.organization.domain.request.TenantStatusUpdateRequest;
-import com.innospots.nexus.platform.organization.domain.request.TenantUpdateRequest;
-import com.innospots.nexus.platform.organization.domain.vo.TenantVo;
+import com.innospots.nexus.console.scope.tenant.domain.event.TenantCreatedEvent;
+import com.innospots.nexus.console.scope.tenant.domain.entity.TenantEntity;
+import com.innospots.nexus.console.scope.tenant.domain.request.TenantCreateRequest;
+import com.innospots.nexus.console.scope.tenant.domain.request.TenantPageRequest;
+import com.innospots.nexus.console.scope.tenant.domain.request.TenantStatusUpdateRequest;
+import com.innospots.nexus.console.scope.tenant.domain.request.TenantUpdateRequest;
+import com.innospots.nexus.console.scope.tenant.domain.vo.TenantVo;
 import com.innospots.nexus.platform.organization.operator.EnterpriseOperator;
-import com.innospots.nexus.platform.organization.operator.TenantOperator;
+import com.innospots.nexus.console.scope.tenant.operator.TenantOperator;
 import com.innospots.nexus.platform.organization.domain.entity.EnterpriseEntity;
-import com.innospots.nexus.platform.support.PlatformMutationLog;
+import com.innospots.nexus.console.support.MutationLog;
 
 /**
  * 平台租户开通、分页查询与生命周期编排。
@@ -29,7 +29,7 @@ import com.innospots.nexus.platform.support.PlatformMutationLog;
  * @date 2026/10/06
  * @see com.innospots.nexus.platform.organization.endpoint.TenantEndpoint
  * @see PlatformEnterpriseProfileService
- * @see com.innospots.nexus.platform.organization.operator.TenantOperator
+ * @see com.innospots.nexus.console.scope.tenant.operator.TenantOperator
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -39,7 +39,7 @@ public class PlatformTenantService {
     private final EnterpriseOperator enterpriseOperator;
 
     /**
-     * 开通租户（仅 {@code nx_pl_tenant}）。
+     * 开通租户（仅 {@code nx_tenant}）。
      *
      * @param request 租户身份字段
      * @return 创建后的租户概要（含可选企业摘要）
@@ -56,7 +56,7 @@ public class PlatformTenantService {
                 tenant.getTenantId(),
                 tenant.getTenantCode(),
                 tenant.getOwnerTenantUserId()));
-        PlatformMutationLog.info(
+        MutationLog.info(
                 log,
                 "tenant created tenantId={} tenantCode={}",
                 tenant.getTenantId(),
@@ -90,7 +90,7 @@ public class PlatformTenantService {
     }
 
     /**
-     * 更新租户显示名称（管理员见 {@link PlatformTenantAdminService}）。
+     * 更新租户显示名称。
      *
      * @param tenantId 租户标识
      * @param request  非空字段参与更新
@@ -104,7 +104,7 @@ public class PlatformTenantService {
             tenant.setTenantName(request.tenantName().trim());
         }
         tenantOperator.update(tenant);
-        PlatformMutationLog.info(log, "tenant updated tenantId={}", tenantId);
+        MutationLog.info(log, "tenant updated tenantId={}", tenantId);
         return toVo(tenant);
     }
 
@@ -112,7 +112,7 @@ public class PlatformTenantService {
      * 更新租户生命周期状态。
      *
      * @param tenantId 租户标识
-     * @param request  目标状态（{@link com.innospots.nexus.platform.organization.domain.enums.TenantStatus} 名称）
+     * @param request  目标状态（{@link com.innospots.nexus.console.scope.tenant.domain.enums.TenantStatus} 名称）
      * @return 更新后的租户概要
      */
     @Transactional
@@ -122,7 +122,7 @@ public class PlatformTenantService {
         TenantEntity tenant = tenantOperator.requireById(tenantId);
         tenant.setStatus(request.status().trim().toUpperCase());
         tenantOperator.update(tenant);
-        PlatformMutationLog.info(
+        MutationLog.info(
                 log,
                 "tenant status updated tenantId={} status={}",
                 tenantId,

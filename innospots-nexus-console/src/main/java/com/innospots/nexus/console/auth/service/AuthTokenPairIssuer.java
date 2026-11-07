@@ -11,6 +11,8 @@ import com.innospots.nexus.console.auth.domain.vo.AuthTokenVo;
 /**
  * 从会话作用域签发访问与刷新令牌对。
  *
+ * <p>令牌不包含工作区与项目：两者是请求期上下文，由客户端状态声明并逐请求校验。</p>
+ *
  * @author Smars
  * @date 2026/09/13
  */
@@ -36,8 +38,6 @@ public class AuthTokenPairIssuer {
                 userId,
                 scope.tenantId(),
                 scope.tenantMemberId(),
-                scope.workspaceId(),
-                scope.projectId(),
                 now + tokenIssuer.accessTokenTtlSeconds()));
         String refreshToken = tokenIssuer.issue(new TokenClaims(
                 realm,
@@ -46,8 +46,6 @@ public class AuthTokenPairIssuer {
                 userId,
                 scope.tenantId(),
                 scope.tenantMemberId(),
-                scope.workspaceId(),
-                scope.projectId(),
                 now + tokenIssuer.refreshTokenTtlSeconds()));
         return new AuthTokenVo(
                 realm,
@@ -56,7 +54,7 @@ public class AuthTokenPairIssuer {
                 refreshToken,
                 scope.tenantId(),
                 scope.tenantMemberId(),
-                scope.workspaceId(),
-                scope.projectId());
+                null,
+                null);
     }
 }

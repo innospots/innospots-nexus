@@ -10,8 +10,8 @@ import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
 import com.innospots.nexus.console.role.dao.RoleBindingDao;
 import com.innospots.nexus.console.role.dao.RoleDao;
 import com.innospots.nexus.console.role.domain.entity.RoleBindingEntity;
-import com.innospots.nexus.console.scope.ConsoleSessionContext;
-import com.innospots.nexus.console.scope.ConsoleSessionScope;
+import com.innospots.nexus.console.scope.domain.session.ConsoleSessionContext;
+import com.innospots.nexus.console.scope.domain.session.ConsoleSessionScope;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -30,7 +30,7 @@ class SessionAuthorizationSubjectResolverTest {
         TLC.put(TLC.SECURITY_REALM, SecurityRealm.PLATFORM.name());
         TLC.platformUserId("PUS00000000001");
         ConsoleSessionContext.bindScope(ConsoleSessionScope.PLATFORM);
-        SessionContext.bindUser(UserSnapshot.simple(1L, "admin", "Admin"));
+        SessionContext.bindUser(UserSnapshot.simple("1", "admin", "Admin"));
 
         RoleBindingEntity binding = new RoleBindingEntity();
         binding.setRoleId("rol-1");

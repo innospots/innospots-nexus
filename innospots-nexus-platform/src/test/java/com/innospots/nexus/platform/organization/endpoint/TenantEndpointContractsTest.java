@@ -14,12 +14,11 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
-import com.innospots.nexus.platform.organization.domain.request.TenantCreateRequest;
-import com.innospots.nexus.platform.organization.domain.request.TenantPageRequest;
-import com.innospots.nexus.platform.organization.domain.request.TenantStatusUpdateRequest;
-import com.innospots.nexus.platform.organization.domain.request.TenantUpdateRequest;
-import com.innospots.nexus.platform.organization.domain.vo.TenantVo;
-import com.innospots.nexus.platform.organization.endpoint.TenantAdminEndpoint;
+import com.innospots.nexus.console.scope.tenant.domain.request.TenantCreateRequest;
+import com.innospots.nexus.console.scope.tenant.domain.request.TenantPageRequest;
+import com.innospots.nexus.console.scope.tenant.domain.request.TenantStatusUpdateRequest;
+import com.innospots.nexus.console.scope.tenant.domain.request.TenantUpdateRequest;
+import com.innospots.nexus.console.scope.tenant.domain.vo.TenantVo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -53,11 +52,6 @@ class TenantEndpointContractsTest {
                 TenantStatusUpdateRequest.class);
         assertThat(Arrays.stream(TenantEndpoint.class.getMethods()).map(Method::getName))
                 .contains("pageTenants", "createTenant", "getTenant", "updateTenant", "updateTenantStatus");
-        assertThat(TenantAdminEndpoint.class.getAnnotation(Path.class).value())
-                .isEqualTo(com.innospots.nexus.platform.config.PlatformConstant.TENANT_ADMINS_PATH);
-        assertHttpMethod(TenantAdminEndpoint.class, "listAdmins", GET.class, String.class);
-        assertHttpMethod(TenantAdminEndpoint.class, "addAdmin", POST.class, String.class,
-                com.innospots.nexus.platform.organization.domain.request.TenantAdminAddRequest.class);
     }
 
     @Test

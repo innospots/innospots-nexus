@@ -23,8 +23,6 @@ public final class ConsoleJaxRsWebTestTokens {
                 "1001",
                 "tnt-demo",
                 "mbr-demo",
-                "wks-demo",
-                null,
                 now + 3600L);
         return tokenIssuer.issue(claims);
     }

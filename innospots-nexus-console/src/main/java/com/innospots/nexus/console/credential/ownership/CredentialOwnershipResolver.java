@@ -3,7 +3,7 @@ package com.innospots.nexus.console.credential.ownership;
 import com.innospots.nexus.base.util.Checks;
 import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
 import com.innospots.nexus.console.role.domain.enums.RoleOwnerType;
-import com.innospots.nexus.console.scope.ConsoleOwnership;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnership;
 
 /**
  * 将 {@link com.innospots.nexus.console.auth.domain.enums.SecurityRealm} 映射为凭据/OTP 行的

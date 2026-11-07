@@ -1,19 +1,19 @@
-package com.innospots.nexus.platform.user.dao;
+package com.innospots.nexus.console.user.admin.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.junit.jupiter.api.Test;
 
-import com.innospots.nexus.platform.user.domain.entity.PlatformUserEntity;
-import com.innospots.nexus.platform.user.domain.entity.PlatformUserOauthEntity;
+import com.innospots.nexus.console.user.admin.domain.entity.AdminUserEntity;
+import com.innospots.nexus.console.user.admin.domain.entity.AdminUserOauthEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class PlatformUserDaoContractsTest {
+class AdminUserDaoContractsTest {
 
     @Test
     void platformUserDaosBindExpectedEntities() {
-        assertMapperEntity(PlatformUserDao.class, PlatformUserEntity.class);
-        assertMapperEntity(PlatformUserOauthDao.class, PlatformUserOauthEntity.class);
+        assertMapperEntity(AdminUserDao.class, AdminUserEntity.class);
+        assertMapperEntity(AdminUserOauthDao.class, AdminUserOauthEntity.class);
     }
 
     private static void assertMapperEntity(Class<?> mapperType, Class<?> entityType) {

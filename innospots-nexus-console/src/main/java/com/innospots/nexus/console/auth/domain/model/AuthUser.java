@@ -7,7 +7,7 @@ import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
  *
  * @author Smars
  * @date 2026/09/13
- * @param userId    platform_user_id 或 tenant_user_id
+ * @param userId    platform_user_id 或 portal_user_id
  * @param loginName 匹配到的登录名、邮箱或手机号
  * @param status    生命周期状态 name
  * @param realm     所属安全域

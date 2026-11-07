@@ -68,7 +68,7 @@ innospots-nexus-portal          ← 当前 monolith，目标：通用能力迁�
 | 维度 | 当前实现 | 关键代码/表 | 目标归属 |
 |------|----------|-------------|----------|
 | 隔离边界 | `workspaceId` + `tenantId` | `WorkspaceBaseEntity`、`TenantBaseEntity`、`TLC` | core + portal |
-| 用户 | 全局 `nx_user` | `UserEntity` | **拆分**：`nx_platform_user` / `nx_tenant_user` |
+| 用户 | 全局 `nx_user` | `UserEntity` | **拆分**：`nx_platform_user` / `nx_portal_user` |
 | 凭证/OAuth | 全局 | `nx_user_password`、`nx_user_oauth` | platform / portal 各自独立 |
 | 角色 | project 级 | `nx_role` | console（引擎）+ platform/portal（域绑定） |
 | 用户组 | Group | `nx_group` | **删除** → Organization Unit |
@@ -83,7 +83,7 @@ innospots-nexus-portal          ← 当前 monolith，目标：通用能力迁�
 |------|------|------|
 | 隔离边界 | `ProjectBaseEntity.projectId`（已删除） | `tenantId` + `workspaceId`（`TenantBaseEntity` / `WorkspaceBaseEntity`） |
 | 组织 | DTO only | `OrganizationUnit` 树 + `OrganizationMember` |
-| 用户 | 全局 User | `nx_platform_user` + `nx_tenant_user`（分表） |
+| 用户 | 全局 User | `nx_platform_user` + `nx_portal_user`（分表） |
 | 批量授权 | Group | Organization Unit（Group 删除） |
 | RBAC | 按 workspace 隔离的 Role（现状） | `owner_type` = PLATFORM / TENANT / WORKSPACE |
 | 模块结构 | portal monolith | console（公共）+ portal（租户域）+ platform（运营域） |
@@ -137,7 +137,7 @@ Platform Operation Domain                    ← innospots-nexus-platform（运�
 │
 └── Tenant                                   ← 客户/数据/安全/计费/审计边界
     │
-    ├── Tenant User                            ← innospots-nexus-portal（nx_tenant_user）
+    ├── Tenant User                            ← innospots-nexus-portal（nx_portal_user）
     │
     ├── Organization Unit                    ← innospots-nexus-portal
     │   └── Organization Member
@@ -162,7 +162,7 @@ innospots-nexus-console（通用控制台 · 两个平台共同继承）
 │   ├── Tenant 生命周期、企业档案、Platform RBAC、Support Access
 │
 └── innospots-nexus-portal（租户域平台 · TENANT Realm）
-    ├── nx_tenant_user（租户用户，独立表）
+    ├── nx_portal_user（租户用户，独立表）
     ├── Tenant 凭证/OAuth、TenantMember
     ├── Organization、Workspace
     └── Tenant RBAC、Tenant 初始化
@@ -176,7 +176,7 @@ innospots-nexus-console（通用控制台 · 两个平台共同继承）
 | **Platform** | 运营域平台 | `innospots-nexus-platform` | 运营用户、Tenant 生命周期、Platform RBAC |
 | **Portal** | 租户域平台 | `innospots-nexus-portal` | 租户用户、Organization、Workspace、Tenant RBAC |
 | **Platform User** | 运营人员登录身份 | platform | `nx_platform_user`，与租户用户**分表** |
-| **Tenant User** | 企业客户登录身份 | portal | `nx_tenant_user`，与运营用户**分表** |
+| **Tenant User** | 企业客户登录身份 | portal | `nx_portal_user`，与运营用户**分表** |
 | **Tenant** | SaaS 客户边界 | platform（元数据 + 企业信息）+ portal（成员与内部组织） | 数据/安全/计费边界 |
 | **Enterprise** | 企业主体档案 | platform | 开通租户时填写的客户/企业信息，**不是**组织树 |
 | **Organization Unit** | 租户内部组织节点 | portal | 部门/团队树；人员归属；批量授权 |
@@ -187,7 +187,7 @@ innospots-nexus-console（通用控制台 · 两个平台共同继承）
 1. **Tenant ≠ Enterprise ≠ Organization**：Tenant 是 SaaS 客户边界；Enterprise 是运营侧企业档案；Organization 是租户内部部门树。
 2. **portal = 租户域平台**；**platform = 运营域平台**；二者**均依赖 console**，平级互不依赖。
 3. **通用控制台能力在 console**：从 portal 迁出 menu/role/permission/extension/logger/dictionary/auth。
-4. **运营用户与租户用户分表**：`nx_platform_user` 与 `nx_tenant_user` 完全独立，各自凭证/OAuth。
+4. **运营用户与租户用户分表**：`nx_platform_user` 与 `nx_portal_user` 完全独立，各自凭证/OAuth。
 5. **Group 删除**：不再使用；Organization Unit 替代批量授权；Permission 主体仅 `ROLE | ORG_UNIT`。
 6. **Workspace 是 Console RBAC 主边界**：console 权限数据按 `realm + workspaceId` 隔离。
 7. **V1 不做 Resource ACL**。
@@ -301,7 +301,7 @@ status
 |------|-----|------|--------|------|
 | 租户生命周期 | `nx_tenant` | **platform** | 运营 | 开通/停用/套餐、tenant_code |
 | 企业主体档案 | `nx_enterprise` | **platform** | 运营 | 公司名称、证件、联系人、行业等 |
-| 租户登录用户 | `nx_tenant_user` | **portal** | 租户侧注册/邀请 | 能登录的身份 |
+| 租户登录用户 | `nx_portal_user` | **portal** | 租户侧注册/邀请 | 能登录的身份 |
 | 是否属于该租户 | `nx_tenant_member` | **portal** | 邀请/开通绑定 | 成员关系 |
 | 内部组织树 | `nx_organization_unit` | **portal** | 租户管理员 | 部门/团队，**不是**企业档案 |
 | 人在哪个部门 | `nx_organization_member` | **portal** | 租户管理员 | 成员 ↔ 部门 |
@@ -441,10 +441,10 @@ Tenant 层 seed 示例（权限仍由 grant 决定）：
 Platform Realm                         Tenant Realm
       │                                      │
       ▼                                      ▼
-nx_platform_user                    nx_tenant_user
+nx_platform_user                    nx_portal_user
       │                                      │
-      ├─ nx_platform_user_password           ├─ nx_tenant_user_password
-      ├─ nx_platform_user_oauth              ├─ nx_tenant_user_oauth
+      ├─ nx_platform_user_password           ├─ nx_portal_user_password
+      ├─ nx_platform_user_oauth              ├─ nx_portal_user_oauth
       ▼                                      ▼
 Platform 层角色                         TenantMember → 各层角色绑定
 （owner_type=PLATFORM）                  （TENANT / WORKSPACE）
@@ -477,9 +477,9 @@ nx_platform_user_oauth        platform_user_id FK
 归属 **portal** 模块。资料字段**各自独立**，不把登录名、邮箱、手机号混成一个「账号」列。
 
 ```text
-nx_tenant_user
+nx_portal_user
 --------------
-tenant_user_id      PK   前缀 TUS
+portal_user_id      PK   前缀 TUS
 user_name           UNIQUE     登录用户名（Tenant Realm 内全局唯一）
 display_name                   显示用户名（界面展示，可与 user_name 不同）
 email                          独立字段；非空时 Realm 内唯一
@@ -493,8 +493,8 @@ email_verified / mobile_verified
 last_login_time / last_login_ip
 + BaseEntity 审计字段
 
-nx_tenant_user_password       tenant_user_id FK
-nx_tenant_user_oauth          tenant_user_id FK
+nx_portal_user_password       portal_user_id FK
+nx_portal_user_oauth          portal_user_id FK
 ```
 
 | 字段 | 约束 | 说明 |
@@ -519,7 +519,7 @@ nx_tenant_member
 ----------------
 tenant_member_id    PK
 tenant_id           FK
-tenant_user_id      FK → nx_tenant_user
+portal_user_id      FK → nx_portal_user
 status
 joined_at
 ```
@@ -531,8 +531,8 @@ Organization Unit 通过 `nx_organization_member` 关联 `tenant_member_id`。
 | 现有（portal） | 目标 | 模块 | Phase |
 |----------------|------|------|-------|
 | `UserEntity` / `nx_user` | 按 Realm 拆分 | platform + portal | 2 |
-| `UserPasswordCredentialEntity` | `nx_platform_user_password` / `nx_tenant_user_password` | platform + portal | 2 |
-| `UserOauthIdentityEntity` | `nx_platform_user_oauth` / `nx_tenant_user_oauth` | platform + portal | 2 |
+| `UserPasswordCredentialEntity` | `nx_platform_user_password` / `nx_portal_user_password` | platform + portal | 2 |
+| `UserOauthIdentityEntity` | `nx_platform_user_oauth` / `nx_portal_user_oauth` | platform + portal | 2 |
 | `GroupEntity` / `nx_group` | **删除** | — | 2 |
 | `GroupMemberEntity` | **删除** → OrganizationUnit | portal | 2 |
 
@@ -548,10 +548,10 @@ Organization Unit 通过 `nx_organization_member` 关联 `tenant_member_id`。
 | OAuth 协议流程（授权跳转、callback、换票） | **console** | 提供商配置按 Realm 隔离 |
 | 验证码校验 SPI | **console** | `PasswordVerificationOperator`；默认实现可在应用层 |
 | 运营用户 CRUD、凭证行 | **platform** | `nx_platform_user` + `_password` + `_oauth` |
-| 租户用户 CRUD、凭证行 | **portal** | `nx_tenant_user` + `_password` + `_oauth` |
+| 租户用户 CRUD、凭证行 | **portal** | `nx_portal_user` + `_password` + `_oauth` |
 | 加入/邀请 Tenant | **portal** | `nx_tenant_member`，不是注册身份 |
 | 开通 Tenant（客户入驻） | **platform** | 写 `nx_tenant`，再发事件让 portal 建 Owner 成员 |
-| 公开自助注册（租户身份） | **portal** | 只创建 `nx_tenant_user`，**不**自动成为某 Tenant 成员 |
+| 公开自助注册（租户身份） | **portal** | 只创建 `nx_portal_user`，**不**自动成为某 Tenant 成员 |
 | 运营侧公开自助注册 | **不做** | 运营账号仅管理员创建或安装引导 |
 
 ```text
@@ -580,7 +580,7 @@ MembershipDirectory    仅 TENANT：列出/校验 TenantMember（登录后选租
 
 | 动作 | 含义 | 谁调用 | 结果 |
 |------|------|--------|------|
-| **注册身份** | 创建可登录的用户 | 租户门户自助 / OAuth 首次 | `nx_tenant_user`（或运营侧管理员写 `nx_platform_user`） |
+| **注册身份** | 创建可登录的用户 | 租户门户自助 / OAuth 首次 | `nx_portal_user`（或运营侧管理员写 `nx_platform_user`） |
 | **加入租户** | 身份成为某 Tenant 的成员 | 邀请接受 / 开通租户时绑定 Owner | `nx_tenant_member` |
 | **开通租户** | 新建客户边界 + 企业档案 | 仅 Platform | `nx_tenant` + `nx_enterprise`，再事件通知 portal |
 
@@ -610,7 +610,7 @@ POST /tenant/auth/register
   email / mobile          （独立字段，至少提供一种联系方式，产品可再收紧）
   region / time_zone / language
   encryptedPassword
-→ 创建 nx_tenant_user + nx_tenant_user_password
+→ 创建 nx_portal_user + nx_portal_user_password
 → 不创建 Tenant，不创建 TenantMember
 ```
 
@@ -618,8 +618,8 @@ OAuth 首次：
 
 ```text
 GET  /tenant/auth/oauth/{provider}/callback
-→ 按 provider + subject 查找 nx_tenant_user_oauth
-→ 无则创建 nx_tenant_user + oauth 绑定（register_source=OAUTH）
+→ 按 provider + subject 查找 nx_portal_user_oauth
+→ 无则创建 nx_portal_user + oauth 绑定（register_source=OAUTH）
 → 进入登录态（身份 Token），再选租户或等待邀请
 ```
 
@@ -638,7 +638,7 @@ GET  /tenant/auth/oauth/{provider}/callback
 Tenant 管理员  POST /tenant/members/invite   { email | user_name | mobile, 本层角色 }
         → 生成邀请（有效期、tenant_id）
 被邀请人      POST /tenant/invites/{token}/accept
-        → 已有 nx_tenant_user：只插 TenantMember
+        → 已有 nx_portal_user：只插 TenantMember
         → 尚无身份：先走注册身份，再插 TenantMember
         → 绑定 TENANT 层 seed 角色（由邀请指定）
 ```
@@ -650,13 +650,13 @@ Tenant 管理员  POST /tenant/members/invite   { email | user_name | mobile, �
           { tenant_code, plan, enterprise: 公司名/证件/联系人…, owner_login 或 owner_email }
         → nx_tenant + nx_enterprise
         → TenantCreatedEvent（tenant_id, 显示名, owner 标识）
-portal    若 Owner 身份不存在则创建 nx_tenant_user
+portal    若 Owner 身份不存在则创建 nx_portal_user
         → 创建 TenantMember（Owner）
         → seed 默认 Workspace 与角色
         → 可选：空的内部组织树（不把企业档案写成 OrgUnit）
 ```
 
-一人多租户：同一 `nx_tenant_user` 多条 `nx_tenant_member`。登录后选择当前 Tenant。
+一人多租户：同一 `nx_portal_user` 多条 `nx_tenant_member`。登录后选择当前 Tenant。
 
 #### 6.7.4 不做的注册
 
@@ -672,7 +672,7 @@ portal    若 Owner 身份不存在则创建 nx_tenant_user
 | 入口 | API | 用户表 | 成功后 Token realm |
 |------|-----|--------|-------------------|
 | 运营门户 | `POST /platform/auth/login` | `nx_platform_user` | `PLATFORM` |
-| 租户门户 | `POST /tenant/auth/login` | `nx_tenant_user` | `TENANT` |
+| 租户门户 | `POST /tenant/auth/login` | `nx_portal_user` | `TENANT` |
 
 #### 6.8.1 密码登录（两 Realm 同流程，存储不同）
 
@@ -720,8 +720,8 @@ console 签发，claim **禁止**再使用已废弃的 `accountId`。
 | Realm | 必有 claim | 可选 / 后续补齐 |
 |-------|------------|-----------------|
 | PLATFORM | `realm=PLATFORM`, `platformUserId` | — |
-| TENANT 身份票 | `realm=TENANT`, `tenantUserId` | 无 tenantId |
-| TENANT 业务票 | `realm=TENANT`, `tenantUserId`, `tenantId`, `tenantMemberId` | `workspaceId` |
+| TENANT 身份票 | `realm=TENANT`, `portalUserId` | 无 tenantId |
+| TENANT 业务票 | `realm=TENANT`, `portalUserId`, `tenantId`, `tenantMemberId` | `workspaceId` |
 
 - 业务 API：PLATFORM 票只打 `/platform/**`；TENANT 业务票打 `/tenant/**`、`/workspaces/**`。
 - TENANT 身份票只允许：选租户、接受邀请、改自己的资料/密码、登出。
@@ -992,8 +992,8 @@ TenantSecurityContext       ← 仅 Tenant Member + OrgUnit + RoleBinding
 | Realm | Token Claim | 可访问 API |
 |-------|-------------|------------|
 | `PLATFORM` | `realm=PLATFORM`, `platformUserId` | `/platform/**` |
-| `TENANT` 身份票 | `realm=TENANT`, `tenantUserId` | 选租户、接受邀请、本人资料/密码 |
-| `TENANT` 业务票 | `realm=TENANT`, `tenantUserId`, `tenantId`, `tenantMemberId` | `/tenant/**`, `/workspaces/**` |
+| `TENANT` 身份票 | `realm=TENANT`, `portalUserId` | 选租户、接受邀请、本人资料/密码 |
+| `TENANT` 业务票 | `realm=TENANT`, `portalUserId`, `tenantId`, `tenantMemberId` | `/tenant/**`, `/workspaces/**` |
 
 Platform Token **不能**调用 Tenant Business API。Tenant Token **不能**调用 Platform API。
 
@@ -1020,7 +1020,7 @@ Workspace 级操作额外要求 Token 或请求上下文携带 `workspaceId`（�
 | `/platform/auth/**` | PLATFORM | console 机制 + platform 用户表 | 运营登录 / 刷新 / 改密；**无公开注册** |
 | `/platform/users` | PLATFORM | platform | 管理员创建运营用户 |
 | `/platform/**` | PLATFORM | platform | Tenant 生命周期、Platform IAM、Support Access |
-| `/tenant/auth/register` | 公开（限租户门户） | console + portal | 只注册 `nx_tenant_user` |
+| `/tenant/auth/register` | 公开（限租户门户） | console + portal | 只注册 `nx_portal_user` |
 | `/tenant/auth/**` | TENANT | console 机制 + portal 用户表 | 租户登录 / 选租户 / OAuth / 改密 |
 | `/tenant/invites/**` | TENANT 身份或业务票 | portal | 接受邀请 → TenantMember |
 | `/tenant/**` | TENANT 业务票 | portal | Tenant 配置、成员、Organization |
@@ -1120,7 +1120,7 @@ com.innospots.nexus.console
 #### 职责
 
 ```text
-nx_tenant_user + 凭证/OAuth（租户用户，独立表）
+nx_portal_user + 凭证/OAuth（租户用户，独立表）
 TenantMember、Organization Unit / Member（无 Group）
 Workspace
 Tenant RBAC（console `nx_role`，owner=TENANT/WORKSPACE）
@@ -1189,7 +1189,7 @@ Platform 发布 `TenantCreatedEvent` → portal `provisioning` 初始化默认�
 | 能力 | console | platform | portal |
 |------|---------|----------|--------|
 | 登录 / Token / OAuth 协议 | ✓ | 实现 UserDirectory | 实现 UserDirectory |
-| 公开自助注册 | | **禁止** | ✓ 仅 `nx_tenant_user` |
+| 公开自助注册 | | **禁止** | ✓ 仅 `nx_portal_user` |
 | 创建运营用户 | | ✓ 管理员 | |
 | 邀请加入 Tenant | | | ✓ TenantMember |
 | 运营用户表 + 凭证 | | ✓ | |
@@ -1211,7 +1211,7 @@ Platform 发布 `TenantCreatedEvent` → portal `provisioning` 初始化默认�
 | 域 | 前缀 | 核心表 | 模块 |
 |----|------|--------|------|
 | 运营用户 | `nx_platform_` | `nx_platform_user`, `_password`, `_oauth` | platform |
-| 租户用户 | `nx_tenant_` | `nx_tenant_user`, `_password`, `_oauth` | portal |
+| 租户用户 | `nx_tenant_` | `nx_portal_user`, `_password`, `_oauth` | portal |
 | 角色（按归属层级） | `nx_` | `nx_role`, `nx_role_binding` | console |
 | Platform 元数据 | `nx_` | `nx_tenant`, `nx_enterprise`, `nx_support_access_grant` | platform |
 | Tenant 治理 | `nx_` | `nx_tenant_member`, `nx_organization_unit`, `nx_organization_member` | portal |
@@ -1239,11 +1239,11 @@ Platform 发布 `TenantCreatedEvent` → portal `provisioning` 初始化默认�
 
 `platform_user_id` FK，结构同现有 `nx_user_password` / `nx_user_oauth`。
 
-#### nx_tenant_user（portal 模块）
+#### nx_portal_user（portal 模块）
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| tenant_user_id | VARCHAR(32) PK | 前缀 `TUS` |
+| portal_user_id | VARCHAR(32) PK | 前缀 `TUS` |
 | user_name | VARCHAR(64) NOT NULL UNIQUE | 登录用户名 |
 | display_name | VARCHAR(128) | 显示用户名；空则展示时回退 `user_name` |
 | email | VARCHAR(128) | 独立字段；非空 UNIQUE |
@@ -1265,9 +1265,9 @@ Platform 发布 `TenantCreatedEvent` → portal `provisioning` 初始化默认�
 
 现有 `UserEntity.userName` → `user_name`；`locale` → `language`；新增 `region`。
 
-#### nx_tenant_user_password / nx_tenant_user_oauth
+#### nx_portal_user_password / nx_portal_user_oauth
 
-`tenant_user_id` FK。
+`portal_user_id` FK。
 
 **演进**：Phase 2 自 `nx_user` 按 Realm 拆分迁移；**不再使用** `nx_account` 统一表。
 
@@ -1282,7 +1282,7 @@ Platform 发布 `TenantCreatedEvent` → portal `provisioning` 初始化默认�
 | tenant_code | VARCHAR(64) UNIQUE | |
 | status | VARCHAR(32) | ACTIVE / SUSPENDED / ARCHIVED |
 | plan_code | VARCHAR(64) | 套餐引用 |
-| owner_tenant_user_id | VARCHAR(32) | 初始 Owner 对应的 nx_tenant_user |
+| owner_portal_user_id | VARCHAR(32) | 初始 Owner 对应的 nx_portal_user |
 | + BaseEntity | | |
 
 **Scope**: global（Platform 管理）
@@ -1342,12 +1342,12 @@ Platform 发布 `TenantCreatedEvent` → portal `provisioning` 初始化默认�
 |------|------|------|
 | tenant_member_id | VARCHAR(32) PK | 前缀 `TMB` |
 | tenant_id | FK | |
-| tenant_user_id | FK → nx_tenant_user | |
+| portal_user_id | FK → nx_portal_user | |
 | status | VARCHAR(32) | |
 | joined_at | TIMESTAMP | |
 | + BaseEntity | | |
 
-**索引**: UNIQUE(tenant_id, tenant_user_id)
+**索引**: UNIQUE(tenant_id, portal_user_id)
 **Scope**: tenant
 **基类**: TenantBaseEntity
 **模块**: portal
@@ -1530,8 +1530,8 @@ erDiagram
 | 现有类/表（portal） | 目标类/表 | 模块 | 处理方式 | Phase |
 |---------------------|-----------|------|----------|-------|
 | `UserEntity` / `nx_user` | `PlatformUser` + `TenantUser` | platform + portal | 按 Realm 拆分 | 2 |
-| `UserPasswordCredentialEntity` | `nx_platform_user_password` / `nx_tenant_user_password` | platform + portal | 分表迁移 | 2 |
-| `UserOauthIdentityEntity` | `nx_platform_user_oauth` / `nx_tenant_user_oauth` | platform + portal | 分表迁移 | 2 |
+| `UserPasswordCredentialEntity` | `nx_platform_user_password` / `nx_portal_user_password` | platform + portal | 分表迁移 | 2 |
+| `UserOauthIdentityEntity` | `nx_platform_user_oauth` / `nx_portal_user_oauth` | platform + portal | 分表迁移 | 2 |
 | `RoleEntity` / `nx_role` | `nx_role` + `nx_role_binding` | console | 上移 console；`owner_type` 替代固定档位 | 2 |
 | `UserRoleEntity` / `nx_user_role` | `nx_role_binding` | portal | 扩展 scope/subject | 2 |
 | `GroupEntity` / `nx_group` | **删除** | — | 不迁移，OrgUnit 新建 | 2 |
@@ -1635,7 +1635,7 @@ owner_type + owner_id + security_realm
 
 | 任务 | 模块 | 产出 |
 |------|------|------|
-| `nx_user` → `nx_platform_user` + `nx_tenant_user` | platform + portal | 分表 |
+| `nx_user` → `nx_platform_user` + `nx_portal_user` | platform + portal | 分表 |
 | 登录/注册编排上移 console；两 Realm 分入口 | console | AuthFacade + Token |
 | PasswordOperator / Decryptor 上移 console | console | 凭证机制 |
 | menu/role/permission/extension/logger 迁至 console | console | 代码迁移 + realm 列 |
@@ -1677,7 +1677,7 @@ gantt
 
 0. **console** = 通用控制台；**portal** = 租户域平台；**platform** = 运营域平台。
 1. portal 与 platform **均依赖 console**，平级互不依赖。
-2. **nx_platform_user 与 nx_tenant_user 分表**；console 提供认证机制，不持有用户记录。
+2. **nx_platform_user 与 nx_portal_user 分表**；console 提供认证机制，不持有用户记录。
 3. **Group 删除**；Permission 主体仅 `ROLE | ORG_UNIT`。
 4. 菜单/角色/权限/扩展/日志/字典在 **console**；Tenant 业务在 **portal**；Tenant 生命周期在 **platform**。
 
@@ -1745,7 +1745,7 @@ gantt
 | 参考方案术语 | Nexus 目标术语 | 模块 | 现有工程术语 | 备注 |
 |-------------|---------------|------|-------------|------|
 | Platform User | PlatformUser | platform | — | nx_platform_user |
-| Tenant User | TenantUser | portal | UserEntity | nx_tenant_user |
+| Tenant User | TenantUser | portal | UserEntity | nx_portal_user |
 | Tenant Member | TenantMember | portal | — | 新增 |
 | Enterprise | Enterprise | platform | — | nx_enterprise，开通租户时写入 |
 | Organization Unit | OrganizationUnit | portal | — | 内部部门树，替代 Group |

@@ -16,9 +16,9 @@ import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeUpdat
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeOptionVo;
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeVo;
 import com.innospots.nexus.console.dictionary.operator.DictionaryTypeOperator;
-import com.innospots.nexus.console.scope.ConsoleOwnership;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnership;
 import com.innospots.nexus.platform.scope.PlatformConsoleSession;
-import com.innospots.nexus.platform.support.PlatformMutationLog;
+import com.innospots.nexus.console.support.MutationLog;
 
 /**
  * 运营平台字典服务：PLATFORM 会话与归属固化，委托 operator 做基础持久化。
@@ -43,7 +43,7 @@ public class PlatformDictionaryService {
         Checks.notBlank(request.typeCode(), "typeCode");
         Checks.notNull(request.typeName(), "typeName");
         DictionaryTypeVo created = typeOperator.createType(request, platformOwnership());
-        PlatformMutationLog.info(
+        MutationLog.info(
                 log,
                 "dictionary type created dictionaryTypeId={} typeCode={}",
                 created.dictionaryTypeId(),
@@ -55,7 +55,7 @@ public class PlatformDictionaryService {
         Checks.notBlank(dictionaryTypeId, "dictionaryTypeId");
         Objects.requireNonNull(request, "request");
         DictionaryTypeVo updated = typeOperator.updateType(dictionaryTypeId, request, platformOwnership());
-        PlatformMutationLog.info(
+        MutationLog.info(
                 log,
                 "dictionary type updated dictionaryTypeId={} typeCode={}",
                 updated.dictionaryTypeId(),
@@ -67,7 +67,7 @@ public class PlatformDictionaryService {
         Checks.notBlank(dictionaryTypeId, "dictionaryTypeId");
         Objects.requireNonNull(request, "request");
         typeOperator.updateTypeStatus(dictionaryTypeId, request, platformOwnership());
-        PlatformMutationLog.info(
+        MutationLog.info(
                 log,
                 "dictionary type status updated dictionaryTypeId={} status={}",
                 dictionaryTypeId,
@@ -77,7 +77,7 @@ public class PlatformDictionaryService {
     public void deleteDictionaryType(String dictionaryTypeId) {
         Checks.notBlank(dictionaryTypeId, "dictionaryTypeId");
         typeOperator.deleteType(dictionaryTypeId, platformOwnership());
-        PlatformMutationLog.info(log, "dictionary type deleted dictionaryTypeId={}", dictionaryTypeId);
+        MutationLog.info(log, "dictionary type deleted dictionaryTypeId={}", dictionaryTypeId);
     }
 
     public List<DictionaryTypeOptionVo> listDictionaryTypeOptions(BasicStatus status) {

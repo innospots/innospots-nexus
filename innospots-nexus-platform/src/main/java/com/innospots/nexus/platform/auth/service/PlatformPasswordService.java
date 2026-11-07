@@ -18,10 +18,10 @@ import com.innospots.nexus.console.credential.password.service.CredentialService
 import com.innospots.nexus.platform.auth.status.PlatformAuthStatusCode;
 import com.innospots.nexus.platform.auth.support.PlatformAuthSessionSupport;
 import com.innospots.nexus.platform.auth.support.PlatformUserIdentityResolver;
-import com.innospots.nexus.platform.user.domain.entity.PlatformUserEntity;
-import com.innospots.nexus.platform.user.operator.PlatformUserOperator;
-import com.innospots.nexus.platform.support.PlatformMutationLog;
-import com.innospots.nexus.platform.user.status.PlatformUserStatusCode;
+import com.innospots.nexus.console.user.admin.domain.entity.AdminUserEntity;
+import com.innospots.nexus.console.user.admin.operator.AdminUserOperator;
+import com.innospots.nexus.console.support.MutationLog;
+import com.innospots.nexus.console.user.admin.status.AdminUserStatusCode;
 
 /**
  * 运营管理平台密码修改与重置编排（凭据归属 console {@link CredentialService}）。
@@ -37,7 +37,7 @@ public class PlatformPasswordService {
 
     private static final SecurityRealm REALM = SecurityRealm.PLATFORM;
 
-    private final PlatformUserOperator platformUserOperator;
+    private final AdminUserOperator platformUserOperator;
     private final PlatformUserIdentityResolver identityResolver;
     private final CredentialService credentialService;
     private final PasswordVerificationOperator verificationOperator;
@@ -56,7 +56,7 @@ public class PlatformPasswordService {
         String oldPassword = passwordDecryptor.decrypt(request.oldEncryptedPassword());
         String newPassword = passwordDecryptor.decrypt(request.newEncryptedPassword());
         credentialService.changePassword(REALM, platformUserId, oldPassword, newPassword);
-        PlatformMutationLog.info(log, "platform password changed platformUserId={}", platformUserId);
+        MutationLog.info(log, "platform password changed platformUserId={}", platformUserId);
     }
 
     /**
@@ -74,15 +74,15 @@ public class PlatformPasswordService {
         Objects.requireNonNull(verificationCode, "verificationCode must not be null");
         Objects.requireNonNull(type, "type must not be null");
 
-        PlatformUserEntity user = identityResolver.findByIdentity(identity);
+        AdminUserEntity user = identityResolver.findByIdentity(identity);
         if (user == null) {
-            throw NexusException.build(PlatformUserStatusCode.PLATFORM_USER_NOT_FOUND);
+            throw NexusException.build(AdminUserStatusCode.PLATFORM_USER_NOT_FOUND);
         }
 
         verifyResetCode(identity, type, verificationCode);
         String newPassword = passwordDecryptor.decrypt(request.newEncryptedPassword());
         credentialService.resetPassword(REALM, user.getPlatformUserId(), newPassword);
-        PlatformMutationLog.info(
+        MutationLog.info(
                 log,
                 "platform password reset platformUserId={} verificationType={}",
                 user.getPlatformUserId(),

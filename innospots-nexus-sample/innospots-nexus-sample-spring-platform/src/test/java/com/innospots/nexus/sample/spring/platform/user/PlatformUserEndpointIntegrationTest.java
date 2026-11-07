@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         "spring.datasource.url=" + PlatformIntegrationTestSupport.H2_URL_USER_IT,
         "spring.config.import=" + PlatformIntegrationTestSupport.SPRING_CONFIG_IMPORT
 })
-class PlatformUserEndpointIntegrationTest {
+class AdminUserEndpointIntegrationTest {
 
     private static final String OUTPUT_DIR = "sample-platform-user";
 
@@ -49,7 +49,7 @@ class PlatformUserEndpointIntegrationTest {
                 jdbcTemplate,
                 OUTPUT_DIR,
                 "00-clean",
-                Map.of("nx_pl_user", "login_name", "nx_user_credential", "subject_id"));
+                Map.of("nx_admin_user", "login_name", "nx_user_credential", "subject_id"));
     }
 
     @Test
@@ -71,10 +71,10 @@ class PlatformUserEndpointIntegrationTest {
                 jdbcTemplate,
                 OUTPUT_DIR,
                 "01-user-created",
-                Map.of("nx_pl_user", "login_name", "nx_user_credential", "subject_id"));
+                Map.of("nx_admin_user", "login_name", "nx_user_credential", "subject_id"));
 
         String platformUserId = jdbcTemplate.queryForObject(
-                "SELECT platform_user_id FROM nx_pl_user WHERE login_name = ?",
+                "SELECT platform_user_id FROM nx_admin_user WHERE login_name = ?",
                 String.class,
                 "it.platform.user");
 
@@ -111,7 +111,7 @@ class PlatformUserEndpointIntegrationTest {
         assertThat(disabled.statusCode()).as(disabled.body()).isEqualTo(200);
 
         String status = jdbcTemplate.queryForObject(
-                "SELECT status FROM nx_pl_user WHERE platform_user_id = ?",
+                "SELECT status FROM nx_admin_user WHERE platform_user_id = ?",
                 String.class,
                 platformUserId);
         assertThat(status).isEqualTo("DISABLED");
@@ -119,6 +119,6 @@ class PlatformUserEndpointIntegrationTest {
                 jdbcTemplate,
                 OUTPUT_DIR,
                 "02-user-disabled",
-                Map.of("nx_pl_user", "login_name"));
+                Map.of("nx_admin_user", "login_name"));
     }
 }

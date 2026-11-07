@@ -29,9 +29,9 @@ import com.innospots.nexus.platform.access.support.PlatformRegistrationContactSu
 import com.innospots.nexus.platform.access.support.PlatformRegistrationOtpSupport;
 import com.innospots.nexus.console.auth.service.RegistrationPolicyService;
 import com.innospots.nexus.console.config.RegistrationMode;
-import com.innospots.nexus.platform.support.PlatformRequestTrace;
-import com.innospots.nexus.platform.user.domain.vo.PlatformUserVo;
-import com.innospots.nexus.platform.user.service.PlatformUserService;
+import com.innospots.nexus.console.support.RequestTrace;
+import com.innospots.nexus.console.user.admin.domain.vo.AdminUserVo;
+import com.innospots.nexus.console.user.admin.service.AdminUserService;
 
 /**
  * APPROVAL 模式自助注册与审批编排：OTP、待审用户、审批通过/拒绝。
@@ -52,7 +52,7 @@ public class PlatformAccessRequestService {
     private final PlatformAccessRequestOperator accessRequestOperator;
 
     /** 创建待审用户、审批后激活。 */
-    private final PlatformUserService platformUserService;
+    private final AdminUserService platformUserService;
 
     /** 注册 OTP 签发与校验。 */
     private final OtpChallengeService otpChallengeService;
@@ -77,8 +77,8 @@ public class PlatformAccessRequestService {
         Objects.requireNonNull(request, "request");
         log.info(
                 "traceId={} platform APPROVAL registration OTP issue contact={}",
-                PlatformRequestTrace.currentTraceId(),
-                PlatformRequestTrace.describeContact(request.email(), request.mobile()));
+                RequestTrace.currentTraceId(),
+                RequestTrace.describeContact(request.email(), request.mobile()));
         issueAccessVerificationOtp(request);
     }
 
@@ -109,12 +109,12 @@ public class PlatformAccessRequestService {
     public PlatformAccessRequestVo submitAccessRegistration(PlatformAccessRegistrationSubmitRequest request) {
         registrationPolicyService.requireSelfServiceMode(RegistrationMode.APPROVAL);
         Objects.requireNonNull(request, "request");
-        String traceId = PlatformRequestTrace.currentTraceId();
+        String traceId = RequestTrace.currentTraceId();
         log.info(
                 "traceId={} platform APPROVAL registration submit login={} contact={}",
                 traceId,
-                PlatformRequestTrace.safeLogin(request.loginName()),
-                PlatformRequestTrace.describeContact(request.email(), request.mobile()));
+                RequestTrace.safeLogin(request.loginName()),
+                RequestTrace.describeContact(request.email(), request.mobile()));
         Checks.notBlank(request.loginName(), "loginName");
         Checks.notBlank(request.encryptedPassword(), "encryptedPassword");
         PlatformRegistrationContactSupport.requireContact(request.email(), request.mobile());
@@ -123,7 +123,7 @@ public class PlatformAccessRequestService {
         String rawPassword = passwordDecryptor.decrypt(request.encryptedPassword());
         String applicantName = resolveApplicantName(request.displayName(), request.loginName());
         // 先建用户并 enroll 密码，审批通过时仅改状态，无需二次设密或发邀请
-        PlatformUserVo user = platformUserService.createPendingApprovalUserWithPassword(
+        AdminUserVo user = platformUserService.createPendingApprovalUserWithPassword(
                 request.loginName(),
                 request.displayName(),
                 request.email(),
@@ -177,16 +177,16 @@ public class PlatformAccessRequestService {
      * @return 已激活的平台用户
      */
     @Transactional
-    public PlatformUserVo approveAccessRequest(String accessRequestId, PlatformAccessRequestApproveRequest request) {
+    public AdminUserVo approveAccessRequest(String accessRequestId, PlatformAccessRequestApproveRequest request) {
         PlatformAccessRequestEntity entity = accessRequestOperator.requireById(accessRequestId);
         accessRequestOperator.requirePendingApproval(entity);
         Objects.requireNonNull(request, "request");
         Checks.notBlank(entity.getPlatformUserId(), "platformUserId");
-        PlatformUserVo user = platformUserService.activatePendingApprovalUser(entity.getPlatformUserId());
+        AdminUserVo user = platformUserService.activatePendingApprovalUser(entity.getPlatformUserId());
         accessRequestOperator.markApproved(entity, currentReviewer());
         log.info(
                 "traceId={} platform APPROVAL registration approved accessRequestId={} platformUserId={} reviewer={}",
-                PlatformRequestTrace.currentTraceId(),
+                RequestTrace.currentTraceId(),
                 accessRequestId,
                 user.platformUserId(),
                 currentReviewer());
@@ -213,7 +213,7 @@ public class PlatformAccessRequestService {
                 currentReviewer());
         log.info(
                 "traceId={} platform APPROVAL registration rejected accessRequestId={} platformUserId={} reviewer={}",
-                PlatformRequestTrace.currentTraceId(),
+                RequestTrace.currentTraceId(),
                 accessRequestId,
                 entity.getPlatformUserId(),
                 currentReviewer());

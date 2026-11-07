@@ -19,7 +19,7 @@ import com.innospots.nexus.console.auth.domain.vo.AuthCaptchaVo;
 import com.innospots.nexus.console.auth.domain.vo.AuthTokenVo;
 import com.innospots.nexus.console.credential.password.PasswordDecryptor;
 import com.innospots.nexus.console.credential.password.service.CredentialService;
-import com.innospots.nexus.console.scope.service.SessionScopeBinder;
+import com.innospots.nexus.console.scope.domain.session.SessionScopeBinder;
 
 /**
  * 运维平台域登录与令牌刷新编排。租户域认证见 {@code portal.auth.service.TenantAuthFacade}。
@@ -96,7 +96,7 @@ public class AuthFacade {
             throw ConsoleExceptions.build(NexusStatusCode.AUTHENTICATION_FAILED);
         }
         credentialService.authenticate(realm, user.userId(), rawPassword);
-        AuthSessionScope scope = new AuthSessionScope(TOKEN_TYPE_BUSINESS, null, null, null, null);
+        AuthSessionScope scope = new AuthSessionScope(TOKEN_TYPE_BUSINESS, null, null);
         AuthTokenVo token = tokenPairIssuer.issue(realm, user.userId(), scope);
         sessionScopeBinder.bindAfterAuth(user, scope);
         return token;
@@ -122,9 +122,7 @@ public class AuthFacade {
         AuthSessionScope scope = new AuthSessionScope(
                 claims.tokenType(),
                 claims.tenantId(),
-                claims.tenantMemberId(),
-                claims.workspaceId(),
-                claims.projectId());
+                claims.tenantMemberId());
         AuthTokenVo token = tokenPairIssuer.issue(realm, claims.userId(), scope);
         sessionScopeBinder.bindAfterAuth(user, scope);
         return token;

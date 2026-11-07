@@ -16,9 +16,9 @@ import com.innospots.nexus.console.role.domain.vo.RoleBindingVo;
 import com.innospots.nexus.console.role.operator.RoleBindingOperator;
 import com.innospots.nexus.console.role.operator.RoleOperator;
 import com.innospots.nexus.platform.scope.PlatformConsoleSession;
-import com.innospots.nexus.platform.support.PlatformMutationLog;
-import com.innospots.nexus.platform.user.domain.entity.PlatformUserEntity;
-import com.innospots.nexus.platform.user.operator.PlatformUserOperator;
+import com.innospots.nexus.console.support.MutationLog;
+import com.innospots.nexus.console.user.admin.domain.entity.AdminUserEntity;
+import com.innospots.nexus.console.user.admin.operator.AdminUserOperator;
 
 /**
  * 运营平台角色绑定服务：PLATFORM 会话与归属固化，委托 {@link RoleBindingOperator}。
@@ -30,7 +30,7 @@ public class PlatformRoleBindingService {
     private static final int USER_SEARCH_ID_CAP = 500;
 
     private final RoleBindingOperator roleBindingOperator;
-    private final PlatformUserOperator platformUserOperator;
+    private final AdminUserOperator platformUserOperator;
 
     public PageResult<RoleBindingVo> pageRoleBindings(String roleId, RoleBindingPageRequest request) {
         Checks.notBlank(roleId, "roleId");
@@ -49,7 +49,7 @@ public class PlatformRoleBindingService {
         Objects.requireNonNull(request, "request");
         roleBindingOperator.addRoleBindings(
                 roleId, request, PlatformConsoleSession.requireOwnership());
-        PlatformMutationLog.info(
+        MutationLog.info(
                 log,
                 "role bindings added roleId={} subjectType={} subjectCount={}",
                 roleId,
@@ -62,7 +62,7 @@ public class PlatformRoleBindingService {
         Checks.notBlank(bindingId, "bindingId");
         roleBindingOperator.removeRoleBinding(
                 roleId, bindingId, PlatformConsoleSession.requireOwnership());
-        PlatformMutationLog.info(log, "role binding removed roleId={} bindingId={}", roleId, bindingId);
+        MutationLog.info(log, "role binding removed roleId={} bindingId={}", roleId, bindingId);
     }
 
     private List<String> resolveUserSubjectIdFilter(RoleBindingPageRequest pageRequest) {
@@ -88,18 +88,18 @@ public class PlatformRoleBindingService {
         if (userIds.isEmpty()) {
             return page;
         }
-        Map<String, PlatformUserEntity> users = platformUserOperator.findByIds(userIds);
+        Map<String, AdminUserEntity> users = platformUserOperator.findByIds(userIds);
         List<RoleBindingVo> enriched = page.records().stream()
                 .map(row -> enrichRow(row, users))
                 .toList();
         return PageResult.of(enriched, page.pageNo(), page.pageSize(), page.total());
     }
 
-    private static RoleBindingVo enrichRow(RoleBindingVo row, Map<String, PlatformUserEntity> users) {
+    private static RoleBindingVo enrichRow(RoleBindingVo row, Map<String, AdminUserEntity> users) {
         if (row.subjectType() != RoleBindingSubjectType.USER) {
             return row;
         }
-        PlatformUserEntity user = users.get(row.subjectId());
+        AdminUserEntity user = users.get(row.subjectId());
         if (user == null) {
             return row;
         }

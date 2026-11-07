@@ -33,7 +33,7 @@ class PlatformOpenRegistrationServiceTest {
         RegistrationPolicyService policyService = new RegistrationPolicyService(config);
 
         PlatformOpenRegistrationService service = new PlatformOpenRegistrationService(
-                mock(com.innospots.nexus.platform.user.service.PlatformUserService.class),
+                mock(com.innospots.nexus.console.user.admin.service.AdminUserService.class),
                 otpChallengeService,
                 mock(PasswordDecryptor.class),
                 policyService);

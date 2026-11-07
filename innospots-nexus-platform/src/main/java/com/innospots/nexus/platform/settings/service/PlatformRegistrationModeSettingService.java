@@ -14,7 +14,7 @@ import com.innospots.nexus.platform.settings.domain.request.PlatformRegistration
 import com.innospots.nexus.platform.settings.domain.vo.PlatformRegistrationPolicyVo;
 import com.innospots.nexus.platform.settings.status.PlatformRegistrationModeSettingStatusCode;
 import com.innospots.nexus.platform.settings.support.PlatformSettingKeys;
-import com.innospots.nexus.platform.support.PlatformMutationLog;
+import com.innospots.nexus.console.support.MutationLog;
 
 /**
  * 平台自助注册模式设置：基于 {@link SystemSettingService} 的 {@code platform.registration.mode}。
@@ -48,7 +48,7 @@ public class PlatformRegistrationModeSettingService {
                 PlatformSettingKeys.REGISTRATION_MODE,
                 null,
                 request.registrationMode());
-        PlatformMutationLog.info(log, "registration mode updated mode={}", updated);
+        MutationLog.info(log, "registration mode updated mode={}", updated);
         return new PlatformRegistrationPolicyVo(
                 updated,
                 systemSettingService.getUpdatedAtOrBootstrap(

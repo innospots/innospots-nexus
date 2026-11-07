@@ -59,7 +59,7 @@ class PlatformAccessRequestEndpointIntegrationTest {
                 Map.of(
                         "nx_pl_access_request",
                         "access_request_id",
-                        "nx_pl_user",
+                        "nx_admin_user",
                         "platform_user_id"));
     }
 
@@ -76,7 +76,7 @@ class PlatformAccessRequestEndpointIntegrationTest {
                 jdbcTemplate,
                 OUTPUT_DIR,
                 "approve-01-seeded",
-                Map.of("nx_pl_access_request", "access_request_id", "nx_pl_user", "platform_user_id"));
+                Map.of("nx_pl_access_request", "access_request_id", "nx_admin_user", "platform_user_id"));
 
         HttpResponse<String> paged = http.get(PlatformConstant.REGISTRATION_ACCESS_REQUESTS_PATH + "?pageNo=1&pageSize=20");
         assertThat(paged.statusCode()).as(paged.body()).isEqualTo(200);
@@ -94,7 +94,7 @@ class PlatformAccessRequestEndpointIntegrationTest {
         assertThat(approved.body()).contains(APPROVE_USER_ID);
 
         String userStatus = jdbcTemplate.queryForObject(
-                "SELECT status FROM nx_pl_user WHERE platform_user_id = ?",
+                "SELECT status FROM nx_admin_user WHERE platform_user_id = ?",
                 String.class,
                 APPROVE_USER_ID);
         assertThat(userStatus).isEqualTo("ACTIVE");
@@ -108,7 +108,7 @@ class PlatformAccessRequestEndpointIntegrationTest {
                 jdbcTemplate,
                 OUTPUT_DIR,
                 "approve-02-after-approve",
-                Map.of("nx_pl_access_request", "access_request_id", "nx_pl_user", "platform_user_id"));
+                Map.of("nx_pl_access_request", "access_request_id", "nx_admin_user", "platform_user_id"));
     }
 
     @Test
@@ -132,7 +132,7 @@ class PlatformAccessRequestEndpointIntegrationTest {
         assertThat(rejected.statusCode()).as(rejected.body()).isEqualTo(200);
 
         String userStatus = jdbcTemplate.queryForObject(
-                "SELECT status FROM nx_pl_user WHERE platform_user_id = ?",
+                "SELECT status FROM nx_admin_user WHERE platform_user_id = ?",
                 String.class,
                 REJECT_USER_ID);
         assertThat(userStatus).isEqualTo("DISABLED");
@@ -146,6 +146,6 @@ class PlatformAccessRequestEndpointIntegrationTest {
                 jdbcTemplate,
                 OUTPUT_DIR,
                 "reject-01-after-reject",
-                Map.of("nx_pl_access_request", "access_request_id", "nx_pl_user", "platform_user_id"));
+                Map.of("nx_pl_access_request", "access_request_id", "nx_admin_user", "platform_user_id"));
     }
 }

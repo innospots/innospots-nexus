@@ -368,8 +368,8 @@ No runtime implementation class in this task (contract only, same as `RoleEndpoi
 - Superclass: `TenantBaseEntity`
 - Table: `nx_tenant_member`
 - Prefix: `TMB`
-- Fields: `tenantMemberId` PK, `tenantUserId` 32 not null, `status` 32 not null, `joinedAt` `LocalDateTime` not null
-- Unique: `uk_nx_tenant_member_user` on `tenant_id,tenant_user_id`
+- Fields: `tenantMemberId` PK, `portalUserId` 32 not null, `status` 32 not null, `joinedAt` `LocalDateTime` not null
+- Unique: `uk_nx_tenant_member_portal_user` on `tenant_id,portal_user_id`
 - `TenantMemberStatus`: `ACTIVE`, `DISABLED`, `PENDING`
 
 - [ ] **Step 1–4：** TDD contract + entity + DAO.

@@ -37,8 +37,9 @@ import com.innospots.nexus.platform.organization.endpoint.TenantEndpoint;
 import com.innospots.nexus.platform.organization.endpoint.EnterpriseProfileEndpoint;
 import com.innospots.nexus.platform.organization.service.PlatformEnterpriseProfileService;
 import com.innospots.nexus.platform.organization.service.PlatformTenantService;
-import com.innospots.nexus.platform.user.endpoint.PlatformUserEndpoint;
-import com.innospots.nexus.platform.user.service.PlatformUserService;
+import com.innospots.nexus.console.user.admin.endpoint.AdminUserEndpoint;
+import com.innospots.nexus.platform.user.endpoint.PlatformAdminUserEndpoint;
+import com.innospots.nexus.console.user.admin.service.AdminUserService;
 
 /**
  * 运营管理平台 REST 资源生产者。
@@ -48,7 +49,7 @@ public class PlatformResourceProducers {
 
     private final PlatformAuthService platformAuthService;
     private final PlatformPasswordService platformPasswordService;
-    private final PlatformUserService platformUserService;
+    private final AdminUserService platformUserService;
     private final PlatformInviteService platformInviteService;
     private final PlatformPublicInviteService platformPublicInviteService;
     private final PlatformAccessRequestService platformAccessRequestService;
@@ -64,7 +65,7 @@ public class PlatformResourceProducers {
     public PlatformResourceProducers(
             PlatformAuthService platformAuthService,
             PlatformPasswordService platformPasswordService,
-            PlatformUserService platformUserService,
+            AdminUserService platformUserService,
             PlatformInviteService platformInviteService,
             PlatformPublicInviteService platformPublicInviteService,
             PlatformAccessRequestService platformAccessRequestService,
@@ -114,8 +115,8 @@ public class PlatformResourceProducers {
     @Produces
     @Dependent
     @Unremovable
-    PlatformUserEndpoint platformUserEndpoint() {
-        return new PlatformUserEndpoint(platformUserService);
+    AdminUserEndpoint platformUserEndpoint() {
+        return new PlatformAdminUserEndpoint(platformUserService);
     }
 
     @Produces

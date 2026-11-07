@@ -24,9 +24,9 @@ import com.innospots.nexus.console.auth.service.LoginCaptchaGate;
 import com.innospots.nexus.console.auth.service.TokenIssuer;
 import com.innospots.nexus.console.credential.password.PasswordDecryptor;
 import com.innospots.nexus.console.credential.password.service.CredentialService;
-import com.innospots.nexus.console.scope.service.SessionScopeBinder;
-import com.innospots.nexus.portal.auth.api.MembershipDirectory;
-import com.innospots.nexus.portal.auth.domain.model.TenantMembership;
+import com.innospots.nexus.console.scope.domain.session.SessionScopeBinder;
+import com.innospots.nexus.console.scope.tenant.dao.TenantMemberDao;
+import com.innospots.nexus.console.scope.tenant.domain.entity.TenantMemberEntity;
 import com.innospots.nexus.portal.auth.domain.request.SelectTenantRequest;
 
 /**
@@ -40,7 +40,7 @@ public class TenantAuthFacade {
     private final UserDirectory userDirectory;
     private final CredentialService credentialService;
     private final LoginCaptchaGate loginCaptchaGate;
-    private final MembershipDirectory membershipDirectory;
+    private final TenantMemberDao tenantMemberDao;
     private final PasswordDecryptor passwordDecryptor;
     private final TokenIssuer tokenIssuer;
     private final AuthTokenPairIssuer tokenPairIssuer;
@@ -50,7 +50,7 @@ public class TenantAuthFacade {
             UserDirectory userDirectory,
             CredentialService credentialService,
             LoginCaptchaGate loginCaptchaGate,
-            MembershipDirectory membershipDirectory,
+            TenantMemberDao tenantMemberDao,
             PasswordDecryptor passwordDecryptor,
             TokenIssuer tokenIssuer,
             AuthTokenPairIssuer tokenPairIssuer,
@@ -59,7 +59,7 @@ public class TenantAuthFacade {
         this.userDirectory = Objects.requireNonNull(userDirectory, "userDirectory");
         this.credentialService = Objects.requireNonNull(credentialService, "credentialService");
         this.loginCaptchaGate = Objects.requireNonNull(loginCaptchaGate, "loginCaptchaGate");
-        this.membershipDirectory = Objects.requireNonNull(membershipDirectory, "membershipDirectory");
+        this.tenantMemberDao = Objects.requireNonNull(tenantMemberDao, "tenantMemberDao");
         this.passwordDecryptor = Objects.requireNonNull(passwordDecryptor, "passwordDecryptor");
         this.tokenIssuer = Objects.requireNonNull(tokenIssuer, "tokenIssuer");
         this.tokenPairIssuer = Objects.requireNonNull(tokenPairIssuer, "tokenPairIssuer");
@@ -97,19 +97,22 @@ public class TenantAuthFacade {
     /**
      * 将租户身份交换为绑定单一成员关系的业务令牌。
      */
-    public AuthTokenVo selectTenant(String tenantUserId, SelectTenantRequest request) {
-        Checks.notBlank(tenantUserId, "tenantUserId");
+    public AuthTokenVo selectTenant(String portalUserId, SelectTenantRequest request) {
+        Checks.notBlank(portalUserId, "portalUserId");
         Checks.notNull(request, "request");
         Checks.notBlank(request.tenantId(), "tenantId");
-        AuthUser user = userDirectory.findById(tenantUserId)
+        AuthUser user = userDirectory.findById(portalUserId)
                 .orElseThrow(() -> NexusException.build(NexusStatusCode.AUTHENTICATION_FAILED));
-        TenantMembership membership = membershipDirectory.listActiveMemberships(tenantUserId).stream()
-                .filter(item -> request.tenantId().equals(item.tenantId()))
-                .findFirst()
-                .orElseThrow(() -> NexusException.build(NexusStatusCode.NO_PERMISSION));
+        TenantMemberEntity membership =
+                tenantMemberDao.findActiveMembership(portalUserId, request.tenantId());
+        if (membership == null) {
+            throw NexusException.build(NexusStatusCode.NO_PERMISSION);
+        }
         AuthSessionScope scope = new AuthSessionScope(
-                AuthFacade.TOKEN_TYPE_BUSINESS, membership.tenantId(), membership.tenantMemberId(), null, null);
-        AuthTokenVo token = tokenPairIssuer.issue(REALM, tenantUserId, scope);
+                AuthFacade.TOKEN_TYPE_BUSINESS,
+                membership.getTenantId(),
+                membership.getTenantMemberId());
+        AuthTokenVo token = tokenPairIssuer.issue(REALM, portalUserId, scope);
         sessionScopeBinder.bindAfterAuth(user, scope);
         return token;
     }
@@ -131,9 +134,7 @@ public class TenantAuthFacade {
         AuthSessionScope scope = new AuthSessionScope(
                 claims.tokenType(),
                 claims.tenantId(),
-                claims.tenantMemberId(),
-                claims.workspaceId(),
-                claims.projectId());
+                claims.tenantMemberId());
         AuthTokenVo token = tokenPairIssuer.issue(REALM, claims.userId(), scope);
         sessionScopeBinder.bindAfterAuth(user, scope);
         return token;
@@ -148,16 +149,14 @@ public class TenantAuthFacade {
     }
 
     private AuthSessionScope resolveLoginScope(String userId) {
-        List<TenantMembership> memberships = membershipDirectory.listActiveMemberships(userId);
+        List<TenantMemberEntity> memberships = tenantMemberDao.listActiveMemberships(userId);
         if (memberships.size() == 1) {
-            TenantMembership membership = memberships.getFirst();
+            TenantMemberEntity membership = memberships.getFirst();
             return new AuthSessionScope(
                     AuthFacade.TOKEN_TYPE_BUSINESS,
-                    membership.tenantId(),
-                    membership.tenantMemberId(),
-                    null,
-                    null);
+                    membership.getTenantId(),
+                    membership.getTenantMemberId());
         }
-        return new AuthSessionScope(AuthFacade.TOKEN_TYPE_IDENTITY, null, null, null, null);
+        return new AuthSessionScope(AuthFacade.TOKEN_TYPE_IDENTITY, null, null);
     }
 }

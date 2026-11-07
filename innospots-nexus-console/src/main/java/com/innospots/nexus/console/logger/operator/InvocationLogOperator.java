@@ -11,7 +11,7 @@ import com.innospots.nexus.base.json.Jsons;
 import com.innospots.nexus.console.logger.domain.context.InvocationLogContext;
 import com.innospots.nexus.console.logger.dao.AuditLogDao;
 import com.innospots.nexus.console.logger.domain.entity.AuditLogEntity;
-import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnershipScope;
 
 /**
  * 将被拦截调用持久化到审计日志领域的数据操作器。

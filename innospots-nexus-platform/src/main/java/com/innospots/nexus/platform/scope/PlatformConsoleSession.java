@@ -2,11 +2,11 @@ package com.innospots.nexus.platform.scope;
 
 import com.innospots.nexus.base.status.NexusStatusCode;
 import com.innospots.nexus.console.role.domain.enums.RoleOwnerType;
-import com.innospots.nexus.console.scope.ConsoleOwnership;
-import com.innospots.nexus.console.scope.ConsoleOwnershipLevel;
-import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
-import com.innospots.nexus.console.scope.ConsoleSessionContext;
-import com.innospots.nexus.console.scope.ConsoleSessionScope;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnership;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnershipLevel;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnershipScope;
+import com.innospots.nexus.console.scope.domain.session.ConsoleSessionContext;
+import com.innospots.nexus.console.scope.domain.session.ConsoleSessionScope;
 import com.innospots.nexus.console.support.ConsoleExceptions;
 
 /**

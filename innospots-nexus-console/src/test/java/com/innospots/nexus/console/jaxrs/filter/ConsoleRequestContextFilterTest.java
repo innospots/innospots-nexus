@@ -54,7 +54,7 @@ class ConsoleRequestContextFilterTest {
 
     @Test
     void responseFilterEchoesRequestIdAndClearsThreadState() {
-        SessionContext.bindUser(UserSnapshot.simple(1L, "u", null));
+        SessionContext.bindUser(UserSnapshot.simple("1", "u", null));
         ContainerRequestContext request = JaxRsFilterTestSupport.mockRequest(
                 "/api/d/nexus/status",
                 "GET",

@@ -5,9 +5,9 @@ import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Singleton;
 
 import com.innospots.nexus.platform.organization.dao.EnterpriseDao;
-import com.innospots.nexus.platform.organization.dao.TenantDao;
+import com.innospots.nexus.console.scope.tenant.dao.TenantDao;
 import com.innospots.nexus.platform.organization.operator.EnterpriseOperator;
-import com.innospots.nexus.platform.organization.operator.TenantOperator;
+import com.innospots.nexus.console.scope.tenant.operator.TenantOperator;
 import com.innospots.nexus.platform.organization.service.PlatformEnterpriseProfileService;
 import com.innospots.nexus.platform.organization.service.PlatformTenantService;
 

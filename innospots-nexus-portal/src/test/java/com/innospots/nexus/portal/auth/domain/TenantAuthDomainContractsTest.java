@@ -7,8 +7,6 @@ import org.junit.jupiter.api.Test;
 
 import com.innospots.nexus.portal.auth.domain.request.SelectTenantRequest;
 import com.innospots.nexus.portal.auth.domain.request.TenantRegisterRequest;
-import com.innospots.nexus.portal.scope.domain.request.SelectProjectRequest;
-import com.innospots.nexus.portal.scope.domain.request.SelectWorkspaceRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -19,8 +17,6 @@ class TenantAuthDomainContractsTest {
         assertRecordComponents(TenantRegisterRequest.class,
                 "userName", "displayName", "email", "mobile", "region", "timeZone", "language", "encryptedPassword");
         assertRecordComponents(SelectTenantRequest.class, "tenantId");
-        assertRecordComponents(SelectWorkspaceRequest.class, "tenantId", "workspaceId");
-        assertRecordComponents(SelectProjectRequest.class, "tenantId", "workspaceId", "projectId");
     }
 
     private static void assertRecordComponents(Class<?> recordType, String... names) {

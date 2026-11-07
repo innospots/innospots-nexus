@@ -58,7 +58,7 @@ class PlatformPublicAuthEndpointIntegrationTest {
                 jdbcTemplate,
                 OUTPUT_DIR,
                 "00-user-seeded",
-                Map.of("nx_pl_user", "login_name", "nx_user_credential", "subject_id"));
+                Map.of("nx_admin_user", "login_name", "nx_user_credential", "subject_id"));
     }
 
     @Test
@@ -78,7 +78,7 @@ class PlatformPublicAuthEndpointIntegrationTest {
                 jdbcTemplate,
                 OUTPUT_DIR,
                 "01-after-login",
-                Map.of("nx_pl_user", "login_name"));
+                Map.of("nx_admin_user", "login_name"));
 
         String refreshToken = extractJsonStringField(login.body(), "refreshToken");
         String refreshBody = """
@@ -94,13 +94,13 @@ class PlatformPublicAuthEndpointIntegrationTest {
                 jdbcTemplate,
                 OUTPUT_DIR,
                 "02-after-refresh",
-                Map.of("nx_pl_user", "login_name"));
+                Map.of("nx_admin_user", "login_name"));
     }
 
     private void seedLoginUser() {
         jdbcTemplate.update(
                 """
-                INSERT INTO nx_pl_user (
+                INSERT INTO nx_admin_user (
                     platform_user_id, login_name, display_name, status, created_at, updated_at
                 ) VALUES ('it-public-login-user-01', ?, 'IT Public Login', 'ACTIVE',
                     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)

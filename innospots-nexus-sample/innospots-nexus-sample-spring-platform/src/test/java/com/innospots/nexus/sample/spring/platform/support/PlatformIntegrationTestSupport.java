@@ -153,8 +153,8 @@ public final class PlatformIntegrationTestSupport {
 
     public static void cleanOrganization(JdbcTemplate jdbcTemplate) {
         jdbcTemplate.execute("DELETE FROM nx_pl_enterprise");
-        jdbcTemplate.execute("DELETE FROM nx_pl_tenant_admin");
-        jdbcTemplate.execute("DELETE FROM nx_pl_tenant");
+        jdbcTemplate.execute("DELETE FROM nx_tenant_admin");
+        jdbcTemplate.execute("DELETE FROM nx_tenant");
     }
 
     public static void cleanRegistrationSettings(JdbcTemplate jdbcTemplate) {
@@ -186,13 +186,13 @@ public final class PlatformIntegrationTestSupport {
 
     public static void cleanPlatformUsers(JdbcTemplate jdbcTemplate) {
         jdbcTemplate.execute("DELETE FROM nx_user_credential WHERE security_realm = 'PLATFORM'");
-        jdbcTemplate.execute("DELETE FROM nx_pl_user");
+        jdbcTemplate.execute("DELETE FROM nx_admin_user");
     }
 
     public static void cleanAccessRequests(JdbcTemplate jdbcTemplate) {
         jdbcTemplate.execute("DELETE FROM nx_pl_access_request");
         jdbcTemplate.execute("DELETE FROM nx_user_credential WHERE security_realm = 'PLATFORM'");
-        jdbcTemplate.execute("DELETE FROM nx_pl_user");
+        jdbcTemplate.execute("DELETE FROM nx_admin_user");
     }
 
     public static void cleanInvites(JdbcTemplate jdbcTemplate) {
@@ -213,10 +213,10 @@ public final class PlatformIntegrationTestSupport {
         jdbcTemplate.update(
                 "DELETE FROM nx_user_credential WHERE subject_id = ? AND security_realm = 'PLATFORM'",
                 DEV_PLATFORM_USER_ID);
-        jdbcTemplate.update("DELETE FROM nx_pl_user WHERE platform_user_id = ?", DEV_PLATFORM_USER_ID);
+        jdbcTemplate.update("DELETE FROM nx_admin_user WHERE platform_user_id = ?", DEV_PLATFORM_USER_ID);
         jdbcTemplate.update(
                 """
-                INSERT INTO nx_pl_user (
+                INSERT INTO nx_admin_user (
                     platform_user_id, login_name, display_name, status, created_at, updated_at
                 ) VALUES (?, 'dev', 'Dev', 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
                 """,
@@ -227,7 +227,7 @@ public final class PlatformIntegrationTestSupport {
     public static void insertPendingApprovalUser(JdbcTemplate jdbcTemplate, String platformUserId, String loginName) {
         jdbcTemplate.update(
                 """
-                INSERT INTO nx_pl_user (
+                INSERT INTO nx_admin_user (
                     platform_user_id, login_name, display_name, status, created_at, updated_at
                 ) VALUES (?, ?, ?, 'PENDING_APPROVAL', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
                 """,

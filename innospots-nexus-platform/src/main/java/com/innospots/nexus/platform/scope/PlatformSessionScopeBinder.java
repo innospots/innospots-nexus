@@ -4,8 +4,8 @@ import com.innospots.nexus.base.util.Checks;
 import com.innospots.nexus.console.auth.domain.model.AuthUser;
 import com.innospots.nexus.console.auth.domain.model.TokenClaims;
 import com.innospots.nexus.console.auth.service.AuthSessionScope;
-import com.innospots.nexus.console.scope.service.SessionScopeBinder;
-import com.innospots.nexus.console.scope.service.SessionScopeTlc;
+import com.innospots.nexus.console.scope.domain.session.SessionScopeBinder;
+import com.innospots.nexus.console.scope.domain.session.SessionScopeTlc;
 
 /**
  * 运营平台会话绑定：仅同步身份与令牌中的作用域标识，不加载租户 / 工作区 / 项目快照。
@@ -33,9 +33,7 @@ public class PlatformSessionScopeBinder implements SessionScopeBinder {
         bindScope(new AuthSessionScope(
                 claims.tokenType(),
                 claims.tenantId(),
-                claims.tenantMemberId(),
-                claims.workspaceId(),
-                claims.projectId()));
+                claims.tenantMemberId()));
     }
 
     @Override

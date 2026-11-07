@@ -26,10 +26,10 @@ import com.innospots.nexus.platform.invite.operator.PlatformInviteOperator;
 import com.innospots.nexus.platform.invite.status.PlatformInviteStatusCode;
 import com.innospots.nexus.console.auth.service.RegistrationPolicyService;
 import com.innospots.nexus.console.config.RegistrationMode;
-import com.innospots.nexus.platform.support.PlatformRequestTrace;
-import com.innospots.nexus.platform.user.domain.vo.PlatformUserVo;
-import com.innospots.nexus.platform.user.service.PlatformUserService;
-import com.innospots.nexus.platform.user.support.PlatformUserRoleProvisioner;
+import com.innospots.nexus.console.support.RequestTrace;
+import com.innospots.nexus.console.user.admin.domain.vo.AdminUserVo;
+import com.innospots.nexus.console.user.admin.service.AdminUserService;
+import com.innospots.nexus.console.user.admin.support.AdminUserRoleProvisioner;
 
 /**
  * 公开邀请注册：链接 token 接受与注册页邀请码激活（INVITE 模式门禁仅作用于邀请码路径）。
@@ -46,7 +46,7 @@ public class PlatformPublicInviteService {
     private final PlatformInviteOperator inviteOperator;
 
     /** 接受邀请后创建平台用户。 */
-    private final PlatformUserService platformUserService;
+    private final AdminUserService platformUserService;
 
     /** 邀请注册 OTP 签发与校验。 */
     private final OtpChallengeService otpChallengeService;
@@ -58,7 +58,7 @@ public class PlatformPublicInviteService {
     private final RegistrationPolicyService registrationPolicyService;
 
     /** 新用户默认角色绑定。 */
-    private final PlatformUserRoleProvisioner platformUserRoleProvisioner;
+    private final AdminUserRoleProvisioner platformUserRoleProvisioner;
 
     /**
      * 匿名预览邀请令牌（掩码联系方式）。
@@ -86,9 +86,9 @@ public class PlatformPublicInviteService {
         PlatformInviteEntity invite = inviteOperator.requirePendingByToken(token);
         log.info(
                 "traceId={} platform invite accept OTP issue inviteId={} contact={}",
-                PlatformRequestTrace.currentTraceId(),
+                RequestTrace.currentTraceId(),
                 invite.getInviteId(),
-                PlatformRequestTrace.describeContact(invite.getEmail(), invite.getMobile()));
+                RequestTrace.describeContact(invite.getEmail(), invite.getMobile()));
         OtpChannel channel = resolveChannel(invite.getEmail(), invite.getMobile());
         String destination = channel == OtpChannel.EMAIL ? invite.getEmail() : invite.getMobile();
         String locale = request == null ? null : request.locale();
@@ -111,13 +111,13 @@ public class PlatformPublicInviteService {
     public String acceptInvite(String token, PlatformInviteAcceptRequest request) {
         Objects.requireNonNull(request, "request");
         Checks.notBlank(request.encryptedPassword(), "encryptedPassword");
-        String traceId = PlatformRequestTrace.currentTraceId();
+        String traceId = RequestTrace.currentTraceId();
         PlatformInviteEntity invite = inviteOperator.requirePendingByToken(token);
         log.info(
                 "traceId={} platform invite accept submit inviteId={} login={}",
                 traceId,
                 invite.getInviteId(),
-                PlatformRequestTrace.safeLogin(request.loginName()));
+                RequestTrace.safeLogin(request.loginName()));
         if (invite.deliveryModeEnum() == PlatformInviteDeliveryMode.ONLINE) {
             verifyInviteAcceptCode(invite, request.verificationCode());
         }
@@ -143,14 +143,14 @@ public class PlatformPublicInviteService {
         Checks.notBlank(request.inviteCode(), "inviteCode");
         Checks.notBlank(request.contact(), "contact");
         Checks.notBlank(request.encryptedPassword(), "encryptedPassword");
-        String traceId = PlatformRequestTrace.currentTraceId();
+        String traceId = RequestTrace.currentTraceId();
         PlatformInviteEntity invite = inviteOperator.requirePendingByCode(request.inviteCode());
         log.info(
                 "traceId={} platform invite code activate submit inviteId={} login={} contact={}",
                 traceId,
                 invite.getInviteId(),
-                PlatformRequestTrace.safeLogin(request.loginName()),
-                PlatformRequestTrace.describeContactValue(request.contact()));
+                RequestTrace.safeLogin(request.loginName()),
+                RequestTrace.describeContactValue(request.contact()));
         assertContactMatches(invite, request.contact());
         String platformUserId = completeInviteActivation(invite, request.loginName(), request.encryptedPassword());
         log.info(
@@ -164,13 +164,13 @@ public class PlatformPublicInviteService {
     /**
      * 创建 ACTIVE 用户、按邀请单授予默认角色（非空时），并将邀请单标记为已接受。
      *
-     * <p>登录名或联系方式与已有用户冲突时由 {@link PlatformUserService} 抛出异常，邀请单保持
+     * <p>登录名或联系方式与已有用户冲突时由 {@link AdminUserService} 抛出异常，邀请单保持
      * {@link com.innospots.nexus.platform.invite.domain.enums.PlatformInviteStatus#PENDING}。</p>
      */
     private String completeInviteActivation(PlatformInviteEntity invite, String loginName, String encryptedPassword) {
         String resolvedLoginName = resolveLoginName(invite, loginName);
         String rawPassword = passwordDecryptor.decrypt(encryptedPassword);
-        PlatformUserVo user = platformUserService.createActiveUserWithPassword(
+        AdminUserVo user = platformUserService.createActiveUserWithPassword(
                 resolvedLoginName,
                 invite.getEmail(),
                 invite.getMobile(),

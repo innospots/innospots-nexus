@@ -15,8 +15,8 @@ import com.innospots.nexus.console.credential.password.algorithm.EncodedCredenti
 import com.innospots.nexus.console.credential.password.dao.UserCredentialDao;
 import com.innospots.nexus.console.credential.password.domain.entity.UserCredentialEntity;
 import com.innospots.nexus.console.credential.password.CredentialKind;
-import com.innospots.nexus.console.scope.ConsoleOwnership;
-import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnership;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnershipScope;
 
 /**
  * {@code nx_user_credential} 的读写与证明校验；同一表按 {@link CredentialKind} 存密码、TOTP 等行。

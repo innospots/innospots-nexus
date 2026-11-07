@@ -28,7 +28,7 @@ import com.innospots.nexus.platform.access.domain.vo.PlatformAccessRequestVo;
 import com.innospots.nexus.platform.access.service.PlatformAccessRequestService;
 import com.innospots.nexus.platform.config.PlatformConstant;
 import com.innospots.nexus.platform.entry.BuiltinPlatformEntryPlugins;
-import com.innospots.nexus.platform.user.domain.vo.PlatformUserVo;
+import com.innospots.nexus.console.user.admin.domain.vo.AdminUserVo;
 
 /**
  * 注册待审核管理端 REST：分页、通过（用户 {@code ACTIVE}）、拒绝。
@@ -80,7 +80,7 @@ public class PlatformAccessRequestEndpoint {
             recordArgs = false,
             auditLog = true)
     @Operation(operationId = "platformAccessRequestApprove", summary = "通过注册待审核申请")
-    public R<PlatformUserVo> approveAccessRequest(
+    public R<AdminUserVo> approveAccessRequest(
             @PathParam("accessRequestId") String accessRequestId,
             PlatformAccessRequestApproveRequest request) {
         return R.ok(accessRequestService.approveAccessRequest(accessRequestId, request));

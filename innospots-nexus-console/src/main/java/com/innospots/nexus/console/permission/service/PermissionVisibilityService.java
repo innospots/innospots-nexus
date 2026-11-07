@@ -23,8 +23,8 @@ import com.innospots.nexus.console.permission.authorization.AuthorizationSubject
 import com.innospots.nexus.console.permission.dao.PermissionGrantDao;
 import com.innospots.nexus.console.permission.domain.entity.PermissionGrantEntity;
 import com.innospots.nexus.console.permission.domain.enums.PermissionSubjectType;
-import com.innospots.nexus.console.scope.ConsoleOwnership;
-import com.innospots.nexus.console.scope.ConsoleOwnershipScope;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnership;
+import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnershipScope;
 
 /**
  * 按当前主体构建可见资源与菜单视图。

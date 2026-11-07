@@ -1,14 +1,14 @@
-package com.innospots.nexus.platform.user.status;
+package com.innospots.nexus.console.user.admin.status;
 
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class PlatformUserStatusCodeTest {
+class AdminUserStatusCodeTest {
 
     @Test
     void platformUserStatusCodesUsePluModulePrefix() {
-        assertThat(PlatformUserStatusCode.PLATFORM_USER_NOT_FOUND.fullCode()).startsWith("PLU");
-        assertThat(PlatformUserStatusCode.LOGIN_NAME_DUPLICATED.httpStatusCode()).isEqualTo(409);
+        assertThat(AdminUserStatusCode.PLATFORM_USER_NOT_FOUND.fullCode()).startsWith("PLU");
+        assertThat(AdminUserStatusCode.LOGIN_NAME_DUPLICATED.httpStatusCode()).isEqualTo(409);
     }
 }

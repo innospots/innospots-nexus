@@ -8,11 +8,12 @@ import com.innospots.nexus.console.credential.password.PasswordDecryptor;
 import com.innospots.nexus.console.credential.password.service.CredentialService;
 import com.innospots.nexus.console.role.dao.RoleBindingDao;
 import com.innospots.nexus.console.role.dao.RoleDao;
-import com.innospots.nexus.platform.user.dao.PlatformUserDao;
-import com.innospots.nexus.platform.user.endpoint.PlatformUserEndpoint;
-import com.innospots.nexus.platform.user.operator.PlatformUserOperator;
-import com.innospots.nexus.platform.user.service.PlatformUserService;
-import com.innospots.nexus.platform.user.support.PlatformUserRoleProvisioner;
+import com.innospots.nexus.console.user.admin.dao.AdminUserDao;
+import com.innospots.nexus.console.user.admin.endpoint.AdminUserEndpoint;
+import com.innospots.nexus.platform.user.endpoint.PlatformAdminUserEndpoint;
+import com.innospots.nexus.console.user.admin.operator.AdminUserOperator;
+import com.innospots.nexus.console.user.admin.service.AdminUserService;
+import com.innospots.nexus.console.user.admin.support.AdminUserRoleProvisioner;
 
 /**
  * 运营管理平台用户 Spring 装配。
@@ -21,22 +22,22 @@ import com.innospots.nexus.platform.user.support.PlatformUserRoleProvisioner;
 public class PlatformUserConfiguration {
 
     @Bean
-    PlatformUserOperator platformUserOperator(PlatformUserDao platformUserDao) {
-        return new PlatformUserOperator(platformUserDao);
+    AdminUserOperator platformUserOperator(AdminUserDao platformUserDao) {
+        return new AdminUserOperator(platformUserDao);
     }
 
     @Bean
-    PlatformUserRoleProvisioner platformUserRoleProvisioner(RoleDao roleDao, RoleBindingDao roleBindingDao) {
-        return new PlatformUserRoleProvisioner(roleDao, roleBindingDao);
+    AdminUserRoleProvisioner platformUserRoleProvisioner(RoleDao roleDao, RoleBindingDao roleBindingDao) {
+        return new AdminUserRoleProvisioner(roleDao, roleBindingDao);
     }
 
     @Bean
-    PlatformUserService platformUserService(
-            PlatformUserOperator platformUserOperator,
+    AdminUserService platformUserService(
+            AdminUserOperator platformUserOperator,
             CredentialService credentialService,
             PasswordDecryptor passwordDecryptor,
-            PlatformUserRoleProvisioner platformUserRoleProvisioner) {
-        return new PlatformUserService(
+            AdminUserRoleProvisioner platformUserRoleProvisioner) {
+        return new AdminUserService(
                 platformUserOperator,
                 credentialService,
                 passwordDecryptor,
@@ -45,7 +46,7 @@ public class PlatformUserConfiguration {
 
     @Bean
     @Lazy
-    PlatformUserEndpoint platformUserEndpoint(PlatformUserService platformUserService) {
-        return new PlatformUserEndpoint(platformUserService);
+    AdminUserEndpoint platformUserEndpoint(AdminUserService platformUserService) {
+        return new PlatformAdminUserEndpoint(platformUserService);
     }
 }

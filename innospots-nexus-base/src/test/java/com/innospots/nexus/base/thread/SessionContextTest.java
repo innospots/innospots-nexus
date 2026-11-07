@@ -22,12 +22,12 @@ class SessionContextTest {
 
     @Test
     void bindsUserSnapshotAndSynchronizesTlcKeys() {
-        UserSnapshot user = UserSnapshot.simple(9L, "alice", "Alice");
+        UserSnapshot user = UserSnapshot.simple("9", "alice", "Alice");
 
         SessionContext.bindUser(user);
 
         assertThat(SessionContext.user()).contains(user);
-        assertThat(TLC.userId()).isEqualTo(9L);
+        assertThat(TLC.userId()).isEqualTo("9");
         assertThat(TLC.userName()).isEqualTo("alice");
     }
 
@@ -64,7 +64,7 @@ class SessionContextTest {
 
     @Test
     void clearsBoundUserAndTlcIdentityKeys() {
-        SessionContext.bindUser(UserSnapshot.simple(1L, "bob", "Bob"));
+        SessionContext.bindUser(UserSnapshot.simple("1", "bob", "Bob"));
 
         SessionContext.clearUser();
 

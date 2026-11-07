@@ -61,8 +61,6 @@ final class JaxRsFilterTestSupport {
                 "42",
                 "tenant-1",
                 null,
-                "ws-1",
-                null,
                 Instant.now().getEpochSecond() + 3600);
     }
 

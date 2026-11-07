@@ -41,9 +41,9 @@ MySQL 权威 DDL 见仓库 `docs/schema/mysql/`；演示 DML 见 `docs/schema/my
 
 ### `nexus-platform-h2.sql`
 
-- `nx_pl_enterprise` / `nx_pl_tenant` / `nx_pl_tenant_admin`
-- `nx_pl_user` — 平台用户（login_name、email、status）
-- `nx_pl_user_oauth`
+- `nx_pl_enterprise` / `nx_tenant` / `nx_tenant_admin`
+- `nx_admin_user` — 平台用户（login_name、email、status）
+- `nx_admin_user_oauth`
 - `nx_pl_invite` / `nx_pl_access_request`
 
 ## 演示账号（DML 种子）

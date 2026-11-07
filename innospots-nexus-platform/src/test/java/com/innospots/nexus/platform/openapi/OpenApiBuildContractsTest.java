@@ -59,9 +59,9 @@ class OpenApiBuildContractsTest {
         assertThat(yaml).contains("name: PlatformPublicAuth");
         assertThat(yaml).contains("name: PlatformAuthSession");
         assertThat(yaml).contains("name: PlatformOrganization");
-        assertThat(yaml).contains("name: PlatformUser");
+        assertThat(yaml).contains("name: AdminUser");
         assertThat(yaml).contains("bearerAuth");
         assertThat(yaml).contains("TenantCreateRequest:");
-        assertThat(yaml).contains("PlatformUserVo:");
+        assertThat(yaml).contains("AdminUserVo:");
     }
 }

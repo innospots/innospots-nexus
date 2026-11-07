@@ -14,6 +14,6 @@
  * @see com.innospots.nexus.platform.auth.endpoint.PlatformAuthSessionEndpoint
  * @see com.innospots.nexus.platform.auth.endpoint.PlatformPublicPasswordResetEndpoint
  * @see com.innospots.nexus.platform.auth.adapter.PlatformUserDirectory
- * @see com.innospots.nexus.platform.user.operator.PlatformUserOperator
+ * @see com.innospots.nexus.console.user.admin.operator.AdminUserOperator
  */
 package com.innospots.nexus.platform.auth;
