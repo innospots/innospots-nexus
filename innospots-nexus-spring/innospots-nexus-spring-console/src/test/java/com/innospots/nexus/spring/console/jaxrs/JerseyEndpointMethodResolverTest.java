@@ -60,7 +60,7 @@ class JerseyEndpointMethodResolverTest {
     @Test
     void recordsInterfaceAnnotationUsingJerseyMatchedImplementationMethod() {
         ContainerRequest request = request("create");
-        SessionContext.bindUser(UserSnapshot.simple(1L, "alice", null));
+        SessionContext.bindUser(UserSnapshot.simple("1", "alice", null));
 
         grantFilter.filter(request);
         filter.filter(request);
