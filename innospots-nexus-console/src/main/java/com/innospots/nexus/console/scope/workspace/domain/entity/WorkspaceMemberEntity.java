@@ -76,4 +76,13 @@ public class WorkspaceMemberEntity extends TenantWorkspaceBaseEntity {
      */
     @Column(length = 32, nullable = false)
     private String status;
+
+    /**
+     * 工作区内的业务角色，由产品侧定义取值（如空间管理员、策略分析）。
+     *
+     * <p>与权限体系无关：工作区权限仍通过角色绑定与权限授权表达，
+     * 本字段只承载产品语义上的岗位标识，允许为空。</p>
+     */
+    @Column(length = 32)
+    private String memberRole;
 }

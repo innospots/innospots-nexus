@@ -329,7 +329,14 @@ public final class ConsoleOwnershipScope {
             query.apply("(owner_id IS NULL OR owner_id = {0})", "");
             return;
         }
-        query.apply("owner_id = {0}", ownership.ownerId());
+        // 身份级 TENANT 归属（如 nx_portal_user 的登录密码）写入时 ownerId 为 null，
+        // 查询必须用 IS NULL 才能命中：SQL 中 owner_id = NULL 恒为 UNKNOWN。
+        String ownerId = ownership.ownerId();
+        if (ownerId == null || ownerId.isBlank()) {
+            query.apply("owner_id IS NULL");
+            return;
+        }
+        query.apply("owner_id = {0}", ownerId);
     }
 
     private static void appendOwnerIdForRole(
