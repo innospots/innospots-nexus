@@ -32,6 +32,14 @@ project_class_dirs=(
     "${REPO_ROOT}/innospots-nexus-base/target/classes"
 )
 
+# Artifact ids represented by the classes directories above. Their installed JARs must be
+# removed from the dependency classpath: otherwise plugin declarations / resources are
+# discovered twice (target/classes and the JAR), and PluginCatalog rejects the duplicate id.
+project_artifact_ids=()
+for dir in "${project_class_dirs[@]}"; do
+    project_artifact_ids+=("$(basename "${dir%/target/classes}")")
+done
+
 missing_dirs=()
 for dir in "${project_class_dirs[@]}"; do
     if [[ ! -d "${dir}" ]]; then
@@ -93,7 +101,25 @@ runtime_classpath=""
 for dir in "${project_class_dirs[@]}"; do
     runtime_classpath+="${dir}:"
 done
-runtime_classpath+="$(<"${classpath_file}")"
+
+# Filter the dependency classpath on every start (not only when it is regenerated), so a
+# previously cached file cannot reintroduce duplicate project JARs.
+filtered_dependency_classpath=""
+IFS=':' read -r -a dependency_entries <<< "$(<"${classpath_file}")"
+for entry in "${dependency_entries[@]}"; do
+    [[ -z "${entry}" ]] && continue
+    skip=false
+    for artifact in "${project_artifact_ids[@]}"; do
+        if [[ "${entry}" == *"/com/innospots/${artifact}/"* ]]; then
+            skip=true
+            break
+        fi
+    done
+    if [[ "${skip}" == "false" ]]; then
+        filtered_dependency_classpath+="${entry}:"
+    fi
+done
+runtime_classpath+="${filtered_dependency_classpath}"
 
 printf 'Starting %s from existing classes (no build).\n' "${MAIN_CLASS}"
 cd "${REPO_ROOT}"

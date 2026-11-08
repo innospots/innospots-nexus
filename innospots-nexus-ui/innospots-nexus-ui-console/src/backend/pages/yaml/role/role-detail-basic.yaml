@@ -109,7 +109,7 @@ body:
                   className: mb-3
                 children:
                   - type: Button
-                    when: ${data.role.status == 'ENABLED' || data.role.status == 'DISABLED'}
+                    when: ${!data.role.readOnly && (data.role.status == 'ENABLED' || data.role.status == 'DISABLED')}
                     props:
                       text: "${data.role.status == 'ENABLED' ? t('role.role-detail-basic.disable') : t('role.role-detail-basic.enable')}"
                     events:
@@ -132,6 +132,7 @@ body:
                           params:
                             dataSource: role
                   - type: Button
+                    when: ${!data.role.readOnly}
                     props:
                       text: '$i18n{role.role-detail-basic.edit:修改}'
                       variant: primary
@@ -365,6 +366,7 @@ body:
                                 draftGrants: ${data.grants.grants}
                                 dirty: false
                       - type: Button
+                        when: ${!data.role.readOnly}
                         props:
                           text: '$i18n{role.role-detail-basic.save-full-authorization-2:保存完整授权}'
                           variant: primary

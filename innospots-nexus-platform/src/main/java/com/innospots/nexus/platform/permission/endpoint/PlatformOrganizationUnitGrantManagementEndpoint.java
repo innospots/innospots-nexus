@@ -17,7 +17,7 @@ import com.innospots.nexus.platform.config.PlatformConstant;
 import com.innospots.nexus.platform.entry.BuiltinPlatformEntryPlugins;
 import com.innospots.nexus.platform.permission.service.PlatformPermissionService;
 
-@EndpointModule(value = "permission", domain = BuiltinPlatformEntryPlugins.OPERATION_DOMAIN_KEY)
+@EndpointModule(value = "organization", domain = BuiltinPlatformEntryPlugins.OPERATION_DOMAIN_KEY)
 @Path(PlatformConstant.ORGANIZATION_UNIT_PERMISSIONS_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)

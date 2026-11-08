@@ -33,6 +33,7 @@ class RoleConverterTest {
         assertThat(vo.securityRealm()).isEqualTo(SecurityRealm.TENANT);
         assertThat(vo.status()).isEqualTo(BasicStatus.ENABLED);
         assertThat(vo.memberCount()).isEqualTo(3L);
+        assertThat(vo.readOnly()).isTrue();
         assertThat(vo.createdAt()).isEqualTo(entity.getCreatedAt());
     }
 
@@ -73,6 +74,7 @@ class RoleConverterTest {
         entity.setSortOrder(1);
         entity.setBuiltIn(false);
         entity.setAdministrator(false);
+        entity.setReadOnly(true);
         return entity;
     }
 }

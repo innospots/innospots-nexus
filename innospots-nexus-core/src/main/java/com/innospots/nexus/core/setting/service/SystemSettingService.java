@@ -53,14 +53,24 @@ public class SystemSettingService {
             assertValueType(entity, SettingValueType.STRING);
             return entity.getSettingValue();
         }
-        return settingOperator.insert(
-                        domain,
-                        scope,
-                        scopeId,
-                        settingKey,
-                        SettingValueType.STRING,
-                        deploymentDefault.trim())
-                .getSettingValue();
+        try {
+            return settingOperator.insert(
+                            domain,
+                            scope,
+                            scopeId,
+                            settingKey,
+                            SettingValueType.STRING,
+                            deploymentDefault.trim())
+                    .getSettingValue();
+        } catch (RuntimeException insertFailure) {
+            // 并发首次读取时只有一个 INSERT 成功，其余请求回读已插入的行。
+            SystemSettingEntity concurrent = settingOperator.find(domain, scope, scopeId, settingKey);
+            if (concurrent == null) {
+                throw insertFailure;
+            }
+            assertValueType(concurrent, SettingValueType.STRING);
+            return concurrent.getSettingValue();
+        }
     }
 
     /**
@@ -181,13 +191,24 @@ public class SystemSettingService {
         SystemSettingEntity entity = settingOperator.find(
                 settingKey.domain(), settingKey.scope(), scopeId, settingKey.key());
         if (entity == null) {
-            return settingOperator.insert(
-                    settingKey.domain(),
-                    settingKey.scope(),
-                    scopeId,
-                    settingKey.key(),
-                    settingKey.valueType(),
-                    normalized);
+            try {
+                return settingOperator.insert(
+                        settingKey.domain(),
+                        settingKey.scope(),
+                        scopeId,
+                        settingKey.key(),
+                        settingKey.valueType(),
+                        normalized);
+            } catch (RuntimeException insertFailure) {
+                // 并发首个请求同时发现缺行时，只有一个 INSERT 能成功；其余请求回读已插入的行。
+                SystemSettingEntity concurrent = settingOperator.find(
+                        settingKey.domain(), settingKey.scope(), scopeId, settingKey.key());
+                if (concurrent == null) {
+                    throw insertFailure;
+                }
+                assertValueType(concurrent, settingKey.valueType());
+                return concurrent;
+            }
         }
         assertValueType(entity, settingKey.valueType());
         // 读路径保留库内已有值；写路径在值变化时落库

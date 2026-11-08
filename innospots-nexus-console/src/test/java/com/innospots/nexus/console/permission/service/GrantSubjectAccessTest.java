@@ -84,6 +84,44 @@ class GrantSubjectAccessTest {
         access.ensureSubjectInScope(PermissionSubjectType.ROLE, "rol-1", ownership, "tnt-a", "wks-a");
     }
 
+    @Test
+    void ensureSubjectGrantMutableRejectsBootstrapReadOnlyRole() {
+        ConsoleOwnership ownership = new ConsoleOwnership(
+                RoleOwnerType.PLATFORM, null, SecurityRealm.PLATFORM.name());
+        RoleEntity role = new RoleEntity();
+        role.setRoleId("rol-1");
+        role.setOwnerType(RoleOwnerType.PLATFORM.name());
+        role.setOwnerId(null);
+        role.setSecurityRealm(SecurityRealm.PLATFORM.name());
+        role.setReadOnly(true);
+        RoleDao roleDao = mock(RoleDao.class);
+        when(roleDao.selectOne(any())).thenReturn(role);
+        GrantSubjectAccess access = new GrantSubjectAccess(roleDao, null);
+
+        assertThatThrownBy(() -> access.ensureSubjectGrantMutable(
+                PermissionSubjectType.ROLE, "rol-1", ownership, null, null))
+                .isInstanceOf(NexusException.class)
+                .hasMessageContaining("startup configuration");
+    }
+
+    @Test
+    void ensureSubjectGrantMutableAcceptsEditableRoleAndOrgUnits() {
+        ConsoleOwnership ownership = new ConsoleOwnership(
+                RoleOwnerType.PLATFORM, null, SecurityRealm.PLATFORM.name());
+        RoleEntity role = new RoleEntity();
+        role.setRoleId("rol-1");
+        role.setOwnerType(RoleOwnerType.PLATFORM.name());
+        role.setOwnerId(null);
+        role.setSecurityRealm(SecurityRealm.PLATFORM.name());
+        role.setReadOnly(false);
+        RoleDao roleDao = mock(RoleDao.class);
+        when(roleDao.selectOne(any())).thenReturn(role);
+        GrantSubjectAccess access = new GrantSubjectAccess(roleDao, null);
+
+        access.ensureSubjectGrantMutable(PermissionSubjectType.ROLE, "rol-1", ownership, null, null);
+        access.ensureSubjectGrantMutable(PermissionSubjectType.ORG_UNIT, "unit-1", ownership, null, null);
+    }
+
     private static ConsoleOwnership workspaceOwnership(String workspaceId) {
         return ConsoleOwnershipScope.workspaceOwnership(workspaceId, SecurityRealm.TENANT.name());
     }

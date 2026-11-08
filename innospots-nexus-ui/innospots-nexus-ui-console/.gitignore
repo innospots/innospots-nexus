@@ -4,3 +4,4 @@ dist-module/
 .next/
 *.tsbuildinfo
 .playwright-cli/
+.test-dist/

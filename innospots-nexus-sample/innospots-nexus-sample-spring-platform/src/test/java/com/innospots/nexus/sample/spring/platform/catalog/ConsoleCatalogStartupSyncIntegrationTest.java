@@ -94,13 +94,12 @@ class ConsoleCatalogStartupSyncIntegrationTest {
                 CatalogTreeJsonSupport.extractModuleKeys(treeResponse.body(), PLATFORM_CONSOLE_PLUGIN);
         assertThat(apiModuleKeys).containsExactlyInAnyOrder(
                 "organization",
-                "menu",
                 "user",
                 "dictionary",
                 "role",
-                "permission",
                 "logger",
-                "settings");
+                "settings",
+                "theme");
         assertThat(apiResourceKeys).contains(
                 "module:organization",
                 "module:user",
@@ -135,7 +134,7 @@ class ConsoleCatalogStartupSyncIntegrationTest {
                 .as("GET /catalog/tree keys should be indexed in nx_console_catalog_resource")
                 .containsAll(apiResourceKeys);
         assertThat(countResourcesByType("MENU")).isZero();
-        assertThat(countResourcesByType("MODULE")).isEqualTo(8L);
+        assertThat(countResourcesByType("MODULE")).isEqualTo(7L);
     }
 
     private Long countResourcesByType(String resourceType) {

@@ -62,6 +62,15 @@ public final class ConsoleResourcePermissionFilter implements ContainerRequestFi
         if (!ConsoleAntPathMatcher.matchesAny(security.getConsolePathPatterns(), path)) {
             return;
         }
+        // 先解析主体：未登录时必须返回认证失败（401），而不是在缺失工作区时抛出 400。
+        var subject = subjectResolver.resolve();
+        if (subject.isEmpty()) {
+            if (grant.ignoreAuth()) {
+                // 端点本身允许匿名；没有主体就没有可判定的授权，跳过权限检查。
+                return;
+            }
+            throw ConsoleExceptions.build(NexusStatusCode.AUTHENTICATION_FAILED);
+        }
         String workspaceId = SessionContext.workspaceId();
         if (ConsoleSessionContext.scope() != ConsoleSessionScope.PLATFORM) {
             workspaceId = SessionContext.requireWorkspaceId();
@@ -69,8 +78,7 @@ public final class ConsoleResourcePermissionFilter implements ContainerRequestFi
         AuthorizationDecision decision = resourcePermissionAuthorizer.authorizeEndpoint(
                 workspaceId,
                 grant,
-                subjectResolver.resolve()
-                        .orElseThrow(() -> ConsoleExceptions.build(NexusStatusCode.AUTHENTICATION_FAILED)));
+                subject.get());
         if (!decision.allowed()) {
             throw ConsoleExceptions.build(NexusStatusCode.NO_PERMISSION);
         }

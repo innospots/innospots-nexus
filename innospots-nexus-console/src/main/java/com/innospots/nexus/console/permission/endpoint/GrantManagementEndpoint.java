@@ -39,7 +39,7 @@ public interface GrantManagementEndpoint {
     @PUT
     @EndpointGrant(
             action = EndpointGrantAction.REPLACE,
-            group = CatalogOperationGroups.REPLACE,
+            group = CatalogOperationGroups.UPDATE,
             name = "permission.grant.role.replace",
             label = @I18nLiteral(pairs = {"zh-CN", "全量替换角色授权", "en", "Replace role permissions"}),
             recordArgs = false,

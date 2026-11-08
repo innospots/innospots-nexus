@@ -51,8 +51,12 @@ function PactorAppInner({
 
   return (
     <NavigationLayoutProvider>
+        {/*
+         * 不要给 SitemapApp 加 key={pathname}: 它会使整个应用（含导航壳）在每次路由变化时
+         * 重挂载，重新拉取 sitemap 并进入 loading，造成页面闪动。SitemapApp 内部已按
+         * pathname 重新解析路由，外层 admin 布局保持常驻。
+         */}
         <SitemapApp
-          key={pathname}
           sources={sitemapSources}
           baseUrl={apiBaseUrl}
           pathname={pathname}

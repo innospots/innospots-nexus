@@ -50,6 +50,7 @@
                                 com.innospots.nexus.base.i18n,
                                 com.innospots.nexus.base.domain.enums,
                                 com.innospots.nexus.console.auth.domain,
+                                com.innospots.nexus.console.auth.endpoint,
                                 com.innospots.nexus.console.dictionary.domain,
                                 com.innospots.nexus.console.logger.domain,
                                 com.innospots.nexus.console.menu.domain.vo,

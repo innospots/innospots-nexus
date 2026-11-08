@@ -85,6 +85,9 @@ public final class PlatformIntegrationTestSupport {
     public static final String H2_URL_PERMISSION_GRANT_FLOW_IT =
             "jdbc:h2:mem:nexus-sample-platform-permission-grant-flow-it" + H2_SUFFIX;
 
+    public static final String H2_URL_BOOTSTRAP_IT =
+            "jdbc:h2:mem:nexus-sample-platform-bootstrap-it" + H2_SUFFIX;
+
     private static final String PLATFORM_IT_ADMIN_ROLE_ID = "ROL0000000099";
 
     private static final String PLATFORM_IT_ADMIN_ROLE_CODE = "it-platform-admin";

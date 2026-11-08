@@ -23,7 +23,7 @@ import com.innospots.nexus.platform.config.PlatformConstant;
 import com.innospots.nexus.platform.dictionary.endpoint.PlatformDictionaryTypeEndpoint;
 import com.innospots.nexus.platform.entry.BuiltinPlatformEntryPlugins;
 import com.innospots.nexus.platform.invite.endpoint.PlatformInviteEndpoint;
-import com.innospots.nexus.console.user.admin.endpoint.AdminUserEndpoint;
+import com.innospots.nexus.platform.user.endpoint.PlatformAdminUserEndpoint;
 import com.innospots.nexus.sample.spring.platform.SamplePlatformConsoleServer;
 import com.innospots.nexus.sample.spring.platform.endpoint.grant.support.EndpointGrantManagerStartupExpectations;
 import com.innospots.nexus.sample.spring.platform.support.PlatformIntegrationTestSupport;
@@ -75,7 +75,7 @@ class EndpointGrantManagerStartupIntegrationTest {
         assertThat(resourceTypes)
                 .containsAll(EndpointGrantManagerStartupExpectations.REQUIRED_RESOURCE_TYPES);
         assertThat(resourceTypes).contains(PlatformDictionaryTypeEndpoint.class);
-        assertThat(resourceTypes).contains(AdminUserEndpoint.class);
+        assertThat(resourceTypes).contains(PlatformAdminUserEndpoint.class);
         assertThat(resourceTypes).contains(ConsoleCatalogEndpoint.class);
         assertThat(resourceTypes).contains(PluginManagementEndpoint.class);
         assertThat(resourceTypes).contains(PlatformInviteEndpoint.class);
@@ -146,7 +146,7 @@ class EndpointGrantManagerStartupIntegrationTest {
 
     @Test
     void platformStandaloneEndpointLoadsUserModuleGrants() {
-        long userDescriptors = EndpointGrantManagerStartupExpectations.descriptorsForResource(AdminUserEndpoint.class)
+        long userDescriptors = EndpointGrantManagerStartupExpectations.descriptorsForResource(PlatformAdminUserEndpoint.class)
                 .size();
         assertThat(userDescriptors).isGreaterThanOrEqualTo(1L);
 
@@ -157,7 +157,7 @@ class EndpointGrantManagerStartupIntegrationTest {
                 .orElseThrow();
         LOGGER.info("Platform user grant sample: {}", create);
 
-        assertThat(create.resourceClass()).isEqualTo(AdminUserEndpoint.class.getName());
+        assertThat(create.resourceClass()).isEqualTo(PlatformAdminUserEndpoint.class.getName());
         assertThat(endpointGrantManager.match(create.httpMethod(), create.path()))
                 .map(EndpointGrantDescriptor::name)
                 .hasValue("platform.user.create");

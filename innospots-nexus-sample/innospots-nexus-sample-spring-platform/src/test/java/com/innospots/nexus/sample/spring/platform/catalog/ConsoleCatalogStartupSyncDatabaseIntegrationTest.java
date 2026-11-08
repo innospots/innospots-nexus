@@ -51,13 +51,12 @@ class ConsoleCatalogStartupSyncDatabaseIntegrationTest {
 
     private static final Set<String> EXPECTED_PLATFORM_MODULE_KEYS = Set.of(
             "organization",
-            "menu",
             "user",
             "dictionary",
             "role",
-            "permission",
             "logger",
-            "settings");
+            "settings",
+            "theme");
 
     private static final String SELECT_ALL = """
             SELECT resource_id, owner_plugin_id, domain_key, module_key, resource_type, resource_key,

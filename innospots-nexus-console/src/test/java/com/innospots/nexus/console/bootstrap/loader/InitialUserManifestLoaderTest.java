@@ -91,7 +91,7 @@ class InitialUserManifestLoaderTest {
 
             assertThatThrownBy(manifestLoader::load)
                     .isInstanceOf(NexusException.class)
-                    .hasMessageContaining("admin");
+                    .hasMessageMatching("(?i).*admin.*");
         }
     }
 

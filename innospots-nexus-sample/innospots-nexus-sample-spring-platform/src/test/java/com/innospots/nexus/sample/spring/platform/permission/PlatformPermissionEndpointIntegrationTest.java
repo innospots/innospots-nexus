@@ -342,7 +342,8 @@ class PlatformPermissionEndpointIntegrationTest {
                        g.constraint_definition, g.created_at, r.resource_key, r.resource_type
                 FROM nx_permission_grant g
                 LEFT JOIN nx_console_catalog_resource r
-                    ON g.grant_key = CONCAT(r.entry_page_key, ':', r.domain_key, '.', r.module_key)
+                    ON r.resource_type = 'MODULE'
+                   AND g.grant_key LIKE CONCAT(r.domain_key, '.', r.module_key, ':%')
                 WHERE g.subject_type = ? AND g.subject_id = ?
                 ORDER BY r.resource_key
                 """,

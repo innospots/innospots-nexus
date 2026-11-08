@@ -39,7 +39,7 @@ public interface OrganizationUnitGrantManagementEndpoint {
     @PUT
     @EndpointGrant(
             action = EndpointGrantAction.REPLACE,
-            group = CatalogOperationGroups.REPLACE,
+            group = CatalogOperationGroups.ASSIGN,
             name = "permission.grant.org-unit.replace",
             label = @I18nLiteral(pairs = {"zh-CN", "全量替换组织单元授权", "en", "Replace organization unit permissions"}),
             recordArgs = false,

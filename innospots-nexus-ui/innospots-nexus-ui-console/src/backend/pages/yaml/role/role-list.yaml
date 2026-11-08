@@ -292,6 +292,7 @@ body:
                             params:
                               to: /system/roles/${row.roleId}
                     - type: Button
+                      when: ${!row.readOnly}
                       props:
                         text: "${row.status == 'ENABLED' ? t('role.role-list.disable') : t('role.role-list.enable')}"
                         variant: link
@@ -316,6 +317,7 @@ body:
                             params:
                               dataSource: roles
                     - type: Button
+                      when: ${!row.readOnly}
                       props:
                         text: '$i18n{role.role-list.delete:删除}'
                         variant: link

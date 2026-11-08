@@ -189,12 +189,18 @@ public class PlatformPublicInviteEndpoint {
 ## 5. 运行时链路
 
 ```text
+ConsoleRequestContextFilter          @Priority(AUTHENTICATION - 200)
+  → 请求开始/响应结束清理 SessionContext 与 TLC
+
 ConsoleResolvedEndpointGrantFilter   @Priority(AUTHENTICATION - 100)
   → 解析 @EndpointModule + @EndpointGrant
   → 写入 ResolvedEndpointBinding
 
 ConsoleAuthenticationFilter          @Priority(AUTHENTICATION)
   → grant.ignoreAuth()
+
+WorkspaceScopeSessionFilter          @Priority(AUTHENTICATION + 50)
+  → 绑定租户/工作区/项目作用域
 
 ConsoleResourcePermissionFilter          @Priority(AUTHENTICATION + 100)
   → grant.ignorePermission()

@@ -9,7 +9,6 @@ import com.innospots.nexus.console.credential.password.service.CredentialService
 import com.innospots.nexus.console.role.dao.RoleBindingDao;
 import com.innospots.nexus.console.role.dao.RoleDao;
 import com.innospots.nexus.console.user.admin.dao.AdminUserDao;
-import com.innospots.nexus.console.user.admin.endpoint.AdminUserEndpoint;
 import com.innospots.nexus.platform.user.endpoint.PlatformAdminUserEndpoint;
 import com.innospots.nexus.console.user.admin.operator.AdminUserOperator;
 import com.innospots.nexus.console.user.admin.service.AdminUserService;
@@ -46,7 +45,7 @@ public class PlatformUserConfiguration {
 
     @Bean
     @Lazy
-    AdminUserEndpoint platformUserEndpoint(AdminUserService platformUserService) {
+    PlatformAdminUserEndpoint platformUserEndpoint(AdminUserService platformUserService) {
         return new PlatformAdminUserEndpoint(platformUserService);
     }
 }

@@ -22,6 +22,7 @@ import com.innospots.nexus.sample.spring.platform.jaxrs.web.support.ConsoleJaxRs
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -56,7 +57,7 @@ class ConsoleResourcePermissionFilterTest extends ConsoleJaxRsWebIntegrationTest
     @Test
     void grantedApiPathWithDeniedDecisionReturns403() throws Exception {
         when(ConsoleJaxRsWebTestMocks.RESOURCE_PERMISSION_AUTHORIZER.authorizeEndpoint(
-                        anyString(), any(ResolvedEndpointGrant.class), any(AuthorizationSubject.class)))
+                        nullable(String.class), any(ResolvedEndpointGrant.class), any(AuthorizationSubject.class)))
                 .thenReturn(AuthorizationDecision.deny("denied"));
         HttpResponse<String> response = http.exchange(
                 "GET",
@@ -66,12 +67,19 @@ class ConsoleResourcePermissionFilterTest extends ConsoleJaxRsWebIntegrationTest
         assertThat(response.statusCode()).isEqualTo(403);
         JsonNode root = OBJECT_MAPPER.readTree(response.body());
         assertThat(root.get("success").asBoolean()).isFalse();
+        // 异常路径也必须执行请求上下文过滤器的响应阶段，确保 requestId 与线程会话被清理。
+        assertThat(response.headers().firstValue("X-Request-Id"))
+                .as("denied request must still carry the request context id")
+                .isPresent()
+                .get()
+                .asString()
+                .isNotEqualTo("unknown");
     }
 
     @Test
     void grantedApiPathWithAllowedDecisionSucceeds() throws Exception {
         when(ConsoleJaxRsWebTestMocks.RESOURCE_PERMISSION_AUTHORIZER.authorizeEndpoint(
-                        anyString(), any(ResolvedEndpointGrant.class), any(AuthorizationSubject.class)))
+                        nullable(String.class), any(ResolvedEndpointGrant.class), any(AuthorizationSubject.class)))
                 .thenReturn(AuthorizationDecision.allow(new AuthorizationContext(
                         "wks-demo",
                         "platform.jaxrs-web-test:jaxrs.web.test.echo",

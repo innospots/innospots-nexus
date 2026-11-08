@@ -128,7 +128,10 @@ public class SampleWebFluxHttpResource {
     @TimeoutProtected("adapter.governance.timeout")
     public Map<String, String> governanceTimeout() {
         ServiceContext serviceContext = contextAccessor.requireCurrent();
-        return onBoundedElasticBlocking(serviceContext, () -> {
+        // 该场景模拟阻塞式业务：在 boundedElastic 上执行并等待结果，使 @TimeoutProtected
+        // 的取消窗口覆盖业务执行（直接返回 Mono 会在方法返回时就结束调用窗口）。
+        // 不使用 Mono#block()：Reactor 禁止在事件循环线程调用 block。
+        return await(onBoundedElastic(serviceContext, () -> {
             long remaining = 2_000L;
             while (remaining > 0) {
                 if (contextAccessor.requireCurrent().cancellation().isCancelled()) {
@@ -139,7 +142,25 @@ public class SampleWebFluxHttpResource {
                 remaining -= step;
             }
             return Map.of("status", "ok");
-        });
+        }).toFuture());
+    }
+
+    private static <T> T await(java.util.concurrent.Future<T> future) {
+        try {
+            return future.get();
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException(ex);
+        } catch (java.util.concurrent.ExecutionException ex) {
+            Throwable cause = ex.getCause();
+            if (cause instanceof RuntimeException runtime) {
+                throw runtime;
+            }
+            if (cause instanceof Error error) {
+                throw error;
+            }
+            throw new IllegalStateException(cause);
+        }
     }
 
     @GetMapping(AdapterScenarioPaths.OBSERVABILITY_TRACE)
@@ -150,10 +171,6 @@ public class SampleWebFluxHttpResource {
     @GetMapping(AdapterScenarioPaths.DOWNLOAD)
     public DownloadResource download() {
         return AdapterDownloadFixtures.memoryDownload();
-    }
-
-    private <T> T onBoundedElasticBlocking(ServiceContext serviceContext, Supplier<T> supplier) {
-        return onBoundedElastic(serviceContext, supplier).block();
     }
 
     private <T> Mono<T> onBoundedElastic(ServiceContext serviceContext, Supplier<T> supplier) {

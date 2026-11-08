@@ -65,9 +65,28 @@ class RoleBindingEndpointIntegrationTest {
         jdbcTemplate.execute("DELETE FROM nx_permission_grant");
         jdbcTemplate.execute("DELETE FROM nx_role_binding");
         jdbcTemplate.execute("DELETE FROM nx_role");
+        seedPlatformUser(USER_ALPHA, "plt-user-alpha", "PLT User Alpha");
+        seedPlatformUser(USER_BETA, "plt-user-beta", "PLT User Beta");
         http = new RoleEndpointHttpClient(port);
         assertThat(roleBindingEndpoint).isSameAs(platformRoleBindingEndpoint);
         RoleBindingDatabaseJsonSnapshot.logAndPersist(jdbcTemplate, "00-clean");
+    }
+
+    /**
+     * 角色绑定的 USER 主体必须是真实平台用户：分页 input 通过平台用户关键字解析主体 ID。
+     */
+    private void seedPlatformUser(String userId, String loginName, String displayName) {
+        jdbcTemplate.update("DELETE FROM nx_admin_user WHERE admin_user_id = ?", userId);
+        jdbcTemplate.update(
+                """
+                INSERT INTO nx_admin_user (
+                    admin_user_id, security_realm, login_name, display_name, status,
+                    created_at, updated_at
+                ) VALUES (?, 'PLATFORM', ?, ?, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                """,
+                userId,
+                loginName,
+                displayName);
     }
 
     @Test

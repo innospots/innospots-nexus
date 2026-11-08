@@ -1,0 +1,40 @@
+# ---------------------------------------------------------------------------
+# 集成测试用控制台 Web 配置（覆盖 src/main/resources 同名文件）。
+#
+# 绝大多数 HTTP 集成测试不是鉴权用例，它们以 dev-session 的固定 PLATFORM 会话
+# 访问管理端接口，因此这里关闭请求侧 Bearer 鉴权并启用 dev-session。
+# 需要验证真实鉴权的用例（如 PlatformNavigationMenuEndpointIntegrationTest、
+# PlatformPermissionGrantFlowIntegrationTest、ConsoleBootstrapDataIntegrationTest）
+# 通过 @TestPropertySource 显式开启 security.enabled 并关闭 dev-session。
+# ---------------------------------------------------------------------------
+nexus:
+  console:
+    web:
+      enabled: true
+      security:
+        enabled: false
+        dev-session:
+          enabled: true
+          user-id: "1"
+          tenant-id: dev-tenant
+          project-id: dev-project
+          realm: PLATFORM
+          session-scope: PLATFORM
+          tenant-member-id: member-1
+      cors:
+        enabled: true
+        allowed-origins:
+          - "*"
+        allowed-methods:
+          - GET
+          - POST
+          - PUT
+          - PATCH
+          - DELETE
+          - OPTIONS
+          - HEAD
+        allowed-headers:
+          - "*"
+        exposed-headers: []
+        allow-credentials: false
+        max-age-seconds: 3600

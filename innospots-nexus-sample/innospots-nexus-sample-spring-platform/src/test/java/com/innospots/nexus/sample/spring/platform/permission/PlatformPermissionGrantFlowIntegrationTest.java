@@ -133,7 +133,8 @@ class PlatformPermissionGrantFlowIntegrationTest {
         accessToken = loginAsDevUser();
 
         assertPageAccess(dictionary, true);
-        assertDictionaryCreateSucceeded();
+        // 仅浏览分组授权只允许进入页面与读取接口，写操作仍需对应的 operation 分组。
+        assertDictionaryCreateForbidden();
 
         HttpResponse<String> mePermissions = http.exchange(
                 "GET",
@@ -248,7 +249,8 @@ class PlatformPermissionGrantFlowIntegrationTest {
                   "domainKey": "%s",
                   "moduleKey": "dictionary",
                   "pageKey": "%s",
-                  "grantGroup": "view"
+                  "grantGroup": "view",
+                  "accessMode": "grant"
                 }
                 """.formatted(BuiltinPlatformEntryPlugins.SYSTEM_DOMAIN_KEY, DICTIONARY_PAGE_KEY);
         HttpResponse<String> response = http.exchange(

@@ -39,16 +39,7 @@ public final class CatalogTreeJsonSupport {
         List<String> moduleKeys = new ArrayList<>();
         if (data != null && data.isArray()) {
             for (JsonNode node : data) {
-                if (ownerPluginId != null) {
-                    JsonNode owner = node.get("ownerPluginId");
-                    if (owner == null || !ownerPluginId.equals(owner.asText())) {
-                        continue;
-                    }
-                }
-                JsonNode moduleKey = node.get("moduleKey");
-                if (moduleKey != null && moduleKey.isTextual()) {
-                    moduleKeys.add(moduleKey.asText());
-                }
+                collectModuleKeys(node, ownerPluginId, moduleKeys);
             }
         }
         return moduleKeys;
@@ -79,6 +70,31 @@ public final class CatalogTreeJsonSupport {
         }
     }
 
+    private static void collectModuleKeys(
+            JsonNode node,
+            String ownerPluginId,
+            List<String> moduleKeys
+    ) {
+        if (ownerPluginId != null) {
+            JsonNode owner = node.get("ownerPluginId");
+            if (owner == null || !ownerPluginId.equals(owner.asText())) {
+                return;
+            }
+        }
+        JsonNode moduleKey = node.get("moduleKey");
+        if (moduleKey != null && moduleKey.isTextual()) {
+            moduleKeys.add(moduleKey.asText());
+        }
+        for (String childField : new String[]{"modules", "children"}) {
+            JsonNode children = node.get(childField);
+            if (children != null && children.isArray()) {
+                for (JsonNode child : children) {
+                    collectModuleKeys(child, ownerPluginId, moduleKeys);
+                }
+            }
+        }
+    }
+
     private static void collectResourceKeys(JsonNode node, Set<String> keys) {
         collectResourceKeys(node, keys, null);
     }
@@ -94,10 +110,12 @@ public final class CatalogTreeJsonSupport {
         if (resourceKey != null && resourceKey.isTextual()) {
             keys.add(resourceKey.asText());
         }
-        JsonNode children = node.get("children");
-        if (children != null && children.isArray()) {
-            for (JsonNode child : children) {
-                collectResourceKeys(child, keys, ownerPluginId);
+        for (String childField : new String[]{"modules", "children"}) {
+            JsonNode children = node.get(childField);
+            if (children != null && children.isArray()) {
+                for (JsonNode child : children) {
+                    collectResourceKeys(child, keys, ownerPluginId);
+                }
             }
         }
     }

@@ -25,6 +25,7 @@ import com.innospots.nexus.console.role.domain.enums.RoleOwnerType;
  * @param builtIn        角色是否由系统管理
  * @param administrator  角色是否绕过普通资源检查
  * @param memberCount    已分配用户数量
+ * @param readOnly       是否由启动配置声明为只读（只读角色不能改授权/状态/删除）
  * @param createdAt      创建时间
  * @param updatedAt      最后更新时间
  */
@@ -57,6 +58,8 @@ public record RoleVo(
         @Schema(description = "创建时间", required = true)
         LocalDateTime createdAt,
         @Schema(description = "最后更新时间", required = true)
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+        @Schema(description = "是否由启动配置声明为只读", required = true)
+        Boolean readOnly
 ) {
 }

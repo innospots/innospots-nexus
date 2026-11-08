@@ -72,6 +72,8 @@ public class PermissionGrantService {
         Checks.notNull(request, "request");
         validateSubject(subjectType, subjectId, request);
         grantSubjectAccess.ensureSubjectInScope(subjectType, subjectId, ownership);
+        grantSubjectAccess.ensureSubjectGrantMutable(
+                subjectType, subjectId, ownership, null, null);
         replaceGrants(subjectType, subjectId, request, ownership);
     }
 
@@ -88,6 +90,8 @@ public class PermissionGrantService {
         Checks.notNull(request, "request");
         validateSubject(subjectType, subjectId, request);
         grantSubjectAccess.ensureSubjectInScope(subjectType, subjectId, ownership, tenantId, workspaceId);
+        grantSubjectAccess.ensureSubjectGrantMutable(
+                subjectType, subjectId, ownership, tenantId, workspaceId);
         replaceGrants(subjectType, subjectId, request, ownership);
     }
 

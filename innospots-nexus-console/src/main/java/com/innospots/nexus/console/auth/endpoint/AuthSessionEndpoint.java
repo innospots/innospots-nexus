@@ -38,7 +38,8 @@ public interface AuthSessionEndpoint {
             name = "auth.token.refresh",
             label = @I18nLiteral(pairs = {"zh-CN", "刷新访问令牌", "en", "Refresh access token"}),
             recordArgs = false,
-            ignoreAuth = true)
+            ignoreAuth = true,
+            ignorePermission = true)
     @Operation(operationId = "authRefresh", summary = "刷新访问令牌")
     R<AuthTokenVo> refresh(TokenRefreshRequest request);
 
@@ -50,7 +51,8 @@ public interface AuthSessionEndpoint {
             name = "auth.logout",
             label = @I18nLiteral(pairs = {"zh-CN", "登出当前会话", "en", "Logout"}),
             recordArgs = false,
-            auditLog = true)
+            auditLog = true,
+            ignorePermission = true)
     @Operation(operationId = "authLogout", summary = "登出当前会话")
     @SecurityRequirement(name = NexusOpenApiSecurityNames.BEARER_AUTH)
     R<Void> logout();

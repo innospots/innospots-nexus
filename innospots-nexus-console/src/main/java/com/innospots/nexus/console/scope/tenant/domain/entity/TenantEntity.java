@@ -1,6 +1,7 @@
 package com.innospots.nexus.console.scope.tenant.domain.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import jakarta.persistence.Column;
@@ -82,8 +83,12 @@ public class TenantEntity extends BaseEntity {
     private String planCode;
 
     /**
-     * 租户用户域的初始所有者身份。
+     * 初始 Owner 对应的门户用户身份。
+     *
+     * <p>列名在 {@code tenant_user → portal_user} 重命名后固定为
+     * {@code owner_portal_user_id}；Java 字段名沿用历史 API 以保持契约兼容。</p>
      */
     @Column(length = 32)
+    @TableField("owner_portal_user_id")
     private String ownerTenantUserId;
 }

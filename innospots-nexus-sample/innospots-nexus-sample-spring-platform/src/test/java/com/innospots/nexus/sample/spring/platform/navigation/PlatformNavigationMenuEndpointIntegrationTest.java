@@ -272,30 +272,19 @@ class PlatformNavigationMenuEndpointIntegrationTest {
     private void assertNavigationTree(JsonNode menus) {
         assertThat(rootMenuKeys(menus))
                 .as("navigation root menu keys")
-                .containsExactly("platform-user-main", "home", "operations", "system");
+                .containsExactly("platform-user-main", "home", "operations");
         assertMenuTreeShape(menus, new LinkedHashSet<>());
 
         JsonNode operations = findMenuByKey(menus, "operations");
         assertThat(operations).as("operations group").isNotNull();
         assertThat(menuKeys(operations.path("children")))
-                .as("operations children")
-                .containsExactly(
-                        "nav-roles",
-                        "nav-organization-tenants",
-                        "nav-platform-users",
-                        "nav-platform-invites",
-                        "nav-platform-access-requests");
+                .as("operations children are limited to granted pages")
+                .containsExactly("nav-platform-users", "nav-platform-invites", "nav-platform-access-requests");
 
-        JsonNode system = findMenuByKey(menus, "system");
-        assertThat(system).as("system group").isNotNull();
-        assertThat(menuKeys(system.path("children")))
-                .as("system children")
-                .containsExactly(
-                        "nav-system-settings",
-                        "nav-themes",
-                        "nav-plugins",
-                        "nav-audit",
-                        "nav-dictionaries");
+        // system 分组下没有任何已授权页面：整组必须隐藏，避免出现空白入口。
+        assertThat(findMenuByKey(menus, "system"))
+                .as("ungranted system group must stay hidden")
+                .isNull();
     }
 
     private void assertMenuTreeShape(JsonNode menus, Set<String> visitedKeys) {

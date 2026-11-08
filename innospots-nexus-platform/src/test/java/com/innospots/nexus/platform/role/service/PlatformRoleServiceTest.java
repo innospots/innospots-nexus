@@ -50,7 +50,8 @@ class PlatformRoleServiceTest {
                 false,
                 0L,
                 null,
-                null);
+                null,
+                false);
         when(operator.createRole(eq("Ops"), eq("ops"), eq("d"), eq(RoleOwnerType.PLATFORM), isNull()))
                 .thenReturn(vo);
         PlatformRoleService service = new PlatformRoleService(operator);

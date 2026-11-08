@@ -262,12 +262,16 @@ PUT /api/d/platform/roles/{roleId}/permissions
 | 顺序 | Filter | 作用 |
 |------|--------|------|
 | 1 | `ConsoleCorsFilter` | CORS |
-| 2 | `ConsoleResolvedEndpointGrantFilter` | 从资源类/契约方法解析 grant |
-| 3 | `ConsoleAuthenticationFilter` | 公共路径、`ignoreAuth`、Bearer 登录 |
-| 4 | `ConsoleDevSessionFilter` | 仅安全关闭时注入 dev session |
-| 5 | `ConsoleResourcePermissionFilter` | 按操作项键或分组键鉴权 |
-| 6 | `ConsoleRequestContextFilter` | requestId 和线程上下文 |
-| 7 | `ConsoleAuditLogFilter` | 按 grant 记录审计 |
+| 2 | `ConsoleRequestContextFilter` | 请求开始清理线程身份、requestId；响应后清理 |
+| 3 | `ConsoleResolvedEndpointGrantFilter` | 从资源类/契约方法解析 grant |
+| 4 | `ConsoleAuthenticationFilter` | 公共路径、`ignoreAuth`、Bearer 登录 |
+| 5 | `ConsoleDevSessionFilter` | 仅安全关闭时注入 dev session |
+| 6 | `WorkspaceScopeSessionFilter` | 绑定租户/工作区/项目作用域 |
+| 7 | `ConsoleResourcePermissionFilter` | 按操作项键或分组键鉴权 |
+| 8 | `ConsoleAuditLogFilter` | 按 grant 记录审计 |
+
+`ConsoleRequestContextFilter` 必须在鉴权过滤器之前执行并在请求开始时清理会话：异常路径只执行
+「已运行过」过滤器的响应阶段，否则 401/403 会在线程池遗留上一个请求的身份。
 
 新增接口时依次检查：路径是否被 `consolePathPatterns` 覆盖；grant 是否成功解析；
 自助或公开路径是否应命中 `ignoreAuth`；是否只应跳过权限；最终 grant key 是否和

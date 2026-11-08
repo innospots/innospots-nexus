@@ -301,12 +301,16 @@ sequenceDiagram
 | 顺序 | 过滤器 | 优先级 | 作用 |
 |---|---|---|---|
 | 1 | `ConsoleCorsFilter` | `50` | CORS 预检与响应头 |
-| 2 | `ConsoleResolvedEndpointGrantFilter` | `AUTHENTICATION - 100` | 解析资源类/契约方法上的 endpoint grant，并绑定到请求 |
-| 3 | `ConsoleAuthenticationFilter` | `AUTHENTICATION` | 公共路径、skip-auth 分支；其余验证 Bearer |
-| 4 | `ConsoleDevSessionFilter` | `AUTHENTICATION + 10` | 安全关闭时按开发配置绑定会话 |
-| 5 | `ConsoleResourcePermissionFilter` | `AUTHENTICATION + 100` | 对命中的控制台资源和当前主体执行授权 |
-| 6 | `ConsoleRequestContextFilter` | `USER` | 请求 ID、请求上下文 |
-| 7 | `ConsoleAuditLogFilter` | `USER + 100` | 按 endpoint 审计配置记录结果 |
+| 2 | `ConsoleRequestContextFilter` | `AUTHENTICATION - 200` | 请求开始时清理线程身份、分配请求 ID；响应后再次清理 |
+| 3 | `ConsoleResolvedEndpointGrantFilter` | `AUTHENTICATION - 100` | 解析资源类/契约方法上的 endpoint grant，并绑定到请求 |
+| 4 | `ConsoleAuthenticationFilter` | `AUTHENTICATION` | 公共路径、skip-auth 分支；其余验证 Bearer |
+| 5 | `ConsoleDevSessionFilter` | `AUTHENTICATION + 10` | 安全关闭时按开发配置绑定会话 |
+| 6 | `WorkspaceScopeSessionFilter` | `AUTHENTICATION + 50` | 按业务解析器绑定租户/工作区/项目作用域 |
+| 7 | `ConsoleResourcePermissionFilter` | `AUTHENTICATION + 100` | 对命中的控制台资源和当前主体执行授权 |
+| 8 | `ConsoleAuditLogFilter` | `USER + 100` | 按 endpoint 审计配置记录结果 |
+
+> `ConsoleRequestContextFilter` 必须排在鉴权之前：JAX-RS 只执行「已运行过」的请求过滤器的响应阶段，
+> 否则认证/授权过滤器抛出 401/403 时不会清理线程池中的会话，可能泄漏给后续匿名请求。
 
 ### 5.2 认证分支
 

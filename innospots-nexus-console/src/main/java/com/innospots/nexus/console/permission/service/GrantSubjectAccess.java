@@ -8,6 +8,7 @@ import com.innospots.nexus.console.permission.domain.enums.PermissionSubjectType
 import com.innospots.nexus.console.role.dao.RoleDao;
 import com.innospots.nexus.console.role.domain.entity.RoleEntity;
 import com.innospots.nexus.console.role.domain.enums.RoleOwnerType;
+import com.innospots.nexus.console.role.status.RoleStatusCode;
 import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnership;
 import com.innospots.nexus.console.scope.domain.ownership.ConsoleOwnershipScope;
 import com.innospots.nexus.console.support.ConsoleExceptions;
@@ -62,6 +63,41 @@ public final class GrantSubjectAccess {
             return;
         }
         throw ConsoleExceptions.build(NexusStatusCode.INVALID_PARAMETER);
+    }
+
+    /**
+     * 校验授权主体是否允许在管理端变更授权。
+     *
+     * <p>由 {@code console/bootstrap/roles.yaml} 声明的只读角色只能通过修改配置并重启变更，
+     * 管理端不得追加或撤销其授权。</p>
+     *
+     * @param subjectType 授权主体类型
+     * @param subjectId   授权主体 ID
+     * @param ownership   当前归属
+     * @param tenantId    租户 ID（工作区/租户会话）
+     * @param workspaceId 工作区 ID（工作区会话）
+     */
+    public void ensureSubjectGrantMutable(
+            PermissionSubjectType subjectType,
+            String subjectId,
+            ConsoleOwnership ownership,
+            String tenantId,
+            String workspaceId
+    ) {
+        if (subjectType != PermissionSubjectType.ROLE) {
+            return;
+        }
+        RoleEntity role = roleDao.selectOne(ConsoleOwnershipScope.applyRoleListVisibility(
+                Wrappers.<RoleEntity>lambdaQuery().eq(RoleEntity::getRoleId, subjectId),
+                ownership,
+                tenantId,
+                workspaceId));
+        if (role == null) {
+            throw ConsoleExceptions.build(NexusStatusCode.NO_PERMISSION);
+        }
+        if (Boolean.TRUE.equals(role.getReadOnly())) {
+            throw ConsoleExceptions.build(RoleStatusCode.ROLE_READ_ONLY);
+        }
     }
 
     private void ensureRoleInScope(

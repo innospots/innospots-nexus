@@ -23,6 +23,7 @@
     "build:app:test": "node scripts/build.mjs test",
     "start": "next start -p 9011",
     "lint": "eslint",
+    "test": "node tests/run-tests.mjs",
     "build:dev": "npm run build:app:dev",
     "build:test": "npm run build:app:test",
     "build:module": "node scripts/build-module.mjs",

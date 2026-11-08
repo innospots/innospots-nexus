@@ -7,6 +7,7 @@ import com.innospots.nexus.core.setting.domain.entity.SystemSettingEntity;
 import com.innospots.nexus.core.setting.domain.enums.SettingScope;
 import com.innospots.nexus.core.setting.domain.enums.SettingValueType;
 import com.innospots.nexus.core.setting.operator.SystemSettingOperator;
+import com.innospots.nexus.core.setting.support.SettingKey;
 import com.innospots.nexus.core.setting.status.SystemSettingStatusCode;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,6 +47,56 @@ class SystemSettingServiceTest {
                 "registration.mode",
                 SettingValueType.STRING,
                 "INVITE");
+    }
+
+    @Test
+    void getStringOrBootstrapReReadsWhenConcurrentInsertWins() {
+        SystemSettingOperator operator = mock(SystemSettingOperator.class);
+        SystemSettingEntity concurrent = new SystemSettingEntity();
+        concurrent.setSettingValue("INVITE");
+        concurrent.setValueType(SettingValueType.STRING.name());
+        when(operator.find("platform", SettingScope.GLOBAL, null, "registration.mode"))
+                .thenReturn(null, concurrent);
+        when(operator.insert(
+                        "platform",
+                        SettingScope.GLOBAL,
+                        null,
+                        "registration.mode",
+                        SettingValueType.STRING,
+                        "INVITE"))
+                .thenThrow(new IllegalStateException("unique key violation"));
+
+        SystemSettingService service = new SystemSettingService(operator);
+
+        assertThat(service.getStringOrBootstrap(
+                        "platform", SettingScope.GLOBAL, null, "registration.mode", "INVITE"))
+                .isEqualTo("INVITE");
+    }
+
+    @Test
+    void getOrBootstrapReReadsWhenConcurrentInsertWins() {
+        SystemSettingOperator operator = mock(SystemSettingOperator.class);
+        SystemSettingEntity concurrent = new SystemSettingEntity();
+        concurrent.setSettingValue("SIDEBAR");
+        concurrent.setValueType(SettingValueType.STRING.name());
+        when(operator.find("platform", SettingScope.GLOBAL, null, "console.navigation.layout"))
+                .thenReturn(null, concurrent);
+        when(operator.insert(
+                        "platform",
+                        SettingScope.GLOBAL,
+                        null,
+                        "console.navigation.layout",
+                        SettingValueType.STRING,
+                        "DEFAULT"))
+                .thenThrow(new IllegalStateException("unique key violation"));
+
+        SystemSettingService service = new SystemSettingService(operator);
+
+        assertThat(service.getOrBootstrap(
+                        SettingKey.ofString("platform", "console.navigation.layout", SettingScope.GLOBAL),
+                        null,
+                        "DEFAULT"))
+                .isEqualTo("SIDEBAR");
     }
 
     @Test
