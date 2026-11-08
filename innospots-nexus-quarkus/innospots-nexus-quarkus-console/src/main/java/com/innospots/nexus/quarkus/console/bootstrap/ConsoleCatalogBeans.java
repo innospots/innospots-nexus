@@ -4,7 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Singleton;
 
-import com.innospots.nexus.console.catalog.bootstrap.ConsoleCatalogSyncStartupTask;
+import com.innospots.nexus.console.bootstrap.task.CatalogBootstrapTask;
 import com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogService;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogSyncService;
@@ -95,9 +95,8 @@ public class ConsoleCatalogBeans {
      */
     @Produces
     @Singleton
-    ConsoleCatalogSyncStartupTask consoleCatalogSyncStartupTask(
-            ConsoleCatalogSyncService syncService) {
-        return new ConsoleCatalogSyncStartupTask(syncService);
+    CatalogBootstrapTask catalogBootstrapTask(ConsoleCatalogSyncService syncService) {
+        return new CatalogBootstrapTask(syncService);
     }
 
     /**

@@ -74,7 +74,7 @@ class AdminUserEndpointIntegrationTest {
                 Map.of("nx_admin_user", "login_name", "nx_user_credential", "subject_id"));
 
         String platformUserId = jdbcTemplate.queryForObject(
-                "SELECT platform_user_id FROM nx_admin_user WHERE login_name = ?",
+                "SELECT admin_user_id FROM nx_admin_user WHERE login_name = ?",
                 String.class,
                 "it.platform.user");
 
@@ -111,7 +111,7 @@ class AdminUserEndpointIntegrationTest {
         assertThat(disabled.statusCode()).as(disabled.body()).isEqualTo(200);
 
         String status = jdbcTemplate.queryForObject(
-                "SELECT status FROM nx_admin_user WHERE platform_user_id = ?",
+                "SELECT status FROM nx_admin_user WHERE admin_user_id = ?",
                 String.class,
                 platformUserId);
         assertThat(status).isEqualTo("DISABLED");

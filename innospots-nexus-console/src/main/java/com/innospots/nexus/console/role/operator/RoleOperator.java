@@ -110,6 +110,7 @@ public class RoleOperator {
         entity.setStatus(BasicStatus.ENABLED.name());
         entity.setBuiltIn(false);
         entity.setAdministrator(false);
+        entity.setReadOnly(false);
         roleDao.insert(entity);
         log.info("Created role {} with code {}", entity.getRoleId(), entity.getRoleCode());
         return roleConverter.toVo(entity, 0L);
@@ -261,6 +262,11 @@ public class RoleOperator {
     ) {
         RoleEntity entity = requireReadableEntity(roleId, ownership, tenantId, workspaceId);
         ConsoleOwnershipScope.assertRoleWritable(entity, tenantId, ownership);
+        // 由启动配置文件声明的角色不允许在管理端变更/停用/删除，
+        // 必须修改 console/bootstrap/roles.yaml 后重启生效。
+        if (Boolean.TRUE.equals(entity.getReadOnly())) {
+            throw ConsoleExceptions.build(RoleStatusCode.ROLE_READ_ONLY);
+        }
         return entity;
     }
 

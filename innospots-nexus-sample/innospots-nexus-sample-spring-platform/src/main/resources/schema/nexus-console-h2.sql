@@ -208,6 +208,7 @@ CREATE TABLE IF NOT EXISTS nx_permission_grant (
     owner_type             VARCHAR(32) NOT NULL,
     owner_id               VARCHAR(32),
     security_realm         VARCHAR(32) NOT NULL,
+    read_only              BOOLEAN     NOT NULL DEFAULT FALSE,
     created_at             TIMESTAMP,
     updated_at             TIMESTAMP,
     created_by             VARCHAR(64),
@@ -281,6 +282,7 @@ CREATE TABLE IF NOT EXISTS nx_role (
     sort_order      INTEGER          NOT NULL,
     built_in        BOOLEAN   NOT NULL,
     administrator   BOOLEAN   NOT NULL,
+    read_only       BOOLEAN   NOT NULL DEFAULT FALSE,
     created_at      TIMESTAMP,
     updated_at      TIMESTAMP,
     created_by      VARCHAR(64),
@@ -290,7 +292,12 @@ CREATE TABLE IF NOT EXISTS nx_role (
 );
 
 CREATE INDEX IF NOT EXISTS idx_nx_role_owner_status ON nx_role (owner_type, owner_id, status);
-
 CREATE INDEX IF NOT EXISTS idx_nx_role_name ON nx_role (role_name);
 
 CREATE INDEX IF NOT EXISTS idx_nx_role_realm ON nx_role (security_realm);
+
+-- 只读标记：由 classpath 配置（console/bootstrap/roles.yaml）同步的角色与授权，
+-- 不允许在管理端删除、改权限或下线，只能通过配置文件修改后重启生效。
+ALTER TABLE nx_role ADD COLUMN IF NOT EXISTS read_only BOOLEAN NOT NULL DEFAULT FALSE;
+
+ALTER TABLE nx_permission_grant ADD COLUMN IF NOT EXISTS read_only BOOLEAN NOT NULL DEFAULT FALSE;

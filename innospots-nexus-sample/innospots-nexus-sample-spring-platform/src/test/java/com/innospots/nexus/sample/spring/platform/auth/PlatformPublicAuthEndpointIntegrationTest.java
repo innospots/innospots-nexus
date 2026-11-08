@@ -101,8 +101,9 @@ class PlatformPublicAuthEndpointIntegrationTest {
         jdbcTemplate.update(
                 """
                 INSERT INTO nx_admin_user (
-                    platform_user_id, login_name, display_name, status, created_at, updated_at
-                ) VALUES ('it-public-login-user-01', ?, 'IT Public Login', 'ACTIVE',
+                    admin_user_id, security_realm, login_name, display_name, status,
+                    created_at, updated_at
+                ) VALUES ('it-public-login-user-01', 'PLATFORM', ?, 'IT Public Login', 'ACTIVE',
                     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
                 """,
                 LOGIN_NAME);

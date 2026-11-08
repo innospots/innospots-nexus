@@ -188,6 +188,7 @@ CREATE TABLE IF NOT EXISTS nx_permission_grant (
     owner_type             VARCHAR(32) NOT NULL,
     owner_id               VARCHAR(32),
     security_realm         VARCHAR(32) NOT NULL,
+    read_only              TINYINT(1)  NOT NULL DEFAULT 0,
     created_at             DATETIME(6),
     updated_at             DATETIME(6),
     created_by             VARCHAR(64),
@@ -229,6 +230,7 @@ CREATE TABLE IF NOT EXISTS nx_role (
     sort_order      INT          NOT NULL,
     built_in        TINYINT(1)   NOT NULL,
     administrator   TINYINT(1)   NOT NULL,
+    read_only       TINYINT(1)   NOT NULL DEFAULT 0,
     created_at      DATETIME(6),
     updated_at      DATETIME(6),
     created_by      VARCHAR(64),
@@ -239,3 +241,14 @@ CREATE TABLE IF NOT EXISTS nx_role (
     KEY idx_nx_role_name (role_name),
     KEY idx_nx_role_realm (security_realm)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+-- ---------------------------------------------------------------------------
+-- 增量升级：只读标记（已有库执行）
+--
+-- 由 classpath 配置 console/bootstrap/roles.yaml 同步的角色与授权会写入
+-- read_only = 1，管理端不允许删除、改授权或下线，只能改配置文件后重启生效。
+-- 新建库无需执行，上面的 CREATE TABLE 已包含该列；重复执行会因列已存在而报错，
+-- 可用下面的存储过程形式做幂等判断。
+-- ---------------------------------------------------------------------------
+
+-- ALTER TABLE nx_role ADD COLUMN read_only TINYINT(1) NOT NULL DEFAULT 0;
+-- ALTER TABLE nx_permission_grant ADD COLUMN read_only TINYINT(1) NOT NULL DEFAULT 0;

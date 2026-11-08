@@ -1,0 +1,85 @@
+# 角色与资源授权初始化清单
+#
+# 用途：管理端未启用时，由本文件完成角色与资源授权初始化。
+#       这是角色与授权的唯一初始化来源——不再使用 data/*.sql 写入。
+# 加载：服务启动时读取服务端 classpath 中的 console/bootstrap/roles.yaml（唯一一份），
+#       不跨模块或插件 jar 合并；文件缺失视为未配置，启动跳过。
+# 校验：同一文件内 roleCode 不允许重复，重复即启动失败。
+#
+# 只读约束：由本文件声明的角色与授权会写入 read_only = true，
+#           管理端不允许删除、变更授权或下线，只能修改本文件后重启生效。
+# 移除语义：从本文件删除的角色/授权不会自动从数据库删除，需手工清理。
+#
+# grants 结构：按 domain + module 聚合，grantGroups 用列表一次列出该模块的全部分组。
+# 落库键为 domain.module:grantGroup，例如 system.settings:view。
+# 所有分组必须存在于权限目录的 viewGroups / operationGroups 中，否则启动报 CONFIG_ERROR。
+
+roles:
+  - roleCode: sys_admin
+    roleName: 系统管理员
+    nameEn: System Administrator
+    description: 平台内置系统管理员，拥有全部管理能力
+    ownerType: PLATFORM
+    administrator: true
+    sortOrder: 10
+    grants:
+      - domain: system
+        module: settings
+        grantGroups: [view, operate, update]
+      - domain: system
+        module: theme
+        grantGroups: [view, operate, update]
+      - domain: system
+        module: logger
+        grantGroups: [view, operate]
+      - domain: system
+        module: dictionary
+        grantGroups: [view, operate, create, update, delete, status]
+      - domain: system
+        module: plugin
+        grantGroups: [view, operate]
+      - domain: operation
+        module: role
+        grantGroups: [view, operate, create, update, delete, status]
+      - domain: operation
+        module: user
+        grantGroups: [view, operate, create, update, delete, status, execute]
+      - domain: operation
+        module: organization
+        grantGroups: [view, operate, create, update, status, assign, revoke]
+
+  - roleCode: operator
+    roleName: 系统运营
+    nameEn: System Operator
+    description: 平台内置运营角色，负责用户、角色与组织维护
+    ownerType: PLATFORM
+    administrator: false
+    sortOrder: 20
+    grants:
+      - domain: operation
+        module: role
+        grantGroups: [view, operate, create, update, delete, status]
+      - domain: operation
+        module: user
+        grantGroups: [view, operate, create, update, delete, status, execute]
+      - domain: operation
+        module: organization
+        grantGroups: [view, operate, create, update, status, assign, revoke]
+
+  - roleCode: user
+    roleName: 普通用户
+    nameEn: Standard User
+    description: 平台内置只读角色
+    ownerType: PLATFORM
+    administrator: false
+    sortOrder: 30
+    grants:
+      - domain: operation
+        module: role
+        grantGroups: [view]
+      - domain: operation
+        module: user
+        grantGroups: [view]
+      - domain: operation
+        module: organization
+        grantGroups: [view]

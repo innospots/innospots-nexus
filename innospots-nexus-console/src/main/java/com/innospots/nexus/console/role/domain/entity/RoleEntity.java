@@ -74,4 +74,13 @@ public class RoleEntity extends BaseEntity {
 
     @Column(nullable = false)
     private Boolean administrator;
+
+    /**
+     * 是否由启动配置文件声明。
+     *
+     * <p>只读角色不允许在管理端删除、改名、改名编码或停用；任何变更都必须修改
+     * classpath 下的角色授权配置文件后重启生效。</p>
+     */
+    @Column(nullable = false)
+    private Boolean readOnly;
 }

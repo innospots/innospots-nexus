@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Import;
 
 import com.innospots.nexus.spring.console.EnableNexusConsole;
 import com.innospots.nexus.spring.platform.config.PlatformAuthConfiguration;
+import com.innospots.nexus.spring.platform.config.PlatformBootstrapConfiguration;
 import com.innospots.nexus.spring.platform.config.PlatformDictionaryConfiguration;
 import com.innospots.nexus.spring.platform.config.PlatformLoggerConfiguration;
 import com.innospots.nexus.spring.platform.config.PlatformNavigationConfiguration;
@@ -44,7 +45,8 @@ import com.innospots.nexus.spring.platform.config.PlatformUserConfiguration;
         PlatformNavigationConfiguration.class,
         PlatformOrganizationConfiguration.class,
         PlatformProvisioningConfiguration.class,
-        PlatformSettingsConfiguration.class
+        PlatformSettingsConfiguration.class,
+        PlatformBootstrapConfiguration.class
 })
 public @interface EnableNexusPlatform {
 }

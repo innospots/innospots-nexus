@@ -97,10 +97,23 @@ public class PermissionGrantService {
             PermissionGrantReplaceRequest request,
             ConsoleOwnership ownership
     ) {
+        // 只读授权由启动配置声明，管理端不可撤销：先取出后跳过删除，
+        // 否则全量替换会把配置声明的授权一并清掉。
+        List<String> readOnlyGrantKeys = grantDao
+                .selectList(grantScopeQuery(subjectType, subjectId, ownership))
+                .stream()
+                .filter(grant -> Boolean.TRUE.equals(grant.getReadOnly()))
+                .map(PermissionGrantEntity::getGrantKey)
+                .toList();
         // 全量替换保证撤销的资源不会残留，同时事务保证删除和新增一起提交。
-        grantDao.delete(grantScopeQuery(subjectType, subjectId, ownership));
+        grantDao.delete(grantScopeQuery(subjectType, subjectId, ownership)
+                .ne(PermissionGrantEntity::getReadOnly, true));
         Map<String, PermissionGrantKeyType> grantKeyTypes = catalogService.grantKeyTypes();
         for (PermissionGrantItemRequest item : request.grants()) {
+            if (readOnlyGrantKeys.contains(item.resourceKey())) {
+                // 已由配置保留，避免唯一键冲突。
+                continue;
+            }
             PermissionGrantKeyType keyType = grantKeyTypes.get(item.resourceKey());
             if (keyType == null) {
                 invalid("Unknown permission resource: " + item.resourceKey());
@@ -112,6 +125,7 @@ public class PermissionGrantService {
             grant.setGrantKey(item.resourceKey());
             grant.setGrantKeyType(keyType.code());
             grant.setConstraintDefinition(normalizeConstraint(item.constraintDefinition()));
+            grant.setReadOnly(false);
             grantDao.insert(grant);
         }
     }

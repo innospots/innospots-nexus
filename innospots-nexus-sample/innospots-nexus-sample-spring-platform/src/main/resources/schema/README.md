@@ -10,10 +10,26 @@
 | 2 | DDL | `schema/nexus-plugin-h2.sql` | 插件安装表 |
 | 3 | DDL | `schema/nexus-console-h2.sql` | 控制台 catalog、角色、授权、字典、审计、菜单、凭据 |
 | 4 | DDL | `schema/nexus-platform-h2.sql` | 平台租户、用户、邀请、注册审批 |
-| 5 | DML | `data/nexus-platform-seed-h2.sql` | 演示角色/用户/BCrypt 凭据/角色绑定（仅 local） |
-| 6 | DML | `data/nexus-platform-seed-permission-grants-h2.sql` | 演示角色 catalog 资源授权（`nx_permission_grant`） |
+| 5 | YAML | `console/bootstrap/roles.yaml` | 角色定义 + 角色资源授权（启动管线加载，非 SQL） |
+| 6 | YAML | `console/bootstrap/users.yaml` | 初始后台用户 + 用户角色绑定（启动管线加载，非 SQL） |
 
-MySQL 权威 DDL 见仓库 `docs/schema/mysql/`；演示 DML 见 `docs/schema/mysql/nexus-platform-seed-mysql.sql` 与 `nexus-platform-seed-permission-grants-mysql.sql`。
+MySQL 权威 DDL 见仓库 `docs/schema/mysql/`。
+
+## 初始化数据不再使用 SQL
+
+角色、角色授权、后台用户与用户角色绑定**不再**由 `data/*.sql` 写入，改由 classpath
+YAML 提供，并在服务启动时由 `console.bootstrap` 管线按依赖顺序同步：
+
+```
+nx_console_catalog_resource → nx_role → nx_permission_grant → nx_admin_user → nx_role_binding
+      (catalog, 200)          (role, 210)    (role-grant, 220)      (user, 230)  (binding, 240)
+```
+
+- 顺序固定不可调换：授权校验依赖目录索引，绑定依赖已存在的角色与用户；
+- 两个 YAML 均由服务端提供唯一一份，不跨模块合并；文件内 `roleCode` / `loginName` 重复会启动失败；
+- 由 YAML 同步的角色与授权写入 `read_only = true`，管理端不可删除/改授权/下线，
+  只能改配置文件后重启生效；
+- 用户以 `loginName` 判重，已存在则整体跳过（不重置密码、不改角色绑定）。
 
 ## DDL 分文件职责
 
@@ -46,7 +62,7 @@ MySQL 权威 DDL 见仓库 `docs/schema/mysql/`；演示 DML 见 `docs/schema/my
 - `nx_admin_user_oauth`
 - `nx_pl_invite` / `nx_pl_access_request`
 
-## 演示账号（DML 种子）
+## 演示账号（`console/bootstrap/users.yaml`）
 
 | 登录名 | 明文密码（仅联调） | 邮箱 | 角色 code |
 |--------|-------------------|------|-----------|

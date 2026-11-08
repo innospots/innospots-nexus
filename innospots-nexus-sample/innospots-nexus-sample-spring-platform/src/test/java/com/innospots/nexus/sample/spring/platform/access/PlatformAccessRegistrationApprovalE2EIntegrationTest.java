@@ -103,7 +103,7 @@ class PlatformAccessRegistrationApprovalE2EIntegrationTest {
         assertThat(submitted.statusCode()).as(submitted.body()).isEqualTo(200);
         assertThat(submitted.body()).contains("PENDING_APPROVAL");
         String accessRequestId = extractJsonStringField(submitted.body(), "accessRequestId");
-        String pendingUserId = extractJsonStringField(submitted.body(), "platformUserId");
+        String pendingUserId = extractJsonStringField(submitted.body(), "adminUserId");
         PlatformDatabaseJsonSnapshot.logAndPersist(
                 jdbcTemplate,
                 OUTPUT_DIR,

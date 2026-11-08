@@ -12,6 +12,8 @@ import com.innospots.nexus.spring.console.config.ConsoleCatalogConfiguration;
 import com.innospots.nexus.spring.console.config.ConsoleDictionaryConfiguration;
 import com.innospots.nexus.spring.console.config.ConsoleMenuConfiguration;
 import com.innospots.nexus.spring.console.config.ConsolePluginConfiguration;
+import com.innospots.nexus.spring.console.config.ConsolePluginConfiguration;
+import com.innospots.nexus.spring.console.config.ConsoleRoleBootstrapConfiguration;
 import com.innospots.nexus.spring.core.plugin.EnableNexusPluginHost;
 
 /**
@@ -30,7 +32,8 @@ import com.innospots.nexus.spring.core.plugin.EnableNexusPluginHost;
         ConsolePluginConfiguration.class,
         ConsoleCatalogConfiguration.class,
         ConsoleMenuConfiguration.class,
-        ConsoleDictionaryConfiguration.class
+        ConsoleDictionaryConfiguration.class,
+        ConsoleRoleBootstrapConfiguration.class
 })
 public @interface EnableNexusConsole {
 }

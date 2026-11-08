@@ -57,6 +57,15 @@ public class PermissionGrantEntity extends OwnershipEntity {
     @Column(columnDefinition = "text")
     private String constraintDefinition;
 
+    /**
+     * 是否由启动配置文件声明。
+     *
+     * <p>只读授权不允许在管理端撤销；任何变更都必须修改 classpath 下的角色授权
+     * 配置文件后重启生效。</p>
+     */
+    @Column(nullable = false)
+    private Boolean readOnly;
+
     @Override
     public String idPrefix() {
         return "PGR";

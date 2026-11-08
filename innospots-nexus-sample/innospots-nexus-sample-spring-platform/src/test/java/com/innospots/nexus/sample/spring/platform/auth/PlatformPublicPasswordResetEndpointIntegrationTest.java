@@ -73,8 +73,9 @@ class PlatformPublicPasswordResetEndpointIntegrationTest {
         jdbcTemplate.update(
                 """
                 INSERT INTO nx_admin_user (
-                    platform_user_id, login_name, display_name, email, status, created_at, updated_at
-                ) VALUES (?, 'it.reset.user', 'IT Reset User', ?, 'ACTIVE',
+                    admin_user_id, security_realm, login_name, display_name, email, status,
+                    created_at, updated_at
+                ) VALUES (?, 'PLATFORM', 'it.reset.user', 'IT Reset User', ?, 'ACTIVE',
                     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
                 """,
                 USER_ID,

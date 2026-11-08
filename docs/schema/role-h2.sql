@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS nx_role (
     sort_order      INTEGER          NOT NULL,
     built_in        BOOLEAN   NOT NULL,
     administrator   BOOLEAN   NOT NULL,
+    read_only       BOOLEAN   NOT NULL DEFAULT FALSE,
     created_at      TIMESTAMP,
     updated_at      TIMESTAMP,
     created_by      VARCHAR(64),

@@ -17,12 +17,13 @@ import com.innospots.nexus.spring.console.support.EnableImportResolver;
 import com.innospots.nexus.spring.core.bootstrap.NexusPersistenceConfiguration;
 import com.innospots.nexus.spring.core.plugin.PluginHostConfiguration;
 import com.innospots.nexus.spring.core.plugin.PluginHostStartupConfiguration;
+import com.innospots.nexus.spring.console.config.ConsoleRoleBootstrapConfiguration;
 import com.innospots.nexus.spring.core.setting.NexusSystemSettingConfiguration;
 
 class ConsoleEnableImportsTest {
 
     @Test
-    void simpleConsole_includesCoreDomainsWithoutCatalogPluginMenuDictionary() {
+    void simpleConsole_includesCoreDomainsWithoutCatalogPluginDictionary() {
         Set<Class<?>> imported = EnableImportResolver.resolveImportedConfigurationTypes(
                 EnableNexusSimpleConsole.class);
 
@@ -31,13 +32,14 @@ class ConsoleEnableImportsTest {
                 NexusSystemSettingConfiguration.class,
                 ConsoleAuthConfiguration.class,
                 ConsoleRoleConfiguration.class,
-                ConsoleI18nConfiguration.class);
+                ConsoleI18nConfiguration.class,
+                // 菜单持久化属于基础能力，simple console 也提供。
+                ConsoleMenuConfiguration.class);
         assertThat(imported).doesNotContain(
                 PluginHostConfiguration.class,
                 PluginHostStartupConfiguration.class,
                 ConsolePluginConfiguration.class,
                 ConsoleCatalogConfiguration.class,
-                ConsoleMenuConfiguration.class,
                 ConsoleDictionaryConfiguration.class);
     }
 
@@ -53,6 +55,8 @@ class ConsoleEnableImportsTest {
                 ConsolePluginConfiguration.class,
                 ConsoleCatalogConfiguration.class,
                 ConsoleMenuConfiguration.class,
-                ConsoleDictionaryConfiguration.class);
+                ConsoleDictionaryConfiguration.class,
+                // 角色授权启动引导依赖目录索引，只在完整控制台装配。
+                ConsoleRoleBootstrapConfiguration.class);
     }
 }

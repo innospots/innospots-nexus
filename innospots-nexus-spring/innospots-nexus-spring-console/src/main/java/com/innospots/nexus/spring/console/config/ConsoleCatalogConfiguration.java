@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
-import com.innospots.nexus.console.catalog.bootstrap.ConsoleCatalogSyncStartupTask;
+import com.innospots.nexus.console.bootstrap.task.CatalogBootstrapTask;
 import com.innospots.nexus.console.catalog.dao.ConsoleCatalogResourceDao;
 import com.innospots.nexus.console.catalog.endpoint.ConsoleCatalogEndpoint;
 import com.innospots.nexus.console.catalog.service.ConsoleCatalogService;
@@ -62,9 +62,8 @@ public class ConsoleCatalogConfiguration {
     }
 
     @Bean
-    ConsoleCatalogSyncStartupTask consoleCatalogSyncStartupTask(
-            ConsoleCatalogSyncService syncService) {
-        return new ConsoleCatalogSyncStartupTask(syncService);
+    CatalogBootstrapTask catalogBootstrapTask(ConsoleCatalogSyncService syncService) {
+        return new CatalogBootstrapTask(syncService);
     }
 
     @Bean

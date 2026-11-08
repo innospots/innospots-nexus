@@ -12,6 +12,8 @@ public enum RoleStatusCode implements StatusCode {
     ROLE_NOT_FOUND("0001", StatusCategory.RESOURCE_DATA, "Role was not found", 404),
     ROLE_CODE_DUPLICATED("0002", StatusCategory.DATA_CONSISTENCY, "Role code already exists", 409),
     ROLE_PROTECTED("0003", StatusCategory.PERMISSION_SECURITY, "Built-in role cannot be deleted", 403),
+    ROLE_READ_ONLY("0006", StatusCategory.PERMISSION_SECURITY,
+            "Role is declared by startup configuration and cannot be changed", 403),
     ROLE_BINDING_NOT_FOUND("0004", StatusCategory.RESOURCE_DATA, "Role binding was not found", 404),
     INVALID_ROLE_OWNER("0005", StatusCategory.CONFIGURATION, "Role owner is invalid", 400);
 

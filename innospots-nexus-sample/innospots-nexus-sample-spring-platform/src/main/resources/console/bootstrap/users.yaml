@@ -1,0 +1,47 @@
+# 初始后台用户清单
+#
+# 用途：服务启动时初始化后台用户及其角色，适用于全新部署或管理端尚未开放时。
+#       这是后台用户初始化的唯一来源——不再使用 data/*.sql 写入用户、角色与授权。
+# 加载：服务启动时读取服务端 classpath 中的 console/bootstrap/users.yaml（唯一一份），
+#       不跨模块或插件 jar 合并。enabled: false 即整体关闭用户同步；缺省视为 true。
+#
+# 执行顺序（由 console.bootstrap 管线保证）：
+#   资源目录 → 角色 → 角色授权 → 用户 → 用户角色绑定
+# 因此这里引用的 roleCodes 一定已经被 roles.yaml 创建。
+#
+# 幂等语义：后台用户只能下线、不能删除，因此同步以 loginName 为唯一判据——
+#           只要该登录名已存在就整体跳过，不重置密码、不改角色绑定，
+#           避免覆盖运营人员在管理端做的手工调整。
+#
+# 初始密码：当前为明文，仅供首次创建时写入 BCrypt 哈希。
+#           生产环境应改为外部密钥注入，并首次登录强制改密。
+#
+# 演示账号：admin/Admin12345、user01/User12345、opt01/Opt12345
+
+enabled: true
+
+users:
+  - loginName: admin
+    displayName: Admin
+    email: admin@demo.com
+    mobile: "13800000000"
+    password: Admin12345
+    securityRealm: PLATFORM
+    roleCodes:
+      - sys_admin
+
+  - loginName: user01
+    displayName: User01
+    email: user01@demo.com
+    password: User12345
+    securityRealm: PLATFORM
+    roleCodes:
+      - user
+
+  - loginName: opt01
+    displayName: Opt01
+    email: opt01@demo.com
+    password: Opt12345
+    securityRealm: PLATFORM
+    roleCodes:
+      - operator

@@ -105,10 +105,11 @@ public final class PlatformIntegrationTestSupport {
                 """
                 INSERT INTO nx_role (
                     role_id, role_name, role_code, owner_type, owner_id, security_realm,
-                    description, status, sort_order, built_in, administrator, created_at, updated_at
+                    description, status, sort_order, built_in, administrator, read_only,
+                    created_at, updated_at
                 ) VALUES (
                     ?, 'IT Platform Admin', ?, 'PLATFORM', NULL, 'PLATFORM',
-                    'integration test bootstrap', 'ENABLED', 0, FALSE, TRUE,
+                    'integration test bootstrap', 'ENABLED', 0, FALSE, TRUE, FALSE,
                     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
                 )
                 """,
@@ -213,12 +214,12 @@ public final class PlatformIntegrationTestSupport {
         jdbcTemplate.update(
                 "DELETE FROM nx_user_credential WHERE subject_id = ? AND security_realm = 'PLATFORM'",
                 DEV_PLATFORM_USER_ID);
-        jdbcTemplate.update("DELETE FROM nx_admin_user WHERE platform_user_id = ?", DEV_PLATFORM_USER_ID);
+        jdbcTemplate.update("DELETE FROM nx_admin_user WHERE admin_user_id = ?", DEV_PLATFORM_USER_ID);
         jdbcTemplate.update(
                 """
                 INSERT INTO nx_admin_user (
-                    platform_user_id, login_name, display_name, status, created_at, updated_at
-                ) VALUES (?, 'dev', 'Dev', 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                    admin_user_id, security_realm, login_name, display_name, status, created_at, updated_at
+                ) VALUES (?, 'PLATFORM', 'dev', 'Dev', 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
                 """,
                 DEV_PLATFORM_USER_ID);
         credentialService.enrollPassword(SecurityRealm.PLATFORM, DEV_PLATFORM_USER_ID, rawPassword);
@@ -228,8 +229,8 @@ public final class PlatformIntegrationTestSupport {
         jdbcTemplate.update(
                 """
                 INSERT INTO nx_admin_user (
-                    platform_user_id, login_name, display_name, status, created_at, updated_at
-                ) VALUES (?, ?, ?, 'PENDING_APPROVAL', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                    admin_user_id, security_realm, login_name, display_name, status, created_at, updated_at
+                ) VALUES (?, 'PLATFORM', ?, ?, 'PENDING_APPROVAL', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
                 """,
                 platformUserId,
                 loginName,
@@ -245,7 +246,7 @@ public final class PlatformIntegrationTestSupport {
         jdbcTemplate.update(
                 """
                 INSERT INTO nx_pl_access_request (
-                    access_request_id, applicant_name, login_name, platform_user_id, status,
+                    access_request_id, applicant_name, login_name, admin_user_id, status,
                     created_at, updated_at
                 ) VALUES (?, ?, ?, ?, 'PENDING_APPROVAL', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
                 """,

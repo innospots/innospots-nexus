@@ -21,6 +21,6 @@ spring:
         - classpath:schema/nexus-plugin-h2.sql
         - classpath:schema/nexus-console-h2.sql
         - classpath:schema/nexus-platform-h2.sql
-      data-locations:
-        - classpath:data/nexus-platform-seed-h2.sql
-        - classpath:data/nexus-platform-seed-permission-grants-h2.sql
+      # 不再使用 SQL 种子初始化角色、授权与用户：
+      # 全部由 console/bootstrap/{roles,users}.yaml + console.bootstrap 启动管线完成，
+      # 顺序为 资源目录 → 角色 → 角色授权 → 用户 → 用户角色绑定。
