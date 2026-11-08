@@ -43,6 +43,11 @@
         <mapstruct.version>1.6.3</mapstruct.version>
         <smallrye-open-api-maven-plugin.version>4.3.5</smallrye-open-api-maven-plugin.version>
         <jandex-maven-plugin.version>3.3.1</jandex-maven-plugin.version>
+        <!--
+          JAX-RS 实现版本：生产由 spring-boot-starter-jersey 提供；
+          framework-neutral 模块的测试需要它来装配 RuntimeDelegate（构造 Response 等）。
+        -->
+        <jersey.version>4.0.2</jersey.version>
     </properties>
 
     <dependencyManagement>

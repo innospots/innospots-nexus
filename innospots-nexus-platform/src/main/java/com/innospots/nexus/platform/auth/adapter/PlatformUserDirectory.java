@@ -47,7 +47,7 @@ public class PlatformUserDirectory implements UserDirectory {
 
     private static AuthUser toAuthUser(AdminUserEntity user, String loginName) {
         return new AuthUser(
-                user.getPlatformUserId(),
+                user.getAdminUserId(),
                 loginName,
                 user.getStatus(),
                 SecurityRealm.PLATFORM);

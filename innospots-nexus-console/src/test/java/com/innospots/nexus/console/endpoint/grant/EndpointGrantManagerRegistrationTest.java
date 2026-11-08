@@ -1,4 +1,4 @@
-package com.innospots.nexus.core.endpoint.grant;
+package com.innospots.nexus.console.endpoint.grant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import java.lang.reflect.Method;
@@ -27,6 +27,12 @@ import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypeUpdat
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeOptionVo;
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeVo;
 import com.innospots.nexus.console.dictionary.endpoint.DictionaryTypeEndpoint;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrant;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrantDescriptor;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrantManager;
+import com.innospots.nexus.core.endpoint.grant.EndpointModule;
+import com.innospots.nexus.core.endpoint.grant.EndpointModuleGrantCatalog;
 import com.innospots.nexus.core.endpoint.grant.I18nLiteral;
 
 /**

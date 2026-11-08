@@ -130,7 +130,7 @@ public class PlatformInviteService {
                 entity.getExpiresAt(),
                 entity.getInviteCode(),
                 inviteLinkBuilder.buildInviteLink(entity.getInviteToken()),
-                entity.getPlatformUserId(),
+                entity.getAdminUserId(),
                 entity.getAcceptedAt(),
                 entity.getCreatedAt());
     }

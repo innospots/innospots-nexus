@@ -33,13 +33,13 @@ class PlatformPublicAuthEndpointContractsTest {
                         .getAnnotation(Operation.class)
                         .operationId())
                 .isEqualTo("authLogin");
-        assertThat(PlatformPublicAuthEndpoint.class.getMethod("login", AuthLoginRequest.class)
-                        .getAnnotation(Operation.class)
-                        .operationId())
-                .isEqualTo("platformAuthLogin");
-        assertThat(PlatformPublicAuthEndpoint.class.getMethod("login", AuthLoginRequest.class)
-                        .getAnnotation(POST.class))
-                .isNotNull();
+        /*
+         * 实现类只写 @Override，不重复接口注解 —— 这是仓库统一约定
+         * （见 PlatformStandaloneEndpointGrantContractsTest
+         * #consoleContractImplementationsDoNotRepeatInterfaceMethodAnnotations）。
+         * 因此这里不再断言实现类方法上的 @Operation；HTTP 路由与 operationId
+         * 统一由 console 契约接口承载。
+         */
         assertThat(PublicAuthEndpoint.class.getMethod("login", AuthLoginRequest.class)
                         .getAnnotation(POST.class))
                 .isNotNull();

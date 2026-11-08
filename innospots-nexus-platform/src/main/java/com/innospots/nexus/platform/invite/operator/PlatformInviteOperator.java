@@ -132,11 +132,11 @@ public class PlatformInviteOperator {
     }
 
     @Transactional
-    public void markAccepted(PlatformInviteEntity entity, String platformUserId) {
+    public void markAccepted(PlatformInviteEntity entity, String adminUserId) {
         ensurePending(entity);
         entity.setStatus(PlatformInviteStatus.ACCEPTED.name());
         entity.setAcceptedAt(LocalDateTime.now());
-        entity.setPlatformUserId(platformUserId);
+        entity.setAdminUserId(adminUserId);
         inviteDao.updateById(entity);
     }
 

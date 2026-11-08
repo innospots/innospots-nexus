@@ -11,7 +11,7 @@ public record PlatformAccessRequestVo(
         @Schema(description = "登录名")
         String loginName,
         @Schema(description = "平台用户 ID")
-        String platformUserId,
+        String adminUserId,
         @Schema(description = "申请人姓名")
         String applicantName,
         @Schema(description = "邮箱")

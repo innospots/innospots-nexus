@@ -105,7 +105,7 @@ public class PlatformPublicInviteService {
      *
      * @param token   邀请令牌
      * @param request 设密与可选 OTP、登录名
-     * @return 新或关联的 {@code platformUserId}
+     * @return 新或关联的 {@code adminUserId}
      */
     @Transactional
     public String acceptInvite(String token, PlatformInviteAcceptRequest request) {
@@ -121,20 +121,20 @@ public class PlatformPublicInviteService {
         if (invite.deliveryModeEnum() == PlatformInviteDeliveryMode.ONLINE) {
             verifyInviteAcceptCode(invite, request.verificationCode());
         }
-        String platformUserId = completeInviteActivation(invite, request.loginName(), request.encryptedPassword());
+        String adminUserId = completeInviteActivation(invite, request.loginName(), request.encryptedPassword());
         log.info(
-                "traceId={} platform invite accept completed inviteId={} platformUserId={}",
+                "traceId={} platform invite accept completed inviteId={} adminUserId={}",
                 traceId,
                 invite.getInviteId(),
-                platformUserId);
-        return platformUserId;
+                adminUserId);
+        return adminUserId;
     }
 
     /**
      * 注册页凭邀请码开通（要求当前 {@link PlatformRegistrationMode#INVITE}）。
      *
      * @param request 邀请码、联系方式校验与设密
-     * @return {@code platformUserId}
+     * @return {@code adminUserId}
      */
     @Transactional
     public String activateByInviteCode(PlatformInviteActivateByCodeRequest request) {
@@ -152,13 +152,13 @@ public class PlatformPublicInviteService {
                 RequestTrace.safeLogin(request.loginName()),
                 RequestTrace.describeContactValue(request.contact()));
         assertContactMatches(invite, request.contact());
-        String platformUserId = completeInviteActivation(invite, request.loginName(), request.encryptedPassword());
+        String adminUserId = completeInviteActivation(invite, request.loginName(), request.encryptedPassword());
         log.info(
-                "traceId={} platform invite code activate completed inviteId={} platformUserId={}",
+                "traceId={} platform invite code activate completed inviteId={} adminUserId={}",
                 traceId,
                 invite.getInviteId(),
-                platformUserId);
-        return platformUserId;
+                adminUserId);
+        return adminUserId;
     }
 
     /**
@@ -175,9 +175,9 @@ public class PlatformPublicInviteService {
                 invite.getEmail(),
                 invite.getMobile(),
                 rawPassword);
-        platformUserRoleProvisioner.assignDefaultRolesIfPresent(user.platformUserId(), invite.getDefaultRoleCodes());
-        inviteOperator.markAccepted(invite, user.platformUserId());
-        return user.platformUserId();
+        platformUserRoleProvisioner.assignDefaultRolesIfPresent(user.adminUserId(), invite.getDefaultRoleCodes());
+        inviteOperator.markAccepted(invite, user.adminUserId());
+        return user.adminUserId();
     }
 
     private void verifyInviteAcceptCode(PlatformInviteEntity invite, String verificationCode) {

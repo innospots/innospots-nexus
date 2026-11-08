@@ -34,6 +34,14 @@ public class ConsoleAuthProperties {
     /** 登录是否要求图形验证码。 */
     private boolean loginCaptchaEnabled = true;
 
+    /**
+     * 是否把登录图形验证码明文写入 INFO 日志（仅本地/联调）。
+     *
+     * <p>与 {@code nexus.console.registration.otp.debug-log-enabled} 无关：
+     * 后者只覆盖注册时的邮件/短信验证码。</p>
+     */
+    private boolean loginCaptchaDebugLogEnabled = false;
+
     /** 连续登录失败多少次后锁定账号。 */
     private int loginMaxFailedAttempts = 5;
 

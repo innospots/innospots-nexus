@@ -187,4 +187,46 @@ class CaptchaChallengeServiceTest {
     private OtpChallengeService newService() {
         return new OtpChallengeService(mockDao(), new OtpPolicy(6, Duration.ofMinutes(5), Duration.ZERO, 5));
     }
+
+    /**
+     * 登录图形验证码与注册邮件/短信 OTP 是两条独立链路：
+     * 图形验证码不进事件总线，因此必须由 {@code CaptchaChallengeService} 自己的开关
+     * 决定是否输出明文，供本地联调排查。
+     */
+    @Test
+    void debugLogSwitchDoesNotAffectIssuedChallenge() {
+        CaptchaChallengeService withDebug = new CaptchaChallengeService(newService(), true);
+        CaptchaIssueResult issued = withDebug.issue(new CaptchaIssueCommand(
+                SecurityRealm.TENANT,
+                OtpPurpose.LOGIN_STEP_UP,
+                "client-debug",
+                null));
+
+        // 开关只影响日志输出，不改变发放结果与校验行为。
+        assertThat(issued.challengeId()).isNotBlank();
+        assertThat(issued.imageBase64()).isNotBlank();
+        assertThat(withDebug.verify(new CaptchaVerifyCommand(
+                SecurityRealm.TENANT, OtpPurpose.LOGIN_STEP_UP, "client-debug", "wrong-code")))
+                .isFalse();
+    }
+
+    @Test
+    void captchaNeverPublishesOtpSendEventRegardlessOfDebugSwitch() {
+        CaptchaChallengeService withDebug = new CaptchaChallengeService(newService(), true);
+        withDebug.issue(new CaptchaIssueCommand(
+                SecurityRealm.TENANT, OtpPurpose.LOGIN_STEP_UP, "client-event", null));
+
+        // 图形验证码同步生成，不应触发 OTP 投递事件（那是邮件/短信通道的职责）。
+        assertThat(lastEvent.get()).isNull();
+    }
+
+    @Test
+    void defaultConstructorKeepsDebugLoggingDisabled() {
+        CaptchaChallengeService captcha = new CaptchaChallengeService(newService());
+        CaptchaIssueResult issued = captcha.issue(new CaptchaIssueCommand(
+                SecurityRealm.TENANT, OtpPurpose.LOGIN_STEP_UP, "client-default", null));
+
+        assertThat(issued.challengeId()).isNotBlank();
+        assertThat(lastEvent.get()).isNull();
+    }
 }

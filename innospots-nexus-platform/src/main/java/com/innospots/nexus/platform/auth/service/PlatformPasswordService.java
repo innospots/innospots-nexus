@@ -81,11 +81,11 @@ public class PlatformPasswordService {
 
         verifyResetCode(identity, type, verificationCode);
         String newPassword = passwordDecryptor.decrypt(request.newEncryptedPassword());
-        credentialService.resetPassword(REALM, user.getPlatformUserId(), newPassword);
+        credentialService.resetPassword(REALM, user.getAdminUserId(), newPassword);
         MutationLog.info(
                 log,
                 "platform password reset platformUserId={} verificationType={}",
-                user.getPlatformUserId(),
+                user.getAdminUserId(),
                 type);
     }
 

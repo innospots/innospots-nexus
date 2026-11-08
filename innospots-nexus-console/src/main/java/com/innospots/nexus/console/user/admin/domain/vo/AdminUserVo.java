@@ -5,15 +5,17 @@ import java.time.LocalDateTime;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 /**
- * 运营管理 API 返回的平台用户概要。
+ * 运营管理 API 返回的后台用户概要。
  *
  * @author Smars
  * @date 2026/09/13
  */
-@Schema(name = "AdminUserVo", description = "平台用户概要")
+@Schema(name = "AdminUserVo", description = "后台用户概要")
 public record AdminUserVo(
-        @Schema(description = "平台用户 ID", required = true)
-        String platformUserId,
+        @Schema(description = "后台用户 ID", required = true)
+        String adminUserId,
+        @Schema(description = "归属安全域", required = true, examples = {"PLATFORM", "TENANT"})
+        String securityRealm,
         @Schema(description = "登录名", required = true)
         String loginName,
         @Schema(description = "显示名称")

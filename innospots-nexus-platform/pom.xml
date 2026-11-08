@@ -55,10 +55,18 @@
                                 com.innospots.nexus.console.menu.domain.vo,
                                 com.innospots.nexus.console.permission.domain,
                                 com.innospots.nexus.console.permission.pageaccess,
-                                com.innospots.nexus.console.role.domain
+                                com.innospots.nexus.console.role.domain,
+                                com.innospots.nexus.console.scope.tenant.domain,
+                                com.innospots.nexus.console.user.admin.domain
                             </scanPackages>
                             <scanDependenciesDisable>false</scanDependenciesDisable>
                             <openApiVersion>3.1.0</openApiVersion>
+                            <!--
+                              CLASS_METHOD：operationId 取 ClassName_method。
+                              端点上的 @Operation(operationId) 也会被保留（见 invite 系列），
+                              但实现 console 契约接口的端点依赖接口上的语义化 operationId，
+                              这类端点在本策略下以 ClassName_method 形式出现。
+                            -->
                             <operationIdStrategy>CLASS_METHOD</operationIdStrategy>
                             <infoTitle>Innospots Nexus Platform API</infoTitle>
                             <infoVersion>1.0.0</infoVersion>

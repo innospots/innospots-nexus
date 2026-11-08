@@ -39,7 +39,7 @@ class AdminUserServiceTest {
         when(userDao.selectCount(any())).thenReturn(0L);
         doAnswer(invocation -> {
             AdminUserEntity entity = invocation.getArgument(0);
-            entity.setPlatformUserId(generator.nextUUID(entity));
+            entity.setAdminUserId(generator.nextUUID(entity));
             return 1;
         }).when(userDao).insert(any(AdminUserEntity.class));
         when(decryptor.decrypt(eq("front-encrypted-password"))).thenReturn("raw-secret");
@@ -56,17 +56,18 @@ class AdminUserServiceTest {
                 "alice@innospots.com",
                 "13800000001",
                 "ops,viewer",
-                "front-encrypted-password"));
+                "front-encrypted-password",
+                null));
 
-        assertThat(created.platformUserId()).startsWith("PUS");
+        assertThat(created.adminUserId()).startsWith("ADM");
         assertThat(created.loginName()).isEqualTo("ops.alice");
         assertThat(created.status()).isEqualTo(AdminUserStatus.ACTIVE.name());
         verify(decryptor).decrypt("front-encrypted-password");
         verify(credentialService).enrollPassword(
                 eq(SecurityRealm.PLATFORM),
-                eq(created.platformUserId()),
+                eq(created.adminUserId()),
                 eq("raw-secret"));
-        verify(roleProvisioner).assignDefaultRolesIfPresent(created.platformUserId(), "ops,viewer");
+        verify(roleProvisioner).assignDefaultRolesIfPresent(created.adminUserId(), "ops,viewer");
     }
 
     @Test
@@ -74,7 +75,7 @@ class AdminUserServiceTest {
         AdminUserService service = serviceWithMocks(mock(AdminUserDao.class));
 
         assertThatThrownBy(() -> service.createUser(new AdminUserCreateRequest(
-                " ", "Alice", null, null, null, "encrypted")))
+                " ", "Alice", null, null, null, "encrypted", null)))
                 .isInstanceOf(NexusException.class);
     }
 
@@ -90,7 +91,8 @@ class AdminUserServiceTest {
                 null,
                 null,
                 null,
-                "encrypted")))
+                "encrypted",
+                null)))
                 .isInstanceOf(NexusException.class)
                 .extracting(ex -> ((NexusException) ex).code())
                 .isEqualTo(AdminUserStatusCode.LOGIN_NAME_DUPLICATED.fullCode());
@@ -102,7 +104,7 @@ class AdminUserServiceTest {
         CredentialService credentialService = mock(CredentialService.class);
         PasswordDecryptor decryptor = mock(PasswordDecryptor.class);
         AdminUserEntity entity = new AdminUserEntity();
-        entity.setPlatformUserId("pus-1");
+        entity.setAdminUserId("pus-1");
         when(userDao.selectById("pus-1")).thenReturn(entity);
         when(decryptor.decrypt("cipher")).thenReturn("NewPass1");
 
@@ -122,7 +124,7 @@ class AdminUserServiceTest {
     void updateUserStatusRejectsNonAdminStatuses() {
         AdminUserDao userDao = mock(AdminUserDao.class);
         AdminUserEntity entity = new AdminUserEntity();
-        entity.setPlatformUserId("pus-1");
+        entity.setAdminUserId("pus-1");
         entity.setStatus(AdminUserStatus.ACTIVE.name());
         when(userDao.selectById("pus-1")).thenReturn(entity);
 

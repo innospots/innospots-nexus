@@ -54,7 +54,8 @@ CREATE TABLE IF NOT EXISTS nx_tenant_admin (
 CREATE INDEX IF NOT EXISTS idx_nx_tenant_admin_tenant ON nx_tenant_admin (tenant_id);
 
 CREATE TABLE IF NOT EXISTS nx_admin_user (
-    platform_user_id  VARCHAR(32)  NOT NULL,
+    admin_user_id     VARCHAR(32)  NOT NULL,
+    security_realm    VARCHAR(32)  NOT NULL,
     login_name        VARCHAR(64)  NOT NULL,
     display_name      VARCHAR(128),
     email             VARCHAR(128),
@@ -67,15 +68,17 @@ CREATE TABLE IF NOT EXISTS nx_admin_user (
     updated_at        TIMESTAMP,
     created_by        VARCHAR(64),
     updated_by        VARCHAR(64),
-    PRIMARY KEY (platform_user_id),
+    PRIMARY KEY (admin_user_id),
     CONSTRAINT uk_nx_admin_user_login_name UNIQUE (login_name)
 );
 
 CREATE INDEX IF NOT EXISTS idx_nx_admin_user_status ON nx_admin_user (status);
 
+CREATE INDEX IF NOT EXISTS idx_nx_admin_user_realm ON nx_admin_user (security_realm);
+
 CREATE TABLE IF NOT EXISTS nx_admin_user_oauth (
     identity_id           VARCHAR(32)  NOT NULL,
-    platform_user_id      VARCHAR(32)  NOT NULL,
+    admin_user_id         VARCHAR(32)  NOT NULL,
     provider              VARCHAR(64)  NOT NULL,
     provider_subject      VARCHAR(256) NOT NULL,
     provider_account      VARCHAR(128),
@@ -93,7 +96,7 @@ CREATE TABLE IF NOT EXISTS nx_admin_user_oauth (
     CONSTRAINT uk_nx_admin_user_oauth_provider_subject UNIQUE (provider, provider_subject)
 );
 
-CREATE INDEX IF NOT EXISTS idx_nx_admin_user_oauth_user ON nx_admin_user_oauth (platform_user_id);
+CREATE INDEX IF NOT EXISTS idx_nx_admin_user_oauth_user ON nx_admin_user_oauth (admin_user_id);
 
 CREATE TABLE IF NOT EXISTS nx_pl_invite (
     invite_id            VARCHAR(32)   NOT NULL,
@@ -107,7 +110,7 @@ CREATE TABLE IF NOT EXISTS nx_pl_invite (
     delivery_mode        VARCHAR(32)   NOT NULL,
     expires_at           TIMESTAMP     NOT NULL,
     accepted_at          TIMESTAMP,
-    platform_user_id     VARCHAR(32),
+    admin_user_id     VARCHAR(32),
     revoked_at           TIMESTAMP,
     code_failed_attempts INTEGER       NOT NULL DEFAULT 0,
     created_at           TIMESTAMP,
@@ -127,7 +130,7 @@ CREATE TABLE IF NOT EXISTS nx_pl_access_request (
     access_request_id   VARCHAR(32)   NOT NULL,
     applicant_name      VARCHAR(128)  NOT NULL,
     login_name          VARCHAR(64),
-    platform_user_id    VARCHAR(32),
+    admin_user_id    VARCHAR(32),
     email               VARCHAR(128),
     mobile              VARCHAR(32),
     description         VARCHAR(512),
@@ -145,4 +148,4 @@ CREATE TABLE IF NOT EXISTS nx_pl_access_request (
 
 CREATE INDEX IF NOT EXISTS idx_nx_pl_access_request_status ON nx_pl_access_request (status);
 
-CREATE INDEX IF NOT EXISTS idx_nx_pl_access_request_user ON nx_pl_access_request (platform_user_id);
+CREATE INDEX IF NOT EXISTS idx_nx_pl_access_request_user ON nx_pl_access_request (admin_user_id);

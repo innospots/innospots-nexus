@@ -392,6 +392,7 @@ nexus-platform-h2.sql
 | `access-token-ttl-seconds` | 访问令牌 TTL，默认 7200 秒 |
 | `refresh-token-ttl-seconds` | 刷新令牌 TTL，默认 604800 秒 |
 | `login-captcha-enabled` | 登录验证码 |
+| `login-captcha-debug-log-enabled` | 把**登录图形验证码**明文写入 INFO 日志（前缀 `Login captcha debug`），只用于本地联调；生产必须 `false` |
 | `login-max-failed-attempts` | 失败锁定阈值 |
 | `login-lock-minutes` | 锁定时长 |
 | `rsa.public-key` | 前端 RSA-OAEP 加密公钥 |
@@ -406,7 +407,7 @@ nexus-platform-h2.sql
 |----|------|
 | `mode` | `OPEN`、`INVITE`、`APPROVAL`、`CLOSED` |
 | `otp-verification` | `EMAIL`、`MOBILE`、`NONE` |
-| `otp.debug-log-enabled` | 把 OTP 明文写入 INFO 日志，只用于联调 |
+| `otp.debug-log-enabled` | 把**注册邮件/短信 OTP** 明文写入 INFO 日志，只用于联调。不覆盖登录图形验证码（见 `auth.login-captcha-debug-log-enabled`） |
 | `otp.email.*` | SMTP 地址、账号、密码、发件人、TLS |
 | `otp.mobile.*` | 短信网关 URL 和 API Key |
 

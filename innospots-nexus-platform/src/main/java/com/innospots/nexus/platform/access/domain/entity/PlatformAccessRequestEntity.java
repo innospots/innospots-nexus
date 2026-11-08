@@ -51,7 +51,7 @@ public class PlatformAccessRequestEntity extends BaseEntity {
     private String loginName;
 
     @Column(length = 32)
-    private String platformUserId;
+    private String adminUserId;
 
     @Column(length = 128)
     private String email;

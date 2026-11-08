@@ -9,7 +9,7 @@ DELETE FROM nx_role_binding
 WHERE subject_type = 'USER'
   AND subject_id IN ('PUS00000000001', 'PUS00000000002', 'PUS00000000003');
 DELETE FROM nx_user_credential WHERE credential_id IN ('UCR00000000001', 'UCR00000000002', 'UCR00000000003');
-DELETE FROM nx_admin_user WHERE platform_user_id IN ('PUS00000000001', 'PUS00000000002', 'PUS00000000003');
+DELETE FROM nx_admin_user WHERE admin_user_id IN ('PUS00000000001', 'PUS00000000002', 'PUS00000000003');
 DELETE FROM nx_role WHERE role_id IN ('ROL00000000001', 'ROL00000000002', 'ROL00000000003');
 
 INSERT INTO nx_role (
@@ -33,18 +33,18 @@ INSERT INTO nx_role (
     );
 
 INSERT INTO nx_admin_user (
-    platform_user_id, login_name, display_name, email, status, created_at, updated_at
+    admin_user_id, security_realm, login_name, display_name, email, status, created_at, updated_at
 ) VALUES
     (
-        'PUS00000000001', 'admin', 'Admin', 'admin@demo.com', 'ACTIVE',
+        'PUS00000000001', 'PLATFORM', 'admin', 'Admin', 'admin@demo.com', 'ACTIVE',
         CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
     ),
     (
-        'PUS00000000002', 'user01', 'User01', 'user01@demo.com', 'ACTIVE',
+        'PUS00000000002', 'PLATFORM', 'user01', 'User01', 'user01@demo.com', 'ACTIVE',
         CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
     ),
     (
-        'PUS00000000003', 'opt01', 'Opt01', 'opt01@demo.com', 'ACTIVE',
+        'PUS00000000003', 'PLATFORM', 'opt01', 'Opt01', 'opt01@demo.com', 'ACTIVE',
         CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
     );
 

@@ -22,10 +22,40 @@
             <groupId>com.innospots</groupId>
             <artifactId>innospots-nexus-plugin</artifactId>
         </dependency>
+        <!--
+          测试需要构造 jakarta.ws.rs.core.Response 等对象，这要求运行时能通过
+          RuntimeDelegate 找到 JAX-RS 实现。生产环境由 Spring Boot 的
+          spring-boot-starter-jersey 提供；本模块是 framework-neutral 的，
+          不引入 Spring，因此只在 test scope 声明 jersey-common。
+        -->
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-common</artifactId>
+            <version>${jersey.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <!--
+              Jandex 索引：console 是其它业务模块（platform/portal）的依赖 jar。
+              这些模块用 smallrye 生成 OpenAPI 时需要读取本模块接口上的
+              @Path/@GET/@Operation，没有索引就无法沿 implements 解析方法级路由，
+              结果是一整组端点从 spec 中消失。
+            -->
+            <plugin>
+                <groupId>io.smallrye</groupId>
+                <artifactId>jandex-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>make-index</id>
+                        <goals>
+                            <goal>jandex</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>io.smallrye</groupId>
                 <artifactId>smallrye-open-api-maven-plugin</artifactId>

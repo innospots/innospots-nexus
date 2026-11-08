@@ -39,6 +39,15 @@ public class AuthConfig {
     private boolean loginCaptchaEnabled = true;
 
     /**
+     * 是否把登录图形验证码明文写入 INFO 日志，仅供本地/联调排查。
+     *
+     * <p>图形验证码由 {@code CaptchaChallengeService} 同步生成、不经过 OTP 事件总线，
+     * 因此与注册邮件/短信验证码的调试开关（{@code nexus.console.registration.otp.debug-log-enabled}）
+     * 是两件不同的事，必须分开控制。生产环境必须保持 {@code false}。</p>
+     */
+    private boolean loginCaptchaDebugLogEnabled = false;
+
+    /**
      * 登录密码 RSA 加解密密钥（{@code nexus.console.auth.rsa.*}）。
      */
     private Rsa rsa = new Rsa();

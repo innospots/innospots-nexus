@@ -71,16 +71,17 @@ public class AdminUserService {
                 request.email(),
                 normalizeMobileForStorage(request.mobile()),
                 null,
-                AdminUserStatus.ACTIVE);
+                AdminUserStatus.ACTIVE,
+                request.securityRealm());
         platformUserOperator.insert(user);
 
-        String rawPassword = decryptEncryptedPassword(request.encryptedPassword(), user.getPlatformUserId());
-        enrollPassword(user.getPlatformUserId(), rawPassword);
-        platformUserRoleProvisioner.assignDefaultRolesIfPresent(user.getPlatformUserId(), request.roleCodes());
+        String rawPassword = decryptEncryptedPassword(request.encryptedPassword(), user.getAdminUserId());
+        enrollPassword(user.getAdminUserId(), rawPassword);
+        platformUserRoleProvisioner.assignDefaultRolesIfPresent(user.getAdminUserId(), request.roleCodes());
         MutationLog.info(
                 log,
                 "platform user created platformUserId={} login={}",
-                user.getPlatformUserId(),
+                user.getAdminUserId(),
                 RequestTrace.safeLogin(user.getLoginName()));
         return toVo(user);
     }
@@ -218,13 +219,14 @@ public class AdminUserService {
                 email,
                 normalizeMobileForStorage(mobile),
                 employeeNo,
-                status);
+                status,
+                null);
         platformUserOperator.insert(user);
-        enrollPassword(user.getPlatformUserId(), rawPassword);
+        enrollPassword(user.getAdminUserId(), rawPassword);
         MutationLog.info(
                 log,
                 "platform user provisioned platformUserId={} login={} status={}",
-                user.getPlatformUserId(),
+                user.getAdminUserId(),
                 RequestTrace.safeLogin(user.getLoginName()),
                 status);
         return toVo(user);
@@ -261,7 +263,8 @@ public class AdminUserService {
 
     private AdminUserVo toVo(AdminUserEntity entity) {
         return new AdminUserVo(
-                entity.getPlatformUserId(),
+                entity.getAdminUserId(),
+                entity.getSecurityRealm(),
                 entity.getLoginName(),
                 entity.getDisplayName(),
                 entity.getEmail(),

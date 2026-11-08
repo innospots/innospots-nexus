@@ -25,14 +25,15 @@ class AdminUserEntityContractsTest {
         assertPersistenceTable(AdminUserEntity.class, "nx_admin_user");
         assertPersistenceTable(AdminUserOauthEntity.class, "nx_admin_user_oauth");
         assertThat(AdminUserEntity.class.getSuperclass()).isEqualTo(BaseEntity.class);
-        assertThat(new AdminUserEntity().idPrefix()).isEqualTo("PUS");
+        assertThat(new AdminUserEntity().idPrefix()).isEqualTo("ADM");
         assertThat(new AdminUserOauthEntity().idPrefix()).isEqualTo("POI");
     }
 
     @Test
     void platformUserEntityContainsOpsIdentityFields() throws NoSuchFieldException {
-        assertPersistenceId(AdminUserEntity.class.getDeclaredField("platformUserId"));
-        assertField(AdminUserEntity.class, "platformUserId", String.class, 32, false);
+        assertPersistenceId(AdminUserEntity.class.getDeclaredField("adminUserId"));
+        assertField(AdminUserEntity.class, "adminUserId", String.class, 32, false);
+        assertField(AdminUserEntity.class, "securityRealm", String.class, 32, false);
         assertField(AdminUserEntity.class, "loginName", String.class, 64, false);
         assertField(AdminUserEntity.class, "displayName", String.class, 128, true);
         assertField(AdminUserEntity.class, "email", String.class, 128, true);
@@ -44,16 +45,17 @@ class AdminUserEntityContractsTest {
     }
 
     @Test
-    void platformUserOauthBindsPlatformUserId() throws NoSuchFieldException {
-        assertField(AdminUserOauthEntity.class, "platformUserId", String.class, 32, false);
+    void platformUserOauthBindsAdminUserId() throws NoSuchFieldException {
+        assertField(AdminUserOauthEntity.class, "adminUserId", String.class, 32, false);
         assertIndex(AdminUserOauthEntity.class, "idx_nx_admin_user_oauth_user",
-                "platform_user_id", false);
+                "admin_user_id", false);
     }
 
     @Test
     void platformUserEntityDeclaresLoginNameUniqueIndex() {
         assertIndex(AdminUserEntity.class, "uk_nx_admin_user_login_name", "login_name", true);
         assertIndex(AdminUserEntity.class, "idx_nx_admin_user_status", "status", false);
+        assertIndex(AdminUserEntity.class, "idx_nx_admin_user_realm", "security_realm", false);
     }
 
     @Test

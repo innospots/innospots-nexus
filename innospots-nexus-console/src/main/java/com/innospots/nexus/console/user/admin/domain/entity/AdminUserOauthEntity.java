@@ -25,7 +25,7 @@ import com.innospots.nexus.core.persistence.entity.BaseEntity;
 @Setter
 @Entity
 @Table(name = AdminUserOauthEntity.TABLE_NAME, indexes = {
-        @Index(name = "idx_nx_admin_user_oauth_user", columnList = "platform_user_id"),
+        @Index(name = "idx_nx_admin_user_oauth_user", columnList = "admin_user_id"),
         @Index(name = "uk_nx_admin_user_oauth_provider_subject",
                 columnList = "provider, provider_subject", unique = true)
 })
@@ -53,10 +53,10 @@ public class AdminUserOauthEntity extends BaseEntity {
     }
 
     /**
-     * 平台域 user 标识符。
+     * 后台管理用户标识符（外键指向 {@code nx_admin_user.admin_user_id}）。
      */
     @Column(length = 32, nullable = false)
-    private String platformUserId;
+    private String adminUserId;
 
     /**
      * 外部身份提供方名称。

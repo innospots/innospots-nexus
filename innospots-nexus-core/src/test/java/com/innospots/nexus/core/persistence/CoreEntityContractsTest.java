@@ -30,6 +30,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class CoreEntityContractsTest {
 
+    /** {@code IdGenerator} 的 Snowflake Base62 定长编码宽度。 */
+    private static final int BASE62_LENGTH = 11;
+
     @Test
     void baseEntityDefinesAuditFillFields() throws NoSuchFieldException {
         assertThat(BaseEntity.class.getAnnotation(MappedSuperclass.class)).isNotNull();
@@ -138,13 +141,24 @@ class CoreEntityContractsTest {
         assertStringAssignedUuidPrimaryKey(ServiceRegistryEntity.class.getDeclaredField("serviceRegistryId"));
     }
 
+    /**
+     * 主键形状：{@code [prefix] + 11 位 Base62(snowflake)}。
+     *
+     * <p>无前缀实体（{@link BaseEntity}）为 11 位；带 {@code idPrefix()} 的实体
+     * 为 {@code prefix.length() + 11}。此前断言写的 29 / 26 是早期 UUID 方案的长度，
+     * 与当前 {@code IdGenerator} 的 Base62 定长实现不符。</p>
+     */
     @Test
     void databasePrimaryGeneratorUsesEntityPrefixes() {
         DbPrimaryGenerator generator = new DbPrimaryGenerator();
 
-        assertThat(generator.nextUUID(new MetaResourceEntity())).startsWith("RES").hasSize(29);
-        assertThat(generator.nextUUID(new ServiceRegistryEntity())).startsWith("SRV").hasSize(29);
-        assertThat(generator.nextUUID(new BaseEntity())).hasSize(26);
+        String resourceId = generator.nextUUID(new MetaResourceEntity());
+        String serviceId = generator.nextUUID(new ServiceRegistryEntity());
+        String baseId = generator.nextUUID(new BaseEntity());
+
+        assertThat(resourceId).startsWith("RES").hasSize("RES".length() + BASE62_LENGTH);
+        assertThat(serviceId).startsWith("SRV").hasSize("SRV".length() + BASE62_LENGTH);
+        assertThat(baseId).hasSize(BASE62_LENGTH);
     }
 
     @Test

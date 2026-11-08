@@ -73,12 +73,14 @@ class PlatformAdminUserEndpointContractsTest {
                         "email",
                         "mobile",
                         "roleCodes",
-                        "encryptedPassword");
+                        "encryptedPassword",
+                        "securityRealm");
         assertThat(AdminUserVo.class.isRecord()).isTrue();
         assertThat(Arrays.stream(AdminUserVo.class.getRecordComponents())
                 .map(RecordComponent::getName))
                 .containsExactly(
-                        "platformUserId",
+                        "adminUserId",
+                        "securityRealm",
                         "loginName",
                         "displayName",
                         "email",

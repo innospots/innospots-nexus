@@ -103,7 +103,7 @@ public class PlatformAccessRequestService {
      * 提交待审注册：OTP 通过后创建 {@code PENDING_APPROVAL} 用户并写入申请单。
      *
      * @param request 登录名、联系方式、加密密码与验证码
-     * @return 申请视图（含 {@code platformUserId}）
+     * @return 申请视图（含 {@code adminUserId}）
      */
     @Transactional
     public PlatformAccessRequestVo submitAccessRegistration(PlatformAccessRegistrationSubmitRequest request) {
@@ -133,17 +133,17 @@ public class PlatformAccessRequestService {
         PlatformAccessRequestEntity entity = new PlatformAccessRequestEntity();
         entity.setApplicantName(applicantName);
         entity.setLoginName(user.loginName());
-        entity.setPlatformUserId(user.platformUserId());
+        entity.setAdminUserId(user.adminUserId());
         entity.setEmail(request.email());
         entity.setMobile(request.mobile());
         entity.setDescription(request.description());
         entity.setStatus(com.innospots.nexus.platform.access.domain.enums.PlatformAccessRequestStatus.PENDING_APPROVAL.name());
         accessRequestOperator.insert(entity);
         log.info(
-                "traceId={} platform APPROVAL registration submitted accessRequestId={} platformUserId={}",
+                "traceId={} platform APPROVAL registration submitted accessRequestId={} adminUserId={}",
                 traceId,
                 entity.getAccessRequestId(),
-                user.platformUserId());
+                user.adminUserId());
         return toVo(entity);
     }
 
@@ -181,14 +181,14 @@ public class PlatformAccessRequestService {
         PlatformAccessRequestEntity entity = accessRequestOperator.requireById(accessRequestId);
         accessRequestOperator.requirePendingApproval(entity);
         Objects.requireNonNull(request, "request");
-        Checks.notBlank(entity.getPlatformUserId(), "platformUserId");
-        AdminUserVo user = platformUserService.activatePendingApprovalUser(entity.getPlatformUserId());
+        Checks.notBlank(entity.getAdminUserId(), "adminUserId");
+        AdminUserVo user = platformUserService.activatePendingApprovalUser(entity.getAdminUserId());
         accessRequestOperator.markApproved(entity, currentReviewer());
         log.info(
-                "traceId={} platform APPROVAL registration approved accessRequestId={} platformUserId={} reviewer={}",
+                "traceId={} platform APPROVAL registration approved accessRequestId={} adminUserId={} reviewer={}",
                 RequestTrace.currentTraceId(),
                 accessRequestId,
-                user.platformUserId(),
+                user.adminUserId(),
                 currentReviewer());
         return user;
     }
@@ -203,19 +203,19 @@ public class PlatformAccessRequestService {
     public void rejectAccessRequest(String accessRequestId, PlatformAccessRequestRejectRequest request) {
         PlatformAccessRequestEntity entity = accessRequestOperator.requireById(accessRequestId);
         accessRequestOperator.requirePendingApproval(entity);
-        if (entity.getPlatformUserId() != null && !entity.getPlatformUserId().isBlank()) {
+        if (entity.getAdminUserId() != null && !entity.getAdminUserId().isBlank()) {
             // 拒绝后保持不可登录（DISABLED），保留行以便审计
-            platformUserService.disableUserAfterRegistrationRejected(entity.getPlatformUserId());
+            platformUserService.disableUserAfterRegistrationRejected(entity.getAdminUserId());
         }
         accessRequestOperator.markRejected(
                 entity,
                 request == null ? null : request.rejectReason(),
                 currentReviewer());
         log.info(
-                "traceId={} platform APPROVAL registration rejected accessRequestId={} platformUserId={} reviewer={}",
+                "traceId={} platform APPROVAL registration rejected accessRequestId={} adminUserId={} reviewer={}",
                 RequestTrace.currentTraceId(),
                 accessRequestId,
-                entity.getPlatformUserId(),
+                entity.getAdminUserId(),
                 currentReviewer());
     }
 
@@ -258,7 +258,7 @@ public class PlatformAccessRequestService {
         return new PlatformAccessRequestVo(
                 entity.getAccessRequestId(),
                 entity.getLoginName(),
-                entity.getPlatformUserId(),
+                entity.getAdminUserId(),
                 entity.getApplicantName(),
                 entity.getEmail(),
                 entity.getMobile(),

@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import com.innospots.nexus.base.domain.response.PageResult;
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexus.base.util.Checks;
+import com.innospots.nexus.console.auth.domain.enums.SecurityRealm;
 import com.innospots.nexus.console.user.admin.dao.AdminUserDao;
 import com.innospots.nexus.console.user.admin.domain.entity.AdminUserEntity;
 import com.innospots.nexus.console.user.admin.domain.enums.AdminUserStatus;
@@ -70,7 +71,7 @@ public class AdminUserOperator {
         }
         return rows.stream()
                 .filter(Objects::nonNull)
-                .collect(Collectors.toMap(AdminUserEntity::getPlatformUserId, Function.identity(), (a, b) -> a));
+                .collect(Collectors.toMap(AdminUserEntity::getAdminUserId, Function.identity(), (a, b) -> a));
     }
 
     /**
@@ -83,7 +84,7 @@ public class AdminUserOperator {
         int capped = Math.min(Math.max(limit, 1), 500);
         String trimmed = keyword.trim();
         LambdaQueryWrapper<AdminUserEntity> query = new LambdaQueryWrapper<>();
-        query.select(AdminUserEntity::getPlatformUserId);
+        query.select(AdminUserEntity::getAdminUserId);
         query.and(wrapper -> wrapper
                 .like(AdminUserEntity::getLoginName, trimmed)
                 .or()
@@ -96,7 +97,7 @@ public class AdminUserOperator {
             return List.of();
         }
         return rows.stream()
-                .map(AdminUserEntity::getPlatformUserId)
+                .map(AdminUserEntity::getAdminUserId)
                 .filter(id -> id != null && !id.isBlank())
                 .toList();
     }
@@ -147,7 +148,7 @@ public class AdminUserOperator {
         LambdaQueryWrapper<AdminUserEntity> query = new LambdaQueryWrapper<AdminUserEntity>()
                 .apply("LOWER(email) = {0}", normalized.toLowerCase());
         if (excludePlatformUserId != null && !excludePlatformUserId.isBlank()) {
-            query.ne(AdminUserEntity::getPlatformUserId, excludePlatformUserId);
+            query.ne(AdminUserEntity::getAdminUserId, excludePlatformUserId);
         }
         if (platformUserDao.selectCount(query) > 0) {
             throw NexusException.build(AdminUserStatusCode.EMAIL_DUPLICATED);
@@ -162,7 +163,7 @@ public class AdminUserOperator {
         LambdaQueryWrapper<AdminUserEntity> query = new LambdaQueryWrapper<AdminUserEntity>()
                 .eq(AdminUserEntity::getMobile, normalized);
         if (excludePlatformUserId != null && !excludePlatformUserId.isBlank()) {
-            query.ne(AdminUserEntity::getPlatformUserId, excludePlatformUserId);
+            query.ne(AdminUserEntity::getAdminUserId, excludePlatformUserId);
         }
         if (platformUserDao.selectCount(query) > 0) {
             throw NexusException.build(AdminUserStatusCode.MOBILE_DUPLICATED);
@@ -175,7 +176,8 @@ public class AdminUserOperator {
             String email,
             String mobile,
             String employeeNo,
-            AdminUserStatus status
+            AdminUserStatus status,
+            String securityRealm
     ) {
         AdminUserEntity user = new AdminUserEntity();
         user.setLoginName(loginName);
@@ -184,14 +186,33 @@ public class AdminUserOperator {
         user.setMobile(mobile);
         user.setEmployeeNo(employeeNo);
         user.setStatus(status.name());
+        user.setSecurityRealm(normalizeRealm(securityRealm));
         return user;
+    }
+
+    /**
+     * 归一化安全域代码，缺省或非法值回退 {@link SecurityRealm#PLATFORM}。
+     *
+     * @param securityRealm 安全域代码
+     * @return 规范化的安全域代码
+     */
+    private static String normalizeRealm(String securityRealm) {
+        if (securityRealm == null || securityRealm.isBlank()) {
+            return SecurityRealm.PLATFORM.name();
+        }
+        for (SecurityRealm candidate : SecurityRealm.values()) {
+            if (candidate.name().equalsIgnoreCase(securityRealm.trim())) {
+                return candidate.name();
+            }
+        }
+        return SecurityRealm.PLATFORM.name();
     }
 
     @Transactional
     public void updateStatus(AdminUserEntity entity, AdminUserStatus status) {
         entity.setStatus(status.name());
         platformUserDao.updateById(entity);
-        log.info("Updated platform user {} status to {}", entity.getPlatformUserId(), status);
+        log.info("Updated platform user {} status to {}", entity.getAdminUserId(), status);
     }
 
     @Transactional
@@ -201,14 +222,14 @@ public class AdminUserOperator {
         }
         entity.setStatus(AdminUserStatus.ACTIVE.name());
         platformUserDao.updateById(entity);
-        log.info("Activated platform user {} from registration approval", entity.getPlatformUserId());
+        log.info("Activated platform user {} from registration approval", entity.getAdminUserId());
     }
 
     @Transactional
     public void markDisabled(AdminUserEntity entity) {
         entity.setStatus(AdminUserStatus.DISABLED.name());
         platformUserDao.updateById(entity);
-        log.info("Disabled platform user {}", entity.getPlatformUserId());
+        log.info("Disabled platform user {}", entity.getAdminUserId());
     }
 
     private boolean existsLoginName(String loginName) {

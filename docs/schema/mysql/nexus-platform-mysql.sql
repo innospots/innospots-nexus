@@ -53,7 +53,8 @@ CREATE TABLE IF NOT EXISTS nx_tenant_admin (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS nx_admin_user (
-    platform_user_id  VARCHAR(32)  NOT NULL,
+    admin_user_id     VARCHAR(32)  NOT NULL,
+    security_realm    VARCHAR(32)  NOT NULL,
     login_name        VARCHAR(64)  NOT NULL,
     display_name      VARCHAR(128),
     email             VARCHAR(128),
@@ -66,14 +67,15 @@ CREATE TABLE IF NOT EXISTS nx_admin_user (
     updated_at        DATETIME(6),
     created_by        VARCHAR(64),
     updated_by        VARCHAR(64),
-    PRIMARY KEY (platform_user_id),
+    PRIMARY KEY (admin_user_id),
     CONSTRAINT uk_nx_admin_user_login_name UNIQUE (login_name),
-    KEY idx_nx_admin_user_status (status)
+    KEY idx_nx_admin_user_status (status),
+    KEY idx_nx_admin_user_realm (security_realm)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS nx_admin_user_oauth (
     identity_id           VARCHAR(32)  NOT NULL,
-    platform_user_id      VARCHAR(32)  NOT NULL,
+    admin_user_id      VARCHAR(32)  NOT NULL,
     provider              VARCHAR(64)  NOT NULL,
     provider_subject      VARCHAR(256) NOT NULL,
     provider_account      VARCHAR(128),
@@ -88,7 +90,7 @@ CREATE TABLE IF NOT EXISTS nx_admin_user_oauth (
     created_by            VARCHAR(64),
     updated_by            VARCHAR(64),
     PRIMARY KEY (identity_id),
-    KEY idx_nx_admin_user_oauth_user (platform_user_id),
+    KEY idx_nx_admin_user_oauth_user (admin_user_id),
     CONSTRAINT uk_nx_admin_user_oauth_provider_subject UNIQUE (provider, provider_subject)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -104,7 +106,7 @@ CREATE TABLE IF NOT EXISTS nx_pl_invite (
     delivery_mode       VARCHAR(32)   NOT NULL,
     expires_at          DATETIME(6)   NOT NULL,
     accepted_at         DATETIME(6),
-    platform_user_id    VARCHAR(32),
+    admin_user_id    VARCHAR(32),
     revoked_at          DATETIME(6),
     code_failed_attempts INT          NOT NULL DEFAULT 0,
     created_at          DATETIME(6),
@@ -122,7 +124,7 @@ CREATE TABLE IF NOT EXISTS nx_pl_access_request (
     access_request_id   VARCHAR(32)   NOT NULL,
     applicant_name      VARCHAR(128)  NOT NULL,
     login_name          VARCHAR(64),
-    platform_user_id    VARCHAR(32),
+    admin_user_id    VARCHAR(32),
     email               VARCHAR(128),
     mobile              VARCHAR(32),
     description         VARCHAR(512),
@@ -137,5 +139,5 @@ CREATE TABLE IF NOT EXISTS nx_pl_access_request (
     updated_by          VARCHAR(64),
     PRIMARY KEY (access_request_id),
     KEY idx_nx_pl_access_request_status (status),
-    KEY idx_nx_pl_access_request_user (platform_user_id)
+    KEY idx_nx_pl_access_request_user (admin_user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

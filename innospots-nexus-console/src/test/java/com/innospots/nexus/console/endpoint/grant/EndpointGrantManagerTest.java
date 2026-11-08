@@ -1,4 +1,4 @@
-package com.innospots.nexus.core.endpoint.grant;
+package com.innospots.nexus.console.endpoint.grant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -15,6 +15,10 @@ import com.innospots.nexus.console.dictionary.domain.request.DictionaryTypePageR
 import com.innospots.nexus.console.dictionary.domain.vo.DictionaryTypeVo;
 import com.innospots.nexus.console.dictionary.endpoint.DictionaryTypeEndpoint;
 import com.innospots.nexus.console.entry.ConsolePageRoutes;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrantDescriptor;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrantManager;
+import com.innospots.nexus.core.endpoint.grant.EndpointModule;
+import com.innospots.nexus.core.endpoint.grant.EndpointModuleGrantCatalog;
 import com.innospots.nexus.core.endpoint.grant.support.EndpointGrantAnnotations;
 import com.innospots.nexus.core.endpoint.grant.support.EndpointGrantHttpIntrospection;
 import com.innospots.nexus.core.endpoint.grant.support.EndpointGrantPathMatcher;

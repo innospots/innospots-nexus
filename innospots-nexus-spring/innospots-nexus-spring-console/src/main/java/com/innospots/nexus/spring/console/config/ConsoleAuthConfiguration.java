@@ -51,6 +51,7 @@ public class ConsoleAuthConfiguration {
         config.setAccessTokenTtlSeconds(properties.getAccessTokenTtlSeconds());
         config.setRefreshTokenTtlSeconds(properties.getRefreshTokenTtlSeconds());
         config.setLoginCaptchaEnabled(properties.isLoginCaptchaEnabled());
+        config.setLoginCaptchaDebugLogEnabled(properties.isLoginCaptchaDebugLogEnabled());
         ConsoleAuthProperties.Rsa rsaProperties = properties.getRsa();
         if (rsaProperties == null) {
             config.setRsa(new AuthConfig.Rsa());

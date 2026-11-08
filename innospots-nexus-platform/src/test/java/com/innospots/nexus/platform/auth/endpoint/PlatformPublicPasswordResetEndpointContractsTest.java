@@ -27,15 +27,12 @@ class PlatformPublicPasswordResetEndpointContractsTest {
                         .getAnnotation(Operation.class)
                         .operationId())
                 .isEqualTo("authPasswordReset");
-        assertThat(PlatformPublicPasswordResetEndpoint.class.getMethod(
-                                "resetPassword", PasswordResetRequest.class)
-                        .getAnnotation(Operation.class)
-                        .operationId())
-                .isEqualTo("platformAuthPasswordReset");
-        assertThat(PlatformPublicPasswordResetEndpoint.class.getMethod(
-                                "resetPassword", PasswordResetRequest.class)
-                        .getAnnotation(POST.class))
-                .isNotNull();
+        /*
+         * 实现类只写 @Override，不重复接口注解 —— 仓库统一约定
+         * （见 PlatformStandaloneEndpointGrantContractsTest
+         * #consoleContractImplementationsDoNotRepeatInterfaceMethodAnnotations）。
+         * 因此实现类方法上不声明 @Operation / @POST。
+         */
         assertThat(PublicPasswordResetEndpoint.class.getMethod("resetPassword", PasswordResetRequest.class)
                         .getAnnotation(POST.class))
                 .isNotNull();

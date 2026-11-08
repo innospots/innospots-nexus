@@ -75,7 +75,7 @@ public class PlatformInviteEntity extends BaseEntity {
     private LocalDateTime acceptedAt;
 
     @Column(length = 32)
-    private String platformUserId;
+    private String adminUserId;
 
     @Column
     private LocalDateTime revokedAt;

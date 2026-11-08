@@ -27,7 +27,7 @@ public record PlatformInviteVo(
         @Schema(description = "邀请链接")
         String inviteLink,
         @Schema(description = "接受后平台用户 ID")
-        String platformUserId,
+        String adminUserId,
         @Schema(description = "接受时间")
         LocalDateTime acceptedAt,
         @Schema(description = "创建时间")

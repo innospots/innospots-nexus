@@ -8,6 +8,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.innospots.nexus.console.config.AuthConfig;
 import com.innospots.nexus.console.credential.otp.dao.OtpChallengeDao;
 import com.innospots.nexus.console.credential.otp.service.CaptchaChallengeService;
 import com.innospots.nexus.console.credential.otp.service.OtpChallengeService;
@@ -77,9 +78,23 @@ public class ConsoleCredentialConfiguration {
         return new OtpChallengeService(otpChallengeDao);
     }
 
+    /**
+     * 图形验证码门面。
+     *
+     * <p>调试开关来自 {@code nexus.console.auth.login-captcha-debug-log-enabled}：
+     * 登录图形验证码与注册的邮件/短信 OTP 是两条独立链路，前者不进事件总线，
+     * 因此不能用 {@code registration.otp.debug-log-enabled} 控制。</p>
+     *
+     * @param otpChallengeService 挑战服务
+     * @param authConfig          认证配置（含图形验证码调试开关）
+     * @return 图形验证码门面
+     */
     @Bean
-    CaptchaChallengeService captchaChallengeService(OtpChallengeService otpChallengeService) {
-        return new CaptchaChallengeService(otpChallengeService);
+    CaptchaChallengeService captchaChallengeService(
+            OtpChallengeService otpChallengeService,
+            AuthConfig authConfig) {
+        return new CaptchaChallengeService(
+                otpChallengeService, authConfig.isLoginCaptchaDebugLogEnabled());
     }
 
     @Bean

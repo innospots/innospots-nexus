@@ -47,7 +47,7 @@ class AdminUserOperatorTest {
     void updateStatusPersistsTargetStatus() {
         AdminUserDao userDao = mock(AdminUserDao.class);
         AdminUserEntity entity = new AdminUserEntity();
-        entity.setPlatformUserId("pus_test");
+        entity.setAdminUserId("pus_test");
         entity.setStatus(AdminUserStatus.ACTIVE.name());
         when(userDao.selectById("pus_test")).thenReturn(entity);
         AdminUserOperator operator = new AdminUserOperator(userDao);

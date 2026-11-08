@@ -117,11 +117,11 @@ public class PlatformOpenRegistrationService {
                 request.mobile(),
                 rawPassword);
         log.info(
-                "traceId={} platform OPEN registration completed platformUserId={} login={}",
+                "traceId={} platform OPEN registration completed adminUserId={} login={}",
                 traceId,
-                user.platformUserId(),
+                user.adminUserId(),
                 RequestTrace.safeLogin(user.loginName()));
-        return user.platformUserId();
+        return user.adminUserId();
     }
 
     private void verifyOpenRegistrationCode(String contact, String verificationCode) {

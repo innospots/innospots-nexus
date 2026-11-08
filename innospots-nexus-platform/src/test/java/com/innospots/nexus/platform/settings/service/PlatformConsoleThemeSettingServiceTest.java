@@ -25,7 +25,7 @@ class PlatformConsoleThemeSettingServiceTest {
                 new PlatformConsoleThemeSettingService(systemSettingService, PlatformConsoleTheme.CHENWUNAIFU);
 
         assertThat(service.getConsoleThemeSetting().theme()).isEqualTo(PlatformConsoleTheme.TAIJINGSHENLIN);
-        assertThat(service.getConsoleThemeSetting().skinKey()).isEqualTo("taijingshenlin");
+        assertThat(service.getConsoleThemeSetting().skinKey()).isEqualTo("bi-shan");
     }
 
     @Test

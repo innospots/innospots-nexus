@@ -1,5 +1,8 @@
 package com.innospots.nexus.console.credential.otp.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.innospots.nexus.base.util.Checks;
 import com.innospots.nexus.console.credential.otp.captcha.CaptchaPolicy;
 import com.innospots.nexus.console.credential.otp.captcha.CaptchaStyle;
@@ -17,10 +20,31 @@ import com.innospots.nexus.console.credential.otp.domain.enums.OtpChannel;
  */
 public final class CaptchaChallengeService {
 
+    private static final Logger log = LoggerFactory.getLogger(CaptchaChallengeService.class);
+
     private final OtpChallengeService otpChallengeService;
 
+    /**
+     * 是否把验证码明文写进 INFO 日志，仅供本地/联调排查。
+     *
+     * <p>来源为 {@code nexus.console.auth.login-captcha-debug-log-enabled}。
+     * 登录图形验证码不经过事件总线（{@code publishSendEvent=false}），
+     * {@code RegistrationOtpDebugLogger} 收不到它；后者只覆盖注册时的邮件/短信 OTP。
+     * 生产必须保持 {@code false}。</p>
+     */
+    private final boolean debugLogEnabled;
+
     public CaptchaChallengeService(OtpChallengeService otpChallengeService) {
+        this(otpChallengeService, false);
+    }
+
+    /**
+     * @param otpChallengeService 挑战服务
+     * @param debugLogEnabled     是否在 INFO 日志输出验证码明文（仅本地/联调）
+     */
+    public CaptchaChallengeService(OtpChallengeService otpChallengeService, boolean debugLogEnabled) {
         this.otpChallengeService = Checks.notNull(otpChallengeService, "otpChallengeService");
+        this.debugLogEnabled = debugLogEnabled;
     }
 
     /**
@@ -44,6 +68,15 @@ public final class CaptchaChallengeService {
                         command.clientKey(),
                         null),
                 generated.code());
+        if (debugLogEnabled) {
+            log.info(
+                    "Login captcha debug challengeId={} realm={} purpose={} clientKey={} code={}",
+                    challengeId,
+                    command.securityRealm(),
+                    command.purpose(),
+                    command.clientKey(),
+                    generated.code());
+        }
         return new CaptchaIssueResult(
                 challengeId,
                 generated.imageBase64(),

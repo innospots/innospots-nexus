@@ -70,4 +70,15 @@ public class TenantMemberEntity extends TenantBaseEntity {
      */
     @Column(nullable = false)
     private LocalDateTime joinedAt;
+
+    /**
+     * 租户内的业务角色，由产品侧定义取值（如团队拥有者、管理员、成员）。
+     *
+     * <p>与权限体系无关：租户权限仍通过角色绑定与权限授权表达，
+     * 本字段只承载产品语义上的成员角色标识，允许为空。
+     * 与 {@link com.innospots.nexus.console.scope.workspace.domain.entity.WorkspaceMemberEntity#getMemberRole()}
+     * 保持同一套建模方式。</p>
+     */
+    @Column(length = 32)
+    private String memberRole;
 }

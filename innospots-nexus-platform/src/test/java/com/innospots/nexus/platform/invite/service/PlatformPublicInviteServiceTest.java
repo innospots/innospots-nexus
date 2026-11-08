@@ -56,6 +56,7 @@ class PlatformPublicInviteServiceTest {
                 eq("raw-pass")))
                 .thenReturn(new AdminUserVo(
                         "usr-1",
+                        "PLATFORM",
                         "alice",
                         null,
                         "alice@example.com",
@@ -97,6 +98,7 @@ class PlatformPublicInviteServiceTest {
         when(userService.createActiveUserWithPassword(any(), any(), any(), any()))
                 .thenReturn(new AdminUserVo(
                         "usr-2",
+                        "PLATFORM",
                         "bob",
                         null,
                         "bob@example.com",
