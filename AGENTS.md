@@ -285,3 +285,17 @@ mvn -q help:effective-pom
 ```
 
 若本地 JDK 低于 25，应报告环境不匹配，而不是降低项目基线。
+
+## Cursor Cloud specific instructions
+
+Cloud Agent 使用 `.cursor/environment.json` 的 `install` 脚本安装工具链（OpenJDK 25、Apache Maven 3.9.9，路径在 `/usr/local/bin` 与 `/etc/profile.d/innospots-nexus-toolchain.sh`）。仓库无 `mvnw`，且 enforcer 要求 **JDK ≥ 25**、**Maven ≥ 3.9.0**。
+
+安装完成后在仓库根目录执行：
+
+```bash
+mvn validate
+mvn clean compile
+mvn test
+```
+
+单模块示例：`mvn -pl innospots-nexus-base -am test`。`install` 仅跑 `mvn validate` 作基线校验，完整单测由 agent 在任务中执行。
