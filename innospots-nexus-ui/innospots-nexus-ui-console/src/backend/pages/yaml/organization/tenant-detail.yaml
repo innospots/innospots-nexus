@@ -95,97 +95,73 @@ body:
             gap: small
           children:
             - type: Button
+              when: ${data.tenant.status != 'ACTIVE'}
+              props:
+                text: '$i18n{organization.tenant-detail.enable:启用}'
+                variant: primary
+              events:
+                onClick:
+                  - action: confirm
+                    params:
+                      title: '$i18n{organization.tenant-detail.enable-tenant:启用租户}'
+                      content: '$i18n{organization.tenant-detail.enabling-makes-the-tenant-available-continue:启用后租户将恢复访问，确定继续吗？}'
+                  - action: request
+                    params:
+                      method: PUT
+                      url: /api/d/platform/tenants/${params.tenantId}/status
+                      body:
+                        status: ACTIVE
+                  - action: message
+                    params:
+                      messageType: success
+                      text: '$i18n{organization.tenant-detail.tenant-enabled:租户已启用}'
+                  - action: reload
+                    params:
+                      dataSource: tenant
+            - type: Button
               when: ${data.tenant.status == 'ACTIVE'}
               props:
-                text: '$i18n{organization.tenant-detail.suspend:暂停}'
+                text: '$i18n{organization.tenant-detail.disable:停用}'
               events:
                 onClick:
                   - action: confirm
                     params:
-                      title: '$i18n{organization.tenant-detail.suspend-tenant:暂停租户}'
-                      content: '$i18n{organization.tenant-detail.suspending-blocks-tenant-access-continue:暂停后租户访问将被阻断，确定继续吗？}'
+                      title: '$i18n{organization.tenant-detail.disable-tenant:停用租户}'
+                      content: '$i18n{organization.tenant-detail.disabling-blocks-tenant-access-continue:停用后租户访问将被阻断，确定继续吗？}'
                   - action: request
                     params:
                       method: PUT
                       url: /api/d/platform/tenants/${params.tenantId}/status
                       body:
-                        status: SUSPENDED
+                        status: DISABLED
                   - action: message
                     params:
                       messageType: success
-                      text: '$i18n{organization.tenant-detail.tenant-suspended:租户已暂停}'
+                      text: '$i18n{organization.tenant-detail.tenant-disabled:租户已停用}'
                   - action: reload
                     params:
                       dataSource: tenant
             - type: Button
-              when: ${data.tenant.status == 'SUSPENDED'}
+              when: ${data.tenant.status != 'DISSOLVED'}
               props:
-                text: '$i18n{organization.tenant-detail.restore:恢复}'
-                variant: primary
-              events:
-                onClick:
-                  - action: confirm
-                    params:
-                      title: '$i18n{organization.tenant-detail.restore-tenant:恢复租户}'
-                      content: '$i18n{organization.tenant-detail.restore-normal-operation:确定恢复为正常运营状态吗？}'
-                  - action: request
-                    params:
-                      method: PUT
-                      url: /api/d/platform/tenants/${params.tenantId}/status
-                      body:
-                        status: ACTIVE
-                  - action: message
-                    params:
-                      messageType: success
-                      text: '$i18n{organization.tenant-detail.tenant-restored:租户已恢复}'
-                  - action: reload
-                    params:
-                      dataSource: tenant
-            - type: Button
-              when: ${data.tenant.status == 'ARCHIVED'}
-              props:
-                text: '$i18n{organization.tenant-detail.restore-2:恢复}'
-                variant: primary
-              events:
-                onClick:
-                  - action: confirm
-                    params:
-                      title: '$i18n{organization.tenant-detail.restore-tenant-2:恢复租户}'
-                      content: '$i18n{organization.tenant-detail.restore-the-archived-tenant-to-normal-operation:确定将归档租户恢复为正常运营状态吗？}'
-                  - action: request
-                    params:
-                      method: PUT
-                      url: /api/d/platform/tenants/${data.tenant.tenantId}/status
-                      body:
-                        status: ACTIVE
-                  - action: message
-                    params:
-                      messageType: success
-                      text: '$i18n{organization.tenant-detail.tenant-restored-to-active:租户已恢复为正常}'
-                  - action: reload
-                    params:
-                      dataSource: tenant
-            - type: Button
-              when: ${data.tenant.status != 'ARCHIVED'}
-              props:
-                text: '$i18n{organization.tenant-detail.archive:归档}'
+                text: '$i18n{organization.tenant-detail.dissolve:解散}'
                 danger: true
               events:
                 onClick:
                   - action: confirm
                     params:
-                      title: '$i18n{organization.tenant-detail.archive-tenant:归档租户}'
-                      content: '$i18n{organization.tenant-detail.archiving-makes-the-tenant-inactive-continue:归档后租户不再活跃，确定继续吗？}'
+                      title: '$i18n{organization.tenant-detail.dissolve-tenant:解散租户}'
+                      content: '$i18n{organization.tenant-detail.dissolving-makes-the-tenant-inactive-continue:解散后团队将注销，确定继续吗？}'
                   - action: request
                     params:
                       method: PUT
                       url: /api/d/platform/tenants/${params.tenantId}/status
                       body:
-                        status: ARCHIVED
+                        status: DISSOLVED
                   - action: message
                     params:
                       messageType: success
-                      text: '$i18n{organization.tenant-detail.tenant-archived:租户已归档}'
+                      text: '$i18n{organization.tenant-detail.tenant-dissolved:租户已解散}'
                   - action: reload
                     params:
                       dataSource: tenant
@@ -244,8 +220,9 @@ body:
               - label:
                   '$i18n{organization.tenant-detail.status:状态}'
                 value: "${data.tenant.status == 'ACTIVE' ? t('organization.tenant-detail.status.active') : data.tenant.status ==
-                  'SUSPENDED' ? t('organization.tenant-detail.status.suspended') : data.tenant.status == 'ARCHIVED' ?
-                  t('organization.tenant-detail.status.archived') : data.tenant.status}"
+                  'PENDING' ? t('organization.tenant-detail.status.pending') : data.tenant.status == 'DISABLED' ?
+                  t('organization.tenant-detail.status.disabled') : data.tenant.status == 'DISSOLVED' ?
+                  t('organization.tenant-detail.status.dissolved') : data.tenant.status}"
         - type: Form
           when: ${state.editingTenant}
           props:

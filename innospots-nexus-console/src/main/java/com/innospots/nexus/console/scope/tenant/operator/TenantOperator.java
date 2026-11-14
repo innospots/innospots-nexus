@@ -1,6 +1,7 @@
 package com.innospots.nexus.console.scope.tenant.operator;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -145,7 +146,7 @@ public class TenantOperator {
         if (tenant.getStatus() == null || tenant.getStatus().isBlank()) {
             tenant.setStatus(TenantStatus.ACTIVE.name());
         } else {
-            requireTenantStatus(tenant.getStatus());
+            tenant.setStatus(requireTenantStatus(tenant.getStatus()));
         }
         tenant.setTenantType(TenantType.valueOf(tenant.getTenantType().trim().toUpperCase()).name());
         tenant.setTenantCode(tenant.getTenantCode().trim());
@@ -154,14 +155,18 @@ public class TenantOperator {
     }
 
     /**
-     * 校验状态字符串是否为合法的 {@link TenantStatus} 名称。
+     * 校验状态字符串是否为合法的 {@link TenantStatus} 名称，并返回规范化的名称。
+     *
+     * <p>允许 {@code ACTIVE}、{@code PENDING}、{@code DISABLED}、{@code DISSOLVED}
+     * 四种状态；切换方向不做限制。</p>
      *
      * @param status 待校验状态
+     * @return 大写规范化的状态名称
      */
-    public static void requireTenantStatus(String status) {
+    public static String requireTenantStatus(String status) {
         requireText(status, "status");
         try {
-            TenantStatus.valueOf(status.trim().toUpperCase());
+            return TenantStatus.valueOf(status.trim().toUpperCase(Locale.ROOT)).name();
         } catch (IllegalArgumentException ex) {
             throw NexusException.build(
                     NexusStatusCode.INVALID_PARAMETER.fullCode(),

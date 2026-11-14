@@ -42,7 +42,7 @@ class TenantEntityContractsTest {
     @Test
     void tenantStatusEnumeratesOpsLifecycle() {
         assertThat(TenantStatus.values()).containsExactly(
-                TenantStatus.ACTIVE, TenantStatus.SUSPENDED, TenantStatus.ARCHIVED);
+                TenantStatus.ACTIVE, TenantStatus.PENDING, TenantStatus.DISABLED, TenantStatus.DISSOLVED);
     }
 
     @Test

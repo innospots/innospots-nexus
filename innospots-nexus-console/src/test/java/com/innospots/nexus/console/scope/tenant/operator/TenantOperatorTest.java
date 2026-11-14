@@ -43,6 +43,37 @@ class TenantOperatorTest {
     }
 
     @Test
+    void insertPersistsProvidedStatus() {
+        TenantDao tenantDao = mock(TenantDao.class);
+        TenantEntity tenant = new TenantEntity();
+        tenant.setTenantName("Acme");
+        tenant.setTenantCode("acme");
+        tenant.setTenantType(TenantType.TEAM.name());
+        tenant.setStatus("pending");
+
+        new TenantOperator(tenantDao).insert(tenant);
+
+        assertThat(tenant.getStatus()).isEqualTo(TenantStatus.PENDING.name());
+        verify(tenantDao).insert(tenant);
+    }
+
+    @Test
+    void requireTenantStatusNormalizesLifecycleNames() {
+        assertThat(TenantOperator.requireTenantStatus("active")).isEqualTo(TenantStatus.ACTIVE.name());
+        assertThat(TenantOperator.requireTenantStatus("pending")).isEqualTo(TenantStatus.PENDING.name());
+        assertThat(TenantOperator.requireTenantStatus("disabled")).isEqualTo(TenantStatus.DISABLED.name());
+        assertThat(TenantOperator.requireTenantStatus("dissolved")).isEqualTo(TenantStatus.DISSOLVED.name());
+    }
+
+    @Test
+    void requireTenantStatusRejectsRetiredNames() {
+        assertThatThrownBy(() -> TenantOperator.requireTenantStatus("SUSPENDED"))
+                .isInstanceOf(NexusException.class);
+        assertThatThrownBy(() -> TenantOperator.requireTenantStatus("ARCHIVED"))
+                .isInstanceOf(NexusException.class);
+    }
+
+    @Test
     void insertRejectsInvalidTenantCodeFormat() {
         TenantOperator operator = new TenantOperator(mock(TenantDao.class));
         TenantEntity tenant = new TenantEntity();

@@ -71,7 +71,8 @@ public class TenantEntity extends BaseEntity {
     private String tenantType;
 
     /**
-     * 以 {@link TenantStatus} 名称持久化的生命周期状态。
+     * 以 {@link TenantStatus} 名称持久化的生命周期状态：
+     * {@code ACTIVE}、{@code PENDING}、{@code DISABLED}、{@code DISSOLVED}。
      */
     @Column(length = 32, nullable = false)
     private String status;

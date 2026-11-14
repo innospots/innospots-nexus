@@ -1280,13 +1280,15 @@ Platform 发布 `TenantCreatedEvent` → portal `provisioning` 初始化默认�
 | tenant_id | VARCHAR(32) PK | 前缀 `TNT` |
 | tenant_name | VARCHAR(128) | |
 | tenant_code | VARCHAR(64) UNIQUE | |
-| status | VARCHAR(32) | ACTIVE / SUSPENDED / ARCHIVED |
+| status | VARCHAR(32) | ACTIVE（启用）/ PENDING（待启用）/ DISABLED（停用）/ DISSOLVED（解散），可逆 |
 | plan_code | VARCHAR(64) | 套餐引用 |
 | owner_portal_user_id | VARCHAR(32) | 初始 Owner 对应的 nx_portal_user |
 | + BaseEntity | | |
 
 **Scope**: global（Platform 管理）
 **模块**: platform
+**状态切换**: 由运营平台按需发起，服务端只校验枚举合法性，不限制流转方向；`DISSOLVED` 可切回 `ACTIVE` 恢复。
+**开通默认值**: 新租户默认 `ACTIVE`，`PENDING` 由运营通过状态接口显式设置。
 
 #### nx_enterprise（企业主体档案）
 

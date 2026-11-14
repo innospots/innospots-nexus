@@ -227,14 +227,17 @@ body:
                           '$i18n{organization.tenant-list.all-3:全部}'
                         value: ""
                       - label:
-                          '$i18n{organization.tenant-list.active:正常}'
+                          '$i18n{organization.tenant-list.active:启用}'
                         value: ACTIVE
                       - label:
-                          '$i18n{organization.tenant-list.suspend:暂停}'
-                        value: SUSPENDED
+                          '$i18n{organization.tenant-list.pending:待启用}'
+                        value: PENDING
                       - label:
-                          '$i18n{organization.tenant-list.archive:归档}'
-                        value: ARCHIVED
+                          '$i18n{organization.tenant-list.disabled:停用}'
+                        value: DISABLED
+                      - label:
+                          '$i18n{organization.tenant-list.dissolved:解散}'
+                        value: DISSOLVED
             - type: Field
               props:
                 label:  
@@ -306,9 +309,10 @@ body:
                 cell:
                   type: Text
                   props:
-                    text: "${row.status == 'ACTIVE' ? t('organization.tenant-list.status.active') : row.status == 'SUSPENDED' ?
-                      t('organization.tenant-list.status.suspended') : row.status == 'ARCHIVED' ?
-                      t('organization.tenant-list.status.archived') : row.status}"
+                    text: "${row.status == 'ACTIVE' ? t('organization.tenant-list.status.active') : row.status == 'PENDING' ?
+                      t('organization.tenant-list.status.pending') : row.status == 'DISABLED' ?
+                      t('organization.tenant-list.status.disabled') : row.status == 'DISSOLVED' ?
+                      t('organization.tenant-list.status.dissolved') : row.status}"
               - title:
                   '$i18n{organization.tenant-list.plan:套餐}'
                 dataIndex: planCode

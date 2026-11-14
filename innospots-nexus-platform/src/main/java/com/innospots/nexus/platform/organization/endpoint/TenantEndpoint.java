@@ -115,7 +115,8 @@ public class TenantEndpoint {
     @Operation(
             operationId = "platformTenantUpdateStatus",
             summary = "更新租户状态",
-            description = "目标状态为 ACTIVE、SUSPENDED 或 ARCHIVED；归档后可传 ACTIVE 恢复为正常。")
+            description = "目标状态为 ACTIVE（启用）、PENDING（待启用）、DISABLED（停用）或 DISSOLVED（解散）；"
+                    + "四种状态之间不做流转限制，解散后可传 ACTIVE 恢复。")
     public R<TenantVo> updateTenantStatus(
             @Parameter(description = "租户 ID", required = true) @PathParam("tenantId") String tenantId,
             TenantStatusUpdateRequest request) {

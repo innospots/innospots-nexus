@@ -112,15 +112,16 @@ public class PlatformTenantService {
      * 更新租户生命周期状态。
      *
      * @param tenantId 租户标识
-     * @param request  目标状态（{@link com.innospots.nexus.console.scope.tenant.domain.enums.TenantStatus} 名称）
+     * @param request  目标状态（{@link com.innospots.nexus.console.scope.tenant.domain.enums.TenantStatus} 名称：
+     *                 {@code ACTIVE}、{@code PENDING}、{@code DISABLED}、{@code DISSOLVED}）
      * @return 更新后的租户概要
      */
     @Transactional
     public TenantVo updateTenantStatus(String tenantId, TenantStatusUpdateRequest request) {
         Objects.requireNonNull(request, "request");
-        TenantOperator.requireTenantStatus(request.status());
+        String status = TenantOperator.requireTenantStatus(request.status());
         TenantEntity tenant = tenantOperator.requireById(tenantId);
-        tenant.setStatus(request.status().trim().toUpperCase());
+        tenant.setStatus(status);
         tenantOperator.update(tenant);
         MutationLog.info(
                 log,

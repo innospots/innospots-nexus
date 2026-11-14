@@ -29,7 +29,7 @@ public record TenantVo(
         String tenantCode,
         @Schema(description = "租户类型", examples = {"TEAM"})
         String tenantType,
-        @Schema(description = "生命周期状态", examples = {"ACTIVE"})
+        @Schema(description = "生命周期状态（ACTIVE、PENDING、DISABLED、DISSOLVED）", examples = {"ACTIVE"})
         String status,
         @Schema(description = "套餐/计划编码")
         String planCode,

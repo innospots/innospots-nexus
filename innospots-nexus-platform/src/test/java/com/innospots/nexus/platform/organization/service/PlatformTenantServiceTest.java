@@ -10,6 +10,8 @@ import com.innospots.nexus.console.scope.tenant.domain.entity.TenantEntity;
 import com.innospots.nexus.console.scope.tenant.domain.enums.TenantType;
 import com.innospots.nexus.console.scope.tenant.domain.event.TenantCreatedEvent;
 import com.innospots.nexus.console.scope.tenant.domain.request.TenantCreateRequest;
+import com.innospots.nexus.console.scope.tenant.domain.request.TenantStatusUpdateRequest;
+import com.innospots.nexus.console.scope.tenant.domain.vo.TenantVo;
 import com.innospots.nexus.platform.organization.operator.EnterpriseOperator;
 import com.innospots.nexus.console.scope.tenant.operator.TenantOperator;
 
@@ -17,6 +19,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class PlatformTenantServiceTest {
 
@@ -51,5 +55,26 @@ class PlatformTenantServiceTest {
         assertThat(captured.get().tenantId()).isEqualTo("tnt01");
         assertThat(captured.get().tenantCode()).isEqualTo("acme");
         assertThat(captured.get().eventType()).isEqualTo("platform.organization.created");
+    }
+
+    @Test
+    void updateTenantStatusStoresCanonicalLifecycleName() {
+        TenantOperator tenantOperator = mock(TenantOperator.class);
+        TenantEntity tenant = new TenantEntity();
+        tenant.setTenantId("tnt01");
+        tenant.setTenantName("Acme");
+        tenant.setTenantCode("acme");
+        tenant.setTenantType(TenantType.TEAM.name());
+        when(tenantOperator.requireById("tnt01")).thenReturn(tenant);
+
+        PlatformTenantService service = new PlatformTenantService(
+                tenantOperator,
+                mock(EnterpriseOperator.class));
+
+        TenantVo vo = service.updateTenantStatus("tnt01", new TenantStatusUpdateRequest(" dissolved "));
+
+        assertThat(vo.status()).isEqualTo("DISSOLVED");
+        assertThat(tenant.getStatus()).isEqualTo("DISSOLVED");
+        verify(tenantOperator).update(tenant);
     }
 }
