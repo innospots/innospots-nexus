@@ -43,3 +43,4 @@ node_modules/
 next-env.d.ts
 /.pnpm-store/
 node_modules.pactor-backup/
+/.openidea/
