@@ -1,0 +1,8 @@
+node_modules/
+dist-module/
+.module-pack-*/
+*.tgz
+.next/
+*.tsbuildinfo
+.playwright-cli/
+.test-dist/

@@ -1,7 +1,7 @@
 # 控制台接口、角色、导航与页面鉴权设计（当前实现）
 
 > 实现基线：2026-11-05
-> 适用范围：`innospots-nexus-platform`、`innospots-nexus-console`、`innospots-nexus-core`、示例 Spring 应用，以及 `innospots-nexus-ui/innospots-nexus-ui-console`。
+> 适用范围：`innospots-nexus-platform`、`innospots-nexus-console`、`innospots-nexus-core`、示例 Spring 应用，以及 `innospots-nexus-ui/ui-platform/ui-platform-app`。
 
 本文按当前代码的实际行为描述平台控制台鉴权，不描述尚未落地的通用权限平台能力。代码、插件声明和运行配置是事实来源。
 
@@ -407,7 +407,7 @@ viewGroup, order, public, hidden, activeMenu, roles, children
 
 ### 6.2 Next.js 拼接
 
-前端 `innospots-nexus-ui/innospots-nexus-ui-console/src/backend/pages/yaml/sitemap.yaml` 只维护：
+前端 `innospots-nexus-ui/ui-platform/ui-platform-app/src/backend/pages/yaml/sitemap.yaml` 只维护：
 
 - `pages`：页面 ID、路径、标题、版本、lazy、layout、activeMenu 等。
 - `layouts`：布局 DSL。
@@ -730,11 +730,11 @@ state.grantGroupsAll   // 当前主体是否拥有 "*"
 | 页面与操作鉴权服务 | `innospots-nexus-platform/src/main/java/com/innospots/nexus/platform/permission/service/` |
 | 导航组合与过滤 | `innospots-nexus-console/src/main/java/com/innospots/nexus/console/navigation/` |
 | 后端 meta-sitemap | `innospots-nexus-sample/innospots-nexus-sample-spring-platform/src/main/resources/console/meta-sitemap.yaml` |
-| Next.js sitemap 合成 | `innospots-nexus-ui/innospots-nexus-ui-console/src/backend/pages/sitemap.ts` |
-| page-access 客户端 | `innospots-nexus-ui/innospots-nexus-ui-console/src/backend/pages/page-access.ts` |
-| DSL 操作过滤 | `innospots-nexus-ui/innospots-nexus-ui-console/src/backend/pages/action-access.ts` |
-| 角色授权界面 YAML | `innospots-nexus-ui/innospots-nexus-ui-console/src/backend/pages/yaml/role/role-detail-basic.yaml` |
-| 授权面板组件 | `innospots-nexus-ui/innospots-nexus-ui-console/src/frontend/components/settings/permission-grant-panel.tsx` |
+| Next.js sitemap 合成 | `innospots-nexus-ui/ui-platform/ui-platform-app/src/backend/pages/sitemap.ts` |
+| page-access 客户端 | `innospots-nexus-ui/ui-platform/ui-platform-app/src/backend/pages/page-access.ts` |
+| DSL 操作过滤 | `innospots-nexus-ui/ui-platform/ui-platform-app/src/backend/pages/action-access.ts` |
+| 角色授权界面 YAML | `innospots-nexus-ui/ui-platform/ui-platform-app/src/backend/pages/yaml/role/role-detail-basic.yaml` |
+| 授权面板组件 | `innospots-nexus-ui/ui-platform/ui-platform-app/src/frontend/components/settings/permission-grant-panel.tsx` |
 | Pactor 页面 Schema | `../pactor/packages/schema/src/schemas/page-dsl.ts` |
 | Pactor action 执行语义 | `../pactor/packages/runtime/src/action/engine.ts` |
 

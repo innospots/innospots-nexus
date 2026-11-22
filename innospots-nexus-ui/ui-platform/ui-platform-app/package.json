@@ -1,0 +1,70 @@
+{
+  "name": "@innospots/ui-platform-app",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "files": [
+    "dist-module",
+    "module"
+  ],
+  "exports": {
+    "./manifest": "./dist-module/manifest.json",
+    "./client": {
+      "types": "./module/client.d.ts",
+      "default": "./dist-module/client/index.js"
+    },
+    "./server": {
+      "types": "./module/server.d.ts",
+      "default": "./dist-module/server/index.mjs"
+    },
+    "./styles.css": "./dist-module/client/index.css"
+  },
+  "scripts": {
+    "dev": "next dev -p 9011",
+    "build": "next build",
+    "start": "next start -p 9011",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "node tests/run-tests.mjs",
+    "build:module": "pactor module build",
+    "pack:module": "pactor module pack --no-bump",
+    "publish:module": "pactor module publish"
+  },
+  "peerDependencies": {
+    "@pactor-app/core": "1.72.0",
+    "@pactor-app/runtime": "1.72.0",
+    "@pactor-app/ui": "1.72.0",
+    "next": "16.3.5",
+    "pactor-app": "1.72.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "dependencies": {
+    "@pactor-app/core": "1.72.0",
+    "@pactor-app/i18n": "1.72.0",
+    "@pactor-app/router": "1.72.0",
+    "@pactor-app/runtime": "1.72.0",
+    "@pactor-app/schema": "1.72.0",
+    "@pactor-app/theme": "1.72.0",
+    "@pactor-app/ui": "1.72.0",
+    "lucide-react": "1.45.0",
+    "next": "16.3.5",
+    "pactor-app": "1.72.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "yaml": "^2.9.1"
+  },
+  "devDependencies": {
+    "@pactor-app/cli": "1.72.0",
+    "@tailwindcss/cli": "^4.3.4",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^20.19.43",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "esbuild": "^0.25.12",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "16.3.5",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.9.3"
+  }
+}

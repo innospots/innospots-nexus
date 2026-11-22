@@ -1,0 +1,42 @@
+{
+  "name": "innospots-ui-platform-shell",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev -p 9020",
+    "assemble:modules": "pactor-shell assemble",
+    "validate:modules": "pactor-shell validate",
+    "theme:sync": "pactor-shell theme sync",
+    "smoke:module-api": "node tools/smoke-module-api.mjs",
+    "build": "npm run assemble:modules && npm run validate:modules && npm run theme:sync && next build",
+    "start": "next start -p 9020",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@innospots/ui-platform-app": "file:../ui-platform-app/innospots-ui-platform-app-0.1.0.tgz",
+    "@pactor-app/blocks": "1.72.0",
+    "@pactor-app/core": "1.72.0",
+    "@pactor-app/i18n": "1.72.0",
+    "@pactor-app/runtime": "1.72.0",
+    "@pactor-app/shell": "1.72.0",
+    "@pactor-app/ui": "1.72.0",
+    "lucide-react": "^1.34.0",
+    "next": "16.3.5",
+    "pactor-app": "1.72.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "yaml": "^2.9.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^20.19.43",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "16.3.5",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.9.3"
+  }
+}

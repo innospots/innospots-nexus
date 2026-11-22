@@ -1,0 +1,9 @@
+{
+  "modules": [
+    {
+      "package": "@innospots/ui-platform-app",
+      "enabled": true,
+      "menuMode": "hidden"
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "components": {
+    "Typography": ["props.text"],
+    "Field": ["props.label", "props.labelHint", "props.description"],
+    "Textarea": [
+      "props.label",
+      "props.placeholder",
+      "props.description",
+      "props.rules[*].message"
+    ],
+    "Input": ["props.rules[*].message"],
+    "Select": ["props.rules[*].message"],
+    "RadioGroup": ["props.label", "props.options[*].label", "props.rules[*].message"],
+    "Breadcrumb": ["props.items[*].label"],
+    "Descriptions": ["props.title", "props.items[*].label"],
+    "Tabs": ["props.items[*].label"],
+    "Drawer": ["props.title", "props.cancelText", "props.okText"],
+    "Alert": ["props.message", "props.description"],
+    "Header": ["props.locales[*].label", "props.user.items[*].label"],
+    "FilterSelect": [
+      "props.label",
+      "props.placeholder",
+      "props.options[*].label",
+      "props.rules[*].message"
+    ],
+    "NavigationShell": [],
+    "ThemeGallery": [],
+    "NavigationLayoutSettingPanel": [],
+    "ConsoleTimezoneSettingRow": []
+  },
+  "actions": {
+    "overlay.open": ["params.overlay.title"]
+  }
+}

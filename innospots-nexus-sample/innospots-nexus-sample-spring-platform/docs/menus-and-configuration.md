@@ -162,7 +162,7 @@ openMode = INTERNAL
 前端文件：
 
 ```text
-innospots-nexus-ui-console/src/server/yaml/sitemap.yaml
+innospots-nexus-ui/ui-platform/ui-platform-app/src/server/yaml/sitemap.yaml
 ```
 
 根字段通常包括：

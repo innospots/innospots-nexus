@@ -1,0 +1,66 @@
+# Shell 站点定制层：品牌 + 全量导航。
+#
+# 菜单策略：ui-platform-app 在 module-list.json 中设为 menuMode: "hidden"，
+# 模块自带的菜单不进入导航（仅保留为隐藏路由），导航完全由本文件定义。
+# 因此这里的每条菜单都需要：
+#   - pageId：装配后的全局页面 id（<moduleId>:<pageId>）；
+#   - path：装配后的公开路径（<basePath><pages[].path>），Shell 站点不会
+#     自动为跨模块页面推导 path，必须显式写。
+id: shell
+resourceType: sitemap
+version: 2
+dslVersion: "1.0"
+app: { name: InnoSpots }
+
+# 未登录时进入控制台自己的登录页（平台登录，写 nexus_platform_access_token）。
+auth: { loginPath: /console/login }
+
+menus:
+  - { id: workspace, type: page, pageId: "console:dashboard", path: /console, title: 工作台, icon: workspace }
+
+  - id: console-system
+    type: group
+    title: 系统管理
+    icon: settings
+    children:
+      - { id: console-system-settings, type: page, pageId: "console:system-settings", path: /console/system/settings/general, title: 系统设置 }
+      - { id: console-dictionaries, type: page, pageId: "console:dictionary-type-list", path: /console/system/dictionaries, title: 数据字典 }
+      - { id: themes, type: page, pageId: "shell:themes", path: /settings/themes, title: 主题设置, icon: palette }
+      - { id: console-audit-logs, type: page, pageId: "console:audit-log-list", path: /console/system/audit-logs, title: 审计日志 }
+      - { id: console-plugins, type: page, pageId: "console:plugin-list", path: /console/system/plugins, title: 插件管理 }
+
+  - id: console-ops
+    type: group
+    title: 运营管理
+    icon: users
+    children:
+      - { id: console-roles, type: page, pageId: "console:role-list", path: /console/system/roles, title: 角色管理 }
+      - { id: console-tenants, type: page, pageId: "console:tenant-list", path: /console/ops/organization/tenants, title: 租户管理 }
+      - { id: console-platform-users, type: page, pageId: "console:platform-user-list", path: /console/ops/platform-users, title: 用户列表 }
+      - { id: console-platform-invites, type: page, pageId: "console:platform-invite-list", path: /console/ops/platform-users/invites, title: 邀请列表 }
+      - { id: console-access-requests, type: page, pageId: "console:platform-access-request-list", path: /console/ops/platform-users/access-requests, title: 注册审批 }
+
+
+
+  # ── 隐藏路由：认证 / 详情 / 创建页（不在导航展示，但必须进入路由注册表） ──
+  - { id: console-themes, type: page, pageId: "console:themes", path: /console/system/settings/themes, title: 主题选择, hidden: true }
+  - { id: console-login, type: page, pageId: "console:login", path: /console/login, title: 登录, layout: login, hidden: true }
+  - { id: console-password-reset, type: page, pageId: "console:password-reset", path: /console/password/reset, title: 找回密码, layout: login, hidden: true }
+  - { id: console-pending-approval, type: page, pageId: "console:pending-approval", path: /console/pending-approval, title: 注册待审核, layout: login, hidden: true }
+  - { id: console-password-change, type: page, pageId: "console:password-change", path: /console/account/password, title: 修改密码, hidden: true }
+  - { id: console-invite-accept, type: page, pageId: "console:invite-accept", path: "/console/invite/:token", title: 接受邀请, layout: login, hidden: true }
+  - { id: console-invite-activate, type: page, pageId: "console:invite-activate", path: /console/register/invite, title: 邀请码注册, layout: login, hidden: true }
+  - { id: console-open-registration, type: page, pageId: "console:open-registration", path: /console/register/open, title: 开放注册, layout: login, hidden: true }
+  - { id: console-access-registration, type: page, pageId: "console:access-registration", path: /console/register/approval, title: 注册待审核, layout: login, hidden: true }
+
+  - { id: console-role-detail-basic, type: page, pageId: "console:role-detail-basic", path: "/console/system/roles/:roleId", title: 角色详情, activeMenu: console-roles, hidden: true }
+  - { id: console-role-detail-permissions, type: page, pageId: "console:role-detail-permissions", path: "/console/system/roles/:roleId/permissions", title: 角色权限设置, activeMenu: console-roles, hidden: true }
+  - { id: console-role-detail-members, type: page, pageId: "console:role-detail-members", path: "/console/system/roles/:roleId/members", title: 角色成员列表, activeMenu: console-roles, hidden: true }
+  - { id: console-dictionary-create, type: page, pageId: "console:dictionary-type-create", path: /console/system/dictionaries/create, title: 新建字典, activeMenu: console-dictionaries, hidden: true }
+  - { id: console-dictionary-detail, type: page, pageId: "console:dictionary-type-detail", path: "/console/system/dictionaries/:dictionaryTypeId", title: 字典详情, activeMenu: console-dictionaries, hidden: true }
+  - { id: console-audit-log-detail, type: page, pageId: "console:audit-log-detail", path: "/console/system/audit-logs/:logId", title: 审计日志详情, activeMenu: console-audit-logs, hidden: true }
+  - { id: console-plugin-detail, type: page, pageId: "console:plugin-detail", path: "/console/system/plugins/:pluginId", title: 插件详情, activeMenu: console-plugins, hidden: true }
+  - { id: console-platform-user-create, type: page, pageId: "console:platform-user-create", path: /console/ops/platform-users/create, title: 添加平台用户, activeMenu: console-platform-users, hidden: true }
+  - { id: console-platform-user-detail, type: page, pageId: "console:platform-user-detail", path: "/console/ops/platform-users/:platformUserId", title: 平台用户详情, activeMenu: console-platform-users, hidden: true }
+  - { id: console-tenant-detail, type: page, pageId: "console:tenant-detail", path: "/console/ops/organization/tenants/:tenantId", title: 租户详情, activeMenu: console-tenants, hidden: true }
+  - { id: profile, type: page, pageId: "shell:profile", path: /profile, title: 个人中心, hidden: true }

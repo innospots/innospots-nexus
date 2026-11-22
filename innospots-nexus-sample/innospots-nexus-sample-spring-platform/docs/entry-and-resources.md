@@ -331,12 +331,12 @@ POST /api/d/nexus/catalog/sync
 
 | 目录/文件 | 用途 |
 |-----------|------|
-| `innospots-nexus-ui-console/src/server/yaml/sitemap.yaml` | 前端页面、布局和菜单总表 |
-| `innospots-nexus-ui-console/src/server/yaml/**/{pageId}.yaml` | 页面 DSL，文件名必须等于 `pages[].id` |
-| `innospots-nexus-ui-console/app/api/sitemap/route.ts` | BFF 的 `/api/sitemap`，按会话过滤后返回前端 sitemap |
-| `innospots-nexus-ui-console/app/api/public/pages/[id]/route.ts` | 懒加载页面 DSL |
-| `innospots-nexus-ui-console/src/pactor/components/` | 自定义组件 |
-| `innospots-nexus-ui-console/public/` | 静态资源 |
+| `innospots-nexus-ui/ui-platform/ui-platform-app/src/server/yaml/sitemap.yaml` | 前端页面、布局和菜单总表 |
+| `innospots-nexus-ui/ui-platform/ui-platform-app/src/server/yaml/**/{pageId}.yaml` | 页面 DSL，文件名必须等于 `pages[].id` |
+| `innospots-nexus-ui/ui-platform/ui-platform-app/app/api/sitemap/route.ts` | BFF 的 `/api/sitemap`，按会话过滤后返回前端 sitemap |
+| `innospots-nexus-ui/ui-platform/ui-platform-app/app/api/public/pages/[id]/route.ts` | 懒加载页面 DSL |
+| `innospots-nexus-ui/ui-platform/ui-platform-app/src/pactor/components/` | 自定义组件 |
+| `innospots-nexus-ui/ui-platform/ui-platform-app/public/` | 静态资源 |
 
 后端 `console/meta-sitemap.yaml` 与前端 `sitemap.yaml` 的 `menus[]` 是两套事实源，菜单节点外形相近，但可见性字段不同：后端使用 `roles`，前端 BFF 使用 `public` / `permission`。二者不是同一个文件，也不会互相读取。
 
