@@ -1,0 +1,8 @@
+dsl: "1.0"
+page:
+  access-mode: authenticated
+  id: settings-appearance
+  title: 界面设置
+  name: settingsAppearance
+body:
+  type: PortalAppearanceSettings

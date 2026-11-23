@@ -1,7 +1,7 @@
-package com.innospots.nexus.portal.auth.domain.request;
+package com.innospots.nexus.portal.registration.domain.request;
 
 /**
- * 租户域身份注册。不创建 TenantMember。
+ * 租户域身份注册。只创建登录身份，不创建 TenantMember，也不签发令牌。
  *
  * @param userName           唯一登录名
  * @param displayName        可选显示名称

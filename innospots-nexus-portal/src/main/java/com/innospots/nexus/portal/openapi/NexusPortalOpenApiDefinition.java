@@ -20,11 +20,12 @@ import com.innospots.nexus.core.openapi.NexusOpenApiSecurityNames;
         info = @Info(
                 title = "Innospots Nexus Portal API",
                 version = "1.0.0",
-                description = "租户域认证、注册与作用域选择 Jakarta REST 契约；运行时仅暴露构建期生成的 OpenAPI。",
+                description = "租户域注册、认证与作用域选择 Jakarta REST 契约；运行时仅暴露构建期生成的 OpenAPI。",
                 contact = @Contact(name = "Innospots Nexus")
         ),
         tags = {
-                @Tag(name = "TenantAuth", description = "租户域认证与注册"),
+                @Tag(name = "TenantRegistration", description = "租户域身份注册"),
+                @Tag(name = "TenantAuth", description = "租户域认证"),
                 @Tag(name = "TenantScope", description = "工作区与项目作用域选择")
         }
 )

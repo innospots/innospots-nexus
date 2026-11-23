@@ -1,0 +1,8 @@
+node_modules/
+.next/
+out/
+dist-module/
+*.tgz
+.env*.local
+tsconfig.tsbuildinfo
+next-env.d.ts

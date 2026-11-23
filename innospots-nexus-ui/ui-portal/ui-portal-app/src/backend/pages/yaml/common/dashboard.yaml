@@ -1,0 +1,47 @@
+dsl: "1.0"
+page:
+  access-mode: authenticated
+  id: dashboard
+  title: 工作台
+  name: dashboard
+body:
+  type: Page
+  props: { className: portal-page }
+  children:
+    - type: Flex
+      props: { direction: vertical, gap: middle }
+      children:
+        - type: Typography
+          props:
+            variant: h3
+            text: 欢迎回来，${data.session.user.name}
+        - type: Typography
+          props:
+            variant: muted
+            text: 这是租户门户的工作台。当前版本先提供登录、注册、工作台与个人设置。
+    - type: Grid
+      props: { columns: 2, gap: 16 }
+      children:
+        - type: Card
+          props: { title: 账号 }
+          children:
+            - type: Typography
+              props: { variant: muted, text: "当前登录名：${data.session.user.username}" }
+            - type: Button
+              props: { text: 打开个人设置, variant: primary }
+              events:
+                onClick:
+                  - action: navigate
+                    params: { to: /settings/profile }
+        - type: Card
+          props: { title: 下一步 }
+          children:
+            - type: Typography
+              props: { variant: muted, text: 后续可在此接入租户、工作区、项目与业务模块。 }
+    - type: Card
+      props: { title: 联调状态 }
+      children:
+        - type: Typography
+          props: { variant: muted, text: "认证接口：/tenant/auth（spring-portal :8081）" }
+        - type: Typography
+          props: { variant: muted, text: "页面访问模式：authenticated（未登录自动跳转登录页）" }

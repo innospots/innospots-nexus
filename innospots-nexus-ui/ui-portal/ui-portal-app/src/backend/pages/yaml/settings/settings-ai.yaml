@@ -1,0 +1,8 @@
+dsl: "1.0"
+page:
+  access-mode: authenticated
+  id: settings-ai
+  title: AI 设置
+  name: settingsAi
+body:
+  type: PortalAiSettings

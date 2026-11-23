@@ -15,8 +15,9 @@ class OpenApiBuildContractsTest {
         assertThat(spec).exists();
         String yaml = Files.readString(spec);
         assertThat(yaml).contains("Innospots Nexus Portal API");
+        assertThat(yaml).contains("/tenant/registration/register");
         assertThat(yaml).contains("/tenant/auth/login");
-        assertThat(yaml).contains("operationId: tenantAuthRegister");
+        assertThat(yaml).contains("operationId: tenantRegistrationRegister");
         assertThat(yaml).contains("operationId: tenantAuthCaptchaIssue");
         assertThat(yaml).contains("operationId: tenantAuthLogin");
         assertThat(yaml).contains("operationId: tenantAuthSelectTenant");

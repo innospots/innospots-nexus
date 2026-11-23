@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Import;
 
 import com.innospots.nexus.spring.console.EnableNexusConsole;
 import com.innospots.nexus.spring.portal.config.PortalAuthConfiguration;
+import com.innospots.nexus.spring.portal.config.PortalRegistrationConfiguration;
 import com.innospots.nexus.spring.portal.config.PortalScopeConfiguration;
 import com.innospots.nexus.spring.portal.config.PortalUserConfiguration;
 
@@ -18,6 +19,7 @@ import com.innospots.nexus.spring.portal.config.PortalUserConfiguration;
  *
  * <p>组合 {@link EnableNexusConsole} 与 portal 域各领域配置：</p>
  * <ul>
+ *   <li>{@link PortalRegistrationConfiguration}：租户域身份注册（独立领域）；</li>
  *   <li>{@link PortalAuthConfiguration}：登录、令牌与认证端点；</li>
  *   <li>{@link PortalUserConfiguration}：平台注册用户、密码与 OAuth 身份；</li>
  *   <li>{@link PortalScopeConfiguration}：租户 → 工作区 → 项目作用域。</li>
@@ -32,6 +34,7 @@ import com.innospots.nexus.spring.portal.config.PortalUserConfiguration;
 @Documented
 @EnableNexusConsole
 @Import({
+        PortalRegistrationConfiguration.class,
         PortalAuthConfiguration.class,
         PortalUserConfiguration.class,
         PortalScopeConfiguration.class

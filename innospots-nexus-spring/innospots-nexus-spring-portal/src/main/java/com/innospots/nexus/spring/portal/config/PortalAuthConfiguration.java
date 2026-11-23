@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
+import com.innospots.nexus.console.auth.service.AuthRsaKeyService;
 import com.innospots.nexus.console.auth.service.AuthTokenPairIssuer;
 import com.innospots.nexus.console.auth.service.LoginCaptchaGate;
 import com.innospots.nexus.console.auth.service.TokenIssuer;
@@ -110,6 +111,7 @@ public class PortalAuthConfiguration {
      * @param portalUserService     用户服务
      * @param portalPasswordService 密码服务
      * @param passwordDecryptor     密码解密器
+     * @param authRsaKeyService     RSA 公钥服务
      * @return 认证端点
      */
     @Bean
@@ -118,8 +120,10 @@ public class PortalAuthConfiguration {
             TenantAuthFacade tenantAuthFacade,
             PortalUserService portalUserService,
             PortalPasswordService portalPasswordService,
-            PasswordDecryptor passwordDecryptor) {
+            PasswordDecryptor passwordDecryptor,
+            AuthRsaKeyService authRsaKeyService) {
         return new TenantAuthEndpoint(
-                tenantAuthFacade, portalUserService, portalPasswordService, passwordDecryptor);
+                tenantAuthFacade, portalUserService, portalPasswordService,
+                passwordDecryptor, authRsaKeyService);
     }
 }

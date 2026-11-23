@@ -37,6 +37,19 @@ class PortalModuleBoundaryTest {
                 .isNotInterface();
     }
 
+    @Test
+    void registrationIsAnIndependentPortalDomain() throws ClassNotFoundException {
+        assertTypeAbsent("com.innospots.nexus.portal.auth.domain.request.TenantRegisterRequest");
+        assertTypeAbsent("com.innospots.nexus.portal.auth.endpoint.TenantRegistrationEndpoint");
+
+        assertThat(Class.forName("com.innospots.nexus.portal.registration.domain.request.TenantRegisterRequest"))
+                .isNotNull();
+        assertThat(Class.forName("com.innospots.nexus.portal.registration.endpoint.TenantRegistrationEndpoint"))
+                .isNotNull();
+        assertThat(Class.forName("com.innospots.nexus.portal.registration.service.TenantRegistrationFacade"))
+                .isNotNull();
+    }
+
     private static void assertTypeAbsent(String className) {
         assertThatThrownBy(() -> Class.forName(className))
                 .as(className)

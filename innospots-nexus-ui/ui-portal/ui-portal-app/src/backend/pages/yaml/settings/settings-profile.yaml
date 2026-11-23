@@ -1,0 +1,8 @@
+dsl: "1.0"
+page:
+  access-mode: authenticated
+  id: settings-profile
+  title: 个人设置
+  name: settingsProfile
+body:
+  type: PortalProfileSettings

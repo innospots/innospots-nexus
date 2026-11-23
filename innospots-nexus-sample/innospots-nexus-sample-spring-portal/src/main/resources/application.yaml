@@ -1,6 +1,9 @@
 spring:
   application:
     name: nexus-console
+  jersey:
+    # Jersey Servlet 直接处理 Jakarta REST 路由
+    type: servlet
   config:
     import:
       - optional:classpath:nexus/console-application.yaml
@@ -13,13 +16,22 @@ spring:
   sql:
     init:
       mode: always
-      # plugin 安装表（本模块 resources）+ 目录索引（innospots-nexus-core JAR）
-      schema-locations: classpath:nexus/schema/plugin-installation-h2.sql,classpath:nexus/schema/console-catalog-h2.sql
+      # core → plugin → console → portal；脚本均为 CREATE IF NOT EXISTS
+      schema-locations:
+        - classpath:schema/nexus-core-h2.sql
+        - classpath:schema/nexus-plugin-h2.sql
+        - classpath:schema/nexus-console-h2.sql
+        - classpath:schema/nexus-portal-h2.sql
 
 server:
   port: 8081
 
 # ---------------------------------------------------------------------------
+# 租户门户 Web 横切
+#
+# 绑定类: com.innospots.nexus.spring.console.config.ConsoleWebProperties
+# 装配类: ConsoleJaxRsWebConfiguration
+#
 # Nexus 插件宿主与控制台策略
 #
 # 绑定类: com.innospots.nexus.spring.core.plugin.PluginHostProperties
@@ -32,6 +44,25 @@ server:
 # 为宿主全局，不按 workspace 分表。
 # ---------------------------------------------------------------------------
 nexus:
+  console:
+    web:
+      enabled: true
+      security:
+        # 租户域匿名认证路径；其余 /tenant/auth/** 仍要求 Bearer 令牌。
+        permit-all-patterns:
+          - /
+          - /openapi/**
+          - /api/public/**
+          - /api/d/*/public/**
+          - /health
+          - /actuator/health/**
+          - /tenant/registration/register
+          - /tenant/auth/captcha/issue
+          - /tenant/auth/login
+          - /tenant/auth/refresh
+          - /tenant/auth/rsa-public-key
+          - /tenant/auth/password/reset
+
   plugin:
     # nexus.plugin.auto-install
     # 含义: classpath 首次发现插件时，是否自动写入 nx_plugin_installation 并期望启用。

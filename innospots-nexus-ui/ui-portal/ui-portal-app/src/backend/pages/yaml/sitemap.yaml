@@ -1,0 +1,41 @@
+# Nexus 用户门户 Sitemap
+id: portal
+resourceType: sitemap
+version: 1
+dslVersion: "1.0"
+app: { name: Nexus Portal }
+layout: admin
+auth: { loginPath: /login }
+
+pages:
+  - { id: login, path: /login, title: 登录, version: 1, lazy: true, public: true, layout: auth }
+  - { id: register, path: /register, title: 注册, version: 1, lazy: true, public: true, layout: auth }
+  - { id: dashboard, path: /, title: 工作台, version: 1, lazy: true }
+  - { id: settings-profile, path: /settings/profile, title: 个人设置, version: 1, lazy: true, activeMenu: nav-settings }
+  - { id: settings-appearance, path: /settings/appearance, title: 界面设置, version: 1, lazy: true, activeMenu: nav-settings }
+  - { id: settings-ai, path: /settings/ai, title: AI 设置, version: 1, lazy: true, activeMenu: nav-settings }
+
+layouts:
+  admin:
+    dsl: "1.0"
+    body:
+      type: Layout
+      props: { className: portal-shell-root }
+      children:
+        - type: PortalShell
+          props:
+            user: ${data.session.user}
+            menus: ${data.session.menus}
+          children:
+            - type: Content
+              props: { className: portal-shell-content }
+              children:
+                - type: PageOutlet
+  auth:
+    dsl: "1.0"
+    body:
+      type: PageOutlet
+  blank:
+    dsl: "1.0"
+    body:
+      type: PageOutlet

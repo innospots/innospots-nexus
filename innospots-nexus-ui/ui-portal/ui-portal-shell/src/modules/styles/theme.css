@@ -1,0 +1,5 @@
+/* Nexus Portal 布局令牌；颜色与尺度由 @pactor-app/theme 皮肤提供。 */
+:root {
+  --sidebar-width: 16rem;
+  --sidebar-width-icon: 3rem;
+}

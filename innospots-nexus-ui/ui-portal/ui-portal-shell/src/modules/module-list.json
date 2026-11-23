@@ -1,0 +1,9 @@
+{
+  "modules": [
+    {
+      "package": "@innospots/ui-portal-app",
+      "enabled": true,
+      "menuMode": "hidden"
+    }
+  ]
+}

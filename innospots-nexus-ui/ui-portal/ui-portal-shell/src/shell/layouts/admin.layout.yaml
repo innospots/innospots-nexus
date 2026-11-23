@@ -1,0 +1,16 @@
+# 门户外壳布局：使用 portal 模块注册的 PortalShell（带文字导航与退出）。
+# 通过 Shell 站点层覆盖 @pactor-app/shell 的内置 admin 布局。
+dsl: "1.0"
+body:
+  type: Layout
+  props: { className: portal-shell-root }
+  children:
+    - type: PortalShell
+      props:
+        user: ${data.session.user}
+        menus: ${data.session.menus}
+      children:
+        - type: Content
+          props: { className: portal-shell-content }
+          children:
+            - type: PageOutlet

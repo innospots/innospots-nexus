@@ -1,0 +1,14 @@
+{
+  "id": "portal",
+  "name": "Nexus 用户门户",
+  "basePath": "/portal",
+  "yamlRoot": "src/backend/pages/yaml",
+  "clientEntry": "module/client.ts",
+  "serverEntry": "module/server.ts",
+  "apiPrefixes": ["/api/d", "/api/auth", "/api/registration"],
+  "actions": [],
+  "publicDir": "public",
+  "target": "innospots-web-shell@3",
+  "access": { "default": "authenticated" },
+  "tailwind": { "enabled": true, "input": "src/app/globals.css" }
+}

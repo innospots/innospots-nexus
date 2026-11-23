@@ -1,0 +1,34 @@
+# Shell 站点定制层：品牌 + 全量导航。
+#
+# portal 模块在 module-list.json 中设为 menuMode: "hidden"，
+# 模块自带菜单不进入导航（仅保留为隐藏路由），导航完全由本文件定义。
+# 每条菜单的 path 必须是装配后的公开路径（<basePath><pages[].path>）。
+id: shell
+resourceType: sitemap
+version: 1
+dslVersion: "1.0"
+app: { name: Nexus Portal }
+
+# 未登录时进入 portal 自己的登录页。
+auth: { loginPath: /portal/login }
+
+menus:
+  - { id: workspace, type: page, pageId: "portal:dashboard", path: /portal, title: 工作台, icon: workspace }
+
+  - id: settings
+    type: group
+    title: 设置
+    icon: settings
+    children:
+      - { id: portal-settings-profile, type: page, pageId: "portal:settings-profile", path: /portal/settings/profile, title: 个人设置, icon: user-round }
+      - { id: portal-settings-appearance, type: page, pageId: "portal:settings-appearance", path: /portal/settings/appearance, title: 界面设置, icon: palette }
+      - { id: portal-settings-ai, type: page, pageId: "portal:settings-ai", path: /portal/settings/ai, title: AI 设置, icon: sparkles }
+
+  # ── 隐藏路由：认证页与 Shell 内置页（不在导航展示，但需进入路由注册表） ──
+  - { id: login, type: page, pageId: "portal:login", path: /portal/login, title: 登录, layout: login, public: true, hidden: true }
+  - { id: portal-register, type: page, pageId: "portal:register", path: /portal/register, title: 注册, layout: login, public: true, hidden: true }
+  - { id: themes, type: page, pageId: "shell:themes", path: /settings/themes, title: 主题设置, hidden: true }
+  - { id: profile, type: page, pageId: "shell:profile", path: /profile, title: 个人中心, hidden: true }
+  - { id: "403", type: page, pageId: "shell:403", path: /403, title: 无权限, layout: blank, public: true, hidden: true }
+  - { id: "404", type: page, pageId: "shell:404", path: /404, title: 页面不存在, layout: blank, public: true, hidden: true }
+  - { id: "500", type: page, pageId: "shell:500", path: /500, title: 服务异常, layout: blank, public: true, hidden: true }

@@ -1,6 +1,7 @@
 package com.innospots.nexus.portal.auth.endpoint;
 
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -17,26 +18,27 @@ import com.innospots.nexus.base.thread.TLC;
 import com.innospots.nexus.base.util.Checks;
 import com.innospots.nexus.console.auth.domain.request.AuthCaptchaIssueRequest;
 import com.innospots.nexus.console.auth.domain.request.AuthLoginRequest;
-import com.innospots.nexus.console.auth.domain.vo.AuthCaptchaVo;
 import com.innospots.nexus.console.auth.domain.request.PasswordChangeRequest;
 import com.innospots.nexus.console.auth.domain.request.PasswordResetRequest;
 import com.innospots.nexus.console.auth.domain.request.TokenRefreshRequest;
+import com.innospots.nexus.console.auth.domain.vo.AuthCaptchaVo;
+import com.innospots.nexus.console.auth.domain.vo.AuthRsaPublicKeyVo;
 import com.innospots.nexus.console.auth.domain.vo.AuthTokenVo;
+import com.innospots.nexus.console.auth.service.AuthRsaKeyService;
 import com.innospots.nexus.portal.auth.domain.request.SelectTenantRequest;
-import com.innospots.nexus.portal.auth.domain.request.TenantRegisterRequest;
 import com.innospots.nexus.portal.auth.service.TenantAuthFacade;
 import com.innospots.nexus.console.credential.password.PasswordDecryptor;
-import com.innospots.nexus.console.user.portal.domain.request.PortalUserPasswordRegisterRequest;
+import com.innospots.nexus.console.user.portal.domain.vo.PortalUserProfileVo;
 import com.innospots.nexus.console.user.portal.service.PortalPasswordService;
 import com.innospots.nexus.console.user.portal.service.PortalUserService;
 
 /**
- * 租户域认证与身份注册 REST 资源。
+ * 租户域认证 REST 资源。注册由 {@link com.innospots.nexus.portal.registration} 独立提供。
  */
 @Path("/tenant/auth")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-@Tag(name = "TenantAuth", description = "租户域认证与注册")
+@Tag(name = "TenantAuth", description = "租户域认证")
 @RequiredArgsConstructor
 public class TenantAuthEndpoint {
 
@@ -44,27 +46,23 @@ public class TenantAuthEndpoint {
     private final PortalUserService userOperator;
     private final PortalPasswordService passwordOperator;
     private final PasswordDecryptor passwordDecryptor;
+    private final AuthRsaKeyService authRsaKeyService;
 
-    @POST
-    @Path("/register")
-    @Operation(operationId = "tenantAuthRegister", summary = "注册租户域身份")
-    public R<AuthTokenVo> register(TenantRegisterRequest request) {
-        Checks.notNull(request, "request");
-        userOperator.registerWithPassword(new PortalUserPasswordRegisterRequest(
-                request.userName(),
-                request.displayName(),
-                request.email(),
-                request.mobile(),
-                request.region(),
-                request.timeZone(),
-                request.language(),
-                request.encryptedPassword()));
-        AuthLoginRequest loginRequest = new AuthLoginRequest(
-                request.userName(),
-                request.encryptedPassword(),
-                null,
-                null);
-        return R.ok(tenantAuthFacade.login(loginRequest));
+    @GET
+    @Path("/rsa-public-key")
+    @Operation(operationId = "tenantAuthRsaPublicKey", summary = "获取登录密码 RSA 公钥")
+    public R<AuthRsaPublicKeyVo> getPasswordEncryptionPublicKey() {
+        return R.ok(authRsaKeyService.getPasswordEncryptionPublicKey());
+    }
+
+    @GET
+    @Path("/profile")
+    @Operation(operationId = "tenantAuthProfile", summary = "当前登录用户档案")
+    public R<PortalUserProfileVo> profile() {
+        String userId = requireAuthenticatedUserId();
+        PortalUserProfileVo profile = userOperator.findById(userId)
+                .orElseThrow(() -> NexusException.build(NexusStatusCode.AUTHENTICATION_FAILED));
+        return R.ok(profile);
     }
 
     @POST

@@ -1,0 +1,694 @@
+@import "tailwindcss";
+
+:root {
+  --radius: 12px;
+  --sidebar-width: 16rem;
+  --sidebar-width-icon: 3rem;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI",
+      Roboto, "Noto Sans", Arial, sans-serif);
+}
+
+/* ── 认证页 ─────────────────────────────────────────────── */
+
+.portal-auth-page {
+  display: flex;
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  min-height: 100vh;
+  max-height: 100vh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  padding: 48px 16px;
+  overflow-y: auto;
+  background:
+    radial-gradient(circle at 15% 10%, color-mix(in oklab, var(--primary) 12%, transparent), transparent 45%),
+    radial-gradient(circle at 85% 90%, color-mix(in oklab, var(--primary) 8%, transparent), transparent 40%),
+    var(--background);
+}
+
+.portal-auth-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.portal-auth-mark {
+  display: inline-flex;
+  height: 34px;
+  width: 34px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.portal-auth-brand-name {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.portal-auth-card {
+  width: 100%;
+  max-width: 420px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--card);
+  padding: 32px;
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 4%),
+    0 18px 45px -24px rgb(15 23 42 / 35%);
+}
+
+.portal-auth-title {
+  font-size: 22px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.portal-auth-subtitle {
+  margin-top: 6px;
+  color: var(--muted-foreground);
+  font-size: 13.5px;
+}
+
+.portal-auth-body {
+  margin-top: 26px;
+}
+
+.portal-auth-footer {
+  margin-top: 22px;
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+  color: var(--muted-foreground);
+  font-size: 13px;
+  text-align: center;
+}
+
+.portal-auth-link {
+  margin-left: 6px;
+  color: var(--primary);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.portal-auth-link:hover {
+  text-decoration: underline;
+}
+
+.portal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.portal-form > button {
+  width: 100%;
+}
+
+.portal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.portal-field-label {
+  font-size: 13px;
+  font-weight: 550;
+}
+
+.portal-field-hint {
+  color: var(--muted-foreground);
+  font-size: 12px;
+}
+
+.portal-form-error {
+  border: 1px solid color-mix(in oklab, #dc2626 35%, transparent);
+  border-radius: 8px;
+  background: color-mix(in oklab, #dc2626 8%, transparent);
+  padding: 8px 10px;
+  color: #b91c1c;
+  font-size: 13px;
+}
+
+/* ── 门户外壳：左轨一级菜单 + 二级侧栏 ─────────────────── */
+
+.portal-shell-root {
+  min-height: 100vh;
+  background: var(--background);
+}
+
+.portal-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.portal-rail {
+  display: flex;
+  width: var(--sidebar-width-icon, 3rem);
+  flex-shrink: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  border-right: 1px solid var(--border);
+  background: var(--card);
+  padding: 12px 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.portal-rail-mark {
+  display: inline-flex;
+  height: 30px;
+  width: 30px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.portal-rail-items {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+}
+
+.portal-rail-item {
+  display: inline-flex;
+  height: 36px;
+  width: 36px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  color: var(--muted-foreground);
+  text-decoration: none;
+  transition: background 150ms ease, color 150ms ease;
+}
+
+.portal-rail-item:hover {
+  background: color-mix(in oklab, var(--primary) 8%, transparent);
+  color: var(--foreground);
+}
+
+.portal-rail-item.is-active {
+  background: color-mix(in oklab, var(--primary) 12%, transparent);
+  color: var(--primary);
+}
+
+.portal-rail-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.portal-sidebar {
+  display: flex;
+  width: var(--sidebar-width, 16rem);
+  flex-shrink: 0;
+  flex-direction: column;
+  gap: 10px;
+  border-right: 1px solid var(--border);
+  background: color-mix(in oklab, var(--card) 65%, var(--background));
+  padding: 22px 12px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.portal-sidebar-title {
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+}
+
+.portal-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.portal-sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border-radius: 9px;
+  padding: 8px 10px;
+  color: var(--muted-foreground);
+  font-size: 13.5px;
+  text-decoration: none;
+  transition: background 150ms ease, color 150ms ease;
+}
+
+.portal-sidebar-item:hover {
+  background: color-mix(in oklab, var(--primary) 7%, transparent);
+  color: var(--foreground);
+}
+
+.portal-sidebar-item.is-active {
+  background: color-mix(in oklab, var(--primary) 11%, transparent);
+  color: var(--primary);
+  font-weight: 550;
+}
+
+.portal-main {
+  min-width: 0;
+  flex: 1;
+  padding: 32px;
+  overflow-x: hidden;
+}
+
+.portal-shell-content {
+  display: block;
+}
+
+/* ── 页面内容 ───────────────────────────────────────────── */
+
+.portal-page {
+  display: flex;
+  max-width: 1040px;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.portal-page-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.portal-page-title {
+  font-size: 24px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.portal-page-subtitle {
+  color: var(--muted-foreground);
+  font-size: 13.5px;
+}
+
+.portal-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--card);
+  padding: 22px;
+}
+
+.portal-card-title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.portal-card-hint {
+  color: var(--muted-foreground);
+  font-size: 13px;
+}
+
+.portal-card > button {
+  align-self: flex-start;
+}
+
+.portal-descriptions {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.portal-descriptions-row {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 12px;
+  border-top: 1px solid var(--border);
+  padding: 10px 0;
+  font-size: 13.5px;
+}
+
+.portal-descriptions-row:first-child {
+  border-top: 0;
+}
+
+.portal-descriptions-row dt {
+  color: var(--muted-foreground);
+}
+
+.portal-descriptions-row dd {
+  font-weight: 500;
+}
+
+.portal-choice-group {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.portal-choice {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: transparent;
+  padding: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 150ms ease, background 150ms ease;
+}
+
+.portal-choice:hover {
+  border-color: color-mix(in oklab, var(--primary) 45%, var(--border));
+}
+
+.portal-choice.is-active {
+  border-color: var(--primary);
+  background: color-mix(in oklab, var(--primary) 7%, transparent);
+}
+
+.portal-choice-label {
+  font-size: 13.5px;
+  font-weight: 550;
+}
+
+.portal-choice-hint {
+  color: var(--muted-foreground);
+  font-size: 12px;
+}
+
+/* ── 主题皮肤 ───────────────────────────────────────────── */
+
+.portal-skin-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.portal-skin-card {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: transparent;
+  padding: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 150ms ease, background 150ms ease;
+}
+
+.portal-skin-card:hover {
+  border-color: color-mix(in oklab, var(--primary) 45%, var(--border));
+}
+
+.portal-skin-card.is-active {
+  border-color: var(--primary);
+  background: color-mix(in oklab, var(--primary) 7%, transparent);
+}
+
+.portal-skin-preview {
+  display: flex;
+  height: 52px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.portal-skin-preview-window {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 6px;
+  border-radius: 5px;
+  background: rgb(255 255 255 / 92%);
+  padding: 6px;
+}
+
+.portal-skin-preview-dot {
+  height: 10px;
+  width: 10px;
+  flex-shrink: 0;
+  border-radius: 999px;
+}
+
+.portal-skin-preview-lines {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.portal-skin-preview-lines i {
+  display: block;
+  height: 2px;
+  border-radius: 999px;
+  background: rgb(15 23 42 / 18%);
+}
+
+.portal-skin-preview-lines i:nth-child(2) {
+  width: 80%;
+}
+
+.portal-skin-preview-lines i:nth-child(3) {
+  width: 60%;
+}
+
+.portal-skin-name {
+  font-size: 13.5px;
+  font-weight: 550;
+}
+
+.portal-skin-desc {
+  color: var(--muted-foreground);
+  font-size: 12px;
+}
+
+.portal-text-muted {
+  color: var(--muted-foreground);
+}
+
+/* ── 设置预览 ───────────────────────────────────────────── */
+
+.portal-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: color-mix(in oklab, var(--card) 80%, var(--background));
+  padding: 16px;
+}
+
+.portal-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.portal-preview-title {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.portal-preview-badge {
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--primary) 12%, transparent);
+  padding: 2px 8px;
+  color: var(--primary);
+  font-size: 11px;
+}
+
+.portal-preview-text {
+  color: var(--muted-foreground);
+  font-size: 13px;
+}
+
+.portal-preview-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.portal-preview-button {
+  border-radius: 7px;
+  background: var(--primary);
+  padding: 5px 12px;
+  color: var(--primary-foreground);
+  font-size: 12px;
+}
+
+.portal-preview-button.is-ghost {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--foreground);
+}
+
+/* ── 团队切换 ───────────────────────────────────────────── */
+
+.portal-team-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.portal-team-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 150ms ease, background 150ms ease;
+}
+
+.portal-team-item:hover {
+  border-color: color-mix(in oklab, var(--primary) 45%, var(--border));
+}
+
+.portal-team-item.is-active {
+  border-color: var(--primary);
+  background: color-mix(in oklab, var(--primary) 7%, transparent);
+}
+
+.portal-team-name {
+  font-size: 13.5px;
+  font-weight: 550;
+}
+
+.portal-team-meta {
+  color: var(--primary);
+  font-size: 12px;
+}
+
+.portal-team-hint {
+  color: var(--muted-foreground);
+  font-size: 12.5px;
+}
+
+/* ── 加载态 ─────────────────────────────────────────────── */
+
+.portal-loading {
+  display: flex;
+  min-height: 60vh;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--muted-foreground);
+  font-size: 14px;
+}
+
+.portal-loading-dot {
+  height: 8px;
+  width: 8px;
+  border-radius: 999px;
+  background: var(--primary);
+  animation: portal-pulse 1s ease-in-out infinite;
+}
+
+@keyframes portal-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ── 响应式 ─────────────────────────────────────────────── */
+
+@media (max-width: 720px) {
+  .portal-shell {
+    flex-direction: column;
+  }
+
+  .portal-rail {
+    width: 100%;
+    height: auto;
+    flex-direction: row;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+    padding: 10px 12px;
+  }
+
+  .portal-rail-items {
+    flex: 1;
+    flex-direction: row;
+    margin-left: 8px;
+  }
+
+  .portal-rail-footer {
+    flex-direction: row;
+    margin-left: auto;
+  }
+
+  .portal-sidebar {
+    position: static;
+    height: auto;
+    width: 100%;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+    padding: 12px;
+  }
+
+  .portal-sidebar-nav {
+    flex-direction: row;
+    overflow-x: auto;
+  }
+
+  .portal-main {
+    padding: 20px 16px;
+  }
+
+  .portal-choice-group {
+    grid-template-columns: 1fr;
+  }
+
+  .portal-skin-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .portal-descriptions-row {
+    grid-template-columns: 92px 1fr;
+  }
+
+  .portal-auth-card {
+    padding: 24px;
+  }
+}
