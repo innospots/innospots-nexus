@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.innospots</groupId>
+        <artifactId>innospots-nexus-parent</artifactId>
+        <version>${revision}</version>
+        <relativePath>../innospots-nexus-parent/pom.xml</relativePath>
+    </parent>
+
+    <artifactId>innospots-nexus-ai</artifactId>
+    <packaging>jar</packaging>
+
+    <name>innospots-nexus-ai</name>
+    <description>AI 运行时宿主与 /ai 反向代理；Node runtime 作为独立 npm 包发布。</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.innospots</groupId>
+            <artifactId>innospots-nexus-console</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-common</artifactId>
+            <version>${jersey.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>io.smallrye</groupId>
+                <artifactId>jandex-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>make-index</id>
+                        <goals>
+                            <goal>jandex</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Nexus-Ai-Runtime-Package>@innospots/nexus-ai-runtime</Nexus-Ai-Runtime-Package>
+                            <Nexus-Ai-Runtime-Version>${project.version}</Nexus-Ai-Runtime-Version>
+                            <Nexus-Ai-Node-Range>[22.19.0,)</Nexus-Ai-Node-Range>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

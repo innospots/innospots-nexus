@@ -1,0 +1,12 @@
+apiVersion: nexus.ai/v1
+kind: Skill
+metadata:
+  name: example
+spec:
+  # 相对 <configDir>；也可以写绝对路径，例如 /etc/nexus-ai/skills/pdf-tools
+  path: ./skills/example
+  mode: inline
+  include:
+    - SKILL.md
+  maxBytes: 32768
+  enabled: true

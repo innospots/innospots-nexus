@@ -1,0 +1,8 @@
+runtime/node_modules/
+runtime/dist/
+runtime/coverage/
+runtime/.pnpm-store/
+
+# 根 .gitignore 忽略了 scripts/；runtime 构建脚本需要入库
+!runtime/scripts/
+!runtime/scripts/**

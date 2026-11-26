@@ -1,0 +1,11 @@
+apiVersion: nexus.ai/v1
+kind: McpServer
+metadata:
+  name: docs
+spec:
+  transport: http
+  url: https://mcp.internal.example/mcp
+  headers:
+    # 从 <dataDir>/secrets.env 读取
+    Authorization: Bearer ${DOCS_TOKEN}
+  enabled: true

@@ -1,0 +1,27 @@
+apiVersion: nexus.ai/v1
+kind: Model
+metadata:
+  name: gpt-main
+spec:
+  provider: openai-main
+  modelId: gpt-5.1
+  displayName: GPT-5.1
+  contextWindow: 400000
+  maxOutputTokens: 128000
+  capabilities: [text, tool, vision]
+  defaultParams:
+    temperature: 0.2
+  enabled: true
+---
+apiVersion: nexus.ai/v1
+kind: Model
+metadata:
+  name: internal-chat
+spec:
+  provider: internal-gateway
+  modelId: internal-chat-v1
+  displayName: Internal Chat
+  contextWindow: 128000
+  maxOutputTokens: 16384
+  capabilities: [text, tool]
+  enabled: true

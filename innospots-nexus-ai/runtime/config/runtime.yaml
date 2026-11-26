@@ -1,0 +1,26 @@
+apiVersion: nexus.ai/v1
+kind: Runtime
+metadata:
+  name: default
+spec:
+  logLevel: info
+  maxConcurrentRuns: 2
+  runTimeoutSeconds: 300
+  maxMessageBytes: 1048576
+  maxFileReadBytes: 262144
+  maxFileWriteBytes: 1048576
+  maxFileListEntries: 1000
+  maxFileOpsPerRun: 100
+  trashRetentionDays: 7
+  allowSymlinks: false
+  toolHttpAllowlist: []
+  fileDenyPatterns:
+    - ".git/**"
+    - ".env*"
+    - ".ssh/**"
+    - "id_rsa*"
+    - "*.pem"
+    - "*.key"
+    - "*.p12"
+    - ".aws/**"
+    - ".kube/**"

@@ -1,0 +1,19 @@
+apiVersion: nexus.ai/v1
+kind: Tool
+metadata:
+  name: http.echo
+spec:
+  type: http
+  method: POST
+  url: https://api.internal.example/echo
+  headers:
+    Content-Type: application/json
+  parameters:
+    type: object
+    properties:
+      text:
+        type: string
+    required: [text]
+  timeoutSeconds: 15
+  allowPrivateNetwork: false
+  enabled: true

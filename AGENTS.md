@@ -226,6 +226,44 @@ grill-me  →  java:project（需新建/改模块时）  →  java:design  →  
 - 必须依赖 `console`（及传递的 `core` / `base`）。不得依赖
   `innospots-nexus-portal`。
 
+### `innospots-nexus-ai`
+
+- 基于 `pi-agent-core` 的 **AI Agent 运行时模块**，与 portal / platform 平行。
+- AI REST/SSE 契约与实现由模块内独立 **Node 进程**拥有；Java 侧负责 runtime 定位与解压、
+  进程启动/停止、健康检查、优雅关闭，并暴露 `/ai/**` **透明反向代理端点**作为唯一对外入口。
+- 依赖 `innospots-nexus-console`（及传递的 core / base），复用控制台 Bearer 鉴权、
+  `@EndpointGrant` 与审计；不得依赖 portal、platform；不得绑定 Spring/Quarkus，
+  也不得用 JDBC/ORM 定义 AI 持久化（AI 数据仍由 Node 持有）。
+- Node 进程只监听 loopback，不对外暴露且**不做 HTTP 鉴权**；鉴权统一在 Java
+  `/ai/**` 端点完成。Node 不提供 HTTP shutdown 端点，由 supervisor 发送 SIGTERM。
+- 模型配置、AgentProfile、MCP/HTTP 工具、文件根与运行参数**只读加载**：优先宿主提供的
+  `ConfigSource` 接口，其次本地 YAML 多文件；**不提供配置维护 API**，也不使用 SQLite。
+- 会话正文直接使用 `pi-coding-agent` 的 **`SessionManager`**（v3 JSONL，隔离的
+  `sessionDir`）；文件操作审计写 JSONL。唯一的运行时可变数据是会话。
+- **不引入 SQLite 或任何关系型数据库**；Java 侧禁止引入 Entity、Dao、JDBC。
+- Java 侧提供 `/ai/v1/health`、`/health/live`、`/health/ready`；Node 未启动、启动中、
+  健康检查失败或配置无效时，业务端点直接 503，状态端点返回可诊断原因。
+- 对外只暴露最小调用面：本地 health、代理 agents（只读）/sessions/messages/runs；
+  配置、诊断、维护端点不对外暴露。
+- `SessionManager` 必须显式传入 `sessionDir` 与 `cwd`，不得回退到 `~/.pi`；
+  禁止调用会触发项目资源发现的 `createAgentSession()`。
+- 必须与宿主 pi 安装完全隔离：不得读取 `~/.pi`、`auth.json`、`models.json`
+  或宿主 provider 环境变量；所有状态、日志、密钥、临时文件限定在配置的数据目录。
+- 运行期不得联网安装 Node 依赖；运行机只需 Node ≥ 22.19。
+- Java 侧发布 **thin jar**（仅 supervisor + `/ai/**` 代理），**不再内嵌 runtime**；
+  Node runtime 以 `@innospots/nexus-ai-runtime` **npm 包**独立发布。
+- 引用方通过 pnpm 安装对应 runtime 版本，`runtimeDir` 指向
+  `node_modules/@innospots/nexus-ai-runtime`，不再解包 jar。
+- Node runtime 统一通过 npm bin `nexus-ai`（别名 `nexus-ai-runtime`）启动；Java supervisor 使用
+  `node <runtimeDir>/bin/nexus-ai-runtime.mjs` + 参数，直接 spawn，不经过 shell。
+- npm 包版本必须与 jar manifest 的 `Nexus-Ai-Runtime-Version` 一致；不匹配拒绝启动。
+- 引用方构建机必须提供 Node ≥ 22.19 与 pnpm；本模块制品不包含 `dist`。
+- 文件工具仅允许操作经 API 登记、Agent 绑定、会话快照的根目录；只接受相对路径并做
+  realpath / 符号链接校验；禁止 shell、代码执行与任意路径访问；删除默认软删除到
+  数据目录。MCP 仅允许 HTTP/SSE 传输。
+- Java 反向代理不重复定义 AI 契约，OpenAPI 由 Node 生成并经 `/ai/v1/openapi` 暴露；
+  因此本模块不生成 Java OpenAPI 索引。
+
 ## 依赖规则
 
 - `innospots-nexus-base` 必须保持 middleware-free。
@@ -241,11 +279,13 @@ grill-me  →  java:project（需新建/改模块时）  →  java:design  →  
   `innospots-nexus-core` 及它们的传递 base foundation。
 - `innospots-nexus-platform` 可依赖 `innospots-nexus-console`、
   `innospots-nexus-core` 及它们的传递 base foundation。
+- `innospots-nexus-ai` 可依赖 `innospots-nexus-console`（及传递的 core / base），
+  不得依赖 portal、platform；console、portal、platform 不得反向依赖 ai。
 - 主依赖方向为
   `innospots-nexus-base -> innospots-nexus-core -> innospots-nexus-plugin ->
-  innospots-nexus-console`，然后 `console -> innospots-nexus-portal` 与
-  `console -> innospots-nexus-platform` 并行。Portal 与 platform 不得
-  相互依赖。依赖不得指回更高层。
+  innospots-nexus-console`，然后 `console -> innospots-nexus-portal`、
+  `console -> innospots-nexus-platform` 与 `console -> innospots-nexus-ai` 并行。
+  Portal、platform、ai 三者不得相互依赖。依赖不得指回更高层。
 - `innospots-nexus-core` 可提供具体业务中立 middleware 与
   database 支持，但不得绑定 Spring Boot
   auto-configuration。

@@ -1,0 +1,25 @@
+apiVersion: nexus.ai/v1
+kind: Provider
+metadata:
+  name: openai-main
+spec:
+  type: openai
+  baseUrl: https://api.openai.com/v1
+  apiKey:
+    # 从 <dataDir>/secrets.env 读取，不读取宿主环境变量
+    fromEnv: OPENAI_API_KEY
+  enabled: true
+---
+apiVersion: nexus.ai/v1
+kind: Provider
+metadata:
+  name: internal-gateway
+spec:
+  type: openai-compatible
+  baseUrl: https://llm.internal.example/v1
+  apiKey:
+    # 由部署工具/密钥管理系统写入，指向 <dataDir>/secrets/internal-gateway.enc
+    secretRef: internal-gateway
+  headers:
+    X-Tenant: nexus
+  enabled: true

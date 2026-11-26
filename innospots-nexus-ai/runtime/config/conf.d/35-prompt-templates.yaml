@@ -1,0 +1,13 @@
+apiVersion: nexus.ai/v1
+kind: PromptTemplate
+metadata:
+  name: default-assistant
+spec:
+  content: |
+    You are ${role}.
+    Follow the workspace policy; never access paths outside the sandbox.
+    Use tools only when necessary.
+  variables:
+    role:
+      required: true
+      default: a helpful enterprise assistant

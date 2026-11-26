@@ -113,6 +113,11 @@
             </dependency>
             <dependency>
                 <groupId>com.innospots</groupId>
+                <artifactId>innospots-nexus-ai</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.innospots</groupId>
                 <artifactId>innospots-nexus-spring-app</artifactId>
                 <version>${revision}</version>
             </dependency>

@@ -45,6 +45,7 @@
         <module>innospots-nexus-console</module>
         <module>innospots-nexus-portal</module>
         <module>innospots-nexus-platform</module>
+        <module>innospots-nexus-ai</module>
         <module>innospots-nexus-spring</module>
         <module>innospots-nexus-quarkus</module>
         <module>innospots-nexus-sample</module>

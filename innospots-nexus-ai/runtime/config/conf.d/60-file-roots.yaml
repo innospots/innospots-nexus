@@ -1,0 +1,8 @@
+apiVersion: nexus.ai/v1
+kind: FileRoot
+metadata:
+  name: workspace
+spec:
+  # 绝对路径；不得位于 <dataDir> 内，也不得包含 <dataDir>
+  path: /srv/nexus/workspace
+  enabled: true

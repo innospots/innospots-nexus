@@ -1,0 +1,45 @@
+{
+  "name": "@innospots/nexus-ai-runtime",
+  "version": "0.1.0-SNAPSHOT",
+  "description": "Nexus AI runtime: pi agent based HTTP/SSE service with isolated local state.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "bin": {
+    "nexus-ai": "bin/nexus-ai-runtime.mjs",
+    "nexus-ai-runtime": "bin/nexus-ai-runtime.mjs"
+  },
+  "main": "dist/server.mjs",
+  "files": [
+    "bin",
+    "dist",
+    "config",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "dev": "node --experimental-strip-types src/main.ts",
+    "start": "node bin/nexus-ai-runtime.mjs --host 127.0.0.1 --port 0 --data-dir ./data --config-dir ./config",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm build"
+  },
+  "dependencies": {
+    "@earendil-works/pi-agent-core": "1.6.1",
+    "@earendil-works/pi-ai": "1.6.1",
+    "@earendil-works/pi-coding-agent": "1.6.1",
+    "@earendil-works/pi-mcp": "1.6.1",
+    "@earendil-works/pi-schema": "1.6.1",
+    "yaml": "2.9.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.9.0",
+    "vitest": "^3.2.0"
+  }
+}

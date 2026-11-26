@@ -1,0 +1,26 @@
+apiVersion: nexus.ai/v1
+kind: AgentProfile
+metadata:
+  name: default
+spec:
+  displayName: Default Assistant
+  description: Enterprise assistant with read-only workspace access
+  model: gpt-main
+  promptTemplate: default-assistant
+  promptVariables:
+    role: enterprise assistant
+  thinkingLevel: medium
+  toolExecution: parallel
+  maxTurns: 12
+  maxToolCalls: 100
+  mcpServers:
+    - docs
+  skills:
+    - example
+  tools:
+    - http.echo
+    - mcp__docs__search
+  fileRoot: workspace
+  fileAccess: read
+  allowDelete: false
+  enabled: true
