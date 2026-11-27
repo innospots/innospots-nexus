@@ -32,7 +32,9 @@ replay_pid*
 logs
 .vscode
 .claude/
-.cursor/
+.cursor/*
+!.cursor/environment.json
+!.cursor/cloud-agent-install.sh
 .agents/
 .workbuddy/
 scripts/
